@@ -1,0 +1,7 @@
+{
+  "description": "Meetup event page is parseable (Fusion LA Israel)",
+  "url": "https://www.meetup.com/fusion-la-israel/events/314842056/",
+  "expected": {
+    "title": { "nonEmpty": true }
+  }
+}
