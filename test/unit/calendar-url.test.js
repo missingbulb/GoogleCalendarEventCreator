@@ -8,11 +8,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// background.js registers a chrome listener at load time; stub just enough
-// and evaluate it as global code so its function declarations land on
-// globalThis.
+// Evaluate background.js as global code so its function declarations land
+// on globalThis.
 function loadBackground() {
-  globalThis.chrome = { action: { onClicked: { addListener() {} } } };
   vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"));
   return {
     buildCalendarUrl: globalThis.buildCalendarUrl,

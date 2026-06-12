@@ -1,9 +1,11 @@
 # Google Calendar Event Creator
 
 A Chrome extension that adds a toolbar button which, when clicked, reads event
-details from the current web page and opens a pre-filled Google Calendar event
-(via `https://calendar.google.com/calendar/render?action=TEMPLATE`) — no API
-keys or OAuth needed. You review the pre-filled event and hit Save.
+details from the current web page and shows a small popup with a summary of
+what was found. Clicking the popup's button opens a pre-filled Google
+Calendar event (via
+`https://calendar.google.com/calendar/render?action=TEMPLATE`) — no API keys
+or OAuth needed. You review the pre-filled event and hit Save.
 
 ## What it extracts
 
@@ -65,8 +67,10 @@ extension's card in `chrome://extensions`.
 ## Use
 
 Navigate to a page describing an event and click the extension's toolbar
-button. A new tab opens with the Google Calendar "create event" screen
-pre-filled; review and save.
+button. A small popup opens showing the event title, date/time, and location
+that were found on the page. Click **Add to Google Calendar** to open a new
+tab with the Google Calendar "create event" screen pre-filled; review and
+save.
 
 ## Testing
 
@@ -165,7 +169,8 @@ from facebook.com, so it can't be snapshotted as a live case.
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
-| `background.js` | Service worker: runs the extractor, builds and opens the URL  |
+| `popup.html`, `popup.js` | Toolbar popup: runs the extractor, shows a summary, and opens the URL on click |
+| `background.js` | Shared library: builds the pre-filled Google Calendar URL     |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
 | `extractors/meetup.js`, `facebook.js`, `eventbrite.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |

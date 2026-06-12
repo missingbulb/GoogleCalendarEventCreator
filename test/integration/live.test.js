@@ -55,11 +55,10 @@ const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
 const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates"];
 
-// background.js registers a chrome listener at load time; stub just enough
-// and evaluate it as global code so its function declarations land on
-// globalThis.
+// Evaluate background.js as global code so its function declarations land
+// on the sandbox.
 function loadFormatDatesParam() {
-  const sandbox = { chrome: { action: { onClicked: { addListener() {} } } } };
+  const sandbox = {};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"), sandbox);
   return sandbox.formatDatesParam;
 }
