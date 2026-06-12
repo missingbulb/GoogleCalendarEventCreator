@@ -23,5 +23,8 @@ jobs:
       - name: Validate manifest.json
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.json'))"
 
-      - name: Run extraction e2e tests
-        run: npm test
+      - name: Run offline extraction tests
+        run: npm run test:offline
+
+      - name: Run live tests against real event pages
+        run: npm run test:live

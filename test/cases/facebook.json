@@ -1,0 +1,8 @@
+{
+  "description": "Facebook public event page is parseable (logged-out view)",
+  "url": "https://www.facebook.com/events/2116485579196340",
+  "expected": {
+    "title": { "nonEmpty": true },
+    "start": { "matches": "^\\d{4}-\\d{2}-\\d{2}" }
+  }
+}

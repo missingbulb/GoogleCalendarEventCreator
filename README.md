@@ -61,49 +61,52 @@ pre-filled; review and save.
 
 ## Testing
 
-End-to-end extraction tests live in `test/` and run with:
+Two complementary suites live in `test/`:
 
 ```sh
 npm install
-npm test
+npm run test:live      # fetch REAL event pages and verify they're parseable
+npm run test:offline   # deterministic unit tests of the extraction logic
+npm test               # both
 ```
 
-Each scenario is a small declarative JSON file in `test/cases/` — a URL plus
-the values the extractor must produce for the page at that URL:
+**Live end-to-end tests** (`test/live.test.js`) are driven by declarative
+JSON files in `test/cases/` — a real event page URL plus what the extractor
+must produce for it. At test time the page is fetched over the network
+(browser-like headers, 3 retry attempts), loaded into a DOM at that URL — so
+hostname-based site detection works exactly as in Chrome — and run through
+the real extractor files (the same `EXTRACTOR_FILES` list `background.js`
+injects, in the same order). Nothing is cached or committed; a passing run
+means the site's *current* markup is parseable.
 
 ```json
 {
-  "description": "Meetup event page (site-specific selectors)",
-  "url": "https://www.meetup.com/brooklyn-rustaceans/events/304218765/",
+  "description": "Meetup event page is parseable",
+  "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
   "expected": {
-    "title": "Intro to Rust: Hands-on Workshop",
-    "start": "2026-07-08T18:30:00-04:00",
-    "location": "Brooklyn Public Library",
-    "descriptionIncludes": ["ownership, borrowing, and lifetimes"],
-    "multipleEvents": false
+    "title": { "includes": "NYC Tech Mixer" },
+    "start": { "matches": "^2026-06-25T18:00" },
+    "location": { "nonEmpty": true }
   }
 }
 ```
 
-The page's HTML is stored as a fixture in `test/fixtures/` (same base name as
-the case file), so tests are fast, deterministic, and run offline. The runner
-(`test/e2e.test.js`) loads the fixture into a DOM at the case's URL — so
-hostname-based site detection works exactly as in the browser — executes the
-real extractor files (the same `EXTRACTOR_FILES` list `background.js`
-injects, in the same order), and asserts the expected fields.
-`title`/`start`/`end`/`location`/`multipleEvents` are exact matches;
-`descriptionIncludes` checks substrings. Every field is optional — assert only
-what matters for the scenario.
+Each expected field takes an exact string/boolean, or a matcher:
+`{ "includes": "substring" }`, `{ "matches": "regex" }`, or
+`{ "nonEmpty": true }`. Use exact values when the event's details are stable;
+use matchers to assert "the field is extracted" on a live page. All fields
+are optional. **To cover a new website or platform, add one case file
+pointing at a real event page on it** — no runner changes needed. Note that
+cases need occasional gardening: when an event page is eventually taken
+down, point its case at a newer event.
 
-**Adding coverage for a new website or platform:**
+**Offline unit tests** (`test/extraction.test.js`) pin down the extraction
+logic itself (site selectors, JSON-LD handling, text date parsing,
+multiple-event detection) against small synthetic HTML snippets written
+inline in the test — they need no network and never flake, so PRs keep a
+trustworthy signal even when a third-party site is down.
 
-1. Create `test/cases/<name>.json` with the event page URL and expected values.
-2. Snapshot the live page: `npm run record test/cases/<name>.json`
-   (or hand-craft `test/fixtures/<name>.html`). Re-record with
-   `npm run record -- --all` when a site's markup changes.
-3. Run `npm test`. No runner code changes are needed.
-
-Tests run automatically on every pull request to `main` via GitHub Actions
+Both suites run on every pull request to `main` via GitHub Actions
 (`.github/workflows/test.yml`).
 
 ## Files

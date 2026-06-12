@@ -1,0 +1,10 @@
+{
+  "description": "Eventbrite event page is parseable (Games for Change Festival, Jul 21-22 2026)",
+  "url": "https://www.eventbrite.com/e/2026-games-for-change-festival-tickets-1982011672266",
+  "expected": {
+    "title": { "includes": "Games for Change" },
+    "start": { "matches": "^2026-07-21" },
+    "location": { "nonEmpty": true },
+    "description": { "nonEmpty": true }
+  }
+}
