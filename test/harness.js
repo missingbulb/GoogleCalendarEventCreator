@@ -27,7 +27,7 @@ const SOURCES = extractorSources();
 
 /**
  * @param {string} html  Full HTML of the page.
- * @param {string} url   The URL the page "lives" at.
+ * @param {string} url   The page URL.
  * @returns {object}     The extractor's result: { title, start, end, location, description, multipleEvents }
  */
 function extractFromHtml(html, url) {
