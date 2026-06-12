@@ -1,14 +1,15 @@
 // Live extraction tests — the suite you review to confirm the extractor
 // produces the right values for each supported site.
 //
-// These run OFFLINE against committed HTML snapshots in test/snapshots/,
-// which a GitHub Actions job keeps fresh (refreshed daily, and again before
-// the live tests run on a push to main — see test/refresh-snapshots.js and
-// .github/workflows/). Asserting against a recently-cached copy of the real
-// page makes the suite deterministic and runnable anywhere (no network),
-// while still reflecting each site's current markup.
+// These run OFFLINE against committed HTML snapshots in
+// test/integration/snapshots/, which a GitHub Actions job keeps fresh
+// (refreshed daily, and again before the live tests run on a push to main —
+// see test/integration/refresh-snapshots.js and .github/workflows/).
+// Asserting against a recently-cached copy of the real page makes the suite
+// deterministic and runnable anywhere (no network), while still reflecting
+// each site's current markup.
 //
-// Each JSON file in test/cases/ describes one scenario:
+// Each JSON file in test/integration/cases/ describes one scenario:
 //
 //   {
 //     "description": "Meetup event page is parseable",
@@ -28,15 +29,15 @@
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
-// `node test/refresh-snapshots.js` (on a machine with internet) or let CI
-// record it on the next run. No runner changes needed.
+// `node test/integration/refresh-snapshots.js` (on a machine with internet)
+// or let CI record it on the next run. No runner changes needed.
 "use strict";
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { extractFromHtml } = require("./harness");
+const { extractFromHtml } = require("../harness");
 
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
@@ -96,7 +97,7 @@ for (const file of caseFiles) {
     const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.html`);
     assert.ok(
       fs.existsSync(snapshotPath),
-      `Missing snapshot for "${name}". Record it with: node test/refresh-snapshots.js`
+      `Missing snapshot for "${name}". Record it with: node test/integration/refresh-snapshots.js`
     );
 
     const entry = manifest[name];

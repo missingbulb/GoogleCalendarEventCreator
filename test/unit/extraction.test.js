@@ -1,12 +1,12 @@
 // Offline unit tests for the extraction layers, using small synthetic HTML
 // snippets inline (no network, no committed page snapshots). These pin down
-// the extractor's behavior deterministically; test/live.test.js is the suite
-// that checks the real sites still serve parseable markup.
+// the extractor's behavior deterministically; test/integration/live.test.js
+// is the suite that checks the real sites still serve parseable markup.
 "use strict";
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { extractFromHtml } = require("./harness");
+const { extractFromHtml } = require("../harness");
 
 test("Meetup: hardcoded selectors (title, time, venue, details)", () => {
   const html = `

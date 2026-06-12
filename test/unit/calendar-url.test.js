@@ -13,7 +13,7 @@ const vm = require("node:vm");
 // globalThis.
 function loadBackground() {
   globalThis.chrome = { action: { onClicked: { addListener() {} } } };
-  vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "background.js"), "utf8"));
+  vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"));
   return {
     buildCalendarUrl: globalThis.buildCalendarUrl,
     formatDatesParam: globalThis.formatDatesParam,

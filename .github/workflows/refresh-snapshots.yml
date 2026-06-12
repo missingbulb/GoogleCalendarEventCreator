@@ -35,10 +35,10 @@ jobs:
 
       - name: Commit refreshed snapshots
         run: |
-          if [ -n "$(git status --porcelain test/snapshots)" ]; then
+          if [ -n "$(git status --porcelain test/integration/snapshots)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add test/snapshots
+            git add test/integration/snapshots
             git commit -m "chore: refresh HTML snapshots [skip ci]"
             git push
           else

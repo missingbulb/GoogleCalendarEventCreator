@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
-    "test:offline": "node --test test/extraction.test.js test/calendar-url.test.js",
-    "test:live": "node --test test/live.test.js",
-    "refresh": "node test/refresh-snapshots.js"
+    "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js",
+    "test:live": "node --test test/integration/live.test.js",
+    "refresh": "node test/integration/refresh-snapshots.js"
   },
   "license": "MIT",
   "devDependencies": {

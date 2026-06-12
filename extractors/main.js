@@ -12,7 +12,8 @@
 //
 // To support a new event platform, add extractors/<site>.js that pushes
 // onto GCal.sites (see meetup.js for the pattern), list it in
-// EXTRACTOR_FILES in background.js, and add a test case under test/cases/.
+// EXTRACTOR_FILES in background.js, and add a test case under
+// test/integration/cases/.
 (() => {
   const host = location.hostname.replace(/^www\./, "");
   const site = GCal.sites.find((s) => s.matches(host));

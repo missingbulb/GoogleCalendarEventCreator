@@ -62,22 +62,23 @@ pre-filled; review and save.
 
 ## Testing
 
-There are two kinds of tests, with different audiences:
+There are two kinds of tests, with different audiences, separated under
+`test/integration/` and `test/unit/`:
 
 ```sh
 npm install
-npm run test:live      # the REVIEWED assertions for each supported site
-npm run test:offline   # internal unit tests of the extraction logic
+npm run test:live      # integration: the REVIEWED assertions for each supported site
+npm run test:offline   # unit: internal tests of the extraction logic
 npm run refresh        # re-fetch the live snapshots (needs internet)
 npm test               # everything
 ```
 
-### Live tests — the ones you review
+### Integration tests — the ones you review
 
-**`test/live.test.js`** is driven by declarative JSON files in `test/cases/`
-— a real event page URL plus the values the extractor must produce for it.
-These are the assertions a human reviews to confirm each site is handled
-correctly.
+**`test/integration/live.test.js`** is driven by declarative JSON files in
+`test/integration/cases/` — a real event page URL plus the values the
+extractor must produce for it. These are the assertions a human reviews to
+confirm each site is handled correctly.
 
 ```json
 {
@@ -98,52 +99,55 @@ Use exact values when the value is known and stable; use matchers otherwise.
 All fields are optional.
 
 The tests themselves run **offline**, against committed HTML snapshots in
-`test/snapshots/` (one `<case>.html` per case, plus `manifest.json` recording
-each snapshot's source URL and fetch time). The snapshot is loaded into a DOM
-at the case's URL — so hostname-based site detection behaves exactly as in
-Chrome — and run through the real extractor files. This keeps the suite
-deterministic and runnable anywhere, while still reflecting each site's
-*current* markup, because the snapshots are kept fresh by a separate workflow:
+`test/integration/snapshots/` (one `<case>.html` per case, plus
+`manifest.json` recording each snapshot's source URL and fetch time). The
+snapshot is loaded into a DOM at the case's URL — so hostname-based site
+detection behaves exactly as in Chrome — and run through the real extractor
+files. This keeps the suite deterministic and runnable anywhere, while still
+reflecting each site's *current* markup, because the snapshots are kept fresh
+by a separate workflow:
 
-- **`test/refresh-snapshots.js`** (`npm run refresh`) re-fetches any snapshot
-  that is missing, older than 24h, or whose case URL changed (`--force` does
-  all of them). A failed fetch keeps the previous snapshot and only warns, so
-  a site outage or bot-blocking never breaks the suite.
+- **`test/integration/refresh-snapshots.js`** (`npm run refresh`) re-fetches
+  any snapshot that is missing, older than 24h, or whose case URL changed
+  (`--force` does all of them). A failed fetch keeps the previous snapshot and
+  only warns, so a site outage or bot-blocking never breaks the suite.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
-  push to `main`: it runs the offline tests, then the live tests against the
-  HTML snapshots **already committed** in `test/snapshots/` — it never
-  fetches or refreshes anything itself, so it's fast and has no network
-  dependency.
+  push to `main`: it runs the unit tests, then the integration tests against
+  the HTML snapshots **already committed** in `test/integration/snapshots/`
+  — it never fetches or refreshes anything itself, so it's fast and has no
+  network dependency.
 - The **Refresh snapshots** workflow (`.github/workflows/refresh-snapshots.yml`)
   runs daily (and on demand via "Run workflow"), force-refreshes every
-  snapshot, runs the live tests, and commits the result — so a site changing
-  its markup turns a scheduled run red within a day, independently of anyone
-  pushing. It's the *only* thing that fetches live pages and commits
+  snapshot, runs the integration tests, and commits the result — so a site
+  changing its markup turns a scheduled run red within a day, independently of
+  anyone pushing. It's the *only* thing that fetches live pages and commits
   snapshots, which keeps the Tests workflow simple and rules out any
   refresh→commit→refresh loop.
 
 The snapshot commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the
-Tests workflow ignores pushes that only touch `test/snapshots/**` — belt-and-
-suspenders against that commit ever re-triggering CI.
+Tests workflow ignores pushes that only touch
+`test/integration/snapshots/**` — belt-and-suspenders against that commit
+ever re-triggering CI.
 
 **To cover a new website or platform, add one case file** pointing at a real
-event page, then **record its snapshot before relying on the live test**:
-either run `npm run refresh` locally (needs internet), or trigger the
+event page, then **record its snapshot before relying on the integration
+test**: either run `npm run refresh` locally (needs internet), or trigger the
 **Refresh snapshots** workflow manually ("Run workflow" in the Actions tab).
 Until a snapshot exists for the new case, `test:live` (and so the Tests
 workflow) will fail with `Missing snapshot for "<case>"`. Note that cases also
 need occasional gardening: when an event page is eventually taken down, point
 its case at a newer event (and refresh its snapshot the same way).
 
-### Offline tests — the internal safety net
+### Unit tests — the internal safety net
 
-**`test/extraction.test.js`** pins down the extraction logic (site selectors,
-JSON-LD handling, text date parsing, multiple-event detection) and
-**`test/calendar-url.test.js`** covers the Google Calendar URL building
-(`dates` formats, the `details` field layout). Both use small synthetic HTML
-snippets written inline — no network, never flake — so a regression is caught
-on every PR even when a third-party site or its snapshot is unavailable.
+**`test/unit/extraction.test.js`** pins down the extraction logic (site
+selectors, JSON-LD handling, text date parsing, multiple-event detection) and
+**`test/unit/calendar-url.test.js`** covers the Google Calendar URL building
+(`dates`/`ctz` formats, the `details` field layout). Both use small synthetic
+HTML snippets written inline — no network, never flake — so a regression is
+caught on every PR even when a third-party site or its snapshot is
+unavailable.
 
 Facebook extraction is covered only here: GitHub Actions runners get HTTP 400
 from facebook.com, so it can't be snapshotted as a live case.
@@ -159,11 +163,12 @@ from facebook.com, so it can't be snapshotted as a live case.
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
-| `test/cases/`   | Reviewed live-test cases (URL + expected values), one JSON each |
-| `test/snapshots/` | Committed HTML snapshots the live tests assert against, kept fresh by CI |
-| `test/refresh-snapshots.js` | Re-fetches stale/missing snapshots          |
-| `test/live.test.js` | Runs the reviewed assertions against the snapshots       |
-| `test/extraction.test.js`, `test/calendar-url.test.js` | Internal offline unit tests |
+| `test/integration/cases/`   | Reviewed live-test cases (URL + expected values), one JSON each |
+| `test/integration/snapshots/` | Committed HTML snapshots the live tests assert against, kept fresh by CI |
+| `test/integration/refresh-snapshots.js` | Re-fetches stale/missing snapshots          |
+| `test/integration/live.test.js` | Runs the reviewed assertions against the snapshots       |
+| `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
+| `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions

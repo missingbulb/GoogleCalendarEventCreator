@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Refresh the committed HTML snapshots that the live tests assert against
-// (test/snapshots/<case>.html + test/snapshots/manifest.json).
+// (test/integration/snapshots/<case>.html + test/integration/snapshots/manifest.json).
 //
 // A snapshot is refreshed when any of these hold:
 //   - --force was given
@@ -13,8 +13,8 @@
 // case ends up with no snapshot at all.
 //
 // Usage:
-//   node test/refresh-snapshots.js            # refresh stale snapshots only
-//   node test/refresh-snapshots.js --force    # refresh everything
+//   node test/integration/refresh-snapshots.js            # refresh stale snapshots only
+//   node test/integration/refresh-snapshots.js --force    # refresh everything
 "use strict";
 
 const fs = require("node:fs");
