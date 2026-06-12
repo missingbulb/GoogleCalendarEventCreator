@@ -39,11 +39,12 @@ several `schema.org/Event` microdata items, or several timestamped list
 cards), the **first event** is suggested and a note is added to the details
 field.
 
-Dates with an explicit timezone offset are passed to Google Calendar as exact
-UTC instants; dates without one are passed as floating local times so the
-event shows the same wall-clock time the page displayed. When no end time is
-found, a 2-hour duration is assumed. A date without a time becomes an all-day
-event.
+Dates with an explicit timezone offset are passed to Google Calendar as the
+page's wall-clock time plus a `ctz` parameter for the matching timezone, so
+the event keeps the same time regardless of the viewer's own timezone; dates
+without an offset are passed as floating local times so the event shows the
+same wall-clock time the page displayed. When no end time is found, a 2-hour
+duration is assumed. A date without a time becomes an all-day event.
 
 ## Install (developer mode)
 
