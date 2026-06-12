@@ -4,9 +4,10 @@
   "expected": {
     "title": "2026 Games for Change Festival",
     "start": "2026-07-21T13:30:00Z",
-    "location": "The Glasshouse, 660 12th Avenue, New York, NY, 10019",
+    "end": "2026-07-22T18:30:00-04:00",
+    "location": "The Glasshouse, 660 12th Avenue, #Floor 6, New York, NY 10019",
     "description": {
-      "includes": ["Games for Change", "Reimagining Play"]
+      "includes": ["Play, learn, and connect", "longest-running gaming conference"]
     }
   }
 }
