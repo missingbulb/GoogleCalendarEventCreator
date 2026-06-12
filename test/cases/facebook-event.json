@@ -1,0 +1,10 @@
+{
+  "description": "Facebook event page (title + date scanned from visible text)",
+  "url": "https://www.facebook.com/events/1234567890123456/",
+  "expected": {
+    "title": "Summer Rooftop Party",
+    "start": "2026-06-20T19:00:00",
+    "descriptionIncludes": ["Sunset views, live DJ"],
+    "multipleEvents": false
+  }
+}

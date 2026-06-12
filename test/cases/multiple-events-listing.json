@@ -1,0 +1,10 @@
+{
+  "description": "Listing page with several events: first one is suggested, all-day date",
+  "url": "https://www.townartscouncil.example/calendar",
+  "expected": {
+    "title": "Open-Air Sculpture Fair",
+    "start": "2026-10-03",
+    "location": "Market Square",
+    "multipleEvents": true
+  }
+}

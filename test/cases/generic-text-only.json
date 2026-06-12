@@ -1,0 +1,11 @@
+{
+  "description": "Generic page with no structured data (heuristics only)",
+  "url": "https://www.riversideneighbors.example/news/spring-cleanup",
+  "expected": {
+    "title": "Annual Neighborhood Cleanup",
+    "start": "2026-04-19T09:00:00",
+    "location": "Riverside Park boathouse, 120 River Rd",
+    "descriptionIncludes": ["gloves and trash grabbers provided"],
+    "multipleEvents": false
+  }
+}

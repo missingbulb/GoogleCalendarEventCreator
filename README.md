@@ -56,6 +56,52 @@ Navigate to a page describing an event and click the extension's toolbar
 button. A new tab opens with the Google Calendar "create event" screen
 pre-filled; review and save.
 
+## Testing
+
+End-to-end extraction tests live in `test/` and run with:
+
+```sh
+npm install
+npm test
+```
+
+Each scenario is a small declarative JSON file in `test/cases/` — a URL plus
+the values the extractor must produce for the page at that URL:
+
+```json
+{
+  "description": "Meetup event page (site-specific selectors)",
+  "url": "https://www.meetup.com/brooklyn-rustaceans/events/304218765/",
+  "expected": {
+    "title": "Intro to Rust: Hands-on Workshop",
+    "start": "2026-07-08T18:30:00-04:00",
+    "location": "Brooklyn Public Library",
+    "descriptionIncludes": ["ownership, borrowing, and lifetimes"],
+    "multipleEvents": false
+  }
+}
+```
+
+The page's HTML is stored as a fixture in `test/fixtures/` (same base name as
+the case file), so tests are fast, deterministic, and run offline. The runner
+(`test/e2e.test.js`) loads the fixture into a DOM at the case's URL — so
+hostname-based site detection works exactly as in the browser — executes the
+real, unmodified `extractor.js`, and asserts the expected fields.
+`title`/`start`/`end`/`location`/`multipleEvents` are exact matches;
+`descriptionIncludes` checks substrings. Every field is optional — assert only
+what matters for the scenario.
+
+**Adding coverage for a new website or platform:**
+
+1. Create `test/cases/<name>.json` with the event page URL and expected values.
+2. Snapshot the live page: `npm run record test/cases/<name>.json`
+   (or hand-craft `test/fixtures/<name>.html`). Re-record with
+   `npm run record -- --all` when a site's markup changes.
+3. Run `npm test`. No runner code changes are needed.
+
+Tests run automatically on every pull request to `main` via GitHub Actions
+(`.github/workflows/test.yml`).
+
 ## Files
 
 | File            | Purpose                                                       |
@@ -63,6 +109,7 @@ pre-filled; review and save.
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
 | `background.js` | Service worker: runs the extractor, builds and opens the URL  |
 | `extractor.js`  | Injected into the page; all extraction logic lives here       |
+| `test/`         | Declarative e2e extraction tests (cases, fixtures, runner)    |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions

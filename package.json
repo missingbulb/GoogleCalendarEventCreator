@@ -1,0 +1,14 @@
+{
+  "name": "google-calendar-event-creator",
+  "version": "1.0.0",
+  "description": "Chrome extension that creates a pre-filled Google Calendar event from the event details on the current web page.",
+  "private": true,
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "record": "node test/record.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}

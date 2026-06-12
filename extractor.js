@@ -33,6 +33,12 @@
     return "";
   }
 
+  function bodyText() {
+    const body = document.body;
+    if (!body) return "";
+    return body.innerText || body.textContent || "";
+  }
+
   function meta(nameOrProp) {
     const el = document.querySelector(
       `meta[property="${nameOrProp}"], meta[name="${nameOrProp}"], meta[itemprop="${nameOrProp}"]`
@@ -81,10 +87,10 @@
     if (isoMatch) return normalizeIso(isoMatch[0]);
 
     const patterns = [
-      // "June 14, 2026 at 7:00 PM" / "Jun 14 2026, 19:00"
-      new RegExp(`${MONTH}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}(?:\\s*(?:,|at|@|·|—|–|-)?\\s*(${TIME}))?`, "i"),
+      // "June 14, 2026 at 7:00 PM" / "Jun 14 2026, 19:00" / "June 14, 2026 from 7 PM"
+      new RegExp(`${MONTH}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}(?:\\s*(?:,|at|from|@|·|—|–|-)?\\s*(${TIME}))?`, "i"),
       // "14 June 2026 at 7 PM"
-      new RegExp(`\\d{1,2}(?:st|nd|rd|th)?\\s+${MONTH}\\.?,?\\s+\\d{4}(?:\\s*(?:,|at|@|·|—|–|-)?\\s*(${TIME}))?`, "i"),
+      new RegExp(`\\d{1,2}(?:st|nd|rd|th)?\\s+${MONTH}\\.?,?\\s+\\d{4}(?:\\s*(?:,|at|from|@|·|—|–|-)?\\s*(${TIME}))?`, "i"),
       // "Sunday, June 14 at 7 PM" (no year -> assume nearest upcoming)
       new RegExp(`${MONTH}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:\\s*(?:,|at|@|·)\\s*(${TIME}))`, "i"),
       // "6/14/2026 7:00 PM"
@@ -96,7 +102,7 @@
       if (!m) continue;
       let candidate = m[0]
         .replace(/(\d{1,2})(st|nd|rd|th)/gi, "$1")
-        .replace(/\s+(?:at|@|·|—|–)\s+/gi, " ")
+        .replace(/\s+(?:at|from|@|·|—|–)\s+/gi, " ")
         .replace(/,\s*(\d{1,2}[:\s])/g, " $1");
       const hasTime = new RegExp(TIME, "i").test(candidate);
       // V8 won't parse "7 PM" without minutes; expand it.
@@ -211,7 +217,7 @@
     if (!title) {
       title = clean(document.title.replace(/\s*\|\s*Facebook\s*$/i, ""));
     }
-    const topText = (document.body.innerText || "").slice(0, 4000);
+    const topText = bodyText().slice(0, 4000);
     return {
       title,
       start: parseDateFromText(topText),
@@ -255,7 +261,7 @@
       if (timeEl) out.start = normalizeDateValue(timeEl.getAttribute("datetime"));
     }
     if (!out.start) {
-      out.start = parseDateFromText((document.body.innerText || "").slice(0, 8000));
+      out.start = parseDateFromText(bodyText().slice(0, 8000));
     }
 
     out.location =
