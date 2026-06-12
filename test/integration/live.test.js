@@ -14,44 +14,43 @@
 //   {
 //     "description": "Meetup event page is parseable",
 //     "url":         "https://www.meetup.com/<group>/events/<id>/",
-//     "_calendarUrl": "https://calendar.google.com/calendar/render?...", <- informational only,
-//                                                                            not validated; the
-//                                                                            full URL buildCalendarUrl
-//                                                                            produces for this case,
-//                                                                            for reviewers to eyeball
 //     "expected": {
-//       "title":    "Exact Title",                  <- string: exact match
-//       "start":    "2026-06-25T18:00:00-04:00",    <- string: exact match
-//       "location": { "includes": "Library" },      <- substring(s)
-//       "description": { "nonEmpty": true },         <- just has to be there
-//       "multipleEvents": false,                     <- boolean: exact match
-//       "dates":    "20260625T220000Z/20260626T010000Z", <- the Calendar URL's dates= param
-//       "details":  { "startsWith": "...exact prefix..." } <- exact, literal prefix match
+//       "title":          "Exact Title",
+//       "start":          "2026-06-25T18:00:00-04:00",
+//       "end":            "2026-06-25T21:00:00-04:00",
+//       "location":       "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
+//       "multipleEvents": false,
+//       "dates":          "20260625T220000Z/20260626T010000Z",
+//       "details":        "[https://www.meetup.com/.../events/123](https://www.meetup.com/.../events/123/)\n\n...full description..."
 //     }
 //   }
+//
+// `expected` must be the *complete*, exact object the extractor + URL
+// builder produce — it is deep-equal compared against:
+//   { title, start, end, location, multipleEvents, dates, details }
+// (see below). There are no substring/regex/prefix matchers: every field
+// must be present and match exactly, including the full text of `details`.
+// This catches any drift — in extraction, date math, or URL composition —
+// however small. When a snapshot refresh legitimately changes a page's
+// content, update `expected` to match the new exact values.
 //
 // `dates` is derived from the extracted start/end via background.js's
 // formatDatesParam(), so it doubles as integration coverage for the
 // URL-building logic against real-world date/timezone formats.
 //
 // `details` is the final Calendar template "details" field, built from the
-// extraction result via background.js's buildCalendarUrl().
-//
-// Use exact strings when the value is known and stable; use matchers
-// ({ "includes": [...] }, { "startsWith": "..." }, { "matches": "regex" },
-// { "nonEmpty": true }) otherwise.
-//
-// IMPORTANT for future updates to these integration tests: prefer
-// { "startsWith": "..." } (or a plain exact string) with the full, literal
-// expected text over { "matches": "regex" } whenever the expected value is
-// deterministic — e.g. the meetup.com canonical-URL link in `details`. Exact
-// matches catch subtle formatting regressions (stray characters, wrong
-// punctuation, encoding slips) that a loose regex/substring check would miss. Every field is optional — assert what matters.
+// extraction result via background.js's buildCalendarUrl() — a link back to
+// the source page (on meetup.com, the canonical URL linking to the original,
+// tracked URL) followed by the page's description, truncated to
+// MAX_DETAILS_LENGTH. There is no separate "description" field: `details` is
+// the one place the description shows up, exactly as it will appear in the
+// generated Calendar event.
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
 // `node test/integration/refresh-snapshots.js` (on a machine with internet)
-// or let CI record it on the next run. No runner changes needed.
+// or let CI record it on the next run. Run the suite once to see the actual
+// extracted values in the failure output, then copy them into `expected`.
 "use strict";
 
 const test = require("node:test");
@@ -64,7 +63,7 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates", "details"];
+const FIELDS = ["title", "start", "end", "location", "multipleEvents", "dates", "details"];
 
 // background.js registers a chrome listener at load time; stub just enough
 // and evaluate it as global code so its function declarations land on
@@ -83,39 +82,6 @@ const STALE_WARNING_HOURS = 48;
 
 const manifest = fs.existsSync(MANIFEST_PATH) ? JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8")) : {};
 
-function assertField(field, actual, expectation, extracted) {
-  const context = `\nfull extracted event: ${JSON.stringify(extracted, null, 2)}`;
-  if (typeof expectation === "string" || typeof expectation === "boolean") {
-    assert.equal(actual, expectation, `"${field}" mismatch${context}`);
-    return;
-  }
-  if (expectation && typeof expectation === "object") {
-    if (expectation.nonEmpty) {
-      assert.ok(actual, `"${field}" should be non-empty${context}`);
-    }
-    if (expectation.matches) {
-      assert.match(String(actual || ""), new RegExp(expectation.matches), `"${field}" regex mismatch${context}`);
-    }
-    if (expectation.includes) {
-      for (const part of [].concat(expectation.includes)) {
-        assert.ok(
-          String(actual || "").includes(part),
-          `"${field}" should include "${part}" but was: "${actual}"${context}`
-        );
-      }
-    }
-    if (expectation.startsWith) {
-      assert.equal(
-        String(actual || "").slice(0, expectation.startsWith.length),
-        expectation.startsWith,
-        `"${field}" should start with "${expectation.startsWith}" but was: "${actual}"${context}`
-      );
-    }
-    return;
-  }
-  assert.fail(`Unsupported expectation for "${field}": ${JSON.stringify(expectation)}`);
-}
-
 const caseFiles = fs
   .readdirSync(CASES_DIR)
   .filter((f) => f.endsWith(".json"))
@@ -129,10 +95,13 @@ for (const file of caseFiles) {
 
   test(`${testCase.description || file} — ${testCase.url}`, (t) => {
     assert.ok(testCase.url, `${file}: "url" is required`);
-    assert.ok(
-      testCase.expected && Object.keys(testCase.expected).length > 0,
-      `${file}: "expected" must list at least one field`
-    );
+    assert.ok(testCase.expected, `${file}: "expected" is required`);
+    for (const field of Object.keys(testCase.expected)) {
+      assert.ok(FIELDS.includes(field), `${file}: unknown expected field "${field}". Allowed: ${FIELDS.join(", ")}`);
+    }
+    for (const field of FIELDS) {
+      assert.ok(field in testCase.expected, `${file}: "expected" is missing required field "${field}"`);
+    }
 
     const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.html`);
     assert.ok(
@@ -152,20 +121,25 @@ for (const file of caseFiles) {
 
     const html = fs.readFileSync(snapshotPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
-    extracted.dates = formatDatesParam(extracted.start, extracted.end);
+    const dates = formatDatesParam(extracted.start, extracted.end);
 
     // Run the same details-composition logic background.js uses when it
-    // opens the Calendar template, so cases can assert on the final
-    // "details" field (e.g. the meetup.com canonical-URL link).
+    // opens the Calendar template, so cases assert on the final "details"
+    // field (link back to the source + description) rather than the raw,
+    // pre-composition "description".
     const calendarUrl = buildCalendarUrl(extracted, { url: testCase.url, title: extracted.title, index: 0 });
-    extracted.details = new URL(calendarUrl).searchParams.get("details");
+    const details = new URL(calendarUrl).searchParams.get("details");
 
-    for (const [field, expectation] of Object.entries(testCase.expected)) {
-      assert.ok(
-        FIELDS.includes(field),
-        `${file}: unknown expectation "${field}". Allowed: ${FIELDS.join(", ")}`
-      );
-      assertField(field, extracted[field], expectation, extracted);
-    }
+    const actual = {
+      title: extracted.title,
+      start: extracted.start,
+      end: extracted.end,
+      location: extracted.location,
+      multipleEvents: extracted.multipleEvents,
+      dates,
+      details,
+    };
+
+    assert.deepEqual(actual, testCase.expected, `${file}: extracted result does not match "expected" exactly`);
   });
 }
