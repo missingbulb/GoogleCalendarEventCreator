@@ -48,11 +48,19 @@ duration is assumed. A date without a time becomes an all-day event.
 
 ## Install (developer mode)
 
-1. Clone this repository.
+1. Get the code onto your machine, either:
+   - Clone this repository: `git clone https://github.com/missingbulb/GoogleCalendarEventCreator.git`, or
+   - If you don't have `git`, download
+     [the `main` branch as a ZIP](https://github.com/missingbulb/GoogleCalendarEventCreator/archive/refs/heads/main.zip)
+     and extract it (it unpacks into a `GoogleCalendarEventCreator-main` folder).
 2. Open `chrome://extensions` in Chrome.
 3. Enable **Developer mode** (top right).
-4. Click **Load unpacked** and select the repository folder.
+4. Click **Load unpacked** and select the folder from step 1 (the one
+   containing `manifest.json`).
 5. Optionally pin the extension's calendar icon to the toolbar.
+
+To pick up later changes, re-download/pull and click the refresh icon on the
+extension's card in `chrome://extensions`.
 
 ## Use
 
