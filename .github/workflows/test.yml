@@ -5,11 +5,12 @@ on:
     branches: [main]
   push:
     branches: [main]
-    # Pushes from the "Refresh snapshots" workflow only touch this path and
-    # carry [skip ci]; this is a redundant extra guard against re-triggering
-    # this workflow.
+    # Pushes from the "Refresh snapshots" / "Refresh UI snapshot" workflows
+    # only touch these paths and carry [skip ci]; this is a redundant extra
+    # guard against re-triggering this workflow.
     paths-ignore:
       - "test/integration/snapshots/**"
+      - "test/ui/snapshots/popup.png"
 
 jobs:
   test:
@@ -38,3 +39,25 @@ jobs:
       # them).
       - name: Run live tests
         run: npm run test:live
+
+  ui-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Compares a rendered popup.html against test/ui/snapshots/popup.png.
+      # Kept as its own job so a browser-download failure doesn't block the
+      # offline/live test job above.
+      - name: Run UI snapshot test
+        run: npm run test:ui

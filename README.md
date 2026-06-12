@@ -74,15 +74,17 @@ save.
 
 ## Testing
 
-There are two kinds of tests, with different audiences, separated under
-`test/integration/` and `test/unit/`:
+There are three kinds of tests, with different audiences, separated under
+`test/integration/`, `test/unit/`, and `test/ui/`:
 
 ```sh
 npm install
 npm run test:live      # integration: the REVIEWED assertions for each supported site
 npm run test:offline   # unit: internal tests of the extraction logic
+npm run test:ui        # UI: popup screenshot vs. the stored snapshot (needs Playwright's Chromium)
 npm run refresh        # re-fetch the live snapshots (needs internet)
-npm test               # everything
+npm run refresh:ui     # regenerate the popup UI snapshot after an intentional change
+npm test               # offline + live (test:ui is separate — see below)
 ```
 
 ### Integration tests — the ones you review
@@ -164,6 +166,28 @@ unavailable.
 Facebook extraction is covered only here: GitHub Actions runners get HTTP 400
 from facebook.com, so it can't be snapshotted as a live case.
 
+### UI snapshot test
+
+**`test/ui/popup.test.js`** renders `popup.html` in headless Chromium (via
+Playwright) with a stubbed `chrome` extension API returning fixed fixture
+data (`test/ui/fixture.js`), screenshots the result, and compares it
+pixel-by-pixel (via `pixelmatch`, with a small tolerance for font-rendering
+differences) against the committed image at
+**`test/ui/snapshots/popup.png`** — open that file on GitHub to see what the
+popup currently looks like.
+
+This test requires Playwright's Chromium browser (`npx playwright install
+chromium`), which is why it has its own npm script (`test:ui`) and its own CI
+job, separate from the offline/live tests run by `npm test`.
+
+After an intentional change to `popup.html`/`popup.js`, run `npm run
+refresh:ui` to regenerate `popup.png` (or use the **Refresh UI snapshot**
+workflow, "Run workflow" in the Actions tab, so it's rendered on the same
+runner image the `ui-test` CI job uses) and commit the updated PNG so
+reviewers can see the before/after in the diff. On mismatch, the test writes
+`test/ui/snapshots/popup.actual.png` and `popup.diff.png` (both gitignored)
+for local debugging.
+
 ## Files
 
 | File            | Purpose                                                       |
@@ -182,6 +206,11 @@ from facebook.com, so it can't be snapshotted as a live case.
 | `test/integration/live.test.js` | Runs the reviewed assertions against the snapshots       |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
+| `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
+| `test/ui/capture.js` | Renders `popup.html` in headless Chromium and screenshots it |
+| `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
+| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png`              |
+| `test/ui/snapshots/popup.png` | Committed reference screenshot of the popup, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions
