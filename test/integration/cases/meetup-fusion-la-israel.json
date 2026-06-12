@@ -10,6 +10,9 @@
     "dates": "20260607T060000Z/20260607T093000Z",
     "description": {
       "includes": ["Fusion VC", "Google for Startups"]
+    },
+    "details": {
+      "matches": "^\\[https://www\\.meetup\\.com/fusion-la-israel/events/314842056\\]\\(https://www\\.meetup\\.com/fusion-la-israel/events/314842056/\\)\\n\\n"
     }
   }
 }

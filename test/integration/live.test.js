@@ -53,18 +53,18 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates"];
+const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates", "details"];
 
 // background.js registers a chrome listener at load time; stub just enough
 // and evaluate it as global code so its function declarations land on
 // globalThis.
-function loadFormatDatesParam() {
-  const sandbox = { chrome: { action: { onClicked: { addListener() {} } } } };
+function loadBackgroundFns() {
+  const sandbox = { chrome: { action: { onClicked: { addListener() {} } } }, URL, URLSearchParams };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"), sandbox);
-  return sandbox.formatDatesParam;
+  return { formatDatesParam: sandbox.formatDatesParam, buildCalendarUrl: sandbox.buildCalendarUrl };
 }
 
-const formatDatesParam = loadFormatDatesParam();
+const { formatDatesParam, buildCalendarUrl } = loadBackgroundFns();
 
 // Warn (don't fail) when a snapshot is older than this — a silently broken
 // refresh pipeline then shows up in the test output instead of going unnoticed.
@@ -135,6 +135,12 @@ for (const file of caseFiles) {
     const html = fs.readFileSync(snapshotPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
     extracted.dates = formatDatesParam(extracted.start, extracted.end);
+
+    // Run the same details-composition logic background.js uses when it
+    // opens the Calendar template, so cases can assert on the final
+    // "details" field (e.g. the meetup.com canonical-URL link).
+    const calendarUrl = buildCalendarUrl(extracted, { url: testCase.url, title: extracted.title, index: 0 });
+    extracted.details = new URL(calendarUrl).searchParams.get("details");
 
     for (const [field, expectation] of Object.entries(testCase.expected)) {
       assert.ok(

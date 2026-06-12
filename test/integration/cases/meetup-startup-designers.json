@@ -10,6 +10,9 @@
     "dates": "20260617T160000Z/20260617T180000Z",
     "description": {
       "includes": ["התגעגענו"]
+    },
+    "details": {
+      "matches": "^\\[https://www\\.meetup\\.com/startup-designers/events/315022301\\]\\(https://www\\.meetup\\.com/startup-designers/events/315022301/\\)\\n\\n"
     }
   }
 }
