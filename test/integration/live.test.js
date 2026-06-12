@@ -19,9 +19,15 @@
 //       "start":    "2026-06-25T18:00:00-04:00",    <- string: exact match
 //       "location": { "includes": "Library" },      <- substring(s)
 //       "description": { "nonEmpty": true },         <- just has to be there
-//       "multipleEvents": false                      <- boolean: exact match
+//       "multipleEvents": false,                     <- boolean: exact match
+//       "dates":    "20260625T180000/20260625T210000", <- the Calendar URL's dates= param
+//       "ctz":      "Etc/GMT+4"                      <- the Calendar URL's ctz= param
 //     }
 //   }
+//
+// `dates` and `ctz` are derived from the extracted start/end via
+// background.js's formatDatesParam(), so they double as integration coverage
+// for the URL-building logic against real-world date/timezone formats.
 //
 // Use exact strings when the value is known and stable; use matchers
 // ({ "includes": [...] }, { "matches": "regex" }, { "nonEmpty": true })
@@ -37,12 +43,24 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 const { extractFromHtml } = require("../harness");
 
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents"];
+const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates", "ctz"];
+
+// background.js registers a chrome listener at load time; stub just enough
+// and evaluate it as global code so its function declarations land on
+// globalThis.
+function loadFormatDatesParam() {
+  const sandbox = { chrome: { action: { onClicked: { addListener() {} } } } };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"), sandbox);
+  return sandbox.formatDatesParam;
+}
+
+const formatDatesParam = loadFormatDatesParam();
 
 // Warn (don't fail) when a snapshot is older than this — a silently broken
 // refresh pipeline then shows up in the test output instead of going unnoticed.
@@ -112,6 +130,7 @@ for (const file of caseFiles) {
 
     const html = fs.readFileSync(snapshotPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
+    Object.assign(extracted, formatDatesParam(extracted.start, extracted.end));
 
     for (const [field, expectation] of Object.entries(testCase.expected)) {
       assert.ok(
