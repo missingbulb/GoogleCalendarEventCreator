@@ -14,6 +14,11 @@
 //   {
 //     "description": "Meetup event page is parseable",
 //     "url":         "https://www.meetup.com/<group>/events/<id>/",
+//     "_calendarUrl": "https://calendar.google.com/calendar/render?...", <- informational only,
+//                                                                            not validated; the
+//                                                                            full URL buildCalendarUrl
+//                                                                            produces for this case,
+//                                                                            for reviewers to eyeball
 //     "expected": {
 //       "title":    "Exact Title",                  <- string: exact match
 //       "start":    "2026-06-25T18:00:00-04:00",    <- string: exact match
