@@ -46,11 +46,13 @@ function buildCalendarUrl(data, tab) {
   const dates = formatDatesParam(data.start, data.end);
   if (dates) params.set("dates", dates);
 
+  // The details field always starts with the original event page URL,
+  // followed by the extracted description.
   let details = (data.description || "").slice(0, MAX_DETAILS_LENGTH);
   if (data.multipleEvents) {
     details = "(First of several events found on this page.)\n\n" + details;
   }
-  details = (details ? details + "\n\n" : "") + "Source: " + (tab.url || "");
+  details = (tab.url ? tab.url + "\n\n" : "") + details;
   params.set("details", details.trim());
 
   if (data.location) params.set("location", data.location);

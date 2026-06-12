@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
-    "test:offline": "node --test test/extraction.test.js",
+    "test:offline": "node --test test/extraction.test.js test/calendar-url.test.js",
     "test:live": "node --test test/live.test.js"
   },
   "license": "MIT",

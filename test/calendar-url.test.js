@@ -1,0 +1,79 @@
+// Offline unit tests for background.js's Google Calendar URL building:
+// the `dates` parameter formats and the composition of the `details` field.
+"use strict";
+
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+
+// background.js registers a chrome listener at load time; stub just enough
+// and evaluate it as global code so its function declarations land on
+// globalThis.
+function loadBackground() {
+  globalThis.chrome = { action: { onClicked: { addListener() {} } } };
+  vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "background.js"), "utf8"));
+  return {
+    buildCalendarUrl: globalThis.buildCalendarUrl,
+    formatDatesParam: globalThis.formatDatesParam,
+  };
+}
+
+const { buildCalendarUrl, formatDatesParam } = loadBackground();
+const TAB = { title: "Tab Title", url: "https://www.meetup.com/group/events/123/", index: 0 };
+
+function paramsOf(url) {
+  return new URL(url).searchParams;
+}
+
+test("details starts with the original event page URL, then the description", () => {
+  const url = buildCalendarUrl({ title: "Picnic", description: "Bring food." }, TAB);
+  assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nBring food.`);
+});
+
+test("details is just the URL when the page had no description", () => {
+  const url = buildCalendarUrl({ title: "Picnic" }, TAB);
+  assert.equal(paramsOf(url).get("details"), TAB.url);
+});
+
+test("multiple-events note comes after the URL, before the description", () => {
+  const url = buildCalendarUrl({ title: "Fair", description: "Art.", multipleEvents: true }, TAB);
+  assert.equal(
+    paramsOf(url).get("details"),
+    `${TAB.url}\n\n(First of several events found on this page.)\n\nArt.`
+  );
+});
+
+test("falls back to the tab title when no title was extracted", () => {
+  const url = buildCalendarUrl({}, TAB);
+  assert.equal(paramsOf(url).get("text"), "Tab Title");
+});
+
+test("dates: floating local time gets a 2-hour default duration", () => {
+  assert.equal(formatDatesParam("2026-06-14T19:00:00", ""), "20260614T190000/20260614T210000");
+});
+
+test("dates: explicit offset is converted to exact UTC instants", () => {
+  assert.equal(
+    formatDatesParam("2026-06-14T19:00:00-04:00", "2026-06-14T21:00:00-04:00"),
+    "20260614T230000Z/20260615T010000Z"
+  );
+});
+
+test("dates: date-only becomes an all-day event (exclusive end)", () => {
+  assert.equal(formatDatesParam("2026-06-14", ""), "20260614/20260615");
+});
+
+test("dates: an end before the start is ignored in favor of the default duration", () => {
+  assert.equal(
+    formatDatesParam("2026-06-14T19:00:00", "2026-06-14T18:00:00"),
+    "20260614T190000/20260614T210000"
+  );
+});
+
+test("dates: omitted entirely when no start was found", () => {
+  assert.equal(formatDatesParam("", ""), "");
+  const url = buildCalendarUrl({ title: "No date" }, TAB);
+  assert.equal(paramsOf(url).get("dates"), null);
+});
