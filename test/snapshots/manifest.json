@@ -6,5 +6,13 @@
   "meetup": {
     "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
     "fetchedAt": "2026-06-12T20:33:53.360Z"
+  },
+  "meetup-fusion-la-israel": {
+    "url": "https://www.meetup.com/fusion-la-israel/events/314842056/",
+    "fetchedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "meetup-startup-designers": {
+    "url": "https://www.meetup.com/startup-designers/events/315022301/",
+    "fetchedAt": "1970-01-01T00:00:00.000Z"
   }
 }
