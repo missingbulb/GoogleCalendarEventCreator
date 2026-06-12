@@ -39,11 +39,11 @@ several `schema.org/Event` microdata items, or several timestamped list
 cards), the **first event** is suggested and a note is added to the details
 field.
 
-Dates with an explicit timezone offset are passed to Google Calendar as the
-page's wall-clock time plus a `ctz` parameter for the matching timezone, so
-the event keeps the same time regardless of the viewer's own timezone; dates
-without an offset are passed as floating local times so the event shows the
-same wall-clock time the page displayed. When no end time is found, a 2-hour
+Dates with an explicit timezone offset are converted to an exact UTC instant
+before being passed to Google Calendar, so the event occurs at the same
+moment in time regardless of the viewer's own timezone; dates without an
+offset are passed as floating local times so the event shows the same
+wall-clock time the page displayed. When no end time is found, a 2-hour
 duration is assumed. A date without a time becomes an all-day event.
 
 ## Install (developer mode)
@@ -144,7 +144,7 @@ its case at a newer event (and refresh its snapshot the same way).
 **`test/unit/extraction.test.js`** pins down the extraction logic (site
 selectors, JSON-LD handling, text date parsing, multiple-event detection) and
 **`test/unit/calendar-url.test.js`** covers the Google Calendar URL building
-(`dates`/`ctz` formats, the `details` field layout). Both use small synthetic
+(`dates` formats, the `details` field layout). Both use small synthetic
 HTML snippets written inline — no network, never flake — so a regression is
 caught on every PR even when a third-party site or its snapshot is
 unavailable.

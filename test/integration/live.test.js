@@ -25,14 +25,13 @@
 //       "location": { "includes": "Library" },      <- substring(s)
 //       "description": { "nonEmpty": true },         <- just has to be there
 //       "multipleEvents": false,                     <- boolean: exact match
-//       "dates":    "20260625T180000/20260625T210000", <- the Calendar URL's dates= param
-//       "ctz":      "Etc/GMT+4"                      <- the Calendar URL's ctz= param
+//       "dates":    "20260625T220000Z/20260626T010000Z" <- the Calendar URL's dates= param
 //     }
 //   }
 //
-// `dates` and `ctz` are derived from the extracted start/end via
-// background.js's formatDatesParam(), so they double as integration coverage
-// for the URL-building logic against real-world date/timezone formats.
+// `dates` is derived from the extracted start/end via background.js's
+// formatDatesParam(), so it doubles as integration coverage for the
+// URL-building logic against real-world date/timezone formats.
 //
 // Use exact strings when the value is known and stable; use matchers
 // ({ "includes": [...] }, { "matches": "regex" }, { "nonEmpty": true })
@@ -54,7 +53,7 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates", "ctz"];
+const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates"];
 
 // background.js registers a chrome listener at load time; stub just enough
 // and evaluate it as global code so its function declarations land on
@@ -135,7 +134,7 @@ for (const file of caseFiles) {
 
     const html = fs.readFileSync(snapshotPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
-    Object.assign(extracted, formatDatesParam(extracted.start, extracted.end));
+    extracted.dates = formatDatesParam(extracted.start, extracted.end);
 
     for (const [field, expectation] of Object.entries(testCase.expected)) {
       assert.ok(
