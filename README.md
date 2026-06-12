@@ -61,58 +61,82 @@ pre-filled; review and save.
 
 ## Testing
 
-Two complementary suites live in `test/`:
+There are two kinds of tests, with different audiences:
 
 ```sh
 npm install
-npm run test:live      # fetch REAL event pages and verify they're parseable
-npm run test:offline   # deterministic unit tests of the extraction logic
-npm test               # both
+npm run test:live      # the REVIEWED assertions for each supported site
+npm run test:offline   # internal unit tests of the extraction logic
+npm run refresh        # re-fetch the live snapshots (needs internet)
+npm test               # everything
 ```
 
-**Live end-to-end tests** (`test/live.test.js`) are driven by declarative
-JSON files in `test/cases/` — a real event page URL plus what the extractor
-must produce for it. At test time the page is fetched over the network
-(browser-like headers, 3 retry attempts), loaded into a DOM at that URL — so
-hostname-based site detection works exactly as in Chrome — and run through
-the real extractor files (the same `EXTRACTOR_FILES` list `background.js`
-injects, in the same order). Nothing is cached or committed; a passing run
-means the site's *current* markup is parseable.
+### Live tests — the ones you review
+
+**`test/live.test.js`** is driven by declarative JSON files in `test/cases/`
+— a real event page URL plus the values the extractor must produce for it.
+These are the assertions a human reviews to confirm each site is handled
+correctly.
 
 ```json
 {
   "description": "Meetup event page is parseable",
   "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
   "expected": {
-    "title": { "includes": "NYC Tech Mixer" },
-    "start": { "matches": "^2026-06-25T18:00" },
-    "location": { "nonEmpty": true }
+    "title": "NYC Tech Mixer 2026",
+    "start": "2026-06-25T18:00:00-04:00",
+    "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
+    "description": { "includes": ["JOIN US FOR THE BEST NETWORKING EVENT"] }
   }
 }
 ```
 
 Each expected field takes an exact string/boolean, or a matcher:
-`{ "includes": "substring" }`, `{ "matches": "regex" }`, or
-`{ "nonEmpty": true }`. Use exact values when the event's details are stable;
-use matchers to assert "the field is extracted" on a live page. All fields
-are optional. **To cover a new website or platform, add one case file
-pointing at a real event page on it** — no runner changes needed. Note that
-cases need occasional gardening: when an event page is eventually taken
-down, point its case at a newer event.
+`{ "includes": [...] }`, `{ "matches": "regex" }`, or `{ "nonEmpty": true }`.
+Use exact values when the value is known and stable; use matchers otherwise.
+All fields are optional.
 
-A case may set `"allowFetchFailure": true` for sites that refuse anonymous
-CI clients (Facebook answers HTTP 400 from GitHub Actions runners): a refused
-fetch then skips the test instead of failing it, but a page that is fetched
-and fails to parse still fails.
+The tests themselves run **offline**, against committed HTML snapshots in
+`test/snapshots/` (one `<case>.html` per case, plus `manifest.json` recording
+each snapshot's source URL and fetch time). The snapshot is loaded into a DOM
+at the case's URL — so hostname-based site detection behaves exactly as in
+Chrome — and run through the real extractor files. This keeps the suite
+deterministic and runnable anywhere, while still reflecting each site's
+*current* markup, because the snapshots are kept fresh automatically:
 
-**Offline unit tests** (`test/extraction.test.js`) pin down the extraction
-logic itself (site selectors, JSON-LD handling, text date parsing,
-multiple-event detection) against small synthetic HTML snippets written
-inline in the test — they need no network and never flake, so PRs keep a
-trustworthy signal even when a third-party site is down.
+- **`test/refresh-snapshots.js`** (`npm run refresh`) re-fetches any snapshot
+  that is missing, older than 24h, or whose case URL changed (`--force` does
+  all of them). A failed fetch keeps the previous snapshot and only warns, so
+  a site outage or bot-blocking never breaks the suite.
+- The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
+  push to `main`: it refreshes stale snapshots, runs the live tests against
+  them, and — only on a push to `main` — commits the refreshed snapshots back.
+- The **Refresh snapshots** workflow (`.github/workflows/refresh-snapshots.yml`)
+  runs daily (and on demand), force-refreshes every snapshot, runs the live
+  tests, and commits the result — so a site changing its markup turns a
+  scheduled run red within a day, independently of anyone pushing.
 
-Both suites run on every pull request to `main` via GitHub Actions
-(`.github/workflows/test.yml`).
+The snapshot commit is pushed with the default `GITHUB_TOKEN` (whose pushes
+never trigger another workflow run), carries a `[skip ci]` marker, and the
+Tests workflow ignores pushes that only touch `test/snapshots/**` — three
+independent safeguards against a refresh→commit→refresh loop.
+
+**To cover a new website or platform, add one case file** pointing at a real
+event page; CI records its first snapshot on the next run (or run
+`npm run refresh` locally). Note that cases need occasional gardening: when an
+event page is eventually taken down, point its case at a newer event.
+
+### Offline tests — the internal safety net
+
+**`test/extraction.test.js`** pins down the extraction logic (site selectors,
+JSON-LD handling, text date parsing, multiple-event detection) and
+**`test/calendar-url.test.js`** covers the Google Calendar URL building
+(`dates` formats, the `details` field layout). Both use small synthetic HTML
+snippets written inline — no network, never flake — so a regression is caught
+on every PR even when a third-party site or its snapshot is unavailable.
+
+Facebook extraction is covered only here: GitHub Actions runners get HTTP 400
+from facebook.com, so it can't be snapshotted as a live case.
 
 ## Files
 
@@ -125,7 +149,11 @@ Both suites run on every pull request to `main` via GitHub Actions
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
-| `test/`         | Declarative e2e extraction tests (cases, fixtures, runner)    |
+| `test/cases/`   | Reviewed live-test cases (URL + expected values), one JSON each |
+| `test/snapshots/` | Committed HTML snapshots the live tests assert against, kept fresh by CI |
+| `test/refresh-snapshots.js` | Re-fetches stale/missing snapshots          |
+| `test/live.test.js` | Runs the reviewed assertions against the snapshots       |
+| `test/extraction.test.js`, `test/calendar-url.test.js` | Internal offline unit tests |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions

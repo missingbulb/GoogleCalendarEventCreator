@@ -1,7 +1,12 @@
-// Live end-to-end tests: fetch each case's REAL event page over the network
-// at test time, run the extractor on it, and check the result. This is the
-// suite that proves the extractor still works against today's markup of each
-// site — nothing is cached or committed.
+// Live extraction tests — the suite you review to confirm the extractor
+// produces the right values for each supported site.
+//
+// These run OFFLINE against committed HTML snapshots in test/snapshots/,
+// which a GitHub Actions job keeps fresh (refreshed daily, and again before
+// the live tests run on a push to main — see test/refresh-snapshots.js and
+// .github/workflows/). Asserting against a recently-cached copy of the real
+// page makes the suite deterministic and runnable anywhere (no network),
+// while still reflecting each site's current markup.
 //
 // Each JSON file in test/cases/ describes one scenario:
 //
@@ -10,19 +15,21 @@
 //     "url":         "https://www.meetup.com/<group>/events/<id>/",
 //     "expected": {
 //       "title":    "Exact Title",                  <- string: exact match
-//       "start":    { "matches": "^2026-06-25" },   <- regex on the value
+//       "start":    "2026-06-25T18:00:00-04:00",    <- string: exact match
 //       "location": { "includes": "Library" },      <- substring(s)
-//       "description": { "nonEmpty": true },        <- just has to be there
-//       "multipleEvents": false                     <- boolean: exact match
+//       "description": { "nonEmpty": true },         <- just has to be there
+//       "multipleEvents": false                      <- boolean: exact match
 //     }
 //   }
 //
-// Use exact strings when the event's details are known and stable; use
-// matchers when the page is live and you only need to prove the field is
-// extracted correctly. Every field is optional — assert what matters.
+// Use exact strings when the value is known and stable; use matchers
+// ({ "includes": [...] }, { "matches": "regex" }, { "nonEmpty": true })
+// otherwise. Every field is optional — assert what matters.
 //
 // To cover a new website or platform: add a case file pointing at a real
-// event page on it. No runner changes needed.
+// event page, then record its first snapshot with
+// `node test/refresh-snapshots.js` (on a machine with internet) or let CI
+// record it on the next run. No runner changes needed.
 "use strict";
 
 const test = require("node:test");
@@ -32,38 +39,15 @@ const path = require("node:path");
 const { extractFromHtml } = require("./harness");
 
 const CASES_DIR = path.join(__dirname, "cases");
+const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
+const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
 const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents"];
 
-const FETCH_ATTEMPTS = 3;
-const FETCH_TIMEOUT_MS = 20_000;
-// Event sites tend to reject clients that don't look like a browser.
-const BROWSER_HEADERS = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
-  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-  "Accept-Language": "en-US,en;q=0.9",
-};
+// Warn (don't fail) when a snapshot is older than this — a silently broken
+// refresh pipeline then shows up in the test output instead of going unnoticed.
+const STALE_WARNING_HOURS = 48;
 
-async function fetchPage(url) {
-  let lastError;
-  for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
-    try {
-      const res = await fetch(url, {
-        headers: BROWSER_HEADERS,
-        redirect: "follow",
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.text();
-    } catch (err) {
-      lastError = err;
-      if (attempt < FETCH_ATTEMPTS) {
-        await new Promise((r) => setTimeout(r, 2000 * attempt));
-      }
-    }
-  }
-  throw new Error(`Could not fetch ${url} after ${FETCH_ATTEMPTS} attempts: ${lastError.message}`);
-}
+const manifest = fs.existsSync(MANIFEST_PATH) ? JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8")) : {};
 
 function assertField(field, actual, expectation, extracted) {
   const context = `\nfull extracted event: ${JSON.stringify(extracted, null, 2)}`;
@@ -99,29 +83,33 @@ const caseFiles = fs
 assert.ok(caseFiles.length > 0, `No test cases found in ${CASES_DIR}`);
 
 for (const file of caseFiles) {
+  const name = path.basename(file, ".json");
   const testCase = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
 
-  test(`${testCase.description || file} — ${testCase.url}`, async (t) => {
+  test(`${testCase.description || file} — ${testCase.url}`, (t) => {
     assert.ok(testCase.url, `${file}: "url" is required`);
     assert.ok(
       testCase.expected && Object.keys(testCase.expected).length > 0,
       `${file}: "expected" must list at least one field`
     );
 
-    let html;
-    try {
-      html = await fetchPage(testCase.url);
-    } catch (err) {
-      // Some sites refuse anonymous datacenter clients (Facebook answers
-      // HTTP 400 from CI runners). A case can opt into tolerating that with
-      // "allowFetchFailure": true — the test is then skipped, but a fetched
-      // page that fails to PARSE still fails the test.
-      if (testCase.allowFetchFailure) {
-        t.skip(`tolerated fetch failure ("allowFetchFailure" is set): ${err.message}`);
-        return;
+    const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.html`);
+    assert.ok(
+      fs.existsSync(snapshotPath),
+      `Missing snapshot for "${name}". Record it with: node test/refresh-snapshots.js`
+    );
+
+    const entry = manifest[name];
+    if (entry && entry.fetchedAt) {
+      const ageHours = (Date.now() - Date.parse(entry.fetchedAt)) / 3_600_000;
+      if (ageHours > STALE_WARNING_HOURS) {
+        t.diagnostic(
+          `snapshot for "${name}" is ${Math.round(ageHours)}h old (fetched ${entry.fetchedAt}) — refresh pipeline may be broken`
+        );
       }
-      throw err;
     }
+
+    const html = fs.readFileSync(snapshotPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
 
     for (const [field, expectation] of Object.entries(testCase.expected)) {

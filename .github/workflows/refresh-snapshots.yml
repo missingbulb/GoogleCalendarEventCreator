@@ -1,0 +1,46 @@
+name: Refresh snapshots
+
+# Keeps the committed HTML snapshots fresh independently of pushes, and
+# surfaces site markup changes as a failing scheduled run within a day.
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Force a fresh fetch of every snapshot regardless of age.
+      - name: Refresh all HTML snapshots
+        run: npm run refresh -- --force
+
+      # Run the live assertions against the freshly fetched pages, so a site
+      # that changed its markup turns this scheduled run red.
+      - name: Run live tests
+        run: npm run test:live
+
+      - name: Commit refreshed snapshots
+        run: |
+          if [ -n "$(git status --porcelain test/snapshots)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add test/snapshots
+            git commit -m "chore: refresh HTML snapshots [skip ci]"
+            git push
+          else
+            echo "Snapshots already fresh; nothing to commit."
+          fi

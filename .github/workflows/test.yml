@@ -5,6 +5,15 @@ on:
     branches: [main]
   push:
     branches: [main]
+    # A push that only refreshes snapshots must not start CI. Combined with
+    # the [skip ci] message and the GITHUB_TOKEN no-recursion rule, this is
+    # the outermost guard against a snapshot-commit loop.
+    paths-ignore:
+      - "test/snapshots/**"
+
+# Allow the "commit refreshed snapshots" step to push back to main.
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -20,11 +29,35 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate manifest.json
+      - name: Validate extension manifest.json
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.json'))"
 
-      - name: Run offline extraction tests
+      # "For me" tests: deterministic, no network. These gate every change.
+      - name: Run offline tests
         run: npm run test:offline
 
-      - name: Run live tests against real event pages
+      # Refresh any snapshot older than 24h (or missing) so the live tests
+      # below assert against an up-to-date copy of each real event page.
+      - name: Refresh HTML snapshots
+        run: npm run refresh
+
+      # "For you" tests: the reviewed assertions, run against the snapshots.
+      - name: Run live tests
         run: npm run test:live
+
+      # Persist refreshed snapshots back to main. Pushes made with the
+      # default GITHUB_TOKEN do not trigger another workflow run, and the
+      # [skip ci] marker plus the paths-ignore filter above are redundant
+      # safeguards — so this cannot start a commit loop.
+      - name: Commit refreshed snapshots
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if [ -n "$(git status --porcelain test/snapshots)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add test/snapshots
+            git commit -m "chore: refresh HTML snapshots [skip ci]"
+            git push
+          else
+            echo "Snapshots already fresh; nothing to commit."
+          fi
