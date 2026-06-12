@@ -4,7 +4,7 @@
   "description": "Chrome extension that creates a pre-filled Google Calendar event from the event details on the current web page.",
   "private": true,
   "scripts": {
-    "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\"",
+    "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\" \"test/ui/**/*.test.js\"",
     "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js",
     "test:live": "node --test test/integration/live.test.js",
     "test:ui": "node --test test/ui/popup.test.js",
@@ -13,9 +13,10 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "jsdom": "^29.1.1",
     "pixelmatch": "^7.2.0",
-    "playwright": "^1.60.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "satori": "^0.26.0"
   }
 }

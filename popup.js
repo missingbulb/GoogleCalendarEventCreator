@@ -41,7 +41,7 @@
     await chrome.tabs.create({ url, index: tab.index + 1 });
     window.close();
   });
-})();
+})().catch((e) => console.error("Popup failed to initialize:", e));
 
 // Human-readable summary of the extracted date/time for the popup (separate
 // from formatDatesParam's Google Calendar URL encoding).

@@ -1,7 +1,7 @@
-// UI snapshot test: renders the popup with fixed fixture data (see
-// fixture.js) and compares it against the stored screenshot in
-// test/ui/snapshots/popup.png. Run `npm run refresh:ui` to regenerate the
-// stored screenshot after an intentional UI change.
+// UI snapshot test: renders an approximation of the popup with fixed fixture
+// data (see fixture.js and render.js) and compares it against the stored
+// image in test/ui/snapshots/popup.png. Run `npm run refresh:ui` to
+// regenerate the stored image after an intentional UI change.
 "use strict";
 
 const test = require("node:test");
@@ -9,20 +9,21 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
-const pixelmatch = require("pixelmatch");
-const { capturePopupScreenshot } = require("./capture");
+const pixelmatch = require("pixelmatch").default;
+const { renderPopupPng } = require("./render");
 
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const SNAPSHOT_PATH = path.join(SNAPSHOTS_DIR, "popup.png");
 const ACTUAL_PATH = path.join(SNAPSHOTS_DIR, "popup.actual.png");
 const DIFF_PATH = path.join(SNAPSHOTS_DIR, "popup.diff.png");
 
-// Allow a tiny fraction of pixels to differ, to absorb minor
-// font-rendering/antialiasing differences between machines.
-const MAX_DIFF_RATIO = 0.01;
+// Rendering is deterministic (no browser/fonts involved), so pixels should
+// match exactly run to run; allow a tiny tolerance for any
+// platform-dependent rasterization differences.
+const MAX_DIFF_RATIO = 0.005;
 
 test("popup UI matches the stored snapshot", async () => {
-  const actualBuffer = await capturePopupScreenshot();
+  const actualBuffer = await renderPopupPng();
   const actual = PNG.sync.read(actualBuffer);
 
   assert.ok(

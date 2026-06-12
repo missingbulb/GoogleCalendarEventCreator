@@ -81,10 +81,10 @@ There are three kinds of tests, with different audiences, separated under
 npm install
 npm run test:live      # integration: the REVIEWED assertions for each supported site
 npm run test:offline   # unit: internal tests of the extraction logic
-npm run test:ui        # UI: popup screenshot vs. the stored snapshot (needs Playwright's Chromium)
+npm run test:ui        # UI: rendered popup vs. the stored snapshot image
 npm run refresh        # re-fetch the live snapshots (needs internet)
 npm run refresh:ui     # regenerate the popup UI snapshot after an intentional change
-npm test               # offline + live (test:ui is separate — see below)
+npm test               # everything above (offline + live + UI)
 ```
 
 ### Integration tests — the ones you review
@@ -168,23 +168,31 @@ from facebook.com, so it can't be snapshotted as a live case.
 
 ### UI snapshot test
 
-**`test/ui/popup.test.js`** renders `popup.html` in headless Chromium (via
-Playwright) with a stubbed `chrome` extension API returning fixed fixture
-data (`test/ui/fixture.js`), screenshots the result, and compares it
-pixel-by-pixel (via `pixelmatch`, with a small tolerance for font-rendering
-differences) against the committed image at
+**`test/ui/popup.test.js`** renders an approximation of the popup
+(`test/ui/render.js`, using `satori` + `@resvg/resvg-js` — no browser) for
+fixed fixture data (`test/ui/fixture.js`), and compares it pixel-by-pixel
+(via `pixelmatch`) against the committed image at
 **`test/ui/snapshots/popup.png`** — open that file on GitHub to see what the
 popup currently looks like.
 
-This test requires Playwright's Chromium browser (`npx playwright install
-chromium`), which is why it has its own npm script (`test:ui`) and its own CI
-job, separate from the offline/live tests run by `npm test`.
+Note this is **not a screenshot of the real `popup.html`**: satori only
+supports a constrained flexbox-based HTML/CSS subset, so `render.js` is a
+hand-maintained tree mirroring `popup.html`'s structure and styles. If
+`popup.html`/`popup.css`/`popup.js` change in ways that affect the rendered
+output (copy, layout, colors), update `buildTree()` in `render.js` to match.
+This tradeoff was chosen for determinism and zero extra runtime
+dependencies (no browser download); a real-browser screenshot (e.g. via
+Playwright) would have higher fidelity but couldn't run in all environments
+— revisit if the approximation's fidelity becomes a problem.
 
-After an intentional change to `popup.html`/`popup.js`, run `npm run
-refresh:ui` to regenerate `popup.png` (or use the **Refresh UI snapshot**
-workflow, "Run workflow" in the Actions tab, so it's rendered on the same
-runner image the `ui-test` CI job uses) and commit the updated PNG so
-reviewers can see the before/after in the diff. On mismatch, the test writes
+Rendering is deterministic, so this is fast and dependency-light enough to
+run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
+browser install step.
+
+After an intentional change to the popup's UI, run `npm run refresh:ui` to
+regenerate `popup.png` (or use the **Refresh UI snapshot** workflow, "Run
+workflow" in the Actions tab) and commit the updated PNG so reviewers can see
+the before/after in the diff. On mismatch, the test writes
 `test/ui/snapshots/popup.actual.png` and `popup.diff.png` (both gitignored)
 for local debugging.
 
@@ -207,10 +215,12 @@ for local debugging.
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
 | `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
-| `test/ui/capture.js` | Renders `popup.html` in headless Chromium and screenshots it |
+| `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `popup.js` for use in `render.js` |
+| `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
+| `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
 | `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png`              |
-| `test/ui/snapshots/popup.png` | Committed reference screenshot of the popup, browsable on GitHub |
+| `test/ui/snapshots/popup.png` | Committed reference image of the popup, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions
