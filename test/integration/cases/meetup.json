@@ -15,7 +15,7 @@
       ]
     },
     "details": {
-      "matches": "^\\[https://www\\.meetup\\.com/nyctechmixer/events/311245599\\]\\(https://www\\.meetup\\.com/nyctechmixer/events/311245599/\\)\\n\\n"
+      "startsWith": "[https://www.meetup.com/nyctechmixer/events/311245599](https://www.meetup.com/nyctechmixer/events/311245599/)\n\n"
     }
   }
 }

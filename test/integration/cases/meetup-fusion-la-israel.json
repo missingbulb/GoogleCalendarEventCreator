@@ -12,7 +12,7 @@
       "includes": ["Fusion VC", "Google for Startups"]
     },
     "details": {
-      "matches": "^\\[https://www\\.meetup\\.com/fusion-la-israel/events/314842056\\]\\(https://www\\.meetup\\.com/fusion-la-israel/events/314842056/\\)\\n\\n"
+      "startsWith": "[https://www.meetup.com/fusion-la-israel/events/314842056](https://www.meetup.com/fusion-la-israel/events/314842056/)\n\n"
     }
   }
 }

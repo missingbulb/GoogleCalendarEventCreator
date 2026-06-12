@@ -25,7 +25,8 @@
 //       "location": { "includes": "Library" },      <- substring(s)
 //       "description": { "nonEmpty": true },         <- just has to be there
 //       "multipleEvents": false,                     <- boolean: exact match
-//       "dates":    "20260625T220000Z/20260626T010000Z" <- the Calendar URL's dates= param
+//       "dates":    "20260625T220000Z/20260626T010000Z", <- the Calendar URL's dates= param
+//       "details":  { "startsWith": "...exact prefix..." } <- exact, literal prefix match
 //     }
 //   }
 //
@@ -33,9 +34,19 @@
 // formatDatesParam(), so it doubles as integration coverage for the
 // URL-building logic against real-world date/timezone formats.
 //
+// `details` is the final Calendar template "details" field, built from the
+// extraction result via background.js's buildCalendarUrl().
+//
 // Use exact strings when the value is known and stable; use matchers
-// ({ "includes": [...] }, { "matches": "regex" }, { "nonEmpty": true })
-// otherwise. Every field is optional — assert what matters.
+// ({ "includes": [...] }, { "startsWith": "..." }, { "matches": "regex" },
+// { "nonEmpty": true }) otherwise.
+//
+// IMPORTANT for future updates to these integration tests: prefer
+// { "startsWith": "..." } (or a plain exact string) with the full, literal
+// expected text over { "matches": "regex" } whenever the expected value is
+// deterministic — e.g. the meetup.com canonical-URL link in `details`. Exact
+// matches catch subtle formatting regressions (stray characters, wrong
+// punctuation, encoding slips) that a loose regex/substring check would miss. Every field is optional — assert what matters.
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
@@ -92,6 +103,13 @@ function assertField(field, actual, expectation, extracted) {
           `"${field}" should include "${part}" but was: "${actual}"${context}`
         );
       }
+    }
+    if (expectation.startsWith) {
+      assert.equal(
+        String(actual || "").slice(0, expectation.startsWith.length),
+        expectation.startsWith,
+        `"${field}" should start with "${expectation.startsWith}" but was: "${actual}"${context}`
+      );
     }
     return;
   }
