@@ -58,24 +58,34 @@
     };
   }
 
+  // Sites often repeat the city/state inside streetAddress (Meetup puts
+  // "96 Wythe Ave, Brooklyn, NY" there AND fills addressLocality/Region),
+  // so each part is only added if it isn't already present.
   function flattenLocation(loc) {
     if (!loc) return "";
     if (Array.isArray(loc)) loc = loc[0];
     if (typeof loc === "string") return clean(loc);
     const parts = [];
-    if (loc.name) parts.push(clean(loc.name));
+    const add = (value) => {
+      value = clean(value == null ? "" : String(value));
+      if (value && !parts.join(", ").toLowerCase().includes(value.toLowerCase())) {
+        parts.push(value);
+      }
+    };
+    add(loc.name);
     const addr = loc.address;
     if (typeof addr === "string") {
-      parts.push(clean(addr));
+      add(addr);
     } else if (addr && typeof addr === "object") {
-      parts.push(
-        [addr.streetAddress, addr.addressLocality, addr.addressRegion, addr.postalCode, addr.addressCountry]
-          .map(clean)
-          .filter(Boolean)
-          .join(", ")
-      );
+      add(addr.streetAddress);
+      add(addr.addressLocality);
+      add(addr.addressRegion);
+      add(addr.postalCode);
+      // A country code after a region is noise ("..., NY, us"); keep the
+      // country only when it's the most specific thing we have.
+      if (!addr.addressRegion) add(addr.addressCountry);
     }
-    return parts.filter(Boolean).join(", ");
+    return parts.join(", ");
   }
 
   function stripHtml(s) {

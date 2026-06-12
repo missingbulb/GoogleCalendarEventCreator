@@ -78,6 +78,20 @@ test("Generic site: JSON-LD inside @graph, location flattened, HTML stripped", (
   assert.equal(ev.description, "An intimate evening of jazz.");
 });
 
+test("JSON-LD location: city/state repeated inside streetAddress is not duplicated", () => {
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Tech Mixer", "startDate": "2026-06-25T18:00:00-04:00",
+      "location": { "@type": "Place", "name": "The Williamsburg Hotel Bar",
+                    "address": { "streetAddress": "96 Wythe Ave, Brooklyn, NY",
+                                 "addressLocality": "Brooklyn", "addressRegion": "NY",
+                                 "addressCountry": "us" } } }
+    </script>`;
+
+  const ev = extractFromHtml(html, "https://www.someevents.example/mixer");
+  assert.equal(ev.location, "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY");
+});
+
 test("Generic site with no structured data: heuristics only", () => {
   const html = `
     <meta name="description" content="Gloves and trash grabbers provided.">
