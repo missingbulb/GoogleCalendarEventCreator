@@ -1,18 +1,18 @@
 {
   "eventbrite": {
     "url": "https://www.eventbrite.com/e/2026-games-for-change-festival-tickets-1982011672266",
-    "fetchedAt": "2026-06-12T20:33:52.926Z"
+    "fetchedAt": "2026-06-12T20:41:45.232Z"
   },
   "meetup": {
     "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
-    "fetchedAt": "2026-06-12T20:33:53.360Z"
+    "fetchedAt": "2026-06-12T20:41:45.678Z"
   },
   "meetup-fusion-la-israel": {
     "url": "https://www.meetup.com/fusion-la-israel/events/314842056/",
-    "fetchedAt": "1970-01-01T00:00:00.000Z"
+    "fetchedAt": "2026-06-12T20:41:45.386Z"
   },
   "meetup-startup-designers": {
     "url": "https://www.meetup.com/startup-designers/events/315022301/",
-    "fetchedAt": "1970-01-01T00:00:00.000Z"
+    "fetchedAt": "2026-06-12T20:41:45.647Z"
   }
 }
