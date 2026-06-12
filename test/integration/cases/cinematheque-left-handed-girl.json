@@ -1,0 +1,10 @@
+{
+  "description": "Tel Aviv Cinematheque event page is parseable (The Left-Handed Girl, pre-premiere screening with Q&A)",
+  "url": "https://www.cinema.co.il/event/%d7%94%d7%99%d7%9c%d7%93%d7%94-%d7%94%d7%a9%d7%9e%d7%90%d7%9c%d7%99%d7%aa-%d7%98%d7%a8%d7%95%d7%9d-%d7%91%d7%9b%d7%95%d7%a8%d7%94-%d7%a7%d7%95%d7%9c%d7%a0%d7%95%d7%a2-%d7%98%d7%99%d7%95%d7%95%d7%90/",
+  "expected": {
+    "title": { "nonEmpty": true },
+    "start": { "nonEmpty": true },
+    "location": { "nonEmpty": true },
+    "description": { "nonEmpty": true }
+  }
+}

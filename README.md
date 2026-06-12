@@ -21,7 +21,8 @@ are simply left for you to fill in on the Google Calendar screen.
 Extraction runs in three layers, merged field-by-field (first non-empty wins):
 
 1. **Site-specific scrapers** with hardcoded selectors for the major event
-   sites: **meetup.com**, **facebook.com** events, and **eventbrite.com**.
+   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**, and
+   **cinema.co.il** (Tel Aviv Cinematheque).
    Each lives in its own file under `extractors/` with a comment describing
    the HTML it expects; to support a new platform, add a file there following
    the same pattern and list it in `EXTRACTOR_FILES` in `background.js`.
@@ -167,7 +168,7 @@ from facebook.com, so it can't be snapshotted as a live case.
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
 | `background.js` | Service worker: runs the extractor, builds and opens the URL  |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
-| `extractors/meetup.js`, `facebook.js`, `eventbrite.js` | One file per supported event site, with hardcoded selectors |
+| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `cinema.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
