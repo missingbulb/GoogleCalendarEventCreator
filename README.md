@@ -22,6 +22,9 @@ Extraction runs in three layers, merged field-by-field (first non-empty wins):
 
 1. **Site-specific scrapers** with hardcoded selectors for the major event
    sites: **meetup.com**, **facebook.com** events, and **eventbrite.com**.
+   Each lives in its own file under `extractors/` with a comment describing
+   the HTML it expects; to support a new platform, add a file there following
+   the same pattern and list it in `EXTRACTOR_FILES` in `background.js`.
 2. **schema.org JSON-LD** (`<script type="application/ld+json">` with an
    `Event` type) — most event pages publish this, so it's the strongest
    generic signal.
@@ -86,7 +89,8 @@ The page's HTML is stored as a fixture in `test/fixtures/` (same base name as
 the case file), so tests are fast, deterministic, and run offline. The runner
 (`test/e2e.test.js`) loads the fixture into a DOM at the case's URL — so
 hostname-based site detection works exactly as in the browser — executes the
-real, unmodified `extractor.js`, and asserts the expected fields.
+real extractor files (the same `EXTRACTOR_FILES` list `background.js`
+injects, in the same order), and asserts the expected fields.
 `title`/`start`/`end`/`location`/`multipleEvents` are exact matches;
 `descriptionIncludes` checks substrings. Every field is optional — assert only
 what matters for the scenario.
@@ -108,7 +112,11 @@ Tests run automatically on every pull request to `main` via GitHub Actions
 | --------------- | ------------------------------------------------------------- |
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
 | `background.js` | Service worker: runs the extractor, builds and opens the URL  |
-| `extractor.js`  | Injected into the page; all extraction logic lives here       |
+| `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
+| `extractors/meetup.js`, `facebook.js`, `eventbrite.js` | One file per supported event site, with hardcoded selectors |
+| `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
+| `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
+| `extractors/main.js` | Entry point: picks extractors, merges results            |
 | `test/`         | Declarative e2e extraction tests (cases, fixtures, runner)    |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
