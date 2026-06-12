@@ -1,7 +1,15 @@
 {
-  "description": "Meetup event page is parseable (Fusion LA Israel)",
+  "description": "Meetup event page is parseable (Fusion LA Israel, Jun 7 2026)",
   "url": "https://www.meetup.com/fusion-la-israel/events/314842056/",
   "expected": {
-    "title": { "nonEmpty": true }
+    "title": "The New VC Playbook - Investing in vibe coders, solo-founders & builders",
+    "start": "2026-06-07T09:00:00+03:00",
+    "end": "2026-06-07T12:30:00+03:00",
+    "location": {
+      "includes": ["Google for Startups", "HaOmanim", "Tel-Aviv"]
+    },
+    "description": {
+      "includes": ["Fusion VC", "Google for Startups"]
+    }
   }
 }

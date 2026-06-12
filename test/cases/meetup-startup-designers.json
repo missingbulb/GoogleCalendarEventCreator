@@ -1,7 +1,15 @@
 {
-  "description": "Meetup event page is parseable (Startup Designers)",
+  "description": "Meetup event page is parseable (Startup Designers #41, Jun 17 2026)",
   "url": "https://www.meetup.com/startup-designers/events/315022301/",
   "expected": {
-    "title": { "nonEmpty": true }
+    "title": "Startup Designers: Lets Meet #41",
+    "start": "2026-06-17T19:00:00+03:00",
+    "end": "2026-06-17T21:00:00+03:00",
+    "location": {
+      "includes": ["Imperva", "Menachem Begin Road 125", "Tel Aviv"]
+    },
+    "description": {
+      "includes": ["התגעגענו"]
+    }
   }
 }
