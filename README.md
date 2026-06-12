@@ -102,29 +102,38 @@ each snapshot's source URL and fetch time). The snapshot is loaded into a DOM
 at the case's URL — so hostname-based site detection behaves exactly as in
 Chrome — and run through the real extractor files. This keeps the suite
 deterministic and runnable anywhere, while still reflecting each site's
-*current* markup, because the snapshots are kept fresh automatically:
+*current* markup, because the snapshots are kept fresh by a separate workflow:
 
 - **`test/refresh-snapshots.js`** (`npm run refresh`) re-fetches any snapshot
   that is missing, older than 24h, or whose case URL changed (`--force` does
   all of them). A failed fetch keeps the previous snapshot and only warns, so
   a site outage or bot-blocking never breaks the suite.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
-  push to `main`: it refreshes stale snapshots, runs the live tests against
-  them, and — only on a push to `main` — commits the refreshed snapshots back.
+  push to `main`: it runs the offline tests, then the live tests against the
+  HTML snapshots **already committed** in `test/snapshots/` — it never
+  fetches or refreshes anything itself, so it's fast and has no network
+  dependency.
 - The **Refresh snapshots** workflow (`.github/workflows/refresh-snapshots.yml`)
-  runs daily (and on demand), force-refreshes every snapshot, runs the live
-  tests, and commits the result — so a site changing its markup turns a
-  scheduled run red within a day, independently of anyone pushing.
+  runs daily (and on demand via "Run workflow"), force-refreshes every
+  snapshot, runs the live tests, and commits the result — so a site changing
+  its markup turns a scheduled run red within a day, independently of anyone
+  pushing. It's the *only* thing that fetches live pages and commits
+  snapshots, which keeps the Tests workflow simple and rules out any
+  refresh→commit→refresh loop.
 
 The snapshot commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the
-Tests workflow ignores pushes that only touch `test/snapshots/**` — three
-independent safeguards against a refresh→commit→refresh loop.
+Tests workflow ignores pushes that only touch `test/snapshots/**` — belt-and-
+suspenders against that commit ever re-triggering CI.
 
 **To cover a new website or platform, add one case file** pointing at a real
-event page; CI records its first snapshot on the next run (or run
-`npm run refresh` locally). Note that cases need occasional gardening: when an
-event page is eventually taken down, point its case at a newer event.
+event page, then **record its snapshot before relying on the live test**:
+either run `npm run refresh` locally (needs internet), or trigger the
+**Refresh snapshots** workflow manually ("Run workflow" in the Actions tab).
+Until a snapshot exists for the new case, `test:live` (and so the Tests
+workflow) will fail with `Missing snapshot for "<case>"`. Note that cases also
+need occasional gardening: when an event page is eventually taken down, point
+its case at a newer event (and refresh its snapshot the same way).
 
 ### Offline tests — the internal safety net
 
