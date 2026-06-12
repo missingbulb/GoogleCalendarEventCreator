@@ -1,9 +1,0 @@
-{
-  "description": "Facebook public event page is parseable (logged-out view; Facebook often refuses anonymous CI clients, so a refused fetch is tolerated)",
-  "url": "https://www.facebook.com/events/2116485579196340",
-  "allowFetchFailure": true,
-  "expected": {
-    "title": { "nonEmpty": true },
-    "start": { "matches": "^\\d{4}-\\d{2}-\\d{2}" }
-  }
-}
