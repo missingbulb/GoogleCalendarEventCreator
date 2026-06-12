@@ -1,0 +1,7 @@
+{
+  "description": "Meetup event page is parseable (Startup Designers)",
+  "url": "https://www.meetup.com/startup-designers/events/315022301/",
+  "expected": {
+    "title": { "nonEmpty": true }
+  }
+}
