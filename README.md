@@ -100,6 +100,11 @@ pointing at a real event page on it** — no runner changes needed. Note that
 cases need occasional gardening: when an event page is eventually taken
 down, point its case at a newer event.
 
+A case may set `"allowFetchFailure": true` for sites that refuse anonymous
+CI clients (Facebook answers HTTP 400 from GitHub Actions runners): a refused
+fetch then skips the test instead of failing it, but a page that is fetched
+and fails to parse still fails.
+
 **Offline unit tests** (`test/extraction.test.js`) pin down the extraction
 logic itself (site selectors, JSON-LD handling, text date parsing,
 multiple-event detection) against small synthetic HTML snippets written

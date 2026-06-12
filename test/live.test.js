@@ -101,14 +101,27 @@ assert.ok(caseFiles.length > 0, `No test cases found in ${CASES_DIR}`);
 for (const file of caseFiles) {
   const testCase = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
 
-  test(`${testCase.description || file} — ${testCase.url}`, async () => {
+  test(`${testCase.description || file} — ${testCase.url}`, async (t) => {
     assert.ok(testCase.url, `${file}: "url" is required`);
     assert.ok(
       testCase.expected && Object.keys(testCase.expected).length > 0,
       `${file}: "expected" must list at least one field`
     );
 
-    const html = await fetchPage(testCase.url);
+    let html;
+    try {
+      html = await fetchPage(testCase.url);
+    } catch (err) {
+      // Some sites refuse anonymous datacenter clients (Facebook answers
+      // HTTP 400 from CI runners). A case can opt into tolerating that with
+      // "allowFetchFailure": true — the test is then skipped, but a fetched
+      // page that fails to PARSE still fails the test.
+      if (testCase.allowFetchFailure) {
+        t.skip(`tolerated fetch failure ("allowFetchFailure" is set): ${err.message}`);
+        return;
+      }
+      throw err;
+    }
     const extracted = extractFromHtml(html, testCase.url);
 
     for (const [field, expectation] of Object.entries(testCase.expected)) {
