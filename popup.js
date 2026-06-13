@@ -20,21 +20,23 @@
   }
 
   const MAX_EVENTS = 7;
+  const view = chooseContent(tab.url, data);
 
-  const allEvents = data.events && data.events.length ? data.events : [];
+  if (view.mode === "request") {
+    // Unsupported site (red toolbar border). Never surface scraped events
+    // here — that's exactly the border/popup mismatch we avoid — so offer the
+    // embedded "request this source" form, prefilled with whatever little the
+    // generic/JSON-LD layers managed to find.
+    headingEl.textContent = "Add support for this site";
+    eventsEl.appendChild(makeSourceRequestButton(tab, view.prefill));
+    return;
+  }
+
+  const allEvents = view.events;
   const events = allEvents.slice(0, MAX_EVENTS);
 
   if (!events.length) {
-    // Nothing found on the page. On a non-compatible site (red toolbar
-    // border) offer the embedded "request this source" form instead of a bare
-    // label; on a supported site — or before the form has been configured —
-    // just say so.
-    if (isSupportedHost(tab.url)) {
-      headingEl.textContent = "No events found on this page";
-    } else {
-      headingEl.textContent = "Add support for this site";
-      eventsEl.appendChild(makeSourceRequestButton(tab, allEvents[0]));
-    }
+    headingEl.textContent = "No events found on this page";
     return;
   }
 
@@ -52,17 +54,21 @@
   });
 })().catch((e) => console.error("Popup failed to initialize:", e));
 
-// Whether a site-specific extractor exists for this URL's host — the same
-// check icon-state.js uses to color the toolbar icon green (supported) vs. red
-// (not). Relies on GCal.siteHosts (extractors/site-hosts.js, loaded by
-// popup.html before this file).
-function isSupportedHost(url) {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "");
-    return GCal.siteHosts.some((site) => site.matches(host));
-  } catch (e) {
-    return false; // no URL yet, or a non-http(s) URL (chrome://, etc.)
+// The one decision behind what the popup renders, derived from the same
+// supported-host check (GCal.isSupportedHost, in extractors/site-hosts.js)
+// that colors the toolbar icon — so the popup and the icon can never disagree.
+// Returns either:
+//   { mode: "request", prefill }  — unsupported host (red border): only the
+//       "request this source" flow, seeded with any scraped event, never an
+//       event button (even when the generic/JSON-LD layers found something).
+//   { mode: "events", events }    — supported host (green border): the
+//       extracted events, which may be empty ("No events found").
+function chooseContent(url, data) {
+  const allEvents = data && data.events && data.events.length ? data.events : [];
+  if (!GCal.isSupportedHost(url)) {
+    return { mode: "request", prefill: allEvents[0] };
   }
+  return { mode: "events", events: allEvents };
 }
 
 // On an unsupported page with no event found, a button that opens a prefilled
