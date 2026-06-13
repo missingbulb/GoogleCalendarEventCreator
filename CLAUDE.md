@@ -13,10 +13,17 @@ For every new task in this repo:
 `npm test` runs everything; `README.md` "Testing" has the mechanics. Keep
 these decisions in mind:
 
-- **Add an integration case** (`test/integration/cases/`) whenever you add or
-  change support for a site, or fix an extraction bug — one real, focused event
-  page per distinct behavior. For logic that doesn't depend on a third-party
-  page (date math, URL building, parsing), prefer a `test/unit/` test instead.
+- **Integration cases are the reviewed contract.** A person reads
+  `test/integration/cases/` to confirm the behavior is right; nobody reviews the
+  unit tests. So every required change or bugfix must be covered by an
+  integration case — add or update one whenever you add/change support for a
+  site or fix an extraction bug (one real, focused event page per distinct
+  behavior). Unit tests (`test/unit/`) are a supplementary safety net for logic
+  that doesn't depend on a third-party page (date math, URL building, parsing),
+  not a substitute.
+- **Keep integration cases as simple as possible.** This matters a lot, because
+  they're what gets reviewed: minimal, representative pages; no incidental
+  complexity; one behavior per case rather than sprawling catch-alls.
 - **New HTML snapshots** can't be fetched here (no internet, so `npm run
   refresh` won't work): add the case file with its `url`, push, then run the
   **Refresh snapshots** workflow to fetch and commit the snapshot + manifest
