@@ -1,7 +1,15 @@
 {
-  "description": "Edinburgh Fringe show page is parseable (Sophie Duker: Hot Beef Injection, 23 dates) — TODO: tighten assertions (incl. eventCount: 23) once a snapshot is recorded",
+  "description": "Edinburgh Fringe show page is parseable (Sophie Duker: Hot Beef Injection, 23 dates)",
   "url": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection",
+  "_calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Sophie+Duker%3A+Hot+Beef+Injection&dates=20260805T193000Z%2F20260805T203000Z&ctz=GB&details=https%3A%2F%2Fwww.edfringe.com%2Ftickets%2Fwhats-on%2Fsophie-duker-hot-beef-injection%0A%0ADuker%E2%80%99s+back+on+her+bullshit.+And+this+time%2C+she%E2%80%99s+done+with+dudes.+Promise.+The+people%E2%80%99s+princess+of+provocation+returns+with+a+beefy+hour+about+sex+and+privilege.&location=Forth+at+Pleasance+Courtyard%2C+60+Pleasance%2C+EH8+9TJ",
   "expected": {
-    "ctz": "GB"
+    "title": { "includes": "Sophie Duker" },
+    "start": "2026-08-05T19:30:00.000Z",
+    "end": "2026-08-05T20:30:00.000Z",
+    "location": { "includes": ["Pleasance Courtyard", "EH8 9TJ"] },
+    "description": { "nonEmpty": true },
+    "ctz": "GB",
+    "eventCount": 23,
+    "dates": "20260805T193000Z/20260805T203000Z"
   }
 }

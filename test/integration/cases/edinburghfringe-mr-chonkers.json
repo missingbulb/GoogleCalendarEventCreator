@@ -1,7 +1,15 @@
 {
-  "description": "Edinburgh Fringe show page is parseable (Mr Chonkers: Work in Chonkers, single date) — TODO: tighten assertions once a snapshot is recorded",
+  "description": "Edinburgh Fringe show page is parseable (Mr Chonkers: Work in Chonkers, single date)",
   "url": "https://www.edfringe.com/tickets/whats-on/mr-chonkers-work-in-chonkers",
+  "_calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Mr+Chonkers%3A+Work+in+Chonkers&dates=20260810T225500Z%2F20260810T235500Z&ctz=GB&details=https%3A%2F%2Fwww.edfringe.com%2Ftickets%2Fwhats-on%2Fmr-chonkers-work-in-chonkers%0A%0AJohn+Norris+%28Mr+Chonkers%2C+allegedly%29+is+trying+out+1-3+hours+of+new+stuff.+Goofs%2C+gags%2C+musings%2C+bits+and+vague+energy.+Nonsense.&location=Monkey+Barrel+4+at+Monkey+Barrel+Comedy%2C+9-12+Blair+Street%2C+EH1+1QR",
   "expected": {
-    "ctz": "GB"
+    "title": "Mr Chonkers: Work in Chonkers",
+    "start": "2026-08-10T22:55:00.000Z",
+    "end": "2026-08-10T23:55:00.000Z",
+    "location": { "includes": ["Monkey Barrel", "EH1 1QR"] },
+    "description": { "includes": "John Norris" },
+    "ctz": "GB",
+    "eventCount": 1,
+    "dates": "20260810T225500Z/20260810T235500Z"
   }
 }

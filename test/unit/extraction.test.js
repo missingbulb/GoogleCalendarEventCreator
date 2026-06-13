@@ -123,41 +123,66 @@ test("Listing page with several events: first suggested, flagged, all-day date",
   assert.equal(ev.multipleEvents, true);
 });
 
-test("Edinburgh Fringe: ctz is always GB, eventCount from performance dates", () => {
-  const html = `
-    <script type="application/ld+json">
-    { "@type": "Event", "name": "Mr Chonkers: Work in Chonkers",
-      "startDate": "2026-08-10T19:30:00",
-      "location": { "@type": "Place", "name": "Pleasance Courtyard" } }
-    </script>
-    <h1>Mr Chonkers: Work in Chonkers</h1>
-    <div class="performance-dates">
-      <time datetime="2026-08-10T19:30:00">10 Aug</time>
-    </div>`;
+test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB, eventCount from performances", () => {
+  const nextData = {
+    props: {
+      pageProps: {
+        data: {
+          event: {
+            title: "Mr Chonkers: Work in Chonkers",
+            description: "Goofs, gags, musings, bits and vague energy.",
+            venues: [{ title: "Monkey Barrel Comedy", address1: "9-12 Blair Street", postCode: "EH1 1QR" }],
+            spaces: [{ venueName: "Monkey Barrel 4 at Monkey Barrel Comedy" }],
+            performances: [{ dateTime: "2026-08-10T22:55:00.000Z", estimatedEndDateTime: "2026-08-10T23:55:00.000Z" }],
+          },
+        },
+      },
+    },
+  };
+  const html = `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify(nextData)}</script>`;
 
   const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/mr-chonkers-work-in-chonkers");
   assert.equal(ev.title, "Mr Chonkers: Work in Chonkers");
-  assert.equal(ev.start, "2026-08-10T19:30:00");
+  assert.equal(ev.start, "2026-08-10T22:55:00.000Z");
+  assert.equal(ev.end, "2026-08-10T23:55:00.000Z");
+  assert.equal(ev.location, "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR");
+  assert.ok(ev.description.includes("vague energy"));
   assert.equal(ev.ctz, "GB");
   assert.equal(ev.eventCount, 1);
 });
 
-test("Edinburgh Fringe: eventCount reflects every listed performance, not just the JSON-LD one", () => {
-  const html = `
-    <script type="application/ld+json">
-    { "@type": "Event", "name": "Sophie Duker: Hot Beef Injection", "startDate": "2026-08-05T20:45:00" }
-    </script>
-    <h1>Sophie Duker: Hot Beef Injection</h1>
-    <div class="performance-dates">
-      <time datetime="2026-08-05T20:45:00">5 Aug</time>
-      <time datetime="2026-08-06T20:45:00">6 Aug</time>
-      <time datetime="2026-08-07T20:45:00">7 Aug</time>
-    </div>`;
+test("Edinburgh Fringe: eventCount reflects every listed performance", () => {
+  const nextData = {
+    props: {
+      pageProps: {
+        data: {
+          event: {
+            title: "Sophie Duker: Hot Beef Injection",
+            description: "The people's princess of provocation returns.",
+            venues: [{ title: "Pleasance Courtyard", address1: "60 Pleasance", postCode: "EH8 9TJ" }],
+            spaces: [{ venueName: "Forth at Pleasance Courtyard" }],
+            performances: [
+              { dateTime: "2026-08-05T19:30:00.000Z", estimatedEndDateTime: "2026-08-05T21:00:00.000Z" },
+              { dateTime: "2026-08-06T19:30:00.000Z", estimatedEndDateTime: "2026-08-06T21:00:00.000Z" },
+              { dateTime: "2026-08-07T19:30:00.000Z", estimatedEndDateTime: "2026-08-07T21:00:00.000Z" },
+            ],
+          },
+        },
+      },
+    },
+  };
+  const html = `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify(nextData)}</script>`;
 
   const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection");
+  assert.equal(ev.start, "2026-08-05T19:30:00.000Z");
   assert.equal(ev.ctz, "GB");
   assert.equal(ev.eventCount, 3);
-  assert.equal(ev.multipleEvents, false); // only one schema.org Event on the page
+});
+
+test("Edinburgh Fringe: ctz is GB even when the event JSON can't be found", () => {
+  const html = `<h1>Some other edfringe.com page</h1>`;
+  const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/some-other-page");
+  assert.equal(ev.ctz, "GB");
 });
 
 test("Page with no event information at all: still returns a usable title", () => {

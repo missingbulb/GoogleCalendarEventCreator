@@ -1,7 +1,15 @@
 {
-  "description": "Edinburgh Fringe show page is parseable (Daniel Sloss: Bitter, single date) — TODO: tighten assertions once a snapshot is recorded",
+  "description": "Edinburgh Fringe show page is parseable (Daniel Sloss: BITTER, single date)",
   "url": "https://www.edfringe.com/tickets/whats-on/daniel-sloss-bitter",
+  "_calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Daniel+Sloss%3A+BITTER&dates=20260814T190000Z%2F20260814T211000Z&ctz=GB&details=https%3A%2F%2Fwww.edfringe.com%2Ftickets%2Fwhats-on%2Fdaniel-sloss-bitter%0A%0AScotland%E2%80%99s+Netflix+superstar%2C+one+of+the+biggest+global+names+in+live+stand-up%2C+unleashes+his+latest+devastatingly+hilarious+hour.&location=Auditorium+at+Edinburgh+Playhouse%2C+18-22+Greenside+Pl%2C+EH1+3AA",
   "expected": {
-    "ctz": "GB"
+    "title": { "includes": "Daniel Sloss" },
+    "start": "2026-08-14T19:00:00.000Z",
+    "end": "2026-08-14T21:10:00.000Z",
+    "location": { "includes": ["Edinburgh Playhouse", "EH1 3AA"] },
+    "description": { "nonEmpty": true },
+    "ctz": "GB",
+    "eventCount": 1,
+    "dates": "20260814T190000Z/20260814T211000Z"
   }
 }
