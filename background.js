@@ -29,7 +29,7 @@ function buildCalendarUrl(data, tab) {
   const title = data.title || tab.title || "New event";
   params.set("text", title);
 
-  const dates = formatDatesParam(data.start, data.end, data.ctz);
+  const dates = formatDatesParam(data.start, data.end);
   if (dates) params.set("dates", dates);
   if (data.ctz) params.set("ctz", data.ctz);
 
@@ -69,15 +69,14 @@ function sourceLink(tab) {
 // Build the `dates` parameter for the TEMPLATE URL:
 //   timed:   YYYYMMDDTHHMMSS/YYYYMMDDTHHMMSS  (floating, placed by ctz or the
 //            user's calendar tz)
-//            or with trailing Z when the source gave an absolute instant and we
-//            don't know the event's timezone
+//            or with trailing Z when the source gave an absolute instant
 //   all-day: YYYYMMDD/YYYYMMDD               (end date exclusive)
 //
-// When the source carried an absolute offset/Z *and* the extractor pinned the
-// event's timezone (`ctz`), we emit the wall-clock time in that timezone
-// (no Z) rather than UTC: the `ctz` param then places it correctly, and the
-// `dates` string reads as the time the page actually showed.
-function formatDatesParam(start, end, ctz) {
+// Extractors that know the event's timezone already hand us floating local
+// times (see GCal.localizeToZone), so a known-timezone event reaches here as a
+// floating start/end and its ctz param places it. An offset/Z that survives to
+// here is an event with no known timezone, and is pinned to a UTC instant.
+function formatDatesParam(start, end) {
   if (!start) return "";
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(start)) {
@@ -92,12 +91,6 @@ function formatDatesParam(start, end, ctz) {
   let endDate = end ? new Date(end) : null;
   if (!endDate || isNaN(endDate) || endDate <= startDate) {
     endDate = new Date(startDate.getTime() + DEFAULT_DURATION_MS);
-  }
-
-  if (hasOffset && ctz) {
-    const startZoned = compactInZone(startDate, ctz);
-    const endZoned = compactInZone(endDate, ctz);
-    if (startZoned && endZoned) return `${startZoned}/${endZoned}`;
   }
 
   return hasOffset
@@ -130,31 +123,5 @@ function compactLocal(d) {
   return (
     `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}` +
     `T${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
-  );
-}
-
-// The instant `d` rendered as floating YYYYMMDDTHHMMSS wall-clock time in the
-// IANA timezone `tz`. Returns "" if `tz` isn't a zone Intl can resolve, so the
-// caller can fall back to UTC.
-function compactInZone(d, tz) {
-  let parts;
-  try {
-    parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      hourCycle: "h23",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }).formatToParts(d);
-  } catch (e) {
-    return "";
-  }
-  const get = (type) => (parts.find((p) => p.type === type) || {}).value || "";
-  return (
-    `${get("year")}${get("month")}${get("day")}` +
-    `T${get("hour")}${get("minute")}${get("second")}`
   );
 }

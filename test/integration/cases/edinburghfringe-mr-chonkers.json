@@ -5,8 +5,8 @@
     "events": [
       {
         "title": "Mr Chonkers: Work in Chonkers",
-        "start": "2026-08-10T22:55:00.000Z",
-        "end": "2026-08-10T23:55:00.000Z",
+        "start": "2026-08-10T23:55:00",
+        "end": "2026-08-11T00:55:00",
         "location": "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR",
         "ctz": "GB",
         "dates": "20260810T235500/20260811T005500",

@@ -197,8 +197,11 @@ test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
 
   const e = firstEvent(html, "https://www.edfringe.com/tickets/whats-on/mr-chonkers-work-in-chonkers");
   assert.equal(e.title, "Mr Chonkers: Work in Chonkers");
-  assert.equal(e.start, "2026-08-10T22:55:00.000Z");
-  assert.equal(e.end, "2026-08-10T23:55:00.000Z");
+  // The source instants are UTC; with ctz GB (BST in August) they're stored as
+  // floating local wall-clock time, so 22:55Z reads as 23:55 and rolls the end
+  // past midnight.
+  assert.equal(e.start, "2026-08-10T23:55:00");
+  assert.equal(e.end, "2026-08-11T00:55:00");
   assert.equal(e.location, "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR");
   assert.ok(e.description.includes("vague energy"));
   assert.equal(e.ctz, "GB");
@@ -228,9 +231,10 @@ test("Edinburgh Fringe: a multi-performance show yields one event per performanc
 
   const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection");
   assert.equal(ev.events.length, 3);
-  assert.equal(ev.events[0].start, "2026-08-05T19:30:00.000Z");
-  assert.equal(ev.events[1].start, "2026-08-06T19:30:00.000Z");
-  assert.equal(ev.events[2].start, "2026-08-07T19:30:00.000Z");
+  // 19:30Z reads as 20:30 local (GB is BST in August).
+  assert.equal(ev.events[0].start, "2026-08-05T20:30:00");
+  assert.equal(ev.events[1].start, "2026-08-06T20:30:00");
+  assert.equal(ev.events[2].start, "2026-08-07T20:30:00");
   assert.equal(ev.events[0].ctz, "GB");
 });
 
@@ -259,6 +263,9 @@ test("Meetup: ctz read from the group's timezone embedded in page scripts", () =
 
   const e = firstEvent(html, "https://www.meetup.com/brooklyn-rustaceans/events/304218765/");
   assert.equal(e.ctz, "America/New_York");
+  // With the timezone known, the offset start is stored as floating local
+  // wall-clock time in that zone (the ctz param then places it).
+  assert.equal(e.start, "2026-07-08T18:30:00");
 });
 
 test("Meetup: an unrecognized timezone string is ignored", () => {

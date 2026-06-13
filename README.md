@@ -48,21 +48,19 @@ dates stays one event.
 
 Dates without a timezone offset are passed as floating local times, so the
 event shows the same wall-clock time the page displayed. Dates with an
-explicit offset are converted to an exact UTC instant before being passed to
-Google Calendar, so the event occurs at the same moment in time regardless of
-the viewer's own timezone — *unless* the event's timezone is known (see `ctz`
-below), in which case the instant is rendered as the wall-clock time in that
-timezone instead. When no end time is found, a 2-hour duration is assumed. A
-date without a time becomes an all-day event.
+explicit offset (or trailing `Z`) are converted to an exact UTC instant before
+being passed to Google Calendar, so the event occurs at the same moment in time
+regardless of the viewer's own timezone. When no end time is found, a 2-hour
+duration is assumed. A date without a time becomes an all-day event.
 
 A site extractor that knows an event's location is fixed (e.g. a festival
 that only ever runs in one city) can set `ctz` to that timezone (e.g. `"GB"`
 for the Edinburgh Festival Fringe); it's passed straight through as the
-Calendar URL's `ctz` parameter. A start/end is then interpreted in that
-timezone rather than the viewer's own: a floating time keeps the wall-clock
-the page showed, and a time with an explicit offset is converted into the
-event's timezone (no trailing `Z`) so the `ctz` parameter places it — rather
-than being pinned to UTC.
+Calendar URL's `ctz` parameter. When `ctz` is set, an absolute start/end (one
+carrying an offset or `Z`) is re-expressed as the floating local wall-clock
+time in that timezone — so there's no need to keep it in UTC: the value reads
+as the time the event's own city shows, and the `ctz` parameter places it
+correctly regardless of the viewer's own timezone.
 
 ## Install (developer mode)
 
