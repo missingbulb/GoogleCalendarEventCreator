@@ -44,7 +44,8 @@ page describes **several distinct events** — a film week or festival listing,
 several JSON-LD events, etc. — every event is returned and the popup shows
 **one button per event** so you can pick which one to add. An ordinary event
 page yields a single event/button; a film that merely has several screening
-dates stays one event.
+dates stays one event. The events are ordered by start time, so they read
+chronologically regardless of the order the page listed them in.
 
 Dates without a timezone offset are passed as floating local times, so the
 event shows the same wall-clock time the page displayed. Dates with an
