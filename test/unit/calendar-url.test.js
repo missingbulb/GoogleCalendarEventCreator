@@ -61,6 +61,12 @@ test("a bare/incomplete markdown link (no URL) is left untouched", () => {
   assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nSponsored by [Poalim Tech]`);
 });
 
+test("the full description is kept; details is not truncated", () => {
+  const description = "x".repeat(5000);
+  const url = buildCalendarUrl({ title: "Talk", description }, TAB);
+  assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\n${description}`);
+});
+
 test("falls back to the tab title when no title was extracted", () => {
   const url = buildCalendarUrl({}, TAB);
   assert.equal(paramsOf(url).get("text"), "Tab Title");

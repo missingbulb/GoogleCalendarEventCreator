@@ -21,7 +21,6 @@ const EXTRACTOR_FILES = [
 
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
-const MAX_DETAILS_LENGTH = 1500; // keep the template URL a reasonable size
 
 function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
@@ -35,9 +34,8 @@ function buildCalendarUrl(data, tab) {
   if (data.ctz) params.set("ctz", data.ctz);
 
   // The details field always starts with a link back to the original event
-  // page, followed by the extracted description.
-  let details = (data.description || "").slice(0, MAX_DETAILS_LENGTH);
-  details = linkifyMarkdown(details);
+  // page, followed by the full extracted description.
+  let details = linkifyMarkdown(data.description || "");
   const link = sourceLink(tab);
   details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
@@ -68,12 +66,11 @@ function sourceLink(tab) {
   return tab.url;
 }
 
-// Markdown links survive extraction (e.g. Meetup's JSON-LD description, which
-// jsonld.js runs through stripHtml() — that drops HTML tags but leaves markdown
-// intact). Google Calendar renders the details field as HTML, not markdown, so
-// turn [text](url) into an <a> anchor; the URL is kept as-is. An incomplete
-// link left dangling by the MAX_DETAILS_LENGTH slice (a `[text]` with no
-// following `(url)`) doesn't match and stays literal.
+// Markdown links survive extraction (e.g. Meetup's description, whose inline
+// JSON state and JSON-LD both carry markdown). Google Calendar renders the
+// details field as HTML, not markdown, so turn [text](url) into an <a> anchor;
+// the URL is kept as-is. A bare `[text]` with no following `(url)` doesn't
+// match and stays literal.
 function linkifyMarkdown(text) {
   return text.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
 }
