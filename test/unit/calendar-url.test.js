@@ -35,14 +35,6 @@ test("details is just the URL when the page had no description", () => {
   assert.equal(paramsOf(url).get("details"), TAB.url);
 });
 
-test("multiple-events note comes after the URL, before the description", () => {
-  const url = buildCalendarUrl({ title: "Fair", description: "Art.", multipleEvents: true }, TAB);
-  assert.equal(
-    paramsOf(url).get("details"),
-    `${TAB.url}\n\n(First of several events found on this page.)\n\nArt.`
-  );
-});
-
 test("meetup.com: details links the canonical URL to the original (tracked) URL", () => {
   const meetupTab = {
     title: "Tab Title",

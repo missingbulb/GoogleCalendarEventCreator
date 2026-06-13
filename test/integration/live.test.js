@@ -9,55 +9,42 @@
 // deterministic and runnable anywhere (no network), while still reflecting
 // each site's current markup.
 //
-// Each JSON file in test/integration/cases/ describes one scenario:
+// Each JSON file in test/integration/cases/ describes one scenario. The
+// extractor always returns a list of events, so `expected` is just that list:
 //
 //   {
 //     "description": "Meetup event page is parseable",
 //     "url":         "https://www.meetup.com/<group>/events/<id>/",
 //     "expected": {
-//       "title":          "Exact Title",
-//       "start":          "2026-06-25T18:00:00-04:00",
-//       "end":            "2026-06-25T21:00:00-04:00",
-//       "location":       "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
-//       "multipleEvents": false,
-//       "dates":          "20260625T220000Z/20260626T010000Z",
-//       "details":        "[https://www.meetup.com/.../events/123](https://www.meetup.com/.../events/123/)\n\n...full description...",
-//       "calendarUrl":    "https://calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=...&details=...&location=...",
-//       "eventCount":     23,                        <- total events found on the page
-//       "ctz":            "GB"                       <- the Calendar URL's ctz= param, or null if absent
+//       "events": [
+//         {
+//           "title":    "Exact Title",
+//           "start":    "2026-06-25T18:00:00-04:00",
+//           "end":      "2026-06-25T21:00:00-04:00",
+//           "location": "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
+//           "ctz":      "America/New_York",          <- the Calendar URL's ctz= param, or null
+//           "dates":    "20260625T220000Z/20260626T010000Z",
+//           "details":  "[https://...](https://.../)\n\n...full description..."
+//         }
+//       ]
 //     }
 //   }
 //
-// `expected` must be the *complete*, exact object the extractor + URL
-// builder produce — it is deep-equal compared against:
-//   { title, start, end, location, multipleEvents, dates, details, calendarUrl, eventCount, ctz }
-// (see below). There are no substring/regex/prefix matchers: every field
-// must be present and match exactly, including the full text of `details`
-// and `calendarUrl`. This catches any drift — in extraction, date math, or
-// URL composition — however small. When a snapshot refresh legitimately
-// changes a page's content, update `expected` to match the new exact values.
+// `expected.events` must be the *complete*, exact array the extractor + URL
+// builder produce. Each event is deep-equal compared against:
+//   { title, start, end, location, ctz, dates, details }
+// There are no substring/regex/prefix matchers: every field must be present
+// and match exactly, including the full text of `details`.
+// This catches any drift — in extraction, date math, or URL composition —
+// however small, and the array length pins down how many events were found
+// (one for an ordinary page, several for a listing/series page). When a
+// snapshot refresh legitimately changes a page, update `expected` to match.
 //
-// `dates` is derived from the extracted start/end via background.js's
-// formatDatesParam(), so it doubles as integration coverage for the
-// URL-building logic against real-world date/timezone formats.
-//
-// `details` is the final Calendar template "details" field, built from the
-// extraction result via background.js's buildCalendarUrl() — a link back to
-// the source page (on meetup.com, the canonical URL linking to the original,
-// tracked URL) followed by the page's description, truncated to
-// MAX_DETAILS_LENGTH. There is no separate "description" field: `details` is
-// the one place the description shows up, exactly as it will appear in the
-// generated Calendar event.
-//
-// `calendarUrl` is the complete URL background.js opens, i.e. the full
-// return value of buildCalendarUrl() (which embeds `details` and `dates`
-// among other params). It's the end-to-end check: if this matches, the
-// extension produces exactly this Calendar template for this page.
-//
-// `eventCount` is the total number of events/performances the extractor
-// found on the page (see extractors/main.js); `ctz` is the timezone a site
-// extractor pinned the event to (e.g. "GB" for edfringe.com), or null when
-// no extractor set one.
+// Per event: `dates` is derived from start/end via background.js's
+// formatDatesParam(); `details` is what background.js's buildCalendarUrl()
+// puts in the `details=` param (a link back to the source page followed by
+// the description). `ctz` is the timezone a site extractor pinned the event
+// to (e.g. "GB" for edfringe.com), or null.
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
@@ -76,18 +63,6 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = [
-  "title",
-  "start",
-  "end",
-  "location",
-  "multipleEvents",
-  "dates",
-  "details",
-  "calendarUrl",
-  "eventCount",
-  "ctz",
-];
 
 // Evaluate background.js as global code so its function declarations land
 // on the sandbox.
@@ -118,13 +93,10 @@ for (const file of caseFiles) {
 
   test(`${testCase.description || file} — ${testCase.url}`, (t) => {
     assert.ok(testCase.url, `${file}: "url" is required`);
-    assert.ok(testCase.expected, `${file}: "expected" is required`);
-    for (const field of Object.keys(testCase.expected)) {
-      assert.ok(FIELDS.includes(field), `${file}: unknown expected field "${field}". Allowed: ${FIELDS.join(", ")}`);
-    }
-    for (const field of FIELDS) {
-      assert.ok(field in testCase.expected, `${file}: "expected" is missing required field "${field}"`);
-    }
+    assert.ok(
+      testCase.expected && Array.isArray(testCase.expected.events) && testCase.expected.events.length,
+      `${file}: "expected.events" must be a non-empty array`
+    );
 
     const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.html`);
     assert.ok(
@@ -144,28 +116,26 @@ for (const file of caseFiles) {
 
     const html = fs.readFileSync(snapshotPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
-    const dates = formatDatesParam(extracted.start, extracted.end);
 
-    // Run the same details-composition logic background.js uses when it
-    // opens the Calendar template, so cases assert on the final "details"
-    // field (link back to the source + description) rather than the raw,
-    // pre-composition "description".
-    const calendarUrl = buildCalendarUrl(extracted, { url: testCase.url, title: extracted.title, index: 0 });
-    const details = new URL(calendarUrl).searchParams.get("details");
+    // Build each event exactly as background.js would when opening the
+    // Calendar template, so cases assert on the final dates/details/URL.
+    // Spread into a Node-realm array first: extractFromHtml returns a
+    // jsdom-realm array, and deepEqual rejects a cross-realm array even when
+    // its contents match.
+    const events = [...(extracted.events || [])].map((e) => {
+      const tab = { url: testCase.url, title: e.title, index: 0 };
+      const calendarUrl = buildCalendarUrl(e, tab);
+      return {
+        title: e.title,
+        start: e.start,
+        end: e.end || null,
+        location: e.location,
+        ctz: e.ctz || null,
+        dates: formatDatesParam(e.start, e.end),
+        details: new URL(calendarUrl).searchParams.get("details"),
+      };
+    });
 
-    const actual = {
-      title: extracted.title,
-      start: extracted.start,
-      end: extracted.end,
-      location: extracted.location,
-      multipleEvents: extracted.multipleEvents,
-      dates,
-      details,
-      calendarUrl,
-      eventCount: extracted.eventCount,
-      ctz: extracted.ctz || null,
-    };
-
-    assert.deepEqual(actual, testCase.expected, `${file}: extracted result does not match "expected" exactly`);
+    assert.deepEqual({ events }, testCase.expected, `${file}: extracted events do not match "expected" exactly`);
   });
 }

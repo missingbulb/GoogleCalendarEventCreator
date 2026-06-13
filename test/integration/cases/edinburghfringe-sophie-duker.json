@@ -2,15 +2,214 @@
   "description": "Edinburgh Fringe show page is parseable (Sophie Duker: Hot Beef Injection, 23 dates)",
   "url": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection",
   "expected": {
-    "title": "Sophie Duker: Hot Beef Injection",
-    "start": "2026-08-05T19:30:00.000Z",
-    "end": "2026-08-05T20:30:00.000Z",
-    "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
-    "multipleEvents": false,
-    "dates": "20260805T193000Z/20260805T203000Z",
-    "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times).",
-    "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Sophie+Duker%3A+Hot+Beef+Injection&dates=20260805T193000Z%2F20260805T203000Z&ctz=GB&details=https%3A%2F%2Fwww.edfringe.com%2Ftickets%2Fwhats-on%2Fsophie-duker-hot-beef-injection%0A%0ADuker%E2%80%99s+back+on+her+bullshit.+And+this+time%2C+she%E2%80%99s+done+with+dudes.+Promise.+The+people%E2%80%99s+princess+of+provocation+returns+with+a+beefy+hour+about+sex+and+privilege.+Taskmaster+Champion+and+Just+For+Laughs+International+New+Face.+As+seen+crushing+Live+at+the+Apollo%2C+House+of+Games%2C+Celebrity+Mastermind+and+Celebrity+Pointless.+Sell-out+Fringe+runs+since+2019.+%E2%80%98Obscenely+good%E2%80%A6+Charisma+to+burn%E2%80%99+%28Rolling+Stone%29.+%27Extremely+funny%27+****+%28Scotsman%29.+%27Truly+one+of+the+best+comedians+around%27+****+%28DIVA%29.+%27Laugh-out-loud+funny%27+****+%28Telegraph%29.+%27Not+scared+to+push+the+boundaries%27+****+%28Fest%29.+****+%28Skinny%29.+****+%28Evening+Standard%29.+****+%28Times%29.&location=Forth+at+Pleasance+Courtyard%2C+60+Pleasance%2C+EH8+9TJ",
-    "eventCount": 23,
-    "ctz": "GB"
+    "events": [
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-05T19:30:00.000Z",
+        "end": "2026-08-05T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260805T193000Z/20260805T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-06T19:30:00.000Z",
+        "end": "2026-08-06T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260806T193000Z/20260806T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-07T19:30:00.000Z",
+        "end": "2026-08-07T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260807T193000Z/20260807T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-08T19:30:00.000Z",
+        "end": "2026-08-08T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260808T193000Z/20260808T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-09T19:30:00.000Z",
+        "end": "2026-08-09T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260809T193000Z/20260809T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-10T19:30:00.000Z",
+        "end": "2026-08-10T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260810T193000Z/20260810T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-11T19:30:00.000Z",
+        "end": "2026-08-11T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260811T193000Z/20260811T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-13T19:30:00.000Z",
+        "end": "2026-08-13T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260813T193000Z/20260813T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-14T19:30:00.000Z",
+        "end": "2026-08-14T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260814T193000Z/20260814T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-15T19:30:00.000Z",
+        "end": "2026-08-15T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260815T193000Z/20260815T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-16T19:30:00.000Z",
+        "end": "2026-08-16T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260816T193000Z/20260816T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-17T19:30:00.000Z",
+        "end": "2026-08-17T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260817T193000Z/20260817T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-18T19:30:00.000Z",
+        "end": "2026-08-18T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260818T193000Z/20260818T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-20T19:30:00.000Z",
+        "end": "2026-08-20T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260820T193000Z/20260820T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-21T19:30:00.000Z",
+        "end": "2026-08-21T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260821T193000Z/20260821T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-22T19:30:00.000Z",
+        "end": "2026-08-22T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260822T193000Z/20260822T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-23T19:30:00.000Z",
+        "end": "2026-08-23T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260823T193000Z/20260823T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-24T19:30:00.000Z",
+        "end": "2026-08-24T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260824T193000Z/20260824T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-25T19:30:00.000Z",
+        "end": "2026-08-25T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260825T193000Z/20260825T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-27T19:30:00.000Z",
+        "end": "2026-08-27T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260827T193000Z/20260827T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-28T19:30:00.000Z",
+        "end": "2026-08-28T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260828T193000Z/20260828T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-29T19:30:00.000Z",
+        "end": "2026-08-29T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260829T193000Z/20260829T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      },
+      {
+        "title": "Sophie Duker: Hot Beef Injection",
+        "start": "2026-08-30T19:30:00.000Z",
+        "end": "2026-08-30T20:30:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260830T193000Z/20260830T203000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection\n\nDuker’s back on her bullshit. And this time, she’s done with dudes. Promise. The people’s princess of provocation returns with a beefy hour about sex and privilege. Taskmaster Champion and Just For Laughs International New Face. As seen crushing Live at the Apollo, House of Games, Celebrity Mastermind and Celebrity Pointless. Sell-out Fringe runs since 2019. ‘Obscenely good… Charisma to burn’ (Rolling Stone). 'Extremely funny' **** (Scotsman). 'Truly one of the best comedians around' **** (DIVA). 'Laugh-out-loud funny' **** (Telegraph). 'Not scared to push the boundaries' **** (Fest). **** (Skinny). **** (Evening Standard). **** (Times)."
+      }
+    ]
   }
 }

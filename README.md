@@ -1,9 +1,9 @@
 # Google Calendar Event Creator
 
 A Chrome extension that adds a toolbar button which, when clicked, reads event
-details from the current web page and shows a small popup with a summary of
-what was found. Clicking the popup's button opens a pre-filled Google
-Calendar event (via
+details from the current web page and shows a small popup listing what was
+found — one button per event when the page describes several. Clicking a
+button opens a pre-filled Google Calendar event (via
 `https://calendar.google.com/calendar/render?action=TEMPLATE`) — no API keys
 or OAuth needed. You review the pre-filled event and hit Save.
 
@@ -38,10 +38,13 @@ Extraction runs in three layers, merged field-by-field (first non-empty wins):
    finally a date/time pattern scan over the page's visible text
    ("June 14, 2026 at 7 PM", "14 June 2026, 19:30", "6/14/2026", ISO dates, …).
 
-If the page appears to list **multiple events** (several JSON-LD events,
-several `schema.org/Event` microdata items, or several timestamped list
-cards), the **first event** is suggested and a note is added to the details
-field.
+The extractor always returns a list of events (`{ events: [...] }`), each one
+self-described (title, date/time, location, description, timezone). When a
+page describes **several distinct events** — a film week or festival listing,
+several JSON-LD events, etc. — every event is returned and the popup shows
+**one button per event** so you can pick which one to add. An ordinary event
+page yields a single event/button; a film that merely has several screening
+dates stays one event.
 
 Dates with an explicit timezone offset are converted to an exact UTC instant
 before being passed to Google Calendar, so the event occurs at the same
@@ -75,10 +78,10 @@ extension's card in `chrome://extensions`.
 ## Use
 
 Navigate to a page describing an event and click the extension's toolbar
-button. A small popup opens showing the event title, date/time, and location
-that were found on the page. Click **Add to Google Calendar** to open a new
-tab with the Google Calendar "create event" screen pre-filled; review and
-save.
+button. A small popup opens with a button for each event found on the page,
+showing its title, date/time, and location. Click the event you want to open
+a new tab with the Google Calendar "create event" screen pre-filled; review
+and save.
 
 ## Testing
 
@@ -107,18 +110,29 @@ confirm each site is handled correctly.
   "description": "Meetup event page is parseable",
   "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
   "expected": {
-    "title": "NYC Tech Mixer 2026",
-    "start": "2026-06-25T18:00:00-04:00",
-    "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
-    "description": { "includes": ["JOIN US FOR THE BEST NETWORKING EVENT"] }
+    "events": [
+      {
+        "title": "NYC Tech Mixer 2026",
+        "start": "2026-06-25T18:00:00-04:00",
+        "end": "2026-06-25T21:00:00-04:00",
+        "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
+        "ctz": "America/New_York",
+        "dates": "20260625T220000Z/20260626T010000Z",
+        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description...",
+        "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=..."
+      }
+    ]
   }
 }
 ```
 
-Each expected field takes an exact string/boolean, or a matcher:
-`{ "includes": [...] }`, `{ "matches": "regex" }`, or `{ "nonEmpty": true }`.
-Use exact values when the value is known and stable; use matchers otherwise.
-All fields are optional.
+`expected.events` is the **complete, exact** array the extractor + URL builder
+produce: each event is deep-equal compared on `title`, `start`, `end`,
+`location`, `ctz`, `dates`, `details`, and `calendarUrl` (no matchers — every
+field must match exactly, including the full `details`/`calendarUrl`). The
+array length also pins down how many events were found: one for an ordinary
+page, several for a listing/series page. See the header comment in
+`live.test.js` for how each field is derived.
 
 The tests themselves run **offline**, against committed HTML snapshots in
 `test/integration/snapshots/` (one `<case>.html` per case, plus
@@ -185,12 +199,16 @@ from facebook.com, so it can't be snapshotted as a live case.
 
 ### UI snapshot test
 
-**`test/ui/popup.test.js`** renders an approximation of the popup
+**`test/ui/popup.test.js`** renders approximations of the popup
 (`test/ui/render.js`, using `satori` + `@resvg/resvg-js` — no browser) for
-fixed fixture data (`test/ui/fixture.js`), and compares it pixel-by-pixel
-(via `pixelmatch`) against the committed image at
-**`test/ui/snapshots/popup.png`** — open that file on GitHub to see what the
-popup currently looks like.
+fixed fixture data (`test/ui/fixture.js`), and compares each pixel-by-pixel
+(via `pixelmatch`) against a committed image. Two layouts are covered — open
+them on GitHub to see what the popup currently looks like:
+
+- **`test/ui/snapshots/popup.png`** — a single-event page: one ~60px
+  "Add to Google Calendar" button.
+- **`test/ui/snapshots/popup-multi.png`** — a listing/series page: one ~60px
+  button per event (6 here) under an "N events on this page" heading.
 
 Note this is **not a screenshot of the real `popup.html`**: satori only
 supports a constrained flexbox-based HTML/CSS subset, so `render.js` is a
@@ -207,10 +225,10 @@ run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
 browser install step.
 
 After an intentional change to the popup's UI, run `npm run refresh:ui` to
-regenerate `popup.png` (or use the **Refresh UI snapshot** workflow, "Run
-workflow" in the Actions tab) and commit the updated PNG so reviewers can see
-the before/after in the diff. On mismatch, the test writes
-`test/ui/snapshots/popup.actual.png` and `popup.diff.png` (both gitignored)
+regenerate both `popup.png` and `popup-multi.png` (or use the **Refresh UI
+snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
+PNGs so reviewers can see the before/after in the diff. On mismatch, the test
+writes `<name>.actual.png` and `<name>.diff.png` (both gitignored)
 for local debugging.
 
 ### Toolbar icon test
@@ -258,8 +276,8 @@ commit the results. On mismatch, the test writes
 | `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
-| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png`              |
-| `test/ui/snapshots/popup.png` | Committed reference image of the popup, browsable on GitHub |
+| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png` and `popup-multi.png` |
+| `test/ui/snapshots/popup.png`, `popup-multi.png` | Committed reference images of the popup (single / multiple events), browsable on GitHub |
 | `test/ui/render-icon.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
 | `test/ui/icon.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
 | `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{red,green}.png` |

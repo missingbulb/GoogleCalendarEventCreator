@@ -2,15 +2,16 @@
   "description": "Meetup event page is parseable (NYC Tech Mixer, Jun 25 2026)",
   "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
   "expected": {
-    "title": "NYC Tech Mixer 2026",
-    "start": "2026-06-25T18:00:00-04:00",
-    "end": "2026-06-25T21:00:00-04:00",
-    "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
-    "multipleEvents": false,
-    "dates": "20260625T220000Z/20260626T010000Z",
-    "details": "[https://www.meetup.com/nyctechmixer/events/311245599](https://www.meetup.com/nyctechmixer/events/311245599/)\n\n**JOIN US FOR THE BEST NETWORKING EVENT IN NYC!** **As seen in Entrepreneur Magazine** **PAID EVENT RSVP HERE** ==> https://tinyurl.com/3anp7ddf <== **PAI",
-    "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=NYC+Tech+Mixer+2026&dates=20260625T220000Z%2F20260626T010000Z&ctz=America%2FNew_York&details=%5Bhttps%3A%2F%2Fwww.meetup.com%2Fnyctechmixer%2Fevents%2F311245599%5D%28https%3A%2F%2Fwww.meetup.com%2Fnyctechmixer%2Fevents%2F311245599%2F%29%0A%0A**JOIN+US+FOR+THE+BEST+NETWORKING+EVENT+IN+NYC%21**+**As+seen+in+Entrepreneur+Magazine**+**PAID+EVENT+RSVP+HERE**+%3D%3D%3E+https%3A%2F%2Ftinyurl.com%2F3anp7ddf+%3C%3D%3D+**PAI&location=The+Williamsburg+Hotel+Bar%2C+96+Wythe+Ave%2C+Brooklyn%2C+NY",
-    "eventCount": 1,
-    "ctz": "America/New_York"
+    "events": [
+      {
+        "title": "NYC Tech Mixer 2026",
+        "start": "2026-06-25T18:00:00-04:00",
+        "end": "2026-06-25T21:00:00-04:00",
+        "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
+        "ctz": "America/New_York",
+        "dates": "20260625T220000Z/20260626T010000Z",
+        "details": "[https://www.meetup.com/nyctechmixer/events/311245599](https://www.meetup.com/nyctechmixer/events/311245599/)\n\n**JOIN US FOR THE BEST NETWORKING EVENT IN NYC!** **As seen in Entrepreneur Magazine** **PAID EVENT RSVP HERE** ==> https://tinyurl.com/3anp7ddf <== **PAI"
+      }
+    ]
   }
 }

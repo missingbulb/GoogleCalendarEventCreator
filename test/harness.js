@@ -28,7 +28,7 @@ const SOURCES = extractorSources();
 /**
  * @param {string} html  Full HTML of the page.
  * @param {string} url   The page URL.
- * @returns {object}     The extractor's result: { title, start, end, location, description, multipleEvents }
+ * @returns {object}     The extractor's result: { events: [{ title, start, end, location, description, ctz }] }
  */
 function extractFromHtml(html, url) {
   const dom = new JSDOM(html, { url, runScripts: "outside-only" });
