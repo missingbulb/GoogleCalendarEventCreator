@@ -111,33 +111,35 @@ file or smuggle in dead weight. This same zip is what testers load unpacked
 ### Versioning
 
 The version users see is `manifest.json`'s `version` (the store reads only
-that; `package.json` is kept in sync by convention). **It is bumped
-deliberately, not automatically per commit** — bump it as part of preparing a
-release. The store rejects an upload whose version isn't strictly higher than
-the live one, so each release must increment it (`1.0.0` → `1.0.1` for a minor
-fix).
+that; `package.json` is kept in sync). **It is bumped deliberately, not
+automatically per commit** — it's set when you cut a release (the Release
+workflow writes it for you; see below). The store rejects an upload whose
+version isn't strictly higher than the live one, so each release must increment
+it.
 
 ### Cutting a release
 
-The **Release** workflow (`.github/workflows/release.yml`) builds and serves
-the zip:
+The **Release** workflow (`.github/workflows/release.yml`) is the one button to
+push: it sets the version, runs the tests, builds the zip, publishes a GitHub
+Release with it attached, and then **auto-publishes it to the Chrome Web Store**
+(via the Publish workflow below).
 
-- **Tag a release.** Bump `manifest.json`'s `version`, commit, then push a
-  matching `vX.Y.Z` tag:
+- **Run workflow** (Actions tab → Release → "Run workflow") is the normal path.
+  Optionally type the version; **leave it blank to bump the current minor
+  version** (`1.0.0` → `1.1.0`). The workflow writes that version into
+  `manifest.json` / `package.json`, commits it, tags `vX.Y.Z`, and releases.
 
-  ```sh
-  git tag v1.0.1 && git push origin v1.0.1
-  ```
+  > GitHub can't pre-fill the input with a *computed* value — `workflow_dispatch`
+  > defaults are static text — so "blank = next minor" is the convenience
+  > instead. The version it settled on is printed in the run summary.
 
-  The workflow runs the full test suite, **verifies the tag matches the
-  manifest version** (a mismatch fails the build), builds the zip, and
-  publishes it on the GitHub Release for that tag. Because the asset name is
-  stable, the newest build is always at a fixed URL:
-  `…/releases/latest/download/google-calendar-event-creator.zip`.
-- **Manual build.** Running the workflow from the Actions tab ("Run workflow")
-  builds the zip off the chosen branch and uploads it as a downloadable
-  workflow artifact — handy for a throwaway test build without cutting a
-  release.
+- **Push a tag `vX.Y.Z` by hand** if you'd rather bump `manifest.json` yourself.
+  The workflow then **verifies the tag matches the manifest version** (a
+  mismatch fails the build) before releasing.
+
+Either way the zip is attached under a stable name, so the newest build is
+always at a fixed URL:
+`…/releases/latest/download/google-calendar-event-creator.zip`.
 
 ### Automated publishing to the store
 
@@ -145,11 +147,15 @@ The **Publish to Chrome Web Store** workflow
 (`.github/workflows/publish-chrome-store.yml`) takes the zip from a GitHub
 Release and uploads it to the store (publishing to users by default), via the
 [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api)
-(`chrome-webstore-upload-cli`). Run it from the Actions tab ("Run workflow"):
-leave the tag blank to publish the **latest** release, or name a tag; uncheck
-**auto_publish** to upload as a draft and publish manually from the dashboard.
+(`chrome-webstore-upload-cli`). The Release workflow **calls it automatically**,
+so a normal release goes straight to the store. You can also run it on its own
+from the Actions tab — leave the tag blank to publish the **latest** release, or
+name a tag; uncheck **auto_publish** to upload as a draft and publish manually
+from the dashboard.
 
-It needs four repository secrets (Settings → Secrets and variables → Actions):
+It needs four repository secrets (Settings → Secrets and variables → Actions) —
+**until they're set, the publish step fails** (the GitHub Release itself still
+succeeds):
 
 | Secret | Where it comes from |
 | --- | --- |
@@ -163,11 +169,6 @@ To mint the OAuth credentials, follow
 (enable the Chrome Web Store API in a Google Cloud project, create an OAuth
 client, and exchange it for a refresh token), then add the four values as
 secrets.
-
-> The workflow also triggers when a release is *published from the GitHub UI by
-> a person*. It will **not** auto-run for releases the [Release](#cutting-a-release)
-> workflow tags automatically, because events from the `GITHUB_TOKEN` it uses
-> don't trigger other workflows — so for those, use "Run workflow".
 
 ### First publish to the Chrome Web Store
 
@@ -184,15 +185,14 @@ secrets.
 
 ### Minor update
 
-1. Make the change (open an issue first per the project workflow), and bump
-   `manifest.json`'s `version`.
-2. Cut a release as above to produce the new zip.
-3. Publish it — either run the
-   [**Publish to Chrome Web Store**](#automated-publishing-to-the-store) workflow
-   (leave the tag blank for the latest release), or do it by hand in the
-   dashboard: open the item → **Package → Upload new package** → submit. Once
-   approved, Chrome auto-pushes the update to existing users within a few hours
-   — no reinstall.
+1. Make the change (open an issue first per the project workflow) and merge it.
+2. Run the **Release** workflow (blank version = next minor). It bumps the
+   version, releases, and publishes to the store in one go.
+
+Once the store approves it, Chrome auto-pushes the update to existing users
+within a few hours — no reinstall. (For the very first listing, do the one-time
+[First publish](#first-publish-to-the-chrome-web-store) steps in the dashboard
+first.)
 
 ## Testing
 

@@ -5,13 +5,13 @@ name: Publish to Chrome Web Store
 # Store API using chrome-webstore-upload-cli.
 #
 # Triggers:
-#   * "Run workflow" (workflow_dispatch) — the reliable path. Grabs the zip from
-#     the given release tag, or the latest release if none is given.
-#   * A release being published. NOTE: the Release workflow publishes releases
-#     with GITHUB_TOKEN, and events from GITHUB_TOKEN do not trigger other
-#     workflows — so an auto-tagged release will NOT auto-run this. It only
-#     fires when a release is published by a person from the GitHub UI. For
-#     auto-tagged releases, use "Run workflow".
+#   * workflow_call — the Release workflow calls this after it publishes a
+#     release, so a release auto-publishes to the store.
+#   * "Run workflow" (workflow_dispatch) — publishes the given release tag, or
+#     the latest release if the tag is left blank.
+#   * A release being published from the GitHub UI by a person. (Releases the
+#     Release workflow tags automatically are published with GITHUB_TOKEN, whose
+#     events don't trigger this — but that path is covered by workflow_call.)
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   CHROME_EXTENSION_ID     the item/app ID from the Web Store dashboard URL
@@ -19,6 +19,12 @@ name: Publish to Chrome Web Store
 #   CHROME_CLIENT_SECRET    OAuth client secret } Chrome Web Store API — see the
 #   CHROME_REFRESH_TOKEN    OAuth refresh token } README "Automated publishing".
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag to publish"
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
