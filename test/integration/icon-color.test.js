@@ -40,6 +40,9 @@ const CASES = [
   { url: "https://www.facebook.com/events/123456/", expected: "green" },
   { url: "https://www.edfringe.com/tickets/whats-on/some-show", expected: "green" },
   { url: "https://www.example.com/some-page", expected: "red" },
+  // Regression (#101): an unsupported event site stays red — its popup must
+  // not offer event buttons under a red border.
+  { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw", expected: "red" },
   { url: "https://www.google.com/calendar", expected: "red" },
   { url: "chrome://extensions", expected: "red" },
   { url: "", expected: "red" },

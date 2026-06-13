@@ -21,7 +21,7 @@ const EXTRACTOR_FILES = [
 
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
-const MAX_EVENT_CREATION_URL_LENGTH = 3000; // keep the whole template URL within a safe length
+const MAX_EVENT_CREATION_URL_LENGTH = 4000; // keep the whole template URL within a safe length
 
 function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
