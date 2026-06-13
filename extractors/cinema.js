@@ -16,12 +16,15 @@
 //               becomes an all-day event
 //   eventCount  number of date options in the picker (one per scheduled
 //               screening of this film)
-//   location    the cinema's street address, shown in the page footer next
-//               to a location-pin icon
+//   location    the venue name (<meta property="og:site_name">, e.g.
+//               "סינמטק תל אביב") followed by the cinema's street address,
+//               shown in the page footer next to a location-pin icon
 //               (<img data-src="...images/location.png">'s enclosing <a>);
 //               every screening happens at the same Tel Aviv Cinematheque
 //               building, so this is fixed regardless of the film
-//   ctz         always "Asia/Tel_Aviv" — every screening happens in Tel Aviv
+//   ctz         always "Asia/Jerusalem" — every screening happens in Tel Aviv
+//   multipleEvents  true when the date picker lists more than one
+//               screening date
 (() => {
   const { clean, meta } = GCal;
 
@@ -42,7 +45,9 @@
   function location() {
     const icon = document.querySelector('img[data-src*="location.png"]');
     const link = icon && icon.closest("a");
-    return link ? clean(link.textContent) : "";
+    const address = link ? clean(link.textContent) : "";
+    const venue = clean(meta("og:site_name"));
+    return venue && address ? `${venue}, ${address}` : address;
   }
 
   GCal.sites.push({
@@ -55,8 +60,9 @@
         description: clean(meta("og:description")),
         start: dates[0] || "",
         location: location(),
-        ctz: "Asia/Tel_Aviv",
+        ctz: "Asia/Jerusalem",
         eventCount: dates.length,
+        multipleEvents: dates.length > 1,
       };
     },
   });
