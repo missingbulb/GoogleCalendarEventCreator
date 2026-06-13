@@ -61,6 +61,24 @@ test("a bare/incomplete markdown link (no URL) is left untouched", () => {
   assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nSponsored by [Poalim Tech]`);
 });
 
+test("a short description is kept in full (no URL-length trimming)", () => {
+  const description = "Bring food and friends.";
+  const url = buildCalendarUrl({ title: "Picnic", description }, TAB);
+  assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\n${description}`);
+});
+
+test("a long description is trimmed so the whole URL fits the length cap", () => {
+  const description = "x".repeat(5000);
+  const url = buildCalendarUrl({ title: "Talk", description }, TAB);
+  assert.ok(url.length <= 3000, `URL length ${url.length} exceeds the cap`);
+  // only the trailing details field is shortened; the rest of the URL survives
+  const details = paramsOf(url).get("details");
+  assert.ok(details.startsWith(`${TAB.url}\n\n`), "details still begins with the source link");
+  assert.ok(details.length < `${TAB.url}\n\n${description}`.length, "details was trimmed");
+  // other fields are untouched
+  assert.equal(paramsOf(url).get("text"), "Talk");
+});
+
 test("falls back to the tab title when no title was extracted", () => {
   const url = buildCalendarUrl({}, TAB);
   assert.equal(paramsOf(url).get("text"), "Tab Title");
