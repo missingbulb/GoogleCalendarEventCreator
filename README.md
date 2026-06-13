@@ -38,12 +38,13 @@ Extraction runs in three layers, merged field-by-field (first non-empty wins):
    finally a date/time pattern scan over the page's visible text
    ("June 14, 2026 at 7 PM", "14 June 2026, 19:30", "6/14/2026", ISO dates, …).
 
-When a page describes **several distinct events** — a film week or festival
-listing, several JSON-LD events, etc. — the extractor returns them all (an
-`events` list), and the popup shows **one button per event** so you can pick
-which one to add. An ordinary event page yields a single button. (A page that
-lists multiple events is also flagged so the suggested event's details note
-it; a single event that merely has several screening dates stays one event.)
+The extractor always returns a list of events (`{ events: [...] }`), each one
+self-described (title, date/time, location, description, timezone). When a
+page describes **several distinct events** — a film week or festival listing,
+several JSON-LD events, etc. — every event is returned and the popup shows
+**one button per event** so you can pick which one to add. An ordinary event
+page yields a single event/button; a film that merely has several screening
+dates stays one event.
 
 Dates with an explicit timezone offset are converted to an exact UTC instant
 before being passed to Google Calendar, so the event occurs at the same
@@ -109,18 +110,29 @@ confirm each site is handled correctly.
   "description": "Meetup event page is parseable",
   "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
   "expected": {
-    "title": "NYC Tech Mixer 2026",
-    "start": "2026-06-25T18:00:00-04:00",
-    "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
-    "description": { "includes": ["JOIN US FOR THE BEST NETWORKING EVENT"] }
+    "events": [
+      {
+        "title": "NYC Tech Mixer 2026",
+        "start": "2026-06-25T18:00:00-04:00",
+        "end": "2026-06-25T21:00:00-04:00",
+        "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
+        "ctz": "America/New_York",
+        "dates": "20260625T220000Z/20260626T010000Z",
+        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description...",
+        "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=..."
+      }
+    ]
   }
 }
 ```
 
-Each expected field takes an exact string/boolean, or a matcher:
-`{ "includes": [...] }`, `{ "matches": "regex" }`, or `{ "nonEmpty": true }`.
-Use exact values when the value is known and stable; use matchers otherwise.
-All fields are optional.
+`expected.events` is the **complete, exact** array the extractor + URL builder
+produce: each event is deep-equal compared on `title`, `start`, `end`,
+`location`, `ctz`, `dates`, `details`, and `calendarUrl` (no matchers — every
+field must match exactly, including the full `details`/`calendarUrl`). The
+array length also pins down how many events were found: one for an ordinary
+page, several for a listing/series page. See the header comment in
+`live.test.js` for how each field is derived.
 
 The tests themselves run **offline**, against committed HTML snapshots in
 `test/integration/snapshots/` (one `<case>.html` per case, plus

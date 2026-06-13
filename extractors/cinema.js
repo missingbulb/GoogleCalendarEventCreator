@@ -24,8 +24,6 @@
 //               (date portion before the "~"); screening times are loaded
 //               via AJAX and aren't present in the static page, so this
 //               becomes an all-day event
-//   eventCount  number of date options in the picker (one per scheduled
-//               screening of this film)
 //   location    the venue name (<meta property="og:site_name">, e.g.
 //               "סינמטק תל אביב") followed by the cinema's street address,
 //               shown in the page footer next to a location-pin icon
@@ -33,8 +31,6 @@
 //               every screening happens at the same Tel Aviv Cinematheque
 //               building, so this is fixed regardless of the film
 //   ctz         always "Asia/Jerusalem" — every screening happens in Tel Aviv
-//   multipleEvents  true when the date picker lists more than one
-//               screening date
 (() => {
   const { clean, meta } = GCal;
 
@@ -89,16 +85,12 @@
     extract() {
       const films = seriesEvents();
       if (films.length) {
-        // A series page: suggest the first film, and expose them all.
+        // A series page: one event per film. description/ctz are page-level
+        // and main.js fills them into each event.
         return {
-          title: films[0].title,
-          description: clean(meta("og:description")),
-          start: films[0].start,
-          location: films[0].location,
-          ctz: "Asia/Jerusalem",
           events: films,
-          eventCount: films.length,
-          multipleEvents: films.length > 1,
+          description: clean(meta("og:description")),
+          ctz: "Asia/Jerusalem",
         };
       }
 
@@ -109,8 +101,6 @@
         start: dates[0] || "",
         location: location(),
         ctz: "Asia/Jerusalem",
-        eventCount: dates.length,
-        multipleEvents: dates.length > 1,
       };
     },
   });

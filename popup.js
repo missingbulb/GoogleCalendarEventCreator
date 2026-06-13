@@ -27,7 +27,7 @@
     // from the tab title.
     headingEl.textContent = "Add to Google Calendar";
     emptyEl.hidden = false;
-    eventsEl.appendChild(makeButton({ title: tab.title || "New event" }, data, tab, false));
+    eventsEl.appendChild(makeButton({ title: tab.title || "New event" }, tab));
     return;
   }
 
@@ -35,28 +35,14 @@
     events.length > 1 ? `${events.length} events on this page` : "Add to Google Calendar";
 
   events.forEach((event) => {
-    eventsEl.appendChild(makeButton(event, data, tab, events.length > 1));
+    eventsEl.appendChild(makeButton(event, tab));
   });
 })().catch((e) => console.error("Popup failed to initialize:", e));
 
-// Build one event button. `pageData` carries page-level fields (description,
-// ctz, source URL) shared by every event. When the page has several distinct
-// events, each button targets its own event and the "first of several" note
-// is suppressed; for a single event the full extraction is used as-is (so a
-// film with several screening dates keeps that note).
-function makeButton(event, pageData, tab, multiple) {
-  const eventData = multiple
-    ? {
-        title: event.title,
-        start: event.start,
-        end: event.end,
-        location: event.location,
-        description: pageData.description,
-        ctz: pageData.ctz,
-      }
-    : pageData;
-
-  const url = buildCalendarUrl({ ...eventData, title: event.title || tab.title }, tab);
+// Build one event button. Each event is self-contained (title, start, end,
+// location, description, ctz), so its Calendar URL is built directly.
+function makeButton(event, tab) {
+  const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab);
 
   const btn = document.createElement("button");
   btn.className = "event-btn";

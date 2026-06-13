@@ -27,11 +27,10 @@
 //               alone, e.g. "Forth at Pleasance Courtyard") plus the venue's
 //               address and postcode
 //   description event.description
-//   eventCount  number of performances listed (a show usually runs on most
-//               days of the festival, but main.js only suggests the first)
 //
-// Every Fringe show runs in Edinburgh, so `ctz` is always "GB" — even on
-// pages where the event JSON couldn't be found.
+// A show usually runs on most days of the festival; we surface the first
+// performance as the event. Every Fringe show runs in Edinburgh, so `ctz` is
+// always "GB" — even on pages where the event JSON couldn't be found.
 (() => {
   const { clean } = GCal;
 
@@ -69,8 +68,7 @@
       const event = readEvent();
       if (!event) return { ctz: "GB" };
 
-      const performances = event.performances || [];
-      const first = performances[0];
+      const first = (event.performances || [])[0];
 
       return {
         title: clean(event.title),
@@ -79,7 +77,6 @@
         location: flattenLocation(event),
         description: clean(event.description),
         ctz: "GB",
-        eventCount: performances.length,
       };
     },
   });

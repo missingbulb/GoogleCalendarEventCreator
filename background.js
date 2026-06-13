@@ -36,9 +36,6 @@ function buildCalendarUrl(data, tab) {
   // The details field always starts with a link back to the original event
   // page, followed by the extracted description.
   let details = (data.description || "").slice(0, MAX_DETAILS_LENGTH);
-  if (data.multipleEvents) {
-    details = "(First of several events found on this page.)\n\n" + details;
-  }
   const link = sourceLink(tab);
   details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
