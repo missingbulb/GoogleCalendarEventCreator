@@ -14,17 +14,20 @@
 // onto GCal.sites (see meetup.js for the pattern), list it in
 // EXTRACTOR_FILES in background.js, and add a test case under
 // test/integration/cases/.
+//
+// `eventCount` is the number of distinct events found on the page: the
+// schema.org JSON-LD event count, or a site extractor's own count of
+// performances/dates if it found more than that.
 (() => {
   const host = location.hostname.replace(/^www\./, "");
   const site = GCal.sites.find((s) => s.matches(host));
 
   const ldEvents = GCal.jsonLd.findEvents();
+  const siteResult = site ? site.extract() : {};
   // If the page lists several events, suggest the first one.
-  const result = GCal.merge(
-    site ? site.extract() : {},
-    GCal.jsonLd.toEvent(ldEvents[0]),
-    GCal.generic.extract()
-  );
+  const result = GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract());
   result.multipleEvents = GCal.generic.detectMultiple(ldEvents.length);
+  result.eventCount = Math.max(ldEvents.length, siteResult.eventCount || 0);
+  result.end = result.end || null;
   return result;
 })();

@@ -1,1 +1,13 @@
 node_modules/
+
+# UI snapshot test failure artifacts (the committed expected image is
+# test/ui/snapshots/popup.png)
+test/ui/snapshots/popup.actual.png
+test/ui/snapshots/popup.diff.png
+
+# UI snapshot test failure artifacts (the committed expected images are
+# test/ui/snapshots/icon-{red,green}.png)
+test/ui/snapshots/icon-red.actual.png
+test/ui/snapshots/icon-red.diff.png
+test/ui/snapshots/icon-green.actual.png
+test/ui/snapshots/icon-green.diff.png

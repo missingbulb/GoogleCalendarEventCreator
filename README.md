@@ -1,9 +1,11 @@
 # Google Calendar Event Creator
 
 A Chrome extension that adds a toolbar button which, when clicked, reads event
-details from the current web page and opens a pre-filled Google Calendar event
-(via `https://calendar.google.com/calendar/render?action=TEMPLATE`) — no API
-keys or OAuth needed. You review the pre-filled event and hit Save.
+details from the current web page and shows a small popup with a summary of
+what was found. Clicking the popup's button opens a pre-filled Google
+Calendar event (via
+`https://calendar.google.com/calendar/render?action=TEMPLATE`) — no API keys
+or OAuth needed. You review the pre-filled event and hit Save.
 
 ## What it extracts
 
@@ -21,11 +23,12 @@ are simply left for you to fill in on the Google Calendar screen.
 Extraction runs in three layers, merged field-by-field (first non-empty wins):
 
 1. **Site-specific scrapers** with hardcoded selectors for the major event
-   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**, and
-   **cinema.co.il** (Tel Aviv Cinematheque).
-   Each lives in its own file under `extractors/` with a comment describing
-   the HTML it expects; to support a new platform, add a file there following
-   the same pattern and list it in `EXTRACTOR_FILES` in `background.js`.
+   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**,
+   **edfringe.com** (Edinburgh Festival Fringe), and **cinema.co.il** (Tel
+   Aviv Cinematheque). Each lives in its own file under `extractors/` with a
+   comment describing the HTML it expects; to support a new platform, add a
+   file there following the same pattern and list it in `EXTRACTOR_FILES` in
+   `background.js`.
 2. **schema.org JSON-LD** (`<script type="application/ld+json">` with an
    `Event` type) — most event pages publish this, so it's the strongest
    generic signal.
@@ -47,6 +50,12 @@ offset are passed as floating local times so the event shows the same
 wall-clock time the page displayed. When no end time is found, a 2-hour
 duration is assumed. A date without a time becomes an all-day event.
 
+A site extractor that knows an event's location is fixed (e.g. a festival
+that only ever runs in one city) can set `ctz` to that timezone (e.g. `"GB"`
+for the Edinburgh Festival Fringe); it's passed straight through as the
+Calendar URL's `ctz` parameter, so a floating start/end time is interpreted
+in that timezone rather than the viewer's own.
+
 ## Install (developer mode)
 
 1. Get the code onto your machine, either:
@@ -66,20 +75,24 @@ extension's card in `chrome://extensions`.
 ## Use
 
 Navigate to a page describing an event and click the extension's toolbar
-button. A new tab opens with the Google Calendar "create event" screen
-pre-filled; review and save.
+button. A small popup opens showing the event title, date/time, and location
+that were found on the page. Click **Add to Google Calendar** to open a new
+tab with the Google Calendar "create event" screen pre-filled; review and
+save.
 
 ## Testing
 
-There are two kinds of tests, with different audiences, separated under
-`test/integration/` and `test/unit/`:
+There are three kinds of tests, with different audiences, separated under
+`test/integration/`, `test/unit/`, and `test/ui/`:
 
 ```sh
 npm install
 npm run test:live      # integration: the REVIEWED assertions for each supported site
 npm run test:offline   # unit: internal tests of the extraction logic
+npm run test:ui        # UI: rendered popup vs. the stored snapshot image
 npm run refresh        # re-fetch the live snapshots (needs internet)
-npm test               # everything
+npm run refresh:ui     # regenerate the popup UI snapshot after an intentional change
+npm test               # everything above (offline + live + UI)
 ```
 
 ### Integration tests — the ones you review
@@ -141,8 +154,17 @@ ever re-triggering CI.
 
 **To cover a new website or platform, add one case file** pointing at a real
 event page, then **record its snapshot before relying on the integration
-test**: either run `npm run refresh` locally (needs internet), or trigger the
-**Refresh snapshots** workflow manually ("Run workflow" in the Actions tab).
+test**. The expected sequence is:
+
+1. Add the extractor (if needed) and the new case file under
+   `test/integration/cases/`, then commit that change.
+2. Run `npm run refresh` locally on the same branch (needs internet) — this
+   is the same `refresh-snapshots.js` step the **Refresh snapshots** workflow
+   runs, and it fetches the new case's HTML and updates
+   `test/integration/snapshots/manifest.json` accordingly.
+3. Commit the resulting files under `test/integration/snapshots/` as a
+   follow-up commit on the branch.
+
 Until a snapshot exists for the new case, `test:live` (and so the Tests
 workflow) will fail with `Missing snapshot for "<case>"`. Note that cases also
 need occasional gardening: when an event page is eventually taken down, point
@@ -161,14 +183,67 @@ unavailable.
 Facebook extraction is covered only here: GitHub Actions runners get HTTP 400
 from facebook.com, so it can't be snapshotted as a live case.
 
+### UI snapshot test
+
+**`test/ui/popup.test.js`** renders an approximation of the popup
+(`test/ui/render.js`, using `satori` + `@resvg/resvg-js` — no browser) for
+fixed fixture data (`test/ui/fixture.js`), and compares it pixel-by-pixel
+(via `pixelmatch`) against the committed image at
+**`test/ui/snapshots/popup.png`** — open that file on GitHub to see what the
+popup currently looks like.
+
+Note this is **not a screenshot of the real `popup.html`**: satori only
+supports a constrained flexbox-based HTML/CSS subset, so `render.js` is a
+hand-maintained tree mirroring `popup.html`'s structure and styles. If
+`popup.html`/`popup.css`/`popup.js` change in ways that affect the rendered
+output (copy, layout, colors), update `buildTree()` in `render.js` to match.
+This tradeoff was chosen for determinism and zero extra runtime
+dependencies (no browser download); a real-browser screenshot (e.g. via
+Playwright) would have higher fidelity but couldn't run in all environments
+— revisit if the approximation's fidelity becomes a problem.
+
+Rendering is deterministic, so this is fast and dependency-light enough to
+run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
+browser install step.
+
+After an intentional change to the popup's UI, run `npm run refresh:ui` to
+regenerate `popup.png` (or use the **Refresh UI snapshot** workflow, "Run
+workflow" in the Actions tab) and commit the updated PNG so reviewers can see
+the before/after in the diff. On mismatch, the test writes
+`test/ui/snapshots/popup.actual.png` and `popup.diff.png` (both gitignored)
+for local debugging.
+
+### Toolbar icon test
+
+**`test/ui/icon.test.js`** generates the expected 128x128 toolbar icon for
+both states described in `icon-state.js` — a green border for pages with a
+site-specific extractor and a red border otherwise — using
+`test/ui/render-icon.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
+no browser). Each generated image is compared pixel-by-pixel against the
+committed reference images **`test/ui/snapshots/icon-red.png`** and
+**`test/ui/snapshots/icon-green.png`** (browsable on GitHub) — the same
+red-bordered / green-bordered icons shown in the toolbar for unsupported and
+supported pages — and, as a cross-check, against the actual shipped
+`icons/icon128-red.png` / `icons/icon128-green.png`.
+
+After an intentional change to `tools/gen_icons.py` / `render-icon.js`, run
+`npm run refresh:ui` to regenerate `icon-red.png` and `icon-green.png` (and
+re-run `python3 tools/gen_icons.py` to regenerate the shipped icons) and
+commit the results. On mismatch, the test writes
+`test/ui/snapshots/icon-{red,green}.actual.png` and
+`icon-{red,green}.diff.png` (gitignored) for local debugging.
+
 ## Files
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
-| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
-| `background.js` | Service worker: runs the extractor, builds and opens the URL  |
+| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
+| `popup.html`, `popup.js` | Toolbar popup: runs the extractor, shows a summary, and opens the URL on click |
+| `background.js` | Shared library: builds the pre-filled Google Calendar URL     |
+| `icon-state.js` | Background service worker: updates the toolbar icon's border color per tab |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
-| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `cinema.js` | One file per supported event site, with hardcoded selectors |
+| `extractors/site-hosts.js` | Hostname matchers shared between the site extractors and `icon-state.js` |
+| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `cinema.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
@@ -178,10 +253,25 @@ from facebook.com, so it can't be snapshotted as a live case.
 | `test/integration/live.test.js` | Runs the reviewed assertions against the snapshots       |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
+| `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
+| `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `popup.js` for use in `render.js` |
+| `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
+| `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
+| `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
+| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png`              |
+| `test/ui/snapshots/popup.png` | Committed reference image of the popup, browsable on GitHub |
+| `test/ui/render-icon.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
+| `test/ui/icon.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
+| `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{red,green}.png` |
+| `test/ui/snapshots/icon-red.png`, `icon-green.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions
 
-Only `activeTab` and `scripting`: the extension can read a page solely when
-you click the button on it, and sends nothing anywhere — it just opens a
-Google Calendar URL in a new tab.
+`activeTab` and `scripting`: the extension can read a page solely when you
+click the button on it, and sends nothing anywhere — it just opens a Google
+Calendar URL in a new tab.
+
+`tabs`: lets `icon-state.js` see each tab's URL (hostname only) so it can
+show the toolbar icon with a green border on pages with a site-specific
+extractor (e.g. meetup.com) and a red border elsewhere.

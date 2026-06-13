@@ -4,13 +4,26 @@
   "description": "Chrome extension that creates a pre-filled Google Calendar event from the event details on the current web page.",
   "private": true,
   "scripts": {
-    "test": "node --test \"test/**/*.test.js\"",
-    "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js",
+    "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\" \"test/ui/**/*.test.js\"",
+    "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js test/integration/icon-color.test.js",
     "test:live": "node --test test/integration/live.test.js",
-    "refresh": "node test/integration/refresh-snapshots.js"
+    "test:ui": "node --test test/ui/popup.test.js test/ui/icon.test.js",
+    "refresh": "node test/integration/refresh-snapshots.js",
+    "refresh:ui": "node test/ui/refresh-snapshot.js && node test/ui/refresh-icon-snapshot.js"
   },
   "license": "MIT",
   "devDependencies": {
-    "jsdom": "^29.1.1"
+    "@resvg/resvg-js": "^2.6.2",
+    "jsdom": "^29.1.1",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "satori": "^0.26.0"
+  },
+  "_dependencyNotes": {
+    "jsdom": "Test-only. Provides a DOM implementation (test/harness.js) so the unmodified extractor scripts can be run and asserted against in Node, exactly as they execute in a browser. Not shipped with the extension.",
+    "satori": "Test-only. Renders the popup's HTML/CSS-subset tree to SVG for UI snapshot tests (test/ui/render.js), since it isn't a real screenshot of popup.html.",
+    "@resvg/resvg-js": "Test-only. Rasterizes the SVG produced by satori into a PNG for UI snapshot tests (test/ui/render.js).",
+    "pngjs": "Test-only. Decodes/encodes the PNG snapshots compared in the UI tests (test/ui/popup.test.js).",
+    "pixelmatch": "Test-only. Performs pixel-level diffing between rendered and reference PNGs in the UI tests (test/ui/popup.test.js)."
   }
 }
