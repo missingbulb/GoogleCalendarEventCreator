@@ -21,6 +21,7 @@
 //               (<img data-src="...images/location.png">'s enclosing <a>);
 //               every screening happens at the same Tel Aviv Cinematheque
 //               building, so this is fixed regardless of the film
+//   ctz         always "Asia/Tel_Aviv" — every screening happens in Tel Aviv
 (() => {
   const { clean, meta } = GCal;
 
@@ -54,6 +55,7 @@
         description: clean(meta("og:description")),
         start: dates[0] || "",
         location: location(),
+        ctz: "Asia/Tel_Aviv",
         eventCount: dates.length,
       };
     },

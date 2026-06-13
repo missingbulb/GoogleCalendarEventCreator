@@ -20,8 +20,16 @@
 //
 // Meetup also embeds JSON-LD, so anything missing here is picked up by the
 // jsonld.js layer during the merge in main.js.
+//
+// Meetup groups (and thus their events) can be based in any timezone. The
+// group's IANA timezone name is embedded as plaintext in one of the page's
+// inline JSON state blobs, e.g. `"timezone":"America/New_York"`. Since the
+// extracted start/end times already carry a UTC offset, this `ctz` mainly
+// makes the Calendar event's displayed timezone match the event's own
+// (rather than the viewer's), so it's only used when it's a recognized IANA
+// name.
 (() => {
-  const { text, firstText, normalizeDateValue } = GCal;
+  const { text, firstText, normalizeDateValue, scriptsText, findTimezone } = GCal;
 
   GCal.sites.push({
     name: "meetup",
@@ -44,6 +52,7 @@
           '[data-event-label="body"]',
           '[data-testid="event-description"]',
         ]),
+        ctz: findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/),
       };
     },
   });

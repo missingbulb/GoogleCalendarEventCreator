@@ -185,6 +185,36 @@ test("Edinburgh Fringe: ctz is GB even when the event JSON can't be found", () =
   assert.equal(ev.ctz, "GB");
 });
 
+test("Tel Aviv Cinematheque: ctz is always Asia/Tel_Aviv", () => {
+  const html = `
+    <meta property="og:title" content="Some Film - סינמטק תל אביב">
+    <select id="smdate_b"><option value="select">בחר תאריך</option><option value="2026-06-17~20522">17.6</option></select>`;
+
+  const ev = extractFromHtml(html, "https://www.cinema.co.il/event/some-film/");
+  assert.equal(ev.ctz, "Asia/Tel_Aviv");
+});
+
+test("Meetup: ctz read from the group's timezone embedded in page scripts", () => {
+  const html = `
+    <h1>Intro to Rust Workshop</h1>
+    <div id="event-info">
+      <time datetime="2026-07-08T18:30:00-04:00">Wed, Jul 8</time>
+    </div>
+    <script type="application/json">{"group":{"timezone":"America/New_York"}}</script>`;
+
+  const ev = extractFromHtml(html, "https://www.meetup.com/brooklyn-rustaceans/events/304218765/");
+  assert.equal(ev.ctz, "America/New_York");
+});
+
+test("Meetup: an unrecognized timezone string is ignored", () => {
+  const html = `
+    <h1>Intro to Rust Workshop</h1>
+    <script type="application/json">{"group":{"timezone":"Not/A_Timezone"}}</script>`;
+
+  const ev = extractFromHtml(html, "https://www.meetup.com/brooklyn-rustaceans/events/304218765/");
+  assert.equal(ev.ctz, undefined);
+});
+
 test("Page with no event information at all: still returns a usable title", () => {
   const html = `<title>Just an Article</title><h1>Ten Tips for Houseplants</h1><p>Water them.</p>`;
 
