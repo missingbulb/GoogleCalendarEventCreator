@@ -45,7 +45,7 @@ test("meetup.com: details strips tracking params from the link itself", () => {
   };
   const url = buildCalendarUrl({ title: "Meetup", description: "Come hang out." }, meetupTab);
   const canonical = "https://www.meetup.com/claude-israel-user-group/events/315103877";
-  const expectedLink = `<a href="${canonical}">${canonical}</a>`;
+  const expectedLink = `<a>${canonical}</a>`;
   assert.equal(paramsOf(url).get("details"), `${expectedLink}\n\nCome hang out.`);
 });
 
