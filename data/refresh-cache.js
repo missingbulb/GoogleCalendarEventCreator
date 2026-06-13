@@ -13,15 +13,15 @@
 // a case ends up with no cached HTML file at all.
 //
 // Usage:
-//   node test/integration/refresh-cache.js            # refresh stale cached HTML files only
-//   node test/integration/refresh-cache.js --force    # refresh everything
+//   node data/refresh-cache.js            # refresh stale cached HTML files only
+//   node data/refresh-cache.js --force    # refresh everything
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
 
-const DATA_DIR = path.join(__dirname, "..", "..", "data");
-const CASES_DIR = path.join(__dirname, "cases");
+const DATA_DIR = __dirname;
+const CASES_DIR = path.join(__dirname, "..", "test", "integration", "cases");
 const URLS_PATH = path.join(DATA_DIR, "urlsToCacheLocally.json");
 
 const MAX_AGE_HOURS = 24;

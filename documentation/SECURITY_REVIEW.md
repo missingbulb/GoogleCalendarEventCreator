@@ -232,7 +232,7 @@ ever called with a dynamic value in the future.
 
 ### 3.8 Dev/CI tooling — cache refresher fetches URLs from case files (Low, dev-only)
 
-`test/integration/refresh-cache.js` fetches the `url` field from each
+`data/refresh-cache.js` fetches the `url` field from each
 JSON file in `test/integration/cases/` and writes the response to disk, then
 the daily `.github/workflows/refresh-cache.yml` workflow commits the
 result with `contents: write`. This is standard SSRF-shaped behavior (fetch a
