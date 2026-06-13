@@ -56,4 +56,7 @@ const TRUNCATED_EVENT = {
   ],
 };
 
-module.exports = { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT };
+// A page with nothing extractable: no buttons, "No events found" heading.
+const NO_EVENTS = { events: [] };
+
+module.exports = { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS };
