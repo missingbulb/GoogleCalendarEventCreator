@@ -9,7 +9,7 @@
     "test:live": "node --test test/integration/live.test.js",
     "test:ui": "node --test test/ui/popup.test.js test/ui/icon.test.js",
     "refresh": "node test/integration/refresh-snapshots.js",
-    "refresh:ui": "node test/ui/refresh-snapshot.js"
+    "refresh:ui": "node test/ui/refresh-snapshot.js && node test/ui/refresh-icon-snapshot.js"
   },
   "license": "MIT",
   "devDependencies": {
