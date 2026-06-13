@@ -135,6 +135,23 @@ test("Listing page with several events: every JSON-LD event is returned, in orde
   assert.equal(ev.events[1].start, "2026-10-10T19:00:00");
 });
 
+test("Several events listed out of order are returned sorted by start time", () => {
+  const html = `
+    <script type="application/ld+json">
+    [ { "@type": "Event", "name": "Evening Show", "startDate": "2026-08-08T17:30:00" },
+      { "@type": "Event", "name": "Matinee", "startDate": "2026-08-08T14:00:00" },
+      { "@type": "Event", "name": "Next Day", "startDate": "2026-08-09T11:00:00" },
+      { "@type": "Event", "name": "Opening", "startDate": "2026-08-07T20:00:00" } ]
+    </script>
+    <h1>Festival Run</h1>`;
+
+  const ev = extractFromHtml(html, "https://www.festival.example/run");
+  assert.deepEqual(
+    [...ev.events].map((e) => e.start),
+    ["2026-08-07T20:00:00", "2026-08-08T14:00:00", "2026-08-08T17:30:00", "2026-08-09T11:00:00"]
+  );
+});
+
 test("Tel Aviv Cinematheque series page: one event per film card", () => {
   const html = `
     <meta property="og:title" content="Demo Film Week - סינמטק תל אביב">

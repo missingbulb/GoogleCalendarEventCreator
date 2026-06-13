@@ -58,5 +58,16 @@
     events = [norm(GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract()))];
   }
 
+  // Present events in chronological order regardless of the order the page (or
+  // a site extractor's performance list) happened to give them in. start is an
+  // ISO-ish string ("2026-08-05T14:00:00" or a date-only "2026-08-05"), so a
+  // lexicographic compare sorts chronologically; events with no start sort
+  // last. The sort is stable, so events sharing a start keep their order.
+  events.sort((a, b) => {
+    if (!a.start) return b.start ? 1 : 0;
+    if (!b.start) return -1;
+    return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
+  });
+
   return { events };
 })();
