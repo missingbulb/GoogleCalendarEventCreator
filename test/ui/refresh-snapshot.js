@@ -1,5 +1,5 @@
-// Regenerates the popup UI snapshots (test/ui/snapshots/popup.png and
-// popup-multi.png), using the same fixed fixture data and rendering as the
+// Regenerates the popup UI snapshots (test/ui/snapshots/popup-single-event.png
+// and popup-multi-event.png), using the same fixed fixture data and rendering as the
 // snapshot test (see render.js). Run after an intentional change to the
 // popup's UI.
 "use strict";
@@ -13,8 +13,8 @@ const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./fix
   const outDir = path.join(__dirname, "snapshots");
   fs.mkdirSync(outDir, { recursive: true });
   for (const [name, data] of [
-    ["popup", SINGLE_EVENT],
-    ["popup-multi", MULTI_EVENT],
+    ["popup-single-event", SINGLE_EVENT],
+    ["popup-multi-event", MULTI_EVENT],
     ["popup-truncated", TRUNCATED_EVENT],
     ["popup-empty", NO_EVENTS],
   ]) {

@@ -1,17 +1,5 @@
 node_modules/
 
-# UI snapshot test failure artifacts (the committed expected images are
-# test/ui/snapshots/popup.png and popup-multi.png)
-test/ui/snapshots/popup.actual.png
-test/ui/snapshots/popup.diff.png
-test/ui/snapshots/popup-multi.actual.png
-test/ui/snapshots/popup-multi.diff.png
-test/ui/snapshots/popup-truncated.actual.png
-test/ui/snapshots/popup-truncated.diff.png
-
-# UI snapshot test failure artifacts (the committed expected images are
-# test/ui/snapshots/icon-{red,green}.png)
-test/ui/snapshots/icon-red.actual.png
-test/ui/snapshots/icon-red.diff.png
-test/ui/snapshots/icon-green.actual.png
-test/ui/snapshots/icon-green.diff.png
+# UI snapshot test failure artifacts (.actual.png / .diff.png), written here
+# by the tests on a mismatch (see test/ui/artifacts-dir.js).
+test/ui/.artifacts/

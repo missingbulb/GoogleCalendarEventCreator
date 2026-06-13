@@ -10,7 +10,7 @@ on:
     # extra guard against re-triggering this workflow.
     paths-ignore:
       - "data/**"
-      - "test/ui/snapshots/popup.png"
+      - "test/ui/snapshots/popup-single-event.png"
 
 jobs:
   test:
@@ -39,7 +39,7 @@ jobs:
       - name: Run live tests
         run: npm run test:live
 
-      # Compares a rendering of the popup against test/ui/snapshots/popup.png
+      # Compares a rendering of the popup against test/ui/snapshots/popup-single-event.png
       # (browsable on GitHub). Deterministic and dependency-light (satori +
       # resvg, no browser), so it runs alongside the other tests.
       - name: Run UI snapshot test
