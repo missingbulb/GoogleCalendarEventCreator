@@ -18,14 +18,13 @@
 //     "expected": {
 //       "events": [
 //         {
-//           "title":       "Exact Title",
-//           "start":       "2026-06-25T18:00:00-04:00",
-//           "end":         "2026-06-25T21:00:00-04:00",
-//           "location":    "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
-//           "ctz":         "America/New_York",          <- the Calendar URL's ctz= param, or null
-//           "dates":       "20260625T220000Z/20260626T010000Z",
-//           "details":     "[https://...](https://.../)\n\n...full description...",
-//           "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=..."
+//           "title":    "Exact Title",
+//           "start":    "2026-06-25T18:00:00-04:00",
+//           "end":      "2026-06-25T21:00:00-04:00",
+//           "location": "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
+//           "ctz":      "America/New_York",          <- the Calendar URL's ctz= param, or null
+//           "dates":    "20260625T220000Z/20260626T010000Z",
+//           "details":  "[https://...](https://.../)\n\n...full description..."
 //         }
 //       ]
 //     }
@@ -33,19 +32,19 @@
 //
 // `expected.events` must be the *complete*, exact array the extractor + URL
 // builder produce. Each event is deep-equal compared against:
-//   { title, start, end, location, ctz, dates, details, calendarUrl }
+//   { title, start, end, location, ctz, dates, details }
 // There are no substring/regex/prefix matchers: every field must be present
-// and match exactly, including the full text of `details` and `calendarUrl`.
+// and match exactly, including the full text of `details`.
 // This catches any drift — in extraction, date math, or URL composition —
 // however small, and the array length pins down how many events were found
 // (one for an ordinary page, several for a listing/series page). When a
 // snapshot refresh legitimately changes a page, update `expected` to match.
 //
 // Per event: `dates` is derived from start/end via background.js's
-// formatDatesParam(); `details` and `calendarUrl` are what background.js's
-// buildCalendarUrl() produces (a link back to the source page followed by the
-// description, embedded in the full TEMPLATE URL). `ctz` is the timezone a
-// site extractor pinned the event to (e.g. "GB" for edfringe.com), or null.
+// formatDatesParam(); `details` is what background.js's buildCalendarUrl()
+// puts in the `details=` param (a link back to the source page followed by
+// the description). `ctz` is the timezone a site extractor pinned the event
+// to (e.g. "GB" for edfringe.com), or null.
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
@@ -134,7 +133,6 @@ for (const file of caseFiles) {
         ctz: e.ctz || null,
         dates: formatDatesParam(e.start, e.end),
         details: new URL(calendarUrl).searchParams.get("details"),
-        calendarUrl,
       };
     });
 

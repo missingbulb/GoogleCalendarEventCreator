@@ -142,24 +142,29 @@ test("Cinema.co.il series page: one event per film card", () => {
     <meta property="og:description" content="A week of films.">
     <div class="register-series-boxes">
       <div class="box"><div class="text-wraper"><div class="title">
-        <h3>First Film</h3><p>17-06-2026 , רביעי / 20:00 / אולם 3</p></div>
+        <h3>First Film</h3><p>18-06-2026 , חמישי / 20:00 / אולם 1</p></div>
         <div class="content-detail"><a href="https://www.cinema.co.il/event/first/">details</a></div>
       </div></div>
       <div class="box"><div class="text-wraper"><div class="title">
-        <h3>Second Film</h3><p>18-06-2026 , חמישי / 18:30 / אולם 1</p></div>
+        <h3>Second Film</h3><p>19-06-2026 , שישי / 20:00 / אולם 1</p></div>
         <div class="content-detail"><a href="https://www.cinema.co.il/event/second/">details</a></div>
+      </div></div>
+      <div class="box"><div class="text-wraper"><div class="title">
+        <h3>Third Film</h3><p>20-06-2026 , שבת / 20:00 / אולם 1</p></div>
+        <div class="content-detail"><a href="https://www.cinema.co.il/event/third/">details</a></div>
       </div></div>
     </div>
     <a href="#"><img data-src="https://www.cinema.co.il/x/location.png">רחוב הארבעה 5, תל אביב</a>`;
 
   const ev = extractFromHtml(html, "https://www.cinema.co.il/series/demo-film-week/");
-  assert.equal(ev.events.length, 2);
+  assert.equal(ev.events.length, 3);
   assert.deepEqual(
     [...ev.events].map((e) => e.title),
-    ["First Film", "Second Film"]
+    ["First Film", "Second Film", "Third Film"]
   );
-  assert.equal(ev.events[0].start, "2026-06-17T20:00:00");
-  assert.equal(ev.events[1].start, "2026-06-18T18:30:00");
+  assert.equal(ev.events[0].start, "2026-06-18T20:00:00");
+  assert.equal(ev.events[1].start, "2026-06-19T20:00:00");
+  assert.equal(ev.events[2].start, "2026-06-20T20:00:00");
   // Page-level description/ctz are filled into each film.
   assert.equal(ev.events[0].ctz, "Asia/Jerusalem");
   assert.equal(ev.events[0].description, "A week of films.");
