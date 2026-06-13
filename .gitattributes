@@ -1,0 +1,4 @@
+# Cached third-party event pages used as test fixtures. They're large
+# full-page HTML and skew GitHub's language stats away from the actual
+# JavaScript source, so exclude them from Linguist's language detection.
+data/*.html linguist-vendored
