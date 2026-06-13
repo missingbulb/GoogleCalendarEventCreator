@@ -3,12 +3,9 @@
 For every new task in this repo:
 
 1. Create a GitHub issue describing the task before starting work.
-2. When creating a branch for the task, include the issue number in the
-   branch name (e.g. `claude/issue_65_bugfix_<suffix>` or
-   `claude/issue_67_feature_<suffix>`).
-3. Reference that issue number in commit messages (e.g. `Refs #123` or
+2. Reference that issue number in commit messages (e.g. `Refs #123` or
    `Fixes #123`).
-4. Update the issue's status (comments / close) as work progresses and
+3. Update the issue's status (comments / close) as work progresses and
    when it's done.
 
 When the repo owner says "LGTM" on a change, treat it as approval to merge
