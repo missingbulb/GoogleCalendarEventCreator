@@ -123,26 +123,30 @@ function dateChip(start) {
   };
 }
 
+// Format a clock time, dropping ":00" for round hours ("10 AM", not
+// "10:00 AM"; "6:30 PM" stays as-is).
+function formatTime(date) {
+  const opts = date.getMinutes() === 0 ? { hour: "numeric" } : { hour: "numeric", minute: "2-digit" };
+  return date.toLocaleTimeString(undefined, opts);
+}
+
 // Human-readable date/time line for the popup (separate from
 // formatDatesParam's Google Calendar URL encoding). The month/day live in the
-// date chip, so this line carries the weekday and time(s).
+// date chip, so this terse line carries just the time(s).
 function formatWhen(start, end) {
   if (!start) return "No date found";
 
   const startDate = eventStart(start);
   if (!startDate) return start;
 
-  const weekday = startDate.toLocaleDateString(undefined, { weekday: "short" });
+  // All-day event (date only): the date is in the chip, so just label it.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(start)) return "All day";
 
-  // All-day event (date only, no time): just the weekday.
-  if (/^\d{4}-\d{2}-\d{2}$/.test(start)) return weekday;
-
-  const timeOpts = { hour: "numeric", minute: "2-digit" };
-  let text = `${weekday} ${startDate.toLocaleTimeString(undefined, timeOpts)}`;
+  let text = formatTime(startDate);
 
   const endDate = end ? new Date(end) : null;
   if (endDate && !isNaN(endDate) && endDate > startDate) {
-    text += ` – ${endDate.toLocaleTimeString(undefined, timeOpts)}`;
+    text += ` – ${formatTime(endDate)}`;
   }
 
   return text;

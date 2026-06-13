@@ -16,59 +16,71 @@
         color: #5f6368;
         margin: 0 0 8px;
       }
-      /* One button per distinct event found on the page. A light card
-         (~60px tall, so several fit without scrolling): a blue date chip on
-         the left (month + day), then the title and a muted date/time (plus
-         location, if any) on the right. */
+      /* One button per distinct event found on the page. A compact, tonal
+         (light-blue) card so it reads as a pressable button: a calendar-style
+         date chip on the left (month banner over day), then the title and a
+         muted time (plus location, if any) on the right. */
       .event-btn {
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         box-sizing: border-box;
         width: 100%;
-        min-height: 60px;
+        min-height: 52px;
         margin-bottom: 8px;
-        padding: 10px 12px;
+        padding: 8px 10px;
         text-align: start;
         color: #202124;
-        background-color: #fff;
-        border: 1px solid #e0e0e0;
+        background-color: #e8f0fe;
+        border: 1px solid #d2e3fc;
         border-radius: 8px;
         box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
         cursor: pointer;
-        transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        transition: box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
       }
       .event-btn:last-child {
         margin-bottom: 0;
       }
       .event-btn:hover {
-        border-color: #d2d2d2;
+        background-color: #d2e3fc;
+        border-color: #aecbfa;
         box-shadow: 0 2px 6px rgba(60, 64, 67, 0.25);
         transform: translateY(-1px);
       }
-      /* Left date chip: stacked short month over day-of-month. */
+      .event-btn:active {
+        background-color: #c2d7fa;
+        box-shadow: 0 1px 1px rgba(60, 64, 67, 0.2);
+        transform: translateY(0);
+      }
+      /* Left date chip styled like a calendar icon: a blue month banner over
+         the day-of-month on a white "page". */
       .event-btn .e-date {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        align-items: stretch;
         flex-shrink: 0;
-        width: 44px;
-        padding: 6px 0;
-        color: #fff;
-        background-color: #1a73e8;
-        border-radius: 6px;
-        line-height: 1;
+        width: 38px;
+        overflow: hidden;
+        background-color: #fff;
+        border: 1px solid #c6dafc;
+        border-radius: 5px;
+        text-align: center;
       }
       .event-btn .e-month {
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 700;
         letter-spacing: 0.5px;
+        color: #fff;
+        background-color: #1a73e8;
+        padding: 2px 0;
       }
       .event-btn .e-day {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 700;
+        line-height: 1.1;
+        color: #1a73e8;
+        padding: 2px 0 3px;
       }
       /* Right column: title over the muted date/time line. min-width:0 lets
          the children ellipsize inside the flex row. */

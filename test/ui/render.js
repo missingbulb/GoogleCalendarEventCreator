@@ -48,8 +48,8 @@ function eventButton(event) {
           display: "flex",
           fontSize: 11,
           color: "#5f6368",
-          // Match popup.html: the date/location line stays on one line and
-          // ellipsizes, keeping each button ~60px tall.
+          // Match popup.html: the time/location line stays on one line and
+          // ellipsizes, keeping each button compact.
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -61,7 +61,8 @@ function eventButton(event) {
 
   const row = [];
 
-  // Left date chip (month + day), when we have a usable date.
+  // Left date chip, styled like a calendar icon: a blue month banner over the
+  // day-of-month on a white "page" (matches popup.html's .e-date).
   const chip = dateChip(event.start);
   if (chip) {
     row.push({
@@ -70,20 +71,29 @@ function eventButton(event) {
         style: {
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: "stretch",
           flexShrink: 0,
-          width: 44,
-          paddingTop: 6,
-          paddingBottom: 6,
-          color: "#ffffff",
-          backgroundColor: "#1a73e8",
-          borderRadius: 6,
-          lineHeight: 1,
+          width: 38,
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
+          border: "1px solid #c6dafc",
+          borderRadius: 5,
         },
         children: [
-          { type: "div", props: { style: { display: "flex", fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }, children: chip.month } },
-          { type: "div", props: { style: { display: "flex", fontSize: 18, fontWeight: 700 }, children: chip.day } },
+          {
+            type: "div",
+            props: {
+              style: { display: "flex", justifyContent: "center", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#ffffff", backgroundColor: "#1a73e8", paddingTop: 2, paddingBottom: 2 },
+              children: chip.month,
+            },
+          },
+          {
+            type: "div",
+            props: {
+              style: { display: "flex", justifyContent: "center", fontSize: 16, fontWeight: 700, lineHeight: 1.1, color: "#1a73e8", paddingTop: 2, paddingBottom: 3 },
+              children: chip.day,
+            },
+          },
         ],
       },
     });
@@ -107,16 +117,16 @@ function eventButton(event) {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        gap: 12,
-        minHeight: 60,
+        gap: 10,
+        minHeight: 52,
         marginBottom: 8,
-        paddingTop: 10,
-        paddingBottom: 10,
-        paddingLeft: 12,
-        paddingRight: 12,
+        paddingTop: 8,
+        paddingBottom: 8,
+        paddingLeft: 10,
+        paddingRight: 10,
         color: "#202124",
-        backgroundColor: "#ffffff",
-        border: "1px solid #e0e0e0",
+        backgroundColor: "#e8f0fe",
+        border: "1px solid #d2e3fc",
         borderRadius: 8,
         boxShadow: "0 1px 2px rgba(60, 64, 67, 0.15)",
       },
