@@ -41,6 +41,7 @@ jobs:
         run: npm run test:live
 
       - name: Commit refreshed snapshots
+        if: always() # TEMP: capture new snapshot even if live assertions aren't filled in yet
         run: |
           if [ -n "$(git status --porcelain test/integration/snapshots)" ]; then
             git config user.name "github-actions[bot]"
