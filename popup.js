@@ -29,10 +29,11 @@
     // border) offer the embedded "request this source" form instead of a bare
     // label; on a supported site — or before the form has been configured —
     // just say so.
-    if (!isSupportedHost(tab.url) && showSourceRequestForm(tab, allEvents[0])) {
-      headingEl.textContent = "Add support for this site";
-    } else {
+    if (isSupportedHost(tab.url)) {
       headingEl.textContent = "No events found on this page";
+    } else {
+      headingEl.textContent = "Add support for this site";
+      eventsEl.appendChild(makeSourceRequestButton(tab, allEvents[0]));
     }
     return;
   }
@@ -64,21 +65,37 @@ function isSupportedHost(url) {
   }
 }
 
-// On an unsupported page with no event found, embed the Google Form for
-// requesting that this site be added as a source, prefilled with whatever
-// details we have. Returns false (rendering nothing) when the form isn't
-// configured yet, so the caller falls back to the plain "No events found"
-// label rather than embedding a broken iframe.
-function showSourceRequestForm(tab, event) {
-  const src = buildSourceRequestUrl(sourceRequestPrefill(tab, event));
-  if (!src) return false;
+// On an unsupported page with no event found, a button that opens a prefilled
+// GitHub "new issue" page (in a new tab) requesting this site be added as a
+// source. Styled like the event buttons for consistency, but with a GitHub
+// mark instead of a date chip. A logged-in GitHub user just submits the
+// already-filled issue.
+function makeSourceRequestButton(tab, event) {
+  const url = buildSourceRequestUrl(sourceRequestPrefill(tab, event));
 
-  const frame = document.createElement("iframe");
-  frame.className = "source-request";
-  frame.src = src;
-  frame.title = "Request support for this site";
-  document.getElementById("events").appendChild(frame);
-  return true;
+  const btn = document.createElement("button");
+  btn.className = "event-btn";
+
+  const body = document.createElement("span");
+  body.className = "e-body";
+
+  const title = document.createElement("span");
+  title.className = "e-title";
+  title.textContent = "Request support for this site";
+  body.appendChild(title);
+
+  const sub = document.createElement("span");
+  sub.className = "e-when";
+  sub.textContent = "Opens a prefilled GitHub issue";
+  body.appendChild(sub);
+
+  btn.appendChild(body);
+
+  btn.addEventListener("click", async () => {
+    await chrome.tabs.create({ url, index: tab.index + 1 });
+    window.close();
+  });
+  return btn;
 }
 
 // The fields that seed the source-request form: the page URL and title, plus

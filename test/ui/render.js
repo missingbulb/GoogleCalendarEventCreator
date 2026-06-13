@@ -135,23 +135,55 @@ function eventButton(event) {
   };
 }
 
-// The embedded "request this source" Google Form shown on an unsupported page
-// (popup.js's showSourceRequestForm / popup.html's .source-request). The
-// iframe's Google Form content isn't ours to render, so this approximates just
-// our chrome: the heading copy and the bordered frame box at its fixed size.
-function sourceRequestFrame() {
+// The "request this source" button shown on an unsupported page (popup.js's
+// makeSourceRequestButton): an event-style card with a title over a muted
+// subtitle, and no date chip. Opens a prefilled GitHub issue in the real
+// popup.
+function sourceRequestButton() {
+  const body = {
+    type: "div",
+    props: {
+      style: { display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, flexGrow: 1, flexShrink: 1, flexBasis: 0, minWidth: 0, overflow: "hidden" },
+      children: [
+        {
+          type: "div",
+          props: {
+            style: { display: "flex", fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: "#202124" },
+            children: "Request support for this site",
+          },
+        },
+        {
+          type: "div",
+          props: {
+            style: { display: "flex", fontSize: 11, color: "#5f6368", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
+            children: "Opens a prefilled GitHub issue",
+          },
+        },
+      ],
+    },
+  };
+
   return {
     type: "div",
     props: {
       style: {
         display: "flex",
-        width: "100%",
-        height: 480,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        minHeight: 52,
+        marginBottom: 8,
+        paddingTop: 8,
+        paddingBottom: 8,
+        paddingLeft: 10,
+        paddingRight: 10,
+        color: "#202124",
+        backgroundColor: "#e8f0fe",
         border: "1px solid #d2e3fc",
         borderRadius: 8,
-        backgroundColor: "#ffffff",
+        boxShadow: "0 1px 2px rgba(60, 64, 67, 0.15)",
       },
-      children: "",
+      children: [body],
     },
   };
 }
@@ -201,7 +233,7 @@ function buildTree(data, opts = {}) {
   }
 
   if (opts.sourceRequestForm) {
-    children.push(sourceRequestFrame());
+    children.push(sourceRequestButton());
   }
 
   children.push(...events.map(eventButton));
