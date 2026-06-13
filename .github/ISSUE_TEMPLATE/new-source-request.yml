@@ -1,0 +1,44 @@
+name: New event source request
+description: Request that a website be added as a supported event source.
+title: "New event source request - [URL]"
+labels: ["new-source"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new event source! Once the page's HTML is
+        cached, a maintainer will add an extractor and an integration test that
+        asserts the values below. Fields the extension couldn't read off the
+        page are left blank — please fill in what you can.
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: The event page to add support for.
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: The event's title.
+  - type: input
+    id: start
+    attributes:
+      label: Start time
+  - type: input
+    id: end
+    attributes:
+      label: End time
+  - type: input
+    id: timezone
+    attributes:
+      label: Timezone
+  - type: input
+    id: location
+    attributes:
+      label: Location
+  - type: textarea
+    id: description
+    attributes:
+      label: Description

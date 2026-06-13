@@ -113,40 +113,36 @@ function formatDatesParam(start, end) {
 // --- New-source request (popup, unsupported pages) -------------------------
 // On a non-compatible site (red toolbar border) where no event is found, the
 // popup offers a button that opens a prefilled GitHub "New issue" page for
-// requesting that the page's site be added as a supported source. A logged-in
-// GitHub user just reviews the prefilled title/body and clicks "Submit new
+// requesting that the page's site be added as a supported source. It targets
+// the "New event source request" issue form (.github/ISSUE_TEMPLATE/
+// new-source-request.yml): a logged-in GitHub user lands on that structured
+// form with the fields already filled in, reviews them, and clicks "Submit new
 // issue" — no token, form service, or backend involved. GitHub forbids framing
 // its pages (X-Frame-Options), so this opens in a new tab rather than being
 // embedded, matching how the extension opens the Google Calendar template.
 const SOURCE_REQUEST_REPO = "missingbulb/GoogleCalendarEventCreator";
+const SOURCE_REQUEST_TEMPLATE = "new-source-request.yml";
+const SOURCE_REQUEST_LABEL = "new-source";
 
-// The event fields, in the order they appear in the prefilled issue body.
-const SOURCE_REQUEST_FIELDS = [
-  ["URL", "url"],
-  ["Name", "name"],
-  ["Start time", "start"],
-  ["End time", "end"],
-  ["Timezone", "timezone"],
-  ["Location", "location"],
-  ["Description", "description"],
-];
+// The prefill keys, which double as the issue form's field ids (the `id:` of
+// each field in the template) — GitHub prefills a form field from the query
+// param matching its id.
+const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "location", "description"];
 
-// Build the GitHub "new issue" URL for a source request, with the title and
-// body prefilled from the current page's details (`prefill` keyed by the field
-// names in SOURCE_REQUEST_FIELDS). The body asks for the site to be added and
-// lists the page's values so a reviewer can turn them into an integration
-// test; unknown fields are marked rather than dropped, since the user can edit
-// the issue before submitting.
+// Build the GitHub issue-form URL for a source request, prefilled from the
+// current page's details (`prefill` keyed by SOURCE_REQUEST_FIELDS). The title
+// carries the page URL; each non-empty field seeds the matching form field
+// (empty ones are left for the user to complete). The `new-source` label is
+// applied by both the template and this param.
 function buildSourceRequestUrl(prefill) {
-  const title = `New event source request - ${prefill.url}`;
-  const values = SOURCE_REQUEST_FIELDS.map(
-    ([label, field]) => `- ${label}: ${prefill[field] || "(unknown — please fill in)"}`
-  ).join("\n");
-  const body =
-    `Please add this as a new source: ${prefill.url}\n\n` +
-    "After getting the HTML cached, write an integration test that asserts the " +
-    `following values:\n\n${values}`;
-  const params = new URLSearchParams({ title, body });
+  const params = new URLSearchParams({
+    template: SOURCE_REQUEST_TEMPLATE,
+    title: `New event source request - ${prefill.url}`,
+    labels: SOURCE_REQUEST_LABEL,
+  });
+  for (const id of SOURCE_REQUEST_FIELDS) {
+    if (prefill[id]) params.set(id, prefill[id]);
+  }
   return `https://github.com/${SOURCE_REQUEST_REPO}/issues/new?${params.toString()}`;
 }
 
