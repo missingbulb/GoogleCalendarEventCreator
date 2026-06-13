@@ -102,15 +102,20 @@ jobs:
       - name: Build extension zip
         run: npm run build
 
-      # Dispatch path: commit the version bump and create the tag. Pushed with
-      # GITHUB_TOKEN, whose pushes don't trigger workflows, so this never
-      # re-triggers the tag-push path above.
+      # Dispatch path: commit the version bump (if any) and create the tag.
+      # Pushed with GITHUB_TOKEN, whose pushes don't trigger workflows, so this
+      # never re-triggers the tag-push path above. Releasing at the current
+      # version (e.g. the first release) is a no-op commit — just tag it.
       - name: Commit and tag
         if: github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "Release ${{ steps.version.outputs.tag }}"
+          if git diff --quiet; then
+            echo "Version already ${{ steps.version.outputs.version }}; tagging the current commit."
+          else
+            git commit -am "Release ${{ steps.version.outputs.tag }}"
+          fi
           git tag "${{ steps.version.outputs.tag }}"
           git push origin HEAD "${{ steps.version.outputs.tag }}"
 
