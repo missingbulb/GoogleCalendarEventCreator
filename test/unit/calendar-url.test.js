@@ -65,6 +65,28 @@ test("dates: explicit offset is converted to exact UTC instants", () => {
   );
 });
 
+test("dates: with a known ctz, an offset is rendered as wall-clock time in that zone (no Z)", () => {
+  assert.equal(
+    formatDatesParam("2026-06-25T18:00:00-04:00", "2026-06-25T21:00:00-04:00", "America/New_York"),
+    "20260625T180000/20260625T210000"
+  );
+});
+
+test("dates: ctz converts the instant into that zone, not the source offset's zone", () => {
+  // 18:00-04:00 is 22:00 UTC, which is 01:00 the next day in Asia/Jerusalem.
+  assert.equal(
+    formatDatesParam("2026-06-25T18:00:00-04:00", "2026-06-25T21:00:00-04:00", "Asia/Jerusalem"),
+    "20260626T010000/20260626T040000"
+  );
+});
+
+test("dates: an unresolvable ctz falls back to UTC instants", () => {
+  assert.equal(
+    formatDatesParam("2026-06-14T19:00:00-04:00", "2026-06-14T21:00:00-04:00", "Not/AZone"),
+    "20260614T230000Z/20260615T010000Z"
+  );
+});
+
 test("dates: date-only becomes an all-day event (exclusive end)", () => {
   assert.equal(formatDatesParam("2026-06-14", ""), "20260614/20260615");
 });

@@ -131,7 +131,7 @@ for (const file of caseFiles) {
         end: e.end || null,
         location: e.location,
         ctz: e.ctz || null,
-        dates: formatDatesParam(e.start, e.end),
+        dates: formatDatesParam(e.start, e.end, e.ctz),
         details: new URL(calendarUrl).searchParams.get("details"),
       };
     });
