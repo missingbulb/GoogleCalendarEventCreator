@@ -39,7 +39,7 @@ function buildCalendarUrl(data, tab) {
   // page, followed by the full extracted description. It is added LAST so that
   // enforcing the overall URL-length cap below shortens the description rather
   // than truncating any of the other fields.
-  let details = linkifyMarkdown(data.description || "");
+  let details = markdownToHtml(data.description || "");
   const link = sourceLink(tab);
   details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
@@ -107,13 +107,20 @@ function sourceLink(tab) {
   return tab.url;
 }
 
-// Markdown links survive extraction (e.g. Meetup's description, whose inline
-// JSON state and JSON-LD both carry markdown). Google Calendar renders the
-// details field as HTML, not markdown, so turn [text](url) into an <a> anchor;
-// the URL is kept as-is. A bare `[text]` with no following `(url)` doesn't
-// match and stays literal.
-function linkifyMarkdown(text) {
-  return text.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+// Markdown survives extraction (e.g. Meetup's description, whose inline JSON
+// state and JSON-LD both carry markdown). Google Calendar renders the details
+// field as HTML, not markdown, so translate the markdown we see into HTML:
+//   - links [text](url) -> <a href="url">text</a> (the URL is kept as-is; a
+//     bare `[text]` with no following `(url)` doesn't match and stays literal)
+//   - bold **text** -> <b>text</b>, but only when each `**` is an isolated
+//     pair (not part of a longer run of asterisks) wrapping star-free,
+//     single-line text. That keeps star ratings (e.g. edfringe reviews'
+//     "***** (Scotsman)"), a stray/unmatched `**`, and `***bold-italic***`
+//     literal rather than mangling them.
+function markdownToHtml(text) {
+  return text
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/(?<!\*)\*\*(?!\*)([^\n*]+?)\*\*(?!\*)/g, "<b>$1</b>");
 }
 
 // Build the `dates` parameter for the TEMPLATE URL:
