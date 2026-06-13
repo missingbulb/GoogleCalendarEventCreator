@@ -25,8 +25,16 @@
   const events = allEvents.slice(0, MAX_EVENTS);
 
   if (!events.length) {
-    // Nothing found on the page: show no buttons, just say so.
-    headingEl.textContent = "No events found on this page";
+    // Nothing found on the page. On a non-compatible site (red toolbar
+    // border) offer the embedded "request this source" form instead of a bare
+    // label; on a supported site — or before the form has been configured —
+    // just say so.
+    if (isSupportedHost(tab.url)) {
+      headingEl.textContent = "No events found on this page";
+    } else {
+      headingEl.textContent = "Add support for this site";
+      eventsEl.appendChild(makeSourceRequestButton(tab, allEvents[0]));
+    }
     return;
   }
 
@@ -43,6 +51,69 @@
     eventsEl.appendChild(makeButton(event, tab));
   });
 })().catch((e) => console.error("Popup failed to initialize:", e));
+
+// Whether a site-specific extractor exists for this URL's host — the same
+// check icon-state.js uses to color the toolbar icon green (supported) vs. red
+// (not). Relies on GCal.siteHosts (extractors/site-hosts.js, loaded by
+// popup.html before this file).
+function isSupportedHost(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return GCal.siteHosts.some((site) => site.matches(host));
+  } catch (e) {
+    return false; // no URL yet, or a non-http(s) URL (chrome://, etc.)
+  }
+}
+
+// On an unsupported page with no event found, a button that opens a prefilled
+// GitHub "new issue" page (in a new tab) requesting this site be added as a
+// source. Styled like the event buttons for consistency, but with a GitHub
+// mark instead of a date chip. A logged-in GitHub user just submits the
+// already-filled issue.
+function makeSourceRequestButton(tab, event) {
+  const url = buildSourceRequestUrl(sourceRequestPrefill(tab, event));
+
+  const btn = document.createElement("button");
+  btn.className = "event-btn";
+
+  const body = document.createElement("span");
+  body.className = "e-body";
+
+  const title = document.createElement("span");
+  title.className = "e-title";
+  title.textContent = "Request support for this site";
+  body.appendChild(title);
+
+  const sub = document.createElement("span");
+  sub.className = "e-when";
+  sub.textContent = "Opens a prefilled GitHub issue";
+  body.appendChild(sub);
+
+  btn.appendChild(body);
+
+  btn.addEventListener("click", async () => {
+    await chrome.tabs.create({ url, index: tab.index + 1 });
+    window.close();
+  });
+  return btn;
+}
+
+// The fields that seed the source-request form: the page URL and title, plus
+// any event details extraction managed to find. On an unsupported page that's
+// often just the URL and title (no event was parsed), so the user completes
+// the rest in the form itself.
+function sourceRequestPrefill(tab, event) {
+  event = event || {};
+  return {
+    url: tab.url || "",
+    name: event.title || tab.title || "",
+    start: event.start || "",
+    end: event.end || "",
+    timezone: event.ctz || "",
+    location: event.location || "",
+    description: event.description || "",
+  };
+}
 
 // Build one event button. Each event is self-contained (title, start, end,
 // location, description, ctz), so its Calendar URL is built directly.

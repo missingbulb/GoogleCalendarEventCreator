@@ -48,7 +48,7 @@ test("every injected extractor file ships", () => {
 
 test("popup's <script src> files ship", () => {
   const srcs = [...read("popup.html").matchAll(/<script src="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(srcs, ["background.js", "popup.js"]);
+  assert.deepEqual(srcs, ["background.js", "extractors/site-hosts.js", "popup.js"]);
   for (const s of srcs) assert.ok(isShipped(s), `popup loads ${s}, but it is not in the shipping set`);
 });
 
