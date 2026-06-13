@@ -135,15 +135,38 @@ function eventButton(event) {
   };
 }
 
-function buildTree(data) {
+// The embedded "request this source" Google Form shown on an unsupported page
+// (popup.js's showSourceRequestForm / popup.html's .source-request). The
+// iframe's Google Form content isn't ours to render, so this approximates just
+// our chrome: the heading copy and the bordered frame box at its fixed size.
+function sourceRequestFrame() {
+  return {
+    type: "div",
+    props: {
+      style: {
+        display: "flex",
+        width: "100%",
+        height: 480,
+        border: "1px solid #d2e3fc",
+        borderRadius: 8,
+        backgroundColor: "#ffffff",
+      },
+      children: "",
+    },
+  };
+}
+
+function buildTree(data, opts = {}) {
   const MAX_EVENTS = 7;
   const allEvents = data.events && data.events.length ? data.events : [];
   const events = allEvents.slice(0, MAX_EVENTS);
-  const heading = !allEvents.length
-    ? "No events found on this page"
-    : allEvents.length > 1
-      ? `${allEvents.length} events on this page`
-      : "Add to Google Calendar";
+  const heading = opts.sourceRequestForm
+    ? "Add support for this site"
+    : !allEvents.length
+      ? "No events found on this page"
+      : allEvents.length > 1
+        ? `${allEvents.length} events on this page`
+        : "Add to Google Calendar";
   const truncated = allEvents.length > MAX_EVENTS;
 
   const children = [
@@ -177,6 +200,10 @@ function buildTree(data) {
     });
   }
 
+  if (opts.sourceRequestForm) {
+    children.push(sourceRequestFrame());
+  }
+
   children.push(...events.map(eventButton));
 
   return {
@@ -197,8 +224,8 @@ function buildTree(data) {
   };
 }
 
-async function renderPopupPng(data) {
-  const svg = await satori(buildTree(data), { width: WIDTH, fonts: FONTS });
+async function renderPopupPng(data, opts = {}) {
+  const svg = await satori(buildTree(data, opts), { width: WIDTH, fonts: FONTS });
   const resvg = new Resvg(svg, { font: { loadSystemFonts: false } });
   return resvg.render().asPng();
 }

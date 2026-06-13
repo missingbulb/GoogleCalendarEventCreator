@@ -12,14 +12,15 @@ const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./fix
 (async () => {
   const outDir = path.join(__dirname, "snapshots");
   fs.mkdirSync(outDir, { recursive: true });
-  for (const [name, data] of [
+  for (const [name, data, opts] of [
     ["popup-single-event", SINGLE_EVENT],
     ["popup-multi-event", MULTI_EVENT],
     ["popup-truncated", TRUNCATED_EVENT],
     ["popup-empty", NO_EVENTS],
+    ["popup-source-request", { events: [] }, { sourceRequestForm: true }],
   ]) {
     const outPath = path.join(outDir, `${name}.png`);
-    fs.writeFileSync(outPath, await renderPopupPng(data));
+    fs.writeFileSync(outPath, await renderPopupPng(data, opts));
     console.log(`Wrote ${outPath}`);
   }
 })();

@@ -25,8 +25,15 @@
   const events = allEvents.slice(0, MAX_EVENTS);
 
   if (!events.length) {
-    // Nothing found on the page: show no buttons, just say so.
-    headingEl.textContent = "No events found on this page";
+    // Nothing found on the page. On a non-compatible site (red toolbar
+    // border) offer the embedded "request this source" form instead of a bare
+    // label; on a supported site — or before the form has been configured —
+    // just say so.
+    if (!isSupportedHost(tab.url) && showSourceRequestForm(tab, allEvents[0])) {
+      headingEl.textContent = "Add support for this site";
+    } else {
+      headingEl.textContent = "No events found on this page";
+    }
     return;
   }
 
@@ -43,6 +50,53 @@
     eventsEl.appendChild(makeButton(event, tab));
   });
 })().catch((e) => console.error("Popup failed to initialize:", e));
+
+// Whether a site-specific extractor exists for this URL's host — the same
+// check icon-state.js uses to color the toolbar icon green (supported) vs. red
+// (not). Relies on GCal.siteHosts (extractors/site-hosts.js, loaded by
+// popup.html before this file).
+function isSupportedHost(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return GCal.siteHosts.some((site) => site.matches(host));
+  } catch (e) {
+    return false; // no URL yet, or a non-http(s) URL (chrome://, etc.)
+  }
+}
+
+// On an unsupported page with no event found, embed the Google Form for
+// requesting that this site be added as a source, prefilled with whatever
+// details we have. Returns false (rendering nothing) when the form isn't
+// configured yet, so the caller falls back to the plain "No events found"
+// label rather than embedding a broken iframe.
+function showSourceRequestForm(tab, event) {
+  const src = buildSourceRequestUrl(sourceRequestPrefill(tab, event));
+  if (!src) return false;
+
+  const frame = document.createElement("iframe");
+  frame.className = "source-request";
+  frame.src = src;
+  frame.title = "Request support for this site";
+  document.getElementById("events").appendChild(frame);
+  return true;
+}
+
+// The fields that seed the source-request form: the page URL and title, plus
+// any event details extraction managed to find. On an unsupported page that's
+// often just the URL and title (no event was parsed), so the user completes
+// the rest in the form itself.
+function sourceRequestPrefill(tab, event) {
+  event = event || {};
+  return {
+    url: tab.url || "",
+    name: event.title || tab.title || "",
+    start: event.start || "",
+    end: event.end || "",
+    timezone: event.ctz || "",
+    location: event.location || "",
+    description: event.description || "",
+  };
+}
 
 // Build one event button. Each event is self-contained (title, start, end,
 // location, description, ctz), so its Calendar URL is built directly.

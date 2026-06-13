@@ -8,6 +8,7 @@
 //   popup-multi-event.png  — a listing/series page: 6 buttons, "N events on this page" heading.
 //   popup-truncated.png    — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
 //   popup-empty.png        — no events found: no buttons, heading "No events found on this page".
+//   popup-source-request.png — unsupported page: heading "Add support for this site" over the embedded request-form frame.
 "use strict";
 
 const test = require("node:test");
@@ -28,12 +29,12 @@ const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 // platform-dependent rasterization differences.
 const MAX_DIFF_RATIO = 0.005;
 
-async function compareToSnapshot(t, name, data) {
+async function compareToSnapshot(t, name, data, opts = {}) {
   const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.png`);
   const actualPath = artifactPath(`${name}.actual.png`);
   const diffPath = artifactPath(`${name}.diff.png`);
 
-  const actualBuffer = await renderPopupPng(data);
+  const actualBuffer = await renderPopupPng(data, opts);
   const actual = PNG.sync.read(actualBuffer);
 
   assert.ok(
@@ -90,6 +91,10 @@ test("empty popup (no events) shows no buttons and a 'No events found' heading",
 // essentially every page) used to render a phantom "No date found" button.
 // Feed such a page through the real extractor and confirm it renders as the
 // empty popup, not a button.
+test("unsupported-site popup shows the embedded source-request form", async (t) => {
+  await compareToSnapshot(t, "popup-source-request", { events: [] }, { sourceRequestForm: true });
+});
+
 test("a page with no event (title only) renders the empty popup, not a button", async (t) => {
   const html = `<title>Just an Article</title><h1>Ten Tips for Houseplants</h1><p>Water them.</p>`;
   const data = extractFromHtml(html, "https://www.blog.example/houseplants");
