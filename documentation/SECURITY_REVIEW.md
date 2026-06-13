@@ -230,11 +230,11 @@ function meta(nameOrProp) {
 selector-injection concern in practice. Worth keeping in mind if `meta()` is
 ever called with a dynamic value in the future.
 
-### 3.8 Dev/CI tooling — snapshot refresher fetches URLs from case files (Low, dev-only)
+### 3.8 Dev/CI tooling — cache refresher fetches URLs from case files (Low, dev-only)
 
-`test/integration/refresh-snapshots.js` fetches the `url` field from each
+`test/integration/refresh-cache.js` fetches the `url` field from each
 JSON file in `test/integration/cases/` and writes the response to disk, then
-the daily `.github/workflows/refresh-snapshots.yml` workflow commits the
+the daily `.github/workflows/refresh-cache.yml` workflow commits the
 result with `contents: write`. This is standard SSRF-shaped behavior (fetch a
 URL, persist the body) but:
 
@@ -411,7 +411,7 @@ length limits, so this is a UX/robustness nit rather than a security hole.
 | 3.5 | `ctz` passed through to Calendar URL | Informational | If ever derived from page content, validate against IANA tz list |
 | 3.6 | Calendar URL construction incl. `sourceLink` | Informational | No action — `URLSearchParams` + fixed origin already mitigate this |
 | 3.7 | `meta()` template-literal selector | Informational | No action — only called with literals |
-| 3.8 | Snapshot refresher fetches case URLs in CI | Low | No action — scheduled/manual only, URLs are repo-reviewed |
+| 3.8 | Cache refresher fetches case URLs in CI | Low | No action — scheduled/manual only, URLs are repo-reviewed |
 | 3.9 | Permissions & supply chain | Informational | No action — minimal permissions beyond `tabs`, no remote code, dev-only dependencies |
 | 4.1 | Generic/JSON-LD parsing gives pages full control over prefilled event content, possibly hidden from view | Informational | By design; covered here for awareness |
 | 4.2 | `description`/`title`/`location` can carry phishing text/links that Google Calendar auto-linkifies once saved | Medium | Add a "review before saving" note in the popup UI |

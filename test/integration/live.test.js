@@ -1,10 +1,10 @@
 // Live extraction tests — the suite you review to confirm the extractor
 // produces the right values for each supported site.
 //
-// These run OFFLINE against committed HTML snapshots in
-// test/integration/snapshots/, which a GitHub Actions job keeps fresh
+// These run OFFLINE against committed cached HTML files in
+// data/, which a GitHub Actions job keeps fresh
 // (refreshed daily, and again before the live tests run on a push to main —
-// see test/integration/refresh-snapshots.js and .github/workflows/).
+// see test/integration/refresh-cache.js and .github/workflows/).
 // Asserting against a recently-cached copy of the real page makes the suite
 // deterministic and runnable anywhere (no network), while still reflecting
 // each site's current markup.
@@ -38,7 +38,7 @@
 // This catches any drift — in extraction, date math, or URL composition —
 // however small, and the array length pins down how many events were found
 // (one for an ordinary page, several for a listing/series page). When a
-// snapshot refresh legitimately changes a page, update `expected` to match.
+// cache refresh legitimately changes a page, update `expected` to match.
 //
 // Per event: `dates` is derived from start/end via background.js's
 // formatDatesParam(); `details` is what background.js's buildCalendarUrl()
@@ -47,8 +47,8 @@
 // to (e.g. "GB" for edfringe.com), or null.
 //
 // To cover a new website or platform: add a case file pointing at a real
-// event page, then record its first snapshot with
-// `node test/integration/refresh-snapshots.js` (on a machine with internet)
+// event page, then record its first cached HTML file with
+// `node test/integration/refresh-cache.js` (on a machine with internet)
 // or let CI record it on the next run. Run the suite once to see the actual
 // extracted values in the failure output, then copy them into `expected`.
 "use strict";
@@ -61,8 +61,8 @@ const vm = require("node:vm");
 const { extractFromHtml } = require("../harness");
 
 const CASES_DIR = path.join(__dirname, "cases");
-const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
-const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
+const DATA_DIR = path.join(__dirname, "..", "..", "data");
+const URLS_PATH = path.join(DATA_DIR, "urlsToCacheLocally.json");
 
 // Evaluate background.js as global code so its function declarations land
 // on the sandbox.
@@ -74,11 +74,12 @@ function loadBackgroundFns() {
 
 const { formatDatesParam, buildCalendarUrl } = loadBackgroundFns();
 
-// Warn (don't fail) when a snapshot is older than this — a silently broken
-// refresh pipeline then shows up in the test output instead of going unnoticed.
+// Warn (don't fail) when a cached HTML file is older than this — a silently
+// broken refresh pipeline then shows up in the test output instead of going
+// unnoticed.
 const STALE_WARNING_HOURS = 48;
 
-const manifest = fs.existsSync(MANIFEST_PATH) ? JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8")) : {};
+const cacheIndex = fs.existsSync(URLS_PATH) ? JSON.parse(fs.readFileSync(URLS_PATH, "utf8")) : {};
 
 const caseFiles = fs
   .readdirSync(CASES_DIR)
@@ -98,23 +99,23 @@ for (const file of caseFiles) {
       `${file}: "expected.events" must be a non-empty array`
     );
 
-    const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.html`);
+    const cachedHtmlPath = path.join(DATA_DIR, `${name}.html`);
     assert.ok(
-      fs.existsSync(snapshotPath),
-      `Missing snapshot for "${name}". Record it with: node test/integration/refresh-snapshots.js`
+      fs.existsSync(cachedHtmlPath),
+      `Missing cached HTML for "${name}". Record it with: node test/integration/refresh-cache.js`
     );
 
-    const entry = manifest[name];
+    const entry = cacheIndex[name];
     if (entry && entry.fetchedAt) {
       const ageHours = (Date.now() - Date.parse(entry.fetchedAt)) / 3_600_000;
       if (ageHours > STALE_WARNING_HOURS) {
         t.diagnostic(
-          `snapshot for "${name}" is ${Math.round(ageHours)}h old (fetched ${entry.fetchedAt}) — refresh pipeline may be broken`
+          `cached HTML for "${name}" is ${Math.round(ageHours)}h old (fetched ${entry.fetchedAt}) — refresh pipeline may be broken`
         );
       }
     }
 
-    const html = fs.readFileSync(snapshotPath, "utf8");
+    const html = fs.readFileSync(cachedHtmlPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
 
     // Build each event exactly as background.js would when opening the
