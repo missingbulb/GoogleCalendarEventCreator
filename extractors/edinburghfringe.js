@@ -68,13 +68,21 @@
       const event = readEvent();
       if (!event) return { ctz: "GB" };
 
-      const first = (event.performances || [])[0];
+      const loc = flattenLocation(event);
+      const t = clean(event.title);
+      const performances = event.performances || [];
+
+      if (!performances.length) {
+        return { title: t, start: "", end: null, location: loc, description: clean(event.description), ctz: "GB" };
+      }
 
       return {
-        title: clean(event.title),
-        start: first ? first.dateTime : "",
-        end: first ? first.estimatedEndDateTime : "",
-        location: flattenLocation(event),
+        events: performances.map((p) => ({
+          title: t,
+          start: p.dateTime || "",
+          end: p.estimatedEndDateTime || null,
+          location: loc,
+        })),
         description: clean(event.description),
         ctz: "GB",
       };

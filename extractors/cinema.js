@@ -95,11 +95,17 @@
       }
 
       const dates = screeningDates();
+      const t = title();
+      const loc = location();
+      const desc = clean(meta("og:description"));
+
+      if (!dates.length) {
+        return { title: t, description: desc, start: "", location: loc, ctz: "Asia/Jerusalem" };
+      }
+
       return {
-        title: title(),
-        description: clean(meta("og:description")),
-        start: dates[0] || "",
-        location: location(),
+        events: dates.map((d) => ({ title: t, start: d, end: null, location: loc })),
+        description: desc,
         ctz: "Asia/Jerusalem",
       };
     },

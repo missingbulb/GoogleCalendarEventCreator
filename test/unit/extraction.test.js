@@ -198,7 +198,7 @@ test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
   assert.equal(e.ctz, "GB");
 });
 
-test("Edinburgh Fringe: a multi-performance show yields one event (the first performance)", () => {
+test("Edinburgh Fringe: a multi-performance show yields one event per performance", () => {
   const nextData = {
     props: {
       pageProps: {
@@ -221,8 +221,10 @@ test("Edinburgh Fringe: a multi-performance show yields one event (the first per
   const html = `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify(nextData)}</script>`;
 
   const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection");
-  assert.equal(ev.events.length, 1);
+  assert.equal(ev.events.length, 3);
   assert.equal(ev.events[0].start, "2026-08-05T19:30:00.000Z");
+  assert.equal(ev.events[1].start, "2026-08-06T19:30:00.000Z");
+  assert.equal(ev.events[2].start, "2026-08-07T19:30:00.000Z");
   assert.equal(ev.events[0].ctz, "GB");
 });
 
