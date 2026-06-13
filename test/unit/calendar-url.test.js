@@ -8,11 +8,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// background.js registers a chrome listener at load time; stub just enough
-// and evaluate it as global code so its function declarations land on
-// globalThis.
+// Evaluate background.js as global code so its function declarations land
+// on globalThis.
 function loadBackground() {
-  globalThis.chrome = { action: { onClicked: { addListener() {} } } };
   vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"));
   return {
     buildCalendarUrl: globalThis.buildCalendarUrl,
@@ -21,7 +19,7 @@ function loadBackground() {
 }
 
 const { buildCalendarUrl, formatDatesParam } = loadBackground();
-const TAB = { title: "Tab Title", url: "https://www.meetup.com/group/events/123/", index: 0 };
+const TAB = { title: "Tab Title", url: "https://example.com/events/picnic", index: 0 };
 
 function paramsOf(url) {
   return new URL(url).searchParams;
@@ -43,6 +41,20 @@ test("multiple-events note comes after the URL, before the description", () => {
     paramsOf(url).get("details"),
     `${TAB.url}\n\n(First of several events found on this page.)\n\nArt.`
   );
+});
+
+test("meetup.com: details links the canonical URL to the original (tracked) URL", () => {
+  const meetupTab = {
+    title: "Tab Title",
+    url:
+      "https://www.meetup.com/claude-israel-user-group/events/315103877/?recId=ee49b341-1deb-4b50-9954-9a4fcc28bf03" +
+      "&recSource=ml-popular-events-nearby-offline&searchId=f541f7ee-b297-426b-b188-08d0bd38f4f6&eventOrigin=find_page%24inPerson",
+    index: 0,
+  };
+  const url = buildCalendarUrl({ title: "Meetup", description: "Come hang out." }, meetupTab);
+  const expectedLink =
+    "[https://www.meetup.com/claude-israel-user-group/events/315103877]" + `(${meetupTab.url})`;
+  assert.equal(paramsOf(url).get("details"), `${expectedLink}\n\nCome hang out.`);
 });
 
 test("falls back to the tab title when no title was extracted", () => {

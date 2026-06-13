@@ -1,15 +1,14 @@
 {
   "description": "Meetup event page is parseable (Fusion LA Israel, Jun 7 2026)",
   "url": "https://www.meetup.com/fusion-la-israel/events/314842056/",
-  "_calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=The+New+VC+Playbook+-+Investing+in+vibe+coders%2C+solo-founders+%26+builders&dates=20260607T060000Z%2F20260607T093000Z&details=https%3A%2F%2Fwww.meetup.com%2Ffusion-la-israel%2Fevents%2F314842056%2F%0A%0A%E2%80%8B%5BFusion+VC%5D%28https%3A%2F%2Fwww.fusion-vc.com%2F%3Futm_source%3Dluma%29%2C+%5BGoogle+for+Startups%5D%28https%3A%2F%2Fstartup.google.com%2Fcampus%2Ftel-aviv%2F%3Futm_source%3Dluma%29%2C+%5BPoalim+Tech%5D&location=Google+for+Startups%2C+12+HaOmanim+st.%2C+Tel-Aviv%2C+al",
   "expected": {
     "title": "The New VC Playbook - Investing in vibe coders, solo-founders & builders",
     "start": "2026-06-07T09:00:00+03:00",
     "end": "2026-06-07T12:30:00+03:00",
     "location": "Google for Startups, 12 HaOmanim st., Tel-Aviv, al",
+    "multipleEvents": false,
     "dates": "20260607T060000Z/20260607T093000Z",
-    "description": {
-      "includes": ["Fusion VC", "Google for Startups"]
-    }
+    "details": "[https://www.meetup.com/fusion-la-israel/events/314842056](https://www.meetup.com/fusion-la-israel/events/314842056/)\n\n​[Fusion VC](https://www.fusion-vc.com/?utm_source=luma), [Google for Startups](https://startup.google.com/campus/tel-aviv/?utm_source=luma), [Poalim Tech]",
+    "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=The+New+VC+Playbook+-+Investing+in+vibe+coders%2C+solo-founders+%26+builders&dates=20260607T060000Z%2F20260607T093000Z&details=%5Bhttps%3A%2F%2Fwww.meetup.com%2Ffusion-la-israel%2Fevents%2F314842056%5D%28https%3A%2F%2Fwww.meetup.com%2Ffusion-la-israel%2Fevents%2F314842056%2F%29%0A%0A%E2%80%8B%5BFusion+VC%5D%28https%3A%2F%2Fwww.fusion-vc.com%2F%3Futm_source%3Dluma%29%2C+%5BGoogle+for+Startups%5D%28https%3A%2F%2Fstartup.google.com%2Fcampus%2Ftel-aviv%2F%3Futm_source%3Dluma%29%2C+%5BPoalim+Tech%5D&location=Google+for+Startups%2C+12+HaOmanim+st.%2C+Tel-Aviv%2C+al"
   }
 }

@@ -1,15 +1,14 @@
 {
   "description": "Eventbrite event page is parseable (Games for Change Festival, Jul 21-22 2026)",
   "url": "https://www.eventbrite.com/e/2026-games-for-change-festival-tickets-1982011672266",
-  "_calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=2026+Games+for+Change+Festival&dates=20260721T133000Z%2F20260722T223000Z&details=https%3A%2F%2Fwww.eventbrite.com%2Fe%2F2026-games-for-change-festival-tickets-1982011672266%0A%0APlay%2C+learn%2C+and+connect+at+NYC%E2%80%99s+longest-running+gaming+conference.+Discover+the+future+of+games+for+good.&location=The+Glasshouse%2C+660+12th+Avenue%2C+%23Floor+6%2C+New+York%2C+NY+10019",
   "expected": {
     "title": "2026 Games for Change Festival",
     "start": "2026-07-21T13:30:00Z",
     "end": "2026-07-22T18:30:00-04:00",
     "location": "The Glasshouse, 660 12th Avenue, #Floor 6, New York, NY 10019",
+    "multipleEvents": false,
     "dates": "20260721T133000Z/20260722T223000Z",
-    "description": {
-      "includes": ["Play, learn, and connect", "longest-running gaming conference"]
-    }
+    "details": "https://www.eventbrite.com/e/2026-games-for-change-festival-tickets-1982011672266\n\nPlay, learn, and connect at NYC’s longest-running gaming conference. Discover the future of games for good.",
+    "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=2026+Games+for+Change+Festival&dates=20260721T133000Z%2F20260722T223000Z&details=https%3A%2F%2Fwww.eventbrite.com%2Fe%2F2026-games-for-change-festival-tickets-1982011672266%0A%0APlay%2C+learn%2C+and+connect+at+NYC%E2%80%99s+longest-running+gaming+conference.+Discover+the+future+of+games+for+good.&location=The+Glasshouse%2C+660+12th+Avenue%2C+%23Floor+6%2C+New+York%2C+NY+10019"
   }
 }
