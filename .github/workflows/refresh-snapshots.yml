@@ -41,6 +41,7 @@ jobs:
         run: npm run test:live
 
       - name: Commit refreshed snapshots
+        if: always()
         run: |
           if [ -n "$(git status --porcelain test/integration/snapshots)" ]; then
             git config user.name "github-actions[bot]"
