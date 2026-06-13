@@ -21,6 +21,7 @@ const EXTRACTOR_FILES = [
 
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
+const MAX_EVENT_CREATION_URL_LENGTH = 3000; // keep the whole template URL within a safe length
 
 function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
@@ -32,17 +33,57 @@ function buildCalendarUrl(data, tab) {
   const dates = formatDatesParam(data.start, data.end);
   if (dates) params.set("dates", dates);
   if (data.ctz) params.set("ctz", data.ctz);
+  if (data.location) params.set("location", data.location);
 
   // The details field always starts with a link back to the original event
-  // page, followed by the full extracted description.
+  // page, followed by the full extracted description. It is added LAST so that
+  // enforcing the overall URL-length cap below shortens the description rather
+  // than truncating any of the other fields.
   let details = linkifyMarkdown(data.description || "");
   const link = sourceLink(tab);
   details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
 
-  if (data.location) params.set("location", data.location);
+  return fitUrlToLimit(params);
+}
 
-  return `${CALENDAR_RENDER_URL}?${params.toString()}`;
+// Build the template URL from `params` and, if it exceeds
+// MAX_EVENT_CREATION_URL_LENGTH, shorten the trailing `details` value until the
+// whole (URL-encoded) URL fits. details is the last param, so only it is
+// trimmed; every other field is kept in full. Trimming works on the actual
+// encoded URL length (not raw characters), so multi-byte/encoded text counts
+// for what it really costs.
+function fitUrlToLimit(params) {
+  const urlFor = (details) => {
+    params.set("details", details);
+    return `${CALENDAR_RENDER_URL}?${params.toString()}`;
+  };
+
+  const details = params.get("details") || "";
+  let url = urlFor(details);
+  if (url.length <= MAX_EVENT_CREATION_URL_LENGTH) return url;
+
+  // Longest prefix of details whose encoded URL fits the cap. Avoid ending on a
+  // lone surrogate (a split emoji/code point), which would otherwise be encoded
+  // as a replacement character.
+  let lo = 0;
+  let hi = details.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (urlFor(details.slice(0, mid)).length <= MAX_EVENT_CREATION_URL_LENGTH) lo = mid;
+    else hi = mid - 1;
+  }
+  if (lo > 0 && lo < details.length) {
+    const code = details.charCodeAt(lo - 1);
+    if (code >= 0xd800 && code <= 0xdbff) lo -= 1; // don't keep a dangling high surrogate
+  }
+
+  if (lo === 0) {
+    // Not even an empty details value leaves room under the cap; drop the field.
+    params.delete("details");
+    return `${CALENDAR_RENDER_URL}?${params.toString()}`;
+  }
+  return urlFor(details.slice(0, lo));
 }
 
 // The link placed at the top of the details field for a given tab. Google
