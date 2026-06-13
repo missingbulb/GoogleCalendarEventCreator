@@ -28,5 +28,6 @@
   const result = GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract());
   result.multipleEvents = GCal.generic.detectMultiple(ldEvents.length);
   result.eventCount = Math.max(ldEvents.length, siteResult.eventCount || 0);
+  result.end = result.end || null;
   return result;
 })();

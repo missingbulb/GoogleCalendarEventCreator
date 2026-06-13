@@ -13,6 +13,7 @@ const EXTRACTOR_FILES = [
   "extractors/meetup.js",
   "extractors/facebook.js",
   "extractors/eventbrite.js",
+  "extractors/cinema.js",
   "extractors/edinburghfringe.js",
   "extractors/main.js",
 ];

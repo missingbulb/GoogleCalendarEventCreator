@@ -23,11 +23,12 @@ are simply left for you to fill in on the Google Calendar screen.
 Extraction runs in three layers, merged field-by-field (first non-empty wins):
 
 1. **Site-specific scrapers** with hardcoded selectors for the major event
-   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**, and
-   **edfringe.com** (Edinburgh Festival Fringe). Each lives in its own file
-   under `extractors/` with a comment describing the HTML it expects; to
-   support a new platform, add a file there following the same pattern and
-   list it in `EXTRACTOR_FILES` in `background.js`.
+   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**,
+   **edfringe.com** (Edinburgh Festival Fringe), and **cinema.co.il** (Tel
+   Aviv Cinematheque). Each lives in its own file under `extractors/` with a
+   comment describing the HTML it expects; to support a new platform, add a
+   file there following the same pattern and list it in `EXTRACTOR_FILES` in
+   `background.js`.
 2. **schema.org JSON-LD** (`<script type="application/ld+json">` with an
    `Event` type) — most event pages publish this, so it's the strongest
    generic signal.
@@ -242,7 +243,7 @@ commit the results. On mismatch, the test writes
 | `icon-state.js` | Background service worker: updates the toolbar icon's border color per tab |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
 | `extractors/site-hosts.js` | Hostname matchers shared between the site extractors and `icon-state.js` |
-| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js` | One file per supported event site, with hardcoded selectors |
+| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `cinema.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
