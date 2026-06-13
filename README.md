@@ -71,7 +71,11 @@ Grab the packaged extension — just the files that ship, not the whole repo:
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
    [Create Release Package workflow](#creating-a-release-package)) and extract
-   it. It unpacks into a folder containing `manifest.json`.
+   it. It unpacks into a folder containing `manifest.json`. As a secondary
+   option, download
+   [the repo as a zip](https://github.com/missingbulb/GoogleCalendarEventCreator/archive/refs/heads/main.zip)
+   and extract it — the `manifest.json` for **Load unpacked** lives at the top
+   of the extracted folder.
 2. Open `chrome://extensions` in Chrome.
 3. Enable **Developer mode** (top right).
 4. Click **Load unpacked** and select the extracted folder (the one
