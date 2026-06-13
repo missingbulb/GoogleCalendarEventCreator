@@ -1,0 +1,16 @@
+{
+  "description": "Edinburgh Fringe show page is parseable (Daniel Sloss: BITTER, single date)",
+  "url": "https://www.edfringe.com/tickets/whats-on/daniel-sloss-bitter",
+  "expected": {
+    "title": "Daniel Sloss: BITTER",
+    "start": "2026-08-14T19:00:00.000Z",
+    "end": "2026-08-14T21:10:00.000Z",
+    "location": "Auditorium at Edinburgh Playhouse, 18-22 Greenside Pl, EH1 3AA",
+    "multipleEvents": false,
+    "dates": "20260814T190000Z/20260814T211000Z",
+    "details": "https://www.edfringe.com/tickets/whats-on/daniel-sloss-bitter\n\nScotland’s Netflix superstar, one of the biggest global names in live stand-up, unleashes his latest devastatingly hilarious show. Work-in-progressed in 2025, now it’s the finished full version currently touring 60 countries. Daniel's been a professional stand-up for more than half his lifetime. In the process he’s sold out nine New York Off-Broadway seasons, broken multiple box office records and become one of the top ticket-selling comedians on the planet. His comedy specials include Jigsaw and DARK on Netflix, X on HBO and SOCiO, HUBRiS, X, and CAN'T all streaming on DanielSloss.com. This will sell out! Book early!",
+    "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Daniel+Sloss%3A+BITTER&dates=20260814T190000Z%2F20260814T211000Z&ctz=GB&details=https%3A%2F%2Fwww.edfringe.com%2Ftickets%2Fwhats-on%2Fdaniel-sloss-bitter%0A%0AScotland%E2%80%99s+Netflix+superstar%2C+one+of+the+biggest+global+names+in+live+stand-up%2C+unleashes+his+latest+devastatingly+hilarious+show.+Work-in-progressed+in+2025%2C+now+it%E2%80%99s+the+finished+full+version+currently+touring+60+countries.+Daniel%27s+been+a+professional+stand-up+for+more+than+half+his+lifetime.+In+the+process+he%E2%80%99s+sold+out+nine+New+York+Off-Broadway+seasons%2C+broken+multiple+box+office+records+and+become+one+of+the+top+ticket-selling+comedians+on+the+planet.+His+comedy+specials+include+Jigsaw+and+DARK+on+Netflix%2C+X+on+HBO+and+SOCiO%2C+HUBRiS%2C+X%2C+and+CAN%27T+all+streaming+on+DanielSloss.com.+This+will+sell+out%21+Book+early%21&location=Auditorium+at+Edinburgh+Playhouse%2C+18-22+Greenside+Pl%2C+EH1+3AA",
+    "eventCount": 1,
+    "ctz": "GB"
+  }
+}

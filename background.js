@@ -13,6 +13,7 @@ const EXTRACTOR_FILES = [
   "extractors/meetup.js",
   "extractors/facebook.js",
   "extractors/eventbrite.js",
+  "extractors/edinburghfringe.js",
   "extractors/main.js",
 ];
 
@@ -29,6 +30,7 @@ function buildCalendarUrl(data, tab) {
 
   const dates = formatDatesParam(data.start, data.end);
   if (dates) params.set("dates", dates);
+  if (data.ctz) params.set("ctz", data.ctz);
 
   // The details field always starts with a link back to the original event
   // page, followed by the extracted description.

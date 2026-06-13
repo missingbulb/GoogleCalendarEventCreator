@@ -38,6 +38,7 @@ const CASES = [
   { url: "https://www.eventbrite.com/e/some-event-tickets-123456", expected: "green" },
   { url: "https://www.eventbrite.co.uk/e/some-event-tickets-123456", expected: "green" },
   { url: "https://www.facebook.com/events/123456/", expected: "green" },
+  { url: "https://www.edfringe.com/tickets/whats-on/some-show", expected: "green" },
   { url: "https://www.example.com/some-page", expected: "red" },
   { url: "https://www.google.com/calendar", expected: "red" },
   { url: "chrome://extensions", expected: "red" },

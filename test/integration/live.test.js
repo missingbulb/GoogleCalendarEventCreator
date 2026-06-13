@@ -22,13 +22,15 @@
 //       "multipleEvents": false,
 //       "dates":          "20260625T220000Z/20260626T010000Z",
 //       "details":        "[https://www.meetup.com/.../events/123](https://www.meetup.com/.../events/123/)\n\n...full description...",
-//       "calendarUrl":    "https://calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=...&details=...&location=..."
+//       "calendarUrl":    "https://calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=...&details=...&location=...",
+//       "eventCount":     23,                        <- total events found on the page
+//       "ctz":            "GB"                       <- the Calendar URL's ctz= param, or null if absent
 //     }
 //   }
 //
 // `expected` must be the *complete*, exact object the extractor + URL
 // builder produce — it is deep-equal compared against:
-//   { title, start, end, location, multipleEvents, dates, details, calendarUrl }
+//   { title, start, end, location, multipleEvents, dates, details, calendarUrl, eventCount, ctz }
 // (see below). There are no substring/regex/prefix matchers: every field
 // must be present and match exactly, including the full text of `details`
 // and `calendarUrl`. This catches any drift — in extraction, date math, or
@@ -52,6 +54,11 @@
 // among other params). It's the end-to-end check: if this matches, the
 // extension produces exactly this Calendar template for this page.
 //
+// `eventCount` is the total number of events/performances the extractor
+// found on the page (see extractors/main.js); `ctz` is the timezone a site
+// extractor pinned the event to (e.g. "GB" for edfringe.com), or null when
+// no extractor set one.
+//
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
 // `node test/integration/refresh-snapshots.js` (on a machine with internet)
@@ -69,7 +76,18 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "multipleEvents", "dates", "details", "calendarUrl"];
+const FIELDS = [
+  "title",
+  "start",
+  "end",
+  "location",
+  "multipleEvents",
+  "dates",
+  "details",
+  "calendarUrl",
+  "eventCount",
+  "ctz",
+];
 
 // Evaluate background.js as global code so its function declarations land
 // on the sandbox.
@@ -144,6 +162,8 @@ for (const file of caseFiles) {
       dates,
       details,
       calendarUrl,
+      eventCount: extracted.eventCount,
+      ctz: extracted.ctz || null,
     };
 
     assert.deepEqual(actual, testCase.expected, `${file}: extracted result does not match "expected" exactly`);
