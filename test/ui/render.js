@@ -92,7 +92,10 @@ function eventButton(event) {
   row.push({
     type: "div",
     props: {
-      style: { display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, flexGrow: 1 },
+      // flexBasis:0 + minWidth:0 + overflow:hidden pin this column to the
+      // leftover row width so the nowrap "when" line ellipsizes (matches
+      // popup.html's .e-body) instead of overflowing the card.
+      style: { display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, flexGrow: 1, flexShrink: 1, flexBasis: 0, minWidth: 0, overflow: "hidden" },
       children: bodyChildren,
     },
   });
