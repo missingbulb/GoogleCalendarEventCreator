@@ -1,10 +1,10 @@
-// Service worker: on toolbar click, run the extractor in the active tab and
-// open a pre-filled Google Calendar event template with whatever was found.
+// Shared library, loaded by the popup: builds a pre-filled Google Calendar
+// event template URL from extracted page data.
 
-// Injected in order into the page on click; all files share one isolated
-// world, so lib.js must come first and main.js (whose completion value is
-// the extraction result) must come last. The test harness reads this list,
-// so tests always exercise exactly what gets injected.
+// Injected in order into the page when the popup opens; all files share one
+// isolated world, so lib.js must come first and main.js (whose completion
+// value is the extraction result) must come last. The test harness reads
+// this list, so tests always exercise exactly what gets injected.
 const EXTRACTOR_FILES = [
   "extractors/lib.js",
   "extractors/jsonld.js",
@@ -18,23 +18,6 @@ const EXTRACTOR_FILES = [
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
 const MAX_DETAILS_LENGTH = 1500; // keep the template URL a reasonable size
-
-chrome.action.onClicked.addListener(async (tab) => {
-  let data = {};
-  try {
-    const [injection] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: EXTRACTOR_FILES,
-    });
-    data = (injection && injection.result) || {};
-  } catch (e) {
-    // Restricted page (chrome://, Web Store, etc.) — fall back to tab metadata.
-    console.warn("Could not extract from page:", e);
-  }
-
-  const url = buildCalendarUrl(data, tab);
-  await chrome.tabs.create({ url, index: tab.index + 1 });
-});
 
 function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();

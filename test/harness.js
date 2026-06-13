@@ -4,7 +4,7 @@
 //
 // The list of files — and their injection order — is read from
 // EXTRACTOR_FILES in background.js, so the tests always exercise exactly
-// what the extension injects.
+// what the popup injects.
 "use strict";
 
 const { readFileSync } = require("node:fs");
