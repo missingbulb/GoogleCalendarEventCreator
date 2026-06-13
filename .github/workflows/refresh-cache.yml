@@ -1,8 +1,9 @@
 name: Refresh cached HTML files
 
 # Records a committed cached HTML file for any urlsToCacheLocally entry that
-# doesn't have one yet (and, with force_all, re-fetches every file). Run on
-# demand — there's no schedule.
+# doesn't have one yet. Run on demand — there's no schedule. To re-record an
+# existing cached file against the live page (e.g. after a site changes its
+# markup), run this workflow with the "force_all" flag checked.
 on:
   workflow_dispatch:
     inputs:

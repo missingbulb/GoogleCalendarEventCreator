@@ -152,11 +152,12 @@ at the time it was recorded:
   refreshes anything itself, so it's fast and has no network dependency.
 - The **Refresh cached HTML files** workflow
   (`.github/workflows/refresh-cache.yml`) runs **on demand** (via "Run
-  workflow"): it records any missing cached HTML file (or, with `force_all`,
-  re-fetches every file), runs the integration tests, and commits the result.
-  It's the *only* thing that fetches live pages and commits cached HTML, which
-  keeps the Tests workflow simple and rules out any refresh→commit→refresh
-  loop.
+  workflow"): it records any missing cached HTML file, runs the integration
+  tests, and commits the result. It's the *only* thing that fetches live pages
+  and commits cached HTML, which keeps the Tests workflow simple and rules out
+  any refresh→commit→refresh loop. To re-record cached files that already
+  exist — e.g. when a site changes its markup — run it with the **`force_all`**
+  flag checked, which re-fetches every file instead of only the missing ones.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the
