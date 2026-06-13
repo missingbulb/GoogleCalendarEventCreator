@@ -209,10 +209,12 @@ for local debugging.
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
-| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
+| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
 | `popup.html`, `popup.js` | Toolbar popup: runs the extractor, shows a summary, and opens the URL on click |
 | `background.js` | Shared library: builds the pre-filled Google Calendar URL     |
+| `icon-state.js` | Background service worker: updates the toolbar icon's border color per tab |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
+| `extractors/site-hosts.js` | Hostname matchers shared between the site extractors and `icon-state.js` |
 | `extractors/meetup.js`, `facebook.js`, `eventbrite.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
@@ -234,6 +236,10 @@ for local debugging.
 
 ## Permissions
 
-Only `activeTab` and `scripting`: the extension can read a page solely when
-you click the button on it, and sends nothing anywhere — it just opens a
-Google Calendar URL in a new tab.
+`activeTab` and `scripting`: the extension can read a page solely when you
+click the button on it, and sends nothing anywhere — it just opens a Google
+Calendar URL in a new tab.
+
+`tabs`: lets `icon-state.js` see each tab's URL (hostname only) so it can
+show the toolbar icon with a green border on pages with a site-specific
+extractor (e.g. meetup.com) and a red border elsewhere.

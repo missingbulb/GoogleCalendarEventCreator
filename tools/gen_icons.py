@@ -7,9 +7,11 @@ import zlib
 BLUE = (26, 115, 232)
 DARK_BLUE = (23, 78, 166)
 WHITE = (255, 255, 255)
+GREEN = (52, 168, 83)
+RED = (217, 48, 37)
 
 
-def make_icon(size):
+def make_icon(size, border_color=None):
     px = [[(0, 0, 0, 0)] * size for _ in range(size)]
     left, right = round(size * 0.08), round(size * 0.92)
     top, bottom = round(size * 0.10), round(size * 0.94)
@@ -30,6 +32,14 @@ def make_icon(size):
     for y in range(cy - thick, cy + thick + 1):
         for x in range(cx - arm, cx + arm + 1):
             px[y][x] = (*BLUE, 255)
+    # optional colored ring around the whole icon, used by the background
+    # script to show whether the current page has a site-specific extractor
+    if border_color:
+        border_w = max(1, round(size * 0.08))
+        for y in range(size):
+            for x in range(size):
+                if x < border_w or x >= size - border_w or y < border_w or y >= size - border_w:
+                    px[y][x] = (*border_color, 255)
     return px
 
 
@@ -55,6 +65,10 @@ def main():
     for size in (16, 32, 48, 128):
         write_png(os.path.join(out_dir, f"icon{size}.png"), make_icon(size))
         print(f"icon{size}.png")
+        write_png(os.path.join(out_dir, f"icon{size}-green.png"), make_icon(size, GREEN))
+        print(f"icon{size}-green.png")
+        write_png(os.path.join(out_dir, f"icon{size}-red.png"), make_icon(size, RED))
+        print(f"icon{size}-red.png")
 
 
 if __name__ == "__main__":

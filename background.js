@@ -7,6 +7,7 @@
 // this list, so tests always exercise exactly what gets injected.
 const EXTRACTOR_FILES = [
   "extractors/lib.js",
+  "extractors/site-hosts.js",
   "extractors/jsonld.js",
   "extractors/generic.js",
   "extractors/meetup.js",
