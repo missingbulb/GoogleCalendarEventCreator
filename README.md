@@ -205,6 +205,17 @@ the before/after in the diff. On mismatch, the test writes
 `test/ui/snapshots/popup.actual.png` and `popup.diff.png` (both gitignored)
 for local debugging.
 
+### Toolbar icon test
+
+**`test/ui/icon.test.js`** generates the expected 128x128 toolbar icon for
+both states described in `icon-state.js` — a green border for pages with a
+site-specific extractor and a red border otherwise — using
+`test/ui/render-icon.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
+no browser), and compares each pixel-by-pixel against the committed
+`icons/icon128-green.png` / `icons/icon128-red.png`. If the icon generation
+logic changes, update both `tools/gen_icons.py` and `render-icon.js` and
+regenerate the icons with `python3 tools/gen_icons.py`.
+
 ## Files
 
 | File            | Purpose                                                       |
@@ -232,6 +243,8 @@ for local debugging.
 | `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
 | `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png`              |
 | `test/ui/snapshots/popup.png` | Committed reference image of the popup, browsable on GitHub |
+| `test/ui/render-icon.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
+| `test/ui/icon.test.js` | Compares the rendered toolbar icon for each state against `icons/icon128-{green,red}.png` |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 
 ## Permissions

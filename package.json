@@ -7,7 +7,7 @@
     "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\" \"test/ui/**/*.test.js\"",
     "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js test/integration/icon-color.test.js",
     "test:live": "node --test test/integration/live.test.js",
-    "test:ui": "node --test test/ui/popup.test.js",
+    "test:ui": "node --test test/ui/popup.test.js test/ui/icon.test.js",
     "refresh": "node test/integration/refresh-snapshots.js",
     "refresh:ui": "node test/ui/refresh-snapshot.js"
   },
