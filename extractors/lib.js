@@ -21,8 +21,12 @@
 // `GCal.sites` is the registry: each site-specific extractor pushes
 //   { name, matches(hostname), extract() }
 // onto it, and main.js runs the first one whose `matches` returns true.
+//
+// We *augment* any existing globalThis.GCal rather than replacing it, so this
+// file can't clobber properties another file already set (notably
+// site-hosts.js's `siteHosts`) if the injection happens to run out of order.
 
-globalThis.GCal = (() => {
+globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   const MONTH =
     "(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
   const TIME = "\\d{1,2}(?::\\d{2})?\\s*(?:a\\.?m\\.?|p\\.?m\\.?)|\\d{1,2}:\\d{2}";
@@ -278,4 +282,4 @@ globalThis.GCal = (() => {
     findTimezone,
     merge,
   };
-})();
+})());
