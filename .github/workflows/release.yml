@@ -1,0 +1,80 @@
+name: Release
+
+# Builds the shippable extension zip (dist/google-calendar-event-creator.zip)
+# and publishes it.
+#
+#   * Push a tag `vX.Y.Z`  -> runs the tests, verifies the tag matches
+#     manifest.json's version, then creates/updates the matching GitHub Release
+#     with the zip attached. The zip name is stable, so the latest build is
+#     always at:
+#       https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip
+#
+#   * Run manually ("Run workflow") -> builds the zip and uploads it as a
+#     workflow artifact only (no release), for a quick test build off a branch.
+#
+# Releasing a new version is therefore a deliberate act: bump manifest.json's
+# `version`, commit, and push the matching tag. There is no automatic per-commit
+# version bump.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Gate the release on the same checks CI runs on every PR.
+      - name: Run offline tests
+        run: npm run test:offline
+      - name: Run live tests
+        run: npm run test:live
+      - name: Run UI snapshot test
+        run: npm run test:ui
+
+      # On a tag, the tag must match manifest.json's version so the released
+      # zip's version can't disagree with the tag people downloaded.
+      - name: Verify tag matches manifest version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          manifest_version="$(node -p "require('./manifest.json').version")"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$manifest_version" != "$tag_version" ]; then
+            echo "Tag $GITHUB_REF_NAME (version $tag_version) does not match manifest.json version $manifest_version." >&2
+            echo "Bump manifest.json's version to match the tag (or tag the right version)." >&2
+            exit 1
+          fi
+          echo "Tag and manifest agree on version $manifest_version."
+
+      - name: Build extension zip
+        run: npm run build
+
+      # Tag push: publish the zip on the GitHub Release for this tag.
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/google-calendar-event-creator.zip
+          generate_release_notes: true
+
+      # Manual run: no tag, so just hand back the zip as a downloadable artifact.
+      - name: Upload build artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-calendar-event-creator
+          path: dist/google-calendar-event-creator.zip

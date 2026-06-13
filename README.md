@@ -65,19 +65,27 @@ correctly regardless of the viewer's own timezone.
 
 ## Install (developer mode)
 
-1. Get the code onto your machine, either:
-   - Clone this repository: `git clone https://github.com/missingbulb/GoogleCalendarEventCreator.git`, or
-   - If you don't have `git`, download
-     [the `main` branch as a ZIP](https://github.com/missingbulb/GoogleCalendarEventCreator/archive/refs/heads/main.zip)
-     and extract it (it unpacks into a `GoogleCalendarEventCreator-main` folder).
+Grab the packaged extension — just the files that ship, not the whole repo:
+
+1. Download
+   [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
+   (`google-calendar-event-creator.zip`, built by the
+   [Release workflow](#releasing--publishing-to-the-chrome-web-store)) and
+   extract it. It unpacks into a folder containing `manifest.json`.
 2. Open `chrome://extensions` in Chrome.
 3. Enable **Developer mode** (top right).
-4. Click **Load unpacked** and select the folder from step 1 (the one
+4. Click **Load unpacked** and select the extracted folder (the one
    containing `manifest.json`).
 5. Optionally pin the extension's calendar icon to the toolbar.
 
-To pick up later changes, re-download/pull and click the refresh icon on the
-extension's card in `chrome://extensions`.
+To pick up a later release, download the new zip, extract it over the same
+folder, and click the refresh icon on the extension's card in
+`chrome://extensions`.
+
+If you're **working on the extension**, clone the repo instead
+(`git clone https://github.com/missingbulb/GoogleCalendarEventCreator.git`) and
+**Load unpacked** the working tree directly — or run `npm run build` to produce
+the very same `dist/google-calendar-event-creator.zip` the release serves.
 
 ## Use
 
@@ -86,6 +94,72 @@ button. A small popup opens with a button for each event found on the page,
 showing its title, date/time, and location. Click the event you want to open
 a new tab with the Google Calendar "create event" screen pre-filled; review
 and save.
+
+## Releasing / publishing to the Chrome Web Store
+
+### The package
+
+`npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
+files the extension ships (manifest, scripts, `extractors/`, `icons/`), and
+nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
+in **`tools/shipping-files.js`** as the single source of truth, and
+`test/unit/shipping-files.test.js` asserts it stays in sync with what the
+manifest and popup actually load — so the zip can't silently drop a runtime
+file or smuggle in dead weight. This same zip is what testers load unpacked
+(see [Install](#install-developer-mode)) and what you upload to the Web Store.
+
+### Versioning
+
+The version users see is `manifest.json`'s `version` (the store reads only
+that; `package.json` is kept in sync by convention). **It is bumped
+deliberately, not automatically per commit** — bump it as part of preparing a
+release. The store rejects an upload whose version isn't strictly higher than
+the live one, so each release must increment it (`1.0.0` → `1.0.1` for a minor
+fix).
+
+### Cutting a release
+
+The **Release** workflow (`.github/workflows/release.yml`) builds and serves
+the zip:
+
+- **Tag a release.** Bump `manifest.json`'s `version`, commit, then push a
+  matching `vX.Y.Z` tag:
+
+  ```sh
+  git tag v1.0.1 && git push origin v1.0.1
+  ```
+
+  The workflow runs the full test suite, **verifies the tag matches the
+  manifest version** (a mismatch fails the build), builds the zip, and
+  publishes it on the GitHub Release for that tag. Because the asset name is
+  stable, the newest build is always at a fixed URL:
+  `…/releases/latest/download/google-calendar-event-creator.zip`.
+- **Manual build.** Running the workflow from the Actions tab ("Run workflow")
+  builds the zip off the chosen branch and uploads it as a downloadable
+  workflow artifact — handy for a throwaway test build without cutting a
+  release.
+
+### First publish to the Chrome Web Store
+
+1. Register a developer account at the
+   [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+   (one-time \$5 fee).
+2. **Add new item** and upload the release zip.
+3. Complete the store listing: description, category, a screenshot
+   (≥ 1280×800 or 640×400), and the privacy tab — justify each requested
+   permission (`activeTab`, `scripting`, `tabs`; see
+   [Permissions](#permissions)) and declare data usage (this extension sends
+   nothing anywhere).
+4. Submit for review. Approval typically takes a few hours to a few days.
+
+### Minor update
+
+1. Make the change (open an issue first per the project workflow), and bump
+   `manifest.json`'s `version`.
+2. Cut a release as above to produce the new zip.
+3. In the dashboard, open the item → **Package → Upload new package** → submit
+   for review. Once approved, Chrome auto-pushes the update to existing users
+   within a few hours — no reinstall.
 
 ## Testing
 
@@ -282,6 +356,9 @@ commit the results. On mismatch, the test writes
 | `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{red,green}.png` |
 | `test/ui/snapshots/icon-red.png`, `icon-green.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
+| `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |
+| `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
+| `test/unit/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
 
 ## Permissions
 
