@@ -143,14 +143,17 @@ test("Cinema.co.il series page: one event per film card", () => {
     <div class="register-series-boxes">
       <div class="box"><div class="text-wraper"><div class="title">
         <h3>First Film</h3><p>18-06-2026 , חמישי / 20:00 / אולם 1</p></div>
+        <ul><li>Israel / 2026 / אורך: 90</li></ul>
         <div class="content-detail"><a href="https://www.cinema.co.il/event/first/">details</a></div>
       </div></div>
       <div class="box"><div class="text-wraper"><div class="title">
         <h3>Second Film</h3><p>19-06-2026 , שישי / 20:00 / אולם 1</p></div>
+        <ul><li>Israel / 2026 / אורך: 90</li></ul>
         <div class="content-detail"><a href="https://www.cinema.co.il/event/second/">details</a></div>
       </div></div>
       <div class="box"><div class="text-wraper"><div class="title">
         <h3>Third Film</h3><p>20-06-2026 , שבת / 20:00 / אולם 1</p></div>
+        <ul><li>Israel / 2026 / אורך: 90</li></ul>
         <div class="content-detail"><a href="https://www.cinema.co.il/event/third/">details</a></div>
       </div></div>
     </div>
@@ -165,6 +168,9 @@ test("Cinema.co.il series page: one event per film card", () => {
   assert.equal(ev.events[0].start, "2026-06-18T20:00:00");
   assert.equal(ev.events[1].start, "2026-06-19T20:00:00");
   assert.equal(ev.events[2].start, "2026-06-20T20:00:00");
+  assert.equal(ev.events[0].end, "2026-06-18T21:30:00");
+  assert.equal(ev.events[1].end, "2026-06-19T21:30:00");
+  assert.equal(ev.events[2].end, "2026-06-20T21:30:00");
   // Page-level description/ctz are filled into each film.
   assert.equal(ev.events[0].ctz, "Asia/Jerusalem");
   assert.equal(ev.events[0].description, "A week of films.");

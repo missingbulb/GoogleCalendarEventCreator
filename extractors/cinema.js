@@ -40,9 +40,30 @@
       .map((box) => {
         const title = clean((box.querySelector(".title h3") || {}).textContent);
         const start = parseBoxDate(clean((box.querySelector(".title p") || {}).textContent));
-        return title && start ? { title, start, end: null, location: location() } : null;
+        const duration = parseDuration(box);
+        const end = duration && start.includes("T") ? addMinutes(start, duration) : null;
+        return title && start ? { title, start, end, location: location() } : null;
       })
       .filter(Boolean);
+  }
+
+  // "... / 2025 / אורך: 108" -> 108 (minutes). Returns 0 if not found.
+  function parseDuration(box) {
+    for (const li of box.querySelectorAll("ul li")) {
+      const m = li.textContent.match(/אורך:\s*(\d+)/);
+      if (m) return +m[1];
+    }
+    return 0;
+  }
+
+  // Add minutes to a floating local datetime string "YYYY-MM-DDTHH:MM:SS".
+  function addMinutes(start, minutes) {
+    const m = start.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})$/);
+    if (!m) return null;
+    const [, date, hh, mm, ss] = m;
+    const total = +hh * 60 + +mm + minutes;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date}T${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}:${ss}`;
   }
 
   // "17-06-2026 , רביעי / 20:00 / אולם 3" -> "2026-06-17T20:00:00" (floating
