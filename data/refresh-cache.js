@@ -2,19 +2,19 @@
 // Refresh the committed cached HTML files that the live tests assert against
 // (data/<case>.html + data/urlsToCacheLocally.json).
 //
-// A cached HTML file is refreshed when any of these hold:
+// urlsToCacheLocally.json is just a list of URLs we want a committed HTML file
+// for. A cached HTML file is fetched only when it's actually missing:
 //   - --force was given
 //   - the cached HTML file or its urlsToCacheLocally entry is missing
 //   - the case's URL changed since the file was fetched
-//   - the cached HTML file is older than 24 hours
 //
 // A failed fetch KEEPS the previous cached HTML file and only warns — a site
 // outage or bot-blocking must not break the pipeline. It is an error only when
 // a case ends up with no cached HTML file at all.
 //
 // Usage:
-//   node data/refresh-cache.js            # refresh stale cached HTML files only
-//   node data/refresh-cache.js --force    # refresh everything
+//   node data/refresh-cache.js            # fetch missing cached HTML files only
+//   node data/refresh-cache.js --force    # re-fetch everything
 "use strict";
 
 const fs = require("node:fs");
@@ -24,7 +24,6 @@ const DATA_DIR = __dirname;
 const CASES_DIR = path.join(__dirname, "..", "test", "integration", "cases");
 const URLS_PATH = path.join(DATA_DIR, "urlsToCacheLocally.json");
 
-const MAX_AGE_HOURS = 24;
 const FETCH_ATTEMPTS = 3;
 const FETCH_TIMEOUT_MS = 20_000;
 // Event sites tend to reject clients that don't look like a browser.
@@ -66,8 +65,6 @@ function needsRefresh(name, url, cacheIndex, force) {
   const entry = cacheIndex[name];
   if (!entry || !fs.existsSync(path.join(DATA_DIR, `${name}.html`))) return "missing";
   if (entry.url !== url) return "case URL changed";
-  const ageHours = (Date.now() - Date.parse(entry.fetchedAt)) / 3_600_000;
-  if (!(ageHours < MAX_AGE_HOURS)) return `${Math.round(ageHours)}h old`;
   return null;
 }
 
@@ -100,18 +97,18 @@ async function main() {
     const reason = needsRefresh(name, url, cacheIndex, force);
 
     if (!reason) {
-      console.log(`${name}: fresh, skipping`);
+      console.log(`${name}: already cached, skipping`);
       continue;
     }
 
     try {
       const html = await fetchPage(url);
       fs.writeFileSync(path.join(DATA_DIR, `${name}.html`), html);
-      cacheIndex[name] = { url, fetchedAt: new Date().toISOString() };
+      cacheIndex[name] = { url };
       console.log(`${name}: refreshed (${reason})`);
     } catch (err) {
       if (fs.existsSync(path.join(DATA_DIR, `${name}.html`)) && cacheIndex[name]) {
-        console.warn(`${name}: fetch failed (${err.message}) — keeping cached HTML from ${cacheIndex[name].fetchedAt}`);
+        console.warn(`${name}: fetch failed (${err.message}) — keeping existing cached HTML`);
       } else {
         console.error(`${name}: fetch failed (${err.message}) and no previous cached HTML exists`);
         missingFiles++;

@@ -22,10 +22,14 @@ const SINGLE_EVENT = {
   ],
 };
 
-const film = (title, start) => ({
+// Times use no timezone offset (parsed as local), so the displayed clock time
+// is the literal hour regardless of where the test runs. The mix below
+// exercises the popup's time formatting: round hours drop ":00" ("8 PM"),
+// non-round keep minutes ("6:30 PM"), for both single times and ranges.
+const film = (title, start, end = null) => ({
   title,
   start,
-  end: null,
+  end,
   location: "Main Cinematheque, Hall 1",
   description: "A week celebrating international cinema.",
   ctz: "Asia/Jerusalem",
@@ -33,10 +37,10 @@ const film = (title, start) => ({
 
 const MULTI_EVENT = {
   events: [
-    film("Opening Night Gala", "2026-06-17T20:00:00"),
-    film("Restored Classics Matinee", "2026-06-18T18:30:00"),
-    film("New Directors Showcase", "2026-06-19T21:00:00"),
-    film("Documentary Spotlight", "2026-06-20T14:30:00"),
+    film("Opening Night Gala", "2026-06-17T20:00:00", "2026-06-17T22:00:00"), // round range -> "8 PM – 10 PM"
+    film("Restored Classics Matinee", "2026-06-18T18:30:00", "2026-06-18T21:15:00"), // odd range -> "6:30 PM – 9:15 PM"
+    film("New Directors Showcase", "2026-06-19T21:00:00"), // round single -> "9 PM"
+    film("Documentary Spotlight", "2026-06-20T14:30:00"), // odd single -> "2:30 PM"
     film("Animation Marathon", "2026-06-20T19:45:00"),
     film("Closing Ceremony & Awards", "2026-06-21T18:30:00"),
   ],

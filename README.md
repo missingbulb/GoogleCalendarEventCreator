@@ -97,7 +97,7 @@ npm install
 npm run test:live      # integration: the REVIEWED assertions for each supported site
 npm run test:offline   # unit: internal tests of the extraction logic
 npm run test:ui        # UI: rendered popup vs. the stored snapshot image
-npm run refresh        # re-fetch the cached HTML files (needs internet)
+npm run refresh        # fetch any missing cached HTML files (needs internet)
 npm run refresh:ui     # regenerate the popup UI snapshot after an intentional change
 npm test               # everything above (offline + live + UI)
 ```
@@ -136,29 +136,29 @@ an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The tests themselves run **offline**, against committed cached HTML files in
-`data/` (one `<case>.html` per case, plus `urlsToCacheLocally.json` recording
-each file's source URL and fetch time). The cached HTML is loaded into a DOM at
-the case's URL — so hostname-based site detection behaves exactly as in Chrome
-— and run through the real extractor files. This keeps the suite deterministic
-and runnable anywhere, while still reflecting each site's *current* markup,
-because the cached HTML files are kept fresh by a separate workflow:
+`data/` (one `<case>.html` per case, plus `urlsToCacheLocally.json` — a plain
+list of the source URL behind each file). The cached HTML is loaded into a DOM
+at the case's URL — so hostname-based site detection behaves exactly as in
+Chrome — and run through the real extractor files. This keeps the suite
+deterministic and runnable anywhere, while still reflecting each site's markup
+at the time it was recorded:
 
-- **`data/refresh-cache.js`** (`npm run refresh`) re-fetches
-  any cached HTML file that is missing, older than 24h, or whose case URL
-  changed (`--force` does all of them). A failed fetch keeps the previous
-  cached HTML file and only warns, so a site outage or bot-blocking never
-  breaks the suite.
+- **`data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
+  that is missing or whose case URL changed; `--force` re-fetches all of them.
+  A failed fetch keeps the previous cached HTML file and only warns, so a site
+  outage or bot-blocking never breaks the suite.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
   push to `main`: it runs the unit tests, then the integration tests against
   the cached HTML files **already committed** in `data/` — it never fetches or
   refreshes anything itself, so it's fast and has no network dependency.
 - The **Refresh cached HTML files** workflow
-  (`.github/workflows/refresh-cache.yml`) runs daily (and on demand via "Run
-  workflow"), force-refreshes every cached HTML file, runs the integration
-  tests, and commits the result — so a site changing its markup turns a
-  scheduled run red within a day, independently of anyone pushing. It's the
-  *only* thing that fetches live pages and commits cached HTML, which keeps the
-  Tests workflow simple and rules out any refresh→commit→refresh loop.
+  (`.github/workflows/refresh-cache.yml`) runs **on demand** (via "Run
+  workflow"): it records any missing cached HTML file, runs the integration
+  tests, and commits the result. It's the *only* thing that fetches live pages
+  and commits cached HTML, which keeps the Tests workflow simple and rules out
+  any refresh→commit→refresh loop. To re-record cached files that already
+  exist — e.g. when a site changes its markup — run it with the **`force_all`**
+  flag checked, which re-fetches every file instead of only the missing ones.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the
@@ -265,8 +265,8 @@ commit the results. On mismatch, the test writes
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
 | `test/integration/cases/`   | Reviewed live-test cases (URL + expected values), one JSON each |
-| `data/` | Committed cached HTML files the live tests assert against (plus `urlsToCacheLocally.json`), kept fresh by CI |
-| `data/refresh-cache.js` | Re-fetches stale/missing cached HTML files     |
+| `data/` | Committed cached HTML files the live tests assert against (plus `urlsToCacheLocally.json`, the list of source URLs) |
+| `data/refresh-cache.js` | Fetches any missing cached HTML files          |
 | `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
