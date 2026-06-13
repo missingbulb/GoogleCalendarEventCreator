@@ -58,7 +58,7 @@ Flow (A) is the main change since the last review: it runs continuously in
 the background and inspects the **URL** (not content) of every open tab.
 Flow (B) is the original extraction pipeline, now triggered by opening the
 popup rather than by a single toolbar click, and extended with two new
-site-specific extractors (`cinema.js`, `edinburghfringe.js`) and a `ctz`
+site-specific extractors (`telavivcinematheque.js`, `edinburghfringe.js`) and a `ctz`
 (calendar timezone) field.
 
 The only "privileged" sinks are `chrome.action.setIcon` (flow A, takes a
@@ -179,7 +179,7 @@ open, not just on click.
 
 `background.js` now does `if (data.ctz) params.set("ctz", data.ctz)`. In all
 current extractors, `ctz` is a **hardcoded constant** chosen by the extractor
-author (`"Asia/Tel_Aviv"` in `cinema.js`, `"GB"` in `edinburghfringe.js`) —
+author (`"Asia/Tel_Aviv"` in `telavivcinematheque.js`, `"GB"` in `edinburghfringe.js`) —
 never derived from page content — so there's no injection concern today.
 `URLSearchParams.set` would percent-encode it regardless.
 

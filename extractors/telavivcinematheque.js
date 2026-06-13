@@ -1,4 +1,4 @@
-// Cinema.co.il pages (Tel Aviv Cinematheque), two kinds:
+// Tel Aviv Cinematheque (cinema.co.il) pages, two kinds:
 //
 //   /series/<slug>/  — a season/festival page LISTING several different films
 //                      (e.g. "Taiwan Film Week"). Each film is a `.box` under
@@ -101,8 +101,8 @@
   }
 
   GCal.sites.push({
-    name: "cinema.co.il",
-    matches: GCal.siteHosts.find((s) => s.name === "cinema").matches,
+    name: "TelAvivCinematheque",
+    matches: GCal.siteHosts.find((s) => s.name === "telavivcinematheque").matches,
     extract() {
       const films = seriesEvents();
       if (films.length) {

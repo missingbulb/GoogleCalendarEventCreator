@@ -15,5 +15,5 @@ GCal.siteHosts = [
   { name: "facebook", matches: (host) => /(^|\.)facebook\.com$/.test(host) },
   { name: "eventbrite", matches: (host) => /(^|\.)eventbrite\./.test(host) },
   { name: "edinburghfringe", matches: (host) => /(^|\.)edfringe\.com$/.test(host) },
-  { name: "cinema", matches: (host) => /(^|\.)cinema\.co\.il$/.test(host) },
+  { name: "telavivcinematheque", matches: (host) => /(^|\.)cinema\.co\.il$/.test(host) },
 ];
