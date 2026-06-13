@@ -38,6 +38,12 @@ the generic/JSON-LD layers get wrong or miss. The flow:
 `npm test` runs everything; `README.md` "Testing" has the mechanics. Keep
 these decisions in mind:
 
+- **`Cannot find module 'jsdom'` means the dev deps aren't installed**, not a
+  code problem. `jsdom` is a test-only devDependency loaded by
+  `test/harness.js`, and `node_modules` starts empty on a fresh checkout (e.g.
+  this ephemeral environment). When you hit that error, run `npm install` and
+  re-run the tests — don't look for any other cause first.
+
 - **Integration cases are the reviewed contract.** A person reads
   `test/integration/cases/` to confirm the behavior is right; nobody reviews the
   unit tests. So every required change or bugfix must be covered by an
