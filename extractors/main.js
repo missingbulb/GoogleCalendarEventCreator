@@ -18,6 +18,10 @@
 // `eventCount` is the number of distinct events found on the page: the
 // schema.org JSON-LD event count, or a site extractor's own count of
 // performances/dates if it found more than that.
+//
+// `multipleEvents` is true if JSON-LD/microdata/heuristics found several
+// events, or if the site extractor itself says so (e.g. several scheduled
+// screenings of the same film).
 (() => {
   const host = location.hostname.replace(/^www\./, "");
   const site = GCal.sites.find((s) => s.matches(host));
@@ -26,7 +30,7 @@
   const siteResult = site ? site.extract() : {};
   // If the page lists several events, suggest the first one.
   const result = GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract());
-  result.multipleEvents = GCal.generic.detectMultiple(ldEvents.length);
+  result.multipleEvents = GCal.generic.detectMultiple(ldEvents.length) || !!siteResult.multipleEvents;
   result.eventCount = Math.max(ldEvents.length, siteResult.eventCount || 0);
   result.end = result.end || null;
   return result;

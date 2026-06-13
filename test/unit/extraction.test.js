@@ -185,13 +185,13 @@ test("Edinburgh Fringe: ctz is GB even when the event JSON can't be found", () =
   assert.equal(ev.ctz, "GB");
 });
 
-test("Tel Aviv Cinematheque: ctz is always Asia/Tel_Aviv", () => {
+test("Tel Aviv Cinematheque: ctz is always Asia/Jerusalem", () => {
   const html = `
     <meta property="og:title" content="Some Film - סינמטק תל אביב">
     <select id="smdate_b"><option value="select">בחר תאריך</option><option value="2026-06-17~20522">17.6</option></select>`;
 
   const ev = extractFromHtml(html, "https://www.cinema.co.il/event/some-film/");
-  assert.equal(ev.ctz, "Asia/Tel_Aviv");
+  assert.equal(ev.ctz, "Asia/Jerusalem");
 });
 
 test("Meetup: ctz read from the group's timezone embedded in page scripts", () => {
