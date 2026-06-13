@@ -1,0 +1,7 @@
+{
+  "description": "Edinburgh Fringe show page is parseable (Kristen Schaal: The Legend of Crystal Shell, single date)",
+  "url": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell",
+  "expected": {
+    "events": []
+  }
+}
