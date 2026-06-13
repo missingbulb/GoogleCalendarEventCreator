@@ -1,6 +1,6 @@
 name: Refresh UI snapshot
 
-# Regenerates the popup UI snapshot (test/ui/snapshots/popup.png). Rendering
+# Regenerates the popup UI snapshot (test/ui/snapshots/popup-single-event.png). Rendering
 # is deterministic (satori + resvg, no browser), so this mainly exists for
 # convenience after an intentional change to popup.html/popup.js, in case
 # refreshing locally isn't convenient.
@@ -14,9 +14,9 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -29,10 +29,10 @@ jobs:
 
       - name: Commit refreshed snapshot
         run: |
-          if [ -n "$(git status --porcelain test/ui/snapshots/popup.png)" ]; then
+          if [ -n "$(git status --porcelain test/ui/snapshots/popup-single-event.png)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add test/ui/snapshots/popup.png
+            git add test/ui/snapshots/popup-single-event.png
             git commit -m "chore: refresh popup UI snapshot [skip ci]"
             git push
           else

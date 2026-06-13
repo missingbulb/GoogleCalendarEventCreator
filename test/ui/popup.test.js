@@ -4,10 +4,10 @@
 // images after an intentional UI change.
 //
 // Cases:
-//   popup.png           — a single-event page: one ~60px button, heading "Add to Google Calendar".
-//   popup-multi.png     — a listing/series page: 6 buttons, "N events on this page" heading.
-//   popup-truncated.png — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
-//   popup-empty.png     — no events found: no buttons, heading "No events found on this page".
+//   popup-single-event.png — a single-event page: one ~60px button, heading "Add to Google Calendar".
+//   popup-multi-event.png  — a listing/series page: 6 buttons, "N events on this page" heading.
+//   popup-truncated.png    — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
+//   popup-empty.png        — no events found: no buttons, heading "No events found on this page".
 "use strict";
 
 const test = require("node:test");
@@ -18,6 +18,7 @@ const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
 const { renderPopupPng } = require("./render");
 const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./fixture");
+const { artifactPath } = require("./artifacts-dir");
 
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 
@@ -28,8 +29,8 @@ const MAX_DIFF_RATIO = 0.005;
 
 async function compareToSnapshot(t, name, data) {
   const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.png`);
-  const actualPath = path.join(SNAPSHOTS_DIR, `${name}.actual.png`);
-  const diffPath = path.join(SNAPSHOTS_DIR, `${name}.diff.png`);
+  const actualPath = artifactPath(`${name}.actual.png`);
+  const diffPath = artifactPath(`${name}.diff.png`);
 
   const actualBuffer = await renderPopupPng(data);
   const actual = PNG.sync.read(actualBuffer);
@@ -58,7 +59,7 @@ async function compareToSnapshot(t, name, data) {
     fs.writeFileSync(diffPath, PNG.sync.write(diff));
     assert.fail(
       `${name}: popup UI changed: ${diffPixels} of ${width * height} pixels differ ` +
-        `(${(ratio * 100).toFixed(2)}%). See ${name}.actual.png and ${name}.diff.png, ` +
+        `(${(ratio * 100).toFixed(2)}%). See ${actualPath} and ${diffPath}, ` +
         `or run "npm run refresh:ui" if this is intentional.`
     );
   } else {
@@ -69,11 +70,11 @@ async function compareToSnapshot(t, name, data) {
 }
 
 test("single-event popup matches the stored snapshot", async (t) => {
-  await compareToSnapshot(t, "popup", SINGLE_EVENT);
+  await compareToSnapshot(t, "popup-single-event", SINGLE_EVENT);
 });
 
 test("multi-event popup matches the stored snapshot", async (t) => {
-  await compareToSnapshot(t, "popup-multi", MULTI_EVENT);
+  await compareToSnapshot(t, "popup-multi-event", MULTI_EVENT);
 });
 
 test("truncated popup (>7 events) shows notice and first 7 buttons", async (t) => {

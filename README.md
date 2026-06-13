@@ -311,9 +311,9 @@ fixed fixture data (`test/ui/fixture.js`), and compares each pixel-by-pixel
 (via `pixelmatch`) against a committed image. Two layouts are covered — open
 them on GitHub to see what the popup currently looks like:
 
-- **`test/ui/snapshots/popup.png`** — a single-event page: one ~60px
+- **`test/ui/snapshots/popup-single-event.png`** — a single-event page: one ~60px
   "Add to Google Calendar" button.
-- **`test/ui/snapshots/popup-multi.png`** — a listing/series page: one ~60px
+- **`test/ui/snapshots/popup-multi-event.png`** — a listing/series page: one ~60px
   button per event (6 here) under an "N events on this page" heading.
 
 Note this is **not a screenshot of the real `popup.html`**: satori only
@@ -331,11 +331,11 @@ run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
 browser install step.
 
 After an intentional change to the popup's UI, run `npm run refresh:ui` to
-regenerate both `popup.png` and `popup-multi.png` (or use the **Refresh UI
+regenerate both `popup-single-event.png` and `popup-multi-event.png` (or use the **Refresh UI
 snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
 PNGs so reviewers can see the before/after in the diff. On mismatch, the test
-writes `<name>.actual.png` and `<name>.diff.png` (both gitignored)
-for local debugging.
+writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
+(gitignored; see `test/ui/artifacts-dir.js`) and prints their full paths.
 
 ### Toolbar icon test
 
@@ -344,18 +344,18 @@ both states described in `icon-state.js` — a green border for pages with a
 site-specific extractor and a red border otherwise — using
 `test/ui/render-icon.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
 no browser). Each generated image is compared pixel-by-pixel against the
-committed reference images **`test/ui/snapshots/icon-red.png`** and
-**`test/ui/snapshots/icon-green.png`** (browsable on GitHub) — the same
+committed reference images **`test/ui/snapshots/icon-unsupported.png`** and
+**`test/ui/snapshots/icon-supported.png`** (browsable on GitHub) — the same
 red-bordered / green-bordered icons shown in the toolbar for unsupported and
 supported pages — and, as a cross-check, against the actual shipped
 `icons/icon128-red.png` / `icons/icon128-green.png`.
 
 After an intentional change to `tools/gen_icons.py` / `render-icon.js`, run
-`npm run refresh:ui` to regenerate `icon-red.png` and `icon-green.png` (and
+`npm run refresh:ui` to regenerate `icon-unsupported.png` and `icon-supported.png` (and
 re-run `python3 tools/gen_icons.py` to regenerate the shipped icons) and
 commit the results. On mismatch, the test writes
-`test/ui/snapshots/icon-{red,green}.actual.png` and
-`icon-{red,green}.diff.png` (gitignored) for local debugging.
+`icon-{unsupported,supported}.actual.png` and `.diff.png` to `test/ui/.artifacts/`
+(gitignored; see `test/ui/artifacts-dir.js`) and prints the paths.
 
 ## Files
 
@@ -380,14 +380,15 @@ commit the results. On mismatch, the test writes
 | `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
 | `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `popup.js` for use in `render.js` |
 | `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
+| `test/ui/artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
-| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup.png` and `popup-multi.png` |
-| `test/ui/snapshots/popup.png`, `popup-multi.png` | Committed reference images of the popup (single / multiple events), browsable on GitHub |
+| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup-single-event.png` and `popup-multi-event.png` |
+| `test/ui/snapshots/popup-single-event.png`, `popup-multi-event.png` | Committed reference images of the popup (single / multiple events), browsable on GitHub |
 | `test/ui/render-icon.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
 | `test/ui/icon.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
-| `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{red,green}.png` |
-| `test/ui/snapshots/icon-red.png`, `icon-green.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
+| `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{unsupported,supported}.png` |
+| `test/ui/snapshots/icon-unsupported.png`, `icon-supported.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
 | `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |
 | `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
