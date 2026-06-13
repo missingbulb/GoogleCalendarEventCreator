@@ -38,6 +38,12 @@ function isSupportedUrl(url) {
   }
 }
 
+// The toolbar icon's border color for a given page URL: green when a
+// site-specific extractor exists for it, red otherwise.
+function iconBorderColor(url) {
+  return isSupportedUrl(url) ? "green" : "red";
+}
+
 async function updateIcon(tabId, url) {
   const path = isSupportedUrl(url) ? SUPPORTED_ICON : UNSUPPORTED_ICON;
   try {
