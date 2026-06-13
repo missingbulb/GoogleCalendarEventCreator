@@ -18,8 +18,8 @@ const ICONS_DIR = path.join(__dirname, "..", "..", "icons");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 
 const CASES = [
-  { state: "unsupported", color: RED, name: "icon-red.png", shippedIcon: "icon128-red.png" },
-  { state: "supported", color: GREEN, name: "icon-green.png", shippedIcon: "icon128-green.png" },
+  { state: "unsupported", color: RED, name: "icon-unsupported.png", shippedIcon: "icon128-red.png" },
+  { state: "supported", color: GREEN, name: "icon-supported.png", shippedIcon: "icon128-green.png" },
 ];
 
 for (const { state, color, name, shippedIcon } of CASES) {
