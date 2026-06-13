@@ -49,6 +49,19 @@ test("meetup.com: details strips tracking params from the link itself", () => {
   assert.equal(paramsOf(url).get("details"), `${expectedLink}\n\nCome hang out.`);
 });
 
+test("markdown links in the description become HTML anchors (kept verbatim)", () => {
+  const description = "See [Fusion VC](https://x.com/?utm_source=luma) and [B](https://y.com)";
+  const url = buildCalendarUrl({ title: "Talk", description }, TAB);
+  const details = paramsOf(url).get("details");
+  assert.ok(details.includes('<a href="https://x.com/?utm_source=luma">Fusion VC</a>'));
+  assert.ok(details.includes('<a href="https://y.com">B</a>'));
+});
+
+test("a bare/incomplete markdown link (no URL) is left untouched", () => {
+  const url = buildCalendarUrl({ title: "Talk", description: "Sponsored by [Poalim Tech]" }, TAB);
+  assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nSponsored by [Poalim Tech]`);
+});
+
 test("falls back to the tab title when no title was extracted", () => {
   const url = buildCalendarUrl({}, TAB);
   assert.equal(paramsOf(url).get("text"), "Tab Title");
