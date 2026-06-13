@@ -56,6 +56,16 @@ test("markdown links in the description become HTML anchors (kept verbatim)", ()
   assert.ok(details.includes('<a href="https://y.com">B</a>'));
 });
 
+test("bold markdown in the description becomes <b> (Calendar renders details as HTML)", () => {
+  const url = buildCalendarUrl({ title: "Talk", description: "Featuring **Jane Doe** and **John**" }, TAB);
+  assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nFeaturing <b>Jane Doe</b> and <b>John</b>`);
+});
+
+test("a stray/unmatched ** in the description is left untouched", () => {
+  const url = buildCalendarUrl({ title: "Talk", description: "Price is 5 ** off today" }, TAB);
+  assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nPrice is 5 ** off today`);
+});
+
 test("a bare/incomplete markdown link (no URL) is left untouched", () => {
   const url = buildCalendarUrl({ title: "Talk", description: "Sponsored by [Poalim Tech]" }, TAB);
   assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nSponsored by [Poalim Tech]`);
