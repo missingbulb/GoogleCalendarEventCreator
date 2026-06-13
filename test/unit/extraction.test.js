@@ -135,7 +135,7 @@ test("Listing page with several events: every JSON-LD event is returned, in orde
   assert.equal(ev.events[1].start, "2026-10-10T19:00:00");
 });
 
-test("Cinema.co.il series page: one event per film card", () => {
+test("Tel Aviv Cinematheque series page: one event per film card", () => {
   const html = `
     <meta property="og:title" content="Demo Film Week - סינמטק תל אביב">
     <meta property="og:site_name" content="סינמטק תל אביב">

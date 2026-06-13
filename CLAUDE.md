@@ -11,6 +11,9 @@ For every new task in this repo:
 4. Update the issue's status (comments / close) as work progresses and
    when it's done.
 
+When the repo owner says "LGTM" on a change, treat it as approval to merge
+that branch's pull request into `main`.
+
 # Adding a site extractor
 
 Extraction merges three layers (site-specific → schema.org JSON-LD → generic

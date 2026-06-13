@@ -16,10 +16,10 @@
 //   1. the site-specific extractor whose `matches(hostname)` is true, if any
 //   2. the first schema.org JSON-LD event on the page
 //   3. generic heuristics (meta tags, microdata, <time>, text scanning)
-// A site extractor can instead supply its own `events` array (e.g. cinema.js
-// for a series page); the page-level description/ctz then fill any field an
-// individual event didn't carry. Otherwise, when the page's JSON-LD lists
-// several events, each becomes an event.
+// A site extractor can instead supply its own `events` array (e.g.
+// telavivcinematheque.js for a series page); the page-level description/ctz
+// then fill any field an individual event didn't carry. Otherwise, when the
+// page's JSON-LD lists several events, each becomes an event.
 //
 // To support a new event platform, add extractors/<site>.js that pushes onto
 // GCal.sites (see meetup.js for the pattern), list it in EXTRACTOR_FILES in
