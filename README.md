@@ -116,25 +116,22 @@ confirm each site is handled correctly.
     "events": [
       {
         "title": "NYC Tech Mixer 2026",
-        "start": "2026-06-25T18:00:00-04:00",
-        "end": "2026-06-25T21:00:00-04:00",
+        "start": "2026-06-25T18:00:00",
+        "end": "2026-06-25T21:00:00",
         "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
         "ctz": "America/New_York",
-        "dates": "20260625T220000Z/20260626T010000Z",
-        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description...",
-        "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=..."
+        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description..."
       }
     ]
   }
 }
 ```
 
-`expected.events` is the **complete, exact** array the extractor + URL builder
-produce: each event is deep-equal compared on `title`, `start`, `end`,
-`location`, `ctz`, `dates`, `details`, and `calendarUrl` (no matchers — every
-field must match exactly, including the full `details`/`calendarUrl`). The
-array length also pins down how many events were found: one for an ordinary
-page, several for a listing/series page. See the header comment in
+`expected.events` is the **complete, exact** array the extractor produces: each
+event is deep-equal compared on `title`, `start`, `end`, `location`, `ctz`, and
+`details` (no matchers — every field must match exactly, including the full
+`details`). The array length also pins down how many events were found: one for
+an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The tests themselves run **offline**, against committed HTML snapshots in
