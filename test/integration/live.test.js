@@ -4,7 +4,7 @@
 // These run OFFLINE against committed cached HTML files in
 // data/, which a GitHub Actions job keeps fresh
 // (refreshed daily, and again before the live tests run on a push to main —
-// see test/integration/refresh-cache.js and .github/workflows/).
+// see data/refresh-cache.js and .github/workflows/).
 // Asserting against a recently-cached copy of the real page makes the suite
 // deterministic and runnable anywhere (no network), while still reflecting
 // each site's current markup.
@@ -46,7 +46,7 @@
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first cached HTML file with
-// `node test/integration/refresh-cache.js` (on a machine with internet)
+// `node data/refresh-cache.js` (on a machine with internet)
 // or let CI record it on the next run. Run the suite once to see the actual
 // extracted values in the failure output, then copy them into `expected`.
 "use strict";
@@ -100,7 +100,7 @@ for (const file of caseFiles) {
     const cachedHtmlPath = path.join(DATA_DIR, `${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath),
-      `Missing cached HTML for "${name}". Record it with: node test/integration/refresh-cache.js`
+      `Missing cached HTML for "${name}". Record it with: node data/refresh-cache.js`
     );
 
     const entry = cacheIndex[name];

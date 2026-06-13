@@ -142,7 +142,7 @@ the case's URL — so hostname-based site detection behaves exactly as in Chrome
 and runnable anywhere, while still reflecting each site's *current* markup,
 because the cached HTML files are kept fresh by a separate workflow:
 
-- **`test/integration/refresh-cache.js`** (`npm run refresh`) re-fetches
+- **`data/refresh-cache.js`** (`npm run refresh`) re-fetches
   any cached HTML file that is missing, older than 24h, or whose case URL
   changed (`--force` does all of them). A failed fetch keeps the previous
   cached HTML file and only warns, so a site outage or bot-blocking never
@@ -265,7 +265,7 @@ commit the results. On mismatch, the test writes
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
 | `test/integration/cases/`   | Reviewed live-test cases (URL + expected values), one JSON each |
 | `data/` | Committed cached HTML files the live tests assert against (plus `urlsToCacheLocally.json`), kept fresh by CI |
-| `test/integration/refresh-cache.js` | Re-fetches stale/missing cached HTML files     |
+| `data/refresh-cache.js` | Re-fetches stale/missing cached HTML files     |
 | `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
