@@ -1,16 +1,52 @@
 {
-  "description": "Edinburgh Fringe show page is parseable (Kristen Schaal: The Legend of Crystal Shell, single date)",
+  "description": "Edinburgh Fringe show page is parseable (Kristen Schaal: The Legend of Crystal Shell, five nightly performances)",
   "url": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell",
   "expected": {
     "events": [
       {
-        "title": "TBD",
-        "start": "TBD",
-        "end": null,
-        "location": "TBD",
+        "title": "Kristen Schaal: The Legend of Crystal Shell",
+        "start": "2026-08-12T18:00:00.000Z",
+        "end": "2026-08-12T19:00:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
         "ctz": "GB",
-        "dates": "TBD",
-        "details": "TBD"
+        "dates": "20260812T180000Z/20260812T190000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
+      },
+      {
+        "title": "Kristen Schaal: The Legend of Crystal Shell",
+        "start": "2026-08-13T18:00:00.000Z",
+        "end": "2026-08-13T19:00:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260813T180000Z/20260813T190000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
+      },
+      {
+        "title": "Kristen Schaal: The Legend of Crystal Shell",
+        "start": "2026-08-14T18:00:00.000Z",
+        "end": "2026-08-14T19:00:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260814T180000Z/20260814T190000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
+      },
+      {
+        "title": "Kristen Schaal: The Legend of Crystal Shell",
+        "start": "2026-08-15T18:00:00.000Z",
+        "end": "2026-08-15T19:00:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260815T180000Z/20260815T190000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
+      },
+      {
+        "title": "Kristen Schaal: The Legend of Crystal Shell",
+        "start": "2026-08-16T18:00:00.000Z",
+        "end": "2026-08-16T19:00:00.000Z",
+        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
+        "ctz": "GB",
+        "dates": "20260816T180000Z/20260816T190000Z",
+        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
       }
     ]
   }
