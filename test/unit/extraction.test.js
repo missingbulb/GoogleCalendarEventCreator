@@ -1,5 +1,5 @@
 // Offline unit tests for the extraction layers, using small synthetic HTML
-// snippets inline (no network, no committed page snapshots). These pin down
+// snippets inline (no network, no committed cached HTML files). These pin down
 // the extractor's behavior deterministically; test/integration/live.test.js
 // is the suite that checks the real sites still serve parseable markup.
 //

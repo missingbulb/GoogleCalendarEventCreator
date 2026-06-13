@@ -1,28 +1,28 @@
 #!/usr/bin/env node
-// Refresh the committed HTML snapshots that the live tests assert against
-// (test/integration/snapshots/<case>.html + test/integration/snapshots/manifest.json).
+// Refresh the committed cached HTML files that the live tests assert against
+// (data/<case>.html + data/urlsToCacheLocally.json).
 //
-// A snapshot is refreshed when any of these hold:
+// A cached HTML file is refreshed when any of these hold:
 //   - --force was given
-//   - the snapshot file or its manifest entry is missing
-//   - the case's URL changed since the snapshot was fetched
-//   - the snapshot is older than 24 hours
+//   - the cached HTML file or its urlsToCacheLocally entry is missing
+//   - the case's URL changed since the file was fetched
+//   - the cached HTML file is older than 24 hours
 //
-// A failed fetch KEEPS the previous snapshot and only warns — a site outage
-// or bot-blocking must not break the pipeline. It is an error only when a
-// case ends up with no snapshot at all.
+// A failed fetch KEEPS the previous cached HTML file and only warns — a site
+// outage or bot-blocking must not break the pipeline. It is an error only when
+// a case ends up with no cached HTML file at all.
 //
 // Usage:
-//   node test/integration/refresh-snapshots.js            # refresh stale snapshots only
-//   node test/integration/refresh-snapshots.js --force    # refresh everything
+//   node test/integration/refresh-cache.js            # refresh stale cached HTML files only
+//   node test/integration/refresh-cache.js --force    # refresh everything
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
 
+const DATA_DIR = path.join(__dirname, "..", "..", "data");
 const CASES_DIR = path.join(__dirname, "cases");
-const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
-const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
+const URLS_PATH = path.join(DATA_DIR, "urlsToCacheLocally.json");
 
 const MAX_AGE_HOURS = 24;
 const FETCH_ATTEMPTS = 3;
@@ -56,15 +56,15 @@ async function fetchPage(url) {
   throw new Error(`${lastError.message} (after ${FETCH_ATTEMPTS} attempts)`);
 }
 
-function readManifest() {
-  if (!fs.existsSync(MANIFEST_PATH)) return {};
-  return JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8"));
+function readCacheIndex() {
+  if (!fs.existsSync(URLS_PATH)) return {};
+  return JSON.parse(fs.readFileSync(URLS_PATH, "utf8"));
 }
 
-function needsRefresh(name, url, manifest, force) {
+function needsRefresh(name, url, cacheIndex, force) {
   if (force) return "forced";
-  const entry = manifest[name];
-  if (!entry || !fs.existsSync(path.join(SNAPSHOTS_DIR, `${name}.html`))) return "missing";
+  const entry = cacheIndex[name];
+  if (!entry || !fs.existsSync(path.join(DATA_DIR, `${name}.html`))) return "missing";
   if (entry.url !== url) return "case URL changed";
   const ageHours = (Date.now() - Date.parse(entry.fetchedAt)) / 3_600_000;
   if (!(ageHours < MAX_AGE_HOURS)) return `${Math.round(ageHours)}h old`;
@@ -73,31 +73,31 @@ function needsRefresh(name, url, manifest, force) {
 
 async function main() {
   const force = process.argv.includes("--force");
-  fs.mkdirSync(SNAPSHOTS_DIR, { recursive: true });
-  const manifest = readManifest();
-  let missingSnapshots = 0;
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  const cacheIndex = readCacheIndex();
+  let missingFiles = 0;
 
   const caseFiles = fs
     .readdirSync(CASES_DIR)
     .filter((f) => f.endsWith(".json"))
     .sort();
 
-  // What to fetch: every case file's URL, plus any manifest entry that has no
-  // case file yet. The latter lets you register a snapshot (name + url) in the
-  // manifest and fetch it *before* writing its case — so you can record the
-  // HTML first, then fill the case's `expected` against the committed snapshot.
+  // What to fetch: every case file's URL, plus any urlsToCacheLocally entry
+  // that has no case file yet. The latter lets you register an entry
+  // (name + url) and fetch it *before* writing its case — so you can record the
+  // HTML first, then fill the case's `expected` against the committed file.
   const targets = new Map();
   for (const file of caseFiles) {
     const name = path.basename(file, ".json");
     const { url } = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
     targets.set(name, url);
   }
-  for (const [name, entry] of Object.entries(manifest)) {
+  for (const [name, entry] of Object.entries(cacheIndex)) {
     if (!targets.has(name) && entry && entry.url) targets.set(name, entry.url);
   }
 
   for (const [name, url] of targets) {
-    const reason = needsRefresh(name, url, manifest, force);
+    const reason = needsRefresh(name, url, cacheIndex, force);
 
     if (!reason) {
       console.log(`${name}: fresh, skipping`);
@@ -106,21 +106,21 @@ async function main() {
 
     try {
       const html = await fetchPage(url);
-      fs.writeFileSync(path.join(SNAPSHOTS_DIR, `${name}.html`), html);
-      manifest[name] = { url, fetchedAt: new Date().toISOString() };
+      fs.writeFileSync(path.join(DATA_DIR, `${name}.html`), html);
+      cacheIndex[name] = { url, fetchedAt: new Date().toISOString() };
       console.log(`${name}: refreshed (${reason})`);
     } catch (err) {
-      if (fs.existsSync(path.join(SNAPSHOTS_DIR, `${name}.html`)) && manifest[name]) {
-        console.warn(`${name}: fetch failed (${err.message}) — keeping snapshot from ${manifest[name].fetchedAt}`);
+      if (fs.existsSync(path.join(DATA_DIR, `${name}.html`)) && cacheIndex[name]) {
+        console.warn(`${name}: fetch failed (${err.message}) — keeping cached HTML from ${cacheIndex[name].fetchedAt}`);
       } else {
-        console.error(`${name}: fetch failed (${err.message}) and no previous snapshot exists`);
-        missingSnapshots++;
+        console.error(`${name}: fetch failed (${err.message}) and no previous cached HTML exists`);
+        missingFiles++;
       }
     }
   }
 
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
-  if (missingSnapshots > 0) process.exit(1);
+  fs.writeFileSync(URLS_PATH, JSON.stringify(cacheIndex, null, 2) + "\n");
+  if (missingFiles > 0) process.exit(1);
 }
 
 main().catch((err) => {
