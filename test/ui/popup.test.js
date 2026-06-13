@@ -4,11 +4,9 @@
 // images after an intentional UI change.
 //
 // Cases:
-//   popup.png       — a single-event page: one ~60px "Add to Google Calendar"
-//                     button under the heading.
-//   popup-multi.png — a listing/series page with several events: one ~60px
-//                     button per event (6 here), under an "N events on this
-//                     page" heading.
+//   popup.png           — a single-event page: one ~60px button, heading "Add to Google Calendar".
+//   popup-multi.png     — a listing/series page: 6 buttons, "N events on this page" heading.
+//   popup-truncated.png — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
 "use strict";
 
 const test = require("node:test");
@@ -18,7 +16,7 @@ const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
 const { renderPopupPng } = require("./render");
-const { SINGLE_EVENT, MULTI_EVENT } = require("./fixture");
+const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT } = require("./fixture");
 
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 
@@ -75,4 +73,8 @@ test("single-event popup matches the stored snapshot", async (t) => {
 
 test("multi-event popup matches the stored snapshot", async (t) => {
   await compareToSnapshot(t, "popup-multi", MULTI_EVENT);
+});
+
+test("truncated popup (>7 events) shows notice and first 7 buttons", async (t) => {
+  await compareToSnapshot(t, "popup-truncated", TRUNCATED_EVENT);
 });

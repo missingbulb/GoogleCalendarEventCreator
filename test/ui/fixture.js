@@ -42,4 +42,18 @@ const MULTI_EVENT = {
   ],
 };
 
-module.exports = { SINGLE_EVENT, MULTI_EVENT };
+const TRUNCATED_EVENT = {
+  events: [
+    film("Opening Night Gala", "2026-06-17T20:00:00"),
+    film("Restored Classics Matinee", "2026-06-18T18:30:00"),
+    film("New Directors Showcase", "2026-06-19T21:00:00"),
+    film("Documentary Spotlight", "2026-06-20T14:30:00"),
+    film("Animation Marathon", "2026-06-20T19:45:00"),
+    film("Closing Ceremony & Awards", "2026-06-21T18:30:00"),
+    film("Retrospective Highlights", "2026-06-22T16:00:00"),
+    film("Short Films Competition", "2026-06-22T20:00:00"),
+    film("Director in Focus", "2026-06-23T19:00:00"),
+  ],
+};
+
+module.exports = { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT };

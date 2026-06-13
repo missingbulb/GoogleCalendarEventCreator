@@ -81,8 +81,11 @@ function eventButton(event) {
 }
 
 function buildTree(data) {
-  const events = data.events && data.events.length ? data.events : [{ title: data.title || "New event" }];
-  const heading = events.length > 1 ? `${events.length} events on this page` : "Add to Google Calendar";
+  const MAX_EVENTS = 7;
+  const allEvents = data.events && data.events.length ? data.events : [];
+  const events = allEvents.length ? allEvents.slice(0, MAX_EVENTS) : [{ title: data.title || "New event" }];
+  const heading = allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
+  const truncated = allEvents.length > MAX_EVENTS;
 
   const children = [
     {
@@ -92,8 +95,30 @@ function buildTree(data) {
         children: heading,
       },
     },
-    ...events.map(eventButton),
   ];
+
+  if (truncated) {
+    children.push({
+      type: "div",
+      props: {
+        style: {
+          display: "flex",
+          fontSize: 11,
+          color: "#7d5500",
+          backgroundColor: "#fef3c7",
+          paddingTop: 4,
+          paddingBottom: 4,
+          paddingLeft: 8,
+          paddingRight: 8,
+          borderRadius: 4,
+          marginBottom: 8,
+        },
+        children: `Showing first ${MAX_EVENTS} of ${allEvents.length}`,
+      },
+    });
+  }
+
+  children.push(...events.map(eventButton));
 
   return {
     type: "div",

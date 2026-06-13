@@ -6,6 +6,8 @@ test/ui/snapshots/popup.actual.png
 test/ui/snapshots/popup.diff.png
 test/ui/snapshots/popup-multi.actual.png
 test/ui/snapshots/popup-multi.diff.png
+test/ui/snapshots/popup-truncated.actual.png
+test/ui/snapshots/popup-truncated.diff.png
 
 # UI snapshot test failure artifacts (the committed expected images are
 # test/ui/snapshots/icon-{red,green}.png)

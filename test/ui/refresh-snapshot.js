@@ -7,7 +7,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { renderPopupPng } = require("./render");
-const { SINGLE_EVENT, MULTI_EVENT } = require("./fixture");
+const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT } = require("./fixture");
 
 (async () => {
   const outDir = path.join(__dirname, "snapshots");
@@ -15,6 +15,7 @@ const { SINGLE_EVENT, MULTI_EVENT } = require("./fixture");
   for (const [name, data] of [
     ["popup", SINGLE_EVENT],
     ["popup-multi", MULTI_EVENT],
+    ["popup-truncated", TRUNCATED_EVENT],
   ]) {
     const outPath = path.join(outDir, `${name}.png`);
     fs.writeFileSync(outPath, await renderPopupPng(data));

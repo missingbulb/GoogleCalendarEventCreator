@@ -20,7 +20,10 @@
     console.warn("Could not extract from page:", e);
   }
 
-  const events = data.events && data.events.length ? data.events : [];
+  const MAX_EVENTS = 7;
+
+  const allEvents = data.events && data.events.length ? data.events : [];
+  const events = allEvents.slice(0, MAX_EVENTS);
 
   if (!events.length) {
     // Nothing structured found; still let the user create an event seeded
@@ -32,7 +35,13 @@
   }
 
   headingEl.textContent =
-    events.length > 1 ? `${events.length} events on this page` : "Add to Google Calendar";
+    allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
+
+  if (allEvents.length > MAX_EVENTS) {
+    const truncEl = document.getElementById("truncated");
+    truncEl.textContent = `Showing first ${MAX_EVENTS} of ${allEvents.length}`;
+    truncEl.hidden = false;
+  }
 
   events.forEach((event) => {
     eventsEl.appendChild(makeButton(event, tab));

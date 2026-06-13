@@ -58,6 +58,14 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      #truncated {
+        font-size: 11px;
+        color: #7d5500;
+        background-color: #fef3c7;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin: 0 0 8px;
+      }
       .empty {
         font-size: 12px;
         color: #80868b;
@@ -66,6 +74,7 @@
   </head>
   <body>
     <p id="heading">Reading page&hellip;</p>
+    <p id="truncated" hidden></p>
     <div id="events"></div>
     <p class="empty" id="empty" hidden>No event details found on this page.</p>
     <script src="background.js"></script>
