@@ -14,7 +14,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
-const { formatWhen, summarize } = require("./load-popup");
+const { formatWhen, summarize, dateChip } = require("./load-popup");
 
 const FONT_FAMILY = "Liberation Sans"; // metric-compatible stand-in for popup.html's Arial fallback
 const FONT_DIR = path.join(__dirname, "fonts");
@@ -29,25 +29,25 @@ const FONTS = [
 const WIDTH = 304;
 
 function eventButton(event) {
-  const children = [
+  // Right column: title over the muted date/time line.
+  const bodyChildren = [
     {
       type: "div",
       props: {
-        style: { display: "flex", fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: "#ffffff" },
+        style: { display: "flex", fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: "#202124" },
         children: event.title,
       },
     },
   ];
   const when = summarize(event);
   if (when) {
-    children.push({
+    bodyChildren.push({
       type: "div",
       props: {
         style: {
           display: "flex",
           fontSize: 11,
-          color: "#ffffff",
-          opacity: 0.9,
+          color: "#5f6368",
           // Match popup.html: the date/location line stays on one line and
           // ellipsizes, keeping each button ~60px tall.
           whiteSpace: "nowrap",
@@ -58,24 +58,66 @@ function eventButton(event) {
       },
     });
   }
+
+  const row = [];
+
+  // Left date chip (month + day), when we have a usable date.
+  const chip = dateChip(event.start);
+  if (chip) {
+    row.push({
+      type: "div",
+      props: {
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          width: 44,
+          paddingTop: 6,
+          paddingBottom: 6,
+          color: "#ffffff",
+          backgroundColor: "#1a73e8",
+          borderRadius: 6,
+          lineHeight: 1,
+        },
+        children: [
+          { type: "div", props: { style: { display: "flex", fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }, children: chip.month } },
+          { type: "div", props: { style: { display: "flex", fontSize: 18, fontWeight: 700 }, children: chip.day } },
+        ],
+      },
+    });
+  }
+
+  row.push({
+    type: "div",
+    props: {
+      style: { display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, flexGrow: 1 },
+      children: bodyChildren,
+    },
+  });
+
   return {
     type: "div",
     props: {
       style: {
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        gap: 2,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
         minHeight: 60,
         marginBottom: 8,
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: 10,
+        paddingBottom: 10,
         paddingLeft: 12,
         paddingRight: 12,
-        backgroundColor: "#1a73e8",
-        borderRadius: 6,
+        color: "#202124",
+        backgroundColor: "#ffffff",
+        border: "1px solid #e0e0e0",
+        borderRadius: 8,
+        boxShadow: "0 1px 2px rgba(60, 64, 67, 0.15)",
       },
-      children,
+      children: row,
     },
   };
 }

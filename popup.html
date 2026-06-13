@@ -16,31 +16,69 @@
         color: #5f6368;
         margin: 0 0 8px;
       }
-      /* One button per distinct event found on the page. Kept compact
-         (~60px tall) so several fit without scrolling: title on top, the
-         date/time (and location, if any) beneath. */
+      /* One button per distinct event found on the page. A light card
+         (~60px tall, so several fit without scrolling): a blue date chip on
+         the left (month + day), then the title and a muted date/time (plus
+         location, if any) on the right. */
       .event-btn {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 2px;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
         box-sizing: border-box;
         width: 100%;
         min-height: 60px;
         margin-bottom: 8px;
-        padding: 8px 12px;
+        padding: 10px 12px;
         text-align: start;
-        color: #fff;
-        background-color: #1a73e8;
-        border: none;
-        border-radius: 6px;
+        color: #202124;
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
         cursor: pointer;
+        transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
       }
       .event-btn:last-child {
         margin-bottom: 0;
       }
       .event-btn:hover {
-        background-color: #1765cc;
+        border-color: #d2d2d2;
+        box-shadow: 0 2px 6px rgba(60, 64, 67, 0.25);
+        transform: translateY(-1px);
+      }
+      /* Left date chip: stacked short month over day-of-month. */
+      .event-btn .e-date {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 44px;
+        padding: 6px 0;
+        color: #fff;
+        background-color: #1a73e8;
+        border-radius: 6px;
+        line-height: 1;
+      }
+      .event-btn .e-month {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .event-btn .e-day {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      /* Right column: title over the muted date/time line. min-width:0 lets
+         the children ellipsize inside the flex row. */
+      .event-btn .e-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
       }
       .event-btn .e-title {
         font-size: 13px;
@@ -53,7 +91,7 @@
       }
       .event-btn .e-when {
         font-size: 11px;
-        opacity: 0.9;
+        color: #5f6368;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
