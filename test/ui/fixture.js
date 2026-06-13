@@ -63,4 +63,23 @@ const TRUNCATED_EVENT = {
 // A page with nothing extractable: no buttons, "No events found" heading.
 const NO_EVENTS = { events: [] };
 
-module.exports = { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS };
+// A single event found WITH content but no parseable date — e.g. a supported
+// site (edfringe) whose event JSON couldn't be read, so only the title and the
+// fixed timezone are known. The button then shows no left date chip and a
+// muted "No date found" line; the user fills the date in on the Calendar
+// screen. (Distinct from NO_EVENTS: a page describing no event at all yields no
+// button, while this is a real-but-dateless event on a known event site.)
+const NO_DATE_EVENT = {
+  events: [
+    {
+      title: "Edinburgh Fringe Show",
+      start: "",
+      end: null,
+      location: "",
+      description: "",
+      ctz: "GB",
+    },
+  ],
+};
+
+module.exports = { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS, NO_DATE_EVENT };

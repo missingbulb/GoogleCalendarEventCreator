@@ -8,6 +8,7 @@
 //   popup-multi-event.png  — a listing/series page: 6 buttons, "N events on this page" heading.
 //   popup-truncated.png    — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
 //   popup-empty.png        — no events found: no buttons, heading "No events found on this page".
+//   popup-no-date.png      — one dateless event: a button with no date chip and a "No date found" line.
 "use strict";
 
 const test = require("node:test");
@@ -17,7 +18,7 @@ const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
 const { renderPopupPng } = require("./render");
-const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./fixture");
+const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS, NO_DATE_EVENT } = require("./fixture");
 const { artifactPath } = require("./artifacts-dir");
 
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
@@ -83,4 +84,8 @@ test("truncated popup (>7 events) shows notice and first 7 buttons", async (t) =
 
 test("empty popup (no events) shows no buttons and a 'No events found' heading", async (t) => {
   await compareToSnapshot(t, "popup-empty", NO_EVENTS);
+});
+
+test("dateless event renders a button with no date chip and 'No date found'", async (t) => {
+  await compareToSnapshot(t, "popup-no-date", NO_DATE_EVENT);
 });
