@@ -35,7 +35,7 @@ test("details is just the URL when the page had no description", () => {
   assert.equal(paramsOf(url).get("details"), TAB.url);
 });
 
-test("meetup.com: details links the canonical URL to the original (tracked) URL", () => {
+test("meetup.com: details strips tracking params from the link itself", () => {
   const meetupTab = {
     title: "Tab Title",
     url:
@@ -44,8 +44,7 @@ test("meetup.com: details links the canonical URL to the original (tracked) URL"
     index: 0,
   };
   const url = buildCalendarUrl({ title: "Meetup", description: "Come hang out." }, meetupTab);
-  const expectedLink =
-    "[https://www.meetup.com/claude-israel-user-group/events/315103877]" + `(${meetupTab.url})`;
+  const expectedLink = "https://www.meetup.com/claude-israel-user-group/events/315103877";
   assert.equal(paramsOf(url).get("details"), `${expectedLink}\n\nCome hang out.`);
 });
 

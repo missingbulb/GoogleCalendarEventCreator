@@ -47,9 +47,10 @@ function buildCalendarUrl(data, tab) {
 
 // The link placed at the top of the details field for a given tab. On
 // meetup.com, event URLs often carry tracking query parameters
-// (recId, recSource, searchId, ...); show the canonical URL as the link text
-// while keeping the original (tracked) URL as the link target, e.g.
-//   [https://www.meetup.com/group/events/123](https://www.meetup.com/group/events/123/?recId=...)
+// (recId, recSource, searchId, ...); strip them entirely so the saved event
+// links to the clean canonical URL, e.g.
+//   https://www.meetup.com/group/events/123
+// for both the link text and the link target.
 function sourceLink(tab) {
   if (!tab.url) return "";
   let url;
@@ -60,8 +61,7 @@ function sourceLink(tab) {
   }
   const host = url.hostname.replace(/^www\./, "");
   if (/(^|\.)meetup\.com$/.test(host)) {
-    const canonical = `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
-    return `[${canonical}](${tab.url})`;
+    return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
   }
   return tab.url;
 }
