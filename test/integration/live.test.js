@@ -2,12 +2,10 @@
 // produces the right values for each supported site.
 //
 // These run OFFLINE against committed cached HTML files in
-// data/, which a GitHub Actions job keeps fresh
-// (refreshed daily, and again before the live tests run on a push to main —
-// see data/refresh-cache.js and .github/workflows/).
-// Asserting against a recently-cached copy of the real page makes the suite
-// deterministic and runnable anywhere (no network), while still reflecting
-// each site's current markup.
+// data/, recorded from each site by data/refresh-cache.js (see also
+// .github/workflows/refresh-cache.yml). Asserting against a cached copy of the
+// real page makes the suite deterministic and runnable anywhere (no network),
+// while still reflecting each site's current markup.
 //
 // Each JSON file in test/integration/cases/ describes one scenario. The
 // extractor always returns a list of events, so `expected` is just that list:
@@ -60,7 +58,6 @@ const { extractFromHtml } = require("../harness");
 
 const CASES_DIR = path.join(__dirname, "cases");
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
-const URLS_PATH = path.join(DATA_DIR, "urlsToCacheLocally.json");
 
 // Evaluate background.js as global code so its function declarations land
 // on the sandbox.
@@ -71,13 +68,6 @@ function loadBackgroundFns() {
 }
 
 const { buildCalendarUrl } = loadBackgroundFns();
-
-// Warn (don't fail) when a cached HTML file is older than this — a silently
-// broken refresh pipeline then shows up in the test output instead of going
-// unnoticed.
-const STALE_WARNING_HOURS = 48;
-
-const cacheIndex = fs.existsSync(URLS_PATH) ? JSON.parse(fs.readFileSync(URLS_PATH, "utf8")) : {};
 
 const caseFiles = fs
   .readdirSync(CASES_DIR)
@@ -90,7 +80,7 @@ for (const file of caseFiles) {
   const name = path.basename(file, ".json");
   const testCase = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
 
-  test(`${testCase.description || file} — ${testCase.url}`, (t) => {
+  test(`${testCase.description || file} — ${testCase.url}`, () => {
     assert.ok(testCase.url, `${file}: "url" is required`);
     assert.ok(
       testCase.expected && Array.isArray(testCase.expected.events) && testCase.expected.events.length,
@@ -102,16 +92,6 @@ for (const file of caseFiles) {
       fs.existsSync(cachedHtmlPath),
       `Missing cached HTML for "${name}". Record it with: node data/refresh-cache.js`
     );
-
-    const entry = cacheIndex[name];
-    if (entry && entry.fetchedAt) {
-      const ageHours = (Date.now() - Date.parse(entry.fetchedAt)) / 3_600_000;
-      if (ageHours > STALE_WARNING_HOURS) {
-        t.diagnostic(
-          `cached HTML for "${name}" is ${Math.round(ageHours)}h old (fetched ${entry.fetchedAt}) — refresh pipeline may be broken`
-        );
-      }
-    }
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");
     const extracted = extractFromHtml(html, testCase.url);
