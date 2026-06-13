@@ -1,6 +1,6 @@
 {
-  "description": "Meetup event page is parseable (Fusion LA Israel, Jun 7 2026)",
-  "url": "https://www.meetup.com/fusion-la-israel/events/314842056/",
+  "description": "Meetup event page is parseable; tracking params are stripped from the details link (Fusion LA Israel, Jun 7 2026)",
+  "url": "https://www.meetup.com/fusion-la-israel/events/314842056/?recId=6d936688-1bdd-4823-ad49-cc6316b99797&recSource=ml-popular-events-nearby-offline&searchId=f541f7ee-b297-426b-b188-08d0bd38f4f6&eventOrigin=find_page%24inPerson",
   "expected": {
     "events": [
       {
@@ -9,7 +9,7 @@
         "end": "2026-06-07T12:30:00",
         "location": "Google for Startups, 12 HaOmanim st., Tel-Aviv, al",
         "ctz": "Asia/Jerusalem",
-        "details": "[https://www.meetup.com/fusion-la-israel/events/314842056](https://www.meetup.com/fusion-la-israel/events/314842056/)\n\n​[Fusion VC](https://www.fusion-vc.com/?utm_source=luma), [Google for Startups](https://startup.google.com/campus/tel-aviv/?utm_source=luma), [Poalim Tech]"
+        "details": "<a href=\"https://www.meetup.com/fusion-la-israel/events/314842056\">https://www.meetup.com/fusion-la-israel/events/314842056</a>\n\n​[Fusion VC](https://www.fusion-vc.com/?utm_source=luma), [Google for Startups](https://startup.google.com/campus/tel-aviv/?utm_source=luma), [Poalim Tech]"
       }
     ]
   }
