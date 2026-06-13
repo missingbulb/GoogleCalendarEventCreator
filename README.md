@@ -46,18 +46,21 @@ several JSON-LD events, etc. — every event is returned and the popup shows
 page yields a single event/button; a film that merely has several screening
 dates stays one event.
 
-Dates with an explicit timezone offset are converted to an exact UTC instant
-before being passed to Google Calendar, so the event occurs at the same
-moment in time regardless of the viewer's own timezone; dates without an
-offset are passed as floating local times so the event shows the same
-wall-clock time the page displayed. When no end time is found, a 2-hour
+Dates without a timezone offset are passed as floating local times, so the
+event shows the same wall-clock time the page displayed. Dates with an
+explicit offset (or trailing `Z`) are converted to an exact UTC instant before
+being passed to Google Calendar, so the event occurs at the same moment in time
+regardless of the viewer's own timezone. When no end time is found, a 2-hour
 duration is assumed. A date without a time becomes an all-day event.
 
 A site extractor that knows an event's location is fixed (e.g. a festival
 that only ever runs in one city) can set `ctz` to that timezone (e.g. `"GB"`
 for the Edinburgh Festival Fringe); it's passed straight through as the
-Calendar URL's `ctz` parameter, so a floating start/end time is interpreted
-in that timezone rather than the viewer's own.
+Calendar URL's `ctz` parameter. When `ctz` is set, an absolute start/end (one
+carrying an offset or `Z`) is re-expressed as the floating local wall-clock
+time in that timezone — so there's no need to keep it in UTC: the value reads
+as the time the event's own city shows, and the `ctz` parameter places it
+correctly regardless of the viewer's own timezone.
 
 ## Install (developer mode)
 
@@ -113,25 +116,22 @@ confirm each site is handled correctly.
     "events": [
       {
         "title": "NYC Tech Mixer 2026",
-        "start": "2026-06-25T18:00:00-04:00",
-        "end": "2026-06-25T21:00:00-04:00",
+        "start": "2026-06-25T18:00:00",
+        "end": "2026-06-25T21:00:00",
         "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
         "ctz": "America/New_York",
-        "dates": "20260625T220000Z/20260626T010000Z",
-        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description...",
-        "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=..."
+        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description..."
       }
     ]
   }
 }
 ```
 
-`expected.events` is the **complete, exact** array the extractor + URL builder
-produce: each event is deep-equal compared on `title`, `start`, `end`,
-`location`, `ctz`, `dates`, `details`, and `calendarUrl` (no matchers — every
-field must match exactly, including the full `details`/`calendarUrl`). The
-array length also pins down how many events were found: one for an ordinary
-page, several for a listing/series page. See the header comment in
+`expected.events` is the **complete, exact** array the extractor produces: each
+event is deep-equal compared on `title`, `start`, `end`, `location`, `ctz`, and
+`details` (no matchers — every field must match exactly, including the full
+`details`). The array length also pins down how many events were found: one for
+an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The tests themselves run **offline**, against committed cached HTML files in

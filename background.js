@@ -67,9 +67,15 @@ function sourceLink(tab) {
 }
 
 // Build the `dates` parameter for the TEMPLATE URL:
-//   timed:   YYYYMMDDTHHMMSS/YYYYMMDDTHHMMSS  (floating, user's calendar tz)
-//            or with trailing Z when the source specified an absolute instant
+//   timed:   YYYYMMDDTHHMMSS/YYYYMMDDTHHMMSS  (floating, placed by ctz or the
+//            user's calendar tz)
+//            or with trailing Z when the source gave an absolute instant
 //   all-day: YYYYMMDD/YYYYMMDD               (end date exclusive)
+//
+// Extractors that know the event's timezone already hand us floating local
+// times (see GCal.localizeToZone), so a known-timezone event reaches here as a
+// floating start/end and its ctz param places it. An offset/Z that survives to
+// here is an event with no known timezone, and is pinned to a UTC instant.
 function formatDatesParam(start, end) {
   if (!start) return "";
 

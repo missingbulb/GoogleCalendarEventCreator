@@ -31,14 +31,20 @@
   const siteResult = site ? site.extract() : {};
   const ldEvents = GCal.jsonLd.findEvents();
 
-  const norm = (e) => ({
-    title: e.title || "",
-    start: e.start || "",
-    end: e.end || null,
-    location: e.location || "",
-    description: e.description || "",
-    ctz: e.ctz || "",
-  });
+  // When the event's timezone is known, store start/end as floating local
+  // wall-clock times in that timezone rather than UTC instants: the Calendar
+  // URL's `ctz` then places them, and the times read as the event's city shows.
+  const norm = (e) => {
+    const ctz = e.ctz || "";
+    return {
+      title: e.title || "",
+      start: GCal.localizeToZone(e.start || "", ctz),
+      end: e.end ? GCal.localizeToZone(e.end, ctz) : null,
+      location: e.location || "",
+      description: e.description || "",
+      ctz,
+    };
+  };
 
   let events;
   if (Array.isArray(siteResult.events) && siteResult.events.length) {
