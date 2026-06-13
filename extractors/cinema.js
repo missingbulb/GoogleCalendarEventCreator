@@ -1,7 +1,17 @@
-// Cinema.co.il event pages (Tel Aviv Cinematheque):
-// https://www.cinema.co.il/event/<slug>/
+// Cinema.co.il pages (Tel Aviv Cinematheque), two kinds:
 //
-// A WordPress site with no schema.org Event JSON-LD. Each field comes from:
+//   /series/<slug>/  — a season/festival page LISTING several different films
+//                      (e.g. "Taiwan Film Week"). Each film is a `.box` under
+//                      `.register-series-boxes`, with its own title, a single
+//                      screening date+time ("17-06-2026 , רביעי / 20:00 / אולם 3"),
+//                      and a "לפרטים נוספים" link to its /event/ page. These
+//                      become the `events` list (one entry per film); the first
+//                      film is the suggested (top-level) event.
+//
+//   /event/<slug>/   — a single film, with a screening-date picker. Handled below.
+//
+// A WordPress site with no schema.org Event JSON-LD. For an /event/ page each
+// field comes from:
 //
 //   title       the page's <meta property="og:title"> with the
 //               " - סינמטק תל אביב" ("- Tel Aviv Cinematheque") site-name
@@ -27,6 +37,29 @@
 //               screening date
 (() => {
   const { clean, meta } = GCal;
+
+  // A series/festival page lists several different films, one per `.box`.
+  function seriesEvents() {
+    return [...document.querySelectorAll(".register-series-boxes .box")]
+      .map((box) => {
+        const title = clean((box.querySelector(".title h3") || {}).textContent);
+        const start = parseBoxDate(clean((box.querySelector(".title p") || {}).textContent));
+        return title && start ? { title, start, end: null, location: location() } : null;
+      })
+      .filter(Boolean);
+  }
+
+  // "17-06-2026 , רביעי / 20:00 / אולם 3" -> "2026-06-17T20:00:00" (floating
+  // local time). The weekday and hall carry no "HH:MM", so the first
+  // colon-separated number is the screening time.
+  function parseBoxDate(text) {
+    const day = text.match(/(\d{2})-(\d{2})-(\d{4})/);
+    if (!day) return "";
+    const [, dd, mm, yyyy] = day;
+    const time = text.match(/(\d{1,2}):(\d{2})/);
+    if (!time) return `${yyyy}-${mm}-${dd}`;
+    return `${yyyy}-${mm}-${dd}T${time[1].padStart(2, "0")}:${time[2]}:00`;
+  }
 
   // The picker's "choose a date" placeholder option has a non-date value
   // (e.g. "בחר תאריך"), so only options whose value looks like
@@ -54,6 +87,21 @@
     name: "cinema.co.il",
     matches: GCal.siteHosts.find((s) => s.name === "cinema").matches,
     extract() {
+      const films = seriesEvents();
+      if (films.length) {
+        // A series page: suggest the first film, and expose them all.
+        return {
+          title: films[0].title,
+          description: clean(meta("og:description")),
+          start: films[0].start,
+          location: films[0].location,
+          ctz: "Asia/Jerusalem",
+          events: films,
+          eventCount: films.length,
+          multipleEvents: films.length > 1,
+        };
+      }
+
       const dates = screeningDates();
       return {
         title: title(),

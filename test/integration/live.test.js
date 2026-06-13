@@ -23,19 +23,29 @@
 //       "dates":          "20260625T220000Z/20260626T010000Z",
 //       "details":        "[https://www.meetup.com/.../events/123](https://www.meetup.com/.../events/123/)\n\n...full description...",
 //       "calendarUrl":    "https://calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=...&details=...&location=...",
-//       "eventCount":     23,                        <- total events found on the page
-//       "ctz":            "GB"                       <- the Calendar URL's ctz= param, or null if absent
+//       "eventCount":     23,                        <- screenings/performances found on the page
+//       "ctz":            "GB",                      <- the Calendar URL's ctz= param, or null if absent
+//       "eventsFound":    1,                         <- number of DISTINCT events (extracted.events.length)
+//       "events":         [ ... ]                    <- OPTIONAL: assert every distinct event (see below)
 //     }
 //   }
 //
 // `expected` must be the *complete*, exact object the extractor + URL
 // builder produce — it is deep-equal compared against:
-//   { title, start, end, location, multipleEvents, dates, details, calendarUrl, eventCount, ctz }
+//   { title, start, end, location, multipleEvents, dates, details, calendarUrl, eventCount, ctz, eventsFound }
 // (see below). There are no substring/regex/prefix matchers: every field
 // must be present and match exactly, including the full text of `details`
 // and `calendarUrl`. This catches any drift — in extraction, date math, or
 // URL composition — however small. When a snapshot refresh legitimately
 // changes a page's content, update `expected` to match the new exact values.
+//
+// `eventsFound` is the number of DISTINCT events on the page
+// (`extracted.events.length`): 1 for an ordinary event page (even a film with
+// several screening dates — that is one event, with `eventCount` > 1), and
+// more for a listing/series page. `events` is OPTIONAL: include it only when
+// you want to pin down every distinct event on the page. When present, it is
+// deep-equal compared against `extracted.events`, each entry shaped as
+// `{ title, start, end, location, dates }` (its own Google Calendar `dates`).
 //
 // `dates` is derived from the extracted start/end via background.js's
 // formatDatesParam(), so it doubles as integration coverage for the
@@ -87,7 +97,10 @@ const FIELDS = [
   "calendarUrl",
   "eventCount",
   "ctz",
+  "eventsFound",
 ];
+// Optional expected keys — asserted only when a case declares them.
+const OPTIONAL_FIELDS = ["events"];
 
 // Evaluate background.js as global code so its function declarations land
 // on the sandbox.
@@ -120,7 +133,10 @@ for (const file of caseFiles) {
     assert.ok(testCase.url, `${file}: "url" is required`);
     assert.ok(testCase.expected, `${file}: "expected" is required`);
     for (const field of Object.keys(testCase.expected)) {
-      assert.ok(FIELDS.includes(field), `${file}: unknown expected field "${field}". Allowed: ${FIELDS.join(", ")}`);
+      assert.ok(
+        FIELDS.includes(field) || OPTIONAL_FIELDS.includes(field),
+        `${file}: unknown expected field "${field}". Allowed: ${[...FIELDS, ...OPTIONAL_FIELDS].join(", ")}`
+      );
     }
     for (const field of FIELDS) {
       assert.ok(field in testCase.expected, `${file}: "expected" is missing required field "${field}"`);
@@ -164,7 +180,22 @@ for (const file of caseFiles) {
       calendarUrl,
       eventCount: extracted.eventCount,
       ctz: extracted.ctz || null,
+      eventsFound: (extracted.events || []).length,
     };
+
+    // Assert every distinct event only when the case opts in via `events`.
+    // Spread into a Node-realm array first: extractFromHtml returns a
+    // jsdom-realm array, and deepEqual rejects a cross-realm array even when
+    // its contents match.
+    if ("events" in testCase.expected) {
+      actual.events = [...(extracted.events || [])].map((e) => ({
+        title: e.title,
+        start: e.start,
+        end: e.end || null,
+        location: e.location,
+        dates: formatDatesParam(e.start, e.end),
+      }));
+    }
 
     assert.deepEqual(actual, testCase.expected, `${file}: extracted result does not match "expected" exactly`);
   });
