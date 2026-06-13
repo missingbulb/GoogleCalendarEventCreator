@@ -21,10 +21,11 @@ are simply left for you to fill in on the Google Calendar screen.
 Extraction runs in three layers, merged field-by-field (first non-empty wins):
 
 1. **Site-specific scrapers** with hardcoded selectors for the major event
-   sites: **meetup.com**, **facebook.com** events, and **eventbrite.com**.
-   Each lives in its own file under `extractors/` with a comment describing
-   the HTML it expects; to support a new platform, add a file there following
-   the same pattern and list it in `EXTRACTOR_FILES` in `background.js`.
+   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**, and
+   **edfringe.com** (Edinburgh Festival Fringe). Each lives in its own file
+   under `extractors/` with a comment describing the HTML it expects; to
+   support a new platform, add a file there following the same pattern and
+   list it in `EXTRACTOR_FILES` in `background.js`.
 2. **schema.org JSON-LD** (`<script type="application/ld+json">` with an
    `Event` type) — most event pages publish this, so it's the strongest
    generic signal.
@@ -45,6 +46,12 @@ moment in time regardless of the viewer's own timezone; dates without an
 offset are passed as floating local times so the event shows the same
 wall-clock time the page displayed. When no end time is found, a 2-hour
 duration is assumed. A date without a time becomes an all-day event.
+
+A site extractor that knows an event's location is fixed (e.g. a festival
+that only ever runs in one city) can set `ctz` to that timezone (e.g. `"GB"`
+for the Edinburgh Festival Fringe); it's passed straight through as the
+Calendar URL's `ctz` parameter, so a floating start/end time is interpreted
+in that timezone rather than the viewer's own.
 
 ## Install (developer mode)
 
@@ -167,7 +174,7 @@ from facebook.com, so it can't be snapshotted as a live case.
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
 | `background.js` | Service worker: runs the extractor, builds and opens the URL  |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
-| `extractors/meetup.js`, `facebook.js`, `eventbrite.js` | One file per supported event site, with hardcoded selectors |
+| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |

@@ -9,6 +9,10 @@
 //       "YYYY-MM-DDTHH:MM[:SS]"       -> floating local time
 //       full ISO with offset or "Z"   -> exact instant
 //   (background.js turns these into the Google Calendar `dates` parameter)
+//   ctz                          : IANA/legacy timezone name (e.g. "GB") to
+//       pin a floating start/end to a specific timezone regardless of the
+//       viewer's own — set by site extractors that know the event's
+//       location is fixed (e.g. a festival that only runs in one city)
 //
 // `GCal.sites` is the registry: each site-specific extractor pushes
 //   { name, matches(hostname), extract() }
@@ -142,7 +146,7 @@ globalThis.GCal = (() => {
   // value for a field wins.
   function merge(...sources) {
     const out = {};
-    for (const key of ["title", "start", "end", "location", "description"]) {
+    for (const key of ["title", "start", "end", "location", "description", "ctz"]) {
       for (const src of sources) {
         if (src && src[key]) {
           out[key] = src[key];

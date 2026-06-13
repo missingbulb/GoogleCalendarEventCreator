@@ -123,6 +123,43 @@ test("Listing page with several events: first suggested, flagged, all-day date",
   assert.equal(ev.multipleEvents, true);
 });
 
+test("Edinburgh Fringe: ctz is always GB, eventCount from performance dates", () => {
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Mr Chonkers: Work in Chonkers",
+      "startDate": "2026-08-10T19:30:00",
+      "location": { "@type": "Place", "name": "Pleasance Courtyard" } }
+    </script>
+    <h1>Mr Chonkers: Work in Chonkers</h1>
+    <div class="performance-dates">
+      <time datetime="2026-08-10T19:30:00">10 Aug</time>
+    </div>`;
+
+  const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/mr-chonkers-work-in-chonkers");
+  assert.equal(ev.title, "Mr Chonkers: Work in Chonkers");
+  assert.equal(ev.start, "2026-08-10T19:30:00");
+  assert.equal(ev.ctz, "GB");
+  assert.equal(ev.eventCount, 1);
+});
+
+test("Edinburgh Fringe: eventCount reflects every listed performance, not just the JSON-LD one", () => {
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Sophie Duker: Hot Beef Injection", "startDate": "2026-08-05T20:45:00" }
+    </script>
+    <h1>Sophie Duker: Hot Beef Injection</h1>
+    <div class="performance-dates">
+      <time datetime="2026-08-05T20:45:00">5 Aug</time>
+      <time datetime="2026-08-06T20:45:00">6 Aug</time>
+      <time datetime="2026-08-07T20:45:00">7 Aug</time>
+    </div>`;
+
+  const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection");
+  assert.equal(ev.ctz, "GB");
+  assert.equal(ev.eventCount, 3);
+  assert.equal(ev.multipleEvents, false); // only one schema.org Event on the page
+});
+
 test("Page with no event information at all: still returns a usable title", () => {
   const html = `<title>Just an Article</title><h1>Ten Tips for Houseplants</h1><p>Water them.</p>`;
 

@@ -1,0 +1,10 @@
+{
+  "description": "Edinburgh Fringe show page is parseable (Daniel Sloss: Bitter, single date)",
+  "url": "https://www.edfringe.com/tickets/whats-on/daniel-sloss-bitter",
+  "expected": {
+    "title": { "includes": "Daniel Sloss" },
+    "start": { "matches": "^2026-08-14" },
+    "ctz": "GB",
+    "eventCount": 1
+  }
+}

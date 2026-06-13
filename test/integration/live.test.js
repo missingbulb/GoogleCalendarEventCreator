@@ -25,7 +25,9 @@
 //       "location": { "includes": "Library" },      <- substring(s)
 //       "description": { "nonEmpty": true },         <- just has to be there
 //       "multipleEvents": false,                     <- boolean: exact match
-//       "dates":    "20260625T220000Z/20260626T010000Z" <- the Calendar URL's dates= param
+//       "dates":    "20260625T220000Z/20260626T010000Z", <- the Calendar URL's dates= param
+//       "eventCount": 23,                            <- number: exact match, total events found
+//       "ctz":      "GB"                             <- the Calendar URL's ctz= param, if any
 //     }
 //   }
 //
@@ -53,7 +55,7 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates"];
+const FIELDS = ["title", "start", "end", "location", "description", "multipleEvents", "dates", "eventCount", "ctz"];
 
 // background.js registers a chrome listener at load time; stub just enough
 // and evaluate it as global code so its function declarations land on
@@ -74,7 +76,7 @@ const manifest = fs.existsSync(MANIFEST_PATH) ? JSON.parse(fs.readFileSync(MANIF
 
 function assertField(field, actual, expectation, extracted) {
   const context = `\nfull extracted event: ${JSON.stringify(extracted, null, 2)}`;
-  if (typeof expectation === "string" || typeof expectation === "boolean") {
+  if (typeof expectation === "string" || typeof expectation === "boolean" || typeof expectation === "number") {
     assert.equal(actual, expectation, `"${field}" mismatch${context}`);
     return;
   }

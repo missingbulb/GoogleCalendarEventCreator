@@ -72,6 +72,16 @@ test("dates: an end before the start is ignored in favor of the default duration
   );
 });
 
+test("ctz: passed through to the Calendar URL when the extractor sets it", () => {
+  const url = buildCalendarUrl({ title: "Show", start: "2026-08-10T19:30:00", ctz: "GB" }, TAB);
+  assert.equal(paramsOf(url).get("ctz"), "GB");
+});
+
+test("ctz: omitted when the extractor didn't set it", () => {
+  const url = buildCalendarUrl({ title: "Show", start: "2026-08-10T19:30:00" }, TAB);
+  assert.equal(paramsOf(url).get("ctz"), null);
+});
+
 test("dates: omitted entirely when no start was found", () => {
   assert.equal(formatDatesParam("", ""), "");
   const url = buildCalendarUrl({ title: "No date" }, TAB);
