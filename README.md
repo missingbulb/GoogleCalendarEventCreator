@@ -70,8 +70,8 @@ Grab the packaged extension — just the files that ship, not the whole repo:
 1. Download
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
-   [Release workflow](#releasing--publishing-to-the-chrome-web-store)) and
-   extract it. It unpacks into a folder containing `manifest.json`.
+   [Create Release Package workflow](#creating-a-release-package)) and extract
+   it. It unpacks into a folder containing `manifest.json`.
 2. Open `chrome://extensions` in Chrome.
 3. Enable **Developer mode** (top right).
 4. Click **Load unpacked** and select the extracted folder (the one
@@ -117,17 +117,18 @@ workflow writes it for you; see below). The store rejects an upload whose
 version isn't strictly higher than the live one, so each release must increment
 it.
 
-### Cutting a release
+### Creating a release package
 
-The **Release** workflow (`.github/workflows/release.yml`) is the one button to
-push: it sets the version, runs the tests, builds the zip, publishes a GitHub
-Release with it attached, and then **auto-publishes it to the Chrome Web Store**
-(via the Publish workflow below).
+The **Create Release Package** workflow (`.github/workflows/release.yml`) sets
+the version, runs the tests, builds the zip, and publishes a GitHub Release with
+it attached. It does **not** touch the store — pushing to the Chrome Web Store
+is a separate, manual step (see below).
 
-- **Run workflow** (Actions tab → Release → "Run workflow") is the normal path.
-  Optionally type the version; **leave it blank to bump the current minor
-  version** (`1.0.0` → `1.1.0`). The workflow writes that version into
-  `manifest.json` / `package.json`, commits it, tags `vX.Y.Z`, and releases.
+- **Run workflow** (Actions tab → Create Release Package → "Run workflow") is
+  the normal path. Optionally type the version; **leave it blank to bump the
+  current minor version** (`1.0.0` → `1.1.0`). The workflow writes that version
+  into `manifest.json` / `package.json`, commits it, tags `vX.Y.Z`, and
+  releases.
 
   > GitHub can't pre-fill the input with a *computed* value — `workflow_dispatch`
   > defaults are static text — so "blank = next minor" is the convenience
@@ -141,21 +142,19 @@ Either way the zip is attached under a stable name, so the newest build is
 always at a fixed URL:
 `…/releases/latest/download/google-calendar-event-creator.zip`.
 
-### Automated publishing to the store
+### Publishing to the store
 
 The **Publish to Chrome Web Store** workflow
 (`.github/workflows/publish-chrome-store.yml`) takes the zip from a GitHub
 Release and uploads it to the store (publishing to users by default), via the
 [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api)
-(`chrome-webstore-upload-cli`). The Release workflow **calls it automatically**,
-so a normal release goes straight to the store. You can also run it on its own
-from the Actions tab — leave the tag blank to publish the **latest** release, or
-name a tag; uncheck **auto_publish** to upload as a draft and publish manually
-from the dashboard.
+(`chrome-webstore-upload-cli`). It's **manual** — run it from the Actions tab
+once a release package exists and you're ready to ship: leave the tag blank to
+publish the **latest** release, or name a tag; uncheck **auto_publish** to
+upload as a draft and publish manually from the dashboard.
 
-It needs four repository secrets (Settings → Secrets and variables → Actions) —
-**until they're set, the publish step fails** (the GitHub Release itself still
-succeeds):
+It needs four repository secrets (Settings → Secrets and variables → Actions);
+the workflow fails fast with a clear message if any are missing:
 
 | Secret | Where it comes from |
 | --- | --- |
@@ -186,8 +185,9 @@ secrets.
 ### Minor update
 
 1. Make the change (open an issue first per the project workflow) and merge it.
-2. Run the **Release** workflow (blank version = next minor). It bumps the
-   version, releases, and publishes to the store in one go.
+2. Run the **Create Release Package** workflow (blank version = next minor) to
+   bump the version and cut the GitHub Release.
+3. Run the **Publish to Chrome Web Store** workflow to ship it.
 
 Once the store approves it, Chrome auto-pushes the update to existing users
 within a few hours — no reinstall. (For the very first listing, do the one-time

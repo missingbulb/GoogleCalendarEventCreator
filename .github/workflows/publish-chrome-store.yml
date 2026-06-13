@@ -4,14 +4,8 @@ name: Publish to Chrome Web Store
 # it to the Chrome Web Store (optionally publishing it to users), via the Web
 # Store API using chrome-webstore-upload-cli.
 #
-# Triggers:
-#   * workflow_call — the Release workflow calls this after it publishes a
-#     release, so a release auto-publishes to the store.
-#   * "Run workflow" (workflow_dispatch) — publishes the given release tag, or
-#     the latest release if the tag is left blank.
-#   * A release being published from the GitHub UI by a person. (Releases the
-#     Release workflow tags automatically are published with GITHUB_TOKEN, whose
-#     events don't trigger this — but that path is covered by workflow_call.)
+# Run it manually from the Actions tab ("Run workflow") once you've created the
+# release package and are ready to ship it to users.
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   CHROME_EXTENSION_ID     the item/app ID from the Web Store dashboard URL
@@ -19,12 +13,6 @@ name: Publish to Chrome Web Store
 #   CHROME_CLIENT_SECRET    OAuth client secret } Chrome Web Store API — see the
 #   CHROME_REFRESH_TOKEN    OAuth refresh token } README "Automated publishing".
 on:
-  workflow_call:
-    inputs:
-      tag:
-        description: "Release tag to publish"
-        required: true
-        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -35,8 +23,6 @@ on:
         description: "Publish to users after upload (uncheck to leave it as a draft in the dashboard)"
         type: boolean
         default: true
-  release:
-    types: [published]
 
 permissions:
   contents: read
@@ -71,13 +57,8 @@ jobs:
       - name: Download the release zip
         run: |
           mkdir -p dist
-          if [ "${{ github.event_name }}" = "release" ]; then
-            tag="${{ github.event.release.tag_name }}"
-          else
-            tag="${{ inputs.tag }}"
-          fi
           # An empty tag makes `gh release download` pick the latest release.
-          gh release download $tag \
+          gh release download ${{ inputs.tag }} \
             --repo "${{ github.repository }}" \
             --pattern "google-calendar-event-creator.zip" \
             --dir dist
@@ -90,8 +71,7 @@ jobs:
       - name: Upload to the Chrome Web Store
         run: |
           flags=
-          # Default to publishing; release events always publish.
-          if [ "${{ github.event_name }}" != "release" ] && [ "${{ inputs.auto_publish }}" = "false" ]; then
+          if [ "${{ inputs.auto_publish }}" = "false" ]; then
             echo "auto_publish is off — uploading as a draft (publish it from the dashboard)."
           else
             flags="--auto-publish"

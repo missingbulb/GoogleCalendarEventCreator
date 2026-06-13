@@ -1,9 +1,9 @@
-name: Release
+name: Create Release Package
 
 # Cuts a release of the extension: bumps the version, builds the shippable zip
-# (dist/google-calendar-event-creator.zip), publishes a GitHub Release with it
-# attached, and then auto-publishes it to the Chrome Web Store (via the
-# reusable Publish workflow).
+# (dist/google-calendar-event-creator.zip), and publishes a GitHub Release with
+# it attached. Pushing the result to the Chrome Web Store is a separate, manual
+# step — run the "Publish to Chrome Web Store" workflow when you're ready.
 #
 #   * "Run workflow" (workflow_dispatch) — the normal path. Optionally type the
 #     version; leave it blank to bump the current minor version (x.Y.z ->
@@ -37,8 +37,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
@@ -122,13 +120,3 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           files: dist/google-calendar-event-creator.zip
           generate_release_notes: true
-
-  # Auto-publish the freshly released zip to the Chrome Web Store. Calling the
-  # Publish workflow directly (rather than relying on a release event) sidesteps
-  # the fact that GITHUB_TOKEN-published releases don't trigger other workflows.
-  publish-store:
-    needs: release
-    uses: ./.github/workflows/publish-chrome-store.yml
-    with:
-      tag: ${{ needs.release.outputs.tag }}
-    secrets: inherit
