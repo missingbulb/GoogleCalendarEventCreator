@@ -55,7 +55,14 @@
   } else if (ldEvents.length > 1) {
     events = ldEvents.map((ld) => norm(GCal.jsonLd.toEvent(ld)));
   } else {
-    events = [norm(GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract()))];
+    const event = norm(GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract()));
+    // The generic layer always fills a title (og:title -> <h1> -> document
+    // title), present on essentially every page, so a title alone is not an
+    // event. Only treat this as a real event when a site-specific or JSON-LD
+    // extractor contributed, or a date was actually parsed from the page;
+    // otherwise the page describes no event and we return none.
+    const isEvent = Boolean(site) || ldEvents.length > 0 || Boolean(event.start);
+    events = isEvent ? [event] : [];
   }
 
   // Present events in chronological order regardless of the order the page (or

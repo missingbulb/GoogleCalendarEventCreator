@@ -294,11 +294,21 @@ test("Meetup: an unrecognized timezone string is ignored", () => {
   assert.equal(e.ctz, ""); // no usable timezone -> empty
 });
 
-test("Page with no event information at all: still returns a single usable title", () => {
+test("Page with no event information at all: returns no events", () => {
+  // A title (og:title / <h1> / document title) is present on essentially every
+  // page, so a title with no date is not an event — the popup shows nothing.
   const html = `<title>Just an Article</title><h1>Ten Tips for Houseplants</h1><p>Water them.</p>`;
 
   const ev = extractFromHtml(html, "https://www.blog.example/houseplants");
+  assert.equal(ev.events.length, 0);
+});
+
+test("Page with a parseable date but no site/JSON-LD: still yields the event", () => {
+  // A date is a real event signal, so the generic fallback keeps the event.
+  const html = `<h1>Block Party</h1><p>Join us on Saturday, July 11, 2026 at 2 PM.</p>`;
+
+  const ev = extractFromHtml(html, "https://www.blog.example/block-party");
   assert.equal(ev.events.length, 1);
-  assert.equal(ev.events[0].title, "Ten Tips for Houseplants");
-  assert.equal(ev.events[0].start, "");
+  assert.equal(ev.events[0].title, "Block Party");
+  assert.equal(ev.events[0].start, "2026-07-11T14:00:00");
 });
