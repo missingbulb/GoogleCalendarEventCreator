@@ -1,13 +1,10 @@
-// Popup: runs the extractor in the active tab, shows a summary of what was
-// found, and only opens the pre-filled Google Calendar event when the user
-// clicks the button.
+// Popup: runs the extractor in the active tab and shows one button per
+// distinct event found. Clicking a button opens that event's pre-filled
+// Google Calendar template in a new tab.
 (async () => {
-  const titleEl = document.getElementById("title");
-  const whenEl = document.getElementById("when");
-  const locationField = document.getElementById("location-field");
-  const locationEl = document.getElementById("location");
-  const multipleNoteEl = document.getElementById("multiple-note");
-  const button = document.getElementById("create-btn");
+  const headingEl = document.getElementById("heading");
+  const eventsEl = document.getElementById("events");
+  const emptyEl = document.getElementById("empty");
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -23,25 +20,73 @@
     console.warn("Could not extract from page:", e);
   }
 
-  titleEl.textContent = data.title || tab.title || "New event";
-  whenEl.textContent = formatWhen(data.start, data.end);
+  const events = data.events && data.events.length ? data.events : [];
 
-  if (data.location) {
-    locationEl.textContent = data.location;
-    locationField.hidden = false;
+  if (!events.length) {
+    // Nothing structured found; still let the user create an event seeded
+    // from the tab title.
+    headingEl.textContent = "Add to Google Calendar";
+    emptyEl.hidden = false;
+    eventsEl.appendChild(makeButton({ title: tab.title || "New event" }, data, tab, false));
+    return;
   }
 
-  if (data.multipleEvents) {
-    multipleNoteEl.hidden = false;
+  headingEl.textContent =
+    events.length > 1 ? `${events.length} events on this page` : "Add to Google Calendar";
+
+  events.forEach((event) => {
+    eventsEl.appendChild(makeButton(event, data, tab, events.length > 1));
+  });
+})().catch((e) => console.error("Popup failed to initialize:", e));
+
+// Build one event button. `pageData` carries page-level fields (description,
+// ctz, source URL) shared by every event. When the page has several distinct
+// events, each button targets its own event and the "first of several" note
+// is suppressed; for a single event the full extraction is used as-is (so a
+// film with several screening dates keeps that note).
+function makeButton(event, pageData, tab, multiple) {
+  const eventData = multiple
+    ? {
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        location: event.location,
+        description: pageData.description,
+        ctz: pageData.ctz,
+      }
+    : pageData;
+
+  const url = buildCalendarUrl({ ...eventData, title: event.title || tab.title }, tab);
+
+  const btn = document.createElement("button");
+  btn.className = "event-btn";
+
+  const title = document.createElement("span");
+  title.className = "e-title";
+  title.textContent = event.title || tab.title || "New event";
+  btn.appendChild(title);
+
+  const whenText = summarize(event);
+  if (whenText) {
+    const when = document.createElement("span");
+    when.className = "e-when";
+    when.textContent = whenText;
+    btn.appendChild(when);
   }
 
-  const url = buildCalendarUrl(data, tab);
-  button.disabled = false;
-  button.addEventListener("click", async () => {
+  btn.addEventListener("click", async () => {
     await chrome.tabs.create({ url, index: tab.index + 1 });
     window.close();
   });
-})().catch((e) => console.error("Popup failed to initialize:", e));
+  return btn;
+}
+
+// Second line of a button: the date/time, plus the location when there's one.
+function summarize(event) {
+  const when = formatWhen(event.start, event.end);
+  if (event.location) return `${when} · ${event.location}`;
+  return when;
+}
 
 // Human-readable summary of the extracted date/time for the popup (separate
 // from formatDatesParam's Google Calendar URL encoding).

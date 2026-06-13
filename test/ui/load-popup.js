@@ -15,7 +15,7 @@ function loadPopupHelpers() {
   const sandbox = { console: { error() {} } };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "popup.js"), "utf8"), sandbox);
-  return { formatWhen: sandbox.formatWhen };
+  return { formatWhen: sandbox.formatWhen, summarize: sandbox.summarize };
 }
 
 module.exports = loadPopupHelpers();

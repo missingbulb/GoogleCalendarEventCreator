@@ -23,6 +23,7 @@ test("Meetup: hardcoded selectors (title, time, venue, details)", () => {
   assert.equal(ev.location, "Brooklyn Public Library");
   assert.ok(ev.description.includes("ownership and borrowing"));
   assert.equal(ev.multipleEvents, false);
+  assert.equal(ev.events.length, 1); // a single event still yields one entry
 });
 
 test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
@@ -121,6 +122,47 @@ test("Listing page with several events: first suggested, flagged, all-day date",
   assert.equal(ev.start, "2026-10-03"); // date-only -> all-day event
   assert.equal(ev.location, "Market Square");
   assert.equal(ev.multipleEvents, true);
+  // All three events are returned; the first matches the top-level fields.
+  assert.equal(ev.events.length, 3);
+  assert.deepEqual(
+    [...ev.events].map((e) => e.title),
+    ["Sculpture Fair", "Poetry Slam", "Chamber Music"]
+  );
+  assert.equal(ev.events[0].start, "2026-10-03");
+  assert.equal(ev.events[1].start, "2026-10-10T19:00:00");
+});
+
+test("Cinema.co.il series page: one event per film card, first film suggested", () => {
+  const html = `
+    <meta property="og:title" content="Demo Film Week - סינמטק תל אביב">
+    <meta property="og:site_name" content="סינמטק תל אביב">
+    <meta property="og:description" content="A week of films.">
+    <div class="register-series-boxes">
+      <div class="box"><div class="text-wraper"><div class="title">
+        <h3>First Film</h3><p>17-06-2026 , רביעי / 20:00 / אולם 3</p></div>
+        <div class="content-detail"><a href="https://www.cinema.co.il/event/first/">details</a></div>
+      </div></div>
+      <div class="box"><div class="text-wraper"><div class="title">
+        <h3>Second Film</h3><p>18-06-2026 , חמישי / 18:30 / אולם 1</p></div>
+        <div class="content-detail"><a href="https://www.cinema.co.il/event/second/">details</a></div>
+      </div></div>
+    </div>
+    <a href="#"><img data-src="https://www.cinema.co.il/x/location.png">רחוב הארבעה 5, תל אביב</a>`;
+
+  const ev = extractFromHtml(html, "https://www.cinema.co.il/series/demo-film-week/");
+  assert.equal(ev.eventCount, 2);
+  assert.equal(ev.multipleEvents, true);
+  assert.equal(ev.events.length, 2);
+  // The first film is the suggested (top-level) event.
+  assert.equal(ev.title, "First Film");
+  assert.equal(ev.start, "2026-06-17T20:00:00");
+  assert.deepEqual(
+    [...ev.events].map((e) => e.title),
+    ["First Film", "Second Film"]
+  );
+  assert.equal(ev.events[1].start, "2026-06-18T18:30:00");
+  assert.equal(ev.ctz, "Asia/Jerusalem");
+  assert.ok(ev.location.includes("סינמטק תל אביב"));
 });
 
 test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB, eventCount from performances", () => {
