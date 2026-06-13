@@ -1,10 +1,10 @@
-// Service worker: on toolbar click, run the extractor in the active tab and
-// open a pre-filled Google Calendar event template with whatever was found.
+// Shared library, loaded by the popup: builds a pre-filled Google Calendar
+// event template URL from extracted page data.
 
-// Injected in order into the page on click; all files share one isolated
-// world, so lib.js must come first and main.js (whose completion value is
-// the extraction result) must come last. The test harness reads this list,
-// so tests always exercise exactly what gets injected.
+// Injected in order into the page when the popup opens; all files share one
+// isolated world, so lib.js must come first and main.js (whose completion
+// value is the extraction result) must come last. The test harness reads
+// this list, so tests always exercise exactly what gets injected.
 const EXTRACTOR_FILES = [
   "extractors/lib.js",
   "extractors/site-hosts.js",
@@ -20,77 +20,6 @@ const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
 const MAX_DETAILS_LENGTH = 1500; // keep the template URL a reasonable size
 
-// Reuse the same hostname matchers as the site-specific extractors (via
-// GCal.siteHosts) to decide whether the toolbar icon shows green (a
-// site-specific extractor exists for this page) or red (it doesn't).
-importScripts("extractors/site-hosts.js");
-
-const ICON_SIZES = [16, 32, 48, 128];
-const SUPPORTED_ICON = Object.fromEntries(ICON_SIZES.map((s) => [s, `icons/icon${s}-green.png`]));
-const UNSUPPORTED_ICON = Object.fromEntries(ICON_SIZES.map((s) => [s, `icons/icon${s}-red.png`]));
-
-function isSupportedUrl(url) {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "");
-    return GCal.siteHosts.some((site) => site.matches(host));
-  } catch (e) {
-    return false; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
-  }
-}
-
-// The toolbar icon's border color for a given page URL: green when a
-// site-specific extractor exists for it, red otherwise.
-function iconBorderColor(url) {
-  return isSupportedUrl(url) ? "green" : "red";
-}
-
-async function updateIcon(tabId, url) {
-  const path = isSupportedUrl(url) ? SUPPORTED_ICON : UNSUPPORTED_ICON;
-  try {
-    await chrome.action.setIcon({ tabId, path });
-  } catch (e) {
-    // Tab may have closed before this ran.
-  }
-}
-
-chrome.tabs.onActivated.addListener(({ tabId }) => {
-  chrome.tabs.get(tabId, (tab) => {
-    if (tab) updateIcon(tabId, tab.url);
-  });
-});
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.url || changeInfo.status === "complete") {
-    updateIcon(tabId, tab.url);
-  }
-});
-
-async function updateAllTabIcons() {
-  for (const tab of await chrome.tabs.query({})) {
-    updateIcon(tab.id, tab.url);
-  }
-}
-
-chrome.runtime.onInstalled.addListener(updateAllTabIcons);
-chrome.runtime.onStartup.addListener(updateAllTabIcons);
-
-chrome.action.onClicked.addListener(async (tab) => {
-  let data = {};
-  try {
-    const [injection] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: EXTRACTOR_FILES,
-    });
-    data = (injection && injection.result) || {};
-  } catch (e) {
-    // Restricted page (chrome://, Web Store, etc.) — fall back to tab metadata.
-    console.warn("Could not extract from page:", e);
-  }
-
-  const url = buildCalendarUrl(data, tab);
-  await chrome.tabs.create({ url, index: tab.index + 1 });
-});
-
 function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
   params.set("action", "TEMPLATE");
@@ -101,18 +30,40 @@ function buildCalendarUrl(data, tab) {
   const dates = formatDatesParam(data.start, data.end);
   if (dates) params.set("dates", dates);
 
-  // The details field always starts with the original event page URL,
-  // followed by the extracted description.
+  // The details field always starts with a link back to the original event
+  // page, followed by the extracted description.
   let details = (data.description || "").slice(0, MAX_DETAILS_LENGTH);
   if (data.multipleEvents) {
     details = "(First of several events found on this page.)\n\n" + details;
   }
-  details = (tab.url ? tab.url + "\n\n" : "") + details;
+  const link = sourceLink(tab);
+  details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
 
   if (data.location) params.set("location", data.location);
 
   return `${CALENDAR_RENDER_URL}?${params.toString()}`;
+}
+
+// The link placed at the top of the details field for a given tab. On
+// meetup.com, event URLs often carry tracking query parameters
+// (recId, recSource, searchId, ...); show the canonical URL as the link text
+// while keeping the original (tracked) URL as the link target, e.g.
+//   [https://www.meetup.com/group/events/123](https://www.meetup.com/group/events/123/?recId=...)
+function sourceLink(tab) {
+  if (!tab.url) return "";
+  let url;
+  try {
+    url = new URL(tab.url);
+  } catch (e) {
+    return tab.url;
+  }
+  const host = url.hostname.replace(/^www\./, "");
+  if (/(^|\.)meetup\.com$/.test(host)) {
+    const canonical = `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+    return `[${canonical}](${tab.url})`;
+  }
+  return tab.url;
 }
 
 // Build the `dates` parameter for the TEMPLATE URL:

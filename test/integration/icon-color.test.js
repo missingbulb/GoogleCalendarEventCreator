@@ -9,11 +9,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// background.js registers chrome listeners and importScripts()'s
+// icon-state.js registers chrome listeners and importScripts()'s
 // extractors/site-hosts.js at load time; stub just enough of the extension
 // APIs and run both files in the same sandbox so iconBorderColor() can see
 // GCal.siteHosts exactly as it does in the real extension.
-function loadBackground() {
+function loadIconState() {
   const sandbox = {
     URL,
     chrome: {
@@ -26,11 +26,11 @@ function loadBackground() {
     },
   };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"), sandbox);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "icon-state.js"), "utf8"), sandbox);
   return { iconBorderColor: sandbox.iconBorderColor };
 }
 
-const { iconBorderColor } = loadBackground();
+const { iconBorderColor } = loadIconState();
 
 const CASES = [
   { url: "https://www.meetup.com/some-group/events/123456/", expected: "green" },

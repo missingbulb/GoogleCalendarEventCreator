@@ -5,11 +5,12 @@ on:
     branches: [main]
   push:
     branches: [main]
-    # Pushes from the "Refresh snapshots" workflow only touch this path and
-    # carry [skip ci]; this is a redundant extra guard against re-triggering
-    # this workflow.
+    # Pushes from the "Refresh snapshots" / "Refresh UI snapshot" workflows
+    # only touch these paths and carry [skip ci]; this is a redundant extra
+    # guard against re-triggering this workflow.
     paths-ignore:
       - "test/integration/snapshots/**"
+      - "test/ui/snapshots/popup.png"
 
 jobs:
   test:
@@ -38,3 +39,9 @@ jobs:
       # them).
       - name: Run live tests
         run: npm run test:live
+
+      # Compares a rendering of the popup against test/ui/snapshots/popup.png
+      # (browsable on GitHub). Deterministic and dependency-light (satori +
+      # resvg, no browser), so it runs alongside the other tests.
+      - name: Run UI snapshot test
+        run: npm run test:ui
