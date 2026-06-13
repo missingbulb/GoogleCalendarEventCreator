@@ -23,7 +23,7 @@
 
   GCal.sites.push({
     name: "facebook",
-    matches: (host) => /(^|\.)facebook\.com$/.test(host),
+    matches: GCal.siteHosts.find((s) => s.name === "facebook").matches,
     extract() {
       let title = text('h1, [role="main"] h2 span');
       if (!title) {

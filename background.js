@@ -1,12 +1,13 @@
-// Service worker: on toolbar click, run the extractor in the active tab and
-// open a pre-filled Google Calendar event template with whatever was found.
+// Shared library, loaded by the popup: builds a pre-filled Google Calendar
+// event template URL from extracted page data.
 
-// Injected in order into the page on click; all files share one isolated
-// world, so lib.js must come first and main.js (whose completion value is
-// the extraction result) must come last. The test harness reads this list,
-// so tests always exercise exactly what gets injected.
+// Injected in order into the page when the popup opens; all files share one
+// isolated world, so lib.js must come first and main.js (whose completion
+// value is the extraction result) must come last. The test harness reads
+// this list, so tests always exercise exactly what gets injected.
 const EXTRACTOR_FILES = [
   "extractors/lib.js",
+  "extractors/site-hosts.js",
   "extractors/jsonld.js",
   "extractors/generic.js",
   "extractors/meetup.js",
@@ -20,23 +21,6 @@ const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
 const MAX_DETAILS_LENGTH = 1500; // keep the template URL a reasonable size
 
-chrome.action.onClicked.addListener(async (tab) => {
-  let data = {};
-  try {
-    const [injection] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: EXTRACTOR_FILES,
-    });
-    data = (injection && injection.result) || {};
-  } catch (e) {
-    // Restricted page (chrome://, Web Store, etc.) — fall back to tab metadata.
-    console.warn("Could not extract from page:", e);
-  }
-
-  const url = buildCalendarUrl(data, tab);
-  await chrome.tabs.create({ url, index: tab.index + 1 });
-});
-
 function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
   params.set("action", "TEMPLATE");
@@ -48,18 +32,40 @@ function buildCalendarUrl(data, tab) {
   if (dates) params.set("dates", dates);
   if (data.ctz) params.set("ctz", data.ctz);
 
-  // The details field always starts with the original event page URL,
-  // followed by the extracted description.
+  // The details field always starts with a link back to the original event
+  // page, followed by the extracted description.
   let details = (data.description || "").slice(0, MAX_DETAILS_LENGTH);
   if (data.multipleEvents) {
     details = "(First of several events found on this page.)\n\n" + details;
   }
-  details = (tab.url ? tab.url + "\n\n" : "") + details;
+  const link = sourceLink(tab);
+  details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
 
   if (data.location) params.set("location", data.location);
 
   return `${CALENDAR_RENDER_URL}?${params.toString()}`;
+}
+
+// The link placed at the top of the details field for a given tab. On
+// meetup.com, event URLs often carry tracking query parameters
+// (recId, recSource, searchId, ...); show the canonical URL as the link text
+// while keeping the original (tracked) URL as the link target, e.g.
+//   [https://www.meetup.com/group/events/123](https://www.meetup.com/group/events/123/?recId=...)
+function sourceLink(tab) {
+  if (!tab.url) return "";
+  let url;
+  try {
+    url = new URL(tab.url);
+  } catch (e) {
+    return tab.url;
+  }
+  const host = url.hostname.replace(/^www\./, "");
+  if (/(^|\.)meetup\.com$/.test(host)) {
+    const canonical = `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+    return `[${canonical}](${tab.url})`;
+  }
+  return tab.url;
 }
 
 // Build the `dates` parameter for the TEMPLATE URL:

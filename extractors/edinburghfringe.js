@@ -64,7 +64,7 @@
 
   GCal.sites.push({
     name: "edinburghfringe",
-    matches: (host) => /(^|\.)edfringe\.com$/.test(host),
+    matches: GCal.siteHosts.find((s) => s.name === "edinburghfringe").matches,
     extract() {
       const event = readEvent();
       if (!event) return { ctz: "GB" };

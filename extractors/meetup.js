@@ -25,7 +25,7 @@
 
   GCal.sites.push({
     name: "meetup",
-    matches: (host) => /(^|\.)meetup\.com$/.test(host),
+    matches: GCal.siteHosts.find((s) => s.name === "meetup").matches,
     extract() {
       const timeEl = document.querySelector(
         "#event-info time[datetime], main time[datetime], time[datetime]"
