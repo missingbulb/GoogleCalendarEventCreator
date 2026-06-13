@@ -5,11 +5,11 @@ on:
     branches: [main]
   push:
     branches: [main]
-    # Pushes from the "Refresh snapshots" / "Refresh UI snapshot" workflows
-    # only touch these paths and carry [skip ci]; this is a redundant extra
-    # guard against re-triggering this workflow.
+    # Pushes from the "Refresh cached HTML files" / "Refresh UI snapshot"
+    # workflows only touch these paths and carry [skip ci]; this is a redundant
+    # extra guard against re-triggering this workflow.
     paths-ignore:
-      - "test/integration/snapshots/**"
+      - "data/**"
       - "test/ui/snapshots/popup.png"
 
 jobs:
@@ -33,10 +33,9 @@ jobs:
       - name: Run offline tests
         run: npm run test:offline
 
-      # "For you" tests: the reviewed assertions, run against the HTML
-      # snapshots committed to test/integration/snapshots/ (kept fresh by
-      # the daily "Refresh snapshots" workflow — this job does not refresh
-      # them).
+      # "For you" tests: the reviewed assertions, run against the cached
+      # HTML files committed to data/ (kept fresh by the daily "Refresh
+      # cached HTML files" workflow — this job does not refresh them).
       - name: Run live tests
         run: npm run test:live
 

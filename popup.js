@@ -4,7 +4,6 @@
 (async () => {
   const headingEl = document.getElementById("heading");
   const eventsEl = document.getElementById("events");
-  const emptyEl = document.getElementById("empty");
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -26,11 +25,8 @@
   const events = allEvents.slice(0, MAX_EVENTS);
 
   if (!events.length) {
-    // Nothing structured found; still let the user create an event seeded
-    // from the tab title.
-    headingEl.textContent = "Add to Google Calendar";
-    emptyEl.hidden = false;
-    eventsEl.appendChild(makeButton({ title: tab.title || "New event" }, tab));
+    // Nothing found on the page: show no buttons, just say so.
+    headingEl.textContent = "No events found on this page";
     return;
   }
 

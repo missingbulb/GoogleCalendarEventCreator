@@ -1,6 +1,6 @@
-name: Refresh snapshots
+name: Refresh cached HTML files
 
-# Keeps the committed HTML snapshots fresh independently of pushes, and
+# Keeps the committed cached HTML files fresh independently of pushes, and
 # surfaces site markup changes as a failing scheduled run within a day.
 on:
   schedule:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       force_all:
-        description: "Force-refresh all snapshots, even ones less than 24h old"
+        description: "Force-refresh all cached HTML files, even ones less than 24h old"
         type: boolean
         default: false
 
@@ -29,10 +29,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Scheduled runs only refresh snapshots older than 24h. Manually
-      # triggered runs can opt into refreshing every snapshot via the
+      # Scheduled runs only refresh cached HTML files older than 24h. Manually
+      # triggered runs can opt into refreshing every file via the
       # "force_all" input.
-      - name: Refresh HTML snapshots
+      - name: Refresh cached HTML files
         run: npm run refresh -- ${{ inputs.force_all && '--force' || '' }}
 
       # Run the live assertions against the freshly fetched pages, so a site
@@ -40,14 +40,14 @@ jobs:
       - name: Run live tests
         run: npm run test:live
 
-      - name: Commit refreshed snapshots
+      - name: Commit refreshed cached HTML files
         run: |
-          if [ -n "$(git status --porcelain test/integration/snapshots)" ]; then
+          if [ -n "$(git status --porcelain data)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add test/integration/snapshots
-            git commit -m "chore: refresh HTML snapshots [skip ci]"
+            git add data
+            git commit -m "chore: refresh cached HTML files [skip ci]"
             git push
           else
-            echo "Snapshots already fresh; nothing to commit."
+            echo "Cached HTML files already fresh; nothing to commit."
           fi

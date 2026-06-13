@@ -83,8 +83,12 @@ function eventButton(event) {
 function buildTree(data) {
   const MAX_EVENTS = 7;
   const allEvents = data.events && data.events.length ? data.events : [];
-  const events = allEvents.length ? allEvents.slice(0, MAX_EVENTS) : [{ title: data.title || "New event" }];
-  const heading = allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
+  const events = allEvents.slice(0, MAX_EVENTS);
+  const heading = !allEvents.length
+    ? "No events found on this page"
+    : allEvents.length > 1
+      ? `${allEvents.length} events on this page`
+      : "Add to Google Calendar";
   const truncated = allEvents.length > MAX_EVENTS;
 
   const children = [
