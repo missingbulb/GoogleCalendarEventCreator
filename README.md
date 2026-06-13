@@ -227,8 +227,8 @@ After an intentional change to the popup's UI, run `npm run refresh:ui` to
 regenerate both `popup-single-event.png` and `popup-multi-event.png` (or use the **Refresh UI
 snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
 PNGs so reviewers can see the before/after in the diff. On mismatch, the test
-writes `<name>.actual.png` and `<name>.diff.png` (both gitignored)
-for local debugging.
+writes `<name>.actual.png` and `<name>.diff.png` to a temp dir outside the repo
+(see `test/ui/artifacts-dir.js`); the failure message prints their full paths.
 
 ### Toolbar icon test
 
@@ -247,8 +247,8 @@ After an intentional change to `tools/gen_icons.py` / `render-icon.js`, run
 `npm run refresh:ui` to regenerate `icon-unsupported.png` and `icon-supported.png` (and
 re-run `python3 tools/gen_icons.py` to regenerate the shipped icons) and
 commit the results. On mismatch, the test writes
-`test/ui/snapshots/icon-{unsupported,supported}.actual.png` and
-`icon-{unsupported,supported}.diff.png` (gitignored) for local debugging.
+`icon-{unsupported,supported}.actual.png` and `.diff.png` to a temp dir outside
+the repo (see `test/ui/artifacts-dir.js`); the failure message prints the paths.
 
 ## Files
 
@@ -273,6 +273,7 @@ commit the results. On mismatch, the test writes
 | `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
 | `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `popup.js` for use in `render.js` |
 | `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
+| `test/ui/artifacts-dir.js` | Temp-dir path the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
 | `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup-single-event.png` and `popup-multi-event.png` |

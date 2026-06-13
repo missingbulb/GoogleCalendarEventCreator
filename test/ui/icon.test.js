@@ -13,6 +13,7 @@ const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
 const { renderIconPng, RED, GREEN } = require("./render-icon");
+const { artifactPath } = require("./artifacts-dir");
 
 const ICONS_DIR = path.join(__dirname, "..", "..", "icons");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
@@ -28,8 +29,8 @@ for (const { state, color, name, shippedIcon } of CASES) {
     const actual = PNG.sync.read(actualBuffer);
 
     const snapshotPath = path.join(SNAPSHOTS_DIR, name);
-    const actualPath = path.join(SNAPSHOTS_DIR, name.replace(/\.png$/, ".actual.png"));
-    const diffPath = path.join(SNAPSHOTS_DIR, name.replace(/\.png$/, ".diff.png"));
+    const actualPath = artifactPath(name.replace(/\.png$/, ".actual.png"));
+    const diffPath = artifactPath(name.replace(/\.png$/, ".diff.png"));
 
     assert.ok(
       fs.existsSync(snapshotPath),
@@ -56,8 +57,8 @@ for (const { state, color, name, shippedIcon } of CASES) {
       fs.writeFileSync(diffPath, PNG.sync.write(diff));
       assert.fail(
         `Icon for ${state} pages changed: ${diffPixels} of ${width * height} pixels differ ` +
-          `from ${snapshotPath}. See test/ui/snapshots/${path.basename(actualPath)} and ` +
-          `${path.basename(diffPath)}, or run "npm run refresh:ui" if this is intentional.`
+          `from ${snapshotPath}. See ${actualPath} and ${diffPath}, ` +
+          `or run "npm run refresh:ui" if this is intentional.`
       );
     } else {
       for (const p of [actualPath, diffPath]) {

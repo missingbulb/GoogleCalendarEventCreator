@@ -1,17 +1,5 @@
 node_modules/
 
-# UI snapshot test failure artifacts (the committed expected images are
-# test/ui/snapshots/popup-single-event.png and popup-multi-event.png)
-test/ui/snapshots/popup-single-event.actual.png
-test/ui/snapshots/popup-single-event.diff.png
-test/ui/snapshots/popup-multi-event.actual.png
-test/ui/snapshots/popup-multi-event.diff.png
-test/ui/snapshots/popup-truncated.actual.png
-test/ui/snapshots/popup-truncated.diff.png
-
-# UI snapshot test failure artifacts (the committed expected images are
-# test/ui/snapshots/icon-{unsupported,supported}.png)
-test/ui/snapshots/icon-unsupported.actual.png
-test/ui/snapshots/icon-unsupported.diff.png
-test/ui/snapshots/icon-supported.actual.png
-test/ui/snapshots/icon-supported.diff.png
+# The UI snapshot tests write their .actual.png / .diff.png failure artifacts
+# to a temp dir outside the repo (see test/ui/artifacts-dir.js), so there's
+# nothing to ignore here.
