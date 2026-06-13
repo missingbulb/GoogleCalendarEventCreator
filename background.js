@@ -29,18 +29,40 @@ function buildCalendarUrl(data, tab) {
   const dates = formatDatesParam(data.start, data.end);
   if (dates) params.set("dates", dates);
 
-  // The details field always starts with the original event page URL,
-  // followed by the extracted description.
+  // The details field always starts with a link back to the original event
+  // page, followed by the extracted description.
   let details = (data.description || "").slice(0, MAX_DETAILS_LENGTH);
   if (data.multipleEvents) {
     details = "(First of several events found on this page.)\n\n" + details;
   }
-  details = (tab.url ? tab.url + "\n\n" : "") + details;
+  const link = sourceLink(tab);
+  details = (link ? link + "\n\n" : "") + details;
   params.set("details", details.trim());
 
   if (data.location) params.set("location", data.location);
 
   return `${CALENDAR_RENDER_URL}?${params.toString()}`;
+}
+
+// The link placed at the top of the details field for a given tab. On
+// meetup.com, event URLs often carry tracking query parameters
+// (recId, recSource, searchId, ...); show the canonical URL as the link text
+// while keeping the original (tracked) URL as the link target, e.g.
+//   [https://www.meetup.com/group/events/123](https://www.meetup.com/group/events/123/?recId=...)
+function sourceLink(tab) {
+  if (!tab.url) return "";
+  let url;
+  try {
+    url = new URL(tab.url);
+  } catch (e) {
+    return tab.url;
+  }
+  const host = url.hostname.replace(/^www\./, "");
+  if (/(^|\.)meetup\.com$/.test(host)) {
+    const canonical = `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+    return `[${canonical}](${tab.url})`;
+  }
+  return tab.url;
 }
 
 // Build the `dates` parameter for the TEMPLATE URL:
