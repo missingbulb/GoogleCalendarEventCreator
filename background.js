@@ -47,11 +47,11 @@ function buildCalendarUrl(data, tab) {
 }
 
 // The link placed at the top of the details field for a given tab. Google
-// Calendar renders the details field as a limited HTML fragment (not
-// markdown), so a clickable link must be an <a> tag. On meetup.com, event URLs
-// often carry tracking query parameters (recId, recSource, searchId, ...);
-// strip them entirely so the link points at the clean canonical URL, e.g.
-//   <a href="https://www.meetup.com/group/events/123">https://www.meetup.com/group/events/123</a>
+// Calendar autolinks a bare URL in the details field, so it's emitted as plain
+// text. On meetup.com, event URLs often carry tracking query parameters
+// (recId, recSource, searchId, ...); strip them entirely so the link points at
+// the clean canonical URL, e.g.
+//   https://www.meetup.com/group/events/123
 function sourceLink(tab) {
   if (!tab.url) return "";
   let url;
@@ -62,8 +62,7 @@ function sourceLink(tab) {
   }
   const host = url.hostname.replace(/^www\./, "");
   if (/(^|\.)meetup\.com$/.test(host)) {
-    const canonical = `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
-    return `<a href="${canonical}">${canonical}</a>`;
+    return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
   }
   return tab.url;
 }
