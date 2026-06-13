@@ -18,3 +18,20 @@ GCal.siteHosts = [
   { name: "edinburghfringe", matches: (host) => /(^|\.)edfringe\.com$/.test(host) },
   { name: "telavivcinematheque", matches: (host) => /(^|\.)cinema\.co\.il$/.test(host) },
 ];
+
+// THE single source of truth for "is this page a supported site": its hostname
+// has a registered site-specific extractor above. Both consumers derive from
+// this one function so they can never disagree — the toolbar icon's border
+// color (icon-state.js) and what the popup shows (popup.js). A page on an
+// unregistered host gets a red border AND the popup's "request this source"
+// flow, never an event button, even if the generic/JSON-LD layers happened to
+// scrape something off it. DOM-free like the rest of this file, so it runs the
+// same in the service worker, the popup, and content-script contexts.
+GCal.isSupportedHost = function (url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return GCal.siteHosts.some((site) => site.matches(host));
+  } catch (e) {
+    return false; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
+  }
+};
