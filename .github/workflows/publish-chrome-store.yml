@@ -1,0 +1,95 @@
+name: Publish to Chrome Web Store
+
+# Takes the google-calendar-event-creator.zip from a GitHub Release and uploads
+# it to the Chrome Web Store (optionally publishing it to users), via the Web
+# Store API using chrome-webstore-upload-cli.
+#
+# Triggers:
+#   * "Run workflow" (workflow_dispatch) — the reliable path. Grabs the zip from
+#     the given release tag, or the latest release if none is given.
+#   * A release being published. NOTE: the Release workflow publishes releases
+#     with GITHUB_TOKEN, and events from GITHUB_TOKEN do not trigger other
+#     workflows — so an auto-tagged release will NOT auto-run this. It only
+#     fires when a release is published by a person from the GitHub UI. For
+#     auto-tagged releases, use "Run workflow".
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   CHROME_EXTENSION_ID     the item/app ID from the Web Store dashboard URL
+#   CHROME_CLIENT_ID        OAuth client ID  } generated once against the
+#   CHROME_CLIENT_SECRET    OAuth client secret } Chrome Web Store API — see the
+#   CHROME_REFRESH_TOKEN    OAuth refresh token } README "Automated publishing".
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (blank = latest release)"
+        required: false
+        type: string
+      auto_publish:
+        description: "Publish to users after upload (uncheck to leave it as a draft in the dashboard)"
+        type: boolean
+        default: true
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # chrome-webstore-upload-cli reads these env vars directly.
+      EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fail early if credentials are missing
+        run: |
+          missing=
+          for v in EXTENSION_ID CLIENT_ID CLIENT_SECRET REFRESH_TOKEN; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "Missing required secret(s):$missing" >&2
+            echo "Add them under Settings → Secrets and variables → Actions (see README)." >&2
+            exit 1
+          fi
+
+      - name: Download the release zip
+        run: |
+          mkdir -p dist
+          if [ "${{ github.event_name }}" = "release" ]; then
+            tag="${{ github.event.release.tag_name }}"
+          else
+            tag="${{ inputs.tag }}"
+          fi
+          # An empty tag makes `gh release download` pick the latest release.
+          gh release download $tag \
+            --repo "${{ github.repository }}" \
+            --pattern "google-calendar-event-creator.zip" \
+            --dir dist
+          ls -l dist
+
+      - name: Show the version being published
+        run: |
+          echo "Publishing $(unzip -p dist/google-calendar-event-creator.zip manifest.json | grep '"version"')"
+
+      - name: Upload to the Chrome Web Store
+        run: |
+          flags=
+          # Default to publishing; release events always publish.
+          if [ "${{ github.event_name }}" != "release" ] && [ "${{ inputs.auto_publish }}" = "false" ]; then
+            echo "auto_publish is off — uploading as a draft (publish it from the dashboard)."
+          else
+            flags="--auto-publish"
+          fi
+          npx --yes chrome-webstore-upload-cli@3 upload \
+            --source dist/google-calendar-event-creator.zip \
+            $flags

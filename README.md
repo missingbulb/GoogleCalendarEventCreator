@@ -139,6 +139,36 @@ the zip:
   workflow artifact — handy for a throwaway test build without cutting a
   release.
 
+### Automated publishing to the store
+
+The **Publish to Chrome Web Store** workflow
+(`.github/workflows/publish-chrome-store.yml`) takes the zip from a GitHub
+Release and uploads it to the store (publishing to users by default), via the
+[Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api)
+(`chrome-webstore-upload-cli`). Run it from the Actions tab ("Run workflow"):
+leave the tag blank to publish the **latest** release, or name a tag; uncheck
+**auto_publish** to upload as a draft and publish manually from the dashboard.
+
+It needs four repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Where it comes from |
+| --- | --- |
+| `CHROME_EXTENSION_ID` | the item ID in the dashboard URL for the extension |
+| `CHROME_CLIENT_ID` | an OAuth client created against the Chrome Web Store API |
+| `CHROME_CLIENT_SECRET` | …same OAuth client |
+| `CHROME_REFRESH_TOKEN` | generated once for that client |
+
+To mint the OAuth credentials, follow
+[`chrome-webstore-upload`'s setup guide](https://github.com/fregante/chrome-webstore-upload/blob/main/How%20to%20generate%20Google%20API%20keys.md)
+(enable the Chrome Web Store API in a Google Cloud project, create an OAuth
+client, and exchange it for a refresh token), then add the four values as
+secrets.
+
+> The workflow also triggers when a release is *published from the GitHub UI by
+> a person*. It will **not** auto-run for releases the [Release](#cutting-a-release)
+> workflow tags automatically, because events from the `GITHUB_TOKEN` it uses
+> don't trigger other workflows — so for those, use "Run workflow".
+
 ### First publish to the Chrome Web Store
 
 1. Register a developer account at the
@@ -157,9 +187,12 @@ the zip:
 1. Make the change (open an issue first per the project workflow), and bump
    `manifest.json`'s `version`.
 2. Cut a release as above to produce the new zip.
-3. In the dashboard, open the item → **Package → Upload new package** → submit
-   for review. Once approved, Chrome auto-pushes the update to existing users
-   within a few hours — no reinstall.
+3. Publish it — either run the
+   [**Publish to Chrome Web Store**](#automated-publishing-to-the-store) workflow
+   (leave the tag blank for the latest release), or do it by hand in the
+   dashboard: open the item → **Package → Upload new package** → submit. Once
+   approved, Chrome auto-pushes the update to existing users within a few hours
+   — no reinstall.
 
 ## Testing
 
