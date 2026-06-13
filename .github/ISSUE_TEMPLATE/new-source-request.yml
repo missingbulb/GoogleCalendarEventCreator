@@ -26,19 +26,25 @@ body:
     id: start
     attributes:
       label: Start time
+      description: When the event starts, e.g. 2026-06-25 18:00.
   - type: input
     id: end
     attributes:
       label: End time
+      description: When the event ends, if shown.
   - type: input
     id: timezone
     attributes:
       label: Timezone
+      description: The event's timezone, e.g. America/New_York.
   - type: input
     id: location
     attributes:
       label: Location
+      description: The venue or address.
   - type: textarea
     id: description
     attributes:
       label: Description
+      description: The event's description or summary, as shown on the page.
+      placeholder: Paste or summarize the event details here.
