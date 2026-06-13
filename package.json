@@ -12,5 +12,8 @@
   "license": "MIT",
   "devDependencies": {
     "jsdom": "^29.1.1"
+  },
+  "_dependencyNotes": {
+    "jsdom": "Test-only. Provides a DOM implementation (test/harness.js) so the unmodified extractor scripts can be run and asserted against in Node, exactly as they execute in a browser. Not shipped with the extension. Currently at the latest release (29.1.1) with 0 known vulnerabilities per `npm audit` (checked 2026-06-13)."
   }
 }
