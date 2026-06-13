@@ -8,6 +8,28 @@ For every new task in this repo:
 3. Update the issue's status (comments / close) as work progresses and
    when it's done.
 
+# Adding a site extractor
+
+Extraction merges three layers (site-specific → schema.org JSON-LD → generic
+heuristics), first non-empty value per field winning — see
+`extractors/main.js`. So a new site extractor only needs to supply the fields
+the generic/JSON-LD layers get wrong or miss. The flow:
+
+1. Register the hostname in `GCal.siteHosts` in `extractors/site-hosts.js`.
+   This file is DOM-free and shared: it both gates the site extractor and
+   drives the green ("supported") vs. red toolbar icon, so adding here is what
+   makes a page count as supported.
+2. Add `extractors/<site>.js` that pushes onto `GCal.sites` with `name`,
+   `matches` (reuse the `siteHosts` entry), and an `extract()` returning a
+   partial event object. Follow `extractors/meetup.js` as the template,
+   including the header comment describing the HTML it expects. Use the shared
+   helpers on `GCal` (see `extractors/lib.js`); return only the fields this
+   site needs.
+3. List the new file in `EXTRACTOR_FILES` in `background.js` — after
+   `lib.js`/`site-hosts.js`, before `main.js` (which must stay last). This list
+   is the single source of truth: the popup injects it and the tests read it.
+4. Add an integration case for a real page on the site (see Testing below).
+
 # Testing
 
 `npm test` runs everything; `README.md` "Testing" has the mechanics. Keep
