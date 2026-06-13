@@ -82,9 +82,21 @@ async function main() {
     .filter((f) => f.endsWith(".json"))
     .sort();
 
+  // What to fetch: every case file's URL, plus any manifest entry that has no
+  // case file yet. The latter lets you register a snapshot (name + url) in the
+  // manifest and fetch it *before* writing its case — so you can record the
+  // HTML first, then fill the case's `expected` against the committed snapshot.
+  const targets = new Map();
   for (const file of caseFiles) {
     const name = path.basename(file, ".json");
     const { url } = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
+    targets.set(name, url);
+  }
+  for (const [name, entry] of Object.entries(manifest)) {
+    if (!targets.has(name) && entry && entry.url) targets.set(name, entry.url);
+  }
+
+  for (const [name, url] of targets) {
     const reason = needsRefresh(name, url, manifest, force);
 
     if (!reason) {
