@@ -21,18 +21,19 @@
 //       "location":       "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
 //       "multipleEvents": false,
 //       "dates":          "20260625T220000Z/20260626T010000Z",
-//       "details":        "[https://www.meetup.com/.../events/123](https://www.meetup.com/.../events/123/)\n\n...full description..."
+//       "details":        "[https://www.meetup.com/.../events/123](https://www.meetup.com/.../events/123/)\n\n...full description...",
+//       "calendarUrl":    "https://calendar.google.com/calendar/render?action=TEMPLATE&text=...&dates=...&details=...&location=..."
 //     }
 //   }
 //
 // `expected` must be the *complete*, exact object the extractor + URL
 // builder produce — it is deep-equal compared against:
-//   { title, start, end, location, multipleEvents, dates, details }
+//   { title, start, end, location, multipleEvents, dates, details, calendarUrl }
 // (see below). There are no substring/regex/prefix matchers: every field
-// must be present and match exactly, including the full text of `details`.
-// This catches any drift — in extraction, date math, or URL composition —
-// however small. When a snapshot refresh legitimately changes a page's
-// content, update `expected` to match the new exact values.
+// must be present and match exactly, including the full text of `details`
+// and `calendarUrl`. This catches any drift — in extraction, date math, or
+// URL composition — however small. When a snapshot refresh legitimately
+// changes a page's content, update `expected` to match the new exact values.
 //
 // `dates` is derived from the extracted start/end via background.js's
 // formatDatesParam(), so it doubles as integration coverage for the
@@ -45,6 +46,11 @@
 // MAX_DETAILS_LENGTH. There is no separate "description" field: `details` is
 // the one place the description shows up, exactly as it will appear in the
 // generated Calendar event.
+//
+// `calendarUrl` is the complete URL background.js opens, i.e. the full
+// return value of buildCalendarUrl() (which embeds `details` and `dates`
+// among other params). It's the end-to-end check: if this matches, the
+// extension produces exactly this Calendar template for this page.
 //
 // To cover a new website or platform: add a case file pointing at a real
 // event page, then record its first snapshot with
@@ -63,7 +69,7 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MANIFEST_PATH = path.join(SNAPSHOTS_DIR, "manifest.json");
-const FIELDS = ["title", "start", "end", "location", "multipleEvents", "dates", "details"];
+const FIELDS = ["title", "start", "end", "location", "multipleEvents", "dates", "details", "calendarUrl"];
 
 // background.js registers a chrome listener at load time; stub just enough
 // and evaluate it as global code so its function declarations land on
@@ -138,6 +144,7 @@ for (const file of caseFiles) {
       multipleEvents: extracted.multipleEvents,
       dates,
       details,
+      calendarUrl,
     };
 
     assert.deepEqual(actual, testCase.expected, `${file}: extracted result does not match "expected" exactly`);
