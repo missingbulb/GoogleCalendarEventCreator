@@ -140,8 +140,17 @@ ever re-triggering CI.
 
 **To cover a new website or platform, add one case file** pointing at a real
 event page, then **record its snapshot before relying on the integration
-test**: either run `npm run refresh` locally (needs internet), or trigger the
-**Refresh snapshots** workflow manually ("Run workflow" in the Actions tab).
+test**. The expected sequence is:
+
+1. Add the extractor (if needed) and the new case file under
+   `test/integration/cases/`, then commit that change.
+2. Run `npm run refresh` locally on the same branch (needs internet) — this
+   is the same `refresh-snapshots.js` step the **Refresh snapshots** workflow
+   runs, and it fetches the new case's HTML and updates
+   `test/integration/snapshots/manifest.json` accordingly.
+3. Commit the resulting files under `test/integration/snapshots/` as a
+   follow-up commit on the branch.
+
 Until a snapshot exists for the new case, `test:live` (and so the Tests
 workflow) will fail with `Missing snapshot for "<case>"`. Note that cases also
 need occasional gardening: when an event page is eventually taken down, point
