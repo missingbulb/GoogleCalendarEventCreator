@@ -12,6 +12,7 @@
 globalThis.GCal = globalThis.GCal || {};
 GCal.siteHosts = [
   { name: "meetup", matches: (host) => /(^|\.)meetup\.com$/.test(host) },
+  { name: "luma", matches: (host) => /(^|\.)(luma\.com|lu\.ma)$/.test(host) },
   { name: "facebook", matches: (host) => /(^|\.)facebook\.com$/.test(host) },
   { name: "eventbrite", matches: (host) => /(^|\.)eventbrite\./.test(host) },
   { name: "edinburghfringe", matches: (host) => /(^|\.)edfringe\.com$/.test(host) },

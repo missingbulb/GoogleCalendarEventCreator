@@ -11,6 +11,7 @@ const EXTRACTOR_FILES = [
   "extractors/jsonld.js",
   "extractors/generic.js",
   "extractors/meetup.js",
+  "extractors/luma.js",
   "extractors/facebook.js",
   "extractors/eventbrite.js",
   "extractors/telavivcinematheque.js",
