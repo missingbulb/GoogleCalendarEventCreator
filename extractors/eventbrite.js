@@ -24,7 +24,7 @@
 
   GCal.sites.push({
     name: "eventbrite",
-    matches: (host) => /(^|\.)eventbrite\./.test(host),
+    matches: GCal.siteHosts.find((s) => s.name === "eventbrite").matches,
     extract() {
       const timeEl = document.querySelector("time[datetime]");
       return {

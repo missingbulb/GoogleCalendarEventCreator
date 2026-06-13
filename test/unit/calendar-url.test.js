@@ -12,7 +12,12 @@ const vm = require("node:vm");
 // and evaluate it as global code so its function declarations land on
 // globalThis.
 function loadBackground() {
-  globalThis.chrome = { action: { onClicked: { addListener() {} } } };
+  globalThis.chrome = {
+    action: { onClicked: { addListener() {} }, setIcon() {} },
+    tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get() {} },
+    runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
+  };
+  globalThis.importScripts = () => {};
   vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"));
   return {
     buildCalendarUrl: globalThis.buildCalendarUrl,

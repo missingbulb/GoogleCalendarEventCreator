@@ -164,9 +164,10 @@ from facebook.com, so it can't be snapshotted as a live case.
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
-| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` permissions) |
-| `background.js` | Service worker: runs the extractor, builds and opens the URL  |
+| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
+| `background.js` | Service worker: runs the extractor, builds and opens the URL, and updates the toolbar icon per tab |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
+| `extractors/site-hosts.js` | Hostname matchers shared between the site extractors and the background script's icon logic |
 | `extractors/meetup.js`, `facebook.js`, `eventbrite.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
@@ -181,6 +182,10 @@ from facebook.com, so it can't be snapshotted as a live case.
 
 ## Permissions
 
-Only `activeTab` and `scripting`: the extension can read a page solely when
-you click the button on it, and sends nothing anywhere — it just opens a
-Google Calendar URL in a new tab.
+`activeTab` and `scripting`: the extension can read a page solely when you
+click the button on it, and sends nothing anywhere — it just opens a Google
+Calendar URL in a new tab.
+
+`tabs`: lets the background script see each tab's URL (hostname only) so it
+can show the toolbar icon with a green border on pages with a site-specific
+extractor (e.g. meetup.com) and a red border elsewhere.

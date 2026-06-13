@@ -59,7 +59,14 @@ const FIELDS = ["title", "start", "end", "location", "description", "multipleEve
 // and evaluate it as global code so its function declarations land on
 // globalThis.
 function loadFormatDatesParam() {
-  const sandbox = { chrome: { action: { onClicked: { addListener() {} } } } };
+  const sandbox = {
+    chrome: {
+      action: { onClicked: { addListener() {} }, setIcon() {} },
+      tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get() {} },
+      runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
+    },
+    importScripts: () => {},
+  };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"), sandbox);
   return sandbox.formatDatesParam;
 }
