@@ -12,11 +12,8 @@
 // file under it.
 const SHIPPING_PATHS = [
   "manifest.json",
-  "background.js",
-  "icon-state.js",
-  "popup.html",
-  "popup.js",
-  "pipeline", // the extraction pipeline + generated load list (popup.js fetches/injects)
+  "pipeline", // the extraction pipeline + generated load list (popup fetches/injects)
+  "ui", // popup (html/css/js + views) and the toolbar-icon service worker
   "icons", // toolbar icons: plain + green/red state variants
 ];
 

@@ -4,8 +4,8 @@ Refs #35
 
 This is a review of the extension's attack surface, trust boundaries, and
 known risks as of the current `main`. It covers the runtime extension code
-(`manifest.json`, `background.js`, `icon-state.js`, `popup.html`/`popup.js`,
-`extractors/`) and, briefly, the repository's dev/CI tooling.
+(`manifest.json`, the `ui/` popup + service worker, and the `pipeline/`
+extraction files) and, briefly, the repository's dev/CI tooling.
 
 ## 1. Summary
 
@@ -38,7 +38,7 @@ There are now two independent flows:
 
 ```
 A) Toolbar icon coloring (always running, no user gesture required)
-   icon-state.js (the manifest's background.service_worker)
+   ui/toolbar-icon.js (the manifest's background.service_worker)
      -> chrome.tabs.onActivated / onUpdated / onInstalled / onStartup
      -> reads tab.url for every tab (requires the "tabs" permission)
      -> pipeline/registry.js + pipeline/sources/*: hostname regex match only

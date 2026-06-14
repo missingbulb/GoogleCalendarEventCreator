@@ -9,11 +9,11 @@
     "tabs"
   ],
   "background": {
-    "service_worker": "icon-state.js"
+    "service_worker": "ui/toolbar-icon.js"
   },
   "action": {
     "default_title": "Create Google Calendar event from this page",
-    "default_popup": "popup.html",
+    "default_popup": "ui/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

@@ -1,18 +1,21 @@
-// Offline unit tests for background.js's source-request URL building: the
-// prefilled GitHub issue-form link the popup opens on an unsupported page
-// (popup.js's makeSourceRequestButton).
+// Offline unit tests for the source-request URL building: the prefilled GitHub
+// issue-form link the popup opens on an unsupported page (the
+// ui/views/source-request-view.js makeSourceRequestButton flow).
 "use strict";
 
-const test = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 
-// Evaluate background.js as global code so its function declarations land on
-// globalThis.
-vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"));
-const { buildSourceRequestUrl } = globalThis;
+// source-request-view.js is an ES module; import it before the tests run.
+let buildSourceRequestUrl;
+before(async () => {
+  ({ buildSourceRequestUrl } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "source-request-view.js"))
+  ));
+});
 
 const PREFILL = {
   url: "https://example.com/events/picnic",

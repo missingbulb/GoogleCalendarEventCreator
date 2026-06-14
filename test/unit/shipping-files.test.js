@@ -46,15 +46,25 @@ test("every injected extractor file ships", () => {
   }
 });
 
-test("popup's <script src> files ship", () => {
-  const srcs = [...read("popup.html").matchAll(/<script src="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(srcs, ["pipeline/build-calendar-url.js", "background.js", "popup.js"]);
-  for (const s of srcs) assert.ok(isShipped(s), `popup loads ${s}, but it is not in the shipping set`);
+test("popup's module script and stylesheet ship", () => {
+  const html = read("ui/popup.html");
+  const scripts = [...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(scripts, ["popup.js"]); // a single ES-module controller; views load via import()
+  const styles = [...html.matchAll(/<link[^>]*href="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(styles, ["popup.css"]);
+  // Both are relative to ui/popup.html.
+  for (const ref of [...scripts, ...styles]) {
+    assert.ok(isShipped(`ui/${ref}`), `popup loads ${ref}, but ui/${ref} is not in the shipping set`);
+  }
 });
 
-test("the service worker's importScripts target ships", () => {
-  const imports = [...read("icon-state.js").matchAll(/importScripts\("([^"]+)"\)/g)].map((m) => m[1]);
-  for (const i of imports) assert.ok(isShipped(i), `icon-state.js imports ${i}, but it is not in the shipping set`);
+test("the service worker's importScripts targets ship", () => {
+  const block = read("ui/toolbar-icon.js").match(/importScripts\(([^)]*)\)/s);
+  assert.ok(block, "toolbar-icon.js must call importScripts");
+  // Strip the leading slash on the worker's root-relative paths.
+  const imports = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1].replace(/^\//, ""));
+  assert.ok(imports.length > 0, "no importScripts targets found in toolbar-icon.js");
+  for (const i of imports) assert.ok(isShipped(i), `toolbar-icon.js imports /${i}, but it is not in the shipping set`);
 });
 
 test("dev/test-only paths do not ship", () => {

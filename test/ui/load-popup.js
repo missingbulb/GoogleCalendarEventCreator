@@ -1,21 +1,18 @@
-// Loads pure helper functions from popup.js into a sandbox so the UI
-// renderer can compute the same display text the real popup shows, without
-// a browser/DOM. popup.js's top-level IIFE throws (no `document`/`chrome`
-// in this sandbox) but is caught by its own .catch(), leaving the
-// function declarations below it (e.g. formatWhen) on the sandbox global.
+// Loads the popup's pure display helpers (formatWhen, summarize, dateChip) so
+// the UI renderer can compute the same text the real popup shows, without a
+// browser/DOM. They live in ui/views/events-view.js, which is an ES module, so
+// this exports an async loader that import()s it. The module's DOM-using parts
+// (makeButton) run only when called, so importing it in Node is side-effect-free.
 "use strict";
 
-const fs = require("node:fs");
 const path = require("node:path");
-const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 
-function loadPopupHelpers() {
-  // A no-op console for the IIFE's expected .catch(console.error) here
-  // (there's no document/chrome in this sandbox) so it doesn't print noise.
-  const sandbox = { console: { error() {} } };
-  vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "popup.js"), "utf8"), sandbox);
-  return { formatWhen: sandbox.formatWhen, summarize: sandbox.summarize, dateChip: sandbox.dateChip };
+async function loadPopupHelpers() {
+  const mod = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))
+  );
+  return { formatWhen: mod.formatWhen, summarize: mod.summarize, dateChip: mod.dateChip };
 }
 
-module.exports = loadPopupHelpers();
+module.exports = loadPopupHelpers;

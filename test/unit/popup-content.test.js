@@ -7,23 +7,20 @@
 // "request this source" flow. On a supported host it surfaces the events.
 "use strict";
 
-const test = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
 const path = require("node:path");
-const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 
-// Load popup.js into a sandbox. Its top-level IIFE throws (no document/chrome/
-// fetch here) but is caught by its own .catch(), leaving chooseContent() on the
-// sandbox.
-function loadChooseContent() {
-  const sandbox = { URL, console: { error() {}, warn() {} } };
-  vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "popup.js"), "utf8"), sandbox);
-  return sandbox.chooseContent;
-}
-
-const chooseContent = loadChooseContent();
+// popup.js is an ES module; import chooseContent before the tests run. Its
+// controller only runs when a real `document` exists, so importing it in Node
+// is side-effect-free.
+let chooseContent;
+before(async () => {
+  ({ chooseContent } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "ui", "popup.js"))
+  ));
+});
 
 const SCRAPED = { title: "Some Show", start: "2026-07-01T20:00:00" };
 
