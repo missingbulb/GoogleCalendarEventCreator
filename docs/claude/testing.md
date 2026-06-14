@@ -42,3 +42,18 @@ these decisions in mind:
   comparison: regenerate the stored PNGs with `npm run refresh:ui` (or the
   **Refresh UI snapshot** workflow) and commit them so the diff shows the
   before/after. A new UI surface needs a new snapshot of its own.
+- **"Does the extension load?" is guarded in two layers.** A startup failure —
+  a bad service-worker `importScripts` path (#146), a missing/renamed injected
+  file, a syntax error in one — must fail a test, not just surface when someone
+  loads the unpacked extension:
+  - `test/integration/extension-loads.test.js` (always-on, no browser) boots the
+    manifest's service worker through a Chrome-faithful `importScripts`
+    (relative to the worker's dir, leading slash = extension root) and asserts it
+    wires up, every injected file parses, and every manifest-referenced file
+    exists. It runs in the default suite and in `test:offline`.
+  - `test/e2e/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
+    unpacked extension in headless Chrome via `puppeteer-core` and asserts the
+    MV3 service worker registers and `GCal` is built inside it. It runs in CI
+    (Chrome is preinstalled on `ubuntu-latest`) and **skips** when no
+    Chrome/`puppeteer-core` is present — so it's a no-op in this bot-blocked
+    sandbox. Because it can't run here, verify changes to it via CI, not locally.

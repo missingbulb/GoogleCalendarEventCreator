@@ -44,3 +44,13 @@ jobs:
       # resvg, no browser), so it runs alongside the other tests.
       - name: Run UI snapshot test
         run: npm run test:ui
+
+      # Real-Chrome smoke test: loads the unpacked extension in headless Chrome
+      # (preinstalled on ubuntu-latest) and asserts the MV3 service worker
+      # registers — the one layer that exercises Chrome's actual extension
+      # loader, the layer that broke in #146. Separate from the browserless
+      # suites above; it skips automatically if no Chrome is found.
+      - name: Run real-Chrome extension-load smoke test
+        run: npm run test:e2e
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
