@@ -9,8 +9,7 @@
     "tabs"
   ],
   "background": {
-    "service_worker": "ui/toolbar-icon.js",
-    "type": "module"
+    "service_worker": "ui/toolbar-icon.js"
   },
   "action": {
     "default_title": "Create Google Calendar event from this page",
