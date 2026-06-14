@@ -52,6 +52,16 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return normalizeBlock(richText(el, opts, root));
   }
 
+  // Render an HTML *string* (e.g. a JSON-LD or inline-JSON description) to text,
+  // preserving its <br>/newline layout instead of flattening it. Parses the
+  // markup into a detached element and runs it through blockText — so no caller
+  // has to collapse a description down to a single line.
+  function htmlToText(html, opts) {
+    const div = document.createElement("div");
+    div.innerHTML = html || "";
+    return blockText(div, opts);
+  }
+
   // A small collector for building a comma-separated string (typically a
   // location) from several pieces: add() cleans each value and skips empties and
   // duplicates, then join() renders them. `equals(candidate, existing)` decides
@@ -76,5 +86,5 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return api;
   }
 
-  return { richText, normalizeBlock, blockText, parts };
+  return { richText, normalizeBlock, blockText, htmlToText, parts };
 })());

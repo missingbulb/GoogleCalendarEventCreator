@@ -22,7 +22,7 @@
 // stripped); location flattens Place name + PostalAddress parts into one
 // comma-separated string.
 (() => {
-  const { clean, normalizeDateValue } = GCal;
+  const { clean, normalizeDateValue, htmlToText } = GCal;
 
   function findEvents() {
     const found = [];
@@ -54,7 +54,9 @@
       start: normalizeDateValue(ld.startDate),
       end: normalizeDateValue(ld.endDate),
       location: flattenLocation(ld.location),
-      description: stripHtml(ld.description),
+      // Render the (possibly HTML) description preserving its <br>/newline
+      // layout, rather than collapsing it to a single line.
+      description: htmlToText(ld.description),
     };
   }
 
@@ -86,13 +88,6 @@
       if (!addr.addressRegion) add(addr.addressCountry);
     }
     return parts.join(", ");
-  }
-
-  function stripHtml(s) {
-    if (!s) return "";
-    const div = document.createElement("div");
-    div.innerHTML = s;
-    return clean(div.textContent);
   }
 
   GCal.jsonLd = { findEvents, toEvent };

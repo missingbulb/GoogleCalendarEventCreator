@@ -20,7 +20,7 @@
 // several timestamped list/article cards. assemble-events.js then suggests the
 // first event and flags it.
 (() => {
-  const { clean, text, meta, bodyText, normalizeDateValue, parseDateFromText } = GCal;
+  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText } = GCal;
 
   function extract() {
     const out = {};
@@ -56,7 +56,8 @@
       text("address") ||
       shortText('[class*="venue" i], [class*="location" i], [id*="location" i]');
 
-    out.description = meta("og:description") || meta("description") || text('[itemprop="description"]');
+    // Preserve the description's line breaks rather than flattening it.
+    out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
 
     return out;
   }

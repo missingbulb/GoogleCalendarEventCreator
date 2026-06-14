@@ -34,7 +34,7 @@
 // (rather than the viewer's), so it's only used when it's a recognized IANA
 // name.
 (() => {
-  const { text, firstText, blockText, normalizeBlock, normalizeDateValue, scriptsText, findTimezone } = GCal;
+  const { text, firstText, blockText, normalizeBlock, normalizeDateValue, scriptsText, findTimezone, merge, jsonLd } = GCal;
 
   // The full event description, pulled from the inline JSON state. Meetup
   // embeds it (and several shorter snippets) as JSON-escaped
@@ -63,7 +63,7 @@
       const timeEl = document.querySelector(
         "#event-info time[datetime], main time[datetime], time[datetime]"
       );
-      return {
+      const dom = {
         title: text("h1"),
         start: timeEl ? normalizeDateValue(timeEl.getAttribute("datetime")) : "",
         location: firstText([
@@ -84,6 +84,11 @@
         })(),
         ctz: findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/),
       };
+      // Self-contained: Meetup's own DOM/inline-JSON fields win (notably the
+      // FULL description, where the page's JSON-LD only carries a truncated
+      // snippet); the page's JSON-LD fills the gaps it leaves — the end time,
+      // and the venue location on pages whose DOM venue nodes aren't present.
+      return merge(dom, jsonLd.toEvent(jsonLd.findEvents()[0]));
     },
   });
 })();
