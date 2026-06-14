@@ -1,0 +1,37 @@
+name: Automated extractor request
+description: Ask a Claude agent to implement a new site extractor automatically.
+title: "feat: add <site> extractor"
+labels: ["extractor-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submitting this issue automatically triggers a Claude agent that will:
+        implement the extractor, fetch a cached copy of the event page, write
+        an integration test, and open a pull request for your review.
+
+        **Required:** `ANTHROPIC_API_KEY` must be set as a repository secret.
+
+  - type: input
+    id: event-url
+    attributes:
+      label: Event page URL
+      description: >
+        A public URL of a specific event on the target site. The agent uses
+        this page as the integration test case and extracts the site's hostname
+        from it automatically.
+      placeholder: "https://www.example.com/events/my-event-123"
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes (optional)
+      description: >
+        Anything the agent should know: known HTML quirks, fields that are hard
+        to find, expected title / date / location so the agent can verify its
+        extraction, etc.
+      placeholder: "Title is in a <h2 class='event-name'> rather than <h1>."
+    validations:
+      required: false
