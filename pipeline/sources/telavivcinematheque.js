@@ -100,9 +100,9 @@
     return venue && address ? `${venue}, ${address}` : address;
   }
 
-  GCal.sites.push({
+  GCal.sources.push({
     name: "TelAvivCinematheque",
-    matches: GCal.siteHosts.find((s) => s.name === "telavivcinematheque").matches,
+    matches: (host) => /(^|\.)cinema\.co\.il$/.test(host),
     extract() {
       const films = seriesEvents();
       if (films.length) {

@@ -1,6 +1,6 @@
 // Integration test: for a given page URL, the toolbar icon's border should
-// be green when the page has a site-specific extractor (extractors/<site>.js,
-// registered via extractors/site-hosts.js) and red otherwise.
+// be green when the page has a site-specific source (pipeline/sources/<site>.js,
+// whose `matches` GCal.isSupportedHost checks) and red otherwise.
 "use strict";
 
 const test = require("node:test");
@@ -9,10 +9,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// icon-state.js registers chrome listeners and importScripts()'s
-// extractors/site-hosts.js at load time; stub just enough of the extension
-// APIs and run both files in the same sandbox so iconBorderColor() can see
-// GCal.siteHosts exactly as it does in the real extension.
+// icon-state.js registers chrome listeners and importScripts()'s the registry
+// and every source at load time; stub just enough of the extension APIs and run
+// them in the same sandbox so iconBorderColor() sees GCal.sources exactly as it
+// does in the real extension.
 function loadIconState() {
   const sandbox = {
     URL,
@@ -21,8 +21,10 @@ function loadIconState() {
       tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get() {} },
       runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
     },
-    importScripts(file) {
-      vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", file), "utf8"), sandbox);
+    importScripts(...files) {
+      for (const file of files) {
+        vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", file), "utf8"), sandbox);
+      }
     },
   };
   vm.createContext(sandbox);

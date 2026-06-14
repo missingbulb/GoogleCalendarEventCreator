@@ -86,9 +86,9 @@
       .join("\n");
   }
 
-  GCal.sites.push({
+  GCal.sources.push({
     name: "luma",
-    matches: GCal.siteHosts.find((s) => s.name === "luma").matches,
+    matches: (host) => /(^|\.)(luma\.com|lu\.ma)$/.test(host),
     extract() {
       const data = readData();
       if (!data || !data.event) return {};

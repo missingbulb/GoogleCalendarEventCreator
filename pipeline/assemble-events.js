@@ -1,32 +1,37 @@
-// Entry point: picks the right extractors for the current page and returns
-// the list of events found on it.
+// Orchestrator: picks the right extractors for the current page and returns
+// the events found on it, plus whether the page is on a supported host.
 //
 // Must be the LAST file in the generated load list
 // (pipeline/load-order.generated.json) — its completion value is what
-// chrome.scripting.executeScript returns to the background worker.
+// chrome.scripting.executeScript returns to the popup.
 //
-// The result is always { events: [...] } with at least one entry. Each event
-// is fully self-described — { title, start, end, location, description, ctz }
-// — so a caller (the popup) can build a Google Calendar URL for any of them
-// without consulting page-level state. An ordinary event page yields one
-// event; a listing/series page (e.g. a film week with several different
-// films) yields one per event.
+// The result is always { events: [...], supported } — `events` holds the
+// extracted events (possibly empty) and `supported` is true when a registered
+// source matched this page's host. Each event is fully self-described —
+// { title, start, end, location, description, ctz } — so a caller (the popup)
+// can build a Google Calendar URL for any of them without consulting page-level
+// state. An ordinary event page yields one event; a listing/series page (e.g. a
+// film week with several different films) yields one per event.
+//
+// The popup reads `supported` to choose between showing event buttons and the
+// "request this source" flow — the same answer GCal.isSupportedHost gives the
+// toolbar icon, so the popup and the icon can never disagree.
 //
 // Each event is assembled by merging, first non-empty value per field wins:
-//   1. the site-specific extractor whose `matches(hostname)` is true, if any
+//   1. the site-specific source whose `matches(hostname)` is true, if any
 //   2. the first schema.org JSON-LD event on the page
 //   3. generic heuristics (meta tags, microdata, <time>, text scanning)
-// A site extractor can instead supply its own `events` array (e.g.
-// telavivcinematheque.js for a series page); the page-level description/ctz
-// then fill any field an individual event didn't carry. Otherwise, when the
-// page's JSON-LD lists several events, each becomes an event.
+// A source can instead supply its own `events` array (e.g.
+// sources/telavivcinematheque.js for a series page); the page-level
+// description/ctz then fill any field an individual event didn't carry.
+// Otherwise, when the page's JSON-LD lists several events, each becomes an event.
 //
-// To support a new event platform, add extractors/<site>.js that pushes onto
-// GCal.sites (see meetup.js for the pattern), run `npm run index` to regenerate
-// the load list, and add a test case under test/integration/cases/.
+// To support a new event platform, add pipeline/sources/<site>.js that pushes
+// onto GCal.sources (see sources/meetup.js for the pattern), run `npm run index`
+// to regenerate the load list, and add a test case under test/integration/cases/.
 (() => {
   const host = location.hostname.replace(/^www\./, "");
-  const site = GCal.sites.find((s) => s.matches(host));
+  const site = GCal.sources.find((s) => s.matches(host));
 
   const siteResult = site ? site.extract() : {};
   const ldEvents = GCal.jsonLd.findEvents();
@@ -76,5 +81,5 @@
     return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
   });
 
-  return { events };
+  return { events, supported: Boolean(site) };
 })();

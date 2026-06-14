@@ -26,7 +26,7 @@ Extraction runs in three layers, merged field-by-field (first non-empty wins):
    sites: **meetup.com**, **facebook.com** events, **eventbrite.com**,
    **edfringe.com** (Edinburgh Festival Fringe), **cinema.co.il** (Tel
    Aviv Cinematheque), and **ticketmaster.co.il** (Ticketmaster Israel). Each
-   lives in its own file under `extractors/` with a
+   lives in its own file under `pipeline/sources/` with a
    comment describing the HTML it expects; to support a new platform, add a
    file there following the same pattern and run `npm run index` to regenerate
    the load list (`pipeline/load-order.generated.json`).
@@ -105,7 +105,7 @@ and save.
 ### The package
 
 `npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
-files the extension ships (manifest, scripts, `extractors/`, `icons/`), and
+files the extension ships (manifest, scripts, `pipeline/`, `icons/`), and
 nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
 in **`tools/shipping-files.js`** as the single source of truth, and
 `test/unit/shipping-files.test.js` asserts it stays in sync with what the
@@ -373,20 +373,22 @@ commit the results. On mismatch, the test writes
 | --------------- | ------------------------------------------------------------- |
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
 | `popup.html`, `popup.js` | Toolbar popup: runs the extractor, shows a summary, and opens the URL on click |
-| `background.js` | Shared library: builds the pre-filled Google Calendar URL     |
+| `background.js` | Source-request flow (prefilled GitHub issue) for unsupported pages |
 | `icon-state.js` | Background service worker: updates the toolbar icon's border color per tab |
-| `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
-| `extractors/site-hosts.js` | Hostname matchers shared between the site extractors and `icon-state.js` |
-| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One file per supported event site, with hardcoded selectors |
-| `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
-| `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
-| `extractors/main.js` | Entry point: picks extractors, merges results            |
+| `pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
+| `pipeline/helpers/` | Shared helpers split by concern (DOM, dates, timezones, timezone-names, merge) |
+| `pipeline/sources/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One file per supported event site, with hardcoded selectors + inline host matcher |
+| `pipeline/extract-jsonld.js` | schema.org JSON-LD extraction                          |
+| `pipeline/extract-generic.js` | Heuristics for any page + multiple-event detection    |
+| `pipeline/build-calendar-url.js` | Builds the pre-filled Google Calendar template URL |
+| `pipeline/assemble-events.js` | Orchestrator: picks sources, merges results, reports `supported` |
+| `pipeline/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `test/integration/cases/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
 | `data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
 | `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
-| `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |
+| `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM) |
 | `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
 | `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `popup.js` for use in `render.js` |
 | `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |

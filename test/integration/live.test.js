@@ -41,9 +41,10 @@
 // (one for an ordinary page, several for a listing/series page). When a
 // cache refresh legitimately changes a page, update `expected` to match.
 //
-// Per event: `details` is what background.js's buildCalendarUrl() puts in the
-// `details=` param (a link back to the source page followed by the
-// description). `ctz` is the timezone a site extractor pinned the event to
+// Per event: `details` is what pipeline/build-calendar-url.js's
+// buildCalendarUrl() puts in the `details=` param (a link back to the source
+// page followed by the description). `ctz` is the timezone a site extractor
+// pinned the event to
 // (e.g. "GB" for edfringe.com), or null.
 //
 // To cover a new website or platform: add a data/<name>.url with the event
@@ -64,15 +65,18 @@ const { extractFromHtml } = require("../harness");
 const CASES_DIR = path.join(__dirname, "cases");
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
 
-// Evaluate background.js as global code so its function declarations land
-// on the sandbox.
-function loadBackgroundFns() {
+// Evaluate build-calendar-url.js as global code so its function declarations
+// land on the sandbox.
+function loadCalendarUrlFns() {
   const sandbox = { URL, URLSearchParams };
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"), sandbox);
+  vm.runInNewContext(
+    fs.readFileSync(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"), "utf8"),
+    sandbox
+  );
   return { buildCalendarUrl: sandbox.buildCalendarUrl };
 }
 
-const { buildCalendarUrl } = loadBackgroundFns();
+const { buildCalendarUrl } = loadCalendarUrlFns();
 
 const caseFiles = fs
   .readdirSync(CASES_DIR)
@@ -103,8 +107,8 @@ for (const file of caseFiles) {
     const html = fs.readFileSync(cachedHtmlPath, "utf8");
     const extracted = extractFromHtml(html, url);
 
-    // Build each event exactly as background.js would when opening the
-    // Calendar template, so cases assert on the final dates/details/URL.
+    // Build each event exactly as the popup would when opening the Calendar
+    // template, so cases assert on the final dates/details/URL.
     // Spread into a Node-realm array first: extractFromHtml returns a
     // jsdom-realm array, and deepEqual rejects a cross-realm array even when
     // its contents match.

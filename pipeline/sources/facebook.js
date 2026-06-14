@@ -21,9 +21,9 @@
 (() => {
   const { clean, text, bodyText, parseDateFromText } = GCal;
 
-  GCal.sites.push({
+  GCal.sources.push({
     name: "facebook",
-    matches: GCal.siteHosts.find((s) => s.name === "facebook").matches,
+    matches: (host) => /(^|\.)facebook\.com$/.test(host),
     extract() {
       let title = text('h1, [role="main"] h2 span');
       if (!title) {

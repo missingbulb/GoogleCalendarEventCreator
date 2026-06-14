@@ -27,14 +27,14 @@ const SOURCES = extractorSources();
 /**
  * @param {string} html  Full HTML of the page.
  * @param {string} url   The page URL.
- * @returns {object}     The extractor's result: { events: [{ title, start, end, location, description, ctz }] }
+ * @returns {object}     The extractor's result: { events: [{ title, start, end, location, description, ctz }], supported }
  */
 function extractFromHtml(html, url) {
   const dom = new JSDOM(html, { url, runScripts: "outside-only" });
   try {
     let result;
     for (const { src } of SOURCES) {
-      result = dom.window.eval(src); // last file (extractors/main.js) returns the event
+      result = dom.window.eval(src); // last file (pipeline/assemble-events.js) returns the result
     }
     return result;
   } finally {

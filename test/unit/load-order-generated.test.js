@@ -22,16 +22,41 @@ test("the committed load order matches `npm run index`", () => {
   );
 });
 
-test("helpers load first and the orchestrator loads last", () => {
+test("the registry loads first and the orchestrator loads last", () => {
   const list = computeLoadOrder();
-  assert.deepEqual(
-    list.slice(0, 2),
-    ["extractors/lib.js", "extractors/site-hosts.js"],
-    "the shared toolbox and host registry must load first"
+  assert.equal(list[0], "pipeline/registry.js", "the registry must load first");
+  // After the registry, the helpers form a contiguous block before any
+  // extract layer or source.
+  const afterRegistry = list.slice(1);
+  const firstNonHelper = afterRegistry.findIndex((f) => !f.startsWith("pipeline/helpers/"));
+  assert.ok(
+    afterRegistry.slice(firstNonHelper).every((f) => !f.startsWith("pipeline/helpers/")),
+    "the helpers must load before the extract layers and sources"
   );
   assert.equal(
     list[list.length - 1],
-    "extractors/main.js",
-    "the orchestrator (main.js) must load last"
+    "pipeline/assemble-events.js",
+    "the orchestrator (assemble-events.js) must load last"
+  );
+});
+
+// The toolbar service worker (icon-state.js) can't read the generated JSON at
+// startup (MV3 only allows synchronous importScripts), so it lists registry +
+// every source explicitly. Guard that hand-list against drift: it must import
+// registry.js and exactly the sources in the generated load order.
+test("the service worker imports the registry and every source", () => {
+  const worker = fs.readFileSync(path.join(ROOT, "icon-state.js"), "utf8");
+  const importBlock = worker.match(/importScripts\(([^)]*)\)/s);
+  assert.ok(importBlock, "icon-state.js must call importScripts");
+  const imported = [...importBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+
+  const loadOrder = computeLoadOrder();
+  const sources = loadOrder.filter((f) => f.startsWith("pipeline/sources/"));
+
+  assert.ok(imported.includes("pipeline/registry.js"), "worker must import pipeline/registry.js");
+  assert.deepEqual(
+    imported.filter((f) => f.startsWith("pipeline/sources/")).sort(),
+    [...sources].sort(),
+    "worker's source imports must match the generated sources — run `npm run index` and update icon-state.js"
   );
 });
