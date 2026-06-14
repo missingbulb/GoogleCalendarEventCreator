@@ -3,6 +3,21 @@
 `npm test` runs everything; `docs/testing.md` has the mechanics. Keep
 these decisions in mind:
 
+- **See every test fail before you trust it.** A green test that has never failed
+  proves nothing — it can assert the wrong thing, or not exercise the code at all.
+  So either write the test first and watch it go red *before* the fix (and green
+  after), or, for a test added with or after a fix, temporarily break what it
+  guards, confirm it goes red, then restore. (The #146 startup guard stayed green
+  while the service worker was broken, because it resolved `importScripts` paths
+  the wrong way; the corrected guards were each confirmed to fail on the real
+  breakage before being trusted.)
+- **A new test must go green twice in CI before merging.** Flaky tests are worse
+  than none, so whenever a change adds or changes a test, let the branch's CI run
+  green at least twice before merging to `main` (push again, or re-run the job) —
+  one green run isn't enough to trust it. A real race surfaced exactly this way:
+  the real-Chrome e2e test passed once, then failed on a later run because it read
+  worker state before initialization had finished.
+
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed**, not a
   code problem. `jsdom` is a test-only devDependency loaded by
   `test/harness.js`, and `node_modules` starts empty on a fresh checkout (e.g.
@@ -42,3 +57,22 @@ these decisions in mind:
   comparison: regenerate the stored PNGs with `npm run refresh:ui` (or the
   **Refresh UI snapshot** workflow) and commit them so the diff shows the
   before/after. A new UI surface needs a new snapshot of its own.
+- **"Does the extension load?" is guarded in two layers.** A startup failure —
+  a bad service-worker `importScripts` path (#146), a missing/renamed injected
+  file, a syntax error in one — must fail a test, not just surface when someone
+  loads the unpacked extension:
+  - `test/integration/extension-loads.test.js` (always-on, no browser) boots the
+    manifest's service worker through a Chrome-faithful `importScripts`
+    (relative to the worker's dir, leading slash = extension root) and asserts it
+    wires up, every injected file parses, and every manifest-referenced file
+    exists. It runs in the default suite and in `test:offline`.
+  - `test/e2e/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
+    unpacked extension and asserts the MV3 service worker registers and `GCal` is
+    built inside it. It has **no npm dependency** — it drives Chrome straight over
+    the DevTools Protocol with Node's built-in `WebSocket`. It needs a Chrome that
+    still honours `--load-extension` (branded Chrome 137+ dropped it), so CI
+    fetches **Chrome for Testing** via `npx @puppeteer/browsers` (run on demand,
+    not a project dependency) and runs the test **headful under `xvfb`** (MV3
+    extensions don't load headless). It **skips** when no Chrome is given (set
+    `CHROME_PATH`) — a no-op in this bot-blocked sandbox, which can't even
+    download Chrome for Testing. So verify changes to it via CI, not locally.

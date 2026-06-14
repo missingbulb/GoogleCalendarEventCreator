@@ -1,10 +1,17 @@
 name: Tests
 
 on:
+  # Manual runs from the Actions tab / API, on any branch. GitHub only exposes
+  # this once the workflow is on the default branch, so it covers future dev
+  # branches; for a brand-new branch, the push trigger below runs CI right away.
+  workflow_dispatch:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    # main, plus agent dev branches, so CI (including the real-Chrome e2e smoke
+    # test) runs on a dev branch without opening a PR. A branch that also has an
+    # open PR gets a pull_request run too — accepted as minor duplication.
+    branches: [main, "claude/**"]
     # Pushes from the "Refresh cached HTML files" / "Refresh UI snapshot"
     # workflows only touch these paths and carry [skip ci]; this is a redundant
     # extra guard against re-triggering this workflow.
@@ -44,3 +51,39 @@ jobs:
       # resvg, no browser), so it runs alongside the other tests.
       - name: Run UI snapshot test
         run: npm run test:ui
+
+      # Real-Chrome smoke test: loads the unpacked extension and asserts the MV3
+      # service worker registers — the one layer that exercises Chrome's actual
+      # extension loader, the layer that broke in #146. The test itself has no
+      # npm dependency (it drives Chrome over the DevTools Protocol via Node's
+      # built-in WebSocket). Two environment quirks handled here:
+      #   * branded Chrome 137+ dropped the --load-extension switch, so we fetch
+      #     Chrome for Testing via `npx @puppeteer/browsers` (run on demand, not
+      #     a project dependency — nothing added to package.json/the lockfile);
+      #   * MV3 extensions only load in *headful* Chrome, so it runs under xvfb.
+      # Separate from the browserless suites above; the test skips if no Chrome.
+      #
+      # The Chrome for Testing download (~150 MB) is cached to keep CI fast. The
+      # key rolls monthly so the cache is reused on virtually every run, while
+      # still refreshing to a current Chrome often enough to catch Chrome changes
+      # (the whole point of this layer).
+      - name: Chrome for Testing cache key
+        id: cft-key
+        run: echo "key=cft-${{ runner.os }}-$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+      - name: Cache Chrome for Testing
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/cft
+          key: ${{ steps.cft-key.outputs.key }}
+      - name: Run real-Chrome extension-load smoke test
+        run: |
+          # Reuse the cached binary when present; otherwise fetch Chrome for Testing.
+          CHROME_PATH="$(find "${RUNNER_TEMP}/cft" -type f -name chrome 2>/dev/null | head -n1)"
+          if [ -z "$CHROME_PATH" ]; then
+            out="$(npx --yes @puppeteer/browsers install chrome@stable --path "${RUNNER_TEMP}/cft")"
+            echo "$out"
+            CHROME_PATH="$(echo "$out" | tail -n1 | awk '{print $NF}')"
+          fi
+          export CHROME_PATH
+          echo "Using Chrome at: $CHROME_PATH"
+          xvfb-run --auto-servernum npm run test:e2e
