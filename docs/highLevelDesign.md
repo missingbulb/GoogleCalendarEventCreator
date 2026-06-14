@@ -6,8 +6,9 @@
 
 ## How extraction works
 
-Everything runs through one top-level extractor, `GCal.extract()`, which picks a
-path by whether the page's host has a per-site source:
+Everything — the popup and the tests alike — runs through one top-level
+extractor, `GCal.extract()`, which selects the per-URL source internally and
+picks a path by whether the page's host has a per-site source:
 
 1. **Supported host** — a **self-contained site scraper** in
    `pipeline/sources/`. It produces every field of its events itself; no other
@@ -45,7 +46,9 @@ event shows the same wall-clock time the page displayed. Dates with an
 explicit offset (or trailing `Z`) are converted to an exact UTC instant before
 being passed to Google Calendar, so the event occurs at the same moment in time
 regardless of the viewer's own timezone. When no end time is found, a 2-hour
-duration is assumed. A date without a time becomes an all-day event.
+duration is assumed. A date without a time becomes an all-day event. These
+tunable product decisions — default duration, the cap on events shown, fallback
+copy — live in `config.js`, not hardcoded across extractors or the UI.
 
 A site extractor that knows an event's location is fixed (e.g. a festival
 that only ever runs in one city) can set `ctz` to that timezone (e.g. `"GB"`);
