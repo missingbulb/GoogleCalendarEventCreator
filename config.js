@@ -19,7 +19,7 @@ export const GCalConfig = {
 
   // Hard cap on the whole Google Calendar template URL; only the trailing
   // details field is trimmed to fit (never the other fields).
-  maxEventUrlLength: 4000,
+  maxEventUrlLength: 6000,
 
   // Title used when neither the page nor the tab gave one.
   fallbackEventTitle: "New event",
