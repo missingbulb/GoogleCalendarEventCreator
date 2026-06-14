@@ -17,6 +17,7 @@ GCal.siteHosts = [
   { name: "eventbrite", matches: (host) => /(^|\.)eventbrite\./.test(host) },
   { name: "edinburghfringe", matches: (host) => /(^|\.)edfringe\.com$/.test(host) },
   { name: "telavivcinematheque", matches: (host) => /(^|\.)cinema\.co\.il$/.test(host) },
+  { name: "ticketmaster", matches: (host) => /(^|\.)ticketmaster\.co\.il$/.test(host) },
 ];
 
 // THE single source of truth for "is this page a supported site": its hostname
