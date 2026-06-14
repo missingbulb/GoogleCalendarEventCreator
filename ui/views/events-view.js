@@ -6,6 +6,7 @@
 // controller's entry point; the pure display helpers (formatWhen, summarize,
 // dateChip) are also exported for the UI-snapshot renderer.
 import { buildCalendarUrl } from "../../pipeline/build-calendar-url.js";
+import { GCalConfig } from "../../config.js";
 
 // Build one event button. Each event is self-contained (title, start, end,
 // location, description, ctz), so its Calendar URL is built directly.
@@ -39,7 +40,7 @@ export function makeButton(event, tab) {
 
   const title = document.createElement("span");
   title.className = "e-title";
-  title.textContent = event.title || tab.title || "New event";
+  title.textContent = event.title || tab.title || GCalConfig.fallbackEventTitle;
   body.appendChild(title);
 
   const whenText = summarize(event);

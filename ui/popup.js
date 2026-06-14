@@ -2,6 +2,7 @@
 // pick a view from the result, and dynamically import only that view to render.
 // The two views — events-view.js and source-request-view.js — are loaded on
 // demand with import() so the popup pulls in just what the page needs.
+import { GCalConfig } from "../config.js";
 
 async function init() {
   const headingEl = document.getElementById("heading");
@@ -26,7 +27,7 @@ async function init() {
     console.warn("Could not extract from page:", e);
   }
 
-  const MAX_EVENTS = 7;
+  const MAX_EVENTS = GCalConfig.maxEventsShown;
   const view = chooseContent(data);
 
   if (view.mode === "request") {
