@@ -31,7 +31,9 @@
     name: "eventbrite",
     matches: (host) => /(^|\.)eventbrite\./.test(host),
     extract() {
+      const { isValidTimezone, findTimezone, scriptsText } = GCal;
       const timeEl = document.querySelector("time[datetime]");
+      const tz = findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/);
 
       // Build the full description from __NEXT_DATA__: the short summary plus
       // the structured-content body paragraphs that don't appear in JSON-LD.
@@ -71,6 +73,7 @@
           : parseDateFromText(firstText([".date-info__full-datetime", '[data-testid="dateAndTime"]'])),
         location: firstText([".location-info__address", '[data-testid="location"]']),
         description,
+        ctz: isValidTimezone(tz) ? tz : "",
       };
       // DOM values win where present; the page's embedded event fills the rest
       // (end time, and location/description on pages whose selectors don't match).
