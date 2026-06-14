@@ -12,7 +12,6 @@
 //
 //   {
 //     "description": "Meetup event page is parseable",
-//     "url":         "https://www.meetup.com/<group>/events/<id>/",
 //     "expected": {
 //       "events": [
 //         {
@@ -26,6 +25,11 @@
 //       ]
 //     }
 //   }
+//
+// The scenario's source URL lives alongside the cached HTML, in
+// data/<name>.url (the single source of truth — refresh-cache.js fetches it,
+// and the suite loads the HTML into a DOM at that URL so hostname-based site
+// detection behaves as in Chrome). It is NOT repeated in the case file.
 //
 // `expected.events` must be the *complete*, exact array the extractor
 // produces. Each event is deep-equal compared against:
@@ -42,11 +46,12 @@
 // description). `ctz` is the timezone a site extractor pinned the event to
 // (e.g. "GB" for edfringe.com), or null.
 //
-// To cover a new website or platform: add a case file pointing at a real
-// event page, then record its first cached HTML file with
-// `node data/refresh-cache.js` (on a machine with internet)
-// or let CI record it on the next run. Run the suite once to see the actual
-// extracted values in the failure output, then copy them into `expected`.
+// To cover a new website or platform: add a data/<name>.url with the event
+// page URL and a case file (test/integration/cases/<name>.json) with its
+// `expected`, then record the cached HTML with `node data/refresh-cache.js`
+// (on a machine with internet) or let CI record it on the next run. Run the
+// suite once to see the actual extracted values in the failure output, then
+// copy them into `expected`.
 "use strict";
 
 const test = require("node:test");
@@ -79,9 +84,11 @@ assert.ok(caseFiles.length > 0, `No test cases found in ${CASES_DIR}`);
 for (const file of caseFiles) {
   const name = path.basename(file, ".json");
   const testCase = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
+  const urlPath = path.join(DATA_DIR, `${name}.url`);
+  const url = fs.existsSync(urlPath) ? fs.readFileSync(urlPath, "utf8").trim() : "";
 
-  test(`${testCase.description || file} — ${testCase.url}`, () => {
-    assert.ok(testCase.url, `${file}: "url" is required`);
+  test(`${testCase.description || file} — ${url}`, () => {
+    assert.ok(url, `Missing source URL for "${name}". Add it to data/${name}.url`);
     assert.ok(
       testCase.expected && Array.isArray(testCase.expected.events) && testCase.expected.events.length,
       `${file}: "expected.events" must be a non-empty array`
@@ -94,7 +101,7 @@ for (const file of caseFiles) {
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");
-    const extracted = extractFromHtml(html, testCase.url);
+    const extracted = extractFromHtml(html, url);
 
     // Build each event exactly as background.js would when opening the
     // Calendar template, so cases assert on the final dates/details/URL.
@@ -102,7 +109,7 @@ for (const file of caseFiles) {
     // jsdom-realm array, and deepEqual rejects a cross-realm array even when
     // its contents match.
     const events = [...(extracted.events || [])].map((e) => {
-      const tab = { url: testCase.url, title: e.title, index: 0 };
+      const tab = { url, title: e.title, index: 0 };
       const calendarUrl = buildCalendarUrl(e, tab);
       return {
         title: e.title,

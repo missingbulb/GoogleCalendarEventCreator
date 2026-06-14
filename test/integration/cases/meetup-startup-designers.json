@@ -1,6 +1,5 @@
 {
   "description": "Meetup event page is parseable; bold markdown in the description becomes <b> (Startup Designers #41, Jun 17 2026)",
-  "url": "https://www.meetup.com/startup-designers/events/315022301/",
   "expected": {
     "events": [
       {

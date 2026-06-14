@@ -1,6 +1,5 @@
 {
   "description": "Edinburgh Fringe show page is parseable (Sophie Duker: Hot Beef Injection, 23 dates)",
-  "url": "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection",
   "expected": {
     "events": [
       {
