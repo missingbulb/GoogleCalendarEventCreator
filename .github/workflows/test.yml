@@ -52,13 +52,17 @@ jobs:
       - name: Run UI snapshot test
         run: npm run test:ui
 
-      # Real-Chrome smoke test: loads the unpacked extension in Chrome
-      # (preinstalled on ubuntu-latest) and asserts the MV3 service worker
-      # registers — the one layer that exercises Chrome's actual extension
-      # loader, the layer that broke in #146. MV3 extensions only load in
-      # *headful* Chrome, so it runs under xvfb (preinstalled on the runner).
-      # Separate from the browserless suites above; skips if no Chrome is found.
+      # Real-Chrome smoke test: loads the unpacked extension and asserts the MV3
+      # service worker registers — the one layer that exercises Chrome's actual
+      # extension loader, the layer that broke in #146. Two environment quirks:
+      #   * branded Chrome 137+ dropped the --load-extension switch, so we use
+      #     Chrome for Testing (installed via @puppeteer/browsers, which ships
+      #     with puppeteer-core — no new dependency, just a one-time download);
+      #   * MV3 extensions only load in *headful* Chrome, so it runs under xvfb.
+      # Separate from the browserless suites above; the test skips if no Chrome.
       - name: Run real-Chrome extension-load smoke test
-        run: xvfb-run --auto-servernum npm run test:e2e
-        env:
-          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          install_out="$(npx --yes @puppeteer/browsers install chrome@stable)"
+          echo "$install_out"
+          export CHROME_PATH="$(echo "$install_out" | tail -n1 | awk '{print $NF}')"
+          xvfb-run --auto-servernum npm run test:e2e

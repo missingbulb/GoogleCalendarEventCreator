@@ -59,6 +59,9 @@ test(
       args: [
         `--disable-extensions-except=${ROOT}`,
         `--load-extension=${ROOT}`,
+        // Branded Chrome 137+ gates --load-extension behind this feature; a
+        // no-op on Chrome for Testing (which we use in CI) and older Chrome.
+        "--disable-features=DisableLoadExtensionCommandLineSwitch",
         "--no-sandbox", // CI runners run as root; Chrome's sandbox needs this off
         "--disable-dev-shm-usage", // CI containers have a tiny /dev/shm
         "--disable-gpu",
