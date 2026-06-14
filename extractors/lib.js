@@ -1,6 +1,6 @@
 // Shared toolbox for the extractors. Injected first; the site-specific
 // extractors, jsonld.js, generic.js, and finally main.js follow (the
-// injection order is the EXTRACTOR_FILES list in background.js).
+// injection order is pipeline/load-order.generated.json — see tools/index.js).
 //
 // Every extractor produces a partial event object with these optional fields:
 //   title, location, description : plain strings

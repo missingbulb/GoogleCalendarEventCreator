@@ -28,8 +28,8 @@ Extraction runs in three layers, merged field-by-field (first non-empty wins):
    Aviv Cinematheque), and **ticketmaster.co.il** (Ticketmaster Israel). Each
    lives in its own file under `extractors/` with a
    comment describing the HTML it expects; to support a new platform, add a
-   file there following the same pattern and list it in `EXTRACTOR_FILES` in
-   `background.js`.
+   file there following the same pattern and run `npm run index` to regenerate
+   the load list (`pipeline/load-order.generated.json`).
 2. **schema.org JSON-LD** (`<script type="application/ld+json">` with an
    `Event` type) — most event pages publish this, so it's the strongest
    generic signal.

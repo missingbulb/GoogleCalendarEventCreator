@@ -46,7 +46,8 @@ A) Toolbar icon coloring (always running, no user gesture required)
 
 B) Event extraction (only while the popup is open, a user-initiated action)
    User opens the popup
-     -> popup.js: chrome.scripting.executeScript(EXTRACTOR_FILES) on the active tab
+     -> popup.js: chrome.scripting.executeScript on the active tab, injecting the
+        files listed in pipeline/load-order.generated.json
      -> extractors/*.js (DOM queries, JSON-LD / __NEXT_DATA__ JSON parsing,
         regex date parsing) over the page's live DOM (untrusted)
      -> background.js: buildCalendarUrl()

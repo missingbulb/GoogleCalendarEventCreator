@@ -37,12 +37,12 @@ test("manifest-referenced files ship", () => {
 });
 
 test("every injected extractor file ships", () => {
-  // EXTRACTOR_FILES in background.js is the list popup.js injects into the page.
-  const files = [...read("background.js").matchAll(/"(extractors\/[^"]+)"/g)].map((m) => m[1]);
-  assert.ok(files.length > 0, "could not find any extractors/* entries in background.js");
+  // pipeline/load-order.generated.json is the list popup.js injects into the page.
+  const files = JSON.parse(read("pipeline/load-order.generated.json"));
+  assert.ok(files.length > 0, "load-order.generated.json lists no files");
   for (const f of files) {
-    assert.ok(fs.existsSync(path.join(ROOT, f)), `EXTRACTOR_FILES lists ${f}, which does not exist`);
-    assert.ok(isShipped(f), `EXTRACTOR_FILES lists ${f}, but it is not in the shipping set`);
+    assert.ok(fs.existsSync(path.join(ROOT, f)), `load order lists ${f}, which does not exist`);
+    assert.ok(isShipped(f), `load order lists ${f}, but it is not in the shipping set`);
   }
 });
 

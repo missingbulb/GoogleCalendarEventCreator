@@ -1,8 +1,9 @@
 // Shared hostname-matching registry for the site-specific extractors.
 //
 // This file is intentionally DOM-free so it can be used in two places:
-//   - as a content script, listed in EXTRACTOR_FILES right after lib.js, where
-//     each extractors/<site>.js reuses the relevant entry's `matches` function
+//   - as a content script, injected right after lib.js (per the generated
+//     pipeline/load-order.generated.json), where each extractors/<site>.js
+//     reuses the relevant entry's `matches` function
 //   - via importScripts() from the background service worker, which uses it to
 //     decide whether the toolbar icon should show as "supported" (green
 //     border) or "unsupported" (red border) for the active tab's hostname

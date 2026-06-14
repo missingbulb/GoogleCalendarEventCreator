@@ -2,9 +2,9 @@
 // HTML document as if it were loaded at a given URL (so hostname-based site
 // detection behaves exactly like in the browser).
 //
-// The list of files — and their injection order — is read from
-// EXTRACTOR_FILES in background.js, so the tests always exercise exactly
-// what the popup injects.
+// The list of files — and their injection order — is read from the generated
+// pipeline/load-order.generated.json (the same list popup.js injects), so the
+// tests always exercise exactly what the popup injects.
 "use strict";
 
 const { readFileSync } = require("node:fs");
@@ -15,11 +15,10 @@ const { JSDOM } = require("jsdom");
 const ROOT = path.join(__dirname, "..");
 
 function extractorSources() {
-  const background = readFileSync(path.join(ROOT, "background.js"), "utf8");
-  const listMatch = background.match(/EXTRACTOR_FILES\s*=\s*\[([^\]]*)\]/);
-  assert.ok(listMatch, "Could not find EXTRACTOR_FILES in background.js");
-  const files = [...listMatch[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(files.length > 0, "EXTRACTOR_FILES in background.js is empty");
+  const files = JSON.parse(
+    readFileSync(path.join(ROOT, "pipeline/load-order.generated.json"), "utf8")
+  );
+  assert.ok(files.length > 0, "pipeline/load-order.generated.json is empty");
   return files.map((file) => ({ file, src: readFileSync(path.join(ROOT, file), "utf8") }));
 }
 

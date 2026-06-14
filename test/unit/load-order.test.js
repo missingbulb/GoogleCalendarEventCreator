@@ -24,7 +24,7 @@ function runInFreshSandbox(files) {
 }
 
 test("site-hosts.js loaded before lib.js still leaves both intact", () => {
-  // Deliberately reverse the EXTRACTOR_FILES order of the first two files.
+  // Deliberately reverse the load list's first two files.
   const sandbox = runInFreshSandbox([
     "extractors/site-hosts.js",
     "extractors/lib.js",
