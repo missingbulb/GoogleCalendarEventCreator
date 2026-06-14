@@ -14,20 +14,22 @@
 // first), so the list is explicit here, and that test fails if a source is
 // added without updating it.
 //
-// Paths are relative to the extension root (the manifest location), NOT to this
-// worker's own location in ui/: that's how importScripts resolves them in an MV3
-// service worker. A leading slash makes the import fail, which aborts the whole
-// worker before the listeners below register — leaving the icon stuck on the
-// neutral default (neither green nor red).
+// Leading-slash (extension-root) paths: an MV3 service worker resolves an
+// importScripts path relative to the worker's OWN location, which is ui/ — but
+// the pipeline files live at the extension root, so each path needs the leading
+// slash to point there. Without it the import resolves to ui/pipeline/… , fails
+// to load, and that first failure aborts the whole worker before the listeners
+// below register — leaving the icon stuck on the neutral default (neither green
+// nor red). See #146.
 importScripts(
-  "pipeline/registry.js",
-  "pipeline/sources/edinburghfringe.js",
-  "pipeline/sources/eventbrite.js",
-  "pipeline/sources/facebook.js",
-  "pipeline/sources/luma.js",
-  "pipeline/sources/meetup.js",
-  "pipeline/sources/telavivcinematheque.js",
-  "pipeline/sources/ticketmaster.js"
+  "/pipeline/registry.js",
+  "/pipeline/sources/edinburghfringe.js",
+  "/pipeline/sources/eventbrite.js",
+  "/pipeline/sources/facebook.js",
+  "/pipeline/sources/luma.js",
+  "/pipeline/sources/meetup.js",
+  "/pipeline/sources/telavivcinematheque.js",
+  "/pipeline/sources/ticketmaster.js"
 );
 
 const ICON_SIZES = [16, 32, 48, 128];

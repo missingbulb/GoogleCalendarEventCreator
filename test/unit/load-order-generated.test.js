@@ -48,22 +48,31 @@ test("the service worker imports the registry and every source", () => {
   const worker = fs.readFileSync(path.join(ROOT, "ui/toolbar-icon.js"), "utf8");
   const importBlock = worker.match(/importScripts\(([^)]*)\)/s);
   assert.ok(importBlock, "ui/toolbar-icon.js must call importScripts");
-  // Paths must be relative to the extension root (the load-order entries), with
-  // no leading slash: in an MV3 worker importScripts resolves against the
-  // extension root, and a leading slash makes the import fail (the worker then
-  // aborts before its listeners register and the icon never updates).
   const imported = [...importBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(
-    imported.every((f) => !f.startsWith("/")),
-    "worker importScripts paths must be extension-root-relative (no leading slash)"
-  );
+  assert.ok(imported.length, "ui/toolbar-icon.js must importScripts at least one file");
+
+  // An MV3 service worker resolves an importScripts path relative to the
+  // worker's OWN location (ui/), with a leading slash meaning the extension
+  // root. Resolve each the same way — as a repo-root-relative path — and assert
+  // it lands on a real file there, which is what actually has to load. (The #146
+  // regression used ui/-relative paths with no leading slash, so every import
+  // resolved to a non-existent ui/pipeline/… and the worker failed to load.)
+  const fromWorker = (p) =>
+    p.startsWith("/") ? p.slice(1) : path.relative(ROOT, path.resolve(ROOT, "ui", p));
+  const resolved = imported.map(fromWorker);
+  imported.forEach((p, i) => {
+    assert.ok(
+      fs.existsSync(path.join(ROOT, resolved[i])),
+      `worker imports "${p}", which resolves to ${resolved[i]} from ui/ — no such file`
+    );
+  });
 
   const loadOrder = computeLoadOrder();
   const sources = loadOrder.filter((f) => f.startsWith("pipeline/sources/"));
 
-  assert.ok(imported.includes("pipeline/registry.js"), "worker must import pipeline/registry.js");
+  assert.ok(resolved.includes("pipeline/registry.js"), "worker must import pipeline/registry.js");
   assert.deepEqual(
-    imported.filter((f) => f.startsWith("pipeline/sources/")).sort(),
+    resolved.filter((f) => f.startsWith("pipeline/sources/")).sort(),
     [...sources].sort(),
     "worker's source imports must match the generated sources — run `npm run index` and update ui/toolbar-icon.js"
   );
