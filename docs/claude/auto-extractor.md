@@ -45,7 +45,27 @@ in two phases, handling the HTML-cache step automatically:
 - Updates the case with real expected values and confirms the tests pass
 - Runs `npm run test:offline` to catch regressions
 - Opens a pull request referencing the issue
+- Dispatches the `Tests` workflow against the branch so CI actually runs (see
+  note below)
 - Posts a comment on the issue with the PR link
+
+### Why the agent has to dispatch CI itself
+
+GitHub deliberately **does not start a workflow run for events triggered by the
+built-in `GITHUB_TOKEN`** (this prevents a workflow from recursively triggering
+itself). So the agent's `git push` (a `push` event) and `gh pr create` (a
+`pull_request` event) do **not** kick off `test.yml` the way a human push would
+— the PR would otherwise open with an empty checks section.
+
+The one documented exception is `workflow_dispatch` (and `repository_dispatch`).
+That is why two things in this pipeline use the Actions dispatch API rather than
+relying on the push/PR triggers:
+
+1. The Phase 1 → Phase 2 handoff dispatches `refresh-cache.yml`.
+2. After opening the PR, the agent dispatches `test.yml` (which has a
+   `workflow_dispatch:` trigger) against its branch. The run executes against
+   the branch's head commit, so its check results attach to that commit and
+   appear on the PR for the reviewer.
 
 ## Required secrets
 

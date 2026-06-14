@@ -306,7 +306,32 @@ Closes #{{ISSUE_NUMBER}}"
 
 ---
 
-## Step 17 — Comment on the issue
+## Step 17 — Trigger CI on the branch
+
+A push or PR made with the workflow's `GITHUB_TOKEN` does **not** start the
+`Tests` workflow — GitHub suppresses workflow runs triggered by `GITHUB_TOKEN`
+to prevent recursion. The one exception is `workflow_dispatch`. `test.yml` has a
+`workflow_dispatch:` trigger, so dispatch it explicitly against your branch; the
+resulting run executes against the branch's head commit, so its checks attach to
+that commit and show up on the PR for the reviewer.
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  "https://api.github.com/repos/{{REPO}}/actions/workflows/test.yml/dispatches" \
+  -d "{\"ref\":\"claude/extractor/<site-slug>\"}"
+
+echo "Triggered Tests workflow on claude/extractor/<site-slug>"
+```
+
+Do not wait for this run to finish or merge based on it — opening the PR is the
+end of the agent's job. The reviewer reads the CI result on the PR.
+
+---
+
+## Step 18 — Comment on the issue
 
 ```bash
 PR_URL=$(gh pr view "claude/extractor/<site-slug>" --json url -q .url 2>/dev/null || echo "(see Actions run)")
