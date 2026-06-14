@@ -67,4 +67,4 @@ the "Last updated" date above will be revised.
 
 ## Contact
 
-Questions about this privacy policy can be sent to: arielra@gmail.com
+Questions about this privacy policy can be sent to: Dev@MissingBulb.com
