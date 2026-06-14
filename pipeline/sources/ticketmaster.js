@@ -41,7 +41,8 @@
 //   location    the venue link in .event-location (the full "venue, city"
 //               string, richer than the row's bare venue name)
 //   description the "about the show" block (.read-more-content), with its
-//               <br> line breaks turned into spaces so words don't run together
+//               <br> line breaks kept as newlines so the show's layout (its
+//               line and paragraph breaks) survives into the calendar details
 //   ctz         always "Asia/Jerusalem" — ticketmaster.co.il is Israel-only
 (() => {
   const { clean, text } = GCal;
@@ -94,14 +95,20 @@
     return out;
   }
 
-  // textContent of `el` with <br> turned into spaces, so the description's
-  // line breaks don't glue adjacent words together once whitespace is collapsed.
+  // textContent of `el` with <br> kept as newlines, so the description reads as
+  // the page lays it out. Google Calendar's details field renders a newline as a
+  // line break, so the author's lines and paragraph breaks carry through. Within
+  // a line, horizontal whitespace (incl. &nbsp;) is collapsed to single spaces
+  // and runs of blank lines to a single blank line; the block is then trimmed.
   function blockText(sel) {
     const el = document.querySelector(sel);
     if (!el) return "";
     const tmp = document.createElement("div");
-    tmp.innerHTML = el.innerHTML.replace(/<br\s*\/?>/gi, " ");
-    return clean(tmp.textContent);
+    tmp.innerHTML = el.innerHTML.replace(/<br\s*\/?>/gi, "\n");
+    return tmp.textContent
+      .replace(/[^\S\n]+/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
   }
 
   GCal.sources.push({
