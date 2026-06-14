@@ -12,15 +12,20 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
 const loadPopupHelpers = require("./popup-helpers");
 
 // The popup's pure display helpers, imported (async) from the events-view ES
-// module on first render and reused thereafter.
-let summarize, dateChip;
+// module on first render and reused thereafter. GCalConfig is loaded the same
+// way so the renderer reads the centralized maxEventsShown (no local copy).
+let summarize, dateChip, GCalConfig;
 async function ensureHelpers() {
   if (!summarize) ({ summarize, dateChip } = await loadPopupHelpers());
+  if (!GCalConfig) {
+    ({ GCalConfig } = await import(pathToFileURL(path.join(__dirname, "..", "..", "config.js"))));
+  }
 }
 
 const FONT_FAMILY = "Liberation Sans"; // metric-compatible stand-in for popup.html's Arial fallback
@@ -196,7 +201,7 @@ function sourceRequestButton() {
 }
 
 function buildTree(data, opts = {}) {
-  const MAX_EVENTS = 7;
+  const MAX_EVENTS = GCalConfig.maxEventsShown;
   const allEvents = data.events && data.events.length ? data.events : [];
   const events = allEvents.slice(0, MAX_EVENTS);
   const heading = opts.sourceRequestForm

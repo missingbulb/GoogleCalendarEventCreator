@@ -5,15 +5,15 @@
 // can be a module — it is never injected into the page). `buildCalendarUrl` and
 // `formatDatesParam` are exported; the rest are module-private helpers.
 
+import { GCalConfig } from "../config.js";
+
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
-const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
-const MAX_EVENT_CREATION_URL_LENGTH = 4000; // keep the whole template URL within a safe length
 
 export function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
   params.set("action", "TEMPLATE");
 
-  const title = data.title || tab.title || "New event";
+  const title = data.title || tab.title || GCalConfig.fallbackEventTitle;
   params.set("text", title);
 
   const dates = formatDatesParam(data.start, data.end);
@@ -34,7 +34,7 @@ export function buildCalendarUrl(data, tab) {
 }
 
 // Build the template URL from `params` and, if it exceeds
-// MAX_EVENT_CREATION_URL_LENGTH, shorten the trailing `details` value until the
+// GCalConfig.maxEventUrlLength, shorten the trailing `details` value until the
 // whole (URL-encoded) URL fits. details is the last param, so only it is
 // trimmed; every other field is kept in full. Trimming works on the actual
 // encoded URL length (not raw characters), so multi-byte/encoded text counts
@@ -47,7 +47,7 @@ function fitUrlToLimit(params) {
 
   const details = params.get("details") || "";
   let url = urlFor(details);
-  if (url.length <= MAX_EVENT_CREATION_URL_LENGTH) return url;
+  if (url.length <= GCalConfig.maxEventUrlLength) return url;
 
   // Longest prefix of details whose encoded URL fits the cap. Avoid ending on a
   // lone surrogate (a split emoji/code point), which would otherwise be encoded
@@ -56,7 +56,7 @@ function fitUrlToLimit(params) {
   let hi = details.length;
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
-    if (urlFor(details.slice(0, mid)).length <= MAX_EVENT_CREATION_URL_LENGTH) lo = mid;
+    if (urlFor(details.slice(0, mid)).length <= GCalConfig.maxEventUrlLength) lo = mid;
     else hi = mid - 1;
   }
   if (lo > 0 && lo < details.length) {
@@ -133,7 +133,7 @@ export function formatDatesParam(start, end) {
 
   let endDate = end ? new Date(end) : null;
   if (!endDate || isNaN(endDate) || endDate <= startDate) {
-    endDate = new Date(startDate.getTime() + DEFAULT_DURATION_MS);
+    endDate = new Date(startDate.getTime() + GCalConfig.defaultEventDurationMs);
   }
 
   return hasOffset
