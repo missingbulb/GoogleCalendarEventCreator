@@ -67,11 +67,23 @@ test(
     try {
       // The MV3 background is a service_worker target under chrome-extension://.
       // It appears once the worker registers — i.e. once its first importScripts
-      // succeeds; a wrong path means it never appears and this wait times out.
-      // Take it if it's already up, otherwise wait for it.
+      // succeeds; a wrong path means it never appears.
       const isWorker = (t) => t.type() === "service_worker" && t.url().endsWith("toolbar-icon.js");
-      const target =
-        browser.targets().find(isWorker) || (await browser.waitForTarget(isWorker, { timeout: 30000 }));
+
+      // MV3 service workers are lazy: opening a page fires the extension's
+      // chrome.tabs listeners, which starts the worker (and registers its
+      // target). Do this before waiting so the target actually appears.
+      await browser.newPage();
+
+      let target = browser.targets().find(isWorker);
+      if (!target) {
+        try {
+          target = await browser.waitForTarget(isWorker, { timeout: 30000 });
+        } catch {
+          const seen = browser.targets().map((t) => `  ${t.type()}  ${t.url()}`).join("\n") || "  (none)";
+          throw new Error(`service_worker (…/toolbar-icon.js) never appeared.\nTargets seen:\n${seen}`);
+        }
+      }
       const worker = await target.worker();
 
       assert.equal(
