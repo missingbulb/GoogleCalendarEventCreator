@@ -34,6 +34,8 @@ S = SIZE * SS       # working buffer edge
 CARD = (22.0, 32.0, 106.0, 108.0)   # left, top, right, bottom
 CARD_RADIUS = 12.0
 HEADER_BOTTOM = 54.0                 # blue header band ends here
+BORDER = 2.5                         # slim outline so the white body shows on
+                                     # a white background
 
 # Two binding tabs poking above the header.
 TABS = [(40.0, 24.0, 49.0, 40.0), (79.0, 24.0, 88.0, 40.0)]
@@ -70,7 +72,14 @@ def sample(x, y):
             color = DARK_BLUE
             break
     if in_round_rect(x, y, CARD, CARD_RADIUS):
-        color = DARK_BLUE if y < HEADER_BOTTOM else WHITE
+        l, t, r, b = CARD
+        inner = (l + BORDER, t + BORDER, r - BORDER, b - BORDER)
+        if not in_round_rect(x, y, inner, CARD_RADIUS - BORDER):
+            color = DARK_BLUE          # slim card border
+        elif y < HEADER_BOTTOM:
+            color = DARK_BLUE
+        else:
+            color = WHITE
     if in_plus(x, y):
         color = BLUE
     if color is None:
