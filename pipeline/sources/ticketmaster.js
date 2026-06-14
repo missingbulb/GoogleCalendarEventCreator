@@ -41,10 +41,11 @@
 //   location    the venue link in .event-location (the full "venue, city"
 //               string, richer than the row's bare venue name)
 //   description the "about the show" block (.read-more-content), with its
-//               <br> line breaks turned into spaces so words don't run together
+//               <br> line breaks kept as newlines so the show's layout (its
+//               line and paragraph breaks) survives into the calendar details
 //   ctz         always "Asia/Jerusalem" — ticketmaster.co.il is Israel-only
 (() => {
-  const { clean, text } = GCal;
+  const { clean, text, blockText } = GCal;
 
   // Hebrew month names as they appear in the date. The header date uses the
   // "d בMMMM y" format, prepending a "ב" ("in") to the month ("ביולי"); the
@@ -92,16 +93,6 @@
       out.push({ title, start: time ? `${date}T${time}:00` : date, end: null, location });
     }
     return out;
-  }
-
-  // textContent of `el` with <br> turned into spaces, so the description's
-  // line breaks don't glue adjacent words together once whitespace is collapsed.
-  function blockText(sel) {
-    const el = document.querySelector(sel);
-    if (!el) return "";
-    const tmp = document.createElement("div");
-    tmp.innerHTML = el.innerHTML.replace(/<br\s*\/?>/gi, " ");
-    return clean(tmp.textContent);
   }
 
   GCal.sources.push({

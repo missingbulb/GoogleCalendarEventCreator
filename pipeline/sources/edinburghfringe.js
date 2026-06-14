@@ -32,33 +32,23 @@
 // performance as the event. Every Fringe show runs in Edinburgh, so `ctz` is
 // always "GB" — even on pages where the event JSON couldn't be found.
 (() => {
-  const { clean } = GCal;
+  const { clean, jsonScript, parts } = GCal;
 
   function readEvent() {
-    const script = document.getElementById("__NEXT_DATA__");
-    if (!script) return null;
-    try {
-      return JSON.parse(script.textContent).props.pageProps.data.event;
-    } catch (e) {
-      return null;
-    }
+    const next = jsonScript("#__NEXT_DATA__");
+    const data = next && next.props && next.props.pageProps && next.props.pageProps.data;
+    return (data && data.event) || null;
   }
 
   function flattenLocation(event) {
     const venue = (event.venues || [])[0];
     const space = (event.spaces || [])[0];
-    const parts = [];
-    const add = (value) => {
-      value = clean(value || "");
-      if (value && !parts.includes(value)) parts.push(value);
-    };
-    add((space && space.venueName) || (venue && venue.title));
-    if (venue) {
-      add(venue.address1);
-      add(venue.address2);
-      add(venue.postCode);
-    }
-    return parts.join(", ");
+    // Case-sensitive de-dup: these are proper names/postcodes, not address
+    // fragments that repeat with different casing.
+    const loc = parts((a, b) => a === b);
+    loc.add((space && space.venueName) || (venue && venue.title));
+    if (venue) loc.add(venue.address1).add(venue.address2).add(venue.postCode);
+    return loc.join();
   }
 
   GCal.sources.push({

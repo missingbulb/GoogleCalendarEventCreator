@@ -43,7 +43,7 @@
 //               building, so this is fixed regardless of the film
 //   ctz         always "Asia/Jerusalem" — every screening happens in Tel Aviv
 (() => {
-  const { clean, meta } = GCal;
+  const { clean, meta, richText } = GCal;
 
   // A series/festival page lists several different films, one per `.box`.
   function seriesEvents() {
@@ -103,29 +103,14 @@
     return clean(meta("og:title")).replace(/\s*-\s*סינמטק תל אביב\s*$/, "");
   }
 
-  // Serialize an element's content to text, mapping <br> to a newline and
-  // wrapping <strong>/<b> runs in <b> so the synopsis heading stays bold in
-  // the Calendar details (which render as HTML). Other tags contribute their
-  // text only.
-  function richText(el) {
-    let out = "";
-    for (const node of el.childNodes) {
-      if (node.nodeType === 3) {
-        out += node.textContent;
-      } else if (node.nodeType === 1) {
-        const tag = node.tagName.toLowerCase();
-        if (tag === "br") out += "\n";
-        else if (tag === "strong" || tag === "b") out += `<b>${clean(node.textContent)}</b>`;
-        else out += richText(node);
-      }
-    }
-    return out;
-  }
+  // Both credit and synopsis blocks keep <strong>/<b> as bold (GCal.richText
+  // with { bold: true }) so the synopsis heading survives into the Calendar
+  // details; the per-block line handling below differs.
 
   // The credits <h5> separates each line with a <br> but also carries blank
   // source lines between them; keep one line per credit, dropping the blanks.
   function creditLines(el) {
-    return richText(el)
+    return richText(el, { bold: true })
       .split("\n")
       .map(clean)
       .filter(Boolean)
@@ -135,7 +120,7 @@
   // The synopsis <p> is a bold heading, a <br><br>, then the body; keep that
   // single blank line and clean away the page's incidental whitespace.
   function synopsisText(el) {
-    return richText(el)
+    return richText(el, { bold: true })
       .split("\n")
       .map(clean)
       .join("\n")

@@ -3,6 +3,7 @@
   "pipeline/helpers/dates.js",
   "pipeline/helpers/dom.js",
   "pipeline/helpers/merge.js",
+  "pipeline/helpers/text.js",
   "pipeline/helpers/timezone-names.js",
   "pipeline/helpers/timezones.js",
   "pipeline/extract-generic.js",
