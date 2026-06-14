@@ -248,15 +248,14 @@ an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The tests themselves run **offline**, against committed cached HTML files in
-`data/` (one `<case>.html` per case, plus `urlsToCacheLocally.json` — a plain
-list of the source URL behind each file). The cached HTML is loaded into a DOM
+`data/` (one `<case>.html` per case). The cached HTML is loaded into a DOM
 at the case's URL — so hostname-based site detection behaves exactly as in
 Chrome — and run through the real extractor files. This keeps the suite
 deterministic and runnable anywhere, while still reflecting each site's markup
 at the time it was recorded:
 
 - **`data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
-  that is missing or whose case URL changed; `--force` re-fetches all of them.
+  that is missing or empty (zero bytes); `--force` re-fetches all of them.
   A failed fetch keeps the previous cached HTML file and only warns, so a site
   outage or bot-blocking never breaks the suite.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
@@ -285,10 +284,8 @@ test**. The expected sequence is:
    `test/integration/cases/`, then commit that change.
 2. Run `npm run refresh` locally on the same branch (needs internet) — this
    is the same `refresh-cache.js` step the **Refresh cached HTML files**
-   workflow runs, and it fetches the new case's HTML and updates
-   `data/urlsToCacheLocally.json` accordingly.
-3. Commit the resulting files under `data/` as a follow-up commit on the
-   branch.
+   workflow runs, and it fetches the new case's HTML.
+3. Commit the resulting `data/<name>.html` as a follow-up commit on the branch.
 
 Until a cached HTML file exists for the new case, `test:live` (and so the Tests
 workflow) will fail with `Missing cached HTML for "<case>"`. Note that cases
@@ -377,8 +374,8 @@ commit the results. On mismatch, the test writes
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
 | `test/integration/cases/`   | Reviewed live-test cases (URL + expected values), one JSON each |
-| `data/` | Committed cached HTML files the live tests assert against (plus `urlsToCacheLocally.json`, the list of source URLs) |
-| `data/refresh-cache.js` | Fetches any missing cached HTML files          |
+| `data/` | Committed cached HTML files the live tests assert against |
+| `data/refresh-cache.js` | Fetches any missing or empty cached HTML files          |
 | `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads extractors into a jsdom DOM) |

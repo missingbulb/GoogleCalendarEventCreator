@@ -59,13 +59,14 @@ these decisions in mind:
   bot-blocked, so `npm run refresh` gets HTTP 403). Record the cached HTML
   *before* writing the case, so you can read its exact `expected` off a
   committed file instead of guessing:
-  1. Add the entry to `data/urlsToCacheLocally.json`
-     (`"<name>": { "url": "<event page URL>" }`) — but **not** the case file
-     yet. Commit and push.
-  2. Run the **Refresh cached HTML files** workflow. `refresh-cache.js` fetches
-     any `urlsToCacheLocally` entry that has no case file yet, so it records and
-     commits `data/<name>.html`; `test:live` stays green because no case asserts
-     it yet.
+  1. Commit two new files — but **not** the case file yet:
+     - `data/<name>.html` — an empty (zero-byte) file; the empty file is the
+       "fetch me" signal for the refresh script.
+     - `data/<name>.url` — a plain-text file containing just the event page URL
+       (e.g. `https://www.meetup.com/.../`).
+  2. Run the **Refresh cached HTML files** workflow. `refresh-cache.js` fills in
+     the empty `data/<name>.html`; `test:live` stays green because no case
+     asserts it yet.
   3. Pull, then add `test/integration/cases/<name>.json` (same `<name>`) and run
      `npm run test:live` — it now runs against the local cached HTML, so its
      output gives you the exact `expected` to paste in. Commit and push.

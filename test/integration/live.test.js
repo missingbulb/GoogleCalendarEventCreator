@@ -89,7 +89,7 @@ for (const file of caseFiles) {
 
     const cachedHtmlPath = path.join(DATA_DIR, `${name}.html`);
     assert.ok(
-      fs.existsSync(cachedHtmlPath),
+      fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
       `Missing cached HTML for "${name}". Record it with: node data/refresh-cache.js`
     );
 
