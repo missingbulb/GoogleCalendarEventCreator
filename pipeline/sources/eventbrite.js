@@ -15,7 +15,8 @@
 //   start       datetime attribute of the first <time>; if absent, parsed
 //               from the human-readable date text
 //   location    the location-info address block
-//   description the structured-content / event-description section
+//   description summary + structuredContent.modules from __NEXT_DATA__; falls
+//               back to DOM selectors, then the JSON-LD short description
 //
 // Eventbrite embeds complete JSON-LD (including endDate), and its server-
 // rendered markup varies a lot between pages, so this reads the event the page
@@ -24,7 +25,7 @@
 // self-contained: it gathers every field itself — notably the end time, which
 // only the embedded data carries — without depending on a later merge.
 (() => {
-  const { firstText, normalizeDateValue, parseDateFromText, merge, embeddedEvents } = GCal;
+  const { firstText, normalizeDateValue, parseDateFromText, merge, embeddedEvents, clean, jsonScript } = GCal;
 
   GCal.sources.push({
     name: "eventbrite",
@@ -33,17 +34,45 @@
       const { isValidTimezone, findTimezone, scriptsText } = GCal;
       const timeEl = document.querySelector("time[datetime]");
       const tz = findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/);
+
+      // Build the full description from __NEXT_DATA__: the short summary plus
+      // the structured-content body paragraphs that don't appear in JSON-LD.
+      let description = firstText([
+        '[data-testid="structured-content"]',
+        ".event-description",
+        "#event-description",
+      ]);
+      if (!description) {
+        const ctx =
+          jsonScript("#__NEXT_DATA__") &&
+          jsonScript("#__NEXT_DATA__").props &&
+          jsonScript("#__NEXT_DATA__").props.pageProps &&
+          jsonScript("#__NEXT_DATA__").props.pageProps.context;
+        if (ctx) {
+          const summary = (ctx.basicInfo && ctx.basicInfo.summary) || "";
+          const modules = (ctx.structuredContent && ctx.structuredContent.modules) || [];
+          const bodyHtml = modules.filter((m) => m.type === "text").map((m) => m.text).join("");
+          if (bodyHtml) {
+            const tmp = document.createElement("div");
+            tmp.innerHTML = bodyHtml;
+            const paras = [...tmp.querySelectorAll("p")]
+              .map((p) => clean(p.textContent))
+              .filter(Boolean);
+            const bodyText = paras.join("\n\n");
+            description = summary && bodyText ? `${summary}\n\n${bodyText}` : summary || bodyText;
+          } else {
+            description = summary;
+          }
+        }
+      }
+
       const dom = {
         title: firstText(["h1.event-title", "h1"]),
         start: timeEl
           ? normalizeDateValue(timeEl.getAttribute("datetime"))
           : parseDateFromText(firstText([".date-info__full-datetime", '[data-testid="dateAndTime"]'])),
         location: firstText([".location-info__address", '[data-testid="location"]']),
-        description: firstText([
-          '[data-testid="structured-content"]',
-          ".event-description",
-          "#event-description",
-        ]),
+        description,
         ctz: isValidTimezone(tz) ? tz : "",
       };
       // DOM values win where present; the page's embedded event fills the rest

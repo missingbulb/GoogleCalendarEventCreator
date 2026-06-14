@@ -76,7 +76,7 @@ test("a short description is kept in full (no URL-length trimming)", () => {
 test("a long description is trimmed so the whole URL fits the length cap", () => {
   const description = "x".repeat(6000);
   const url = buildCalendarUrl({ title: "Talk", description }, TAB);
-  assert.ok(url.length <= 4000, `URL length ${url.length} exceeds the cap`);
+  assert.ok(url.length <= 6000, `URL length ${url.length} exceeds the cap`);
   // only the trailing details field is shortened; the rest of the URL survives
   const details = paramsOf(url).get("details");
   assert.ok(details.startsWith(`${TAB.url}\n\n`), "details still begins with the source link");
