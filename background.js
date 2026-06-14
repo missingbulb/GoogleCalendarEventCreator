@@ -16,6 +16,7 @@ const EXTRACTOR_FILES = [
   "extractors/eventbrite.js",
   "extractors/telavivcinematheque.js",
   "extractors/edinburghfringe.js",
+  "extractors/ticketmaster.js",
   "extractors/main.js",
 ];
 

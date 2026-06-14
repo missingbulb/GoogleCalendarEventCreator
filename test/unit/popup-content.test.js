@@ -41,9 +41,9 @@ test("supported host with no events still shows the events view (empty)", () => 
 });
 
 test("unsupported host never surfaces scraped events — only the request flow", () => {
-  // The reported bug: ticketmaster.co.il is unsupported (red border) yet the
+  // The reported bug: an unsupported event site (red border) where the
   // generic/JSON-LD layers returned an event, which used to render a button.
-  const view = chooseContent("https://www.ticketmaster.co.il/event/MR330/ALL/iw", SCRAPED);
+  const view = chooseContent("https://www.songkick.com/concerts/123456-some-artist", SCRAPED);
   assert.equal(view.mode, "request");
   assert.equal(view.prefill, SCRAPED.events[0]); // seeds the request form, not a button
 });

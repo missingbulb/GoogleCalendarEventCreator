@@ -24,8 +24,9 @@ Extraction runs in three layers, merged field-by-field (first non-empty wins):
 
 1. **Site-specific scrapers** with hardcoded selectors for the major event
    sites: **meetup.com**, **facebook.com** events, **eventbrite.com**,
-   **edfringe.com** (Edinburgh Festival Fringe), and **cinema.co.il** (Tel
-   Aviv Cinematheque). Each lives in its own file under `extractors/` with a
+   **edfringe.com** (Edinburgh Festival Fringe), **cinema.co.il** (Tel
+   Aviv Cinematheque), and **ticketmaster.co.il** (Ticketmaster Israel). Each
+   lives in its own file under `extractors/` with a
    comment describing the HTML it expects; to support a new platform, add a
    file there following the same pattern and list it in `EXTRACTOR_FILES` in
    `background.js`.
@@ -371,7 +372,7 @@ commit the results. On mismatch, the test writes
 | `icon-state.js` | Background service worker: updates the toolbar icon's border color per tab |
 | `extractors/lib.js` | Shared helpers (DOM, date parsing, merging) + site registry |
 | `extractors/site-hosts.js` | Hostname matchers shared between the site extractors and `icon-state.js` |
-| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js` | One file per supported event site, with hardcoded selectors |
+| `extractors/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One file per supported event site, with hardcoded selectors |
 | `extractors/jsonld.js` | schema.org JSON-LD extraction                          |
 | `extractors/generic.js` | Heuristics for any page + multiple-event detection    |
 | `extractors/main.js` | Entry point: picks extractors, merges results            |
