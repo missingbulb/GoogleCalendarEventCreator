@@ -6,4 +6,3 @@ mechanics live in [highLevelDesign.md](highLevelDesign.md) /
 `config.js`.
 
 - Adding support for a new host is the most common change — the architecture must keep it a single, self-contained new file (`pipeline/sources/<site>.js`) plus regenerating the load list, touching nothing else and assuming nothing about other extractors.
-- Name by scope/responsibility, not technology or mechanism.
