@@ -1,5 +1,10 @@
 # High-level design
 
+`toolbar-icon.js` colors the icon by host. On click, `popup.js` injects
+`pipeline/` and runs `assemble-events.js`, which picks the matching
+`sources/<site>.js` (or `extract-unsupported.js`); `build-calendar-url.js`
+builds the URL `events-view.js` renders.
+
 > Top-level rules of the road live in
 > [architectureGuidelines.md](architectureGuidelines.md); the per-file map is in
 > [lowLevelDesign.md](lowLevelDesign.md).
