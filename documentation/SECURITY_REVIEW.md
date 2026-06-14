@@ -50,7 +50,7 @@ B) Event extraction (only while the popup is open, a user-initiated action)
         files listed in pipeline/load-order.generated.json
      -> extractors/*.js (DOM queries, JSON-LD / __NEXT_DATA__ JSON parsing,
         regex date parsing) over the page's live DOM (untrusted)
-     -> background.js: buildCalendarUrl()
+     -> pipeline/build-calendar-url.js: buildCalendarUrl()
      -> shown in the popup; only on button click:
           chrome.tabs.create({ url: "https://calendar.google.com/calendar/render?..." })
 ```

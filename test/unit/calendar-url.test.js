@@ -1,5 +1,6 @@
-// Offline unit tests for background.js's Google Calendar URL building:
-// the `dates` parameter formats and the composition of the `details` field.
+// Offline unit tests for pipeline/build-calendar-url.js's Google Calendar URL
+// building: the `dates` parameter formats and the composition of the `details`
+// field.
 "use strict";
 
 const test = require("node:test");
@@ -8,17 +9,19 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// Evaluate background.js as global code so its function declarations land
-// on globalThis.
-function loadBackground() {
-  vm.runInThisContext(fs.readFileSync(path.join(__dirname, "..", "..", "background.js"), "utf8"));
+// Evaluate build-calendar-url.js as global code so its function declarations
+// land on globalThis.
+function loadCalendarUrl() {
+  vm.runInThisContext(
+    fs.readFileSync(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"), "utf8")
+  );
   return {
     buildCalendarUrl: globalThis.buildCalendarUrl,
     formatDatesParam: globalThis.formatDatesParam,
   };
 }
 
-const { buildCalendarUrl, formatDatesParam } = loadBackground();
+const { buildCalendarUrl, formatDatesParam } = loadCalendarUrl();
 const TAB = { title: "Tab Title", url: "https://example.com/events/picnic", index: 0 };
 
 function paramsOf(url) {
