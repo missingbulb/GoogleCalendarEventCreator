@@ -1,9 +1,9 @@
 name: Refresh UI snapshot
 
-# Regenerates the popup UI snapshot (test/ui/snapshots/popup-single-event.png). Rendering
-# is deterministic (satori + resvg, no browser), so this mainly exists for
-# convenience after an intentional change to popup.html/popup.js, in case
-# refreshing locally isn't convenient.
+# Regenerates all UI snapshots in test/ui/snapshots/. Rendering is deterministic
+# (satori + resvg, no browser), so this mainly exists for convenience after an
+# intentional change to popup.html/popup.js or the icon, in case refreshing
+# locally isn't convenient.
 on:
   workflow_dispatch: {}
 
@@ -27,14 +27,14 @@ jobs:
       - name: Refresh UI snapshot
         run: npm run refresh:ui
 
-      - name: Commit refreshed snapshot
+      - name: Commit refreshed snapshots
         run: |
-          if [ -n "$(git status --porcelain test/ui/snapshots/popup-single-event.png)" ]; then
+          if [ -n "$(git status --porcelain test/ui/snapshots/)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add test/ui/snapshots/popup-single-event.png
-            git commit -m "chore: refresh popup UI snapshot [skip ci]"
+            git add test/ui/snapshots/
+            git commit -m "chore: refresh UI snapshots [skip ci]"
             git push
           else
-            echo "Snapshot already up to date; nothing to commit."
+            echo "Snapshots already up to date; nothing to commit."
           fi
