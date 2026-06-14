@@ -16,53 +16,8 @@ or OAuth needed. You review the pre-filled event and hit Save.
   source page
 
 An event is created with whatever subset of these is available; missing fields
-are simply left for you to fill in on the Google Calendar screen.
-
-## How extraction works
-
-Extraction runs in three layers, merged field-by-field (first non-empty wins):
-
-1. **Site-specific scrapers** with hardcoded selectors for the major event
-   sites: **meetup.com**, **facebook.com** events, **eventbrite.com**,
-   **edfringe.com** (Edinburgh Festival Fringe), **cinema.co.il** (Tel
-   Aviv Cinematheque), and **ticketmaster.co.il** (Ticketmaster Israel). Each
-   lives in its own file under `pipeline/sources/` with a
-   comment describing the HTML it expects; to support a new platform, add a
-   file there following the same pattern and run `npm run index` to regenerate
-   the load list (`pipeline/load-order.generated.json`).
-2. **schema.org JSON-LD** (`<script type="application/ld+json">` with an
-   `Event` type) — most event pages publish this, so it's the strongest
-   generic signal.
-3. **Generic heuristics** for any other page: microdata
-   (`itemprop="startDate"` etc.), Open Graph / meta tags, `<time datetime>`
-   elements, `<h1>`/`<address>` tags, venue/location-named elements, and
-   finally a date/time pattern scan over the page's visible text
-   ("June 14, 2026 at 7 PM", "14 June 2026, 19:30", "6/14/2026", ISO dates, …).
-
-The extractor always returns a list of events (`{ events: [...] }`), each one
-self-described (title, date/time, location, description, timezone). When a
-page describes **several distinct events** — a film week or festival listing,
-several JSON-LD events, etc. — every event is returned and the popup shows
-**one button per event** so you can pick which one to add. An ordinary event
-page yields a single event/button; a film that merely has several screening
-dates stays one event. The events are ordered by start time, so they read
-chronologically regardless of the order the page listed them in.
-
-Dates without a timezone offset are passed as floating local times, so the
-event shows the same wall-clock time the page displayed. Dates with an
-explicit offset (or trailing `Z`) are converted to an exact UTC instant before
-being passed to Google Calendar, so the event occurs at the same moment in time
-regardless of the viewer's own timezone. When no end time is found, a 2-hour
-duration is assumed. A date without a time becomes an all-day event.
-
-A site extractor that knows an event's location is fixed (e.g. a festival
-that only ever runs in one city) can set `ctz` to that timezone (e.g. `"GB"`
-for the Edinburgh Festival Fringe); it's passed straight through as the
-Calendar URL's `ctz` parameter. When `ctz` is set, an absolute start/end (one
-carrying an offset or `Z`) is re-expressed as the floating local wall-clock
-time in that timezone — so there's no need to keep it in UTC: the value reads
-as the time the event's own city shows, and the `ctz` parameter places it
-correctly regardless of the viewer's own timezone.
+are simply left for you to fill in on the Google Calendar screen. For how the
+details are scraped from a page, see [docs/architecture.md](docs/architecture.md).
 
 ## Install (developer mode)
 
@@ -71,7 +26,7 @@ Grab the packaged extension — just the files that ship, not the whole repo:
 1. Download
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
-   [Create Release Package workflow](#creating-a-release-package)) and extract
+   [Create Release Package workflow](docs/releasing.md#creating-a-release-package)) and extract
    it. It unpacks into a folder containing `manifest.json`. As a secondary
    option, download
    [the repo as a zip](https://github.com/missingbulb/GoogleCalendarEventCreator/archive/refs/heads/main.zip)
@@ -100,314 +55,11 @@ showing its title, date/time, and location. Click the event you want to open
 a new tab with the Google Calendar "create event" screen pre-filled; review
 and save.
 
-## Releasing / publishing to the Chrome Web Store
+## Privacy
 
-### The package
-
-`npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
-files the extension ships (manifest, scripts, `pipeline/`, `icons/`), and
-nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
-in **`tools/shipping-files.js`** as the single source of truth, and
-`test/unit/shipping-files.test.js` asserts it stays in sync with what the
-manifest and popup actually load — so the zip can't silently drop a runtime
-file or smuggle in dead weight. This same zip is what testers load unpacked
-(see [Install](#install-developer-mode)) and what you upload to the Web Store.
-
-### Versioning
-
-The version users see is `manifest.json`'s `version` (the store reads only
-that; `package.json` is kept in sync). **It is bumped deliberately, not
-automatically per commit** — it's set when you cut a release (the Release
-workflow writes it for you; see below). The store rejects an upload whose
-version isn't strictly higher than the live one, so each release must increment
-it.
-
-### Creating a release package
-
-The **Create Release Package** workflow (`.github/workflows/release.yml`) sets
-the version, runs the tests, builds the zip, and publishes a GitHub Release with
-it attached. It does **not** touch the store — pushing to the Chrome Web Store
-is a separate, manual step (see below).
-
-- **Run workflow** (Actions tab → Create Release Package → "Run workflow") is
-  the normal path. Optionally type the version; **leave it blank to bump the
-  current minor version** (`1.0.0` → `1.1.0`). The workflow writes that version
-  into `manifest.json` / `package.json`, commits it, tags `vX.Y.Z`, and
-  releases.
-
-  > GitHub can't pre-fill the input with a *computed* value — `workflow_dispatch`
-  > defaults are static text — so "blank = next minor" is the convenience
-  > instead. The version it settled on is printed in the run summary.
-
-- **Push a tag `vX.Y.Z` by hand** if you'd rather bump `manifest.json` yourself.
-  The workflow then **verifies the tag matches the manifest version** (a
-  mismatch fails the build) before releasing.
-
-Either way the zip is attached under a stable name, so the newest build is
-always at a fixed URL:
-`…/releases/latest/download/google-calendar-event-creator.zip`.
-
-### Publishing to the store
-
-The **Publish to Chrome Web Store** workflow
-(`.github/workflows/publish-chrome-store.yml`) takes the zip from a GitHub
-Release and uploads it to the store (publishing to users by default), via the
-[Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api)
-(`chrome-webstore-upload-cli`). It's **manual** — run it from the Actions tab
-once a release package exists and you're ready to ship: leave the tag blank to
-publish the **latest** release, or name a tag; uncheck **auto_publish** to
-upload as a draft and publish manually from the dashboard.
-
-It needs four repository secrets (Settings → Secrets and variables → Actions);
-the workflow fails fast with a clear message if any are missing:
-
-| Secret | Where it comes from |
-| --- | --- |
-| `CHROME_EXTENSION_ID` | the item ID in the dashboard URL for the extension |
-| `CHROME_CLIENT_ID` | an OAuth client created against the Chrome Web Store API |
-| `CHROME_CLIENT_SECRET` | …same OAuth client |
-| `CHROME_REFRESH_TOKEN` | generated once for that client |
-
-To mint the OAuth credentials, follow
-[`chrome-webstore-upload`'s setup guide](https://github.com/fregante/chrome-webstore-upload/blob/main/How%20to%20generate%20Google%20API%20keys.md)
-(enable the Chrome Web Store API in a Google Cloud project, create an OAuth
-client, and exchange it for a refresh token), then add the four values as
-secrets.
-
-### First publish to the Chrome Web Store
-
-1. Register a developer account at the
-   [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-   (one-time \$5 fee).
-2. **Add new item** and upload the release zip.
-3. Complete the store listing: the store icon (`store-assets/icon-128.png`),
-   description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
-   tab — justify each requested permission (`activeTab`, `scripting`, `tabs`;
-   see [Permissions](#permissions)) and declare data usage (this extension sends
-   nothing anywhere).
-4. Submit for review. Approval typically takes a few hours to a few days.
-
-### Minor update
-
-1. Make the change (open an issue first per the project workflow) and merge it.
-2. Run the **Create Release Package** workflow (blank version = next minor) to
-   bump the version and cut the GitHub Release.
-3. Run the **Publish to Chrome Web Store** workflow to ship it.
-
-Once the store approves it, Chrome auto-pushes the update to existing users
-within a few hours — no reinstall. (For the very first listing, do the one-time
-[First publish](#first-publish-to-the-chrome-web-store) steps in the dashboard
-first.)
-
-## Testing
-
-There are three kinds of tests, with different audiences, separated under
-`test/integration/`, `test/unit/`, and `test/ui/`:
-
-```sh
-npm install
-npm run test:live      # integration: the REVIEWED assertions for each supported site
-npm run test:offline   # unit: internal tests of the extraction logic
-npm run test:ui        # UI: rendered popup vs. the stored snapshot image
-npm run refresh        # fetch any missing cached HTML files (needs internet)
-npm run refresh:ui     # regenerate the popup UI snapshot after an intentional change
-npm test               # everything above (offline + live + UI)
-```
-
-### Integration tests — the ones you review
-
-**`test/integration/live.test.js`** is driven by declarative JSON files in
-`test/integration/cases/` — the values the extractor must produce for a page.
-These are the assertions a human reviews to confirm each site is handled
-correctly.
-
-```json
-{
-  "description": "Meetup event page is parseable",
-  "expected": {
-    "events": [
-      {
-        "title": "NYC Tech Mixer 2026",
-        "start": "2026-06-25T18:00:00",
-        "end": "2026-06-25T21:00:00",
-        "location": "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY",
-        "ctz": "America/New_York",
-        "details": "[https://www.meetup.com/...](https://www.meetup.com/.../)\n\n...full description..."
-      }
-    ]
-  }
-}
-```
-
-`expected.events` is the **complete, exact** array the extractor produces: each
-event is deep-equal compared on `title`, `start`, `end`, `location`, `ctz`, and
-`details` (no matchers — every field must match exactly, including the full
-`details`). The array length also pins down how many events were found: one for
-an ordinary page, several for a listing/series page. See the header comment in
-`live.test.js` for how each field is derived.
-
-The case's **source URL is not in the case file** — it lives next to the cached
-HTML, in `data/<name>.url` (a plain-text file holding just the URL). That one
-file is the single source of truth for the page's URL: `refresh-cache.js`
-fetches it, and the live test loads the cached HTML into a DOM at that URL.
-Keeping it out of the reviewed case file means a test (`description` +
-`expected`) and the fetch/provenance record stay separate concerns.
-
-The tests themselves run **offline**, against committed cached HTML files in
-`data/` (one `<name>.html` and one `<name>.url` per case). The cached HTML is
-loaded into a DOM at the `.url` file's URL — so hostname-based site detection
-behaves exactly as in Chrome — and run through the real extractor files. This
-keeps the suite deterministic and runnable anywhere, while still reflecting each
-site's markup at the time it was recorded:
-
-- **`data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
-  that is missing or empty (zero bytes); `--force` re-fetches all of them.
-  A failed fetch keeps the previous cached HTML file and only warns, so a site
-  outage or bot-blocking never breaks the suite.
-- The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
-  push to `main`: it runs the unit tests, then the integration tests against
-  the cached HTML files **already committed** in `data/` — it never fetches or
-  refreshes anything itself, so it's fast and has no network dependency.
-- The **Refresh cached HTML files** workflow
-  (`.github/workflows/refresh-cache.yml`) runs **on demand** (via "Run
-  workflow"): it records any missing cached HTML file, runs the integration
-  tests, and commits the result. It's the *only* thing that fetches live pages
-  and commits cached HTML, which keeps the Tests workflow simple and rules out
-  any refresh→commit→refresh loop. To re-record cached files that already
-  exist — e.g. when a site changes its markup — run it with the **`force_all`**
-  flag checked, which re-fetches every file instead of only the missing ones.
-
-The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
-never trigger another workflow run), carries a `[skip ci]` marker, and the
-Tests workflow ignores pushes that only touch `data/**` — belt-and-suspenders
-against that commit ever re-triggering CI.
-
-**To cover a new website or platform, add per-case files only** — there's no
-shared index to edit, so parallel branches never collide. The expected
-sequence is:
-
-1. Add the extractor (if needed), a `data/<name>.url` with the event page URL,
-   and the new case file (`test/integration/cases/<name>.json`) with its
-   `expected`. Commit that change.
-2. Run `npm run refresh` locally on the same branch (needs internet) — this
-   is the same `refresh-cache.js` step the **Refresh cached HTML files**
-   workflow runs, and it fetches the new page's HTML from `data/<name>.url`.
-3. Commit the resulting `data/<name>.html` as a follow-up commit on the branch.
-
-Until a cached HTML file exists for the new case, `test:live` (and so the Tests
-workflow) will fail with `Missing cached HTML for "<name>"`. Note that cases
-also need occasional gardening: when an event page is eventually taken down,
-point `data/<name>.url` at a newer event (and refresh its cached HTML the same
-way).
-
-### Unit tests — the internal safety net
-
-**`test/unit/extraction.test.js`** pins down the extraction logic (site
-selectors, JSON-LD handling, text date parsing, multiple-event detection) and
-**`test/unit/calendar-url.test.js`** covers the Google Calendar URL building
-(`dates` formats, the `details` field layout). Both use small synthetic
-HTML snippets written inline — no network, never flake — so a regression is
-caught on every PR even when a third-party site or its cached HTML is
-unavailable.
-
-Facebook extraction is covered only here: GitHub Actions runners get HTTP 400
-from facebook.com, so it can't be cached as a live case.
-
-### UI snapshot test
-
-**`test/ui/popup-snapshots.test.js`** renders approximations of the popup
-(`test/ui/popup-renderer.js`, using `satori` + `@resvg/resvg-js` — no browser) for
-fixed fixture data (`test/ui/popup-fixtures.js`), and compares each pixel-by-pixel
-(via `pixelmatch`) against a committed image. Two layouts are covered — open
-them on GitHub to see what the popup currently looks like:
-
-- **`test/ui/snapshots/popup-single-event.png`** — a single-event page: one ~60px
-  "Add to Google Calendar" button.
-- **`test/ui/snapshots/popup-multi-event.png`** — a listing/series page: one ~60px
-  button per event (6 here) under an "N events on this page" heading.
-
-Note this is **not a screenshot of the real popup**: satori only
-supports a constrained flexbox-based HTML/CSS subset, so `popup-renderer.js` is a
-hand-maintained tree mirroring `ui/popup.css`'s styles and the
-`ui/views/events-view.js` button layout. If the popup's markup/CSS or the
-events-view rendering change in ways that affect the rendered output (copy,
-layout, colors), update `buildTree()` in `popup-renderer.js` to match.
-This tradeoff was chosen for determinism and zero extra runtime
-dependencies (no browser download); a real-browser screenshot (e.g. via
-Playwright) would have higher fidelity but couldn't run in all environments
-— revisit if the approximation's fidelity becomes a problem.
-
-Rendering is deterministic, so this is fast and dependency-light enough to
-run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
-browser install step.
-
-After an intentional change to the popup's UI, run `npm run refresh:ui` to
-regenerate both `popup-single-event.png` and `popup-multi-event.png` (or use the **Refresh UI
-snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
-PNGs so reviewers can see the before/after in the diff. On mismatch, the test
-writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
-(gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.
-
-### Toolbar icon test
-
-**`test/ui/toolbar-icon-snapshots.test.js`** generates the expected 128x128 toolbar icon for
-both states described in `ui/toolbar-icon.js` — a green border for pages with a
-site-specific source and a red border otherwise — using
-`test/ui/icon-renderer.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
-no browser). Each generated image is compared pixel-by-pixel against the
-committed reference images **`test/ui/snapshots/icon-unsupported.png`** and
-**`test/ui/snapshots/icon-supported.png`** (browsable on GitHub) — the same
-red-bordered / green-bordered icons shown in the toolbar for unsupported and
-supported pages — and, as a cross-check, against the actual shipped
-`icons/icon128-red.png` / `icons/icon128-green.png`.
-
-After an intentional change to `tools/gen_icons.py` / `icon-renderer.js`, run
-`npm run refresh:ui` to regenerate `icon-unsupported.png` and `icon-supported.png` (and
-re-run `python3 tools/gen_icons.py` to regenerate the shipped icons) and
-commit the results. On mismatch, the test writes
-`icon-{unsupported,supported}.actual.png` and `.diff.png` to `test/ui/.artifacts/`
-(gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints the paths.
-
-## Files
-
-| File            | Purpose                                                       |
-| --------------- | ------------------------------------------------------------- |
-| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
-| `ui/popup.html`, `ui/popup.css`, `ui/popup.js` | Toolbar popup: controller that runs the extractor, picks a view, and renders it (markup + extracted styles) |
-| `ui/views/events-view.js` | Renders one button per event (loaded on demand via `import()`) |
-| `ui/views/source-request-view.js` | Source-request flow (prefilled GitHub issue) for unsupported pages (loaded on demand) |
-| `ui/toolbar-icon.js` | Background service worker: updates the toolbar icon's border color per tab |
-| `pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
-| `pipeline/helpers/` | Shared helpers split by concern (DOM, dates, timezones, timezone-names, merge) |
-| `pipeline/sources/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One file per supported event site, with hardcoded selectors + inline host matcher |
-| `pipeline/extract-jsonld.js` | schema.org JSON-LD extraction                          |
-| `pipeline/extract-generic.js` | Heuristics for any page + multiple-event detection    |
-| `pipeline/build-calendar-url.js` | Builds the pre-filled Google Calendar template URL |
-| `pipeline/assemble-events.js` | Orchestrator: picks sources, merges results, reports `supported` |
-| `pipeline/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
-| `test/integration/cases/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
-| `data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
-| `data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
-| `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
-| `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
-| `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM) |
-| `test/ui/popup-fixtures.js` | Fixed extraction result + tab info used to render the popup deterministically |
-| `test/ui/popup-helpers.js` | Loads pure helpers (e.g. `formatWhen`) from `ui/views/events-view.js` for use in `popup-renderer.js` |
-| `test/ui/popup-renderer.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
-| `test/ui/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
-| `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
-| `test/ui/popup-snapshots.test.js` | Compares the rendered popup against the stored snapshot |
-| `test/ui/refresh-popup-snapshots.js` | Regenerates `test/ui/snapshots/popup-single-event.png` and `popup-multi-event.png` |
-| `test/ui/snapshots/popup-single-event.png`, `popup-multi-event.png` | Committed reference images of the popup (single / multiple events), browsable on GitHub |
-| `test/ui/icon-renderer.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
-| `test/ui/toolbar-icon-snapshots.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
-| `test/ui/refresh-icon-snapshots.js` | Regenerates `test/ui/snapshots/icon-{unsupported,supported}.png` |
-| `test/ui/snapshots/icon-unsupported.png`, `icon-supported.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
-| `tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
-| `tools/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
-| `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |
-| `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
-| `test/unit/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
+The extension collects, stores, and transmits **nothing** — all processing
+happens locally in your browser and it makes no network requests of its own.
+See [PRIVACY.md](PRIVACY.md) for the full policy.
 
 ## Permissions
 
@@ -418,3 +70,12 @@ Calendar URL in a new tab.
 `tabs`: lets `ui/toolbar-icon.js` see each tab's URL (hostname only) so it can
 show the toolbar icon with a green border on pages with a site-specific
 extractor (e.g. meetup.com) and a red border elsewhere.
+
+## Documentation
+
+- [Architecture](docs/architecture.md) — how extraction works and the file map.
+- [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
+- [Releasing](docs/releasing.md) — building the zip and publishing to the Chrome Web Store.
+- [Resources](docs/resources.md) — external references relevant to the project.
+- [Security review](docs/security-review.md) — attack surface, trust boundaries, and known risks.
+- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `docs/claude/`).

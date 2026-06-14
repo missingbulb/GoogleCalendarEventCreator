@@ -10,12 +10,12 @@ extraction files) and, briefly, the repository's dev/CI tooling.
 ## 1. Summary
 
 The extension's overall security posture is good, but it is broader than a
-quick glance at `README.md`'s "Permissions" section suggests:
+quick glance at `../README.md`'s "Permissions" section suggests:
 
 - **Manifest V3**, with `activeTab`, `scripting`, and **`tabs`** permissions.
   `tabs` is new relative to the original `activeTab`+`scripting`-only design
   and is discussed in [3.1](#31-tabs-permission--persistent-background-service-worker-icon-statejs-low--documented).
-  `README.md` already documents this permission and what it's used for.
+  `../README.md` already documents this permission and what it's used for.
 - The **page-content extraction** path (the part that runs untrusted,
   attacker-influenced DOM/JSON from the current page) now runs whenever the
   **popup is opened**, not only when the user clicks "Add to Google
@@ -92,7 +92,7 @@ This is a meaningful change from the original `activeTab`-only model:
 In the current code this is used for nothing more than a hostname regex
 match (`GCal.siteHosts`) to pick a bundled icon — **no page content is read,
 nothing leaves the device, and nothing is persisted**. So the practical risk
-today is low, and `README.md`'s "Permissions" section already documents the
+today is low, and `../README.md`'s "Permissions" section already documents the
 `tabs` permission and this exact hostname-only usage.
 
 Any future change to `icon-state.js` that does more than a hostname check
@@ -405,7 +405,7 @@ length limits, so this is a UX/robustness nit rather than a security hole.
 
 | # | Finding | Severity | Suggested action |
 |---|---------|----------|-------------------|
-| 3.1 | `tabs` permission + always-on `icon-state.js` reads every tab's URL | Low | No action — already documented in `README.md`; re-review if `icon-state.js` ever does more than a hostname check |
+| 3.1 | `tabs` permission + always-on `icon-state.js` reads every tab's URL | Low | No action — already documented in `../README.md`; re-review if `icon-state.js` ever does more than a hostname check |
 | 3.2 | Popup runs the extractor on every open | Informational | No action — same trust boundary, just triggered earlier |
 | 3.3 | `innerHTML` used to strip HTML from untrusted JSON-LD `description` | Medium | Replace with `DOMParser`-based stripping |
 | 3.4 | Regex/JSON parsing over untrusted page content | Low | Keep new patterns simple; avoid nested unbounded quantifiers; consider a ReDoS check in CI |
