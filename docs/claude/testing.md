@@ -33,9 +33,10 @@ is the project-specific mechanics. Keep these decisions in mind:
        (e.g. `https://www.meetup.com/.../`). This file stays for good: it's the
        single source of truth for the page's URL (used by the refresh script and
        by `live.test.js`), so the URL is **not** repeated in the case file.
-  2. Run the **Refresh cached HTML files** workflow. `refresh-cache.js` fills in
-     the empty `data/<name>.html`; `test:live` stays green because no case
-     asserts it yet.
+  2. Push the branch. The **Refresh cached HTML files** workflow runs
+     automatically (the push adds a `data/` file), fills in the empty
+     `data/<name>.html`, and commits it back to the branch; `test:live` stays
+     green because no case asserts it yet.
   3. Pull, then add `test/integration/cases/<name>.json` (same `<name>`, just
      `description` + `expected`, no `url`) and run `npm run test:live` — it now
      runs against the local cached HTML, so its output gives you the exact

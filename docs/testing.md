@@ -68,14 +68,16 @@ site's markup at the time it was recorded:
   the cached HTML files **already committed** in `data/` — it never fetches or
   refreshes anything itself, so it's fast and has no network dependency.
 - The **Refresh cached HTML files** workflow
-  (`.github/workflows/refresh-cache.yml`) runs **on demand** (via "Run
-  workflow"), against the branch you're working on: it records any missing
-  cached HTML file, runs the integration tests, and commits the result. It's the
-  *only* thing that fetches live pages and commits cached HTML, which keeps the
-  Tests workflow simple and rules out any refresh→commit→refresh loop. To
+  (`.github/workflows/refresh-cache.yml`) **runs automatically** when you push a
+  branch (other than `main`) that adds or removes a `data/` file: it records any
+  missing or empty cached HTML, runs the integration tests, and commits the
+  result back to the branch. (It's also runnable from the Actions tab, and the
+  auto-implement-extractor workflow dispatches it explicitly — its `GITHUB_TOKEN`
+  push doesn't fire the push trigger.) It's the *only* thing that fetches live
+  pages and commits cached HTML, which keeps the Tests workflow simple. To
   re-record a cached file that already exists — e.g. when a site changes its
-  markup — delete `data/<name>.html` on your branch, commit, and run the
-  workflow on that branch; the now-missing file is refetched like any other.
+  markup — delete `data/<name>.html` on your branch and push; the now-missing
+  file is refetched like any other.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the

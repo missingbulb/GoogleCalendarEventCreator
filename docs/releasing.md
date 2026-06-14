@@ -26,18 +26,21 @@ strictly higher than the live one, so each release must increment it first.
 
 The **Create Release Package** workflow (`.github/workflows/release.yml`) runs
 the tests, builds the zip, and publishes a GitHub Release with it attached, at
-**whatever version is currently committed in `manifest.json`**. It takes **no
-inputs** and does **not** change the version — bump it first (see above). It
-does **not** touch the store — pushing to the Chrome Web Store is a separate,
-manual step (see below).
+**whatever version is currently committed in `manifest.json`**. It does **not**
+change the version — bump it first (see above).
 
-Run it from the Actions tab → Create Release Package → "Run workflow". It
-**refuses to run** if `manifest.json`'s version already matches the latest
-published release (or a matching `vX.Y.Z` tag already exists) — that means
-nobody bumped the version. On success it tags `vX.Y.Z` at the released commit
-and attaches the zip under a stable name, so the newest build is always at a
-fixed URL:
-`…/releases/latest/download/google-calendar-event-creator.zip`.
+It runs **automatically when a version bump merges to `main`** (a push to `main`
+that touches `manifest.json`), so cutting a release is just merging the bump PR.
+If that version already matches the latest published release (or a `vX.Y.Z` tag
+already exists), the run is a **clean no-op** — so `manifest.json` edits that
+aren't version bumps don't cut a release. You can also run it manually from the
+Actions tab → Create Release Package → "Run workflow".
+
+On a real bump it tags `vX.Y.Z` at the released commit and attaches the zip under
+a stable name, so the newest build is always at a fixed URL:
+`…/releases/latest/download/google-calendar-event-creator.zip`. It does **not**
+touch the store — pushing to the Chrome Web Store is the one remaining manual
+step (see below).
 
 ## Publishing to the store
 
@@ -82,9 +85,9 @@ secrets.
 ## Minor update
 
 1. Make the change (open an issue first per the project workflow) and merge it.
-2. Bump the version (ask Claude to "bump version" = next minor) and merge that PR.
-3. Run the **Create Release Package** workflow to cut the GitHub Release.
-4. Run the **Publish to Chrome Web Store** workflow to ship it.
+2. Bump the version (ask Claude to "bump version" = next minor) and merge that
+   PR — merging it to `main` cuts the GitHub Release automatically.
+3. Run the **Publish to Chrome Web Store** workflow to ship it.
 
 Once the store approves it, Chrome auto-pushes the update to existing users
 within a few hours — no reinstall. (For the very first listing, do the one-time

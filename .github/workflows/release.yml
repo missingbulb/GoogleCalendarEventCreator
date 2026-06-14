@@ -1,17 +1,26 @@
 name: Create Release Package
 
 # Builds and publishes a GitHub Release of the extension at the version that is
-# currently committed in manifest.json. It does NOT change the version and takes
-# NO inputs — bumping is a deliberate, human step (ask Claude to "bump version";
-# it edits manifest.json/package.json on a branch and lands on main via a normal
-# PR — see docs/claude/workflow.md). The workflow refuses to run when that
-# version already matches the latest published release, so the same version can't
-# be shipped twice.
+# currently committed in manifest.json. It does NOT change the version — bumping
+# is a deliberate, human step (ask Claude to "bump version"; it edits
+# manifest.json/package.json on a branch and lands on main via a normal PR — see
+# docs/claude/workflow.md).
 #
-# Run it from the Actions tab ("Run workflow"). Pushing to the Chrome Web Store is
-# a separate, manual step (the "Publish to Chrome Web Store" workflow).
+# It runs automatically when a version bump merges to main (a push to main that
+# touches manifest.json), so cutting a release is just "merge the bump PR". If
+# that version already matches the latest published release, the run is a clean
+# no-op — so manifest.json edits that aren't version bumps don't cut a release.
+# It's also runnable from the Actions tab.
+#
+# Pushing to the Chrome Web Store is the one remaining manual step (the "Publish
+# to Chrome Web Store" workflow).
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - manifest.json
 
 permissions:
   contents: write
@@ -31,10 +40,12 @@ jobs:
         run: npm ci
 
       # The version to release is whatever's committed in manifest.json (the
-      # store's source of truth, kept in sync with package.json). Refuse to
-      # proceed unless it's a new version — it must differ from the latest
-      # published release and have no matching tag yet. A same-version run means
-      # nobody bumped the version; fail loudly instead of rebuilding it.
+      # store's source of truth, kept in sync with package.json). When it already
+      # matches the latest published release (or a matching tag exists), there's
+      # nothing to release: skip cleanly (release=false) rather than fail, so a
+      # non-bump manifest.json change doesn't turn the run red. A drift between
+      # manifest.json and package.json, or a malformed version, is a real mistake
+      # and fails the run.
       - name: Resolve and guard version
         id: version
         env:
@@ -51,33 +62,36 @@ jobs:
             exit 1
           fi
           latest="$(gh release view --json tagName -q .tagName 2>/dev/null | sed 's/^v//' || true)"
-          if [ -n "$latest" ] && [ "$latest" = "$version" ]; then
-            echo "v$version is already the latest release. Bump the version before releasing." >&2
-            exit 1
+          if { [ -n "$latest" ] && [ "$latest" = "$version" ]; } || git rev-parse "v$version" >/dev/null 2>&1; then
+            echo "v$version is already released; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-          if git rev-parse "v$version" >/dev/null 2>&1; then
-            echo "Tag v$version already exists. Bump the version before releasing." >&2
-            exit 1
-          fi
+          echo "release=true" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
           echo "Releasing v$version" >> "$GITHUB_STEP_SUMMARY"
 
       # The same gates CI runs on every PR.
       - name: Run offline tests
+        if: steps.version.outputs.release == 'true'
         run: npm run test:offline
       - name: Run live tests
+        if: steps.version.outputs.release == 'true'
         run: npm run test:live
       - name: Run UI snapshot test
+        if: steps.version.outputs.release == 'true'
         run: npm run test:ui
 
       - name: Build extension zip
+        if: steps.version.outputs.release == 'true'
         run: npm run build
 
       # Publish the Release. action-gh-release creates the tag (vX.Y.Z) at this
       # commit when it doesn't exist — that's a tag, not a push to main, so
       # branch protection on main doesn't apply.
       - name: Publish GitHub Release
+        if: steps.version.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}

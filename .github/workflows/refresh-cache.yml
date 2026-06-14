@@ -1,17 +1,25 @@
 name: Refresh cached HTML files
 
 # Records any missing or empty (zero-byte) data/<name>.html by fetching its URL
-# (from the matching data/<name>.url), then runs the live tests and commits the
-# result to the branch it ran on. Run it on demand from the Actions tab, against
-# the branch you're working on — not main, since under branch protection a commit
-# to main must go through a PR.
+# (from the matching data/<name>.url), runs the live tests, and commits the
+# result back to the branch it ran on.
 #
-# To re-record a cached file that already exists (e.g. after a site changes its
-# markup): delete data/<name>.html on your branch, commit and push, then run this
-# workflow on that branch. The now-missing file is refetched like any other —
-# there's no separate "force" mode.
+# It runs automatically when you push a branch (other than main) that adds or
+# removes a data/ file — a new data/<name>.url, or a deleted data/<name>.html you
+# want re-recorded. So the flow is just "push the branch"; there's no manual step
+# and no separate "force" mode. It's also runnable from the Actions tab, and the
+# auto-implement-extractor workflow dispatches it via the API (its GITHUB_TOKEN
+# push doesn't fire the push trigger — see that workflow).
+#
+# It never runs on main: a commit to main goes through a PR under branch
+# protection, and by merge time the cached HTML is already filled on the branch.
 on:
   workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "data/**"
 
 permissions:
   contents: write
