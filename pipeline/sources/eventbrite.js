@@ -18,13 +18,13 @@
 //   description the structured-content / event-description section
 //
 // Eventbrite embeds complete JSON-LD (including endDate), and its server-
-// rendered markup varies a lot between pages, so this reads the page's own
-// JSON-LD (via the shared GCal.jsonLd helper) and lets the DOM selectors below
-// override it where they match. That keeps the source self-contained: it
-// gathers every field itself — notably the end time, which only the JSON-LD
-// carries — without depending on a later merge.
+// rendered markup varies a lot between pages, so this reads the event the page
+// embeds about itself (via the shared GCal.embeddedEvents helper) and lets the
+// DOM selectors below override it where they match. That keeps the source
+// self-contained: it gathers every field itself — notably the end time, which
+// only the embedded data carries — without depending on a later merge.
 (() => {
-  const { firstText, normalizeDateValue, parseDateFromText, merge, jsonLd } = GCal;
+  const { firstText, normalizeDateValue, parseDateFromText, merge, embeddedEvents } = GCal;
 
   GCal.sources.push({
     name: "eventbrite",
@@ -43,9 +43,9 @@
           "#event-description",
         ]),
       };
-      // DOM values win where present; the page's JSON-LD fills the rest
+      // DOM values win where present; the page's embedded event fills the rest
       // (end time, and location/description on pages whose selectors don't match).
-      return merge(dom, jsonLd.toEvent(jsonLd.findEvents()[0]));
+      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

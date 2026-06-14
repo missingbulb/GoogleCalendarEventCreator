@@ -75,7 +75,7 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     const api = {
       list,
       add(value) {
-        value = GCal.clean(value || "");
+        value = GCal.clean(value == null ? "" : String(value));
         if (value && !list.some((p) => same(value, p))) list.push(value);
         return api;
       },

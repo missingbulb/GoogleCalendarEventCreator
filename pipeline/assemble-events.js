@@ -20,15 +20,14 @@
 // Two distinct paths, depending on whether a site source matches:
 //   - Supported host: the matching site source is SELF-CONTAINED — it produces
 //     every field of its events itself (reusing shared helpers, including the
-//     GCal.jsonLd reader, as it sees fit). We do NOT merge the generic/JSON-LD
-//     fallback layers over it. A source may return a single partial event, or
-//     its own `events` array (e.g. sources/telavivcinematheque.js for a series
-//     page) with page-level description/ctz that fill any field an individual
-//     event didn't carry.
-//   - Unsupported host: no per-site extractor exists, so we fall back to the
-//     JSON-LD and generic layers (first non-empty value per field wins) purely
-//     to seed the popup's "request this source" form. Several JSON-LD events on
-//     the page each become an event.
+//     GCal.embeddedEvents reader, as it sees fit). No other extractor's output
+//     is merged over it. A source may return a single partial event, or its own
+//     `events` array (e.g. sources/telavivcinematheque.js for a series page)
+//     with page-level description/ctz that fill any field an individual event
+//     didn't carry.
+//   - Unsupported host: no per-site extractor exists, so we defer to the
+//     unsupported-site extractor (GCal.unsupportedSiteEvents) purely to seed the
+//     popup's "request this source" form.
 //
 // To support a new event platform, add pipeline/sources/<site>.js that pushes
 // onto GCal.sources (see sources/meetup.js for the pattern), run `npm run index`
@@ -93,20 +92,10 @@
     return event.start ? [event] : [];
   }
 
-  // Unsupported host: no per-site extractor, so fall back to the JSON-LD and
-  // generic layers — purely to seed the popup's "request this source" form.
+  // Unsupported host: no per-site extractor, so defer to the unsupported-site
+  // extractor — purely to seed the popup's "request this source" form.
   function fallbackEvents(norm) {
-    const ldEvents = GCal.jsonLd.findEvents();
-    if (ldEvents.length > 1) {
-      return ldEvents.map((ld) => norm(GCal.jsonLd.toEvent(ld)));
-    }
-    const event = norm(GCal.merge(GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract()));
-    // The generic layer always fills a title (og:title -> <h1> -> document
-    // title), present on essentially every page, so a title alone is not an
-    // event. Treat this as an event only when JSON-LD carried one or a date was
-    // actually parsed from the page.
-    const isEvent = ldEvents.length > 0 || Boolean(event.start);
-    return isEvent ? [event] : [];
+    return GCal.unsupportedSiteEvents.extract().map(norm);
   }
 
   GCal.extract = extract;

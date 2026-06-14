@@ -1,9 +1,17 @@
-// Generic fallback for any web page — the safety net when no site-specific
-// extractor matches and the page has no (or incomplete) JSON-LD.
+// The extractor for UNSUPPORTED sites — pages whose host has no per-site source
+// (pipeline/sources/<site>.js). Its only job is to scrape a best-effort event so
+// the popup can pre-fill the "request this source" form on a red-bordered page;
+// it never renders calendar buttons (assemble-events.js only calls it when no
+// source matched). It is not a "layer" that supported sources lean on: those are
+// self-contained.
 //
-// Expected HTML input: anything. Each field is tried against progressively
-// weaker signals, first hit wins:
+// extract() returns an array of the page's best-effort events (empty when the
+// page describes none), which assemble-events.js normalizes and presents. It
+// combines two best-effort signals, first non-empty value per field winning:
+//   1. events the page embeds about itself (GCal.embeddedEvents — schema.org)
+//   2. generic heuristics over the page's meta tags, microdata, <time>, and text
 //
+// Generic heuristics, each tried against progressively weaker signals:
 //   title       og:title meta tag -> the page's <h1> -> document title
 //   start/end   microdata (itemprop="startDate"/"endDate", on <meta> or
 //               <time> elements) -> event:start_time/end_time meta tags ->
@@ -13,16 +21,24 @@
 //   location    itemprop="location" -> <address> -> the first reasonably
 //               short element whose class/id mentions "venue" or "location"
 //   description og:description or description meta tag ->
-//               itemprop="description"
-//
-// Also decides whether the page lists MULTIPLE events (detectMultiple):
-// several JSON-LD events, several schema.org/Event microdata items, or
-// several timestamped list/article cards. assemble-events.js then suggests the
-// first event and flags it.
+//               itemprop="description" (line breaks preserved)
 (() => {
-  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText } = GCal;
+  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, merge, embeddedEvents } = GCal;
 
   function extract() {
+    const embedded = embeddedEvents.find();
+    // Several embedded events => a listing page; surface each.
+    if (embedded.length > 1) return embedded.map(embeddedEvents.toEvent);
+
+    const event = merge(embeddedEvents.toEvent(embedded[0]), heuristics());
+    // The heuristics always fill a title (og:title -> <h1> -> document title),
+    // present on essentially every page, so a title alone is not an event. Treat
+    // this as an event only when the page embedded one or a date was parsed.
+    return embedded.length > 0 || event.start ? [event] : [];
+  }
+
+  // Best-effort scrape of any page's meta tags / microdata / text.
+  function heuristics() {
     const out = {};
 
     out.title = meta("og:title") || text("h1") || clean(document.title);
@@ -72,15 +88,5 @@
     return "";
   }
 
-  function detectMultiple(jsonLdEventCount) {
-    if (jsonLdEventCount > 1) return true;
-    const micro = document.querySelectorAll('[itemtype*="schema.org/Event" i]');
-    if (micro.length > 1) return true;
-    // Heuristic: several sibling "card"-like containers each carrying a
-    // machine-readable timestamp usually means an event listing page.
-    const times = document.querySelectorAll("article time[datetime], li time[datetime]");
-    return times.length > 2;
-  }
-
-  GCal.generic = { extract, detectMultiple };
+  GCal.unsupportedSiteEvents = { extract };
 })();
