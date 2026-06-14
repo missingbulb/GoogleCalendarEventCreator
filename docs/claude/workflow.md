@@ -9,4 +9,6 @@ For every new task in this repo:
    when it's done.
 
 When the repo owner says "LGTM" on a change, treat it as approval to merge
-that branch's pull request into `main`.
+that branch's pull request into `main`. Before merging a branch that adds or
+changes tests, first confirm its CI has gone green at least twice — new tests
+must prove they aren't flaky (see `docs/claude/testing.md`).
