@@ -94,7 +94,7 @@ jobs:
         run: |
           claude \
             --dangerously-skip-permissions \
-            --model claude-opus-4-8 \
+            --model claude-sonnet-4-6 \
             -p "$(cat /tmp/agent-prompt.txt)"
 
       - name: Comment on failure
