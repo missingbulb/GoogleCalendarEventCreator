@@ -52,9 +52,10 @@ test(
   async () => {
     const browser = await puppeteer.launch({
       executablePath: chromePath,
-      // `true` is new headless in puppeteer v23 — the only headless mode that
-      // loads MV3 extensions (old headless ignored --load-extension).
-      headless: true,
+      // MV3 extension service workers only load reliably in HEADFUL Chrome — new
+      // headless drops the --load-extension worker, so its target never appears.
+      // CI runs this under xvfb (see the e2e step in .github/workflows/test.yml).
+      headless: false,
       args: [
         `--disable-extensions-except=${ROOT}`,
         `--load-extension=${ROOT}`,
@@ -65,12 +66,12 @@ test(
     });
     try {
       // The MV3 background is a service_worker target under chrome-extension://.
-      // It only appears once the worker has registered — i.e. once its first
-      // importScripts succeeded. If a path is wrong this never fires (timeout).
-      const target = await browser.waitForTarget(
-        (t) => t.type() === "service_worker" && t.url().endsWith("toolbar-icon.js"),
-        { timeout: 15000 }
-      );
+      // It appears once the worker registers — i.e. once its first importScripts
+      // succeeds; a wrong path means it never appears and this wait times out.
+      // Take it if it's already up, otherwise wait for it.
+      const isWorker = (t) => t.type() === "service_worker" && t.url().endsWith("toolbar-icon.js");
+      const target =
+        browser.targets().find(isWorker) || (await browser.waitForTarget(isWorker, { timeout: 30000 }));
       const worker = await target.worker();
 
       assert.equal(
