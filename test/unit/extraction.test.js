@@ -195,18 +195,19 @@ test("Tel Aviv Cinematheque series page: one event per film card", () => {
 });
 
 test("Tel Aviv Cinematheque: location is the address text only, not <img>/<noscript> markup", () => {
-  // The location-pin <a> wraps an <img> plus a <noscript> fallback. In a real
-  // browser the <noscript> content survives as a raw text node, leaking its
-  // markup into textContent; here the <noscript> text stands in for that
-  // markup and must not appear in the location.
+  // The location-pin <a> wraps an <img> plus a <noscript> fallback. Parse this
+  // the way a real browser does (scripting on): jsdom then keeps the <noscript>
+  // content as a raw text node, so reading link.textContent would splice that
+  // <img> markup into the address. The fragment is script-free, so "dangerously"
+  // executes nothing — it only flips jsdom's <noscript> parsing to match Chrome.
   const html = `
     <meta property="og:title" content="Some Film - סינמטק תל אביב">
     <meta property="og:site_name" content="סינמטק תל אביב">
     <select id="smdate_b"><option value="select">בחר תאריך</option><option value="2026-06-17~20522">17.6</option></select>
-    <a href="#"><img data-src="https://www.cinema.co.il/x/location.png" alt="img"><noscript>NOSCRIPT-FALLBACK-MARKUP</noscript>רחוב הארבעה 5, תל אביב</a>`;
+    <a href="#"><img data-src="https://www.cinema.co.il/x/location.png" alt="img"><noscript><img src="https://www.cinema.co.il/x/location.png" alt="img"></noscript>רחוב הארבעה 5, תל אביב</a>`;
 
-  const e = firstEvent(html, "https://www.cinema.co.il/event/some-film/");
-  assert.equal(e.location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
+  const ev = extractFromHtml(html, "https://www.cinema.co.il/event/some-film/", { runScripts: "dangerously" });
+  assert.equal(ev.events[0].location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
 });
 
 test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
