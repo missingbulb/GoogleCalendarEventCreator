@@ -35,6 +35,12 @@ From the issue body extract:
 - **Site slug** — short, lowercase, hyphens only, no dots (e.g. `example`)
 - **Case name** — identifies the cached HTML + integration case; format: `<site-slug>-<brief-event-descriptor>` (e.g. `example-rust-workshop`). Keep it concise and filesystem-safe.
 
+The issue is filed from the **Event source request** form, so the body may also
+carry user-supplied values for the event's name, start/end time, timezone,
+location, and description. Only the URL is authoritative — treat the rest as
+**hints to sanity-check your extraction against** (a field that's blank or
+clearly a rough guess shouldn't override what you read off the real page).
+
 All three of these paths use the same `<case-name>`:
 - `data/<case-name>.html`
 - `data/<case-name>.url`
