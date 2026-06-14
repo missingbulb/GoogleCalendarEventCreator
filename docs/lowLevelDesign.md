@@ -9,7 +9,7 @@ See [highLevelDesign.md](highLevelDesign.md) for how extraction works and
 | `ui/popup.html`, `ui/popup.css`, `ui/popup.js` | Toolbar popup: controller that runs the extractor, picks a view, and renders it (markup + extracted styles) |
 | `ui/views/events-view.js` | Renders one button per event (loaded on demand via `import()`) |
 | `ui/views/source-request-view.js` | Source-request flow (prefilled GitHub issue) for unsupported pages (loaded on demand) |
-| `ui/toolbar-icon.js` | Background service worker: updates the toolbar icon's border color per tab |
+| `ui/toolbar-icon.js` | Background service worker: shows a green availability badge on the toolbar icon per tab (none on unsupported pages) |
 | `pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
 | `pipeline/helpers/` | Shared utilities any extractor may use, split by concern: DOM, text (rich-text/`htmlToText`/`parts`), dates, timezones, timezone-names, merge, and `embedded-events` (the `GCal.embeddedEvents` schema.org JSON-LD reader) |
 | `pipeline/sources/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One self-contained scraper per supported event site, with hardcoded selectors + inline host matcher |
@@ -31,10 +31,6 @@ See [highLevelDesign.md](highLevelDesign.md) for how extraction works and
 | `test/ui/popup-snapshots.test.js` | Compares the rendered popup against the stored snapshot |
 | `test/ui/refresh-popup-snapshots.js` | Regenerates `test/ui/snapshots/popup-single-event.png` and `popup-multi-event.png` |
 | `test/ui/snapshots/popup-single-event.png`, `popup-multi-event.png` | Committed reference images of the popup (single / multiple events), browsable on GitHub |
-| `test/ui/icon-renderer.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
-| `test/ui/toolbar-icon-snapshots.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
-| `test/ui/refresh-icon-snapshots.js` | Regenerates `test/ui/snapshots/icon-{unsupported,supported}.png` |
-| `test/ui/snapshots/icon-unsupported.png`, `icon-supported.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
 | `tools/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
 | `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |

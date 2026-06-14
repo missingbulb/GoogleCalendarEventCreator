@@ -1,6 +1,7 @@
 # High-level design
 
-`toolbar-icon.js` colors the icon by host. On click, `popup.js` injects
+`toolbar-icon.js` badges the icon by host (green when a source matches, none
+otherwise). On click, `popup.js` injects
 `pipeline/` and runs `assemble-events.js`, which picks the matching
 `sources/<site>.js` (or `extract-unsupported.js`); `build-calendar-url.js`
 builds the URL `events-view.js` renders.

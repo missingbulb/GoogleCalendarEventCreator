@@ -21,7 +21,7 @@ quick glance at `../README.md`'s "Permissions" section suggests:
   **popup is opened**, not only when the user clicks "Add to Google
   Calendar" ([3.2](#32-popup-runs-the-extractor-on-every-open-not-only-on-create-informational)).
 - The extension still **sends nothing over the network**. Its only outputs
-  are (a) the toolbar icon's color, computed from a hostname regex match, and
+  are (a) the toolbar's availability badge, computed from a hostname regex match, and
   (b) a `https://calendar.google.com/calendar/render?...` URL opened in a new
   tab when the user explicitly clicks the popup's button.
 - No `eval`, `new Function`, remote script loading, or other dynamic-code
@@ -42,7 +42,7 @@ A) Toolbar icon coloring (always running, no user gesture required)
      -> chrome.tabs.onActivated / onUpdated / onInstalled / onStartup
      -> reads tab.url for every tab (requires the "tabs" permission)
      -> pipeline/registry.js + pipeline/sources/*: hostname regex match only
-     -> chrome.action.setIcon(...)   (green/red border, no page content read)
+     -> chrome.action.setBadgeBackgroundColor / setBadgeText(...)   (green badge, no page content read)
 
 B) Event extraction (only while the popup is open, a user-initiated action)
    User opens the popup
@@ -62,9 +62,9 @@ popup rather than by a single toolbar click, and extended with two new
 site-specific extractors (`telavivcinematheque.js`, `edinburghfringe.js`) and a `ctz`
 (calendar timezone) field.
 
-The only "privileged" sinks are `chrome.action.setIcon` (flow A, takes a
-fixed set of bundled icon paths — no attacker-controlled input reaches it)
-and `chrome.tabs.create` (flow B, target constrained to a hardcoded
+The only "privileged" sinks are `chrome.action.setBadgeBackgroundColor` /
+`setBadgeText` (flow A, a fixed green color and a constant badge string — no
+attacker-controlled input reaches them) and `chrome.tabs.create` (flow B, target constrained to a hardcoded
 origin/path with all dynamic values passed through `URLSearchParams`, which
 percent-encodes them).
 
@@ -79,7 +79,7 @@ percent-encodes them).
 `chrome.runtime.onStartup`, and on every event calls `chrome.tabs.get`/iterates
 `chrome.tabs.query({})` to read `tab.url` for **every open tab**, then checks
 it against the hostname regexes the sources register (`pipeline/registry.js`'s
-`isSupportedHost` over `GCal.sources`) to choose a green/red toolbar icon.
+`isSupportedHost` over `GCal.sources`) to show or hide a green toolbar badge.
 
 This is a meaningful change from the original `activeTab`-only model:
 
@@ -90,7 +90,7 @@ This is a meaningful change from the original `activeTab`-only model:
   has open**, including tabs the user never interacts with the extension on.
 
 In the current code this is used for nothing more than a hostname regex
-match (`GCal.siteHosts`) to pick a bundled icon — **no page content is read,
+match (`GCal.siteHosts`) to set a toolbar badge — **no page content is read,
 nothing leaves the device, and nothing is persisted**. So the practical risk
 today is low, and `../README.md`'s "Permissions" section already documents the
 `tabs` permission and this exact hostname-only usage.
@@ -246,8 +246,8 @@ URL, persist the body) but:
 
 No change recommended; noted for completeness since it's the one place CI
 fetches arbitrary network content with a token that can push to the repo. The
-new `test/ui/` snapshot tooling (`refresh-icon-snapshots.js`,
-`refresh-popup-snapshots.js`) follows the same local-render/no-network pattern as
+new `test/ui/` snapshot tooling (`refresh-popup-snapshots.js`) follows the same
+local-render/no-network pattern as
 the rest of the test suite and doesn't add new fetch targets.
 
 ### 3.9 Permissions & supply chain (Informational)

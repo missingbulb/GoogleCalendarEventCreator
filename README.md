@@ -68,8 +68,8 @@ click the button on it, and sends nothing anywhere — it just opens a Google
 Calendar URL in a new tab.
 
 `tabs`: lets `ui/toolbar-icon.js` see each tab's URL (hostname only) so it can
-show the toolbar icon with a green border on pages with a site-specific
-extractor (e.g. meetup.com) and a red border elsewhere.
+show a green badge on the toolbar icon on pages with a site-specific
+extractor (e.g. meetup.com), and no badge elsewhere.
 
 ## Documentation
 

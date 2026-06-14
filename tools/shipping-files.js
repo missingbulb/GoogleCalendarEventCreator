@@ -15,7 +15,7 @@ const SHIPPING_PATHS = [
   "config.js", // tunable product decisions; imported by the popup modules at runtime
   "pipeline", // the extraction pipeline + generated load list (popup fetches/injects)
   "ui", // popup (html/css/js + views) and the toolbar-icon service worker
-  "icons", // toolbar icons: plain + green/red state variants
+  "icons", // toolbar icons: the per-size PNGs the manifest references
 ];
 
 module.exports = { SHIPPING_PATHS };

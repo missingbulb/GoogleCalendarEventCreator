@@ -66,12 +66,12 @@ async function init() {
 
 // The one decision behind what the popup renders, driven by the injected
 // extraction result's `supported` flag (set by assemble-events.js from the
-// same GCal.isSupportedHost check that colors the toolbar icon — so the popup
-// and the icon can never disagree). Returns either:
-//   { mode: "request", prefill }  — unsupported host (red border): only the
+// same GCal.isSupportedHost check that drives the toolbar badge — so the popup
+// and the badge can never disagree). Returns either:
+//   { mode: "request", prefill }  — unsupported host (no badge): only the
 //       "request this source" flow, seeded with any scraped event, never an
 //       event button (even when the generic/JSON-LD layers found something).
-//   { mode: "events", events }    — supported host (green border): the
+//   { mode: "events", events }    — supported host (green badge): the
 //       extracted events, which may be empty ("No events found").
 export function chooseContent(data) {
   const allEvents = data && data.events && data.events.length ? data.events : [];

@@ -1,12 +1,12 @@
-// Background service worker: keeps the toolbar icon's border color in sync
-// with whether the active tab's page has a site-specific extractor.
+// Background service worker: shows a small green badge on the toolbar icon for
+// pages that have a site-specific extractor, and no badge anywhere else.
 //
 // The single supported-host decision is GCal.isSupportedHost (pipeline/
 // registry.js), which derives "supported" from the registered sources' own
 // `matches` functions. The worker loads the registry and every source so the
-// registry is populated, then colors the toolbar icon green (a source matches
-// this page) vs. red (none does). DOM-free files only — the sources register
-// their matchers at load and the worker never calls extract().
+// registry is populated, then shows a green badge when a source matches this
+// page (and clears the badge when none does). DOM-free files only — the sources
+// register their matchers at load and the worker never calls extract().
 //
 // This list is checked against pipeline/load-order.generated.json by
 // test/unit/load-order-generated.test.js: an MV3 service worker can only
@@ -19,8 +19,8 @@
 // the pipeline files live at the extension root, so each path needs the leading
 // slash to point there. Without it the import resolves to ui/pipeline/… , fails
 // to load, and that first failure aborts the whole worker before the listeners
-// below register — leaving the icon stuck on the neutral default (neither green
-// nor red). See #146.
+// below register — leaving the toolbar with no availability badge at all.
+// See #146.
 importScripts(
   "/pipeline/registry.js",
   "/pipeline/sources/edinburghfringe.js",
@@ -32,20 +32,25 @@ importScripts(
   "/pipeline/sources/ticketmaster.js"
 );
 
-const ICON_SIZES = [16, 32, 48, 128];
-const SUPPORTED_ICON = Object.fromEntries(ICON_SIZES.map((s) => [s, `icons/icon${s}-green.png`]));
-const UNSUPPORTED_ICON = Object.fromEntries(ICON_SIZES.map((s) => [s, `icons/icon${s}-red.png`]));
+// Availability is shown by the toolbar badge's background color: a green pill
+// (Google green, matching the icon's "+") on supported pages, and nothing
+// elsewhere. Chrome only paints the badge when its text is non-empty, so a
+// single space gives a text-free colored pill; an empty string clears it.
+const GREEN = "#34a853";
+const SUPPORTED_BADGE = { color: GREEN, text: " " };
+const NO_BADGE = { color: GREEN, text: "" };
 
-// The toolbar icon's border color for a given page URL: green when a
-// site-specific extractor exists for it, red otherwise.
-function iconBorderColor(url) {
-  return GCal.isSupportedHost(url) ? "green" : "red";
+// The toolbar badge for a given page URL: a green pill when a site-specific
+// extractor exists for it, no badge otherwise.
+function availabilityBadge(url) {
+  return GCal.isSupportedHost(url) ? SUPPORTED_BADGE : NO_BADGE;
 }
 
-async function updateIcon(tabId, url) {
-  const path = GCal.isSupportedHost(url) ? SUPPORTED_ICON : UNSUPPORTED_ICON;
+async function updateBadge(tabId, url) {
+  const { color, text } = availabilityBadge(url);
   try {
-    await chrome.action.setIcon({ tabId, path });
+    await chrome.action.setBadgeBackgroundColor({ tabId, color });
+    await chrome.action.setBadgeText({ tabId, text });
   } catch (e) {
     // Tab may have closed before this ran.
   }
@@ -53,21 +58,21 @@ async function updateIcon(tabId, url) {
 
 chrome.tabs.onActivated.addListener(({ tabId }) => {
   chrome.tabs.get(tabId, (tab) => {
-    if (tab) updateIcon(tabId, tab.url);
+    if (tab) updateBadge(tabId, tab.url);
   });
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url || changeInfo.status === "complete") {
-    updateIcon(tabId, tab.url);
+    updateBadge(tabId, tab.url);
   }
 });
 
-async function updateAllTabIcons() {
+async function updateAllTabBadges() {
   for (const tab of await chrome.tabs.query({})) {
-    updateIcon(tab.id, tab.url);
+    updateBadge(tab.id, tab.url);
   }
 }
 
-chrome.runtime.onInstalled.addListener(updateAllTabIcons);
-chrome.runtime.onStartup.addListener(updateAllTabIcons);
+chrome.runtime.onInstalled.addListener(updateAllTabBadges);
+chrome.runtime.onStartup.addListener(updateAllTabBadges);

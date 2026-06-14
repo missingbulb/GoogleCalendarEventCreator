@@ -37,7 +37,7 @@ test("supported host with no events still shows the events view (empty)", () => 
 });
 
 test("unsupported host never surfaces scraped events — only the request flow", () => {
-  // The reported bug: an unsupported event site (red border) where the
+  // The reported bug: an unsupported event site (no badge) where the
   // generic/JSON-LD layers returned an event, which used to render a button.
   const view = chooseContent({ events: [SCRAPED], supported: false });
   assert.equal(view.mode, "request");

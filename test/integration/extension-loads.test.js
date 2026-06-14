@@ -30,7 +30,7 @@ function resolveImport(workerPath, spec) {
 // Boot the background service worker in a sandbox with just enough of the
 // extension APIs stubbed, recording which event listeners it registers. A
 // thrown importScripts (file not found) aborts here just as it aborts the real
-// worker — before any listener registers and before chrome.action.setIcon runs.
+// worker — before any listener registers and before chrome.action.setBadgeText runs.
 function bootServiceWorker() {
   const workerPath = manifest.background.service_worker; // e.g. "ui/toolbar-icon.js"
   const registered = [];
@@ -38,7 +38,7 @@ function bootServiceWorker() {
   const sandbox = {
     URL,
     chrome: {
-      action: { onClicked: listener("action.onClicked"), setIcon() {} },
+      action: { onClicked: listener("action.onClicked"), setBadgeBackgroundColor() {}, setBadgeText() {} },
       tabs: {
         onActivated: listener("tabs.onActivated"),
         onUpdated: listener("tabs.onUpdated"),
