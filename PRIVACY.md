@@ -64,7 +64,3 @@ is not affiliated with or endorsed by Google.
 
 If the extension's data practices ever change, this policy will be updated and
 the "Last updated" date above will be revised.
-
-## Contact
-
-Questions about this privacy policy can be sent to: arielra@gmail.com
