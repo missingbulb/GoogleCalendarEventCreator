@@ -255,10 +255,14 @@ test("Edinburgh Fringe: a multi-performance show yields one event per performanc
   assert.equal(ev.events[0].ctz, "GB");
 });
 
-test("Edinburgh Fringe: ctz is GB even when the event JSON can't be found", () => {
+test("Edinburgh Fringe: a page with no event JSON yields no event", () => {
+  // A supported host alone is not an event signal: an edfringe.com page that
+  // carries no performance JSON (and no parseable date) describes no event, so
+  // the popup shows nothing rather than a dateless suggestion. (The source's
+  // ctz=GB still applies to real events — see the cases above.)
   const html = `<h1>Some other edfringe.com page</h1>`;
-  const e = firstEvent(html, "https://www.edfringe.com/tickets/some-other-page");
-  assert.equal(e.ctz, "GB");
+  const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/some-other-page");
+  assert.equal(ev.events.length, 0);
 });
 
 test("Tel Aviv Cinematheque: ctz is always Asia/Jerusalem", () => {
@@ -288,6 +292,9 @@ test("Meetup: ctz read from the group's timezone embedded in page scripts", () =
 test("Meetup: an unrecognized timezone string is ignored", () => {
   const html = `
     <h1>Intro to Rust Workshop</h1>
+    <div id="event-info">
+      <time datetime="2026-07-08T18:30:00-04:00">Wed, Jul 8</time>
+    </div>
     <script type="application/json">{"group":{"timezone":"Not/A_Timezone"}}</script>`;
 
   const e = firstEvent(html, "https://www.meetup.com/brooklyn-rustaceans/events/304218765/");
@@ -301,6 +308,24 @@ test("Page with no event information at all: returns no events", () => {
 
   const ev = extractFromHtml(html, "https://www.blog.example/houseplants");
   assert.equal(ev.events.length, 0);
+});
+
+test("Supported host, no event on the page: returns no events", () => {
+  // Regression (#133): the home page of a supported site (cinema.co.il) carries
+  // the site's og:title and the footer location that appears on every page, but
+  // no screening picker and no date. A matched host must not be enough on its
+  // own to suggest an event — without a parsed date or JSON-LD event the popup
+  // shows nothing instead of a dateless "עמוד ראשי" / footer-location suggestion.
+  const html = `
+    <meta property="og:title" content="עמוד ראשי - סינמטק תל אביב">
+    <meta property="og:site_name" content="סינמטק תל אביב">
+    <meta property="og:description" content="ברוכים הבאים לסינמטק תל אביב.">
+    <h1>עמוד ראשי</h1>
+    <a href="#"><img data-src="https://www.cinema.co.il/x/location.png">רחוב הארבעה 5, תל אביב</a>`;
+
+  const ev = extractFromHtml(html, "https://www.cinema.co.il/");
+  assert.equal(ev.events.length, 0); // nothing suggested
+  assert.equal(ev.supported, true); // but the host is still recognized (green icon)
 });
 
 test("Page with a parseable date but no site/JSON-LD: still yields the event", () => {
