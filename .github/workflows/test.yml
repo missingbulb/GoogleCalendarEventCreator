@@ -10,7 +10,7 @@ on:
     # extra guard against re-triggering this workflow.
     paths-ignore:
       - "data/**"
-      - "test/ui/snapshots/popup-single-event.png"
+      - "test/ui/snapshots/**"
 
 jobs:
   test:
