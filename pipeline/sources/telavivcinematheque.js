@@ -95,7 +95,20 @@
   function location() {
     const icon = document.querySelector('img[data-src*="location.png"]');
     const link = icon && icon.closest("a");
-    const address = link ? clean(link.textContent) : "";
+    // Read only the link's own text nodes for the street address. The icon's
+    // <a> wraps an <img> plus nested <noscript> fallbacks; in a real browser
+    // (scripting enabled) <noscript> content is kept as a raw text node, so
+    // link.textContent would splice that <img> markup into the address. The
+    // direct text-node children are just the address. (jsdom parses <noscript>
+    // as DOM, which is why the tests didn't surface this.)
+    const address = link
+      ? clean(
+          [...link.childNodes]
+            .filter((n) => n.nodeType === 3 /* TEXT_NODE */)
+            .map((n) => n.textContent)
+            .join(" ")
+        )
+      : "";
     const venue = clean(meta("og:site_name"));
     return venue && address ? `${venue}, ${address}` : address;
   }
