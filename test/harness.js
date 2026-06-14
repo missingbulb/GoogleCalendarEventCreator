@@ -38,11 +38,16 @@ const SOURCES = extractorSources();
 function extractFromHtml(html, url, opts = {}) {
   const dom = new JSDOM(html, { url, runScripts: opts.runScripts || "outside-only" });
   try {
-    let result;
+    // Load every file in injection order so they register onto GCal (the
+    // helpers, the extract layers, and the sources), then run the SAME named
+    // top-level extractor the popup runs — GCal.extract() picks the matching
+    // site source for this URL internally. Going through GCal.extract() (rather
+    // than the last file's completion value) keeps the tests on the exact entry
+    // point the extension uses.
     for (const { src } of SOURCES) {
-      result = dom.window.eval(src); // last file (pipeline/assemble-events.js) returns the result
+      dom.window.eval(src);
     }
-    return result;
+    return dom.window.eval("GCal.extract()");
   } finally {
     dom.window.close();
   }
