@@ -1,6 +1,5 @@
 {
   "description": "Ticketmaster Israel event page is parseable; one event per performance, Hebrew dates parsed with the year from the header, ctz pinned to Asia/Jerusalem (Ravid Plotnik, 3 nights Jul 2026)",
-  "url": "https://www.ticketmaster.co.il/event/MR330/ALL/iw",
   "expected": {
     "events": [
       {

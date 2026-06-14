@@ -59,16 +59,20 @@ these decisions in mind:
   bot-blocked, so `npm run refresh` gets HTTP 403). Record the cached HTML
   *before* writing the case, so you can read its exact `expected` off a
   committed file instead of guessing:
-  1. Add the entry to `data/urlsToCacheLocally.json`
-     (`"<name>": { "url": "<event page URL>" }`) — but **not** the case file
-     yet. Commit and push.
-  2. Run the **Refresh cached HTML files** workflow. `refresh-cache.js` fetches
-     any `urlsToCacheLocally` entry that has no case file yet, so it records and
-     commits `data/<name>.html`; `test:live` stays green because no case asserts
-     it yet.
-  3. Pull, then add `test/integration/cases/<name>.json` (same `<name>`) and run
-     `npm run test:live` — it now runs against the local cached HTML, so its
-     output gives you the exact `expected` to paste in. Commit and push.
+  1. Commit two new files — but **not** the case file yet:
+     - `data/<name>.html` — an empty (zero-byte) file; the empty file is the
+       "fetch me" signal for the refresh script.
+     - `data/<name>.url` — a plain-text file containing just the event page URL
+       (e.g. `https://www.meetup.com/.../`). This file stays for good: it's the
+       single source of truth for the page's URL (used by the refresh script and
+       by `live.test.js`), so the URL is **not** repeated in the case file.
+  2. Run the **Refresh cached HTML files** workflow. `refresh-cache.js` fills in
+     the empty `data/<name>.html`; `test:live` stays green because no case
+     asserts it yet.
+  3. Pull, then add `test/integration/cases/<name>.json` (same `<name>`, just
+     `description` + `expected`, no `url`) and run `npm run test:live` — it now
+     runs against the local cached HTML, so its output gives you the exact
+     `expected` to paste in. Commit and push.
 - **UI changes** (popup or toolbar icon) need their snapshot captured for future
   comparison: regenerate the stored PNGs with `npm run refresh:ui` (or the
   **Refresh UI snapshot** workflow) and commit them so the diff shows the

@@ -1,9 +1,9 @@
 name: Refresh cached HTML files
 
-# Records a committed cached HTML file for any urlsToCacheLocally entry that
-# doesn't have one yet. Run on demand — there's no schedule. To re-record an
-# existing cached file against the live page (e.g. after a site changes its
-# markup), run this workflow with the "force_all" flag checked.
+# Fills in any empty (zero-byte) data/<name>.html file by fetching its URL
+# (from the matching cases/<name>.json or data/<name>.url). Run on demand —
+# there's no schedule. To re-record cached files that already exist (e.g.
+# after a site changes its markup), run this workflow with "force_all" checked.
 on:
   workflow_dispatch:
     inputs:
@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Fetches only the cached HTML files that are missing (or whose URL
-      # changed). The "force_all" input re-fetches every file.
+      # Fetches any cached HTML file that is missing or empty (zero bytes).
+      # The "force_all" input re-fetches every file.
       - name: Refresh cached HTML files
         run: npm run refresh -- ${{ inputs.force_all && '--force' || '' }}
 

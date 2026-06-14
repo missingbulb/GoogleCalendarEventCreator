@@ -1,6 +1,5 @@
 {
   "description": "Edinburgh Fringe show page is parseable (Richard Herring: RHLSTP, daily matinees plus two extra evening performances)",
-  "url": "https://www.edfringe.com/tickets/whats-on/richard-herring-rhlstp",
   "expected": {
     "events": [
       {

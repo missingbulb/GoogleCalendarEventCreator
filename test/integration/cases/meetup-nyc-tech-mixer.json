@@ -1,6 +1,5 @@
 {
   "description": "Meetup event page is parseable (NYC Tech Mixer, Jun 25 2026)",
-  "url": "https://www.meetup.com/nyctechmixer/events/311245599/",
   "expected": {
     "events": [
       {

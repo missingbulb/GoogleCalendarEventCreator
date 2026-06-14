@@ -1,6 +1,5 @@
 {
   "description": "Meetup event page is parseable; details link strips tracking params and markdown links in the description become HTML anchors (Fusion LA Israel, Jun 7 2026)",
-  "url": "https://www.meetup.com/fusion-la-israel/events/314842056/?recId=6d936688-1bdd-4823-ad49-cc6316b99797&recSource=ml-popular-events-nearby-offline&searchId=f541f7ee-b297-426b-b188-08d0bd38f4f6&eventOrigin=find_page%24inPerson",
   "expected": {
     "events": [
       {

@@ -1,19 +1,26 @@
 #!/usr/bin/env node
-// Refresh the committed cached HTML files that the live tests assert against
-// (data/<case>.html + data/urlsToCacheLocally.json).
+// Refresh the committed cached HTML files that the live tests assert against.
 //
-// urlsToCacheLocally.json is just a list of URLs we want a committed HTML file
-// for. A cached HTML file is fetched only when it's actually missing:
-//   - --force was given
-//   - the cached HTML file or its urlsToCacheLocally entry is missing
-//   - the case's URL changed since the file was fetched
+// Each cached page is described by two per-case files in data/:
+//   - data/<name>.url   — plain text, the source URL (single source of truth;
+//                         live.test.js reads it too, to fetch and to set the
+//                         DOM's origin).
+//   - data/<name>.html  — the recorded HTML the live tests assert against.
+//
+// A cached HTML file is fetched when:
+//   - --force was given, OR
+//   - data/<name>.html is missing or empty (zero bytes).
+// A committed empty (zero-byte) data/<name>.html is the "fetch me" signal: pair
+// it with a data/<name>.url and the next refresh fills it in. That's also the
+// pre-case flow — record the HTML first, then add test/integration/cases/<name>.json
+// once you can read the expected values off the committed file.
 //
 // A failed fetch KEEPS the previous cached HTML file and only warns — a site
 // outage or bot-blocking must not break the pipeline. It is an error only when
-// a case ends up with no cached HTML file at all.
+// a page ends up with no cached HTML file at all.
 //
 // Usage:
-//   node data/refresh-cache.js            # fetch missing cached HTML files only
+//   node data/refresh-cache.js            # fetch missing/empty cached HTML files only
 //   node data/refresh-cache.js --force    # re-fetch everything
 "use strict";
 
@@ -21,8 +28,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const DATA_DIR = __dirname;
-const CASES_DIR = path.join(__dirname, "..", "test", "integration", "cases");
-const URLS_PATH = path.join(DATA_DIR, "urlsToCacheLocally.json");
 
 const FETCH_ATTEMPTS = 3;
 const FETCH_TIMEOUT_MS = 20_000;
@@ -55,46 +60,34 @@ async function fetchPage(url) {
   throw new Error(`${lastError.message} (after ${FETCH_ATTEMPTS} attempts)`);
 }
 
-function readCacheIndex() {
-  if (!fs.existsSync(URLS_PATH)) return {};
-  return JSON.parse(fs.readFileSync(URLS_PATH, "utf8"));
-}
-
-function needsRefresh(name, url, cacheIndex, force) {
-  if (force) return "forced";
-  const entry = cacheIndex[name];
-  if (!entry || !fs.existsSync(path.join(DATA_DIR, `${name}.html`))) return "missing";
-  if (entry.url !== url) return "case URL changed";
-  return null;
+function isEmptyOrMissing(filePath) {
+  try {
+    return fs.statSync(filePath).size === 0;
+  } catch {
+    return true;
+  }
 }
 
 async function main() {
   const force = process.argv.includes("--force");
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  const cacheIndex = readCacheIndex();
   let missingFiles = 0;
 
-  const caseFiles = fs
-    .readdirSync(CASES_DIR)
-    .filter((f) => f.endsWith(".json"))
+  const urlFiles = fs
+    .readdirSync(DATA_DIR)
+    .filter((f) => f.endsWith(".url"))
     .sort();
 
-  // What to fetch: every case file's URL, plus any urlsToCacheLocally entry
-  // that has no case file yet. The latter lets you register an entry
-  // (name + url) and fetch it *before* writing its case — so you can record the
-  // HTML first, then fill the case's `expected` against the committed file.
-  const targets = new Map();
-  for (const file of caseFiles) {
-    const name = path.basename(file, ".json");
-    const { url } = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
-    targets.set(name, url);
-  }
-  for (const [name, entry] of Object.entries(cacheIndex)) {
-    if (!targets.has(name) && entry && entry.url) targets.set(name, entry.url);
-  }
+  for (const file of urlFiles) {
+    const name = path.basename(file, ".url");
+    const url = fs.readFileSync(path.join(DATA_DIR, file), "utf8").trim();
+    if (!url) {
+      console.warn(`${name}: ${file} is empty — skipping`);
+      continue;
+    }
 
-  for (const [name, url] of targets) {
-    const reason = needsRefresh(name, url, cacheIndex, force);
+    const htmlPath = path.join(DATA_DIR, `${name}.html`);
+    const reason = force ? "forced" : isEmptyOrMissing(htmlPath) ? "missing/empty" : null;
 
     if (!reason) {
       console.log(`${name}: already cached, skipping`);
@@ -103,11 +96,10 @@ async function main() {
 
     try {
       const html = await fetchPage(url);
-      fs.writeFileSync(path.join(DATA_DIR, `${name}.html`), html);
-      cacheIndex[name] = { url };
+      fs.writeFileSync(htmlPath, html);
       console.log(`${name}: refreshed (${reason})`);
     } catch (err) {
-      if (fs.existsSync(path.join(DATA_DIR, `${name}.html`)) && cacheIndex[name]) {
+      if (!isEmptyOrMissing(htmlPath)) {
         console.warn(`${name}: fetch failed (${err.message}) — keeping existing cached HTML`);
       } else {
         console.error(`${name}: fetch failed (${err.message}) and no previous cached HTML exists`);
@@ -116,7 +108,6 @@ async function main() {
     }
   }
 
-  fs.writeFileSync(URLS_PATH, JSON.stringify(cacheIndex, null, 2) + "\n");
   if (missingFiles > 0) process.exit(1);
 }
 
