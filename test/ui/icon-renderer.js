@@ -1,6 +1,7 @@
 // Renders the expected toolbar icon (128x128) for the "supported" (green
 // border) and "unsupported" (red border) states described in ui/toolbar-icon.js,
-// as a JS port of tools/gen_icons.py's make_icon(). Used by icon.test.js to
+// as a JS port of tools/gen_icons.py's make_icon(). Used by
+// toolbar-icon-snapshots.test.js to
 // confirm the committed icons/icon128-{red,green}.png assets match the spec.
 "use strict";
 

@@ -1,5 +1,5 @@
 // UI snapshot tests: render approximations of the popup with fixed fixture
-// data (see fixture.js and render.js) and compare against stored images in
+// data (see popup-fixtures.js and popup-renderer.js) and compare against stored images in
 // test/ui/snapshots/. Run `npm run refresh:ui` to regenerate the stored
 // images after an intentional UI change.
 //
@@ -17,9 +17,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
-const { renderPopupPng } = require("./render");
-const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./fixture");
-const { artifactPath } = require("./artifacts-dir");
+const { renderPopupPng } = require("./popup-renderer");
+const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./popup-fixtures");
+const { artifactPath } = require("./snapshot-artifacts-dir");
 const { extractFromHtml } = require("../harness");
 
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
