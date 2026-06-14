@@ -12,3 +12,14 @@ When the repo owner says "LGTM" on a change, treat it as approval to merge
 that branch's pull request into `main`. Before merging a branch that adds or
 changes tests, first confirm its CI has gone green at least twice — new tests
 must prove they aren't flaky (see `docs/engineeringPractices.md`).
+
+When the repo owner says **"bump version"**, treat it as a defined instruction
+(like "LGTM"): raise the extension's version by editing the `version` field in
+**both** `manifest.json` and `package.json` (they must stay in sync), on a
+branch, to be merged into `main` through the normal PR flow. Default to a
+**minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an explicit target ("bump version
+to 1.4.0") or level ("bump patch" / "bump major") when given. Bumping the
+version is the *only* prerequisite to releasing: the **Create Release Package**
+workflow then builds and publishes whatever version is committed in
+`manifest.json`, and refuses to run if that version is already the latest
+release. The release workflow never changes the version itself.

@@ -41,9 +41,11 @@ is the project-specific mechanics. Keep these decisions in mind:
      runs against the local cached HTML, so its output gives you the exact
      `expected` to paste in. Commit and push.
 - **UI changes** (popup or toolbar icon) need their snapshot captured for future
-  comparison: regenerate the stored PNGs with `npm run refresh:ui` (or the
-  **Refresh UI snapshot** workflow) and commit them so the diff shows the
-  before/after. A new UI surface needs a new snapshot of its own.
+  comparison: regenerate the stored PNGs with `npm run refresh:ui` and commit
+  them so the diff shows the before/after. (The render is deterministic — satori
+  + resvg, no browser or network — so whoever makes the UI change generates them
+  on their own branch; there's no CI workflow for it.) A new UI surface needs a
+  new snapshot of its own.
 - **"Does the extension load?" is guarded in two layers.** A startup failure —
   a bad service-worker `importScripts` path (#146), a missing/renamed injected
   file, a syntax error in one — must fail a test, not just surface when someone

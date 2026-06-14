@@ -14,35 +14,29 @@ file or smuggle in dead weight. This same zip is what testers load unpacked
 ## Versioning
 
 The version users see is `manifest.json`'s `version` (the store reads only
-that; `package.json` is kept in sync). **It is bumped deliberately, not
-automatically per commit** — it's set when you cut a release (the Release
-workflow writes it for you; see below). The store rejects an upload whose
-version isn't strictly higher than the live one, so each release must increment
-it.
+that; `package.json` is kept in sync). **It is bumped deliberately, by a human,
+not automatically** — and bumping is a separate step from releasing. Ask Claude
+to **"bump version"** (it edits both files on a branch and lands on `main`
+through a normal PR; default is the next minor — see
+[`docs/claude/workflow.md`](claude/workflow.md)). The release workflow never
+changes the version itself. The store rejects an upload whose version isn't
+strictly higher than the live one, so each release must increment it first.
 
 ## Creating a release package
 
-The **Create Release Package** workflow (`.github/workflows/release.yml`) sets
-the version, runs the tests, builds the zip, and publishes a GitHub Release with
-it attached. It does **not** touch the store — pushing to the Chrome Web Store
-is a separate, manual step (see below).
+The **Create Release Package** workflow (`.github/workflows/release.yml`) runs
+the tests, builds the zip, and publishes a GitHub Release with it attached, at
+**whatever version is currently committed in `manifest.json`**. It takes **no
+inputs** and does **not** change the version — bump it first (see above). It
+does **not** touch the store — pushing to the Chrome Web Store is a separate,
+manual step (see below).
 
-- **Run workflow** (Actions tab → Create Release Package → "Run workflow") is
-  the normal path. Optionally type the version; **leave it blank to bump the
-  current minor version** (`1.0.0` → `1.1.0`). The workflow writes that version
-  into `manifest.json` / `package.json`, commits it, tags `vX.Y.Z`, and
-  releases.
-
-  > GitHub can't pre-fill the input with a *computed* value — `workflow_dispatch`
-  > defaults are static text — so "blank = next minor" is the convenience
-  > instead. The version it settled on is printed in the run summary.
-
-- **Push a tag `vX.Y.Z` by hand** if you'd rather bump `manifest.json` yourself.
-  The workflow then **verifies the tag matches the manifest version** (a
-  mismatch fails the build) before releasing.
-
-Either way the zip is attached under a stable name, so the newest build is
-always at a fixed URL:
+Run it from the Actions tab → Create Release Package → "Run workflow". It
+**refuses to run** if `manifest.json`'s version already matches the latest
+published release (or a matching `vX.Y.Z` tag already exists) — that means
+nobody bumped the version. On success it tags `vX.Y.Z` at the released commit
+and attaches the zip under a stable name, so the newest build is always at a
+fixed URL:
 `…/releases/latest/download/google-calendar-event-creator.zip`.
 
 ## Publishing to the store
@@ -88,9 +82,9 @@ secrets.
 ## Minor update
 
 1. Make the change (open an issue first per the project workflow) and merge it.
-2. Run the **Create Release Package** workflow (blank version = next minor) to
-   bump the version and cut the GitHub Release.
-3. Run the **Publish to Chrome Web Store** workflow to ship it.
+2. Bump the version (ask Claude to "bump version" = next minor) and merge that PR.
+3. Run the **Create Release Package** workflow to cut the GitHub Release.
+4. Run the **Publish to Chrome Web Store** workflow to ship it.
 
 Once the store approves it, Chrome auto-pushes the update to existing users
 within a few hours — no reinstall. (For the very first listing, do the one-time
