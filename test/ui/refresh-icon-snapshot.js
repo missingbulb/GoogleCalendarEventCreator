@@ -1,6 +1,6 @@
 // Regenerates test/ui/snapshots/icon-unsupported.png and icon-supported.png, the
 // expected toolbar icon images for the "unsupported" and "supported" states
-// from icon-state.js (see render-icon.js). Run after an intentional change
+// from ui/toolbar-icon.js (see render-icon.js). Run after an intentional change
 // to tools/gen_icons.py / render-icon.js.
 "use strict";
 

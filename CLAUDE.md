@@ -30,9 +30,10 @@ the generic/JSON-LD layers get wrong or miss. The flow:
    single source of truth the popup injects and the tests read). The generator
    pins `registry.js`/`helpers/` first and `assemble-events.js` last and sorts
    the rest, so you never hand-edit the list; a CI test fails if it's stale.
-3. Add the new source to the `importScripts(...)` list in `icon-state.js` (the
-   service worker can't read the generated JSON synchronously at startup, so its
-   list is explicit; a CI test fails if it drifts from the generated sources).
+3. Add the new source to the `importScripts(...)` list in `ui/toolbar-icon.js`
+   (the service worker can't read the generated JSON synchronously at startup,
+   so its list is explicit; a CI test fails if it drifts from the generated
+   sources).
 4. Add an integration case for a real page on the site (see Testing below).
 
 # Testing

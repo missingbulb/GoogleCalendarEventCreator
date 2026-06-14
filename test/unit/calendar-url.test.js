@@ -3,25 +3,18 @@
 // field.
 "use strict";
 
-const test = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
 const path = require("node:path");
-const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 
-// Evaluate build-calendar-url.js as global code so its function declarations
-// land on globalThis.
-function loadCalendarUrl() {
-  vm.runInThisContext(
-    fs.readFileSync(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"), "utf8")
-  );
-  return {
-    buildCalendarUrl: globalThis.buildCalendarUrl,
-    formatDatesParam: globalThis.formatDatesParam,
-  };
-}
-
-const { buildCalendarUrl, formatDatesParam } = loadCalendarUrl();
+// build-calendar-url.js is an ES module; import it before the tests run.
+let buildCalendarUrl, formatDatesParam;
+before(async () => {
+  ({ buildCalendarUrl, formatDatesParam } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"))
+  ));
+});
 const TAB = { title: "Tab Title", url: "https://example.com/events/picnic", index: 0 };
 
 function paramsOf(url) {

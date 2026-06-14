@@ -326,11 +326,12 @@ them on GitHub to see what the popup currently looks like:
 - **`test/ui/snapshots/popup-multi-event.png`** — a listing/series page: one ~60px
   button per event (6 here) under an "N events on this page" heading.
 
-Note this is **not a screenshot of the real `popup.html`**: satori only
+Note this is **not a screenshot of the real popup**: satori only
 supports a constrained flexbox-based HTML/CSS subset, so `render.js` is a
-hand-maintained tree mirroring `popup.html`'s structure and styles. If
-`popup.html`/`popup.css`/`popup.js` change in ways that affect the rendered
-output (copy, layout, colors), update `buildTree()` in `render.js` to match.
+hand-maintained tree mirroring `ui/popup.css`'s styles and the
+`ui/views/events-view.js` button layout. If the popup's markup/CSS or the
+events-view rendering change in ways that affect the rendered output (copy,
+layout, colors), update `buildTree()` in `render.js` to match.
 This tradeoff was chosen for determinism and zero extra runtime
 dependencies (no browser download); a real-browser screenshot (e.g. via
 Playwright) would have higher fidelity but couldn't run in all environments
@@ -350,8 +351,8 @@ writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
 ### Toolbar icon test
 
 **`test/ui/icon.test.js`** generates the expected 128x128 toolbar icon for
-both states described in `icon-state.js` — a green border for pages with a
-site-specific extractor and a red border otherwise — using
+both states described in `ui/toolbar-icon.js` — a green border for pages with a
+site-specific source and a red border otherwise — using
 `test/ui/render-icon.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
 no browser). Each generated image is compared pixel-by-pixel against the
 committed reference images **`test/ui/snapshots/icon-unsupported.png`** and
@@ -372,9 +373,10 @@ commit the results. On mismatch, the test writes
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
 | `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
-| `popup.html`, `popup.js` | Toolbar popup: runs the extractor, shows a summary, and opens the URL on click |
-| `background.js` | Source-request flow (prefilled GitHub issue) for unsupported pages |
-| `icon-state.js` | Background service worker: updates the toolbar icon's border color per tab |
+| `ui/popup.html`, `ui/popup.css`, `ui/popup.js` | Toolbar popup: controller that runs the extractor, picks a view, and renders it (markup + extracted styles) |
+| `ui/views/events-view.js` | Renders one button per event (loaded on demand via `import()`) |
+| `ui/views/source-request-view.js` | Source-request flow (prefilled GitHub issue) for unsupported pages (loaded on demand) |
+| `ui/toolbar-icon.js` | Background service worker: updates the toolbar icon's border color per tab |
 | `pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
 | `pipeline/helpers/` | Shared helpers split by concern (DOM, dates, timezones, timezone-names, merge) |
 | `pipeline/sources/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One file per supported event site, with hardcoded selectors + inline host matcher |
@@ -390,7 +392,7 @@ commit the results. On mismatch, the test writes
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM) |
 | `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
-| `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `popup.js` for use in `render.js` |
+| `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `ui/views/events-view.js` for use in `render.js` |
 | `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
 | `test/ui/artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
@@ -413,6 +415,6 @@ commit the results. On mismatch, the test writes
 click the button on it, and sends nothing anywhere — it just opens a Google
 Calendar URL in a new tab.
 
-`tabs`: lets `icon-state.js` see each tab's URL (hostname only) so it can
+`tabs`: lets `ui/toolbar-icon.js` see each tab's URL (hostname only) so it can
 show the toolbar icon with a green border on pages with a site-specific
 extractor (e.g. meetup.com) and a red border elsewhere.

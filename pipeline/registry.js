@@ -25,7 +25,7 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, {
 
   // THE single source of truth for "is this page a supported site": its
   // hostname has a registered source whose `matches` returns true. The toolbar
-  // service worker (icon-state.js) derives the icon's border color from this;
+  // service worker (ui/toolbar-icon.js) derives the icon's border color from this;
   // the popup gets the same answer from the injected extraction result
   // (assemble-events.js reports whether a source matched). DOM-free, so it runs
   // the same in the service worker, the popup, and content-script contexts.

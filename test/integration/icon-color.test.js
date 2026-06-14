@@ -9,10 +9,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// icon-state.js registers chrome listeners and importScripts()'s the registry
-// and every source at load time; stub just enough of the extension APIs and run
-// them in the same sandbox so iconBorderColor() sees GCal.sources exactly as it
-// does in the real extension.
+// ui/toolbar-icon.js registers chrome listeners and importScripts()'s the
+// registry and every source at load time; stub just enough of the extension
+// APIs and run them in the same sandbox so iconBorderColor() sees GCal.sources
+// exactly as it does in the real extension.
 function loadIconState() {
   const sandbox = {
     URL,
@@ -28,7 +28,7 @@ function loadIconState() {
     },
   };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "icon-state.js"), "utf8"), sandbox);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "..", "ui", "toolbar-icon.js"), "utf8"), sandbox);
   return { iconBorderColor: sandbox.iconBorderColor };
 }
 

@@ -40,15 +40,16 @@ test("the registry loads first and the orchestrator loads last", () => {
   );
 });
 
-// The toolbar service worker (icon-state.js) can't read the generated JSON at
+// The toolbar service worker (ui/toolbar-icon.js) can't read the generated JSON at
 // startup (MV3 only allows synchronous importScripts), so it lists registry +
 // every source explicitly. Guard that hand-list against drift: it must import
 // registry.js and exactly the sources in the generated load order.
 test("the service worker imports the registry and every source", () => {
-  const worker = fs.readFileSync(path.join(ROOT, "icon-state.js"), "utf8");
+  const worker = fs.readFileSync(path.join(ROOT, "ui/toolbar-icon.js"), "utf8");
   const importBlock = worker.match(/importScripts\(([^)]*)\)/s);
-  assert.ok(importBlock, "icon-state.js must call importScripts");
-  const imported = [...importBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(importBlock, "ui/toolbar-icon.js must call importScripts");
+  // Worker paths are root-relative (leading slash); strip it to compare.
+  const imported = [...importBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1].replace(/^\//, ""));
 
   const loadOrder = computeLoadOrder();
   const sources = loadOrder.filter((f) => f.startsWith("pipeline/sources/"));
@@ -57,6 +58,6 @@ test("the service worker imports the registry and every source", () => {
   assert.deepEqual(
     imported.filter((f) => f.startsWith("pipeline/sources/")).sort(),
     [...sources].sort(),
-    "worker's source imports must match the generated sources — run `npm run index` and update icon-state.js"
+    "worker's source imports must match the generated sources — run `npm run index` and update ui/toolbar-icon.js"
   );
 });

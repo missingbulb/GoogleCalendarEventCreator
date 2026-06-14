@@ -1,20 +1,27 @@
-// Renders an approximation of the popup's UI (see popup.html/popup.js) to a
-// PNG, using satori (HTML/CSS-subset -> SVG, no browser) and resvg (SVG ->
-// PNG). The element tree below mirrors popup.html's structure and styles, and
-// popup.js's per-event button layout, for the fixed fixture data in
-// fixture.js.
+// Renders an approximation of the popup's UI (see ui/popup.html + ui/popup.css
+// and ui/views/events-view.js) to a PNG, using satori (HTML/CSS-subset -> SVG,
+// no browser) and resvg (SVG -> PNG). The element tree below mirrors
+// ui/popup.css's styles and the events-view per-event button layout, for the
+// fixed fixture data in fixture.js.
 //
-// This is NOT a screenshot of the real popup.html — satori only supports a
+// This is NOT a screenshot of the real popup — satori only supports a
 // constrained flexbox-based style subset, so this is a best-effort visual
-// approximation for catching unintended layout/copy changes. If popup.html's
-// markup/CSS or popup.js's rendering changes, update buildTree() to match.
+// approximation for catching unintended layout/copy changes. If the popup's
+// markup/CSS or the events-view rendering changes, update buildTree() to match.
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
-const { formatWhen, summarize, dateChip } = require("./load-popup");
+const loadPopupHelpers = require("./load-popup");
+
+// The popup's pure display helpers, imported (async) from the events-view ES
+// module on first render and reused thereafter.
+let summarize, dateChip;
+async function ensureHelpers() {
+  if (!summarize) ({ summarize, dateChip } = await loadPopupHelpers());
+}
 
 const FONT_FAMILY = "Liberation Sans"; // metric-compatible stand-in for popup.html's Arial fallback
 const FONT_DIR = path.join(__dirname, "fonts");
@@ -257,9 +264,10 @@ function buildTree(data, opts = {}) {
 }
 
 async function renderPopupPng(data, opts = {}) {
+  await ensureHelpers();
   const svg = await satori(buildTree(data, opts), { width: WIDTH, fonts: FONTS });
   const resvg = new Resvg(svg, { font: { loadSystemFonts: false } });
   return resvg.render().asPng();
 }
 
-module.exports = { renderPopupPng, formatWhen };
+module.exports = { renderPopupPng };

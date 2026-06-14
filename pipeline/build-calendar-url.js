@@ -1,15 +1,15 @@
 // Builds a pre-filled Google Calendar event-template URL from an extracted
 // event object — the page → events → calendar-URL pipeline's final step.
 //
-// Loaded by the popup as a classic script (popup.js calls buildCalendarUrl).
-// This is the URL-building half of the former background.js; the source-request
-// half still lives there for now.
+// An ES module imported by ui/views/events-view.js (popup-document only, so it
+// can be a module — it is never injected into the page). `buildCalendarUrl` and
+// `formatDatesParam` are exported; the rest are module-private helpers.
 
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given
 const MAX_EVENT_CREATION_URL_LENGTH = 4000; // keep the whole template URL within a safe length
 
-function buildCalendarUrl(data, tab) {
+export function buildCalendarUrl(data, tab) {
   const params = new URLSearchParams();
   params.set("action", "TEMPLATE");
 
@@ -119,7 +119,7 @@ function markdownToHtml(text) {
 // times (see GCal.localizeToZone), so a known-timezone event reaches here as a
 // floating start/end and its ctz param places it. An offset/Z that survives to
 // here is an event with no known timezone, and is pinned to a UTC instant.
-function formatDatesParam(start, end) {
+export function formatDatesParam(start, end) {
   if (!start) return "";
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(start)) {

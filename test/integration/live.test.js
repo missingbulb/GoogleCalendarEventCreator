@@ -55,28 +55,23 @@
 // copy them into `expected`.
 "use strict";
 
-const test = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 const { extractFromHtml } = require("../harness");
 
 const CASES_DIR = path.join(__dirname, "cases");
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
 
-// Evaluate build-calendar-url.js as global code so its function declarations
-// land on the sandbox.
-function loadCalendarUrlFns() {
-  const sandbox = { URL, URLSearchParams };
-  vm.runInNewContext(
-    fs.readFileSync(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"), "utf8"),
-    sandbox
-  );
-  return { buildCalendarUrl: sandbox.buildCalendarUrl };
-}
-
-const { buildCalendarUrl } = loadCalendarUrlFns();
+// build-calendar-url.js is an ES module; import it before the tests run.
+let buildCalendarUrl;
+before(async () => {
+  ({ buildCalendarUrl } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"))
+  ));
+});
 
 const caseFiles = fs
   .readdirSync(CASES_DIR)

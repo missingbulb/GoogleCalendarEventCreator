@@ -1,5 +1,5 @@
 // UI snapshot test: generates the expected toolbar icon (128x128, see
-// render-icon.js) for both states described in icon-state.js -- a green
+// render-icon.js) for both states described in ui/toolbar-icon.js -- a green
 // border for pages with a site-specific extractor and a red border
 // otherwise -- and compares each against the stored images in
 // test/ui/snapshots/icon-{red,green}.png. Run `npm run refresh:ui` to
@@ -67,7 +67,7 @@ for (const { state, color, name, shippedIcon } of CASES) {
     }
   });
 
-  // Cross-check against the actual shipped icon used by icon-state.js, so a
+  // Cross-check against the actual shipped icon used by ui/toolbar-icon.js, so a
   // drift between tools/gen_icons.py and render-icon.js is caught too.
   test(`toolbar icon for ${state} pages matches icons/${shippedIcon}`, () => {
     const actual = PNG.sync.read(renderIconPng(color));
