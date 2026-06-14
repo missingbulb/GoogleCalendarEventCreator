@@ -48,8 +48,15 @@ test("the service worker imports the registry and every source", () => {
   const worker = fs.readFileSync(path.join(ROOT, "ui/toolbar-icon.js"), "utf8");
   const importBlock = worker.match(/importScripts\(([^)]*)\)/s);
   assert.ok(importBlock, "ui/toolbar-icon.js must call importScripts");
-  // Worker paths are root-relative (leading slash); strip it to compare.
-  const imported = [...importBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1].replace(/^\//, ""));
+  // Paths must be relative to the extension root (the load-order entries), with
+  // no leading slash: in an MV3 worker importScripts resolves against the
+  // extension root, and a leading slash makes the import fail (the worker then
+  // aborts before its listeners register and the icon never updates).
+  const imported = [...importBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(
+    imported.every((f) => !f.startsWith("/")),
+    "worker importScripts paths must be extension-root-relative (no leading slash)"
+  );
 
   const loadOrder = computeLoadOrder();
   const sources = loadOrder.filter((f) => f.startsWith("pipeline/sources/"));

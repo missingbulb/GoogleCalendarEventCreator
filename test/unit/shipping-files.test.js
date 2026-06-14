@@ -61,10 +61,11 @@ test("popup's module script and stylesheet ship", () => {
 test("the service worker's importScripts targets ship", () => {
   const block = read("ui/toolbar-icon.js").match(/importScripts\(([^)]*)\)/s);
   assert.ok(block, "toolbar-icon.js must call importScripts");
-  // Strip the leading slash on the worker's root-relative paths.
-  const imports = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1].replace(/^\//, ""));
+  // Paths are relative to the extension root (no leading slash): that's how an
+  // MV3 worker resolves importScripts, and a leading slash makes the import fail.
+  const imports = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
   assert.ok(imports.length > 0, "no importScripts targets found in toolbar-icon.js");
-  for (const i of imports) assert.ok(isShipped(i), `toolbar-icon.js imports /${i}, but it is not in the shipping set`);
+  for (const i of imports) assert.ok(isShipped(i), `toolbar-icon.js imports ${i}, but it is not in the shipping set`);
 });
 
 test("dev/test-only paths do not ship", () => {
