@@ -32,16 +32,12 @@
 // performance as the event. Every Fringe show runs in Edinburgh, so `ctz` is
 // always "GB" — even on pages where the event JSON couldn't be found.
 (() => {
-  const { clean } = GCal;
+  const { clean, jsonScript } = GCal;
 
   function readEvent() {
-    const script = document.getElementById("__NEXT_DATA__");
-    if (!script) return null;
-    try {
-      return JSON.parse(script.textContent).props.pageProps.data.event;
-    } catch (e) {
-      return null;
-    }
+    const next = jsonScript("#__NEXT_DATA__");
+    const data = next && next.props && next.props.pageProps && next.props.pageProps.data;
+    return (data && data.event) || null;
   }
 
   function flattenLocation(event) {

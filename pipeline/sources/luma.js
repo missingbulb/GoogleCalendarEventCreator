@@ -33,17 +33,13 @@
 //   description description_mirror, a ProseMirror doc, flattened to plain text
 //               (one line per block; link/text nodes concatenated in order)
 (() => {
-  const { clean, isValidTimezone } = GCal;
+  const { clean, isValidTimezone, jsonScript } = GCal;
 
   function readData() {
-    const script = document.getElementById("__NEXT_DATA__");
-    if (!script) return null;
-    try {
-      const initial = JSON.parse(script.textContent).props.pageProps.initialData;
-      return initial && initial.kind === "event" ? initial.data : null;
-    } catch (e) {
-      return null;
-    }
+    const next = jsonScript("#__NEXT_DATA__");
+    const pageProps = next && next.props && next.props.pageProps;
+    const initial = pageProps && pageProps.initialData;
+    return initial && initial.kind === "event" ? initial.data : null;
   }
 
   function flattenLocation(event) {
