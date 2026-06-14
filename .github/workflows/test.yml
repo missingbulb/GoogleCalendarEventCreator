@@ -54,10 +54,12 @@ jobs:
 
       # Real-Chrome smoke test: loads the unpacked extension and asserts the MV3
       # service worker registers — the one layer that exercises Chrome's actual
-      # extension loader, the layer that broke in #146. Two environment quirks:
-      #   * branded Chrome 137+ dropped the --load-extension switch, so we use
-      #     Chrome for Testing (installed via @puppeteer/browsers, which ships
-      #     with puppeteer-core — no new dependency, just a one-time download);
+      # extension loader, the layer that broke in #146. The test itself has no
+      # npm dependency (it drives Chrome over the DevTools Protocol via Node's
+      # built-in WebSocket). Two environment quirks handled here:
+      #   * branded Chrome 137+ dropped the --load-extension switch, so we fetch
+      #     Chrome for Testing via `npx @puppeteer/browsers` (run on demand, not
+      #     a project dependency — nothing added to package.json/the lockfile);
       #   * MV3 extensions only load in *headful* Chrome, so it runs under xvfb.
       # Separate from the browserless suites above; the test skips if no Chrome.
       - name: Run real-Chrome extension-load smoke test

@@ -20,7 +20,6 @@
     "jsdom": "^29.1.1",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
-    "puppeteer-core": "23.11.1",
     "satori": "^0.26.0"
   },
   "_dependencyNotes": {
@@ -28,7 +27,6 @@
     "satori": "Test-only. Renders the popup's HTML/CSS-subset tree to SVG for UI snapshot tests (test/ui/popup-renderer.js), since it isn't a real screenshot of the popup.",
     "@resvg/resvg-js": "Test-only. Rasterizes the SVG produced by satori into a PNG for UI snapshot tests (test/ui/popup-renderer.js).",
     "pngjs": "Test-only. Decodes/encodes the PNG snapshots compared in the UI tests (test/ui/popup-snapshots.test.js).",
-    "pixelmatch": "Test-only. Performs pixel-level diffing between rendered and reference PNGs in the UI tests (test/ui/popup-snapshots.test.js).",
-    "puppeteer-core": "Test-only. Drives a system Chrome for the real-Chrome extension-load smoke test (test/e2e/, `npm run test:e2e`). The `-core` build ships no browser, so it adds no binary download; the test skips when no Chrome is present. Not shipped with the extension."
+    "pixelmatch": "Test-only. Performs pixel-level diffing between rendered and reference PNGs in the UI tests (test/ui/popup-snapshots.test.js)."
   }
 }

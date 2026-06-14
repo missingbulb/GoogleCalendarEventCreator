@@ -1,106 +1,184 @@
-// Real-Chrome smoke test: load the unpacked extension in headless Chrome and
-// confirm its MV3 service worker actually registers and runs. This is the only
-// layer that exercises Chrome's *real* extension loader — the layer that broke
-// in #146 — so it catches startup failures (bad importScripts path, manifest
-// error, MV3 type/CSP mismatch) that a Node simulation can only approximate.
-// The deterministic Node-level equivalent is test/integration/extension-loads.test.js.
+// Real-Chrome smoke test: load the unpacked extension and confirm its MV3
+// service worker actually registers and runs — the one layer that exercises
+// Chrome's *real* extension loader (the layer that broke in #146). The
+// deterministic Node-level equivalent is test/integration/extension-loads.test.js.
 //
-// Runs in CI via `npm run test:e2e` against the Chrome preinstalled on
-// ubuntu-latest. SKIPS when neither puppeteer-core nor a Chrome binary is
-// present (e.g. the offline dev sandbox), so it never blocks the default suite.
+// Zero dependencies: it drives Chrome straight over the DevTools Protocol using
+// Node's built-in WebSocket + child_process (no puppeteer). It needs a Chrome
+// that still honours --load-extension — branded Chrome 137+ dropped it, so CI
+// uses Chrome for Testing (installed in .github/workflows/test.yml). MV3
+// extensions only load HEADFUL, so CI runs it under xvfb. The test SKIPS when no
+// such Chrome is given (e.g. the offline dev sandbox), so it never blocks the
+// default suite. Point it at a binary with CHROME_PATH.
 "use strict";
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
+const { spawn } = require("node:child_process");
 
 const ROOT = path.join(__dirname, "..", "..");
 
-let puppeteer = null;
-try {
-  puppeteer = require("puppeteer-core");
-} catch {
-  // devDependency not installed (or pruned) — the test below skips.
-}
-
-// puppeteer-core ships no browser, so point it at a system Chrome. Honor the
-// usual overrides first, then the common install locations.
-function findChrome() {
-  const candidates = [
-    process.env.CHROME_PATH,
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    "/usr/bin/google-chrome",
-    "/usr/bin/google-chrome-stable",
-    "/opt/google/chrome/chrome",
-    "/usr/bin/chromium",
-    "/usr/bin/chromium-browser",
-  ];
-  return candidates.find((p) => p && fs.existsSync(p)) || null;
-}
-
-const chromePath = findChrome();
-const skip = !puppeteer
-  ? "puppeteer-core not installed"
-  : !chromePath
-    ? "no Chrome binary found (set CHROME_PATH)"
+const chromePath = [process.env.CHROME_PATH, process.env.PUPPETEER_EXECUTABLE_PATH].find(
+  (p) => p && fs.existsSync(p)
+);
+// Node has shipped a global WebSocket since v22 (global fetch since v18).
+const skip = !chromePath
+  ? "no extension-capable Chrome given (set CHROME_PATH to a Chrome for Testing binary)"
+  : typeof WebSocket === "undefined"
+    ? "global WebSocket unavailable (needs Node >= 22)"
     : false;
+
+// Minimal DevTools Protocol client over one WebSocket. Flat sessions (a
+// sessionId per message) let us talk to the browser and to an attached target
+// through the same socket.
+function connectCDP(url) {
+  const ws = new WebSocket(url);
+  const pending = new Map();
+  const listeners = new Set();
+  let nextId = 0;
+  ws.addEventListener("message", (ev) => {
+    const msg = JSON.parse(typeof ev.data === "string" ? ev.data : ev.data.toString());
+    if (msg.id != null && pending.has(msg.id)) {
+      const { resolve, reject } = pending.get(msg.id);
+      pending.delete(msg.id);
+      msg.error ? reject(new Error(msg.error.message)) : resolve(msg.result);
+    } else if (msg.method) {
+      for (const fn of listeners) fn(msg);
+    }
+  });
+  const ready = new Promise((resolve, reject) => {
+    ws.addEventListener("open", () => resolve(), { once: true });
+    ws.addEventListener("error", () => reject(new Error("CDP socket error")), { once: true });
+  });
+  return {
+    ready,
+    on: (fn) => listeners.add(fn),
+    send: (method, params = {}, sessionId) =>
+      new Promise((resolve, reject) => {
+        const id = ++nextId;
+        pending.set(id, { resolve, reject });
+        ws.send(JSON.stringify({ id, method, params, sessionId }));
+      }),
+    close: () => ws.close(),
+  };
+}
+
+// Launch Chrome with the unpacked extension and resolve its DevTools WebSocket
+// endpoint (printed to stderr for --remote-debugging-port=0).
+function launchChrome(userDataDir, timeoutMs) {
+  const proc = spawn(
+    chromePath,
+    [
+      `--user-data-dir=${userDataDir}`,
+      "--remote-debugging-port=0",
+      `--disable-extensions-except=${ROOT}`,
+      `--load-extension=${ROOT}`,
+      // Branded Chrome 137+ gates --load-extension behind this feature; a no-op
+      // on Chrome for Testing and older Chrome.
+      "--disable-features=DisableLoadExtensionCommandLineSwitch",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--no-sandbox", // CI runs as root; Chrome's sandbox needs this off
+      "--disable-dev-shm-usage", // CI containers have a tiny /dev/shm
+      "--disable-gpu",
+      "about:blank",
+    ],
+    { stdio: ["ignore", "ignore", "pipe"] }
+  );
+  const endpoint = new Promise((resolve, reject) => {
+    let out = "";
+    const onData = (chunk) => {
+      out += chunk;
+      const m = out.match(/DevTools listening on (ws:\/\/\S+)/);
+      if (m) finish(() => resolve(m[1]));
+    };
+    const onExit = (code) => finish(() => reject(new Error(`Chrome exited early (code ${code}).\n${out}`)));
+    const timer = setTimeout(
+      () => finish(() => reject(new Error(`timed out waiting for the DevTools endpoint.\n${out}`))),
+      timeoutMs
+    );
+    function finish(settle) {
+      clearTimeout(timer);
+      proc.stderr.off("data", onData);
+      proc.off("exit", onExit);
+      settle();
+    }
+    proc.stderr.on("data", onData);
+    proc.on("exit", onExit);
+  });
+  return { proc, endpoint };
+}
 
 test(
   "the unpacked extension loads in Chrome: the service worker registers and GCal is built",
   { skip },
   async () => {
-    const browser = await puppeteer.launch({
-      executablePath: chromePath,
-      // MV3 extension service workers only load reliably in HEADFUL Chrome — new
-      // headless drops the --load-extension worker, so its target never appears.
-      // CI runs this under xvfb (see the e2e step in .github/workflows/test.yml).
-      headless: false,
-      args: [
-        `--disable-extensions-except=${ROOT}`,
-        `--load-extension=${ROOT}`,
-        // Branded Chrome 137+ gates --load-extension behind this feature; a
-        // no-op on Chrome for Testing (which we use in CI) and older Chrome.
-        "--disable-features=DisableLoadExtensionCommandLineSwitch",
-        "--no-sandbox", // CI runners run as root; Chrome's sandbox needs this off
-        "--disable-dev-shm-usage", // CI containers have a tiny /dev/shm
-        "--disable-gpu",
-      ],
-    });
+    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "gcal-e2e-"));
+    const { proc, endpoint } = launchChrome(userDataDir, 30000);
+    let cdp;
     try {
-      // The MV3 background is a service_worker target under chrome-extension://.
-      // It appears once the worker registers — i.e. once its first importScripts
-      // succeeds; a wrong path means it never appears.
-      const isWorker = (t) => t.type() === "service_worker" && t.url().endsWith("toolbar-icon.js");
+      cdp = connectCDP(await endpoint);
+      await cdp.ready;
 
-      // MV3 service workers are lazy: opening a page fires the extension's
-      // chrome.tabs listeners, which starts the worker (and registers its
-      // target). Do this before waiting so the target actually appears.
-      await browser.newPage();
+      // Find the extension's MV3 background as a service_worker target. It only
+      // appears once the worker has registered — i.e. once its first
+      // importScripts succeeded (#146). Opening a page wakes the lazy worker by
+      // firing the extension's chrome.tabs listeners. Collect every target for a
+      // useful failure message.
+      const seen = [];
+      let onWorker;
+      const swTargetId = new Promise((resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error(`service_worker (…/toolbar-icon.js) never appeared.\nTargets seen:\n${seen.join("\n") || "  (none)"}`)),
+          30000
+        );
+        onWorker = (msg) => {
+          if (msg.method !== "Target.targetCreated") return;
+          const t = msg.params.targetInfo;
+          seen.push(`  ${t.type}  ${t.url}`);
+          if (t.type === "service_worker" && t.url.endsWith("toolbar-icon.js")) {
+            clearTimeout(timer);
+            resolve(t.targetId);
+          }
+        };
+      });
+      cdp.on(onWorker);
+      await cdp.send("Target.setDiscoverTargets", { discover: true });
+      await cdp.send("Target.createTarget", { url: "about:blank" }); // wake the worker
+      const targetId = await swTargetId;
 
-      let target = browser.targets().find(isWorker);
-      if (!target) {
-        try {
-          target = await browser.waitForTarget(isWorker, { timeout: 30000 });
-        } catch {
-          const seen = browser.targets().map((t) => `  ${t.type()}  ${t.url()}`).join("\n") || "  (none)";
-          throw new Error(`service_worker (…/toolbar-icon.js) never appeared.\nTargets seen:\n${seen}`);
+      // Attach and run code *inside the worker*: importScripts succeeded iff GCal
+      // got built, and the supported-host decision must work end to end.
+      const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
+      const evaluate = async (expression) => {
+        const { result, exceptionDetails } = await cdp.send(
+          "Runtime.evaluate",
+          { expression, returnByValue: true, awaitPromise: true },
+          sessionId
+        );
+        if (exceptionDetails) {
+          throw new Error(exceptionDetails.exception?.description || exceptionDetails.text);
         }
-      }
-      const worker = await target.worker();
+        return result.value;
+      };
 
       assert.equal(
-        await worker.evaluate(() => typeof globalThis.GCal?.isSupportedHost),
+        await evaluate("typeof globalThis.GCal?.isSupportedHost"),
         "function",
         "importScripts must have run inside the worker and built GCal.isSupportedHost"
       );
       assert.equal(
-        await worker.evaluate((u) => GCal.isSupportedHost(u), "https://www.meetup.com/group/events/1/"),
+        await evaluate('GCal.isSupportedHost("https://www.meetup.com/group/events/1/")'),
         true,
         "a known supported host must read as supported inside the live worker"
       );
     } finally {
-      await browser.close();
+      if (cdp) cdp.close();
+      proc.kill("SIGKILL");
+      fs.rmSync(userDataDir, { recursive: true, force: true });
     }
   }
 );

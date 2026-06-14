@@ -52,8 +52,12 @@ these decisions in mind:
     wires up, every injected file parses, and every manifest-referenced file
     exists. It runs in the default suite and in `test:offline`.
   - `test/e2e/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
-    unpacked extension in headless Chrome via `puppeteer-core` and asserts the
-    MV3 service worker registers and `GCal` is built inside it. It runs in CI
-    (Chrome is preinstalled on `ubuntu-latest`) and **skips** when no
-    Chrome/`puppeteer-core` is present — so it's a no-op in this bot-blocked
-    sandbox. Because it can't run here, verify changes to it via CI, not locally.
+    unpacked extension and asserts the MV3 service worker registers and `GCal` is
+    built inside it. It has **no npm dependency** — it drives Chrome straight over
+    the DevTools Protocol with Node's built-in `WebSocket`. It needs a Chrome that
+    still honours `--load-extension` (branded Chrome 137+ dropped it), so CI
+    fetches **Chrome for Testing** via `npx @puppeteer/browsers` (run on demand,
+    not a project dependency) and runs the test **headful under `xvfb`** (MV3
+    extensions don't load headless). It **skips** when no Chrome is given (set
+    `CHROME_PATH`) — a no-op in this bot-blocked sandbox, which can't even
+    download Chrome for Testing. So verify changes to it via CI, not locally.
