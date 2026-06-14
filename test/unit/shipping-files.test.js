@@ -68,7 +68,7 @@ test("the service worker's importScripts targets ship", () => {
 });
 
 test("dev/test-only paths do not ship", () => {
-  for (const p of ["test", "data", "tools", "package.json", "package-lock.json", "README.md", ".github"]) {
+  for (const p of ["test", "data", "tools", "package.json", "package-lock.json", "README.md", "PRIVACY.md", "docs", ".github"]) {
     assert.ok(!isShipped(p), `${p} should not be in the shipping set`);
   }
 });
