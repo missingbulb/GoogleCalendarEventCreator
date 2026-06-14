@@ -17,14 +17,17 @@
 // "request this source" flow — the same answer GCal.isSupportedHost gives the
 // toolbar icon, so the popup and the icon can never disagree.
 //
-// Each event is assembled by merging, first non-empty value per field wins:
-//   1. the site-specific source whose `matches(hostname)` is true, if any
-//   2. the first schema.org JSON-LD event on the page
-//   3. generic heuristics (meta tags, microdata, <time>, text scanning)
-// A source can instead supply its own `events` array (e.g.
-// sources/telavivcinematheque.js for a series page); the page-level
-// description/ctz then fill any field an individual event didn't carry.
-// Otherwise, when the page's JSON-LD lists several events, each becomes an event.
+// Two distinct paths, depending on whether a site source matches:
+//   - Supported host: the matching site source is SELF-CONTAINED — it produces
+//     every field of its events itself (reusing shared helpers, including the
+//     GCal.embeddedEvents reader, as it sees fit). No other extractor's output
+//     is merged over it. A source may return a single partial event, or its own
+//     `events` array (e.g. sources/telavivcinematheque.js for a series page)
+//     with page-level description/ctz that fill any field an individual event
+//     didn't carry.
+//   - Unsupported host: no per-site extractor exists, so we defer to the
+//     unsupported-site extractor (GCal.unsupportedSiteEvents) purely to seed the
+//     popup's "request this source" form.
 //
 // To support a new event platform, add pipeline/sources/<site>.js that pushes
 // onto GCal.sources (see sources/meetup.js for the pattern), run `npm run index`
@@ -39,9 +42,6 @@
   function extract() {
     const host = location.hostname.replace(/^www\./, "");
     const site = GCal.sources.find((s) => s.matches(host));
-
-    const siteResult = site ? site.extract() : {};
-    const ldEvents = GCal.jsonLd.findEvents();
 
     // When the event's timezone is known, store start/end as floating local
     // wall-clock times in that timezone rather than UTC instants: the Calendar
@@ -58,27 +58,7 @@
       };
     };
 
-    let events;
-    if (Array.isArray(siteResult.events) && siteResult.events.length) {
-      // A site that found several distinct events; fall back to its page-level
-      // description/ctz for any event that didn't carry its own.
-      const pageDefaults = { description: siteResult.description, ctz: siteResult.ctz };
-      events = siteResult.events.map((e) => norm(GCal.merge(e, pageDefaults)));
-    } else if (ldEvents.length > 1) {
-      events = ldEvents.map((ld) => norm(GCal.jsonLd.toEvent(ld)));
-    } else {
-      const event = norm(GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract()));
-      // The generic layer always fills a title (og:title -> <h1> -> document
-      // title), present on essentially every page, so a title alone is not an
-      // event. A matched site host is not enough either: a supported site's
-      // home/listing page (e.g. cinema.co.il's front page) still carries the
-      // host's og/footer metadata but describes no specific event. Only treat
-      // this as a real event when JSON-LD carried one or a date was actually
-      // parsed from the page; otherwise the page describes no event and we
-      // return none.
-      const isEvent = ldEvents.length > 0 || Boolean(event.start);
-      events = isEvent ? [event] : [];
-    }
+    const events = site ? supportedEvents(site, norm) : fallbackEvents(norm);
 
     // Present events in chronological order regardless of the order the page (or
     // a site extractor's performance list) happened to give them in. start is an
@@ -92,6 +72,30 @@
     });
 
     return { events, supported: Boolean(site) };
+  }
+
+  // Supported host: the matching source is self-contained. Use its result as-is
+  // — no generic/JSON-LD merge over it.
+  function supportedEvents(site, norm) {
+    const result = site.extract();
+    if (Array.isArray(result.events) && result.events.length) {
+      // A site that returned several distinct events; fall back to its own
+      // page-level description/ctz for any event that didn't carry its own.
+      const pageDefaults = { description: result.description, ctz: result.ctz };
+      return result.events.map((e) => norm(GCal.merge(e, pageDefaults)));
+    }
+    // A single partial event. A matched host alone is not an event: a supported
+    // site's home/listing page (e.g. cinema.co.il's front page) still carries
+    // the host's og/footer metadata but describes no specific event. Treat it as
+    // a real event only when the source actually parsed a date.
+    const event = norm(result);
+    return event.start ? [event] : [];
+  }
+
+  // Unsupported host: no per-site extractor, so defer to the unsupported-site
+  // extractor — purely to seed the popup's "request this source" form.
+  function fallbackEvents(norm) {
+    return GCal.unsupportedSiteEvents.extract().map(norm);
   }
 
   GCal.extract = extract;

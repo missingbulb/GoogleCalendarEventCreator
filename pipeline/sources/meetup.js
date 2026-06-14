@@ -34,7 +34,7 @@
 // (rather than the viewer's), so it's only used when it's a recognized IANA
 // name.
 (() => {
-  const { text, firstText, clean, normalizeDateValue, scriptsText, findTimezone } = GCal;
+  const { text, firstText, blockText, normalizeBlock, normalizeDateValue, scriptsText, findTimezone, merge, embeddedEvents } = GCal;
 
   // The full event description, pulled from the inline JSON state. Meetup
   // embeds it (and several shorter snippets) as JSON-escaped
@@ -63,7 +63,7 @@
       const timeEl = document.querySelector(
         "#event-info time[datetime], main time[datetime], time[datetime]"
       );
-      return {
+      const dom = {
         title: text("h1"),
         start: timeEl ? normalizeDateValue(timeEl.getAttribute("datetime")) : "",
         location: firstText([
@@ -72,14 +72,24 @@
           'a[data-testid="venue-link"]',
           '[data-event-label="event-location"]',
         ]),
-        description:
-          firstText([
-            "#event-details",
-            '[data-event-label="body"]',
-            '[data-testid="event-description"]',
-          ]) || clean(fullDescription(scriptsText())),
+        // Keep the description's line breaks: render the DOM block (or, when
+        // it's only in the inline JSON state, tidy that markdown) with the
+        // shared block helpers rather than clean(), which would flatten every
+        // newline to a space. The first of the selectors present wins, in order.
+        description: (() => {
+          const el = ["#event-details", '[data-event-label="body"]', '[data-testid="event-description"]']
+            .map((sel) => document.querySelector(sel))
+            .find(Boolean);
+          return el ? blockText(el) : normalizeBlock(fullDescription(scriptsText()));
+        })(),
         ctz: findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/),
       };
+      // Self-contained: Meetup's own DOM/inline-JSON fields win (notably the
+      // FULL description, where the page's embedded data only carries a
+      // truncated snippet); the page's embedded event fills the gaps it leaves —
+      // the end time, and the venue location on pages whose DOM venue nodes
+      // aren't present.
+      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

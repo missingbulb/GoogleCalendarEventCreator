@@ -16,10 +16,11 @@
 //   start  the first date-and-time pattern found in the page's visible text
 //          (top 4000 chars — the event date is always near the top)
 //
-// Location and description are left for the jsonld.js / generic.js layers,
-// which pick up Facebook's meta tags when the page exposes them.
+// Description comes from the page's og:description/description meta tag — the
+// one reliable summary Facebook exposes; the obfuscated markup has no stable
+// location node, so location is left empty.
 (() => {
-  const { clean, text, bodyText, parseDateFromText } = GCal;
+  const { clean, text, meta, bodyText, parseDateFromText } = GCal;
 
   GCal.sources.push({
     name: "facebook",
@@ -32,6 +33,7 @@
       return {
         title,
         start: parseDateFromText(bodyText().slice(0, 4000)),
+        description: meta("og:description") || meta("description"),
       };
     },
   });
