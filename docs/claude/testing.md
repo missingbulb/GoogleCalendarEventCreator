@@ -17,6 +17,13 @@ these decisions in mind:
   one green run isn't enough to trust it. A real race surfaced exactly this way:
   the real-Chrome e2e test passed once, then failed on a later run because it read
   worker state before initialization had finished.
+- **A test that can only run remotely must diagnose itself.** When a test can't
+  run locally (e.g. the real-Chrome e2e — this sandbox has no browser and can't
+  download one), every CI iteration is slow and blind, so make failures explain
+  themselves: dump the observed state, not just an assertion. The e2e test prints
+  every Chrome target and the browser's stderr on failure — which is what turned
+  "the service worker never appeared" into the diagnosis "Chrome loaded no
+  extension at all" (branded Chrome 137+ dropped `--load-extension`).
 
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed**, not a
   code problem. `jsdom` is a test-only devDependency loaded by
