@@ -2,7 +2,7 @@ name: Refresh UI snapshot
 
 # Regenerates all UI snapshots in test/ui/snapshots/. Rendering is deterministic
 # (satori + resvg, no browser), so this mainly exists for convenience after an
-# intentional change to popup.html/popup.js or the icon, in case refreshing
+# intentional change to popup.html/popup.js, in case refreshing
 # locally isn't convenient.
 on:
   workflow_dispatch: {}

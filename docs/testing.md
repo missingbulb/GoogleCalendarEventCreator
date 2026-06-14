@@ -146,23 +146,3 @@ snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
 PNGs so reviewers can see the before/after in the diff. On mismatch, the test
 writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
 (gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.
-
-### Toolbar icon test
-
-**`test/ui/toolbar-icon-snapshots.test.js`** generates the expected 128x128 toolbar icon for
-both states described in `ui/toolbar-icon.js` — a green border for pages with a
-site-specific source and a red border otherwise — using
-`test/ui/icon-renderer.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
-no browser). Each generated image is compared pixel-by-pixel against the
-committed reference images **`test/ui/snapshots/icon-unsupported.png`** and
-**`test/ui/snapshots/icon-supported.png`** (browsable on GitHub) — the same
-red-bordered / green-bordered icons shown in the toolbar for unsupported and
-supported pages — and, as a cross-check, against the actual shipped
-`icons/icon128-red.png` / `icons/icon128-green.png`.
-
-After an intentional change to `tools/gen_icons.py` / `icon-renderer.js`, run
-`npm run refresh:ui` to regenerate `icon-unsupported.png` and `icon-supported.png` (and
-re-run `python3 tools/gen_icons.py` to regenerate the shipped icons) and
-commit the results. On mismatch, the test writes
-`icon-{unsupported,supported}.actual.png` and `.diff.png` to `test/ui/.artifacts/`
-(gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints the paths.
