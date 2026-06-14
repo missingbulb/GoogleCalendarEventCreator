@@ -31,7 +31,7 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. It:
 1. Checks out the repo and installs dependencies.
 2. Fetches the issue from the GitHub API and interpolates it into the agent
    prompt template (`.github/agent-prompt-extractor.md`).
-3. Runs a Claude Opus agent (`claude --dangerously-skip-permissions -p ...`)
+3. Runs a Claude Sonnet agent (`claude --dangerously-skip-permissions -p ...`)
    with full Bash access.
 
 The agent itself does everything described in `docs/claude/adding-a-source.md`
