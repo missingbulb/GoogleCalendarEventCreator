@@ -27,6 +27,13 @@ picks a path by whether the page's host has a per-site source:
    text). Its result is used **only** to pre-fill the "request this source" form;
    it is never shown as a calendar button.
 
+The pipeline is built from two kinds of file: extractors (the per-site sources
+plus the one unsupported-site fallback) and shared helpers. An extractor doesn't
+make output decisions — rendering, whitespace, de-dup, and timezone
+normalization all live in helpers, applied uniformly — except where it must
+encode its own host's constraints (which elements to read, a fixed `ctz`, a
+yearless date format).
+
 The extractor always returns a list of events (`{ events: [...] }`), each one
 self-described (title, date/time, location, description, timezone). When a
 page describes **several distinct events** — a film week or festival listing,

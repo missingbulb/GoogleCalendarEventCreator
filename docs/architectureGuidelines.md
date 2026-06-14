@@ -6,5 +6,4 @@ mechanics live in [highLevelDesign.md](highLevelDesign.md) /
 `config.js`.
 
 - Adding support for a new host is the most common change — the architecture must keep it a single, self-contained new file (`pipeline/sources/<site>.js`) plus regenerating the load list, touching nothing else and assuming nothing about other extractors.
-- Two kinds of building block: extractors (the per-site sources plus one fallback for unsupported hosts) and helpers (reusable utilities). A source decides *what* (which element/field); helpers own *how* (rendering, whitespace, de-dup, normalization), applied uniformly rather than re-decided per source.
 - Name by scope/responsibility, not technology or mechanism.
