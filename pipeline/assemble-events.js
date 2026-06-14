@@ -63,10 +63,13 @@
     const event = norm(GCal.merge(siteResult, GCal.jsonLd.toEvent(ldEvents[0]), GCal.generic.extract()));
     // The generic layer always fills a title (og:title -> <h1> -> document
     // title), present on essentially every page, so a title alone is not an
-    // event. Only treat this as a real event when a site-specific or JSON-LD
-    // extractor contributed, or a date was actually parsed from the page;
-    // otherwise the page describes no event and we return none.
-    const isEvent = Boolean(site) || ldEvents.length > 0 || Boolean(event.start);
+    // event. A matched site host is not enough either: a supported site's
+    // home/listing page (e.g. cinema.co.il's front page) still carries the
+    // host's og/footer metadata but describes no specific event. Only treat
+    // this as a real event when JSON-LD carried one or a date was actually
+    // parsed from the page; otherwise the page describes no event and we
+    // return none.
+    const isEvent = ldEvents.length > 0 || Boolean(event.start);
     events = isEvent ? [event] : [];
   }
 
