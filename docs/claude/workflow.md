@@ -9,9 +9,8 @@ For every new task in this repo:
    when it's done.
 
 When the repo owner says "LGTM" on a change, treat it as approval to merge
-that branch's pull request into `main`. Before merging a branch that adds or
-changes tests, first confirm its CI has gone green at least twice — new tests
-must prove they aren't flaky (see `docs/engineeringPractices.md`).
+that branch's pull request into `main` (the test-flakiness gate in
+`docs/engineeringPractices.md` still applies before merging).
 
 When the repo owner says **"bump version"**, treat it as a defined instruction
 (like "LGTM"): raise the extension's version by editing the `version` field in
