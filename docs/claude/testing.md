@@ -1,29 +1,9 @@
 # Testing
 
-`npm test` runs everything; `docs/testing.md` has the mechanics. Keep
-these decisions in mind:
-
-- **See every test fail before you trust it.** A green test that has never failed
-  proves nothing — it can assert the wrong thing, or not exercise the code at all.
-  So either write the test first and watch it go red *before* the fix (and green
-  after), or, for a test added with or after a fix, temporarily break what it
-  guards, confirm it goes red, then restore. (The #146 startup guard stayed green
-  while the service worker was broken, because it resolved `importScripts` paths
-  the wrong way; the corrected guards were each confirmed to fail on the real
-  breakage before being trusted.)
-- **A new test must go green twice in CI before merging.** Flaky tests are worse
-  than none, so whenever a change adds or changes a test, let the branch's CI run
-  green at least twice before merging to `main` (push again, or re-run the job) —
-  one green run isn't enough to trust it. A real race surfaced exactly this way:
-  the real-Chrome e2e test passed once, then failed on a later run because it read
-  worker state before initialization had finished.
-- **A test that can only run remotely must diagnose itself.** When a test can't
-  run locally (e.g. the real-Chrome e2e — this sandbox has no browser and can't
-  download one), every CI iteration is slow and blind, so make failures explain
-  themselves: dump the observed state, not just an assertion. The e2e test prints
-  every Chrome target and the browser's stderr on failure — which is what turned
-  "the service worker never appeared" into the diagnosis "Chrome loaded no
-  extension at all" (branded Chrome 137+ dropped `--load-extension`).
+`npm test` runs everything; `docs/testing.md` has the mechanics. General test
+discipline — see a test fail before trusting it, green-twice-before-merge,
+self-diagnosing remote tests — lives in `docs/engineeringPractices.md`; this file
+is the project-specific mechanics. Keep these decisions in mind:
 
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed**, not a
   code problem. `jsdom` is a test-only devDependency loaded by

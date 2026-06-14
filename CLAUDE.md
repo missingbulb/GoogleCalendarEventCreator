@@ -14,3 +14,9 @@ changed top-level architectural guideline, update that file as part of the same
 change.
 
 @docs/architectureGuidelines.md
+
+General software-engineering practices that aren't specific to this project
+(verifying platform behavior, earning dependencies, test discipline) live in
+`docs/engineeringPractices.md` (imported below).
+
+@docs/engineeringPractices.md
