@@ -16,6 +16,7 @@ const SHIPPING_PATHS = [
   "icon-state.js",
   "popup.html",
   "popup.js",
+  "pipeline", // load-order.generated.json: the list popup.js fetches and injects
   "extractors", // every extractor file injected into the page
   "icons", // toolbar icons: plain + green/red state variants
 ];

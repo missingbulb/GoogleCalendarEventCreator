@@ -7,11 +7,16 @@
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+  // The files to inject (and their order) come from the generated load list,
+  // the single source of truth shared with the tests — see tools/index.js.
+  const loadOrder = await fetch(chrome.runtime.getURL("pipeline/load-order.generated.json"));
+  const files = await loadOrder.json();
+
   let data = {};
   try {
     const [injection] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: EXTRACTOR_FILES,
+      files,
     });
     data = (injection && injection.result) || {};
   } catch (e) {

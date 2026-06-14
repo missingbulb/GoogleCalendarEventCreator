@@ -1,0 +1,14 @@
+[
+  "extractors/lib.js",
+  "extractors/site-hosts.js",
+  "extractors/edinburghfringe.js",
+  "extractors/eventbrite.js",
+  "extractors/facebook.js",
+  "extractors/generic.js",
+  "extractors/jsonld.js",
+  "extractors/luma.js",
+  "extractors/meetup.js",
+  "extractors/telavivcinematheque.js",
+  "extractors/ticketmaster.js",
+  "extractors/main.js"
+]

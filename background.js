@@ -1,24 +1,8 @@
 // Shared library, loaded by the popup: builds a pre-filled Google Calendar
 // event template URL from extracted page data.
-
-// Injected in order into the page when the popup opens; all files share one
-// isolated world, so lib.js must come first and main.js (whose completion
-// value is the extraction result) must come last. The test harness reads
-// this list, so tests always exercise exactly what gets injected.
-const EXTRACTOR_FILES = [
-  "extractors/lib.js",
-  "extractors/site-hosts.js",
-  "extractors/jsonld.js",
-  "extractors/generic.js",
-  "extractors/meetup.js",
-  "extractors/luma.js",
-  "extractors/facebook.js",
-  "extractors/eventbrite.js",
-  "extractors/telavivcinematheque.js",
-  "extractors/edinburghfringe.js",
-  "extractors/ticketmaster.js",
-  "extractors/main.js",
-];
+//
+// The list of extractor files the popup injects (and their order) lives in the
+// generated pipeline/load-order.generated.json — see tools/index.js — not here.
 
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours when no end time given

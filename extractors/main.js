@@ -1,9 +1,9 @@
 // Entry point: picks the right extractors for the current page and returns
 // the list of events found on it.
 //
-// Must be the LAST file in the EXTRACTOR_FILES list in background.js — its
-// completion value is what chrome.scripting.executeScript returns to the
-// background worker.
+// Must be the LAST file in the generated load list
+// (pipeline/load-order.generated.json) — its completion value is what
+// chrome.scripting.executeScript returns to the background worker.
 //
 // The result is always { events: [...] } with at least one entry. Each event
 // is fully self-described — { title, start, end, location, description, ctz }
@@ -22,8 +22,8 @@
 // page's JSON-LD lists several events, each becomes an event.
 //
 // To support a new event platform, add extractors/<site>.js that pushes onto
-// GCal.sites (see meetup.js for the pattern), list it in EXTRACTOR_FILES in
-// background.js, and add a test case under test/integration/cases/.
+// GCal.sites (see meetup.js for the pattern), run `npm run index` to regenerate
+// the load list, and add a test case under test/integration/cases/.
 (() => {
   const host = location.hostname.replace(/^www\./, "");
   const site = GCal.sites.find((s) => s.matches(host));

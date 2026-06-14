@@ -5,10 +5,11 @@
   "private": true,
   "scripts": {
     "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\" \"test/ui/**/*.test.js\"",
-    "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js test/unit/source-request.test.js test/unit/shipping-files.test.js test/integration/icon-color.test.js",
+    "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js test/unit/source-request.test.js test/unit/shipping-files.test.js test/unit/load-order-generated.test.js test/integration/icon-color.test.js",
     "test:live": "node --test test/integration/live.test.js",
     "test:ui": "node --test test/ui/popup.test.js test/ui/icon.test.js",
     "build": "node tools/build-zip.js",
+    "index": "node tools/index.js",
     "refresh": "node data/refresh-cache.js",
     "refresh:ui": "node test/ui/refresh-snapshot.js && node test/ui/refresh-icon-snapshot.js"
   },

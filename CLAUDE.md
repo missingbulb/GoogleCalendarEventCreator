@@ -28,9 +28,10 @@ the generic/JSON-LD layers get wrong or miss. The flow:
    including the header comment describing the HTML it expects. Use the shared
    helpers on `GCal` (see `extractors/lib.js`); return only the fields this
    site needs.
-3. List the new file in `EXTRACTOR_FILES` in `background.js` — after
-   `lib.js`/`site-hosts.js`, before `main.js` (which must stay last). This list
-   is the single source of truth: the popup injects it and the tests read it.
+3. Run `npm run index` to regenerate `pipeline/load-order.generated.json` (the
+   single source of truth the popup injects and the tests read). The generator
+   pins `lib.js`/`site-hosts.js` first and `main.js` last and sorts the rest, so
+   you never hand-edit the list; a CI test fails if it's stale.
 4. Add an integration case for a real page on the site (see Testing below).
 
 # Testing
