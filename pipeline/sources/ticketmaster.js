@@ -45,7 +45,7 @@
 //               line and paragraph breaks) survives into the calendar details
 //   ctz         always "Asia/Jerusalem" — ticketmaster.co.il is Israel-only
 (() => {
-  const { clean, text } = GCal;
+  const { clean, text, blockText } = GCal;
 
   // Hebrew month names as they appear in the date. The header date uses the
   // "d בMMMM y" format, prepending a "ב" ("in") to the month ("ביולי"); the
@@ -93,22 +93,6 @@
       out.push({ title, start: time ? `${date}T${time}:00` : date, end: null, location });
     }
     return out;
-  }
-
-  // textContent of `el` with <br> kept as newlines, so the description reads as
-  // the page lays it out. Google Calendar's details field renders a newline as a
-  // line break, so the author's lines and paragraph breaks carry through. Within
-  // a line, horizontal whitespace (incl. &nbsp;) is collapsed to single spaces
-  // and runs of blank lines to a single blank line; the block is then trimmed.
-  function blockText(sel) {
-    const el = document.querySelector(sel);
-    if (!el) return "";
-    const tmp = document.createElement("div");
-    tmp.innerHTML = el.innerHTML.replace(/<br\s*\/?>/gi, "\n");
-    return tmp.textContent
-      .replace(/[^\S\n]+/g, " ")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
   }
 
   GCal.sources.push({
