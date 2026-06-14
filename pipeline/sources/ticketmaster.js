@@ -104,9 +104,9 @@
     return clean(tmp.textContent);
   }
 
-  GCal.sites.push({
+  GCal.sources.push({
     name: "ticketmaster",
-    matches: GCal.siteHosts.find((s) => s.name === "ticketmaster").matches,
+    matches: (host) => /(^|\.)ticketmaster\.co\.il$/.test(host),
     extract() {
       const title = text("h1");
       const location = text(".event-location .venue-link, .event-location");

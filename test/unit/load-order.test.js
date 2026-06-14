@@ -1,9 +1,9 @@
-// Regression test for issue #48: the extractor files must not clobber each
-// other's contributions to globalThis.GCal regardless of the order they run
-// in. lib.js builds the shared toolbox and site-hosts.js adds `siteHosts`;
-// if lib.js replaced globalThis.GCal wholesale, running site-hosts.js first
-// would lose `siteHosts`, and the first site extractor (meetup.js) would
-// throw "Cannot read properties of undefined (reading 'find')" at load time.
+// Regression test for issue #48: the pipeline files must not clobber each
+// other's contributions to globalThis.GCal regardless of the order they run in.
+// registry.js creates GCal.sources, the helpers add the shared toolbox, and the
+// sources push their { name, matches, extract } onto GCal.sources; because every
+// file augments GCal with Object.assign (rather than replacing it), loading them
+// in any order keeps every contribution intact.
 "use strict";
 
 const test = require("node:test");
@@ -15,7 +15,7 @@ const vm = require("node:vm");
 const ROOT = path.join(__dirname, "..", "..");
 
 function runInFreshSandbox(files) {
-  const sandbox = { document: undefined };
+  const sandbox = { document: undefined, URL };
   vm.createContext(sandbox);
   for (const file of files) {
     vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), sandbox);
@@ -23,38 +23,32 @@ function runInFreshSandbox(files) {
   return sandbox;
 }
 
-test("site-hosts.js loaded before lib.js still leaves both intact", () => {
-  // Deliberately reverse the load list's first two files.
-  const sandbox = runInFreshSandbox([
-    "extractors/site-hosts.js",
-    "extractors/lib.js",
-  ]);
+test("a helper loaded before the registry still leaves both intact", () => {
+  // Deliberately load a helper before registry.js (the reverse of the load order).
+  const sandbox = runInFreshSandbox(["pipeline/helpers/dom.js", "pipeline/registry.js"]);
 
-  // lib.js must not have wiped out site-hosts.js's contribution...
-  assert.ok(Array.isArray(sandbox.GCal.siteHosts), "GCal.siteHosts survives");
-  assert.ok(
-    sandbox.GCal.siteHosts.find((s) => s.name === "meetup"),
-    "the meetup host entry survives"
-  );
-  // ...nor should site-hosts.js have prevented lib.js's toolbox from loading.
-  assert.ok(Array.isArray(sandbox.GCal.sites), "GCal.sites is present");
-  assert.equal(typeof sandbox.GCal.normalizeDateValue, "function");
+  // registry.js must not have wiped out the helper's contribution...
+  assert.equal(typeof sandbox.GCal.clean, "function", "the dom helper survives");
+  // ...nor should the helper have prevented registry.js's bootstrap.
+  assert.ok(Array.isArray(sandbox.GCal.sources), "GCal.sources is present");
+  assert.equal(typeof sandbox.GCal.isSupportedHost, "function");
 });
 
-test("meetup.js loads without throwing whichever order the base files run", () => {
+test("a source registers onto GCal.sources whichever order the base files run", () => {
   for (const baseOrder of [
-    ["extractors/lib.js", "extractors/site-hosts.js"],
-    ["extractors/site-hosts.js", "extractors/lib.js"],
+    ["pipeline/registry.js", "pipeline/helpers/dom.js"],
+    ["pipeline/helpers/dom.js", "pipeline/registry.js"],
   ]) {
     const sandbox = runInFreshSandbox(baseOrder);
     assert.doesNotThrow(() => {
       vm.runInContext(
-        fs.readFileSync(path.join(ROOT, "extractors/meetup.js"), "utf8"),
+        fs.readFileSync(path.join(ROOT, "pipeline/sources/meetup.js"), "utf8"),
         sandbox
       );
     }, `meetup.js threw with base order ${baseOrder.join(", ")}`);
-    const meetup = sandbox.GCal.sites.find((s) => s.name === "meetup");
-    assert.ok(meetup, "meetup registered itself onto GCal.sites");
+    const meetup = sandbox.GCal.sources.find((s) => s.name === "meetup");
+    assert.ok(meetup, "meetup registered itself onto GCal.sources");
     assert.ok(meetup.matches("www.meetup.com"), "meetup.matches works");
+    assert.ok(sandbox.GCal.isSupportedHost("https://www.meetup.com/x/events/1/"), "isSupportedHost sees it");
   }
 });

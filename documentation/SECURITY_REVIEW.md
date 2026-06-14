@@ -41,15 +41,15 @@ A) Toolbar icon coloring (always running, no user gesture required)
    icon-state.js (the manifest's background.service_worker)
      -> chrome.tabs.onActivated / onUpdated / onInstalled / onStartup
      -> reads tab.url for every tab (requires the "tabs" permission)
-     -> extractors/site-hosts.js: hostname regex match only
+     -> pipeline/registry.js + pipeline/sources/*: hostname regex match only
      -> chrome.action.setIcon(...)   (green/red border, no page content read)
 
 B) Event extraction (only while the popup is open, a user-initiated action)
    User opens the popup
      -> popup.js: chrome.scripting.executeScript on the active tab, injecting the
         files listed in pipeline/load-order.generated.json
-     -> extractors/*.js (DOM queries, JSON-LD / __NEXT_DATA__ JSON parsing,
-        regex date parsing) over the page's live DOM (untrusted)
+     -> pipeline/* extraction files (DOM queries, JSON-LD / __NEXT_DATA__ JSON
+        parsing, regex date parsing) over the page's live DOM (untrusted)
      -> pipeline/build-calendar-url.js: buildCalendarUrl()
      -> shown in the popup; only on button click:
           chrome.tabs.create({ url: "https://calendar.google.com/calendar/render?..." })
@@ -78,8 +78,8 @@ percent-encodes them).
 `chrome.tabs.onUpdated`, `chrome.runtime.onInstalled`, and
 `chrome.runtime.onStartup`, and on every event calls `chrome.tabs.get`/iterates
 `chrome.tabs.query({})` to read `tab.url` for **every open tab**, then checks
-it against the hostname regexes in `extractors/site-hosts.js` to choose a
-green/red toolbar icon.
+it against the hostname regexes the sources register (`pipeline/registry.js`'s
+`isSupportedHost` over `GCal.sources`) to choose a green/red toolbar icon.
 
 This is a meaningful change from the original `activeTab`-only model:
 

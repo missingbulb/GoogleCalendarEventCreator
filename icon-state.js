@@ -1,16 +1,28 @@
 // Background service worker: keeps the toolbar icon's border color in sync
 // with whether the active tab's page has a site-specific extractor.
 //
-// This is separate from background.js (the popup's shared library) because
-// popup.html loads background.js directly as a <script>, where APIs like
-// importScripts() and chrome.tabs.onActivated aren't meaningful — this file
-// is the manifest's "background.service_worker" instead.
-
-// The single supported-host decision (GCal.isSupportedHost) lives in
-// site-hosts.js, shared with the popup so the icon and the popup can never
-// disagree. Load it here to color the toolbar icon green (a site-specific
-// extractor exists for this page) vs. red (it doesn't).
-importScripts("extractors/site-hosts.js");
+// The single supported-host decision is GCal.isSupportedHost (pipeline/
+// registry.js), which derives "supported" from the registered sources' own
+// `matches` functions. The worker loads the registry and every source so the
+// registry is populated, then colors the toolbar icon green (a source matches
+// this page) vs. red (none does). DOM-free files only — the sources register
+// their matchers at load and the worker never calls extract().
+//
+// This list is checked against pipeline/load-order.generated.json by
+// test/unit/load-order-generated.test.js: an MV3 service worker can only
+// importScripts synchronously at startup (it can't read the generated JSON
+// first), so the list is explicit here, and that test fails if a source is
+// added without updating it.
+importScripts(
+  "pipeline/registry.js",
+  "pipeline/sources/edinburghfringe.js",
+  "pipeline/sources/eventbrite.js",
+  "pipeline/sources/facebook.js",
+  "pipeline/sources/luma.js",
+  "pipeline/sources/meetup.js",
+  "pipeline/sources/telavivcinematheque.js",
+  "pipeline/sources/ticketmaster.js"
+);
 
 const ICON_SIZES = [16, 32, 48, 128];
 const SUPPORTED_ICON = Object.fromEntries(ICON_SIZES.map((s) => [s, `icons/icon${s}-green.png`]));

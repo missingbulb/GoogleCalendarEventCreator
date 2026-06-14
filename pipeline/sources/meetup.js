@@ -56,9 +56,9 @@
     return best;
   }
 
-  GCal.sites.push({
+  GCal.sources.push({
     name: "meetup",
-    matches: GCal.siteHosts.find((s) => s.name === "meetup").matches,
+    matches: (host) => /(^|\.)meetup\.com$/.test(host),
     extract() {
       const timeEl = document.querySelector(
         "#event-info time[datetime], main time[datetime], time[datetime]"

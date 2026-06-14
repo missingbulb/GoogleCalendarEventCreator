@@ -15,7 +15,7 @@
 //
 // Event objects may also be nested inside arrays, "@graph", or
 // "itemListElement" wrappers; findEvents() collects them all, in document
-// order, so listing pages yield every event (main.js suggests the first).
+// order, so listing pages yield every event (assemble-events.js suggests the first).
 //
 // Field mapping: title/start/end/description come straight from the
 // name/startDate/endDate/description properties (description with HTML tags

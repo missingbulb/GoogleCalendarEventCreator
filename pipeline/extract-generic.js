@@ -17,8 +17,8 @@
 //
 // Also decides whether the page lists MULTIPLE events (detectMultiple):
 // several JSON-LD events, several schema.org/Event microdata items, or
-// several timestamped list/article cards. main.js then suggests the first
-// event and flags it.
+// several timestamped list/article cards. assemble-events.js then suggests the
+// first event and flags it.
 (() => {
   const { clean, text, meta, bodyText, normalizeDateValue, parseDateFromText } = GCal;
 

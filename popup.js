@@ -25,7 +25,7 @@
   }
 
   const MAX_EVENTS = 7;
-  const view = chooseContent(tab.url, data);
+  const view = chooseContent(data);
 
   if (view.mode === "request") {
     // Unsupported site (red toolbar border). Never surface scraped events
@@ -59,18 +59,18 @@
   });
 })().catch((e) => console.error("Popup failed to initialize:", e));
 
-// The one decision behind what the popup renders, derived from the same
-// supported-host check (GCal.isSupportedHost, in extractors/site-hosts.js)
-// that colors the toolbar icon — so the popup and the icon can never disagree.
-// Returns either:
+// The one decision behind what the popup renders, driven by the injected
+// extraction result's `supported` flag (set by assemble-events.js from the
+// same GCal.isSupportedHost check that colors the toolbar icon — so the popup
+// and the icon can never disagree). Returns either:
 //   { mode: "request", prefill }  — unsupported host (red border): only the
 //       "request this source" flow, seeded with any scraped event, never an
 //       event button (even when the generic/JSON-LD layers found something).
 //   { mode: "events", events }    — supported host (green border): the
 //       extracted events, which may be empty ("No events found").
-function chooseContent(url, data) {
+function chooseContent(data) {
   const allEvents = data && data.events && data.events.length ? data.events : [];
-  if (!GCal.isSupportedHost(url)) {
+  if (!data || !data.supported) {
     return { mode: "request", prefill: allEvents[0] };
   }
   return { mode: "events", events: allEvents };

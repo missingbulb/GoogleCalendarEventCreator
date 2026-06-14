@@ -22,9 +22,9 @@
 (() => {
   const { firstText, normalizeDateValue, parseDateFromText } = GCal;
 
-  GCal.sites.push({
+  GCal.sources.push({
     name: "eventbrite",
-    matches: GCal.siteHosts.find((s) => s.name === "eventbrite").matches,
+    matches: (host) => /(^|\.)eventbrite\./.test(host),
     extract() {
       const timeEl = document.querySelector("time[datetime]");
       return {
