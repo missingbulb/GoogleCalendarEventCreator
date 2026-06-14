@@ -27,10 +27,16 @@ const SOURCES = extractorSources();
 /**
  * @param {string} html  Full HTML of the page.
  * @param {string} url   The page URL.
+ * @param {object} [opts]
+ * @param {"outside-only"|"dangerously"} [opts.runScripts]  jsdom scripting mode.
+ *   Defaults to "outside-only". Pass "dangerously" only for script-free HTML
+ *   fragments that need browser-faithful <noscript> parsing (with scripting on,
+ *   jsdom keeps <noscript> content as raw text, like a real browser); never for
+ *   real cached pages, whose third-party scripts would then execute.
  * @returns {object}     The extractor's result: { events: [{ title, start, end, location, description, ctz }], supported }
  */
-function extractFromHtml(html, url) {
-  const dom = new JSDOM(html, { url, runScripts: "outside-only" });
+function extractFromHtml(html, url, opts = {}) {
+  const dom = new JSDOM(html, { url, runScripts: opts.runScripts || "outside-only" });
   try {
     let result;
     for (const { src } of SOURCES) {
