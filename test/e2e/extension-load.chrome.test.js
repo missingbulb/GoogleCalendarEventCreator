@@ -164,9 +164,23 @@ test(
         }
         return result.value;
       };
+      // The service_worker target can appear before its top-level script has
+      // finished importScripts()-ing the pipeline, so poll until GCal is built
+      // rather than racing a single read (then let the assertion report the
+      // last value seen).
+      const evaluateUntil = async (expression, want, timeoutMs = 10000) => {
+        const deadline = Date.now() + timeoutMs;
+        let value;
+        do {
+          value = await evaluate(expression);
+          if (value === want) break;
+          await new Promise((r) => setTimeout(r, 100));
+        } while (Date.now() < deadline);
+        return value;
+      };
 
       assert.equal(
-        await evaluate("typeof globalThis.GCal?.isSupportedHost"),
+        await evaluateUntil("typeof globalThis.GCal?.isSupportedHost", "function"),
         "function",
         "importScripts must have run inside the worker and built GCal.isSupportedHost"
       );
