@@ -1,0 +1,108 @@
+name: Auto-implement extractor
+
+# Triggered when the 'extractor-request' label is added to an issue.
+# Launches a Claude agent that implements the extractor, fills the HTML cache,
+# and opens a pull request — following the steps in docs/claude/adding-a-source.md.
+#
+# Required repository secrets:
+#   ANTHROPIC_API_KEY — Claude API key for the agent
+#
+# The GITHUB_TOKEN is standard and always available.
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write       # create / push feature branch
+  pull-requests: write  # open PR
+  issues: write         # post progress comment
+  actions: write        # trigger refresh-cache workflow_dispatch
+
+jobs:
+  implement:
+    if: github.event.label.name == 'extractor-request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Use the token so git pushes from inside the agent step are authorised.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Fetch the issue via API (avoids shell-escaping issues with free-form bodies)
+      # and interpolate it into the static prompt template.
+      - name: Build agent prompt
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO:         ${{ github.repository }}
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, urllib.request
+
+          repo         = os.environ["REPO"]
+          issue_number = os.environ["ISSUE_NUMBER"]
+          token        = os.environ["GH_TOKEN"]
+
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/issues/{issue_number}",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as r:
+              issue = json.load(r)
+
+          template = open(".github/agent-prompt-extractor.md").read()
+          prompt = (template
+              .replace("{{ISSUE_NUMBER}}", issue_number)
+              .replace("{{ISSUE_TITLE}}",  issue["title"])
+              .replace("{{ISSUE_BODY}}",   issue["body"] or "")
+              .replace("{{REPO}}",         repo))
+
+          open("/tmp/agent-prompt.txt", "w").write(prompt)
+          print(f"Prompt length: {len(prompt)} chars")
+          PYEOF
+
+      - name: Run Claude agent
+        timeout-minutes: 75
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          REPO:              ${{ github.repository }}
+        run: |
+          claude \
+            --dangerously-skip-permissions \
+            --model claude-opus-4-8 \
+            -p "$(cat /tmp/agent-prompt.txt)"
+
+      - name: Comment on failure
+        if: failure()
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" \
+            --body "⚠️ The auto-implement workflow failed. [View run]($RUN_URL). Manual implementation may be needed."

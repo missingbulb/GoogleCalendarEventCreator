@@ -1,16 +1,25 @@
 name: Refresh cached HTML files
 
-# Fills in any empty (zero-byte) data/<name>.html file by fetching its URL
-# (from the matching cases/<name>.json or data/<name>.url). Run on demand —
-# there's no schedule. To re-record cached files that already exist (e.g.
-# after a site changes its markup), run this workflow with "force_all" checked.
+# Records any missing or empty (zero-byte) data/<name>.html by fetching its URL
+# (from the matching data/<name>.url), runs the live tests, and commits the
+# result back to the branch it ran on.
+#
+# It runs automatically when you push a branch (other than main) that adds or
+# removes a data/ file — a new data/<name>.url, or a deleted data/<name>.html you
+# want re-recorded. So the flow is just "push the branch"; there's no manual step
+# and no separate "force" mode. It's also runnable from the Actions tab, and the
+# auto-implement-extractor workflow dispatches it via the API (its GITHUB_TOKEN
+# push doesn't fire the push trigger — see that workflow).
+#
+# It never runs on main: a commit to main goes through a PR under branch
+# protection, and by merge time the cached HTML is already filled on the branch.
 on:
   workflow_dispatch:
-    inputs:
-      force_all:
-        description: "Re-fetch every cached HTML file (not just missing ones)"
-        type: boolean
-        default: false
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "data/**"
 
 permissions:
   contents: write
@@ -30,9 +39,8 @@ jobs:
         run: npm ci
 
       # Fetches any cached HTML file that is missing or empty (zero bytes).
-      # The "force_all" input re-fetches every file.
       - name: Refresh cached HTML files
-        run: npm run refresh -- ${{ inputs.force_all && '--force' || '' }}
+        run: npm run refresh
 
       # Run the live assertions against the fetched pages, so a site that
       # changed its markup turns this run red.

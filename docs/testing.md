@@ -60,21 +60,24 @@ keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
 - **`data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
-  that is missing or empty (zero bytes); `--force` re-fetches all of them.
-  A failed fetch keeps the previous cached HTML file and only warns, so a site
-  outage or bot-blocking never breaks the suite.
+  that is missing or empty (zero bytes). A failed fetch keeps the previous
+  cached HTML file and only warns, so a site outage or bot-blocking never breaks
+  the suite.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
   push to `main`: it runs the unit tests, then the integration tests against
   the cached HTML files **already committed** in `data/` — it never fetches or
   refreshes anything itself, so it's fast and has no network dependency.
 - The **Refresh cached HTML files** workflow
-  (`.github/workflows/refresh-cache.yml`) runs **on demand** (via "Run
-  workflow"): it records any missing cached HTML file, runs the integration
-  tests, and commits the result. It's the *only* thing that fetches live pages
-  and commits cached HTML, which keeps the Tests workflow simple and rules out
-  any refresh→commit→refresh loop. To re-record cached files that already
-  exist — e.g. when a site changes its markup — run it with the **`force_all`**
-  flag checked, which re-fetches every file instead of only the missing ones.
+  (`.github/workflows/refresh-cache.yml`) **runs automatically** when you push a
+  branch (other than `main`) that adds or removes a `data/` file: it records any
+  missing or empty cached HTML, runs the integration tests, and commits the
+  result back to the branch. (It's also runnable from the Actions tab, and the
+  auto-implement-extractor workflow dispatches it explicitly — its `GITHUB_TOKEN`
+  push doesn't fire the push trigger.) It's the *only* thing that fetches live
+  pages and commits cached HTML, which keeps the Tests workflow simple. To
+  re-record a cached file that already exists — e.g. when a site changes its
+  markup — delete `data/<name>.html` on your branch and push; the now-missing
+  file is refetched like any other.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the
@@ -141,8 +144,7 @@ run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
 browser install step.
 
 After an intentional change to the popup's UI, run `npm run refresh:ui` to
-regenerate both `popup-single-event.png` and `popup-multi-event.png` (or use the **Refresh UI
-snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
-PNGs so reviewers can see the before/after in the diff. On mismatch, the test
+regenerate both `popup-single-event.png` and `popup-multi-event.png` and commit
+the updated PNGs so reviewers can see the before/after in the diff. On mismatch, the test
 writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
 (gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.

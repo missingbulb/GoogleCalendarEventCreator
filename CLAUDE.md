@@ -7,6 +7,7 @@ own file under `docs/claude/` and is imported here:
 @docs/claude/workflow.md
 @docs/claude/adding-a-source.md
 @docs/claude/testing.md
+@docs/claude/auto-extractor.md
 
 The project's top-level architectural rules of the road live in
 `docs/architectureGuidelines.md` (imported below). Whenever we agree on a new or

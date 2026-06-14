@@ -1,35 +1,26 @@
 name: Create Release Package
 
-# Cuts a release of the extension: bumps the version, builds the shippable zip
-# (dist/google-calendar-event-creator.zip), and publishes a GitHub Release with
-# it attached. Pushing the result to the Chrome Web Store is a separate, manual
-# step — run the "Publish to Chrome Web Store" workflow when you're ready.
+# Builds and publishes a GitHub Release of the extension at the version that is
+# currently committed in manifest.json. It does NOT change the version — bumping
+# is a deliberate, human step (ask Claude to "bump version"; it edits
+# manifest.json/package.json on a branch and lands on main via a normal PR — see
+# docs/claude/workflow.md).
 #
-#   * "Run workflow" (workflow_dispatch) — the normal path. Optionally type the
-#     version; leave it blank to bump the current minor version (x.Y.z ->
-#     x.(Y+1).0). The workflow writes that version into manifest.json /
-#     package.json, commits, tags `vX.Y.Z`, and releases.
+# It runs automatically when a version bump merges to main (a push to main that
+# touches manifest.json), so cutting a release is just "merge the bump PR". If
+# that version already matches the latest published release, the run is a clean
+# no-op — so manifest.json edits that aren't version bumps don't cut a release.
+# It's also runnable from the Actions tab.
 #
-#       (GitHub can't pre-fill the input with a computed value — workflow_dispatch
-#       defaults are static — so "blank = next minor" is the convenience instead;
-#       the resolved version is printed in the run summary.)
-#
-#   * Push a tag `vX.Y.Z` by hand — for when you bumped manifest.json yourself.
-#     The tag must match manifest.json's version.
-#
-# Either way the zip is attached to the Release under a stable name, so the
-# latest build is always at:
-#   https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip
+# Pushing to the Chrome Web Store is the one remaining manual step (the "Publish
+# to Chrome Web Store" workflow).
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to release, e.g. 1.1.0 (blank = bump the current minor version)"
-        required: false
-        type: string
+  workflow_dispatch: {}
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
+    paths:
+      - manifest.json
 
 permissions:
   contents: write
@@ -48,78 +39,59 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Resolve the version being released:
-      #   tag push          -> the tag (minus the leading "v")
-      #   dispatch + input  -> the input
-      #   dispatch + blank  -> bump the current manifest minor (x.Y.z -> x.(Y+1).0)
-      - name: Resolve version
+      # The version to release is whatever's committed in manifest.json (the
+      # store's source of truth, kept in sync with package.json). When it already
+      # matches the latest published release (or a matching tag exists), there's
+      # nothing to release: skip cleanly (release=false) rather than fail, so a
+      # non-bump manifest.json change doesn't turn the run red. A drift between
+      # manifest.json and package.json, or a malformed version, is a real mistake
+      # and fails the run.
+      - name: Resolve and guard version
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            version="${GITHUB_REF_NAME#v}"
-          elif [ -n "${{ inputs.version }}" ]; then
-            version="${{ inputs.version }}"
-          else
-            version="$(node -e "const v=require('./manifest.json').version.split('.').map(Number); v[1]++; v[2]=0; console.log(v.join('.'))")"
-          fi
+          version="$(node -p "require('./manifest.json').version")"
           if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "Invalid version '$version' (expected X.Y.Z)." >&2
+            echo "manifest.json version '$version' is not X.Y.Z." >&2
             exit 1
           fi
+          pkg_version="$(node -p "require('./package.json').version")"
+          if [ "$pkg_version" != "$version" ]; then
+            echo "package.json ($pkg_version) and manifest.json ($version) disagree — bump both together." >&2
+            exit 1
+          fi
+          latest="$(gh release view --json tagName -q .tagName 2>/dev/null | sed 's/^v//' || true)"
+          if { [ -n "$latest" ] && [ "$latest" = "$version" ]; } || git rev-parse "v$version" >/dev/null 2>&1; then
+            echo "v$version is already released; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "release=true" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
           echo "Releasing v$version" >> "$GITHUB_STEP_SUMMARY"
 
-      # Dispatch path: write the resolved version into the manifest (the store's
-      # source of truth) and package.json, keeping the two in sync.
-      - name: Apply version
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          version="${{ steps.version.outputs.version }}"
-          node -e "const fs=require('fs'),f='manifest.json',j=JSON.parse(fs.readFileSync(f));j.version='$version';fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
-          npm pkg set version="$version"
-
-      # Tag-push path: the hand-set tag must agree with manifest.json's version,
-      # so the released zip can't disagree with the tag people downloaded.
-      - name: Verify tag matches manifest version
-        if: github.event_name == 'push'
-        run: |
-          manifest_version="$(node -p "require('./manifest.json').version")"
-          if [ "$manifest_version" != "${{ steps.version.outputs.version }}" ]; then
-            echo "Tag ${{ steps.version.outputs.tag }} does not match manifest.json version $manifest_version." >&2
-            echo "Bump manifest.json to match the tag, or use Run workflow to set the version for you." >&2
-            exit 1
-          fi
-
-      # Gate the release on the same checks CI runs on every PR.
+      # The same gates CI runs on every PR.
       - name: Run offline tests
+        if: steps.version.outputs.release == 'true'
         run: npm run test:offline
       - name: Run live tests
+        if: steps.version.outputs.release == 'true'
         run: npm run test:live
       - name: Run UI snapshot test
+        if: steps.version.outputs.release == 'true'
         run: npm run test:ui
 
       - name: Build extension zip
+        if: steps.version.outputs.release == 'true'
         run: npm run build
 
-      # Dispatch path: commit the version bump (if any) and create the tag.
-      # Pushed with GITHUB_TOKEN, whose pushes don't trigger workflows, so this
-      # never re-triggers the tag-push path above. Releasing at the current
-      # version (e.g. the first release) is a no-op commit — just tag it.
-      - name: Commit and tag
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet; then
-            echo "Version already ${{ steps.version.outputs.version }}; tagging the current commit."
-          else
-            git commit -am "Release ${{ steps.version.outputs.tag }}"
-          fi
-          git tag "${{ steps.version.outputs.tag }}"
-          git push origin HEAD "${{ steps.version.outputs.tag }}"
-
+      # Publish the Release. action-gh-release creates the tag (vX.Y.Z) at this
+      # commit when it doesn't exist — that's a tag, not a push to main, so
+      # branch protection on main doesn't apply.
       - name: Publish GitHub Release
+        if: steps.version.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
