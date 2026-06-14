@@ -180,10 +180,10 @@ secrets.
    [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
    (one-time \$5 fee).
 2. **Add new item** and upload the release zip.
-3. Complete the store listing: description, category, a screenshot
-   (≥ 1280×800 or 640×400), and the privacy tab — justify each requested
-   permission (`activeTab`, `scripting`, `tabs`; see
-   [Permissions](#permissions)) and declare data usage (this extension sends
+3. Complete the store listing: the store icon (`store-assets/icon-128.png`),
+   description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
+   tab — justify each requested permission (`activeTab`, `scripting`, `tabs`;
+   see [Permissions](#permissions)) and declare data usage (this extension sends
    nothing anywhere).
 4. Submit for review. Approval typically takes a few hours to a few days.
 
@@ -399,7 +399,8 @@ commit the results. On mismatch, the test writes
 | `test/ui/icon.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
 | `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{unsupported,supported}.png` |
 | `test/ui/snapshots/icon-unsupported.png`, `icon-supported.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
-| `tools/gen_icons.py` | Regenerates the PNG icons (Python stdlib only)           |
+| `tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
+| `tools/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
 | `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |
 | `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
 | `test/unit/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
