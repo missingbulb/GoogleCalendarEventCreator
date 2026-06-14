@@ -33,7 +33,7 @@
 //   description description_mirror, a ProseMirror doc, flattened to plain text
 //               (one line per block; link/text nodes concatenated in order)
 (() => {
-  const { clean, isValidTimezone, jsonScript } = GCal;
+  const { clean, isValidTimezone, jsonScript, parts } = GCal;
 
   function readData() {
     const next = jsonScript("#__NEXT_DATA__");
@@ -44,26 +44,15 @@
 
   function flattenLocation(event) {
     const geo = event.geo_address_info || {};
-    const parts = [];
-    const add = (value) => {
-      value = clean(value || "");
-      if (value && !parts.some((p) => p.toLowerCase() === value.toLowerCase())) {
-        parts.push(value);
-      }
-    };
-    add(geo.name);
-    add(geo.full_address || geo.address);
+    const loc = parts();
+    loc.add(geo.name).add(geo.full_address || geo.address);
     // An obfuscated ("guests-only") location carries no street address; fall
     // back to the approximate neighbourhood and city it does expose.
-    if (!parts.length) {
-      add(geo.sublocality);
-      add(geo.city_state || geo.city);
-      if (!geo.city_state) {
-        add(geo.region);
-        add(geo.country);
-      }
+    if (!loc.list.length) {
+      loc.add(geo.sublocality).add(geo.city_state || geo.city);
+      if (!geo.city_state) loc.add(geo.region).add(geo.country);
     }
-    return parts.join(", ");
+    return loc.join();
   }
 
   // Render a ProseMirror document to plain text: one line per top-level block,

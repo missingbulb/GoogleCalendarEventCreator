@@ -1,10 +1,15 @@
-// Rich-text helpers: turn a page element's markup into the plain/HTML text the
-// Calendar details field should show. This is the generic machinery that used
-// to live, reimplemented, inside individual sources — a source now only says
-// WHICH element (and whether to keep bold), and these own HOW it renders:
-// <br> becomes a newline, and (optionally) <strong>/<b> runs are kept as <b>…</b>
-// so a heading stays bold in the Calendar details (which render as HTML); every
-// other element contributes its text only.
+// Text-building helpers: turn a page's markup or structured fields into the
+// strings the Calendar event should show. This is the generic machinery that
+// used to live, reimplemented, inside individual sources.
+//
+// richText()/normalizeBlock()/blockText() render an element's markup — a source
+// now only says WHICH element (and whether to keep bold), and these own HOW it
+// renders: <br> becomes a newline, and (optionally) <strong>/<b> runs are kept
+// as <b>…</b> so a heading stays bold in the Calendar details (which render as
+// HTML); every other element contributes its text only.
+//
+// parts() assembles a comma-separated string (e.g. a location) from cleaned,
+// de-duplicated pieces, so sources stop hand-rolling the same add/skip/join.
 //
 // Uses GCal.clean at call time. Augments globalThis.GCal (never replaces it) so
 // load order can't clobber another file's contributions.
@@ -47,5 +52,29 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return normalizeBlock(richText(el, opts, root));
   }
 
-  return { richText, normalizeBlock, blockText };
+  // A small collector for building a comma-separated string (typically a
+  // location) from several pieces: add() cleans each value and skips empties and
+  // duplicates, then join() renders them. `equals(candidate, existing)` decides
+  // what counts as a duplicate — default case-insensitive exact match; pass your
+  // own (e.g. (a, b) => a === b for case-sensitive). `.list` is the live array,
+  // so a caller can branch on what's been collected so far (e.g. only add a
+  // fallback when nothing more specific was found). add() is chainable.
+  function parts(equals) {
+    const list = [];
+    const same = equals || ((a, b) => a.toLowerCase() === b.toLowerCase());
+    const api = {
+      list,
+      add(value) {
+        value = GCal.clean(value || "");
+        if (value && !list.some((p) => same(value, p))) list.push(value);
+        return api;
+      },
+      join(sep) {
+        return list.join(sep == null ? ", " : sep);
+      },
+    };
+    return api;
+  }
+
+  return { richText, normalizeBlock, blockText, parts };
 })());
