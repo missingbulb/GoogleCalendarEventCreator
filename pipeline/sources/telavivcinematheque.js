@@ -18,7 +18,18 @@
 //               suffix stripped, e.g.
 //               "הילדה השמאלית | טרום בכורה | שבוע טאיוואן - סינמטק תל אביב"
 //               -> "הילדה השמאלית | טרום בכורה | שבוע טאיוואן"
-//   description <meta property="og:description">
+//   description the full film details from the page body's
+//               `.movie-section .text-wraper` block (the on-page <meta
+//               og:description> is only a truncated "[…]" teaser), composed as:
+//                 <h2>title</h2>            the film title, larger
+//                 country/year/length       e.g. "נורבגיה/.../ 2025 / אורך: 132"
+//                 <blank line>
+//                 director / cast / language each on its own line (the <h5>'s
+//                                            <br>-separated credit lines)
+//                 <b>Hebrew | English</b>   the synopsis heading, bold
+//                 <blank line>
+//                 full synopsis paragraph   (untruncated)
+//               Falls back to <meta og:description> when that block is absent.
 //   start       the first date option of the screening-date picker
 //                 <select id="smdate_b"><option value="2026-06-17~20522">...
 //               (date portion before the "~"); screening times are loaded
@@ -92,6 +103,66 @@
     return clean(meta("og:title")).replace(/\s*-\s*סינמטק תל אביב\s*$/, "");
   }
 
+  // Serialize an element's content to text, mapping <br> to a newline and
+  // wrapping <strong>/<b> runs in <b> so the synopsis heading stays bold in
+  // the Calendar details (which render as HTML). Other tags contribute their
+  // text only.
+  function richText(el) {
+    let out = "";
+    for (const node of el.childNodes) {
+      if (node.nodeType === 3) {
+        out += node.textContent;
+      } else if (node.nodeType === 1) {
+        const tag = node.tagName.toLowerCase();
+        if (tag === "br") out += "\n";
+        else if (tag === "strong" || tag === "b") out += `<b>${clean(node.textContent)}</b>`;
+        else out += richText(node);
+      }
+    }
+    return out;
+  }
+
+  // The credits <h5> separates each line with a <br> but also carries blank
+  // source lines between them; keep one line per credit, dropping the blanks.
+  function creditLines(el) {
+    return richText(el)
+      .split("\n")
+      .map(clean)
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  // The synopsis <p> is a bold heading, a <br><br>, then the body; keep that
+  // single blank line and clean away the page's incidental whitespace.
+  function synopsisText(el) {
+    return richText(el)
+      .split("\n")
+      .map(clean)
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .replace(/^\n+|\n+$/g, "");
+  }
+
+  // The full film details from the page body, or "" when the page has no such
+  // block (so the caller can fall back to the og:description teaser).
+  function eventDescription() {
+    const wrap = document.querySelector(".movie-section .text-wraper");
+    if (!wrap) return "";
+
+    const h3 = clean((wrap.querySelector(".title h3") || {}).textContent);
+    const metaLine = clean((wrap.querySelector(".title p") || {}).textContent);
+    const credits = wrap.querySelector("h5");
+    const synopsis = wrap.querySelector(":scope > p");
+    if (!h3 && !synopsis) return "";
+
+    const lines = [];
+    if (h3) lines.push(`<h2>${h3}</h2>`);
+    if (metaLine) lines.push(metaLine, "");
+    if (credits) lines.push(creditLines(credits));
+    if (synopsis) lines.push(synopsisText(synopsis));
+    return lines.join("\n");
+  }
+
   function location() {
     const icon = document.querySelector('img[data-src*="location.png"]');
     const link = icon && icon.closest("a");
@@ -118,7 +189,9 @@
       const dates = screeningDates();
       const t = title();
       const loc = location();
-      const desc = clean(meta("og:description"));
+      // The page body carries the full film details; fall back to the
+      // truncated og:description teaser only when that block is missing.
+      const desc = eventDescription() || clean(meta("og:description"));
 
       if (!dates.length) {
         return { title: t, description: desc, start: "", location: loc, ctz: "Asia/Jerusalem" };
