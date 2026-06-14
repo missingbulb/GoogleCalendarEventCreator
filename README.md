@@ -17,7 +17,7 @@ or OAuth needed. You review the pre-filled event and hit Save.
 
 An event is created with whatever subset of these is available; missing fields
 are simply left for you to fill in on the Google Calendar screen. For how the
-details are scraped from a page, see [docs/architecture.md](docs/architecture.md).
+details are scraped from a page, see [docs/highLevelDesign.md](docs/highLevelDesign.md).
 
 ## Install (developer mode)
 
@@ -73,7 +73,9 @@ extractor (e.g. meetup.com) and a red border elsewhere.
 
 ## Documentation
 
-- [Architecture](docs/architecture.md) — how extraction works and the file map.
+- [Architecture guidelines](docs/architectureGuidelines.md) — top-level rules of the road.
+- [High-level design](docs/highLevelDesign.md) — how extraction works.
+- [Low-level design](docs/lowLevelDesign.md) — the file map.
 - [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](docs/releasing.md) — building the zip and publishing to the Chrome Web Store.
 - [Resources](docs/resources.md) — external references relevant to the project.
