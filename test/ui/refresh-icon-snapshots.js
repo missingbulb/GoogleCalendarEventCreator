@@ -1,12 +1,12 @@
 // Regenerates test/ui/snapshots/icon-unsupported.png and icon-supported.png, the
 // expected toolbar icon images for the "unsupported" and "supported" states
-// from ui/toolbar-icon.js (see render-icon.js). Run after an intentional change
-// to tools/gen_icons.py / render-icon.js.
+// from ui/toolbar-icon.js (see icon-renderer.js). Run after an intentional change
+// to tools/gen_icons.py / icon-renderer.js.
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { renderIconPng, RED, GREEN } = require("./render-icon");
+const { renderIconPng, RED, GREEN } = require("./icon-renderer");
 
 const outDir = path.join(__dirname, "snapshots");
 fs.mkdirSync(outDir, { recursive: true });

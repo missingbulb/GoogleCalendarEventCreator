@@ -315,9 +315,9 @@ from facebook.com, so it can't be cached as a live case.
 
 ### UI snapshot test
 
-**`test/ui/popup.test.js`** renders approximations of the popup
-(`test/ui/render.js`, using `satori` + `@resvg/resvg-js` — no browser) for
-fixed fixture data (`test/ui/fixture.js`), and compares each pixel-by-pixel
+**`test/ui/popup-snapshots.test.js`** renders approximations of the popup
+(`test/ui/popup-renderer.js`, using `satori` + `@resvg/resvg-js` — no browser) for
+fixed fixture data (`test/ui/popup-fixtures.js`), and compares each pixel-by-pixel
 (via `pixelmatch`) against a committed image. Two layouts are covered — open
 them on GitHub to see what the popup currently looks like:
 
@@ -327,11 +327,11 @@ them on GitHub to see what the popup currently looks like:
   button per event (6 here) under an "N events on this page" heading.
 
 Note this is **not a screenshot of the real popup**: satori only
-supports a constrained flexbox-based HTML/CSS subset, so `render.js` is a
+supports a constrained flexbox-based HTML/CSS subset, so `popup-renderer.js` is a
 hand-maintained tree mirroring `ui/popup.css`'s styles and the
 `ui/views/events-view.js` button layout. If the popup's markup/CSS or the
 events-view rendering change in ways that affect the rendered output (copy,
-layout, colors), update `buildTree()` in `render.js` to match.
+layout, colors), update `buildTree()` in `popup-renderer.js` to match.
 This tradeoff was chosen for determinism and zero extra runtime
 dependencies (no browser download); a real-browser screenshot (e.g. via
 Playwright) would have higher fidelity but couldn't run in all environments
@@ -346,14 +346,14 @@ regenerate both `popup-single-event.png` and `popup-multi-event.png` (or use the
 snapshot** workflow, "Run workflow" in the Actions tab) and commit the updated
 PNGs so reviewers can see the before/after in the diff. On mismatch, the test
 writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
-(gitignored; see `test/ui/artifacts-dir.js`) and prints their full paths.
+(gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.
 
 ### Toolbar icon test
 
-**`test/ui/icon.test.js`** generates the expected 128x128 toolbar icon for
+**`test/ui/toolbar-icon-snapshots.test.js`** generates the expected 128x128 toolbar icon for
 both states described in `ui/toolbar-icon.js` — a green border for pages with a
 site-specific source and a red border otherwise — using
-`test/ui/render-icon.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
+`test/ui/icon-renderer.js` (a JS port of `tools/gen_icons.py`'s `make_icon()`,
 no browser). Each generated image is compared pixel-by-pixel against the
 committed reference images **`test/ui/snapshots/icon-unsupported.png`** and
 **`test/ui/snapshots/icon-supported.png`** (browsable on GitHub) — the same
@@ -361,12 +361,12 @@ red-bordered / green-bordered icons shown in the toolbar for unsupported and
 supported pages — and, as a cross-check, against the actual shipped
 `icons/icon128-red.png` / `icons/icon128-green.png`.
 
-After an intentional change to `tools/gen_icons.py` / `render-icon.js`, run
+After an intentional change to `tools/gen_icons.py` / `icon-renderer.js`, run
 `npm run refresh:ui` to regenerate `icon-unsupported.png` and `icon-supported.png` (and
 re-run `python3 tools/gen_icons.py` to regenerate the shipped icons) and
 commit the results. On mismatch, the test writes
 `icon-{unsupported,supported}.actual.png` and `.diff.png` to `test/ui/.artifacts/`
-(gitignored; see `test/ui/artifacts-dir.js`) and prints the paths.
+(gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints the paths.
 
 ## Files
 
@@ -391,17 +391,17 @@ commit the results. On mismatch, the test writes
 | `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM) |
-| `test/ui/fixture.js` | Fixed extraction result + tab info used to render the popup deterministically |
-| `test/ui/load-popup.js` | Loads pure helpers (e.g. `formatWhen`) from `ui/views/events-view.js` for use in `render.js` |
-| `test/ui/render.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
-| `test/ui/artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
+| `test/ui/popup-fixtures.js` | Fixed extraction result + tab info used to render the popup deterministically |
+| `test/ui/popup-helpers.js` | Loads pure helpers (e.g. `formatWhen`) from `ui/views/events-view.js` for use in `popup-renderer.js` |
+| `test/ui/popup-renderer.js` | Renders an approximation of the popup to PNG via satori + resvg (no browser) |
+| `test/ui/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
-| `test/ui/popup.test.js` | Compares the rendered popup against the stored snapshot |
-| `test/ui/refresh-snapshot.js` | Regenerates `test/ui/snapshots/popup-single-event.png` and `popup-multi-event.png` |
+| `test/ui/popup-snapshots.test.js` | Compares the rendered popup against the stored snapshot |
+| `test/ui/refresh-popup-snapshots.js` | Regenerates `test/ui/snapshots/popup-single-event.png` and `popup-multi-event.png` |
 | `test/ui/snapshots/popup-single-event.png`, `popup-multi-event.png` | Committed reference images of the popup (single / multiple events), browsable on GitHub |
-| `test/ui/render-icon.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
-| `test/ui/icon.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
-| `test/ui/refresh-icon-snapshot.js` | Regenerates `test/ui/snapshots/icon-{unsupported,supported}.png` |
+| `test/ui/icon-renderer.js` | Renders the expected toolbar icon (green/red border) to PNG, no browser |
+| `test/ui/toolbar-icon-snapshots.test.js` | Compares the rendered toolbar icon for each state against the stored snapshots and `icons/icon128-{green,red}.png` |
+| `test/ui/refresh-icon-snapshots.js` | Regenerates `test/ui/snapshots/icon-{unsupported,supported}.png` |
 | `test/ui/snapshots/icon-unsupported.png`, `icon-supported.png` | Committed reference images of the toolbar icon for unsupported/supported pages, browsable on GitHub |
 | `tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
 | `tools/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |

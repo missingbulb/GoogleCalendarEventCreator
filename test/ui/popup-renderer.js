@@ -2,7 +2,7 @@
 // and ui/views/events-view.js) to a PNG, using satori (HTML/CSS-subset -> SVG,
 // no browser) and resvg (SVG -> PNG). The element tree below mirrors
 // ui/popup.css's styles and the events-view per-event button layout, for the
-// fixed fixture data in fixture.js.
+// fixed fixture data in popup-fixtures.js.
 //
 // This is NOT a screenshot of the real popup — satori only supports a
 // constrained flexbox-based style subset, so this is a best-effort visual
@@ -14,7 +14,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
-const loadPopupHelpers = require("./load-popup");
+const loadPopupHelpers = require("./popup-helpers");
 
 // The popup's pure display helpers, imported (async) from the events-view ES
 // module on first render and reused thereafter.

@@ -246,8 +246,8 @@ URL, persist the body) but:
 
 No change recommended; noted for completeness since it's the one place CI
 fetches arbitrary network content with a token that can push to the repo. The
-new `test/ui/` snapshot tooling (`refresh-icon-snapshot.js`,
-`refresh-snapshot.js`) follows the same local-render/no-network pattern as
+new `test/ui/` snapshot tooling (`refresh-icon-snapshots.js`,
+`refresh-popup-snapshots.js`) follows the same local-render/no-network pattern as
 the rest of the test suite and doesn't add new fetch targets.
 
 ### 3.9 Permissions & supply chain (Informational)

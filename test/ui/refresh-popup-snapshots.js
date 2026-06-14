@@ -1,13 +1,13 @@
 // Regenerates the popup UI snapshots (test/ui/snapshots/popup-single-event.png
 // and popup-multi-event.png), using the same fixed fixture data and rendering as the
-// snapshot test (see render.js). Run after an intentional change to the
+// snapshot test (see popup-renderer.js). Run after an intentional change to the
 // popup's UI.
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { renderPopupPng } = require("./render");
-const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./fixture");
+const { renderPopupPng } = require("./popup-renderer");
+const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./popup-fixtures");
 
 (async () => {
   const outDir = path.join(__dirname, "snapshots");

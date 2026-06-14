@@ -1,5 +1,5 @@
 // UI snapshot test: generates the expected toolbar icon (128x128, see
-// render-icon.js) for both states described in ui/toolbar-icon.js -- a green
+// icon-renderer.js) for both states described in ui/toolbar-icon.js -- a green
 // border for pages with a site-specific extractor and a red border
 // otherwise -- and compares each against the stored images in
 // test/ui/snapshots/icon-{red,green}.png. Run `npm run refresh:ui` to
@@ -12,8 +12,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
-const { renderIconPng, RED, GREEN } = require("./render-icon");
-const { artifactPath } = require("./artifacts-dir");
+const { renderIconPng, RED, GREEN } = require("./icon-renderer");
+const { artifactPath } = require("./snapshot-artifacts-dir");
 
 const ICONS_DIR = path.join(__dirname, "..", "..", "icons");
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
@@ -68,7 +68,7 @@ for (const { state, color, name, shippedIcon } of CASES) {
   });
 
   // Cross-check against the actual shipped icon used by ui/toolbar-icon.js, so a
-  // drift between tools/gen_icons.py and render-icon.js is caught too.
+  // drift between tools/gen_icons.py and icon-renderer.js is caught too.
   test(`toolbar icon for ${state} pages matches icons/${shippedIcon}`, () => {
     const actual = PNG.sync.read(renderIconPng(color));
     const shippedPath = path.join(ICONS_DIR, shippedIcon);
