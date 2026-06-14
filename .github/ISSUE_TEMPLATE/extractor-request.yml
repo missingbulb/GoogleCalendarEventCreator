@@ -1,37 +1,53 @@
-name: Automated extractor request
-description: Ask a Claude agent to implement a new site extractor automatically.
-title: "feat: add <site> extractor"
+name: Event source request
+description: Request that a website be added as a supported event source. A Claude agent implements the extractor automatically and opens a pull request for review.
+title: "Event source request - [URL]"
 labels: ["extractor-request"]
 body:
   - type: markdown
     attributes:
       value: |
-        Submitting this issue automatically triggers a Claude agent that will:
-        implement the extractor, fetch a cached copy of the event page, write
-        an integration test, and open a pull request for your review.
+        Thanks for suggesting a new event source! Submitting this issue kicks off
+        a Claude agent that implements the extractor, caches the event page, adds
+        an integration test, and opens a pull request for a maintainer to review.
 
-        **Required:** `ANTHROPIC_API_KEY` must be set as a repository secret.
-
+        Only the URL is required. Any other details you can fill in — the event's
+        name, time, location — help the agent verify its extraction; fields left
+        blank are fine.
   - type: input
-    id: event-url
+    id: url
     attributes:
-      label: Event page URL
-      description: >
-        A public URL of a specific event on the target site. The agent uses
-        this page as the integration test case and extracts the site's hostname
-        from it automatically.
-      placeholder: "https://www.example.com/events/my-event-123"
+      label: URL
+      description: The event page to add support for.
     validations:
       required: true
-
-  - type: textarea
-    id: notes
+  - type: input
+    id: name
     attributes:
-      label: Notes (optional)
-      description: >
-        Anything the agent should know: known HTML quirks, fields that are hard
-        to find, expected title / date / location so the agent can verify its
-        extraction, etc.
-      placeholder: "Title is in a <h2 class='event-name'> rather than <h1>."
-    validations:
-      required: false
+      label: Name
+      description: The event's title.
+  - type: input
+    id: start
+    attributes:
+      label: Start time
+      description: When the event starts, e.g. 2026-06-25 18:00.
+  - type: input
+    id: end
+    attributes:
+      label: End time
+      description: When the event ends, if shown.
+  - type: input
+    id: timezone
+    attributes:
+      label: Timezone
+      description: The event's timezone, e.g. America/New_York.
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: The venue or address.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: The event's description or summary, as shown on the page.
+      placeholder: Paste or summarize the event details here.

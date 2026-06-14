@@ -7,16 +7,20 @@
 // is the controller's entry point; `buildSourceRequestUrl` is also exported for
 // the unit tests. This is the source-request half of the former background.js.
 //
-// The button targets the "New event source request" issue form (.github/
-// ISSUE_TEMPLATE/new-source-request.yml): a logged-in GitHub user lands on that
+// The button targets the "Event source request" issue form (.github/
+// ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands on that
 // structured form with the fields already filled in, reviews them, and clicks
 // "Submit new issue" — no token, form service, or backend involved. GitHub
 // forbids framing its pages (X-Frame-Options), so this opens in a new tab
 // rather than being embedded, matching how the extension opens the Calendar
 // template.
+//
+// The form applies the `extractor-request` label, which kicks off the
+// auto-implement-extractor workflow — so a submitted request flows straight into
+// the agent that writes the extractor and opens a PR.
 const SOURCE_REQUEST_REPO = "missingbulb/GoogleCalendarEventCreator";
-const SOURCE_REQUEST_TEMPLATE = "new-source-request.yml";
-const SOURCE_REQUEST_LABEL = "new-source";
+const SOURCE_REQUEST_TEMPLATE = "extractor-request.yml";
+const SOURCE_REQUEST_LABEL = "extractor-request";
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query
@@ -26,12 +30,12 @@ const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "locat
 // Build the GitHub issue-form URL for a source request, prefilled from the
 // current page's details (`prefill` keyed by SOURCE_REQUEST_FIELDS). The title
 // carries the page URL; each non-empty field seeds the matching form field
-// (empty ones are left for the user to complete). The `new-source` label is
-// applied by both the template and this param.
+// (empty ones are left for the user to complete). The `extractor-request` label
+// is applied by both the template and this param.
 export function buildSourceRequestUrl(prefill) {
   const params = new URLSearchParams({
     template: SOURCE_REQUEST_TEMPLATE,
-    title: `New event source request - ${prefill.url}`,
+    title: `Event source request - ${prefill.url}`,
     labels: SOURCE_REQUEST_LABEL,
   });
   for (const id of SOURCE_REQUEST_FIELDS) {

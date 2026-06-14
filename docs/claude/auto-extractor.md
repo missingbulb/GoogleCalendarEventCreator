@@ -7,14 +7,22 @@ project conventions for what a correct extractor looks like live in
 
 ## How to trigger it
 
-Open a new issue using the **Automated extractor request** template
+Open a new issue using the **Event source request** template
 (`.github/ISSUE_TEMPLATE/extractor-request.yml`). It pre-applies the
 `extractor-request` label, which starts the workflow immediately. The only
-required field is a public URL for a specific event page on the target site.
+required field is a public URL for a specific event page on the target site;
+the other fields (name, time, location, …) are optional context the agent can
+use to sanity-check its extraction.
 
-You can also trigger it manually by adding the `extractor-request` label to
-any existing issue, as long as the issue body contains an event page URL the
-agent can parse.
+This is the **same form the extension's popup opens** from its "Request support
+for this site" button (`ui/views/source-request-view.js`), so an end-user
+request flows straight into the pipeline — submitting it is what fires the agent.
+Because every submission spends an Opus run, keep an Anthropic spend cap set (see
+the secret note below).
+
+You can also trigger it on any existing issue by adding the `extractor-request`
+label by hand, as long as the issue body contains an event page URL the agent
+can parse.
 
 ## What the workflow does
 
