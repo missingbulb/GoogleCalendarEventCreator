@@ -127,3 +127,46 @@ test("dates: omitted entirely when no start was found", () => {
   const url = buildCalendarUrl({ title: "No date" }, TAB);
   assert.equal(paramsOf(url).get("dates"), null);
 });
+
+test("dates: eventLengthInMinutes used instead of default duration when end is missing", () => {
+  assert.equal(formatDatesParam("2026-06-14T19:00:00", "", 90), "20260614T190000/20260614T203000");
+});
+
+test("dates: eventLengthInMinutes used instead of default duration when end is invalid", () => {
+  assert.equal(formatDatesParam("2026-06-14T19:00:00", "bad", 45), "20260614T190000/20260614T194500");
+});
+
+test("dates: eventLengthInMinutes used instead of default duration when end is before start", () => {
+  assert.equal(
+    formatDatesParam("2026-06-14T19:00:00", "2026-06-14T18:00:00", 30),
+    "20260614T190000/20260614T193000"
+  );
+});
+
+test("dates: start derived from end minus eventLengthInMinutes when start is missing (floating)", () => {
+  assert.equal(formatDatesParam("", "2026-06-14T21:00:00", 120), "20260614T190000/20260614T210000");
+});
+
+test("dates: start derived from end minus eventLengthInMinutes when start is missing (UTC offset)", () => {
+  // end = 2026-06-14T21:00:00-04:00 = 2026-06-15T01:00:00Z; start = 01:00Z - 60min = 00:00Z
+  assert.equal(
+    formatDatesParam("", "2026-06-14T21:00:00-04:00", 60),
+    "20260615T000000Z/20260615T010000Z"
+  );
+});
+
+test("dates: omitted when both start and end are missing even with eventLengthInMinutes", () => {
+  assert.equal(formatDatesParam("", "", 90), "");
+});
+
+test("dates: eventLengthInMinutes ignored for all-day events", () => {
+  assert.equal(formatDatesParam("2026-06-14", "", 90), "20260614/20260615");
+});
+
+test("buildCalendarUrl: passes eventLengthInMinutes through to dates param", () => {
+  const url = buildCalendarUrl(
+    { title: "Workshop", start: "2026-06-14T10:00:00", eventLengthInMinutes: 90 },
+    TAB
+  );
+  assert.equal(paramsOf(url).get("dates"), "20260614T100000/20260614T113000");
+});

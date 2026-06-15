@@ -16,7 +16,7 @@ export function buildCalendarUrl(data, tab) {
   const title = data.title || tab.title || GCalConfig.fallbackEventTitle;
   params.set("text", title);
 
-  const dates = formatDatesParam(data.start, data.end);
+  const dates = formatDatesParam(data.start, data.end, data.eventLengthInMinutes);
   if (dates) params.set("dates", dates);
   if (data.ctz) params.set("ctz", data.ctz);
   if (data.location) params.set("location", data.location);
@@ -119,21 +119,37 @@ function markdownToHtml(text) {
 // times (see GCal.localizeToZone), so a known-timezone event reaches here as a
 // floating start/end and its ctz param places it. An offset/Z that survives to
 // here is an event with no known timezone, and is pinned to a UTC instant.
-export function formatDatesParam(start, end) {
-  if (!start) return "";
+//
+// When `eventLengthInMinutes` is supplied it is preferred over
+// `defaultEventDurationMs` when the end is missing or invalid, and it can also
+// derive a missing start from a known end (timed events only — it is ignored
+// for all-day events where a minute duration has no meaning).
+export function formatDatesParam(start, end, eventLengthInMinutes) {
+  if (!start && !end) return "";
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(start)) {
+  if (start && /^\d{4}-\d{2}-\d{2}$/.test(start)) {
+    // All-day event: eventLengthInMinutes doesn't apply to date-only values.
     const endDay = /^\d{4}-\d{2}-\d{2}$/.test(end || "") ? end : start;
     return `${compactDay(start)}/${compactDay(nextDay(endDay))}`;
   }
 
-  const hasOffset = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(start);
-  const startDate = new Date(start);
-  if (isNaN(startDate)) return "";
-
+  // Determine offset presence from whichever bound we have.
+  const hasOffset = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(start || end || "");
+  let startDate = start ? new Date(start) : null;
   let endDate = end ? new Date(end) : null;
+
+  // Derive a missing start from end + length (timed events only).
+  if ((!startDate || isNaN(startDate)) && endDate && !isNaN(endDate) && eventLengthInMinutes) {
+    startDate = new Date(endDate.getTime() - eventLengthInMinutes * 60000);
+  }
+
+  if (!startDate || isNaN(startDate)) return "";
+
   if (!endDate || isNaN(endDate) || endDate <= startDate) {
-    endDate = new Date(startDate.getTime() + GCalConfig.defaultEventDurationMs);
+    const durationMs = eventLengthInMinutes != null
+      ? eventLengthInMinutes * 60000
+      : GCalConfig.defaultEventDurationMs;
+    endDate = new Date(startDate.getTime() + durationMs);
   }
 
   return hasOffset

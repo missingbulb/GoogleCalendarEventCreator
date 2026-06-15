@@ -8,10 +8,13 @@
 // The result is always { events: [...], supported } — `events` holds the
 // extracted events (possibly empty) and `supported` is true when a registered
 // source matched this page's host. Each event is fully self-described —
-// { title, start, end, location, description, ctz } — so a caller (the popup)
-// can build a Google Calendar URL for any of them without consulting page-level
-// state. An ordinary event page yields one event; a listing/series page (e.g. a
-// film week with several different films) yields one per event.
+// { title, start, end, location, description, ctz, eventLengthInMinutes? } — so
+// a caller (the popup) can build a Google Calendar URL for any of them without
+// consulting page-level state. `eventLengthInMinutes` is only present when a
+// site extractor found an explicit duration on the page (not derived from the
+// difference of start and end). An ordinary event page yields one event; a
+// listing/series page (e.g. a film week with several different films) yields one
+// per event.
 //
 // The popup reads `supported` (with the events) to decide what to render: a
 // supported host shows its events; an unsupported host shows the generic
@@ -53,7 +56,7 @@
     // URL's `ctz` then places them, and the times read as the event's city shows.
     const norm = (e) => {
       const ctz = e.ctz || "";
-      return {
+      const out = {
         title: e.title || "",
         start: GCal.localizeToZone(e.start || "", ctz),
         end: e.end ? GCal.localizeToZone(e.end, ctz) : null,
@@ -61,6 +64,8 @@
         description: e.description || "",
         ctz,
       };
+      if (e.eventLengthInMinutes != null) out.eventLengthInMinutes = e.eventLengthInMinutes;
+      return out;
     };
 
     const events = site ? supportedEvents(site, norm) : fallbackEvents(norm);
