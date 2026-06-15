@@ -5,11 +5,9 @@ discipline — see a test fail before trusting it, green-twice-before-merge,
 self-diagnosing remote tests — lives in `docs/engineeringPractices.md`; this file
 is the project-specific mechanics. Keep these decisions in mind:
 
-- **`Cannot find module 'jsdom'` means the dev deps aren't installed**, not a
-  code problem. `jsdom` is a test-only devDependency loaded by
-  `test/harness.js`, and `node_modules` starts empty on a fresh checkout (e.g.
-  this ephemeral environment). When you hit that error, run `npm install` and
-  re-run the tests — don't look for any other cause first.
+- **`Cannot find module 'jsdom'`** means the dev deps aren't installed — run
+  `npm install` (the misleading error, and why, is in
+  `docs/technicalGotchas.md`).
 
 - **Integration cases are the reviewed contract.** A person reads
   `test/integration/cases/` to confirm the behavior is right; nobody reviews the
