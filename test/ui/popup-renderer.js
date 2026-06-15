@@ -147,10 +147,10 @@ function eventButton(event) {
   };
 }
 
-// The "request this source" button shown on an unsupported page (popup.js's
+// The "request this source" button shown under the events on an unsupported
+// page where the fallback found one (State 4; popup.js's
 // makeSourceRequestButton): an event-style card with a title over a muted
-// subtitle, and no date chip. Opens a prefilled GitHub issue in the real
-// popup.
+// subtitle, and no date chip. Opens a prefilled GitHub issue in the real popup.
 function sourceRequestButton() {
   const body = {
     type: "div",
@@ -200,17 +200,27 @@ function sourceRequestButton() {
   };
 }
 
+// The quiet "Disagree?" link shown under "No events found" on an unsupported
+// page (popup.js's makePolicyLink): a small blue text link, not a card.
+function policyLink() {
+  return {
+    type: "div",
+    props: {
+      style: { display: "flex", fontSize: 11, color: "#1a73e8" },
+      children: "Disagree?",
+    },
+  };
+}
+
 function buildTree(data, opts = {}) {
   const MAX_EVENTS = GCalConfig.maxEventsShown;
   const allEvents = data.events && data.events.length ? data.events : [];
   const events = allEvents.slice(0, MAX_EVENTS);
-  const heading = opts.sourceRequestForm
-    ? "Add support for this site"
-    : !allEvents.length
-      ? "No events found on this page"
-      : allEvents.length > 1
-        ? `${allEvents.length} events on this page`
-        : "Add to Google Calendar";
+  const heading = !allEvents.length
+    ? "No events found on this page"
+    : allEvents.length > 1
+      ? `${allEvents.length} events on this page`
+      : "Add to Google Calendar";
   const truncated = allEvents.length > MAX_EVENTS;
 
   const children = [
@@ -244,11 +254,13 @@ function buildTree(data, opts = {}) {
     });
   }
 
-  if (opts.sourceRequestForm) {
-    children.push(sourceRequestButton());
-  }
-
   children.push(...events.map(eventButton));
+
+  // Unsupported-host extras, matching popup.js: a request button under the
+  // events (State 4), or a "Disagree?" policy link when there are none (State
+  // 2/3b). At most one is set.
+  if (opts.requestButton) children.push(sourceRequestButton());
+  if (opts.policyLink) children.push(policyLink());
 
   return {
     type: "div",

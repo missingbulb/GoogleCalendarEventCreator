@@ -13,6 +13,7 @@
 const SHIPPING_PATHS = [
   "manifest.json",
   "config.js", // tunable product decisions; imported by the popup modules at runtime
+  "fallback-policy.js", // host classifier for the generic fallback; imported by the popup at runtime
   "pipeline", // the extraction pipeline + generated load list (popup fetches/injects)
   "ui", // popup (html/css/js + views) and the toolbar-icon service worker
   "icons", // toolbar icons: the per-size PNGs the manifest references

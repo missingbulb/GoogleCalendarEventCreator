@@ -17,7 +17,8 @@ const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./pop
     ["popup-multi-event", MULTI_EVENT],
     ["popup-truncated", TRUNCATED_EVENT],
     ["popup-empty", NO_EVENTS],
-    ["popup-source-request", { events: [] }, { sourceRequestForm: true }],
+    ["popup-fallback-request", SINGLE_EVENT, { requestButton: true }],
+    ["popup-unsupported-empty", NO_EVENTS, { policyLink: true }],
   ]) {
     const outPath = path.join(outDir, `${name}.png`);
     fs.writeFileSync(outPath, await renderPopupPng(data, opts));

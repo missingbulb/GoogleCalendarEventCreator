@@ -1,11 +1,18 @@
-// Source-request view: shown on an unsupported page (red toolbar border) where
-// no source matched. Offers a button that opens a prefilled GitHub "New issue"
-// page requesting that the page's site be added as a supported source.
+// The "what to do on an unsupported page" view: two affordances the popup
+// controller (popup.js) renders for a host with no per-site source.
 //
-// An ES module, loaded on demand by the popup controller (popup.js) via dynamic
-// import() when the page is on an unsupported host. `makeSourceRequestButton`
-// is the controller's entry point; `buildSourceRequestUrl` is also exported for
-// the unit tests. This is the source-request half of the former background.js.
+//   makeSourceRequestButton — shown when the generic fallback DID find an event
+//     on an unknown host (State 4): a button that opens a prefilled GitHub "New
+//     issue" page requesting the site be added as a supported source, seeded
+//     with the scraped event.
+//   makePolicyLink — shown when there's no event to offer (State 2/3b): a quiet
+//     link to the public "how this extension finds events" doc, rather than
+//     pestering for support on a page that has no event.
+//
+// An ES module, loaded on demand by popup.js via dynamic import(). The two
+// `make*` functions are the controller's entry points; `buildSourceRequestUrl`
+// and `buildPolicyDocUrl` are also exported for the unit tests. This is the
+// source-request half of the former background.js.
 //
 // The button targets the "Event source request" issue form (.github/
 // ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands on that
@@ -21,6 +28,12 @@
 const SOURCE_REQUEST_REPO = "missingbulb/GoogleCalendarEventCreator";
 const SOURCE_REQUEST_TEMPLATE = "extractor-request.yml";
 const SOURCE_REQUEST_LABEL = "extractor-request";
+
+// The public doc the "Disagree?" link opens — a short, user-facing explanation
+// of how the extension decides what's an event. Path is relative to the repo
+// root on the default branch; an existence test (test/unit/source-request.test.js)
+// fails if the file is moved without updating this, so the link can't rot.
+const POLICY_DOC_PATH = "docs/extraction-policy.md";
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query
@@ -42,6 +55,13 @@ export function buildSourceRequestUrl(prefill) {
     if (prefill[id]) params.set(id, prefill[id]);
   }
   return `https://github.com/${SOURCE_REQUEST_REPO}/issues/new?${params.toString()}`;
+}
+
+// The URL the "Disagree?" link opens: the policy doc rendered on the repo's
+// default branch. Built from the same repo constant as the issue form, so the
+// slug stays single-sourced.
+export function buildPolicyDocUrl() {
+  return `https://github.com/${SOURCE_REQUEST_REPO}/blob/main/${POLICY_DOC_PATH}`;
 }
 
 // On an unsupported page with no event found, a button that opens a prefilled
@@ -75,6 +95,25 @@ export function makeSourceRequestButton(tab, event) {
     window.close();
   });
   return btn;
+}
+
+// On an unsupported page with no event to offer, a quiet "Disagree?" link that
+// opens the public "how this extension finds events" doc in a new tab. Far
+// lighter than the request button: we don't ask anyone to sponsor a site that
+// has no event — we just point to how the call was made.
+export function makePolicyLink(tab) {
+  const url = buildPolicyDocUrl();
+
+  const link = document.createElement("a");
+  link.className = "policy-link";
+  link.textContent = "Disagree?";
+  link.href = url;
+  link.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await chrome.tabs.create({ url, index: tab.index + 1 });
+    window.close();
+  });
+  return link;
 }
 
 // The fields that seed the source-request form: the page URL and title, plus

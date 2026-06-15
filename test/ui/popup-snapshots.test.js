@@ -7,8 +7,9 @@
 //   popup-single-event.png — a single-event page: one ~60px button, heading "Add to Google Calendar".
 //   popup-multi-event.png  — a listing/series page: 6 buttons, "N events on this page" heading.
 //   popup-truncated.png    — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
-//   popup-empty.png        — no events found: no buttons, heading "No events found on this page".
-//   popup-source-request.png — unsupported page: heading "Add support for this site" over the embedded request-form frame.
+//   popup-empty.png        — supported host, no events: no buttons, heading "No events found on this page".
+//   popup-fallback-request.png — unsupported host, fallback found one (State 4): the event button plus a "request support" button under it.
+//   popup-unsupported-empty.png — unsupported host, nothing to show (State 2/3b): "No events found on this page" and a quiet "Disagree?" policy link.
 "use strict";
 
 const test = require("node:test");
@@ -87,14 +88,23 @@ test("empty popup (no events) shows no buttons and a 'No events found' heading",
   await compareToSnapshot(t, "popup-empty", NO_EVENTS);
 });
 
-// The reported bug: a page describing no event (only a page title, present on
-// essentially every page) used to render a phantom "No date found" button.
-// Feed such a page through the real extractor and confirm it renders as the
-// empty popup, not a button.
-test("unsupported-site popup shows the embedded source-request form", async (t) => {
-  await compareToSnapshot(t, "popup-source-request", { events: [] }, { sourceRequestForm: true });
+// State 5: an unsupported host where the generic fallback found a complete
+// event (title + location + start) and the host is on neither list. The event
+// shows as a button, with a "request support" button under it.
+test("unsupported-host fallback popup shows the event and a request button", async (t) => {
+  await compareToSnapshot(t, "popup-fallback-request", SINGLE_EVENT, { requestButton: true });
 });
 
+// State 2/4: an unsupported host with nothing to offer — no fallback event
+// (or one suppressed by the denylist). Shows "No events found" plus the quiet
+// "Disagree?" link to the policy doc, rather than pestering for support.
+test("unsupported-host empty popup shows 'No events found' and a Disagree? link", async (t) => {
+  await compareToSnapshot(t, "popup-unsupported-empty", NO_EVENTS, { policyLink: true });
+});
+
+// A page describing no event (only a page title, present on essentially every
+// page) must not render a phantom button. Feed such a page through the real
+// extractor and confirm it renders as the empty popup.
 test("a page with no event (title only) renders the empty popup, not a button", async (t) => {
   const html = `<title>Just an Article</title><h1>Ten Tips for Houseplants</h1><p>Water them.</p>`;
   const data = extractFromHtml(html, "https://www.blog.example/houseplants");

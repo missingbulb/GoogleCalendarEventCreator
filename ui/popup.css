@@ -111,3 +111,15 @@ body {
   border-radius: 4px;
   margin: 0 0 8px;
 }
+/* The quiet "Disagree?" link under "No events found" on an unsupported page:
+   a plain text link to the public policy doc, deliberately understated so it
+   doesn't read as a primary action. */
+.policy-link {
+  display: inline-block;
+  font-size: 11px;
+  color: #1a73e8;
+  text-decoration: none;
+}
+.policy-link:hover {
+  text-decoration: underline;
+}
