@@ -24,6 +24,7 @@
 // See #146.
 importScripts(
   "/pipeline/registry.js",
+  "/pipeline/sources/bandsintown.js",
   "/pipeline/sources/edinburghfringe.js",
   "/pipeline/sources/eventbrite.js",
   "/pipeline/sources/eventim-co-il.js",

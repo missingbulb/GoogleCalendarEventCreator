@@ -1,0 +1,15 @@
+{
+  "description": "Bandsintown event page is parseable (Berry Sakharof at Peace Forest, Jun 17 2026, Jerusalem)",
+  "expected": {
+    "events": [
+      {
+        "title": "Berry Sakharof",
+        "start": "2026-06-17T21:00:00",
+        "end": "2026-06-17",
+        "location": "יער השלום Peace Forest, 1, Jerusalem, Israel",
+        "ctz": "Asia/Jerusalem",
+        "details": "https://www.bandsintown.com/e/108293553-berry-sakharof-at-peace-forest\n\nBerry Sakharof at יער השלום Peace Forest 2026-06-17T21:00:00"
+      }
+    ]
+  }
+}
