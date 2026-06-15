@@ -11,6 +11,15 @@ body {
   color: #5f6368;
   margin: 0 0 8px;
 }
+/* When the popup carries a heading-line action (the "Suggest Correction" or
+   "Disagree?" link), lay the heading out as a row: text on the left, link on
+   the right. */
+#heading.with-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
 /* One button per distinct event found on the page. A compact, tonal
    (light-blue) card so it reads as a pressable button: a calendar-style
    date chip on the left (month banner over day), then the title and a
@@ -63,6 +72,8 @@ body {
   text-align: center;
 }
 .event-btn .e-month {
+  display: flex;
+  justify-content: center;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -71,6 +82,8 @@ body {
   padding: 2px 0;
 }
 .event-btn .e-day {
+  display: flex;
+  justify-content: center;
   font-size: 16px;
   font-weight: 700;
   line-height: 1.1;
@@ -111,15 +124,16 @@ body {
   border-radius: 4px;
   margin: 0 0 8px;
 }
-/* The quiet "Disagree?" link under "No events found" on an unsupported page:
-   a plain text link to the public policy doc, deliberately understated so it
-   doesn't read as a primary action. */
-.policy-link {
-  display: inline-block;
+/* The small right-aligned link on the popup's heading line ("Suggest Correction"
+   on an unlisted host with an event, or "Disagree?" when there's nothing to
+   show): deliberately understated so it doesn't read as a primary action. */
+.heading-link {
+  flex-shrink: 0;
   font-size: 11px;
   color: #1a73e8;
   text-decoration: none;
+  white-space: nowrap;
 }
-.policy-link:hover {
+.heading-link:hover {
   text-decoration: underline;
 }

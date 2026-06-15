@@ -1,6 +1,6 @@
 // Offline unit tests for the source-request URL building: the prefilled GitHub
 // issue-form link the popup opens on an unsupported page (the
-// ui/views/source-request-view.js makeSourceRequestButton flow).
+// ui/views/source-request-view.js makeSourceRequestLink flow).
 "use strict";
 
 const { test, before } = require("node:test");

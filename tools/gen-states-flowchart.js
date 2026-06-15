@@ -104,7 +104,7 @@ parts.push(tag(444, 618, "yes"));
 parts.push(box(STATEX, 610, SW, 52, ["State 4 — allowlisted", "Show the event (no support ask)"], SHOW));
 parts.push(line(355, 650, SLEFT, 715));
 parts.push(tag(444, 700, "no"));
-parts.push(box(STATEX, 715, SW, 56, ["State 5 — unlisted", "Show the event + “Request support”"], SHOW));
+parts.push(box(STATEX, 715, SW, 56, ["State 5 — unlisted", "Show the event + “Suggest Correction”"], SHOW));
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>

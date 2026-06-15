@@ -86,12 +86,10 @@
     <!-- State 3 — not denylisted, and the fallback found nothing complete:
          “No events found” plus the quiet “Disagree?” policy link. -->
     <section class="state" data-state="3-nothing-found">
-      <p class="caption">State 3 — nothing found: “No events found” + “Disagree?” link</p>
+      <p class="caption">State 3 — nothing found: “No events found” + a right-aligned “Disagree?” link</p>
       <div class="popup">
-        <p id="heading">No events found on this page</p>
-        <div id="events">
-          <a class="policy-link" href="#">Disagree?</a>
-        </div>
+        <p id="heading" class="with-link">No events found on this page<a class="heading-link" href="#">Disagree?</a></p>
+        <div id="events"></div>
       </div>
     </section>
 
@@ -116,21 +114,15 @@
     <!-- State 5 — a complete fallback event on a host that's on neither list:
          show it AND offer to request first-class support. -->
     <section class="state" data-state="5-unlisted">
-      <p class="caption">State 5 — unlisted: show the event + “Request support”</p>
+      <p class="caption">State 5 — unlisted: show the event + a right-aligned “Suggest Correction” link</p>
       <div class="popup">
-        <p id="heading">Add to Google Calendar</p>
+        <p id="heading" class="with-link">Add to Google Calendar<a class="heading-link" href="#">Suggest Correction</a></p>
         <div id="events">
           <button class="event-btn">
             <span class="e-date"><span class="e-month">AUG</span><span class="e-day">5</span></span>
             <span class="e-body">
               <span class="e-title">Annual Neighborhood Cleanup</span>
               <span class="e-when">9 AM · Riverside Park boathouse</span>
-            </span>
-          </button>
-          <button class="event-btn">
-            <span class="e-body">
-              <span class="e-title">Request support for this site</span>
-              <span class="e-when">Opens a prefilled GitHub issue</span>
             </span>
           </button>
         </div>

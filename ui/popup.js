@@ -52,12 +52,13 @@ async function init() {
     headingEl.textContent = "No events found on this page";
   }
 
-  // Unsupported-host extras. At most one fires: `request` only when an event is
-  // shown (State 4), `policyLink` only when none is (State 2/3b).
+  // A heading-line link on an unlisted host, right-aligned next to the heading
+  // text: "Suggest Correction" when a complete event is shown (State 5), or
+  // "Disagree?" when there's nothing to show (State 3). At most one fires.
   if (request || policyLink) {
     const view = await import("./views/source-request-view.js");
-    if (request) eventsEl.appendChild(view.makeSourceRequestButton(tab, request));
-    if (policyLink) eventsEl.appendChild(view.makePolicyLink(tab));
+    headingEl.classList.add("with-link");
+    headingEl.appendChild(request ? view.makeSourceRequestLink(tab, request) : view.makePolicyLink(tab));
   }
 }
 

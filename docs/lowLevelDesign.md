@@ -10,7 +10,7 @@ See [highLevelDesign.md](highLevelDesign.md) for how extraction works and
 | `fallback-policy.js` | The generic fallback's host classifier (`classifyHost`) + presentability gate, shared by the popup and the auto-extractor triage |
 | `ui/popup.html`, `ui/popup.css`, `ui/popup.js` | Toolbar popup: controller that runs the extractor, picks a view (`chooseContent`), and renders it (markup + extracted styles) |
 | `ui/views/events-view.js` | Renders one button per event (loaded on demand via `import()`) |
-| `ui/views/source-request-view.js` | Unsupported-host affordances (loaded on demand): the prefilled-GitHub-issue "request support" button, and the "Disagree?" link to the policy doc |
+| `ui/views/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
 | `ui/views/popup-states.html` | Static visual reference of the popup's five states; input to the UI snapshot test (not shipped — see `tools/shipping-files.js`) |
 | `docs/extraction-policy.md` | Short public "how this extension finds events" doc the "Disagree?" link opens |
 | `ui/toolbar-icon.js` | Background service worker: shows a green availability badge on the toolbar icon per tab (none on unsupported pages) |

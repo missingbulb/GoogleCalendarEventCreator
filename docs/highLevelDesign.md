@@ -41,8 +41,9 @@ picks a path by whether the page's host has a per-site source:
      "Disagree?" link to the public policy doc (`docs/extraction-policy.md`).
    - **complete event, allowlisted** — show the event; don't ask for support
      (the fallback is already trusted there).
-   - **complete event, on neither list** — show the event **and** a "request
-     support for this site" link, so a good page can become a first-class source.
+   - **complete event, on neither list** — show the event **and** a right-aligned
+     "Suggest Correction" link on the heading line (it opens the prefilled
+     source-request issue), so a good page can become a first-class source.
 
    The toolbar icon still reflects only whether a per-site source exists (it
    can't run extraction), so an unsupported host can show an event in the popup

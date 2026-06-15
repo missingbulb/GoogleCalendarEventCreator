@@ -1,24 +1,25 @@
-// The "what to do on an unsupported page" view: two affordances the popup
-// controller (popup.js) renders for a host with no per-site source.
+// The two heading-line affordances the popup controller (popup.js) renders for a
+// host with no per-site source — both small, right-aligned links that sit on the
+// popup's heading line:
 //
-//   makeSourceRequestButton — shown when the generic fallback DID find an event
-//     on an unknown host (State 4): a button that opens a prefilled GitHub "New
-//     issue" page requesting the site be added as a supported source, seeded
-//     with the scraped event.
-//   makePolicyLink — shown when there's no event to offer (State 2/3b): a quiet
-//     link to the public "how this extension finds events" doc, rather than
-//     pestering for support on a page that has no event.
+//   makeSourceRequestLink — shown when the generic fallback found a complete
+//     event on an unlisted host (State 5): a "Suggest Correction" link that opens
+//     a prefilled GitHub "Event source request" issue, seeded with the scraped
+//     event.
+//   makePolicyLink — shown when there's nothing to show on a non-denylisted host
+//     (State 3): a "Disagree?" link to the public "how this extension finds
+//     events" doc.
 //
 // An ES module, loaded on demand by popup.js via dynamic import(). The two
 // `make*` functions are the controller's entry points; `buildSourceRequestUrl`
 // and `buildPolicyDocUrl` are also exported for the unit tests. This is the
 // source-request half of the former background.js.
 //
-// The button targets the "Event source request" issue form (.github/
-// ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands on that
-// structured form with the fields already filled in, reviews them, and clicks
-// "Submit new issue" — no token, form service, or backend involved. GitHub
-// forbids framing its pages (X-Frame-Options), so this opens in a new tab
+// The "Suggest Correction" link targets the "Event source request" issue form
+// (.github/ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands
+// on that structured form with the fields already filled in, reviews them, and
+// clicks "Submit new issue" — no token, form service, or backend involved.
+// GitHub forbids framing its pages (X-Frame-Options), so this opens in a new tab
 // rather than being embedded, matching how the extension opens the Calendar
 // template.
 //
@@ -64,49 +65,13 @@ export function buildPolicyDocUrl() {
   return `https://github.com/${SOURCE_REQUEST_REPO}/blob/main/${POLICY_DOC_PATH}`;
 }
 
-// On an unsupported page with no event found, a button that opens a prefilled
-// GitHub "new issue" page (in a new tab) requesting this site be added as a
-// source. Styled like the event buttons for consistency, but with a GitHub
-// mark instead of a date chip. A logged-in GitHub user just submits the
-// already-filled issue.
-export function makeSourceRequestButton(tab, event) {
-  const url = buildSourceRequestUrl(sourceRequestPrefill(tab, event));
-
-  const btn = document.createElement("button");
-  btn.className = "event-btn";
-
-  const body = document.createElement("span");
-  body.className = "e-body";
-
-  const title = document.createElement("span");
-  title.className = "e-title";
-  title.textContent = "Request support for this site";
-  body.appendChild(title);
-
-  const sub = document.createElement("span");
-  sub.className = "e-when";
-  sub.textContent = "Opens a prefilled GitHub issue";
-  body.appendChild(sub);
-
-  btn.appendChild(body);
-
-  btn.addEventListener("click", async () => {
-    await chrome.tabs.create({ url, index: tab.index + 1 });
-    window.close();
-  });
-  return btn;
-}
-
-// On an unsupported page with no event to offer, a quiet "Disagree?" link that
-// opens the public "how this extension finds events" doc in a new tab. Far
-// lighter than the request button: we don't ask anyone to sponsor a site that
-// has no event — we just point to how the call was made.
-export function makePolicyLink(tab) {
-  const url = buildPolicyDocUrl();
-
+// A small link that sits on the popup's heading line (right-aligned via
+// #heading.with-link) and opens `url` in a new tab. The shared shape behind both
+// affordances below.
+function headingLink(text, url, tab) {
   const link = document.createElement("a");
-  link.className = "policy-link";
-  link.textContent = "Disagree?";
+  link.className = "heading-link";
+  link.textContent = text;
   link.href = url;
   link.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -114,6 +79,19 @@ export function makePolicyLink(tab) {
     window.close();
   });
   return link;
+}
+
+// State 5: a complete fallback event on an unlisted host. A "Suggest Correction"
+// link that opens the prefilled GitHub "Event source request" issue, seeded with
+// the scraped event — a logged-in user just submits the already-filled form.
+export function makeSourceRequestLink(tab, event) {
+  return headingLink("Suggest Correction", buildSourceRequestUrl(sourceRequestPrefill(tab, event)), tab);
+}
+
+// State 3: nothing to show on a non-denylisted host. A quiet "Disagree?" link to
+// the public "how this extension finds events" doc.
+export function makePolicyLink(tab) {
+  return headingLink("Disagree?", buildPolicyDocUrl(), tab);
 }
 
 // The fields that seed the source-request form: the page URL and title, plus
