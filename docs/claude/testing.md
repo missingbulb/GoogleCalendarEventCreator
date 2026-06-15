@@ -45,8 +45,11 @@ is the project-specific mechanics. Keep these decisions in mind:
   comparison: regenerate the stored PNGs with `npm run refresh:ui` and commit
   them so the diff shows the before/after. (The render is deterministic — satori
   + resvg, no browser or network — so whoever makes the UI change generates them
-  on their own branch; there's no CI workflow for it.) A new UI surface needs a
-  new snapshot of its own.
+  on their own branch; there's no CI workflow for it.) The popup's states are
+  authored as static markup in `ui/views/popup-states.html`, styled by the real
+  `ui/popup.css` (the renderer inlines it — no duplicated style values); edit
+  that file (and the views it mirrors) for a UI change, then regenerate. A new
+  popup state needs a new `.state` section there and its own snapshot.
 - **"Does the extension load?" is guarded in two layers.** A startup failure —
   a bad service-worker `importScripts` path (#146), a missing/renamed injected
   file, a syntax error in one — must fail a test, not just surface when someone

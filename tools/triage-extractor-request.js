@@ -10,8 +10,8 @@
 //
 // As a script (run by the workflow):
 //   in  (env): ISSUE_BODY, ISSUE_TITLE  — the issue's raw body/title
-//   out (GITHUB_OUTPUT): triaged=true|false
-//   out (file, when triaged): /tmp/triage-message.md — the closing comment body
+//   out (GITHUB_OUTPUT): hostInAllowList=true|false, hostInDenyList=true|false
+//   out (file, when either is true): /tmp/triage-message.md — the closing comment
 // As a module (the tests): exports firstUrl() and runTriage().
 "use strict";
 
@@ -80,11 +80,15 @@ if (require.main === module) {
           : "No URL found in the issue — proceeding to the agent."
       );
     }
-    if (process.env.GITHUB_OUTPUT) {
-      fs.appendFileSync(process.env.GITHUB_OUTPUT, `triaged=${res.triaged}\n`);
-    }
+    writeOutputs({ hostInAllowList: res.listing === "allow", hostInDenyList: res.listing === "deny" });
   })().catch((e) => {
     console.error("Triage check errored — proceeding to the agent (fail open):", e);
-    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, "triaged=false\n");
+    writeOutputs({ hostInAllowList: false, hostInDenyList: false });
   });
+
+  function writeOutputs(outputs) {
+    if (!process.env.GITHUB_OUTPUT) return;
+    const lines = Object.entries(outputs).map(([k, v]) => `${k}=${v}`);
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, lines.join("\n") + "\n");
+  }
 }

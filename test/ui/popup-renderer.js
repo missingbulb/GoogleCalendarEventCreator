@@ -1,34 +1,31 @@
-// Renders an approximation of the popup's UI (see ui/popup.html + ui/popup.css
-// and ui/views/events-view.js) to a PNG, using satori (HTML/CSS-subset -> SVG,
-// no browser) and resvg (SVG -> PNG). The element tree below mirrors
-// ui/popup.css's styles and the events-view per-event button layout, for the
-// fixed fixture data in popup-fixtures.js.
+// Renders each of the popup's five states (ui/views/popup-states.html) to a PNG
+// via satori (HTML/CSS-subset -> SVG, no browser) and resvg (SVG -> PNG).
 //
-// This is NOT a screenshot of the real popup — satori only supports a
-// constrained flexbox-based style subset, so this is a best-effort visual
-// approximation for catching unintended layout/copy changes. If the popup's
-// markup/CSS or the events-view rendering changes, update buildTree() to match.
+// satori has no CSS engine — it ignores <style>/<link> and reads only inline
+// styles — so we keep ONE source of truth for the popup's look (the real
+// ui/popup.css) and fold the WHOLE stylesheet onto the static markup here
+// before rendering: parse popup.css into rules, match each against the state's
+// DOM with jsdom (the engine the popup runs in), and inline EVERY declaration.
+// Nothing is cherry-picked: satori quietly ignores what it doesn't use (cursor,
+// transition, -webkit-* line clamp, …). The only adjustment is satori's one
+// structural requirement — an element with >1 child needs an explicit
+// flex/none/contents display — plus swapping in the bundled font. Interaction
+// rules (:hover/:active) match nothing in a static tree, so they're skipped.
+//
+// This is NOT a screenshot of the real popup — satori supports a constrained
+// flexbox style subset — but it's a faithful, deterministic approximation
+// driven by the shipped CSS, for catching unintended layout/copy changes.
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { pathToFileURL } = require("node:url");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
-const loadPopupHelpers = require("./popup-helpers");
+const { JSDOM } = require("jsdom");
 
-// The popup's pure display helpers, imported (async) from the events-view ES
-// module on first render and reused thereafter. GCalConfig is loaded the same
-// way so the renderer reads the centralized maxEventsShown (no local copy).
-let summarize, dateChip, GCalConfig;
-async function ensureHelpers() {
-  if (!summarize) ({ summarize, dateChip } = await loadPopupHelpers());
-  if (!GCalConfig) {
-    ({ GCalConfig } = await import(pathToFileURL(path.join(__dirname, "..", "..", "config.js"))));
-  }
-}
+const ROOT = path.join(__dirname, "..", "..");
 
-const FONT_FAMILY = "Liberation Sans"; // metric-compatible stand-in for popup.html's Arial fallback
+const FONT_FAMILY = "Liberation Sans"; // metric-compatible stand-in for popup.css's Arial fallback
 const FONT_DIR = path.join(__dirname, "fonts");
 const FONTS = [
   { name: FONT_FAMILY, data: fs.readFileSync(path.join(FONT_DIR, "LiberationSans-Regular.ttf")), weight: 400, style: "normal" },
@@ -36,255 +33,134 @@ const FONTS = [
   { name: FONT_FAMILY, data: fs.readFileSync(path.join(FONT_DIR, "LiberationSans-Italic.ttf")), weight: 400, style: "italic" },
 ];
 
-// Total rendered width: popup.html's body is 280px wide with 12px padding on
-// each side.
+// popup.css's body is 280px wide + 12px padding each side.
 const WIDTH = 304;
 
-function eventButton(event) {
-  // Right column: title over the muted date/time line.
-  const bodyChildren = [
-    {
-      type: "div",
-      props: {
-        style: { display: "flex", fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: "#202124" },
-        children: event.title,
-      },
-    },
-  ];
-  const when = summarize(event);
-  if (when) {
-    bodyChildren.push({
-      type: "div",
-      props: {
-        style: {
-          display: "flex",
-          fontSize: 11,
-          color: "#5f6368",
-          // Match popup.html: the time/location line stays on one line and
-          // ellipsizes, keeping each button compact.
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        },
-        children: when,
-      },
-    });
+const POPUP_CSS = fs.readFileSync(path.join(ROOT, "ui", "popup.css"), "utf8");
+const STATES_HTML_PATH = path.join(ROOT, "ui", "views", "popup-states.html");
+
+// Parse flat CSS into { selector, body } rules (comma-separated selectors split
+// out). popup.css has no media queries or nesting, so this stays simple.
+function parseCssRules(css) {
+  const rules = [];
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const re = /([^{}]+)\{([^{}]+)\}/g;
+  let m;
+  while ((m = re.exec(clean))) {
+    const body = m[2].trim();
+    for (const sel of m[1].split(",")) rules.push({ selector: sel.trim(), body });
   }
+  return rules;
+}
 
-  const row = [];
+const RULES = parseCssRules(POPUP_CSS);
+const BODY_RULE = RULES.find((r) => r.selector === "body");
 
-  // Left date chip, styled like a calendar icon: a blue month banner over the
-  // day-of-month on a white "page" (matches popup.html's .e-date).
-  const chip = dateChip(event.start);
-  if (chip) {
-    row.push({
-      type: "div",
-      props: {
-        style: {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "stretch",
-          flexShrink: 0,
-          width: 38,
-          overflow: "hidden",
-          backgroundColor: "#ffffff",
-          border: "1px solid #c6dafc",
-          borderRadius: 5,
-        },
-        children: [
-          {
-            type: "div",
-            props: {
-              style: { display: "flex", justifyContent: "center", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, color: "#ffffff", backgroundColor: "#1a73e8", paddingTop: 2, paddingBottom: 2 },
-              children: chip.month,
-            },
-          },
-          {
-            type: "div",
-            props: {
-              style: { display: "flex", justifyContent: "center", fontSize: 16, fontWeight: 700, lineHeight: 1.1, color: "#1a73e8", paddingTop: 2, paddingBottom: 3 },
-              children: chip.day,
-            },
-          },
-        ],
-      },
-    });
+// Fold popup.css onto a popup subtree as inline styles. The element's own inline
+// style is appended last so it wins. The preview's ".popup" div stands in for
+// the popup's <body>, so it takes the body rule directly.
+function inlinePopupCss(popupEl) {
+  for (const { selector, body } of RULES) {
+    if (selector === "body") continue;
+    let matched;
+    try {
+      matched = popupEl.querySelectorAll(selector);
+    } catch (e) {
+      continue; // a selector jsdom can't evaluate (e.g. some pseudo) — skip
+    }
+    for (const el of matched) el.setAttribute("style", `${body};${el.getAttribute("style") || ""}`);
   }
+  if (BODY_RULE) popupEl.setAttribute("style", `${BODY_RULE.body};${popupEl.getAttribute("style") || ""}`);
+}
 
-  row.push({
-    type: "div",
-    props: {
-      // flexBasis:0 + minWidth:0 + overflow:hidden pin this column to the
-      // leftover row width so the nowrap "when" line ellipsizes (matches
-      // popup.html's .e-body) instead of overflowing the card.
-      style: { display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, flexGrow: 1, flexShrink: 1, flexBasis: 0, minWidth: 0, overflow: "hidden" },
-      children: bodyChildren,
-    },
+const camel = (p) => p.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+function coerceValue(v) {
+  v = v.trim();
+  if (/^-?\d+(\.\d+)?px$/.test(v)) return parseFloat(v);
+  if (/^-?\d+(\.\d+)?$/.test(v)) return parseFloat(v);
+  return v;
+}
+
+// satori validates `display` against a fixed set and rejects anything else
+// (e.g. inline-block). Drop an unsupported value so the box falls back to its
+// default; the >1-child rule below still forces flex where it's structurally
+// required.
+const SATORI_DISPLAY = new Set(["flex", "block", "contents", "none", "-webkit-box"]);
+
+// Inline style string -> satori style object: camelCase the keys and coerce
+// px/number values. Every declaration is kept (satori ignores what it doesn't
+// use) except a `display` value satori would reject.
+function styleObject(styleAttr) {
+  const out = {};
+  for (const decl of (styleAttr || "").split(";")) {
+    const i = decl.indexOf(":");
+    if (i < 0) continue;
+    const prop = decl.slice(0, i).trim();
+    const value = decl.slice(i + 1).trim();
+    if (!prop || !value) continue;
+    const key = camel(prop);
+    if (key === "display" && !SATORI_DISPLAY.has(value)) continue;
+    out[key] = coerceValue(value);
+  }
+  return out;
+}
+
+const FLEXY_DISPLAY = ["flex", "none", "contents"];
+
+// jsdom element -> satori element tree. Tag is irrelevant to satori (it lays out
+// boxes from styles), so everything becomes a div; text nodes become string
+// children (whitespace collapsed).
+function toVDom(el) {
+  const style = styleObject(el.getAttribute("style"));
+  const children = [];
+  for (const node of el.childNodes) {
+    if (node.nodeType === 3) {
+      const t = node.textContent.replace(/\s+/g, " ").trim();
+      if (t) children.push(t);
+    } else if (node.nodeType === 1) {
+      children.push(toVDom(node));
+    }
+  }
+  // satori's one structural requirement: any box that lays out child BOXES (an
+  // element child, or more than one child) needs an explicit flex/none/contents
+  // display — only a lone text child is exempt. The popup stacks vertically, so
+  // default those to a column flex; popup.css's own flex rules (e.g. .event-btn
+  // { display: flex; flex-direction: row }) already satisfy it and are left as-is.
+  const loneTextChild = children.length === 1 && typeof children[0] === "string";
+  if (children.length > 0 && !loneTextChild && !FLEXY_DISPLAY.includes(style.display)) {
+    style.display = "flex";
+    if (!style.flexDirection) style.flexDirection = "column";
+  }
+  const childProp = children.length === 1 ? children[0] : children;
+  return { type: "div", props: { style, children: childProp } };
+}
+
+// Render one state's ".popup" element (a jsdom node) to a PNG buffer.
+async function renderStatePng(popupEl) {
+  inlinePopupCss(popupEl);
+  const vdom = toVDom(popupEl);
+  // Root scaffolding: fixed popup width, and the bundled font (the CSS
+  // font-family stack was dropped so satori uses the one we loaded).
+  Object.assign(vdom.props.style, {
+    width: WIDTH,
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    fontFamily: FONT_FAMILY,
   });
-
-  return {
-    type: "div",
-    props: {
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-        minHeight: 52,
-        marginBottom: 8,
-        paddingTop: 8,
-        paddingBottom: 8,
-        paddingLeft: 10,
-        paddingRight: 10,
-        color: "#202124",
-        backgroundColor: "#e8f0fe",
-        border: "1px solid #d2e3fc",
-        borderRadius: 8,
-        boxShadow: "0 1px 2px rgba(60, 64, 67, 0.15)",
-      },
-      children: row,
-    },
-  };
+  const svg = await satori(vdom, { width: WIDTH, fonts: FONTS });
+  return new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
 }
 
-// The "request this source" button shown under the events on an unsupported
-// page where the fallback found one (State 4; popup.js's
-// makeSourceRequestButton): an event-style card with a title over a muted
-// subtitle, and no date chip. Opens a prefilled GitHub issue in the real popup.
-function sourceRequestButton() {
-  const body = {
-    type: "div",
-    props: {
-      style: { display: "flex", flexDirection: "column", justifyContent: "center", gap: 2, flexGrow: 1, flexShrink: 1, flexBasis: 0, minWidth: 0, overflow: "hidden" },
-      children: [
-        {
-          type: "div",
-          props: {
-            style: { display: "flex", fontSize: 13, fontWeight: 700, lineHeight: 1.3, color: "#202124" },
-            children: "Request support for this site",
-          },
-        },
-        {
-          type: "div",
-          props: {
-            style: { display: "flex", fontSize: 11, color: "#5f6368", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
-            children: "Opens a prefilled GitHub issue",
-          },
-        },
-      ],
-    },
-  };
-
-  return {
-    type: "div",
-    props: {
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-        minHeight: 52,
-        marginBottom: 8,
-        paddingTop: 8,
-        paddingBottom: 8,
-        paddingLeft: 10,
-        paddingRight: 10,
-        color: "#202124",
-        backgroundColor: "#e8f0fe",
-        border: "1px solid #d2e3fc",
-        borderRadius: 8,
-        boxShadow: "0 1px 2px rgba(60, 64, 67, 0.15)",
-      },
-      children: [body],
-    },
-  };
+// The five state popups from the static gallery, in document order:
+// [{ name, popup }], where `name` is the section's data-state.
+function loadStatePopups() {
+  const dom = new JSDOM(fs.readFileSync(STATES_HTML_PATH, "utf8"));
+  return [...dom.window.document.querySelectorAll(".state")].map((section) => ({
+    name: section.getAttribute("data-state"),
+    popup: section.querySelector(".popup"),
+  }));
 }
 
-// The quiet "Disagree?" link shown under "No events found" on an unsupported
-// page (popup.js's makePolicyLink): a small blue text link, not a card.
-function policyLink() {
-  return {
-    type: "div",
-    props: {
-      style: { display: "flex", fontSize: 11, color: "#1a73e8" },
-      children: "Disagree?",
-    },
-  };
-}
-
-function buildTree(data, opts = {}) {
-  const MAX_EVENTS = GCalConfig.maxEventsShown;
-  const allEvents = data.events && data.events.length ? data.events : [];
-  const events = allEvents.slice(0, MAX_EVENTS);
-  const heading = !allEvents.length
-    ? "No events found on this page"
-    : allEvents.length > 1
-      ? `${allEvents.length} events on this page`
-      : "Add to Google Calendar";
-  const truncated = allEvents.length > MAX_EVENTS;
-
-  const children = [
-    {
-      type: "div",
-      props: {
-        style: { display: "flex", fontSize: 12, fontWeight: 500, marginBottom: 8, color: "#5f6368" },
-        children: heading,
-      },
-    },
-  ];
-
-  if (truncated) {
-    children.push({
-      type: "div",
-      props: {
-        style: {
-          display: "flex",
-          fontSize: 11,
-          color: "#7d5500",
-          backgroundColor: "#fef3c7",
-          paddingTop: 4,
-          paddingBottom: 4,
-          paddingLeft: 8,
-          paddingRight: 8,
-          borderRadius: 4,
-          marginBottom: 8,
-        },
-        children: `Showing first ${MAX_EVENTS} of ${allEvents.length}`,
-      },
-    });
-  }
-
-  children.push(...events.map(eventButton));
-
-  // Unsupported-host extras, matching popup.js: a request button under the
-  // events (State 4), or a "Disagree?" policy link when there are none (State
-  // 2/3b). At most one is set.
-  if (opts.requestButton) children.push(sourceRequestButton());
-  if (opts.policyLink) children.push(policyLink());
-
-  return {
-    type: "div",
-    props: {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        width: WIDTH,
-        padding: 12,
-        boxSizing: "border-box",
-        backgroundColor: "#ffffff",
-        color: "#202124",
-        fontFamily: FONT_FAMILY,
-      },
-      children,
-    },
-  };
-}
-
-async function renderPopupPng(data, opts = {}) {
-  await ensureHelpers();
-  const svg = await satori(buildTree(data, opts), { width: WIDTH, fonts: FONTS });
-  const resvg = new Resvg(svg, { font: { loadSystemFonts: false } });
-  return resvg.render().asPng();
-}
-
-module.exports = { renderPopupPng };
+module.exports = { renderStatePng, loadStatePopups };

@@ -19,4 +19,10 @@ const SHIPPING_PATHS = [
   "icons", // toolbar icons: the per-size PNGs the manifest references
 ];
 
-module.exports = { SHIPPING_PATHS };
+// Files that live UNDER a shipped directory but must NOT ship — dev-only
+// artifacts the runtime never loads. Exact repo-relative paths.
+const SHIPPING_EXCLUDES = [
+  "ui/views/popup-states.html", // visual reference + UI-snapshot input; not loaded by the extension
+];
+
+module.exports = { SHIPPING_PATHS, SHIPPING_EXCLUDES };

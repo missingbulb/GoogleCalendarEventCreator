@@ -46,6 +46,11 @@ picks a path by whether the page's host has a per-site source:
    reflects only whether a per-site source exists (it can't run extraction), so
    an unsupported host can show an event in the popup while its icon stays blue.
 
+The five states the popup can land in (regenerate with
+`node tools/gen-states-flowchart.js`):
+
+![Flowchart of the popup's five states](popup-states-flowchart.png)
+
 The pipeline is built from two kinds of file: extractors (the per-site sources
 plus the one unsupported-site fallback) and shared helpers. An extractor doesn't
 make output decisions — rendering, whitespace, de-dup, and timezone

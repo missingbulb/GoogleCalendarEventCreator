@@ -48,8 +48,8 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
         run: node tools/triage-extractor-request.js
 
-      - name: Close an already-triaged request
-        if: steps.triage.outputs.triaged == 'true'
+      - name: Close a request whose host is already listed
+        if: steps.triage.outputs.hostInDenyList == 'true' || steps.triage.outputs.hostInAllowList == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -58,15 +58,15 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
       - name: Install npm dependencies
-        if: steps.triage.outputs.triaged != 'true'
+        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
         run: npm ci
 
       - name: Install Claude Code CLI
-        if: steps.triage.outputs.triaged != 'true'
+        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Configure git
-        if: steps.triage.outputs.triaged != 'true'
+        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -74,7 +74,7 @@ jobs:
       # Fetch the issue via API (avoids shell-escaping issues with free-form bodies)
       # and interpolate it into the static prompt template.
       - name: Build agent prompt
-        if: steps.triage.outputs.triaged != 'true'
+        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -110,7 +110,7 @@ jobs:
           PYEOF
 
       - name: Run Claude agent
-        if: steps.triage.outputs.triaged != 'true'
+        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
         timeout-minutes: 75
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -1,43 +1,40 @@
-// UI snapshot tests: render approximations of the popup with fixed fixture
-// data (see popup-fixtures.js and popup-renderer.js) and compare against stored images in
-// test/ui/snapshots/. Run `npm run refresh:ui` to regenerate the stored
-// images after an intentional UI change.
+// UI snapshot tests: render each of the popup's five states
+// (ui/views/popup-states.html) to a PNG and compare against the stored image in
+// test/ui/snapshots/. The states file is the single visual reference; the real
+// ui/popup.css is inlined onto it before rendering (see popup-renderer.js), so
+// the snapshots track the shipped styling. Run `npm run refresh:ui` to
+// regenerate after an intentional change to the popup markup or ui/popup.css.
 //
-// Cases:
-//   popup-single-event.png — a single-event page: one ~60px button, heading "Add to Google Calendar".
-//   popup-multi-event.png  — a listing/series page: 6 buttons, "N events on this page" heading.
-//   popup-truncated.png    — 9 events but only 7 shown; amber "Showing first 7 of 9" notice.
-//   popup-empty.png        — supported host, no events: no buttons, heading "No events found on this page".
-//   popup-fallback-request.png — unsupported host, fallback found one (State 4): the event button plus a "request support" button under it.
-//   popup-unsupported-empty.png — unsupported host, nothing to show (State 2/3b): "No events found on this page" and a quiet "Disagree?" policy link.
+// The five states (issue #192; see ui/popup.js's chooseContent):
+//   1-supported   — supported host: the extractor's events (a 2-event listing)
+//   2-no-events   — unsupported, nothing found: "No events found" + Disagree? link
+//   3-allowlisted — unsupported, complete fallback event, allowlisted: event only
+//   4-denylisted  — unsupported, complete fallback event, denylisted: same as state 2
+//   5-request     — unsupported, complete fallback event, unlisted: event + request button
 "use strict";
 
-const test = require("node:test");
+const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
-const { renderPopupPng } = require("./popup-renderer");
-const { SINGLE_EVENT, MULTI_EVENT, TRUNCATED_EVENT, NO_EVENTS } = require("./popup-fixtures");
+const { renderStatePng, loadStatePopups } = require("./popup-renderer");
 const { artifactPath } = require("./snapshot-artifacts-dir");
-const { extractFromHtml } = require("../harness");
 
 const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 
-// Rendering is deterministic (no browser/fonts involved), so pixels should
-// match exactly run to run; allow a tiny tolerance for any
+// Rendering is deterministic (no browser/fonts involved beyond the bundled
+// ones), so pixels should match run to run; allow a tiny tolerance for any
 // platform-dependent rasterization differences.
 const MAX_DIFF_RATIO = 0.005;
 
-async function compareToSnapshot(t, name, data, opts = {}) {
+async function compareToSnapshot(name, pngBuffer) {
   const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.png`);
   const actualPath = artifactPath(`${name}.actual.png`);
   const diffPath = artifactPath(`${name}.diff.png`);
 
-  const actualBuffer = await renderPopupPng(data, opts);
-  const actual = PNG.sync.read(actualBuffer);
-
+  const actual = PNG.sync.read(pngBuffer);
   assert.ok(
     fs.existsSync(snapshotPath),
     `No stored snapshot at ${snapshotPath}; run "npm run refresh:ui" to create one.`
@@ -45,7 +42,7 @@ async function compareToSnapshot(t, name, data, opts = {}) {
   const expected = PNG.sync.read(fs.readFileSync(snapshotPath));
 
   if (actual.width !== expected.width || actual.height !== expected.height) {
-    fs.writeFileSync(actualPath, actualBuffer);
+    fs.writeFileSync(actualPath, pngBuffer);
     assert.fail(
       `${name}: popup size changed: expected ${expected.width}x${expected.height}, got ` +
         `${actual.width}x${actual.height}. Run "npm run refresh:ui" if this is intentional.`
@@ -58,7 +55,7 @@ async function compareToSnapshot(t, name, data, opts = {}) {
   const ratio = diffPixels / (width * height);
 
   if (ratio > MAX_DIFF_RATIO) {
-    fs.writeFileSync(actualPath, actualBuffer);
+    fs.writeFileSync(actualPath, pngBuffer);
     fs.writeFileSync(diffPath, PNG.sync.write(diff));
     assert.fail(
       `${name}: popup UI changed: ${diffPixels} of ${width * height} pixels differ ` +
@@ -72,42 +69,14 @@ async function compareToSnapshot(t, name, data, opts = {}) {
   }
 }
 
-test("single-event popup matches the stored snapshot", async (t) => {
-  await compareToSnapshot(t, "popup-single-event", SINGLE_EVENT);
+const STATES = loadStatePopups();
+
+test("the gallery has all five states", () => {
+  assert.equal(STATES.length, 5, "ui/views/popup-states.html should define five .state sections");
 });
 
-test("multi-event popup matches the stored snapshot", async (t) => {
-  await compareToSnapshot(t, "popup-multi-event", MULTI_EVENT);
-});
-
-test("truncated popup (>7 events) shows notice and first 7 buttons", async (t) => {
-  await compareToSnapshot(t, "popup-truncated", TRUNCATED_EVENT);
-});
-
-test("empty popup (no events) shows no buttons and a 'No events found' heading", async (t) => {
-  await compareToSnapshot(t, "popup-empty", NO_EVENTS);
-});
-
-// State 5: an unsupported host where the generic fallback found a complete
-// event (title + location + start) and the host is on neither list. The event
-// shows as a button, with a "request support" button under it.
-test("unsupported-host fallback popup shows the event and a request button", async (t) => {
-  await compareToSnapshot(t, "popup-fallback-request", SINGLE_EVENT, { requestButton: true });
-});
-
-// State 2/4: an unsupported host with nothing to offer — no fallback event
-// (or one suppressed by the denylist). Shows "No events found" plus the quiet
-// "Disagree?" link to the policy doc, rather than pestering for support.
-test("unsupported-host empty popup shows 'No events found' and a Disagree? link", async (t) => {
-  await compareToSnapshot(t, "popup-unsupported-empty", NO_EVENTS, { policyLink: true });
-});
-
-// A page describing no event (only a page title, present on essentially every
-// page) must not render a phantom button. Feed such a page through the real
-// extractor and confirm it renders as the empty popup.
-test("a page with no event (title only) renders the empty popup, not a button", async (t) => {
-  const html = `<title>Just an Article</title><h1>Ten Tips for Houseplants</h1><p>Water them.</p>`;
-  const data = extractFromHtml(html, "https://www.blog.example/houseplants");
-  assert.equal(data.events.length, 0);
-  await compareToSnapshot(t, "popup-empty", data);
-});
+for (const { name, popup } of STATES) {
+  test(`popup state "${name}" matches the stored snapshot`, async () => {
+    await compareToSnapshot(`popup-state-${name}`, await renderStatePng(popup));
+  });
+}

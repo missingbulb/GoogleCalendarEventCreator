@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Popup states — visual reference</title>
+    <!--
+      The five states the popup can render (see ui/popup.js's chooseContent and
+      docs/highLevelDesign.md). This file is the single visual reference for how
+      each one looks, and the input to the UI snapshot test
+      (test/ui/popup-snapshots.test.js), which renders each ".popup" block to an
+      image. It is NOT shipped in the extension (see tools/shipping-files.js).
+
+      The popup markup below uses the EXACT classes ui/views/events-view.js and
+      source-request-view.js produce, styled by the real ui/popup.css — linked
+      here for browsing, and inlined by the snapshot test before rendering — so
+      there is one source of truth for how the popup looks. The <style> block is
+      gallery chrome only (captions / page frame); the snapshot test renders only
+      the ".popup" blocks, so none of it reaches the images.
+    -->
+    <link rel="stylesheet" href="../popup.css" />
+    <style>
+      body {
+        background: #f1f3f4;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        padding: 24px;
+        margin: 0;
+      }
+      .state {
+        margin: 0 0 28px;
+      }
+      .caption {
+        font-size: 13px;
+        font-weight: 600;
+        color: #3c4043;
+        margin: 0 0 8px;
+      }
+      /* A popup-window frame around the real popup content, for browsing only. */
+      .popup {
+        width: 304px;
+        padding: 12px;
+        box-sizing: border-box;
+        background: #fff;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- State 1 — supported host (a per-site source matched): show its events.
+         A listing page yields several, so this one shows two. -->
+    <section class="state" data-state="1-supported">
+      <p class="caption">State 1 — supported host: show the extractor's events</p>
+      <div class="popup">
+        <p id="heading">2 events on this page</p>
+        <div id="events">
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">25</span></span>
+            <span class="e-body">
+              <span class="e-title">NYC Tech Mixer 2026</span>
+              <span class="e-when">6 PM – 9 PM · The Williamsburg Hotel Bar, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">26</span></span>
+            <span class="e-body">
+              <span class="e-title">Designers & Founders Coffee</span>
+              <span class="e-when">9 AM · Devoción, Brooklyn</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- State 2 — unsupported, the generic fallback found nothing presentable:
+         "No events found" plus the quiet "Disagree?" policy link. -->
+    <section class="state" data-state="2-no-events">
+      <p class="caption">State 2 — unsupported, nothing found: policy link only</p>
+      <div class="popup">
+        <p id="heading">No events found on this page</p>
+        <div id="events">
+          <a class="policy-link" href="#">Disagree?</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- State 3 — unsupported, fallback found a complete event, host on the
+         allowlist: show it, but don't ask for support. -->
+    <section class="state" data-state="3-allowlisted">
+      <p class="caption">State 3 — unsupported, allowlisted: show the event, no support ask</p>
+      <div class="popup">
+        <p id="heading">Add to Google Calendar</p>
+        <div id="events">
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUL</span><span class="e-day">1</span></span>
+            <span class="e-body">
+              <span class="e-title">Late Night Jazz</span>
+              <span class="e-when">8 PM · Blue Door Hall, Berlin</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- State 4 — unsupported, fallback found a complete event but the host is
+         on the denylist: suppress it, same view as State 2. -->
+    <section class="state" data-state="4-denylisted">
+      <p class="caption">State 4 — unsupported, denylisted: event suppressed, policy link</p>
+      <div class="popup">
+        <p id="heading">No events found on this page</p>
+        <div id="events">
+          <a class="policy-link" href="#">Disagree?</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- State 5 — unsupported, fallback found a complete event, host on neither
+         list: show it AND offer to request first-class support. -->
+    <section class="state" data-state="5-request">
+      <p class="caption">State 5 — unsupported, unlisted: show the event + request support</p>
+      <div class="popup">
+        <p id="heading">Add to Google Calendar</p>
+        <div id="events">
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">AUG</span><span class="e-day">5</span></span>
+            <span class="e-body">
+              <span class="e-title">Annual Neighborhood Cleanup</span>
+              <span class="e-when">9 AM · Riverside Park boathouse</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-body">
+              <span class="e-title">Request support for this site</span>
+              <span class="e-when">Opens a prefilled GitHub issue</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

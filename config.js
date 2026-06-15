@@ -37,10 +37,14 @@ export const GCalConfig = {
   //     site where a date in an article reads as an event): never surface a
   //     fallback event; the popup shows "no events found" instead.
   // Matching is by exact host or any subdomain — "example.com" also covers
-  // "www.example.com" and "sub.example.com". Hosts WITH a per-site source are
-  // unaffected (they never reach the fallback). Both ship empty: the default
-  // (show fallback events + invite a support request) is the common case, and
-  // these are the escape hatches you populate as specific hosts warrant.
-  sourceFallbackAllowlist: [],
-  sourceFallbackDenylist: [],
+  // "www.example.com" and "sub.example.com". The default (show fallback events
+  // + invite a support request) is the common case; these are the escape
+  // hatches you populate as specific hosts warrant.
+  //
+  // Note meetup.com also has a per-site source, so the popup never consults
+  // these lists for it (a supported host short-circuits before classifyHost).
+  // Its allowlist entry only lets the auto-extractor triage close a redundant
+  // "please support meetup.com" request without spinning up an agent.
+  sourceFallbackAllowlist: ["meetup.com"],
+  sourceFallbackDenylist: ["barby.co.il"],
 };
