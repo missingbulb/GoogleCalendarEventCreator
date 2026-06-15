@@ -38,7 +38,7 @@ function loadIconState() {
         onClicked: { addListener() {} },
         setIcon() {},
       },
-      tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get() {} },
+      tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get: async () => null },
       runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
     },
     importScripts(...files) {
@@ -54,30 +54,42 @@ function loadIconState() {
 
 const { availabilityIcon } = loadIconState();
 
+// States: "supported" → green tile, "denied" → gray tile, "unknown" → blue tile.
 const CASES = [
-  { url: "https://www.meetup.com/some-group/events/123456/", supported: true },
-  { url: "https://meetup.com/some-group/events/123456/", supported: true },
-  { url: "https://www.eventbrite.com/e/some-event-tickets-123456", supported: true },
-  { url: "https://www.eventbrite.co.uk/e/some-event-tickets-123456", supported: true },
-  { url: "https://www.facebook.com/events/123456/", supported: true },
-  { url: "https://www.edfringe.com/tickets/whats-on/some-show", supported: true },
-  { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw", supported: true },
-  { url: "https://www.example.com/some-page", supported: false },
+  { url: "https://www.meetup.com/some-group/events/123456/",         state: "supported" },
+  { url: "https://meetup.com/some-group/events/123456/",             state: "supported" },
+  { url: "https://www.eventbrite.com/e/some-event-tickets-123456",   state: "supported" },
+  { url: "https://www.eventbrite.co.uk/e/some-event-tickets-123456", state: "supported" },
+  { url: "https://www.facebook.com/events/123456/",                  state: "supported" },
+  { url: "https://www.edfringe.com/tickets/whats-on/some-show",      state: "supported" },
+  { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw",        state: "supported" },
+  // Denylisted hosts → gray tile (generic extraction is noise there).
+  { url: "https://www.barby.co.il/event/123",                        state: "denied" },
+  { url: "https://barby.co.il/event/123",                            state: "denied" },
+  // Everything else → blue tile.
+  { url: "https://www.example.com/some-page",                        state: "unknown" },
   // Regression (#101): an unsupported event site shows no indicator — its popup must
   // not offer event buttons for a page we don't actually support.
-  { url: "https://www.songkick.com/concerts/123456-some-artist", supported: false },
-  { url: "https://www.google.com/calendar", supported: false },
-  { url: "chrome://extensions", supported: false },
-  { url: "", supported: false },
+  { url: "https://www.songkick.com/concerts/123456-some-artist",     state: "unknown" },
+  { url: "https://www.google.com/calendar",                          state: "unknown" },
+  { url: "chrome://extensions",                                      state: "unknown" },
+  { url: "",                                                         state: "unknown" },
 ];
 
-for (const { url, supported } of CASES) {
-  test(`${url || "(empty url)"} -> ${supported ? "green tile icon" : "blue tile icon"}`, () => {
+const STATE_LABEL = { supported: "green tile icon", denied: "gray tile icon", unknown: "blue tile icon" };
+
+for (const { url, state } of CASES) {
+  test(`${url || "(empty url)"} -> ${STATE_LABEL[state]}`, () => {
     const icon = availabilityIcon(url);
-    if (supported) {
+    if (state === "supported") {
       assert.ok(icon[128].includes("-supported"), "a supported page must use the green (supported) icon");
+    } else if (state === "denied") {
+      assert.ok(icon[128].includes("-denied"), "a denied page must use the gray (denied) icon");
     } else {
-      assert.ok(!icon[128].includes("-supported"), "an unsupported page must use the default blue icon");
+      assert.ok(
+        !icon[128].includes("-supported") && !icon[128].includes("-denied"),
+        "an unknown page must use the default blue icon"
+      );
     }
   });
 }

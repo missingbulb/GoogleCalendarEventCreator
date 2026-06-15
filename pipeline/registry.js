@@ -26,12 +26,21 @@
 // the popup re-injects the whole pipeline on every open (into a page world that
 // persists between opens), so without it each source's `GCal.sources.push(...)`
 // would stack a duplicate matcher on every reopen.
+//
+// `GCal.sourceFallbackDenylist` mirrors config.js's `sourceFallbackDenylist` so
+// the service worker (which can't import ES modules) can also classify hosts.
+// A shared-constants test (test/uber/shared_constants/) fails if the two lists
+// drift apart.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
   sources: [],
 
+  // Hosts whose generic fallback events are suppressed (noise, not signal).
+  // Must stay in sync with GCalConfig.sourceFallbackDenylist in config.js.
+  sourceFallbackDenylist: ["barby.co.il"],
+
   // THE single source of truth for "is this page a supported site": its
   // hostname has a registered source whose `matches` returns true. The toolbar
-  // service worker (ui/toolbar-icon.js) derives the icon's border color from this;
+  // service worker (ui/toolbar-icon.js) derives the icon color from this;
   // the popup gets the same answer from the injected extraction result
   // (assemble-events.js reports whether a source matched). DOM-free, so it runs
   // the same in the service worker, the popup, and content-script contexts.
@@ -41,6 +50,19 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, {
       return GCal.sources.some((s) => s.matches(host));
     } catch (e) {
       return false; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
+    }
+  },
+
+  // True when the host is on the fallback denylist — the popup suppresses
+  // fallback events there, and the toolbar icon shows a gray tile.
+  isDeniedHost(url) {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, "");
+      return GCal.sourceFallbackDenylist.some(
+        (entry) => host === entry || host.endsWith("." + entry)
+      );
+    } catch (e) {
+      return false;
     }
   },
 });

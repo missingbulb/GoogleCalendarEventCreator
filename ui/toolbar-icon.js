@@ -36,17 +36,21 @@ importScripts(
   "/pipeline/sources/ticketmaster.js"
 );
 
-// Availability is shown by swapping the toolbar icon between two tile variants:
-// a blue tile (default, page not supported) and a green tile (page supported).
+// Availability is shown by swapping the toolbar icon between three tile variants:
+//   green — site has a first-class extractor (GCal.isSupportedHost)
+//   gray  — site is on the fallback denylist (GCal.isDeniedHost)
+//   blue  — default, page not classified
 // Using the icon color rather than a badge avoids the badge pill overlapping the
 // glyph, and makes the signal visible even when the icon is small.
-const BLUE_ICON = { 16: "icons/icon16.png", 32: "icons/icon32.png", 48: "icons/icon48.png", 128: "icons/icon128.png" };
+const BLUE_ICON  = { 16: "icons/icon16.png",           32: "icons/icon32.png",           48: "icons/icon48.png",           128: "icons/icon128.png"           };
 const GREEN_ICON = { 16: "icons/icon16-supported.png", 32: "icons/icon32-supported.png", 48: "icons/icon48-supported.png", 128: "icons/icon128-supported.png" };
+const GRAY_ICON  = { 16: "icons/icon16-denied.png",    32: "icons/icon32-denied.png",    48: "icons/icon48-denied.png",    128: "icons/icon128-denied.png"    };
 
-// The toolbar icon for a given page URL: green tile when a site-specific
-// extractor exists for it, blue tile otherwise.
+// The toolbar icon for a given page URL.
 function availabilityIcon(url) {
-  return GCal.isSupportedHost(url) ? GREEN_ICON : BLUE_ICON;
+  if (GCal.isSupportedHost(url)) return GREEN_ICON;
+  if (GCal.isDeniedHost(url))    return GRAY_ICON;
+  return BLUE_ICON;
 }
 
 async function updateIcon(tabId, url) {
@@ -57,21 +61,23 @@ async function updateIcon(tabId, url) {
   }
 }
 
-chrome.tabs.onActivated.addListener(({ tabId }) => {
-  chrome.tabs.get(tabId, (tab) => {
-    if (tab) updateIcon(tabId, tab.url);
-  });
+// Each listener is async and awaits its Chrome API calls so Chrome keeps the
+// service worker alive until the icon swap completes (MV3 service workers are
+// only kept alive for the duration of a returned Promise, not a callback).
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  if (tab?.url) await updateIcon(tabId, tab.url);
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.url || changeInfo.status === "complete") {
-    updateIcon(tabId, tab.url);
+    await updateIcon(tabId, tab.url);
   }
 });
 
 async function updateAllTabIcons() {
   for (const tab of await chrome.tabs.query({})) {
-    updateIcon(tab.id, tab.url);
+    await updateIcon(tab.id, tab.url);
   }
 }
 

@@ -43,7 +43,7 @@ function bootServiceWorker() {
         onActivated: listener("tabs.onActivated"),
         onUpdated: listener("tabs.onUpdated"),
         query: async () => [],
-        get() {},
+        get: async () => null,
       },
       runtime: {
         onInstalled: listener("runtime.onInstalled"),
