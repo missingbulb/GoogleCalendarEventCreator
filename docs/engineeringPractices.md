@@ -11,3 +11,4 @@ project-specific test mechanics live in `docs/claude/testing.md`.)
 - See a test fail before you trust it: write it red before the fix (green after), or break what it guards and watch it go red. A test that has never failed proves nothing.
 - A new test must go green at least twice in CI before merging — one green run doesn't rule out a flake.
 - A test that can only run remotely (e.g. CI-only) must diagnose itself: on failure, dump the observed state, not just an assertion.
+- Resilience that swallows errors destroys observability — during development, before a solution is proven right, add debugging information first, and remove it later.
