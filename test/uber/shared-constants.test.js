@@ -5,13 +5,8 @@
 // all, or an old value was left behind after a rename.
 //
 // To add a constant: drop a new JSON file in test/uber/shared_constants/.
-// Supported shapes:
-//
-//   Count check (default):
+// Entry shape:
 //   { "what": "...", "value": "...", "counts": { "repo/relative/path": N, ... } }
-//
-//   JSON field sync:
-//   { "what": "...", "type": "json-field-sync", "field": "...", "files": [...] }
 "use strict";
 
 const { test } = require("node:test");
@@ -35,38 +30,16 @@ const entries = fs
   .sort()
   .map((f) => JSON.parse(fs.readFileSync(path.join(REGISTRY_DIR, f), "utf8")));
 
-for (const entry of entries) {
-  if (!entry.type || entry.type === "count") {
-    test(`shared constant "${entry.value}" — ${entry.what}`, () => {
-      for (const [rel, expected] of Object.entries(entry.counts)) {
-        const actual = countOccurrences(read(rel), entry.value);
-        assert.equal(
-          actual,
-          expected,
-          `${rel}: expected ${expected} occurrence(s) of "${entry.value}" but found ${actual}\n` +
-            `  (${entry.what}) — update the file or adjust its shared_constants entry`
-        );
-      }
-    });
-  } else if (entry.type === "json-field-sync") {
-    test(`json-field-sync "${entry.field}" — ${entry.what}`, () => {
-      const values = entry.files.map((f) => ({
-        file: f,
-        value: JSON.parse(read(f))[entry.field],
-      }));
-      const [first, ...rest] = values;
-      for (const other of rest) {
-        assert.equal(
-          other.value,
-          first.value,
-          `"${entry.field}" mismatch: ${first.file}=${first.value}, ${other.file}=${other.value}\n` +
-            `  (${entry.what})`
-        );
-      }
-    });
-  } else {
-    test(`unknown entry type "${entry.type}" — ${entry.what}`, () => {
-      assert.fail(`shared_constants entry has unknown type "${entry.type}"`);
-    });
-  }
+for (const { what, value, counts } of entries) {
+  test(`shared constant "${value}" — ${what}`, () => {
+    for (const [rel, expected] of Object.entries(counts)) {
+      const actual = countOccurrences(read(rel), value);
+      assert.equal(
+        actual,
+        expected,
+        `${rel}: expected ${expected} occurrence(s) of "${value}" but found ${actual}\n` +
+          `  (${what}) — update the file or adjust its shared_constants entry`
+      );
+    }
+  });
 }
