@@ -28,12 +28,7 @@
       const dom = {
         title: text("h1"),
         start: timeEl ? normalizeDateValue(timeEl.getAttribute("datetime")) : "",
-        location: firstText([
-          ".venue-name",
-          ".event-venue",
-          '[class*="venue"]',
-          '[class*="location"]',
-        ]),
+        location: firstText([".venue-name", ".event-venue"]),
         ctz: "Asia/Jerusalem",
       };
       return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
