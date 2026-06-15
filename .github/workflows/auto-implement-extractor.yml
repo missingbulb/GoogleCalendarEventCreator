@@ -120,7 +120,7 @@ jobs:
         run: |
           claude \
             --dangerously-skip-permissions \
-            --model claude-haiku-4-5-20251001 \
+            --model claude-sonnet-4-6 \
             -p "$(cat /tmp/agent-prompt.txt)"
 
       - name: Comment on failure
