@@ -36,13 +36,37 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Pre-flight triage: if the requested host is already on config.js's
+      # fallback allow/denylist, it was already decided — close the issue and
+      # skip the (expensive) agent run. Needs only Node + the repo (no deps), so
+      # it runs before `npm ci`. The issue body/title come from the event
+      # payload via env, so free-form text isn't shell-interpolated.
+      - name: Triage against the fallback allow/denylist
+        id: triage
+        env:
+          ISSUE_BODY:  ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: node tools/triage-extractor-request.js
+
+      - name: Close an already-triaged request
+        if: steps.triage.outputs.triaged == 'true'
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body-file /tmp/triage-message.md
+          gh issue close "$ISSUE_NUMBER" --reason "not planned"
+
       - name: Install npm dependencies
+        if: steps.triage.outputs.triaged != 'true'
         run: npm ci
 
       - name: Install Claude Code CLI
+        if: steps.triage.outputs.triaged != 'true'
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Configure git
+        if: steps.triage.outputs.triaged != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -50,6 +74,7 @@ jobs:
       # Fetch the issue via API (avoids shell-escaping issues with free-form bodies)
       # and interpolate it into the static prompt template.
       - name: Build agent prompt
+        if: steps.triage.outputs.triaged != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -85,6 +110,7 @@ jobs:
           PYEOF
 
       - name: Run Claude agent
+        if: steps.triage.outputs.triaged != 'true'
         timeout-minutes: 75
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

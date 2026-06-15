@@ -28,11 +28,19 @@ can parse.
 
 The workflow is `.github/workflows/auto-implement-extractor.yml`. It:
 
-1. Checks out the repo and installs dependencies.
-2. Fetches the issue from the GitHub API and interpolates it into the agent
-   prompt template (`.github/agent-prompt-extractor.md`).
-3. Runs a Claude Sonnet agent (`claude --dangerously-skip-permissions -p ...`)
-   with full Bash access.
+1. Checks out the repo.
+2. **Triages the request first** (`tools/triage-extractor-request.js`): pulls the
+   event URL from the issue and classifies its host against `config.js`'s
+   fallback lists (the same `classifyHost` the popup uses, via
+   `fallback-policy.js`). If the host is already on the **allowlist** or
+   **denylist**, it was already decided — the workflow comments why, closes the
+   issue as "not planned", and **skips every remaining step** (no `npm ci`, no
+   agent run). This runs before `npm ci` so a triaged request costs almost
+   nothing. It fails open: any error (or no list match) proceeds to the agent.
+3. Otherwise installs dependencies, fetches the issue, and interpolates it into
+   the agent prompt template (`.github/agent-prompt-extractor.md`).
+4. Runs a Claude agent (`claude --dangerously-skip-permissions -p ...`) with
+   full Bash access.
 
 The agent itself does everything described in `docs/claude/adding-a-source.md`
 in two phases, handling the HTML-cache step automatically:
