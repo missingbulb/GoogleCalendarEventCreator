@@ -8,6 +8,10 @@ For every new task in this repo:
 3. Update the issue's status (comments / close) as work progresses and
    when it's done.
 
+Confirm a behavior isn't already provided before building a mechanism for it —
+verify the gap against a real run first; the cheapest fix is often that it
+already works.
+
 When the repo owner says "LGTM" on a change, treat it as approval to merge
 that branch's pull request into `main` (the test-flakiness gate in
 `docs/engineeringPractices.md` still applies before merging).
