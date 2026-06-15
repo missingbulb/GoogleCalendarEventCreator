@@ -2,7 +2,8 @@
 
 Overarching rules for *how we build this*. Specific design decisions and the
 mechanics live in [highLevelDesign.md](highLevelDesign.md) /
-[lowLevelDesign.md](lowLevelDesign.md); tunable product decisions live in
-`config.js`.
+[fileDescriptions.md](fileDescriptions.md); product behavior lives in
+[productRequirements.md](productRequirements.md); tunable product decisions live
+in `config.js`.
 
 - Adding support for a new host is the most common change — the architecture must keep it a single, self-contained new file (`pipeline/sources/<site>.js`) plus regenerating the load list, touching nothing else and assuming nothing about other extractors.

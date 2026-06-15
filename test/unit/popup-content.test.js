@@ -1,10 +1,24 @@
-// Regression test for issue #101: the popup and the toolbar icon must agree.
-// popup.js's chooseContent() is the single decider for what the popup renders,
-// driven by the injected result's `supported` flag (set by assemble-events.js
-// from the same GCal.isSupportedHost check that colors the icon). On an
-// unsupported host it must NEVER return event buttons — even when the
-// generic/JSON-LD layers scraped an event off the page — only the
-// "request this source" flow. On a supported host it surfaces the events.
+// Contract for popup.js's chooseContent() — the single decision behind what the
+// popup renders — plus the host classifier (classifyHost) and presentability
+// gate (isPresentableFallbackEvent) it leans on.
+//
+// The popup renders three things off chooseContent's { events, request,
+// policyLink }: event buttons, a "request support" button (seeded with an
+// event), and a quiet "Disagree?" link to the public policy doc. The five
+// states, in the order they're decided (issue #192):
+//
+//   1 supported host                    -> events only
+//   2 denylisted host                   -> "No events found" (no link, no prompt)
+//   3 not denylisted, nothing complete  -> "No events found" + Disagree? link
+//   4 complete event, allowlisted       -> events only (no support ask)
+//   5 complete event, on neither list   -> events + request button
+//
+// This supersedes the strict #101 rule that an unsupported host must NEVER
+// surface a scraped event: #192 deliberately shows a *complete* fallback event
+// (title + location + start) on an unsupported host. What still holds from #101
+// is that `supported` (which colors the toolbar icon) is untouched — we never
+// relabel such a host "supported"; the icon stays blue while the popup, which
+// alone runs extraction, may show the event.
 "use strict";
 
 const { test, before } = require("node:test");
@@ -12,46 +26,146 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
-// popup.js is an ES module; import chooseContent before the tests run. Its
-// controller only runs when a real `document` exists, so importing it in Node
-// is side-effect-free.
-let chooseContent;
+// Both are ES modules. chooseContent lives in the popup controller (popup.js),
+// whose init() only runs when a real `document` exists, so importing it in Node
+// is side-effect-free; the shared host classifier and presentability gate live
+// in fallback-policy.js.
+let chooseContent, classifyHost, isPresentableFallbackEvent;
 before(async () => {
   ({ chooseContent } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "ui", "popup.js"))
   ));
+  ({ classifyHost, isPresentableFallbackEvent } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "fallback-policy.js"))
+  ));
 });
 
-const SCRAPED = { title: "Some Show", start: "2026-07-01T20:00:00" };
+// A complete fallback event (presentable); and one missing a location (not).
+const FULL = { title: "Some Show", location: "The Venue", start: "2026-07-01T20:00:00" };
+const NO_LOCATION = { title: "Some Show", start: "2026-07-01T20:00:00" };
 
-test("supported host with events surfaces them", () => {
-  const view = chooseContent({ events: [SCRAPED], supported: true });
-  assert.equal(view.mode, "events");
-  assert.deepEqual(view.events, [SCRAPED]);
+// --- isPresentableFallbackEvent: all three main fields required ---
+
+test("a fallback event needs title, location AND start to be presentable", () => {
+  assert.equal(isPresentableFallbackEvent(FULL), true);
+  assert.equal(isPresentableFallbackEvent(NO_LOCATION), false); // no location
+  assert.equal(isPresentableFallbackEvent({ title: "T", location: "L" }), false); // no start
+  assert.equal(isPresentableFallbackEvent({ location: "L", start: "2026-07-01" }), false); // no title
+  assert.equal(isPresentableFallbackEvent(undefined), false);
 });
 
-test("supported host with no events still shows the events view (empty)", () => {
-  const view = chooseContent({ events: [], supported: true });
-  assert.equal(view.mode, "events");
+// --- classifyHost: against injected lists ---
+
+const LISTS = { sourceFallbackAllowlist: ["good.example"], sourceFallbackDenylist: ["bad.example"] };
+
+test("classifyHost matches a host, its www, and its subdomains", () => {
+  assert.equal(classifyHost("https://bad.example/x", LISTS), "deny");
+  assert.equal(classifyHost("https://www.bad.example/x", LISTS), "deny");
+  assert.equal(classifyHost("https://sub.bad.example/x", LISTS), "deny");
+  assert.equal(classifyHost("https://good.example/x", LISTS), "allow");
+  assert.equal(classifyHost("https://other.example/x", LISTS), "none");
+});
+
+test("classifyHost does not match a near-miss host", () => {
+  assert.equal(classifyHost("https://notbad.example/x", LISTS), "none");
+  assert.equal(classifyHost("https://bad.example.evil.com/x", LISTS), "none");
+});
+
+test("classifyHost: deny wins when a host is on both lists", () => {
+  const both = { sourceFallbackAllowlist: ["x.example"], sourceFallbackDenylist: ["x.example"] };
+  assert.equal(classifyHost("https://x.example/", both), "deny");
+});
+
+test("classifyHost: an unparseable URL is unclassified (none)", () => {
+  assert.equal(classifyHost("chrome://extensions", LISTS), "none");
+  assert.equal(classifyHost("", LISTS), "none");
+});
+
+test("classifyHost uses the shipped config by default (meetup.com allow, barby.co.il deny)", () => {
+  assert.equal(classifyHost("https://www.meetup.com/some-group/events/123/"), "allow");
+  assert.equal(classifyHost("https://barby.co.il/event/42"), "deny");
+  assert.equal(classifyHost("https://unlisted.example/e/1"), "none");
+});
+
+// --- chooseContent: the five states ---
+
+test("State 1 — supported host: events only, no request, no policy link", () => {
+  const view = chooseContent({ events: [FULL], supported: true }, "none");
+  assert.deepEqual(view.events, [FULL]);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false);
+});
+
+test("State 1 — supported host with no events: empty events, no extras", () => {
+  const view = chooseContent({ events: [], supported: true }, "none");
   assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false);
 });
 
-test("unsupported host never surfaces scraped events — only the request flow", () => {
-  // The reported bug: an unsupported event site (no badge) where the
-  // generic/JSON-LD layers returned an event, which used to render a button.
-  const view = chooseContent({ events: [SCRAPED], supported: false });
-  assert.equal(view.mode, "request");
-  assert.equal(view.prefill, SCRAPED); // seeds the request form, not a button
+test("State 2 — denylisted host: 'No events found' with NO link or prompt, even with a complete event", () => {
+  // The denylist decision holds regardless of what the fallback scraped.
+  const view = chooseContent({ events: [FULL], supported: false }, "deny");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false); // no "Disagree?" — the call was deliberate
 });
 
-test("unsupported host with nothing scraped also shows the request flow", () => {
-  const view = chooseContent({ events: [], supported: false });
-  assert.equal(view.mode, "request");
-  assert.equal(view.prefill, undefined);
+test("State 2 — denylisted host with nothing scraped: still no link or prompt", () => {
+  const view = chooseContent({ events: [], supported: false }, "deny");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false);
 });
 
-test("a failed injection (restricted page, no result) shows the request flow", () => {
-  const view = chooseContent({});
-  assert.equal(view.mode, "request");
-  assert.equal(view.prefill, undefined);
+test("State 3 — not denylisted, nothing complete (no location): policy link", () => {
+  const view = chooseContent({ events: [NO_LOCATION], supported: false }, "none");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, true);
+});
+
+test("State 3 — allowlisted but nothing complete: still the policy link (allow only matters once an event is found)", () => {
+  const view = chooseContent({ events: [NO_LOCATION], supported: false }, "allow");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.policyLink, true);
+});
+
+test("State 3 — not denylisted, no events at all: policy link", () => {
+  const view = chooseContent({ events: [], supported: false }, "none");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.policyLink, true);
+});
+
+test("State 4 — complete event, allowlisted: events only, NO request", () => {
+  const view = chooseContent({ events: [FULL], supported: false }, "allow");
+  assert.deepEqual(view.events, [FULL]);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false);
+});
+
+test("State 5 — complete event, on neither list: events AND a request button seeded with the event", () => {
+  const view = chooseContent({ events: [FULL], supported: false }, "none");
+  assert.deepEqual(view.events, [FULL]);
+  assert.equal(view.request, FULL);
+  assert.equal(view.policyLink, false);
+});
+
+test("only complete fallback events are shown; incomplete ones are dropped", () => {
+  const view = chooseContent({ events: [NO_LOCATION, FULL], supported: false }, "none");
+  assert.deepEqual(view.events, [FULL]);
+  assert.equal(view.request, FULL);
+});
+
+test("a failed injection (restricted page, no result) shows the policy link", () => {
+  const view = chooseContent({}, "none");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, true);
+});
+
+test("chooseContent defaults listing to 'none' when omitted", () => {
+  const view = chooseContent({ events: [FULL], supported: false }); // -> State 5
+  assert.equal(view.request, FULL);
+  assert.deepEqual(view.events, [FULL]);
 });
