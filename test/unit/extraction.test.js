@@ -114,6 +114,58 @@ test("Generic site with no structured data: heuristics only", () => {
   assert.equal(e.description, "Gloves and trash grabbers provided.");
 });
 
+test("Generic site: a day-first dotted date (D.M.YYYY) yields an all-day event", () => {
+  // The everyday non-US format. With no time directly after it (Hebrew text
+  // intervenes here), it's an all-day event — read day-first, not month-first.
+  const html = `<h1>Standup Night</h1><p>הופעה בתאריך 15.6.2026 פתיחת דלתות 18:30</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/standup");
+  assert.equal(e.title, "Standup Night");
+  assert.equal(e.start, "2026-06-15");
+});
+
+test("Generic site: a dotted date with an adjacent time becomes a timed event", () => {
+  const html = `<h1>Standup Night</h1><p>15.6.2026 19:00</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/standup");
+  assert.equal(e.start, "2026-06-15T19:00:00");
+});
+
+test("Generic site: a day-first hyphenated date (DD-MM-YYYY) is parsed day-first", () => {
+  // The same day-first reading as the dotted form, with "-" as the separator.
+  const html = `<h1>Film Screening</h1><p>הקרנה 18-06-2026</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/screening");
+  assert.equal(e.start, "2026-06-18");
+});
+
+test("Generic site: og:title's trailing site-name suffix is stripped", () => {
+  // og:site_name appended to og:title ("Event - Site") is dropped, so the
+  // generic title is the event alone — matching what a per-site source reads.
+  const html = `
+    <meta property="og:title" content="Quantum Lecture - ThinkLabs">
+    <meta property="og:site_name" content="ThinkLabs">
+    <p>15.6.2026</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/lecture");
+  assert.equal(e.title, "Quantum Lecture");
+});
+
+test("Generic site: location falls back to Open Graph place meta tags", () => {
+  // No microdata/<address>/venue-class on the page, so the location comes from
+  // the OG place fields, composed most-specific-first.
+  const html = `
+    <meta property="og:title" content="Harvest Market">
+    <meta property="og:street-address" content="500 Main St">
+    <meta property="og:locality" content="Springfield">
+    <meta property="og:region" content="IL">
+    <p>Sunday, October 4, 2026 at 10 AM</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/market");
+  assert.equal(e.title, "Harvest Market");
+  assert.equal(e.location, "500 Main St, Springfield, IL");
+});
+
 test("Listing page with several events: every JSON-LD event is returned, in order", () => {
   const html = `
     <script type="application/ld+json">

@@ -24,7 +24,7 @@
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
 (() => {
-  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, merge, embeddedEvents } = GCal;
+  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, merge, embeddedEvents, parts } = GCal;
 
   function extract() {
     const embedded = embeddedEvents.find();
@@ -42,7 +42,7 @@
   function heuristics() {
     const out = {};
 
-    out.title = meta("og:title") || text("h1") || clean(document.title);
+    out.title = stripSiteSuffix(meta("og:title")) || text("h1") || clean(document.title);
 
     const startProp = document.querySelector('[itemprop="startDate"]');
     if (startProp) {
@@ -71,12 +71,45 @@
     out.location =
       text('[itemprop="location"]') ||
       text("address") ||
-      shortText('[class*="venue" i], [class*="location" i], [id*="location" i]');
+      shortText('[class*="venue" i], [class*="location" i], [id*="location" i]') ||
+      metaLocation();
 
     // Preserve the description's line breaks rather than flattening it.
     out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
 
     return out;
+  }
+
+  // og:title often ends with the site's own name (" - Tel Aviv Cinematheque",
+  // "… - Think&Drink"); drop that trailing " <sep> <site name>" so the generic
+  // title is just the event, the way a per-site source would read it. Only the
+  // exact og:site_name is stripped, so a real title that merely contains a dash
+  // is left alone.
+  function stripSiteSuffix(title) {
+    title = clean(title);
+    const site = clean(meta("og:site_name"));
+    if (!title || !site) return title;
+    for (const sep of [" - ", " | ", " – ", " — "]) {
+      const suffix = sep + site;
+      if (title.endsWith(suffix)) return clean(title.slice(0, -suffix.length));
+    }
+    return title;
+  }
+
+  // Last-resort location: the place meta tags some pages publish (the Open Graph
+  // "place"/"business" address fields, or the geo.* tags) when nothing on the
+  // page exposed a location via microdata, <address>, or a venue/location class.
+  // Composed into one comma-separated string, most specific part first; the
+  // coordinate (lat/long) tags are deliberately ignored — they're not a venue.
+  function metaLocation() {
+    const p = parts();
+    p.add(meta("og:title:place") || meta("place:name") || meta("geo.placename"));
+    p.add(meta("og:street-address") || meta("business:contact_data:street_address"));
+    p.add(meta("og:locality") || meta("business:contact_data:locality"));
+    p.add(meta("og:region") || meta("business:contact_data:region") || meta("geo.region"));
+    p.add(meta("og:postal-code") || meta("business:contact_data:postal_code"));
+    p.add(meta("og:country-name") || meta("business:contact_data:country_name"));
+    return p.join();
   }
 
   // First element matching `sel` whose text is plausibly a venue string
