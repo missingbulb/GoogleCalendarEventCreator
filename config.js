@@ -23,4 +23,28 @@ export const GCalConfig = {
 
   // Title used when neither the page nor the tab gave one.
   fallbackEventTitle: "New event",
+
+  // Host classifier for the generic FALLBACK extractor — the events scraped on
+  // a host that has no per-site source (pipeline/sources/<site>.js). The
+  // fallback only ever surfaces an event with a title, a location AND a start
+  // time; these two lists then decide what the popup does with it. A host on
+  // NEITHER list is "unknown": its fallback events are shown AND the popup
+  // offers a "request support for this site" link (so a good page can become a
+  // first-class source). These lists override that default:
+  //   sourceFallbackAllowlist — trust the fallback here: show its events but
+  //     DON'T pester for support (generic extraction already works site-wide).
+  //   sourceFallbackDenylist  — generic guesses here are noise (e.g. a news
+  //     site where a date in an article reads as an event): never surface a
+  //     fallback event; the popup shows "no events found" instead.
+  // Matching is by exact host or any subdomain — "example.com" also covers
+  // "www.example.com" and "sub.example.com". The default (show fallback events
+  // + invite a support request) is the common case; these are the escape
+  // hatches you populate as specific hosts warrant.
+  //
+  // Note meetup.com also has a per-site source, so the popup never consults
+  // these lists for it (a supported host short-circuits before classifyHost).
+  // Its allowlist entry only lets the auto-extractor triage close a redundant
+  // "please support meetup.com" request without spinning up an agent.
+  sourceFallbackAllowlist: ["meetup.com"],
+  sourceFallbackDenylist: ["barby.co.il"],
 };

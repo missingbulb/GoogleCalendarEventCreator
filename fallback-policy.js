@@ -1,0 +1,47 @@
+// The top-level classifier for the generic FALLBACK extractor — the events
+// scraped on a host that has no per-site source (pipeline/sources/<site>.js).
+// It answers two questions: is a scraped event complete enough to present, and
+// how should we treat a given host?
+//
+// Shared (single source of truth) by:
+//   - the popup (ui/popup.js's chooseContent) — to decide what to render;
+//   - the auto-extractor triage (tools/triage-extractor-request.js) — to
+//     auto-close a request whose host is already on a list, before spending an
+//     agent run.
+// So the popup and the workflow can never disagree about a host's listing.
+//
+// An ES module (imported by the popup and, in Node, by the tool and the tests).
+// The host lists themselves live in config.js — the product-decisions module.
+import { GCalConfig } from "./config.js";
+
+// A host with no per-site source yields only best-effort guesses, so we present
+// a fallback event only when it carries all three main fields — a title, a
+// location AND a start time — not on a date alone.
+export function isPresentableFallbackEvent(event) {
+  return Boolean(event && event.title && event.location && event.start);
+}
+
+// True when `host` equals `entry` or is a subdomain of it — the same shape of
+// host match GCal.isSupportedHost uses for sources.
+function hostMatchesList(host, list) {
+  return list.some((entry) => host === entry || host.endsWith("." + entry));
+}
+
+// Classify a host against config.js's fallback lists:
+//   "deny"  — suppress its fallback events (generic guesses there are noise);
+//   "allow" — show them, but don't ask for support (the fallback is trusted);
+//   "none"  — on neither list (or an unparseable URL): show them AND invite a
+//             support request.
+// Deny wins if a host is somehow on both lists. `lists` defaults to the shipped
+// config; tests pass their own.
+export function classifyHost(url, lists = GCalConfig) {
+  let host;
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "");
+  } catch (e) {
+    return "none"; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
+  }
+  if (hostMatchesList(host, lists.sourceFallbackDenylist)) return "deny";
+  if (hostMatchesList(host, lists.sourceFallbackAllowlist)) return "allow";
+  return "none";
+}

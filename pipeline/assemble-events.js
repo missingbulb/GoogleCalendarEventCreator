@@ -13,9 +13,13 @@
 // state. An ordinary event page yields one event; a listing/series page (e.g. a
 // film week with several different films) yields one per event.
 //
-// The popup reads `supported` to choose between showing event buttons and the
-// "request this source" flow — the same answer GCal.isSupportedHost gives the
-// toolbar icon, so the popup and the icon can never disagree.
+// The popup reads `supported` (with the events) to decide what to render: a
+// supported host shows its events; an unsupported host shows the generic
+// fallback's events when they're complete enough (title + location + start),
+// and otherwise/also offers a "request this source" link — see ui/popup.js's
+// chooseContent. `supported` is the same answer GCal.isSupportedHost gives the
+// toolbar icon, so the popup's supported/unsupported split and the icon can
+// never disagree.
 //
 // Two distinct paths, depending on whether a site source matches:
 //   - Supported host: the matching site source is SELF-CONTAINED — it produces
@@ -26,8 +30,9 @@
 //     with page-level description/ctz that fill any field an individual event
 //     didn't carry.
 //   - Unsupported host: no per-site extractor exists, so we defer to the
-//     unsupported-site extractor (GCal.unsupportedSiteEvents) purely to seed the
-//     popup's "request this source" form.
+//     unsupported-site extractor (GCal.unsupportedSiteEvents) for a best-effort
+//     event. The popup presents it when it's complete enough (title + location +
+//     start) and otherwise falls back to the "request this source" flow.
 //
 // To support a new event platform, add pipeline/sources/<site>.js that pushes
 // onto GCal.sources (see sources/meetup.js for the pattern), run `npm run index`
@@ -93,7 +98,8 @@
   }
 
   // Unsupported host: no per-site extractor, so defer to the unsupported-site
-  // extractor — purely to seed the popup's "request this source" form.
+  // extractor for a best-effort event. The popup (chooseContent) decides whether
+  // it's complete enough to present, and whether to offer a source request.
   function fallbackEvents(norm) {
     return GCal.unsupportedSiteEvents.extract().map(norm);
   }
