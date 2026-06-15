@@ -23,6 +23,7 @@
 // See #146.
 importScripts(
   "/pipeline/registry.js",
+  "/pipeline/sources/barby.js",
   "/pipeline/sources/edinburghfringe.js",
   "/pipeline/sources/eventbrite.js",
   "/pipeline/sources/facebook.js",

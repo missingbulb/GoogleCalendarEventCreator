@@ -8,6 +8,7 @@
   "pipeline/helpers/timezone-names.js",
   "pipeline/helpers/timezones.js",
   "pipeline/extract-unsupported.js",
+  "pipeline/sources/barby.js",
   "pipeline/sources/edinburghfringe.js",
   "pipeline/sources/eventbrite.js",
   "pipeline/sources/facebook.js",
