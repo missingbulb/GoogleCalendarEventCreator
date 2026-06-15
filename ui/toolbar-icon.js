@@ -54,22 +54,70 @@ const ready = fetch(chrome.runtime.getURL("pipeline/fallback-lists.json"))
 //   blue  — default, page not classified
 // Using the icon color rather than a badge avoids the badge pill overlapping the
 // glyph, and makes the signal visible even when the icon is small.
+//
+// Each variant is a { size -> packaged PNG path } map, but we must NOT hand those
+// paths to chrome.action.setIcon: setIcon({ path }) is a silent no-op in an MV3
+// service worker — the worker has no document to decode the referenced file, so
+// the icon simply never changes (Chromium #1262029 / docs issue #2165). This was
+// the real cause of #204; making the listeners async fixed the worker's lifetime
+// but not this. The worker has to decode each PNG to ImageData itself
+// (toImageData below) and pass `imageData` instead.
 const BLUE_ICON  = { 16: "icons/icon16.png",           32: "icons/icon32.png",           48: "icons/icon48.png",           128: "icons/icon128.png"           };
 const GREEN_ICON = { 16: "icons/icon16-supported.png", 32: "icons/icon32-supported.png", 48: "icons/icon48-supported.png", 128: "icons/icon128-supported.png" };
 const GRAY_ICON  = { 16: "icons/icon16-denied.png",    32: "icons/icon32-denied.png",    48: "icons/icon48-denied.png",    128: "icons/icon128-denied.png"    };
 
-// The toolbar icon for a given page URL.
+// The { size -> PNG path } map for a given page URL.
 function availabilityIcon(url) {
   if (GCal.isSupportedHost(url)) return GREEN_ICON;
   if (GCal.isDeniedHost(url))    return GRAY_ICON;
   return BLUE_ICON;
 }
 
+// Decode one packaged PNG into ImageData. A service worker has no Image element
+// or document, so the only way to rasterize a PNG is fetch -> Blob ->
+// createImageBitmap -> draw onto an OffscreenCanvas -> getImageData.
+async function decodeIcon(path) {
+  const blob = await (await fetch(chrome.runtime.getURL(path))).blob();
+  const bitmap = await createImageBitmap(blob);
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0);
+  return ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+}
+
+// Decode a whole { size -> path } variant into the { size -> ImageData } map
+// chrome.action.setIcon wants. Cached per variant (the maps are stable module
+// constants) so switching tabs reuses the decode instead of refetching four
+// PNGs; a failed decode is evicted so a later update can retry.
+const iconImageData = new Map();
+function toImageData(paths) {
+  if (!iconImageData.has(paths)) {
+    const decoded = (async () => {
+      const sizes = await Promise.all(
+        Object.entries(paths).map(async ([size, path]) => [size, await decodeIcon(path)])
+      );
+      return Object.fromEntries(sizes);
+    })();
+    decoded.catch(() => iconImageData.delete(paths));
+    iconImageData.set(paths, decoded);
+  }
+  return iconImageData.get(paths);
+}
+
 async function updateIcon(tabId, url) {
+  let imageData;
   try {
-    await chrome.action.setIcon({ tabId, path: availabilityIcon(url) });
+    imageData = await toImageData(availabilityIcon(url));
   } catch (e) {
-    // Tab may have closed before this ran.
+    // A failed icon decode is the real problem (#204), not a benign race — make
+    // it visible in the service worker console instead of silently swallowing it.
+    console.warn("toolbar-icon: could not decode the toolbar icon", e);
+    return; // leave the manifest's default icon in place
+  }
+  try {
+    await chrome.action.setIcon({ tabId, imageData });
+  } catch (e) {
+    // Tab likely closed between picking the icon and applying it — benign.
   }
 }
 
