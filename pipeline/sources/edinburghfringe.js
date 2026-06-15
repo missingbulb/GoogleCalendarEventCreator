@@ -8,6 +8,7 @@
 //     { "props": { "pageProps": { "data": { "event": {
 //       "title": "Sophie Duker: Hot Beef Injection",
 //       "description": "...",
+//       "duration": 60,
 //       "venues": [ { "title": "Pleasance Courtyard",
 //                      "address1": "60 Pleasance", "postCode": "EH8 9TJ" } ],
 //       "spaces": [ { "venueName": "Forth at Pleasance Courtyard" } ],
@@ -20,13 +21,14 @@
 //   </script>
 //
 // Where each field comes from:
-//   title       event.title
-//   start/end   the first performance's dateTime/estimatedEndDateTime
-//               (already exact UTC instants)
-//   location    the space's venueName (more specific than the venue name
-//               alone, e.g. "Forth at Pleasance Courtyard") plus the venue's
-//               address and postcode
-//   description event.description
+//   title               event.title
+//   start/end           the first performance's dateTime/estimatedEndDateTime
+//                       (already exact UTC instants)
+//   eventLengthInMinutes event.duration (minutes, same for every performance)
+//   location            the space's venueName (more specific than the venue name
+//                       alone, e.g. "Forth at Pleasance Courtyard") plus the
+//                       venue's address and postcode
+//   description         event.description
 //
 // A show usually runs on most days of the festival; we surface the first
 // performance as the event. Every Fringe show runs in Edinburgh, so `ctz` is
@@ -62,8 +64,10 @@
       const t = clean(event.title);
       const performances = event.performances || [];
 
+      const eventLengthInMinutes = event.duration ? +event.duration : null;
+
       if (!performances.length) {
-        return { title: t, start: "", end: null, location: loc, description: clean(event.description), ctz: "GB" };
+        return { title: t, start: "", end: null, location: loc, description: clean(event.description), ctz: "GB", eventLengthInMinutes };
       }
 
       return {
@@ -72,6 +76,7 @@
           start: p.dateTime || "",
           end: p.estimatedEndDateTime || null,
           location: loc,
+          eventLengthInMinutes,
         })),
         description: clean(event.description),
         ctz: "GB",

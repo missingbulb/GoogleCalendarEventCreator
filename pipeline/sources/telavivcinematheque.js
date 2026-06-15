@@ -115,6 +115,15 @@
       .map((t) => t.replace(/^(\d):/, "0$1:"));
   }
 
+  // "... / 2025 / אורך: 108" in the single-event page's title/meta line -> 108.
+  // (The series-page variant of this lives in parseDuration(), which reads from
+  // each box's <ul><li> elements instead.)
+  function parseSingleEventDuration() {
+    const metaLine = clean((document.querySelector(".movie-section .text-wraper .title p") || {}).textContent);
+    const m = metaLine && metaLine.match(/אורך:\s*(\d+)/);
+    return m ? +m[1] : null;
+  }
+
   // The date those #smtime_b times belong to: the option currently selected in
   // #smdate_b (a real browser reflects the chosen date in the select's value).
   // "" when it's the "בחר תאריך" placeholder rather than a real
@@ -225,10 +234,11 @@
       // that date becomes one timed event per show, the rest stay all-day.
       const times = screeningTimes();
       const selected = selectedDate();
+      const dur = parseSingleEventDuration();
       const events = dates.flatMap((d) =>
         times.length && d === selected
-          ? times.map((time) => ({ title: t, start: `${d}T${time}:00`, end: null, location: loc }))
-          : [{ title: t, start: d, end: null, location: loc }]
+          ? times.map((time) => ({ title: t, start: `${d}T${time}:00`, end: null, location: loc, eventLengthInMinutes: dur }))
+          : [{ title: t, start: d, end: null, location: loc, eventLengthInMinutes: dur }]
       );
 
       return {
