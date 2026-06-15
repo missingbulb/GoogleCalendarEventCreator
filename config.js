@@ -8,6 +8,13 @@
 // in Node, by the tests via dynamic import(). It is never injected into pages
 // — the extractors don't read product config — so it stays a plain module
 // rather than the GCal-global classic scripts the page injection uses.
+
+// The fallback allow/denylists live in their own JSON file so both this ES
+// module and the service worker's classic-script context (which can't import
+// ES modules) can read from the same source.  The classic-script wrapper
+// pipeline/fallback-lists.js is generated from that JSON by `npm run index`.
+import fallbackLists from "./pipeline/fallback-lists.json" with { type: "json" };
+
 export const GCalConfig = {
   // Event length when a page gives a start time but no end. Timed events only;
   // all-day events stay all-day. Applied only at Calendar-URL build time.
@@ -45,6 +52,6 @@ export const GCalConfig = {
   // these lists for it (a supported host short-circuits before classifyHost).
   // Its allowlist entry only lets the auto-extractor triage close a redundant
   // "please support meetup.com" request without spinning up an agent.
-  sourceFallbackAllowlist: ["meetup.com"],
-  sourceFallbackDenylist: ["barby.co.il"],
+  sourceFallbackAllowlist: fallbackLists.allowlist,
+  sourceFallbackDenylist: fallbackLists.denylist,
 };

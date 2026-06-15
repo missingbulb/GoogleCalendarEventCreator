@@ -1,0 +1,4 @@
+{
+  "allowlist": ["meetup.com"],
+  "denylist": ["barby.co.il"]
+}

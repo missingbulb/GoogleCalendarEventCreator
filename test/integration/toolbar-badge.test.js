@@ -4,7 +4,7 @@
 // every other page gets the default blue tile icon.
 "use strict";
 
-const test = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -12,6 +12,7 @@ const vm = require("node:vm");
 
 const ROOT = path.join(__dirname, "..", "..");
 const WORKER = "ui/toolbar-icon.js";
+const FALLBACK_LISTS = path.join(ROOT, "pipeline/fallback-lists.json");
 
 // Resolve an importScripts() argument the way a real MV3 service worker does:
 // relative to the worker's own location (ui/), with a leading slash meaning the
@@ -25,21 +26,20 @@ function resolveImport(spec) {
     : path.resolve(ROOT, path.dirname(WORKER), spec);
 }
 
-// ui/toolbar-icon.js registers chrome listeners and importScripts()'s the
-// registry and every source at load time; stub just enough of the extension
-// APIs and run them in the same sandbox so availabilityIcon() sees GCal.sources
-// exactly as it does in the real extension. A bad importScripts path throws
-// here (file not found) just as it aborts the real worker.
+// ui/toolbar-icon.js fetches pipeline/fallback-lists.json at startup to populate
+// GCal.sourceFallbackDenylist. Stub fetch to return the real JSON so
+// availabilityIcon() sees the same lists as the production extension.
 function loadIconState() {
   const sandbox = {
     URL,
+    fetch: async () => ({ json: async () => JSON.parse(fs.readFileSync(FALLBACK_LISTS, "utf8")) }),
     chrome: {
       action: {
         onClicked: { addListener() {} },
         setIcon() {},
       },
-      tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get() {} },
-      runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
+      tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get: async () => null },
+      runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, getURL: (p) => p },
     },
     importScripts(...files) {
       for (const file of files) {
@@ -49,35 +49,52 @@ function loadIconState() {
   };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT, WORKER), "utf8"), sandbox);
-  return { availabilityIcon: sandbox.availabilityIcon };
+  return { availabilityIcon: sandbox.availabilityIcon, ready: sandbox.ready };
 }
 
-const { availabilityIcon } = loadIconState();
+let availabilityIcon;
+before(async () => {
+  const state = loadIconState();
+  await state.ready;
+  availabilityIcon = state.availabilityIcon;
+});
 
+// States: "supported" → green tile, "denied" → gray tile, "unknown" → blue tile.
 const CASES = [
-  { url: "https://www.meetup.com/some-group/events/123456/", supported: true },
-  { url: "https://meetup.com/some-group/events/123456/", supported: true },
-  { url: "https://www.eventbrite.com/e/some-event-tickets-123456", supported: true },
-  { url: "https://www.eventbrite.co.uk/e/some-event-tickets-123456", supported: true },
-  { url: "https://www.facebook.com/events/123456/", supported: true },
-  { url: "https://www.edfringe.com/tickets/whats-on/some-show", supported: true },
-  { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw", supported: true },
-  { url: "https://www.example.com/some-page", supported: false },
+  { url: "https://www.meetup.com/some-group/events/123456/",         state: "supported" },
+  { url: "https://meetup.com/some-group/events/123456/",             state: "supported" },
+  { url: "https://www.eventbrite.com/e/some-event-tickets-123456",   state: "supported" },
+  { url: "https://www.eventbrite.co.uk/e/some-event-tickets-123456", state: "supported" },
+  { url: "https://www.facebook.com/events/123456/",                  state: "supported" },
+  { url: "https://www.edfringe.com/tickets/whats-on/some-show",      state: "supported" },
+  { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw",        state: "supported" },
+  // Denylisted hosts → gray tile (generic extraction is noise there).
+  { url: "https://www.barby.co.il/event/123",                        state: "denied" },
+  { url: "https://barby.co.il/event/123",                            state: "denied" },
+  // Everything else → blue tile.
+  { url: "https://www.example.com/some-page",                        state: "unknown" },
   // Regression (#101): an unsupported event site shows no indicator — its popup must
   // not offer event buttons for a page we don't actually support.
-  { url: "https://www.songkick.com/concerts/123456-some-artist", supported: false },
-  { url: "https://www.google.com/calendar", supported: false },
-  { url: "chrome://extensions", supported: false },
-  { url: "", supported: false },
+  { url: "https://www.songkick.com/concerts/123456-some-artist",     state: "unknown" },
+  { url: "https://www.google.com/calendar",                          state: "unknown" },
+  { url: "chrome://extensions",                                      state: "unknown" },
+  { url: "",                                                         state: "unknown" },
 ];
 
-for (const { url, supported } of CASES) {
-  test(`${url || "(empty url)"} -> ${supported ? "green tile icon" : "blue tile icon"}`, () => {
+const STATE_LABEL = { supported: "green tile icon", denied: "gray tile icon", unknown: "blue tile icon" };
+
+for (const { url, state } of CASES) {
+  test(`${url || "(empty url)"} -> ${STATE_LABEL[state]}`, () => {
     const icon = availabilityIcon(url);
-    if (supported) {
+    if (state === "supported") {
       assert.ok(icon[128].includes("-supported"), "a supported page must use the green (supported) icon");
+    } else if (state === "denied") {
+      assert.ok(icon[128].includes("-denied"), "a denied page must use the gray (denied) icon");
     } else {
-      assert.ok(!icon[128].includes("-supported"), "an unsupported page must use the default blue icon");
+      assert.ok(
+        !icon[128].includes("-supported") && !icon[128].includes("-denied"),
+        "an unknown page must use the default blue icon"
+      );
     }
   });
 }

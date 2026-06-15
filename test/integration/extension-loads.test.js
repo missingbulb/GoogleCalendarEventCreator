@@ -37,17 +37,19 @@ function bootServiceWorker() {
   const listener = (name) => ({ addListener: () => registered.push(name) });
   const sandbox = {
     URL,
+    fetch: async () => ({ json: async () => ({ allowlist: [], denylist: [] }) }),
     chrome: {
       action: { onClicked: listener("action.onClicked"), setIcon() {} },
       tabs: {
         onActivated: listener("tabs.onActivated"),
         onUpdated: listener("tabs.onUpdated"),
         query: async () => [],
-        get() {},
+        get: async () => null,
       },
       runtime: {
         onInstalled: listener("runtime.onInstalled"),
         onStartup: listener("runtime.onStartup"),
+        getURL: (p) => p,
       },
     },
     importScripts(...specs) {
