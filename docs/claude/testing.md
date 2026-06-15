@@ -16,6 +16,21 @@ is the project-specific mechanics. Keep these decisions in mind:
 - **Keep integration cases as simple as possible.** This matters a lot, because
   they're what gets reviewed: minimal, representative pages; no incidental
   complexity; one behavior per case rather than sprawling catch-alls.
+- **To see what the generic/unsupported extractor gets** on any cached page —
+  even a supported host — load the files, set `GCal.sources = []`, then call
+  `GCal.extract()`: that forces the unsupported-host path through the same
+  norm/sort the popup uses, no parallel harness needed. When comparing its
+  output to a dedicated source, most start/end *differences* are just the
+  dedicated source localizing to floating time via its hardcoded `ctz` (same
+  instant), not extraction bugs; the real gaps are missing fields (`ctz`,
+  durations, site-specific descriptions) it can't know generically.
+- **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
+  textContent`) returns `textContent` in tests — including `<select>`/`<option>`
+  and hidden text a real browser's `innerText` omits. A generic visible-text
+  extraction can therefore pass against cached HTML yet find nothing in Chrome;
+  treat body-text results as jsdom-optimistic and don't add a case that only
+  passes because of this (same class of jsdom-vs-Chrome gap as the `<noscript>`
+  note in `sources/telavivcinematheque.js`).
 - **New cached HTML files** can't be fetched here (this environment is
   bot-blocked, so `npm run refresh` gets HTTP 403). Record the cached HTML
   *before* writing the case, so you can read its exact `expected` off a

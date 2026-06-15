@@ -15,3 +15,4 @@ project-specific test mechanics live in `docs/claude/testing.md`.)
 - A new test must go green at least twice in CI before merging — one green run doesn't rule out a flake.
 - A test that can only run remotely (e.g. CI-only) must diagnose itself: on failure, dump the observed state, not just an assertion.
 - Resilience that swallows errors destroys observability — during development, before a solution is proven right, add debugging information first, and remove it later.
+- Don't rewrite published/shared history to satisfy a tooling or authorship check (e.g. a hook flagging "unverified" commits): only amend your own un-pushed branch commits. Commits already on a shared branch — including ones merged in from `main` — belong to that history; reset-authoring or rebasing them forks your branch away from it.
