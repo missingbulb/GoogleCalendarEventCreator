@@ -9,7 +9,10 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { computeLoadOrder, render, OUTPUT } = require("../../tools/index");
+const {
+  computeLoadOrder, render, OUTPUT,
+  renderFallbackLists, FALLBACK_LISTS_JSON, FALLBACK_LISTS_JS,
+} = require("../../tools/index");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -40,10 +43,20 @@ test("the registry loads first and the orchestrator loads last", () => {
   );
 });
 
+test("the committed fallback-lists.js matches `npm run index`", () => {
+  const committed = fs.readFileSync(path.join(ROOT, FALLBACK_LISTS_JS), "utf8");
+  const lists = JSON.parse(fs.readFileSync(path.join(ROOT, FALLBACK_LISTS_JSON), "utf8"));
+  assert.equal(
+    committed,
+    renderFallbackLists(lists),
+    `${FALLBACK_LISTS_JS} is stale — run \`npm run index\` and commit it`
+  );
+});
+
 // The toolbar service worker (ui/toolbar-icon.js) can't read the generated JSON at
 // startup (MV3 only allows synchronous importScripts), so it lists registry +
 // every source explicitly. Guard that hand-list against drift: it must import
-// registry.js and exactly the sources in the generated load order.
+// registry.js, fallback-lists.js, and exactly the sources in the generated load order.
 test("the service worker imports the registry and every source", () => {
   const worker = fs.readFileSync(path.join(ROOT, "ui/toolbar-icon.js"), "utf8");
   const importBlock = worker.match(/importScripts\(([^)]*)\)/s);
@@ -70,6 +83,7 @@ test("the service worker imports the registry and every source", () => {
   const loadOrder = computeLoadOrder();
   const sources = loadOrder.filter((f) => f.startsWith("pipeline/sources/"));
 
+  assert.ok(resolved.includes("pipeline/fallback-lists.js"), "worker must import pipeline/fallback-lists.js");
   assert.ok(resolved.includes("pipeline/registry.js"), "worker must import pipeline/registry.js");
   assert.deepEqual(
     resolved.filter((f) => f.startsWith("pipeline/sources/")).sort(),

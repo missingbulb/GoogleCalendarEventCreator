@@ -27,16 +27,14 @@
 // persists between opens), so without it each source's `GCal.sources.push(...)`
 // would stack a duplicate matcher on every reopen.
 //
-// `GCal.sourceFallbackDenylist` mirrors config.js's `sourceFallbackDenylist` so
-// the service worker (which can't import ES modules) can also classify hosts.
-// A shared-constants test (test/uber/shared_constants/) fails if the two lists
-// drift apart.
+// `GCal.sourceFallbackDenylist` / `GCal.sourceFallbackAllowlist` are set by
+// pipeline/fallback-lists.js (generated from pipeline/fallback-lists.json).
+// In the service worker, that file is loaded via importScripts before this one;
+// in the page-injection context they are not present (extractors don't need
+// them). isDeniedHost() below reads the list at call time, so it always sees
+// whatever was populated.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
   sources: [],
-
-  // Hosts whose generic fallback events are suppressed (noise, not signal).
-  // Must stay in sync with GCalConfig.sourceFallbackDenylist in config.js.
-  sourceFallbackDenylist: ["barby.co.il"],
 
   // THE single source of truth for "is this page a supported site": its
   // hostname has a registered source whose `matches` returns true. The toolbar
@@ -55,10 +53,11 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, {
 
   // True when the host is on the fallback denylist — the popup suppresses
   // fallback events there, and the toolbar icon shows a gray tile.
+  // Reads GCal.sourceFallbackDenylist populated by pipeline/fallback-lists.js.
   isDeniedHost(url) {
     try {
       const host = new URL(url).hostname.replace(/^www\./, "");
-      return GCal.sourceFallbackDenylist.some(
+      return (GCal.sourceFallbackDenylist || []).some(
         (entry) => host === entry || host.endsWith("." + entry)
       );
     } catch (e) {

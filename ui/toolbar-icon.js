@@ -23,6 +23,7 @@
 // below register — leaving the toolbar with no availability signal at all.
 // See #146.
 importScripts(
+  "/pipeline/fallback-lists.js",
   "/pipeline/registry.js",
   "/pipeline/sources/bandsintown.js",
   "/pipeline/sources/edinburghfringe.js",

@@ -1,8 +1,0 @@
-{
-  "what": "barby.co.il denylist entry — must appear in both registry.js (for the service worker) and config.js (for the popup); update both when the list changes",
-  "value": "barby.co.il",
-  "counts": {
-    "pipeline/registry.js": 1,
-    "config.js": 1
-  }
-}
