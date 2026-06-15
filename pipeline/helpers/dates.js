@@ -49,23 +49,22 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     const isoMatch = s.match(/\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?/);
     if (isoMatch) return normalizeIso(isoMatch[0]);
 
-    // Day-first dotted dates ("15.6.2026", "15.6.2026 19:00") — the everyday
-    // format outside the US, where the generic patterns below (which lean on
-    // V8's English-only Date parsing) can't help. Built straight from the parts,
-    // read as D.M.Y (the dotted convention), so a yearless time after it is
-    // optional. Only fires when day/month are in range, so it doesn't swallow
-    // unrelated dotted numbers.
-    // (?<!\d)…(?!\d) (not \b) so an abutting letter is fine — block elements
-    // concatenate without spaces in body text ("Night15.6.2026") — while a
-    // neighbouring digit (a longer number) still rules the match out.
-    const dotted = s.match(/(?<!\d)(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)(?:\s*(?:,|at|@|·)?\s*(\d{1,2}):(\d{2}))?/i);
-    if (dotted) {
-      const dd = +dotted[1];
-      const mm = +dotted[2];
-      if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) {
-        const day = `${dotted[3]}-${pad(mm)}-${pad(dd)}`;
-        return dotted[4] != null ? `${day}T${pad(+dotted[4])}:${dotted[5]}:00` : day;
-      }
+    // Day-first numeric dates with "." or "-" separators ("15.6.2026",
+    // "18-06-2026", "15.6.2026 19:00") — the everyday format outside the US,
+    // which the English-only patterns below (built on V8's Date parsing) miss.
+    // ("/" stays month-first American, handled in the patterns below.) Built
+    // straight from the parts, read day-first, with an optional adjacent time. A
+    // backreference pins both separators to the same character, and (?<!\d)…(?!\d)
+    // (not \b) so an abutting letter is fine — block elements concatenate without
+    // spaces in body text ("Night15.6.2026") — while a neighbouring digit (part
+    // of a longer number) rules it out. matchAll lets an out-of-range leading
+    // candidate ("50-12-2026") be skipped to reach a real date later in the text.
+    for (const m of s.matchAll(/(?<!\d)(\d{1,2})([.\-])(\d{1,2})\2(\d{4})(?!\d)(?:\s*(?:,|at|@|·)?\s*(\d{1,2}):(\d{2}))?/g)) {
+      const dd = +m[1];
+      const mm = +m[3];
+      if (dd < 1 || dd > 31 || mm < 1 || mm > 12) continue;
+      const day = `${m[4]}-${pad(mm)}-${pad(dd)}`;
+      return m[5] != null ? `${day}T${pad(+m[5])}:${m[6]}:00` : day;
     }
 
     const patterns = [

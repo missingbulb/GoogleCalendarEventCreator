@@ -42,7 +42,7 @@
   function heuristics() {
     const out = {};
 
-    out.title = meta("og:title") || text("h1") || clean(document.title);
+    out.title = stripSiteSuffix(meta("og:title")) || text("h1") || clean(document.title);
 
     const startProp = document.querySelector('[itemprop="startDate"]');
     if (startProp) {
@@ -78,6 +78,22 @@
     out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
 
     return out;
+  }
+
+  // og:title often ends with the site's own name (" - Tel Aviv Cinematheque",
+  // "… - Think&Drink"); drop that trailing " <sep> <site name>" so the generic
+  // title is just the event, the way a per-site source would read it. Only the
+  // exact og:site_name is stripped, so a real title that merely contains a dash
+  // is left alone.
+  function stripSiteSuffix(title) {
+    title = clean(title);
+    const site = clean(meta("og:site_name"));
+    if (!title || !site) return title;
+    for (const sep of [" - ", " | ", " – ", " — "]) {
+      const suffix = sep + site;
+      if (title.endsWith(suffix)) return clean(title.slice(0, -suffix.length));
+    }
+    return title;
   }
 
   // Last-resort location: the place meta tags some pages publish (the Open Graph
