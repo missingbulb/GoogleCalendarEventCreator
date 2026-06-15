@@ -4,9 +4,13 @@
 //                      (e.g. "Taiwan Film Week"). Each film is a `.box` under
 //                      `.register-series-boxes`, with its own title, a single
 //                      screening date+time ("17-06-2026 , רביעי / 20:00 / אולם 3"),
-//                      and a "לפרטים נוספים" link to its /event/ page. These
-//                      become the `events` list (one entry per film); the first
-//                      film is the suggested (top-level) event.
+//                      cast, meta info (ul li: country/year/אורך, director,
+//                      language), synopsis, and a "לפרטים נוספים" link to its
+//                      /event/ page. These become the `events` list (one entry
+//                      per film); the first film is the suggested (top-level)
+//                      event. Each event carries its own per-film description
+//                      (assembled from the box content) and eventLengthInMinutes
+//                      (from "אורך: N" in the ul li elements).
 //
 //   /event/<slug>/   — a single film, with a screening-date picker. Handled below.
 //
@@ -58,9 +62,29 @@
         const start = parseBoxDate(clean((box.querySelector(".title p") || {}).textContent));
         const duration = parseDuration(box);
         const end = duration && start.includes("T") ? addMinutes(start, duration) : null;
-        return title && start ? { title, start, end, location: location() } : null;
+        const description = boxDescription(box);
+        return title && start
+          ? { title, start, end, location: location(), description, eventLengthInMinutes: duration || null }
+          : null;
       })
       .filter(Boolean);
+  }
+
+  // Assembles a per-film description from a series `.box`: title, date, cast,
+  // then the meta lines (country/year/length, director, language), then synopsis.
+  function boxDescription(box) {
+    const h3 = clean((box.querySelector(".title h3") || {}).textContent);
+    const titlePs = [...box.querySelectorAll(".title p")].map((p) => clean(p.textContent)).filter(Boolean);
+    const liTexts = [...box.querySelectorAll("ul li")].map((li) => clean(li.textContent)).filter(Boolean);
+    const synopsis = clean((box.querySelector(".text-wraper > p") || {}).textContent);
+
+    const parts = [];
+    if (h3) parts.push(h3);
+    if (titlePs[0]) parts.push(titlePs[0]);
+    if (titlePs[1]) { parts.push(""); parts.push(titlePs[1]); }
+    if (liTexts.length) { parts.push(""); parts.push(...liTexts); }
+    if (synopsis) parts.push(synopsis);
+    return parts.join("\n");
   }
 
   // "... / 2025 / אורך: 108" -> 108 (minutes). Returns 0 if not found.
@@ -113,6 +137,15 @@
       .map((o) => clean(o.textContent))
       .filter((t) => /^\d{1,2}:\d{2}$/.test(t))
       .map((t) => t.replace(/^(\d):/, "0$1:"));
+  }
+
+  // "... / 2025 / אורך: 108" in the single-event page's title/meta line -> 108.
+  // (The series-page variant of this lives in parseDuration(), which reads from
+  // each box's <ul><li> elements instead.)
+  function parseSingleEventDuration() {
+    const metaLine = clean((document.querySelector(".movie-section .text-wraper .title p") || {}).textContent);
+    const m = metaLine && metaLine.match(/אורך:\s*(\d+)/);
+    return m ? +m[1] : null;
   }
 
   // The date those #smtime_b times belong to: the option currently selected in
@@ -225,10 +258,11 @@
       // that date becomes one timed event per show, the rest stay all-day.
       const times = screeningTimes();
       const selected = selectedDate();
+      const dur = parseSingleEventDuration();
       const events = dates.flatMap((d) =>
         times.length && d === selected
-          ? times.map((time) => ({ title: t, start: `${d}T${time}:00`, end: null, location: loc }))
-          : [{ title: t, start: d, end: null, location: loc }]
+          ? times.map((time) => ({ title: t, start: `${d}T${time}:00`, end: null, location: loc, eventLengthInMinutes: dur }))
+          : [{ title: t, start: d, end: null, location: loc, eventLengthInMinutes: dur }]
       );
 
       return {

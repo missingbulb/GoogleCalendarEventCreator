@@ -7,7 +7,7 @@
 globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   function merge(...sources) {
     const out = {};
-    for (const key of ["title", "start", "end", "location", "description", "ctz"]) {
+    for (const key of ["title", "start", "end", "location", "description", "ctz", "eventLengthInMinutes"]) {
       for (const src of sources) {
         if (src && src[key]) {
           out[key] = src[key];

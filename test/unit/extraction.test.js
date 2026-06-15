@@ -188,9 +188,13 @@ test("Tel Aviv Cinematheque series page: one event per film card", () => {
   assert.equal(ev.events[0].end, "2026-06-18T21:30:00");
   assert.equal(ev.events[1].end, "2026-06-19T21:30:00");
   assert.equal(ev.events[2].end, "2026-06-20T21:30:00");
-  // Page-level description/ctz are filled into each film.
+  // Each film's description is assembled from its own box content; ctz is page-level.
   assert.equal(ev.events[0].ctz, "Asia/Jerusalem");
-  assert.equal(ev.events[0].description, "A week of films.");
+  assert.equal(
+    ev.events[0].description,
+    "First Film\n18-06-2026 , חמישי / 20:00 / אולם 1\n\nIsrael / 2026 / אורך: 90"
+  );
+  assert.equal(ev.events[0].eventLengthInMinutes, 90);
   assert.ok(ev.events[0].location.includes("סינמטק תל אביב"));
 });
 

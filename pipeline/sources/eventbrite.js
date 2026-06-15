@@ -35,6 +35,13 @@
       const timeEl = document.querySelector("time[datetime]");
       const tz = findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/);
 
+      const nextData = jsonScript("#__NEXT_DATA__");
+      const ctx =
+        nextData &&
+        nextData.props &&
+        nextData.props.pageProps &&
+        nextData.props.pageProps.context;
+
       // Build the full description from __NEXT_DATA__: the short summary plus
       // the structured-content body paragraphs that don't appear in JSON-LD.
       let description = firstText([
@@ -42,30 +49,24 @@
         ".event-description",
         "#event-description",
       ]);
-      if (!description) {
-        const ctx =
-          jsonScript("#__NEXT_DATA__") &&
-          jsonScript("#__NEXT_DATA__").props &&
-          jsonScript("#__NEXT_DATA__").props.pageProps &&
-          jsonScript("#__NEXT_DATA__").props.pageProps.context;
-        if (ctx) {
-          const summary = (ctx.basicInfo && ctx.basicInfo.summary) || "";
-          const modules = (ctx.structuredContent && ctx.structuredContent.modules) || [];
-          const bodyHtml = modules.filter((m) => m.type === "text").map((m) => m.text).join("");
-          if (bodyHtml) {
-            const tmp = document.createElement("div");
-            tmp.innerHTML = bodyHtml;
-            const paras = [...tmp.querySelectorAll("p")]
-              .map((p) => clean(p.textContent))
-              .filter(Boolean);
-            const bodyText = paras.join("\n\n");
-            description = summary && bodyText ? `${summary}\n\n${bodyText}` : summary || bodyText;
-          } else {
-            description = summary;
-          }
+      if (!description && ctx) {
+        const summary = (ctx.basicInfo && ctx.basicInfo.summary) || "";
+        const modules = (ctx.structuredContent && ctx.structuredContent.modules) || [];
+        const bodyHtml = modules.filter((m) => m.type === "text").map((m) => m.text).join("");
+        if (bodyHtml) {
+          const tmp = document.createElement("div");
+          tmp.innerHTML = bodyHtml;
+          const paras = [...tmp.querySelectorAll("p")]
+            .map((p) => clean(p.textContent))
+            .filter(Boolean);
+          const bodyText = paras.join("\n\n");
+          description = summary && bodyText ? `${summary}\n\n${bodyText}` : summary || bodyText;
+        } else {
+          description = summary;
         }
       }
 
+      const durationSeconds = ctx && ctx.basicInfo && ctx.basicInfo.eventDurationSeconds;
       const dom = {
         title: firstText(["h1.event-title", "h1"]),
         start: timeEl
@@ -74,6 +75,7 @@
         location: firstText([".location-info__address", '[data-testid="location"]']),
         description,
         ctz: isValidTimezone(tz) ? tz : "",
+        eventLengthInMinutes: durationSeconds ? Math.round(durationSeconds / 60) : null,
       };
       // DOM values win where present; the page's embedded event fills the rest
       // (end time, and location/description on pages whose selectors don't match).

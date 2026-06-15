@@ -15,12 +15,13 @@
 //     "expected": {
 //       "events": [
 //         {
-//           "title":    "Exact Title",
-//           "start":    "2026-06-25T18:00:00-04:00",
-//           "end":      "2026-06-25T21:00:00-04:00",
-//           "location": "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
-//           "ctz":      "America/New_York",          <- the Calendar URL's ctz= param, or null
-//           "details":  "[https://...](https://.../)\n\n...full description..."
+//           "title":                "Exact Title",
+//           "start":               "2026-06-25T18:00:00-04:00",
+//           "end":                 "2026-06-25T21:00:00-04:00",
+//           "location":            "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
+//           "ctz":                 "America/New_York",   <- the Calendar URL's ctz= param, or null
+//           "eventLengthInMinutes": null,                <- explicit page duration, or null
+//           "details":             "[https://...](https://.../)\n\n...full description..."
 //         }
 //       ]
 //     }
@@ -33,7 +34,7 @@
 //
 // `expected.events` must be the *complete*, exact array the extractor
 // produces. Each event is deep-equal compared against:
-//   { title, start, end, location, ctz, details }
+//   { title, start, end, location, ctz, eventLengthInMinutes, details }
 // There are no substring/regex/prefix matchers: every field must be present
 // and match exactly, including the full text of `details`.
 // This catches any drift — in extraction or in how `details` is composed —
@@ -116,6 +117,7 @@ for (const file of caseFiles) {
         end: e.end || null,
         location: e.location,
         ctz: e.ctz || null,
+        eventLengthInMinutes: e.eventLengthInMinutes ?? null,
         details: new URL(calendarUrl).searchParams.get("details"),
       };
     });
