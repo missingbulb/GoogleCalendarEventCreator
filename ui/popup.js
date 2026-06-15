@@ -67,8 +67,8 @@ async function init() {
 // fallback-policy.js). Returns { events, request, policyLink } — `events` are the
 // buttons to show (possibly empty), `request` is the prefill for a "request
 // support" button (or null), `policyLink` is whether to show the "Disagree?"
-// link. The five states, in the order they're decided (see highLevelDesign.md
-// and docs/popup-states-flowchart.png):
+// link. The five states, in the order they're decided (specified in
+// docs/productRequirements.md; diagram in docs/popup-states-flowchart.png):
 //
 //   State 1 — supported host (a per-site source matched): show its events.
 //     `supported` is the same GCal.isSupportedHost check that colors the toolbar

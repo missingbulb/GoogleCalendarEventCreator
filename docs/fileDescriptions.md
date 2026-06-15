@@ -1,7 +1,9 @@
-# Low-level design — file map
+# File descriptions
 
-See [highLevelDesign.md](highLevelDesign.md) for how extraction works and
-[architectureGuidelines.md](architectureGuidelines.md) for the rules of the road.
+A per-file map of the repo. See [highLevelDesign.md](highLevelDesign.md) for how
+extraction works, [productRequirements.md](productRequirements.md) for what the
+extension does, and [architectureGuidelines.md](architectureGuidelines.md) for
+the rules of the road.
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |

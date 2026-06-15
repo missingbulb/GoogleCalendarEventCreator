@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Regenerates docs/popup-states-flowchart.png — a simple flowchart of the five
 // states the popup can render (issue #192; the same decision ui/popup.js's
-// chooseContent makes, see docs/highLevelDesign.md).
+// chooseContent makes, see docs/productRequirements.md).
 //
 //   node tools/gen-states-flowchart.js
 //

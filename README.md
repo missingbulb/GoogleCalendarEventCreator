@@ -74,8 +74,9 @@ extractor (e.g. meetup.com), and no badge elsewhere.
 ## Documentation
 
 - [Architecture guidelines](docs/architectureGuidelines.md) — top-level rules of the road.
+- [Product requirements](docs/productRequirements.md) — what the extension does (user-facing behavior).
 - [High-level design](docs/highLevelDesign.md) — how extraction works.
-- [Low-level design](docs/lowLevelDesign.md) — the file map.
+- [File descriptions](docs/fileDescriptions.md) — the per-file map.
 - [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](docs/releasing.md) — building the zip and publishing to the Chrome Web Store.
 - [Resources](docs/resources.md) — external references relevant to the project.
