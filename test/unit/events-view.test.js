@@ -70,3 +70,13 @@ test("dateChip: returns an uppercase short month and the day of month", () => {
 test("dateChip: no usable date yields null (button then shows no chip)", () => {
   assert.equal(dateChip(""), null);
 });
+
+test("summarize: eventLengthInMinutes with no end shows a time range", () => {
+  const text = summarize({ start: ROUND, eventLengthInMinutes: 90 });
+  assert.ok(text.includes("–"), `expected a range in "${text}"`);
+});
+
+test("summarize: eventLengthInMinutes is ignored for all-day events", () => {
+  const text = summarize({ start: "2026-06-17", eventLengthInMinutes: 90 });
+  assert.equal(text, "All day");
+});

@@ -62,7 +62,12 @@ export function makeButton(event, tab) {
 
 // Second line of a button: the date/time, plus the location when there's one.
 export function summarize(event) {
-  const when = formatWhen(event.start, event.end);
+  let effectiveEnd = event.end;
+  if (!effectiveEnd && event.eventLengthInMinutes != null && event.start && !/^\d{4}-\d{2}-\d{2}$/.test(event.start)) {
+    const startDate = new Date(event.start);
+    if (!isNaN(startDate)) effectiveEnd = new Date(startDate.getTime() + event.eventLengthInMinutes * 60000);
+  }
+  const when = formatWhen(event.start, effectiveEnd);
   if (event.location) return `${when} · ${event.location}`;
   return when;
 }
