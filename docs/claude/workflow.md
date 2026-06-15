@@ -39,3 +39,8 @@ adding-a-source, auto-extractor); top-level architecture rules to
 `docs/engineeringPractices.md`. Keep every addition terse. Project-specific
 guidance is good; broader engineering practices that generalize beyond this repo
 are better — prefer the most general file a lesson legitimately fits.
+
+A scheduled workflow runs this same pass automatically once a day over the last
+24h of commits and issue/PR activity, opening a PR for review
+(`docs/claude/auto-lessons.md`); saying "learned lessons" is the on-demand
+version of it.
