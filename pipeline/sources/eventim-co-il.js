@@ -7,18 +7,16 @@
 //   <h1>מופע שנות ה-90</h1>
 //   <time datetime="2026-07-02T21:30:00+03:00">...</time>
 //   <span class="venue-name">Zappa Tel Aviv</span>
+//   <!-- artist pages: full description in a .moretext-teaser inside .external-content -->
 //
 // Where each field comes from:
 //   title       the page's <h1>
-//   start       datetime attribute of the first <time> element; Eventim also
-//               embeds schema.org JSON-LD (used as fallback via embeddedEvents)
-//   location    venue name/address near the date block
+//   start       datetime attribute of the first <time> element
+//   end/location  schema.org JSON-LD subEvent (MusicEvent) via embeddedEvents
+//   description full text from .external-content .moretext-teaser (<br> → newlines)
 //   ctz         always "Asia/Jerusalem" — eventim.co.il is Israel-only
-//
-// Eventim embeds schema.org Event JSON-LD; the generic layer fills any gaps
-// the DOM selectors miss (end time, fuller location, etc.).
 (() => {
-  const { text, firstText, normalizeDateValue, merge, embeddedEvents } = GCal;
+  const { text, firstText, blockText, normalizeDateValue, merge, embeddedEvents } = GCal;
 
   GCal.sources.push({
     name: "eventim-co-il",
@@ -29,6 +27,7 @@
         title: text("h1"),
         start: timeEl ? normalizeDateValue(timeEl.getAttribute("datetime")) : "",
         location: firstText([".venue-name", ".event-venue"]),
+        description: blockText(".external-content .moretext-teaser"),
         ctz: "Asia/Jerusalem",
       };
       return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
