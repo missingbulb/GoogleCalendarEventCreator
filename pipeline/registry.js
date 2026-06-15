@@ -18,10 +18,16 @@
 //       local time in that zone via GCal.localizeToZone.
 //
 // We *augment* any existing globalThis.GCal (Object.assign) rather than
-// replacing it, and preserve an already-populated `sources` array, so load
-// order can't clobber another file's contributions.
+// replacing it, so a helper that loaded first keeps its contributions. The
+// `sources` registry is the exception: it's RESET to a fresh array on each
+// load. This file is pinned FIRST in the load order (and first in the worker's
+// importScripts), so it always runs before any source pushes — the reset can't
+// clobber a source's contribution, and it's what makes injection idempotent:
+// the popup re-injects the whole pipeline on every open (into a page world that
+// persists between opens), so without it each source's `GCal.sources.push(...)`
+// would stack a duplicate matcher on every reopen.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
-  sources: (globalThis.GCal && globalThis.GCal.sources) || [],
+  sources: [],
 
   // THE single source of truth for "is this page a supported site": its
   // hostname has a registered source whose `matches` returns true. The toolbar

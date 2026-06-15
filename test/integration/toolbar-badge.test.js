@@ -1,7 +1,7 @@
-// Integration test: the toolbar badge reflects whether a page has a
+// Integration test: the toolbar icon reflects whether a page has a
 // site-specific source (pipeline/sources/<site>.js, whose `matches`
-// GCal.isSupportedHost checks). Supported pages get a green pill; every other
-// page gets no badge at all.
+// GCal.isSupportedHost checks). Supported pages get the green tile icon;
+// every other page gets the default blue tile icon.
 "use strict";
 
 const test = require("node:test");
@@ -27,17 +27,16 @@ function resolveImport(spec) {
 
 // ui/toolbar-icon.js registers chrome listeners and importScripts()'s the
 // registry and every source at load time; stub just enough of the extension
-// APIs and run them in the same sandbox so availabilityBadge() sees GCal.sources
+// APIs and run them in the same sandbox so availabilityIcon() sees GCal.sources
 // exactly as it does in the real extension. A bad importScripts path throws
 // here (file not found) just as it aborts the real worker.
-function loadBadgeState() {
+function loadIconState() {
   const sandbox = {
     URL,
     chrome: {
       action: {
         onClicked: { addListener() {} },
-        setBadgeBackgroundColor() {},
-        setBadgeText() {},
+        setIcon() {},
       },
       tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get() {} },
       runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
@@ -50,12 +49,10 @@ function loadBadgeState() {
   };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT, WORKER), "utf8"), sandbox);
-  return { availabilityBadge: sandbox.availabilityBadge };
+  return { availabilityIcon: sandbox.availabilityIcon };
 }
 
-const { availabilityBadge } = loadBadgeState();
-
-const GREEN = "#34a853";
+const { availabilityIcon } = loadIconState();
 
 const CASES = [
   { url: "https://www.meetup.com/some-group/events/123456/", supported: true },
@@ -66,7 +63,7 @@ const CASES = [
   { url: "https://www.edfringe.com/tickets/whats-on/some-show", supported: true },
   { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw", supported: true },
   { url: "https://www.example.com/some-page", supported: false },
-  // Regression (#101): an unsupported event site shows no badge — its popup must
+  // Regression (#101): an unsupported event site shows no indicator — its popup must
   // not offer event buttons for a page we don't actually support.
   { url: "https://www.songkick.com/concerts/123456-some-artist", supported: false },
   { url: "https://www.google.com/calendar", supported: false },
@@ -75,14 +72,12 @@ const CASES = [
 ];
 
 for (const { url, supported } of CASES) {
-  test(`${url || "(empty url)"} -> ${supported ? "green badge" : "no badge"}`, () => {
-    const badge = availabilityBadge(url);
+  test(`${url || "(empty url)"} -> ${supported ? "green tile icon" : "blue tile icon"}`, () => {
+    const icon = availabilityIcon(url);
     if (supported) {
-      // A non-empty text is what makes Chrome paint the (green) pill.
-      assert.notEqual(badge.text, "", "a supported page must show a badge");
-      assert.equal(badge.color, GREEN, "a supported page's badge must be green");
+      assert.ok(icon[128].includes("-supported"), "a supported page must use the green (supported) icon");
     } else {
-      assert.equal(badge.text, "", "an unsupported page must show no badge");
+      assert.ok(!icon[128].includes("-supported"), "an unsupported page must use the default blue icon");
     }
   });
 }
