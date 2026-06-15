@@ -1,8 +1,11 @@
 // Popup controller (ES module): query the active tab, run the extractor in it,
-// pick a view from the result, and dynamically import only that view to render.
-// The two views — events-view.js and source-request-view.js — are loaded on
-// demand with import() so the popup pulls in just what the page needs.
+// then render — from the one chooseContent() decision — event buttons and/or
+// the unsupported-host affordances (a "request support" button, a "Disagree?"
+// policy link). The two view modules — events-view.js and source-request-view.js
+// — are loaded on demand with import() so the popup pulls in just what the page
+// needs.
 import { GCalConfig } from "../config.js";
+import { classifyHost, isPresentableFallbackEvent } from "../fallback-policy.js";
 
 async function init() {
   const headingEl = document.getElementById("heading");
@@ -28,61 +31,87 @@ async function init() {
   }
 
   const MAX_EVENTS = GCalConfig.maxEventsShown;
-  const view = chooseContent(data);
-
-  if (view.mode === "request") {
-    // Unsupported site (red toolbar border). Never surface scraped events
-    // here — that's exactly the border/popup mismatch we avoid — so offer the
-    // embedded "request this source" form, prefilled with whatever little the
-    // generic/JSON-LD layers managed to find.
-    const { makeSourceRequestButton } = await import("./views/source-request-view.js");
-    headingEl.textContent = "Add support for this site";
-    eventsEl.appendChild(makeSourceRequestButton(tab, view.prefill));
-    return;
-  }
-
-  const allEvents = view.events;
+  const { events: allEvents, request, policyLink } = chooseContent(data, classifyHost(tab.url));
   const events = allEvents.slice(0, MAX_EVENTS);
 
-  if (!events.length) {
+  if (events.length) {
+    headingEl.textContent =
+      allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
+
+    if (allEvents.length > MAX_EVENTS) {
+      const truncEl = document.getElementById("truncated");
+      truncEl.textContent = `Showing first ${MAX_EVENTS} of ${allEvents.length}`;
+      truncEl.hidden = false;
+    }
+
+    const { makeButton } = await import("./views/events-view.js");
+    events.forEach((event) => {
+      eventsEl.appendChild(makeButton(event, tab));
+    });
+  } else {
     headingEl.textContent = "No events found on this page";
-    return;
   }
 
-  headingEl.textContent =
-    allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
-
-  if (allEvents.length > MAX_EVENTS) {
-    const truncEl = document.getElementById("truncated");
-    truncEl.textContent = `Showing first ${MAX_EVENTS} of ${allEvents.length}`;
-    truncEl.hidden = false;
+  // A heading-line link on an unlisted host, right-aligned next to the heading
+  // text: "Suggest Correction" when a complete event is shown (State 5), or
+  // "Disagree?" when there's nothing to show (State 3). At most one fires.
+  if (request || policyLink) {
+    const view = await import("./views/source-request-view.js");
+    headingEl.classList.add("with-link");
+    headingEl.appendChild(request ? view.makeSourceRequestLink(tab, request) : view.makePolicyLink(tab));
   }
-
-  const { makeButton } = await import("./views/events-view.js");
-  events.forEach((event) => {
-    eventsEl.appendChild(makeButton(event, tab));
-  });
 }
 
-// The one decision behind what the popup renders, driven by the injected
-// extraction result's `supported` flag (set by assemble-events.js from the
-// same GCal.isSupportedHost check that drives the toolbar badge — so the popup
-// and the badge can never disagree). Returns either:
-//   { mode: "request", prefill }  — unsupported host (no badge): only the
-//       "request this source" flow, seeded with any scraped event, never an
-//       event button (even when the generic/JSON-LD layers found something).
-//   { mode: "events", events }    — supported host (green badge): the
-//       extracted events, which may be empty ("No events found").
-export function chooseContent(data) {
-  const allEvents = data && data.events && data.events.length ? data.events : [];
-  if (!data || !data.supported) {
-    return { mode: "request", prefill: allEvents[0] };
+// THE one decision behind what the popup renders, given the injected extraction
+// result and the host's fallback classification (classifyHost, in
+// fallback-policy.js). Returns { events, request, policyLink } — `events` are the
+// buttons to show (possibly empty), `request` is the prefill for a "request
+// support" button (or null), `policyLink` is whether to show the "Disagree?"
+// link. The five states, in the order they're decided (specified in
+// docs/productRequirements.md; diagram in docs/popup-states-flowchart.png):
+//
+//   State 1 — supported host (a per-site source matched): show its events.
+//     `supported` is the same GCal.isSupportedHost check that colors the toolbar
+//     icon, so the popup's supported/unsupported split and the icon agree.
+//   State 2 — denylisted host: "No events found", and NO prompt — we've
+//     explicitly decided not to extract there, so we don't surface a fallback
+//     event, a support request, or even the policy link. Decided before the
+//     fallback result, so it holds whether or not the fallback scraped anything.
+//   State 3 — not denylisted, and the fallback found nothing complete: "No
+//     events found" with the quiet "Disagree?" link to the policy doc.
+//   State 4 — a complete fallback event (title + location + start), allowlisted:
+//     show the event; don't ask for support (the fallback is trusted here).
+//   State 5 — a complete fallback event, on neither list: show the event AND a
+//     "request support" button, so a good page can become a first-class source.
+export function chooseContent(data, listing = "none") {
+  const all = data && data.events && data.events.length ? [...data.events] : [];
+
+  // State 1.
+  if (data && data.supported) {
+    return { events: all, request: null, policyLink: false };
   }
-  return { mode: "events", events: allEvents };
+
+  // State 2: a denylisted host shows nothing and prompts for nothing — that
+  // decision is already made, regardless of what the fallback scraped.
+  if (listing === "deny") {
+    return { events: [], request: null, policyLink: false };
+  }
+
+  const presentable = all.filter(isPresentableFallbackEvent);
+
+  // State 3: nothing complete to show — offer the quiet "how this works" link.
+  if (!presentable.length) {
+    return { events: [], request: null, policyLink: true };
+  }
+
+  // States 4 & 5: a complete event. Allowlisted hosts skip the support ask;
+  // unlisted hosts also get the request button, seeded with the event.
+  const request = listing === "allow" ? null : presentable[0];
+  return { events: presentable, request, policyLink: false };
 }
 
 // Run only in the real popup document; importing this module in Node (the
-// tests) just pulls in chooseContent without touching the DOM/chrome APIs.
+// tests) just pulls in the exported helpers without touching the DOM/chrome APIs.
 if (typeof document !== "undefined") {
   init().catch((e) => console.error("Popup failed to initialize:", e));
 }
