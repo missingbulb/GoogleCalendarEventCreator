@@ -1,0 +1,9 @@
+{
+  "what": "extension version must match across manifests",
+  "type": "json-field-sync",
+  "field": "version",
+  "files": [
+    "manifest.json",
+    "package.json"
+  ]
+}
