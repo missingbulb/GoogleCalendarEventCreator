@@ -50,6 +50,18 @@ is the project-specific mechanics. Keep these decisions in mind:
   `ui/popup.css` (the renderer inlines it — no duplicated style values); edit
   that file (and the views it mirrors) for a UI change, then regenerate. A new
   popup state needs a new `.state` section there and its own snapshot.
+- **The snapshot renderer works within satori's limits** (`test/ui/popup-renderer.js`),
+  which aren't obvious — verify a markup/CSS change by running `npm run refresh:ui`,
+  don't reason about it. satori has no CSS engine (it ignores `<style>`/`<link>`),
+  so the renderer inlines `ui/popup.css` onto the markup itself (parse rules →
+  match with jsdom → fold into inline styles); don't cherry-pick properties —
+  satori silently ignores what it can't use. What it *does* require: an explicit
+  `display: flex` (or `none`/`contents`) on any box with element children — a lone
+  *text* child is exempt, and a children **array** counts as multi-child, so pass a
+  lone child unwrapped and give an empty element no children at all; `display:
+  flex; justify-content: center` (not `text-align`) to center a box's content; and
+  a bundled font (the CSS font stack won't match a loaded font). Drop only a
+  `display` value satori rejects (e.g. `inline-block`).
 - **"Does the extension load?" is guarded in two layers.** A startup failure —
   a bad service-worker `importScripts` path (#146), a missing/renamed injected
   file, a syntax error in one — must fail a test, not just surface when someone
