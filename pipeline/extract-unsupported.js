@@ -24,7 +24,7 @@
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
 (() => {
-  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, merge, embeddedEvents } = GCal;
+  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, merge, embeddedEvents, parts } = GCal;
 
   function extract() {
     const embedded = embeddedEvents.find();
@@ -71,12 +71,29 @@
     out.location =
       text('[itemprop="location"]') ||
       text("address") ||
-      shortText('[class*="venue" i], [class*="location" i], [id*="location" i]');
+      shortText('[class*="venue" i], [class*="location" i], [id*="location" i]') ||
+      metaLocation();
 
     // Preserve the description's line breaks rather than flattening it.
     out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
 
     return out;
+  }
+
+  // Last-resort location: the place meta tags some pages publish (the Open Graph
+  // "place"/"business" address fields, or the geo.* tags) when nothing on the
+  // page exposed a location via microdata, <address>, or a venue/location class.
+  // Composed into one comma-separated string, most specific part first; the
+  // coordinate (lat/long) tags are deliberately ignored — they're not a venue.
+  function metaLocation() {
+    const p = parts();
+    p.add(meta("og:title:place") || meta("place:name") || meta("geo.placename"));
+    p.add(meta("og:street-address") || meta("business:contact_data:street_address"));
+    p.add(meta("og:locality") || meta("business:contact_data:locality"));
+    p.add(meta("og:region") || meta("business:contact_data:region") || meta("geo.region"));
+    p.add(meta("og:postal-code") || meta("business:contact_data:postal_code"));
+    p.add(meta("og:country-name") || meta("business:contact_data:country_name"));
+    return p.join();
   }
 
   // First element matching `sel` whose text is plausibly a venue string

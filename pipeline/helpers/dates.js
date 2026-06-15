@@ -49,6 +49,25 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     const isoMatch = s.match(/\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?/);
     if (isoMatch) return normalizeIso(isoMatch[0]);
 
+    // Day-first dotted dates ("15.6.2026", "15.6.2026 19:00") — the everyday
+    // format outside the US, where the generic patterns below (which lean on
+    // V8's English-only Date parsing) can't help. Built straight from the parts,
+    // read as D.M.Y (the dotted convention), so a yearless time after it is
+    // optional. Only fires when day/month are in range, so it doesn't swallow
+    // unrelated dotted numbers.
+    // (?<!\d)…(?!\d) (not \b) so an abutting letter is fine — block elements
+    // concatenate without spaces in body text ("Night15.6.2026") — while a
+    // neighbouring digit (a longer number) still rules the match out.
+    const dotted = s.match(/(?<!\d)(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)(?:\s*(?:,|at|@|·)?\s*(\d{1,2}):(\d{2}))?/i);
+    if (dotted) {
+      const dd = +dotted[1];
+      const mm = +dotted[2];
+      if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) {
+        const day = `${dotted[3]}-${pad(mm)}-${pad(dd)}`;
+        return dotted[4] != null ? `${day}T${pad(+dotted[4])}:${dotted[5]}:00` : day;
+      }
+    }
+
     const patterns = [
       // "June 14, 2026 at 7:00 PM" / "Jun 14 2026, 19:00" / "June 14, 2026 from 7 PM"
       new RegExp(`${MONTH}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}(?:\\s*(?:,|at|from|@|·|—|–|-)?\\s*(${TIME}))?`, "i"),
