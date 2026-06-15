@@ -49,7 +49,7 @@ The extension requests only the minimum permissions needed to work:
   when you explicitly click the extension**, so it can extract the event
   details from that page.
 - `tabs` — to open the pre-filled Google Calendar event in a new tab and to
-  update the toolbar badge to indicate whether the current page is supported.
+  update the toolbar icon to indicate whether the current page is supported.
 
 These permissions are used solely for the functionality described above.
 
