@@ -18,6 +18,11 @@
 # Environment caching).
 set -euo pipefail
 
+# The setup script runs as root before Claude launches, starting in the repo's
+# PARENT directory (/home/user) rather than the checkout. cd in first -- without
+# this, `npm ci` finds no package.json and silently installs nothing.
+cd /home/user/GoogleCalendarEventCreator
+
 # `|| true` so a transient registry hiccup doesn't block the whole session from
 # starting (per the platform's setup-script guidance). A session that never runs
 # the tests is unaffected, and Claude can reinstall mid-session if needed.
