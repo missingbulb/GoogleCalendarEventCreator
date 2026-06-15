@@ -30,24 +30,26 @@ picks a path by whether the page's host has a per-site source:
    best-effort event from the page's embedded JSON-LD and generic heuristics
    (microdata, Open Graph / meta tags, `<time datetime>`, `<h1>`/`<address>`,
    venue/location-named elements, and finally a date/time scan over the visible
-   text). The popup (`ui/popup.js`'s `chooseContent`) presents that event only
-   when it's complete enough — a title, a location **and** a start time — and
-   keys the rest on a host classifier in `config.js` (`sourceFallbackAllowlist`
-   / `sourceFallbackDenylist`):
-   - **on neither list** — show the event **and** a "request support for this
-     site" link, so a good page can become a first-class source;
-   - **allowlisted** — show the event, but don't ask for support (the fallback
-     is already trusted there);
-   - **denylisted** — suppress it (generic guesses there are noise).
+   text). The popup (`ui/popup.js`'s `chooseContent`) decides what to show from
+   the host's classification in `config.js` (`sourceFallbackDenylist` /
+   `sourceFallbackAllowlist`) and whether the fallback found a *complete* event
+   (a title, a location **and** a start time), in this order:
+   - **denylisted host** — "No events found", and no prompt at all: no event, no
+     request, not even the policy link. We've explicitly decided not to extract
+     there, so the call holds whatever the fallback scraped.
+   - **not denylisted, nothing complete found** — "No events found" with a quiet
+     "Disagree?" link to the public policy doc (`docs/extraction-policy.md`).
+   - **complete event, allowlisted** — show the event; don't ask for support
+     (the fallback is already trusted there).
+   - **complete event, on neither list** — show the event **and** a "request
+     support for this site" link, so a good page can become a first-class source.
 
-   When there's no event to show, the popup says "No events found" with a quiet
-   "Disagree?" link to the public policy doc (`docs/extraction-policy.md`) — it
-   never asks anyone to sponsor a page that has no event. The toolbar icon still
-   reflects only whether a per-site source exists (it can't run extraction), so
-   an unsupported host can show an event in the popup while its icon stays blue.
+   The toolbar icon still reflects only whether a per-site source exists (it
+   can't run extraction), so an unsupported host can show an event in the popup
+   while its icon stays blue.
 
-The five states the popup can land in (regenerate with
-`node tools/gen-states-flowchart.js`):
+The five states the popup can land in (the supported-host case plus the four
+above; regenerate the diagram with `node tools/gen-states-flowchart.js`):
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 

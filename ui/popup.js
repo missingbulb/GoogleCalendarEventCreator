@@ -63,46 +63,48 @@ async function init() {
 
 // THE one decision behind what the popup renders, given the injected extraction
 // result and the host's fallback classification (classifyHost, in
-// fallback-policy.js). Returns
-//   { events, request, policyLink }
-// — `events` are the buttons to show (possibly empty), `request` is the prefill
-// for a "request support" button (or null), `policyLink` is whether to show the
-// "Disagree?" link to the public policy doc. The five states (see
-// highLevelDesign.md):
+// fallback-policy.js). Returns { events, request, policyLink } — `events` are the
+// buttons to show (possibly empty), `request` is the prefill for a "request
+// support" button (or null), `policyLink` is whether to show the "Disagree?"
+// link. The five states, in the order they're decided (see highLevelDesign.md
+// and docs/popup-states-flowchart.png):
 //
-//   State 1 — supported host (a per-site source matched): show its events as-is;
-//     no request, no policy link. `supported` comes from the same
-//     GCal.isSupportedHost check that colors the toolbar icon, so the popup and
-//     the icon can never disagree.
-//
-//   Unsupported host — defer to the generic fallback, gated to a presentable
-//   event (title + location + start), then keyed on the host's classification:
-//     State 2 — nothing presentable: no events; show the policy link instead of
-//       pestering for support on a page that has no event.
-//     State 3 — presentable + allowlisted: show events, no request (we already
-//       trust the fallback on this host).
-//     State 4 — presentable + denylisted: suppress it — no events; policy link.
-//     State 5 — presentable + on neither list: show events AND a request button
-//       seeded with the event, so a good page can become a first-class source.
+//   State 1 — supported host (a per-site source matched): show its events.
+//     `supported` is the same GCal.isSupportedHost check that colors the toolbar
+//     icon, so the popup's supported/unsupported split and the icon agree.
+//   State 2 — denylisted host: "No events found", and NO prompt — we've
+//     explicitly decided not to extract there, so we don't surface a fallback
+//     event, a support request, or even the policy link. Decided before the
+//     fallback result, so it holds whether or not the fallback scraped anything.
+//   State 3 — not denylisted, and the fallback found nothing complete: "No
+//     events found" with the quiet "Disagree?" link to the policy doc.
+//   State 4 — a complete fallback event (title + location + start), allowlisted:
+//     show the event; don't ask for support (the fallback is trusted here).
+//   State 5 — a complete fallback event, on neither list: show the event AND a
+//     "request support" button, so a good page can become a first-class source.
 export function chooseContent(data, listing = "none") {
   const all = data && data.events && data.events.length ? [...data.events] : [];
 
-  // State 1: a per-site source owns this host — surface its events untouched.
+  // State 1.
   if (data && data.supported) {
     return { events: all, request: null, policyLink: false };
   }
 
+  // State 2: a denylisted host shows nothing and prompts for nothing — that
+  // decision is already made, regardless of what the fallback scraped.
+  if (listing === "deny") {
+    return { events: [], request: null, policyLink: false };
+  }
+
   const presentable = all.filter(isPresentableFallbackEvent);
 
-  // Nothing to show: no presentable fallback event (State 2), or one we
-  // deliberately suppress on a denylisted host (State 4). Offer the quiet
-  // "how this works" link rather than a support request.
-  if (!presentable.length || listing === "deny") {
+  // State 3: nothing complete to show — offer the quiet "how this works" link.
+  if (!presentable.length) {
     return { events: [], request: null, policyLink: true };
   }
 
-  // A presentable fallback event exists. Allowlisted hosts (State 3) show it
-  // with no support ask; unknown hosts (State 5) also get the request button.
+  // States 4 & 5: a complete event. Allowlisted hosts skip the support ask;
+  // unlisted hosts also get the request button, seeded with the event.
   const request = listing === "allow" ? null : presentable[0];
   return { events: presentable, request, policyLink: false };
 }

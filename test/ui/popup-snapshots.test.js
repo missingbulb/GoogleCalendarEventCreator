@@ -6,11 +6,11 @@
 // regenerate after an intentional change to the popup markup or ui/popup.css.
 //
 // The five states (issue #192; see ui/popup.js's chooseContent):
-//   1-supported   — supported host: the extractor's events (a 2-event listing)
-//   2-no-events   — unsupported, nothing found: "No events found" + Disagree? link
-//   3-allowlisted — unsupported, complete fallback event, allowlisted: event only
-//   4-denylisted  — unsupported, complete fallback event, denylisted: same as state 2
-//   5-request     — unsupported, complete fallback event, unlisted: event + request button
+//   1-supported     — supported host: the extractor's events (a 2-event listing)
+//   2-denylisted    — denylisted host: "No events found" (no link, no prompt)
+//   3-nothing-found — not denylisted, nothing complete: "No events found" + Disagree? link
+//   4-allowlisted   — complete fallback event, allowlisted: the event only
+//   5-unlisted      — complete fallback event, on neither list: event + request button
 "use strict";
 
 const { test } = require("node:test");

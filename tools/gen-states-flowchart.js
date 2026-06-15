@@ -16,7 +16,7 @@ const { Resvg } = require("@resvg/resvg-js");
 
 const ROOT = path.join(__dirname, "..");
 const W = 960;
-const H = 710;
+const H = 790;
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -65,46 +65,46 @@ parts.push(
   `<text x="${W / 2}" y="30" font-family="Liberation Sans, sans-serif" font-size="16" font-weight="700" fill="#202124" text-anchor="middle">How the popup decides what to show</text>`
 );
 
+const STATEX = 710; // center of the right-hand state boxes
+const SW = 400;
+const SLEFT = STATEX - SW / 2; // left edge the arrows point at
+
 // Start
-parts.push(box(SPINE, 70, 210, 40, ["Popup opens on a page"], { fill: "#fff", stroke: "#dadce0", weight: 600 }));
-parts.push(line(SPINE, 90, SPINE, 118));
+parts.push(box(SPINE, 70, 220, 40, ["Popup opens on a page"], { fill: "#fff", stroke: "#dadce0", weight: 600 }));
+parts.push(line(SPINE, 90, SPINE, 121));
 
-// Decision 1
-parts.push(diamond(SPINE, 160, 210, 84, ["Page host has a", "per-site source?"]));
-// -> State 1 (yes)
-parts.push(line(355, 160, 520, 160));
-parts.push(tag(437, 151, "yes"));
-parts.push(box(710, 160, 380, 52, ["State 1 — supported host", "Show the extractor’s events"], SHOW));
-// -> down (no)
-parts.push(line(SPINE, 202, SPINE, 252));
-parts.push(tag(266, 230, "no"));
+// 1. Per-site source? -> State 1
+parts.push(diamond(SPINE, 165, 210, 84, ["Page host has a", "per-site source?"]));
+parts.push(line(355, 165, SLEFT, 165));
+parts.push(tag(437, 156, "yes"));
+parts.push(box(STATEX, 165, SW, 52, ["State 1 — supported host", "Show the extractor’s events"], SHOW));
+parts.push(line(SPINE, 207, SPINE, 270));
+parts.push(tag(266, 240, "no"));
 
-// Decision 2
-parts.push(diamond(SPINE, 300, 246, 96, ["Fallback finds a", "complete event?", "(title + location + start)"]));
-// -> State 2 (no)
-parts.push(line(373, 300, 520, 300));
-parts.push(tag(446, 291, "no"));
-parts.push(box(710, 300, 380, 52, ["State 2 — nothing found", "“No events found” + “Disagree?” link"], NONE));
-// -> down (yes)
-parts.push(line(SPINE, 348, SPINE, 412));
-parts.push(tag(266, 384, "yes"));
+// 2. On the denylist? -> State 2 (no event, no prompt)
+parts.push(diamond(SPINE, 313, 210, 84, ["Host on the", "denylist?"]));
+parts.push(line(355, 313, SLEFT, 313));
+parts.push(tag(437, 304, "yes"));
+parts.push(box(STATEX, 313, SW, 52, ["State 2 — denylisted", "“No events found” (no prompt)"], NONE));
+parts.push(line(SPINE, 355, SPINE, 421));
+parts.push(tag(266, 390, "no"));
 
-// Decision 3
-parts.push(diamond(SPINE, 455, 210, 84, ["Host on a", "fallback list?"]));
+// 3. Fallback found a complete event? -> State 3 (no)
+parts.push(diamond(SPINE, 472, 250, 100, ["Fallback finds a", "complete event?", "(title + location + start)"]));
+parts.push(line(375, 472, SLEFT, 472));
+parts.push(tag(447, 463, "no"));
+parts.push(box(STATEX, 472, SW, 52, ["State 3 — nothing found", "“No events found” + “Disagree?” link"], NONE));
+parts.push(line(SPINE, 522, SPINE, 607));
+parts.push(tag(266, 566, "yes"));
 
-// Three outcomes
-const yBox = 643;
-parts.push(line(SPINE, 497, 170, yBox - 33));
-parts.push(tag(150, 560, "allowlist"));
-parts.push(box(170, yBox, 280, 66, ["State 3 — allowlisted", "Show the event", "(no support request)"], SHOW));
-
-parts.push(line(SPINE, 497, 480, yBox - 33));
-parts.push(tag(300, 545, "neither list"));
-parts.push(box(480, yBox, 280, 66, ["State 5 — unlisted", "Show the event +", "“Request support” button"], SHOW));
-
-parts.push(line(SPINE, 497, 790, yBox - 33));
-parts.push(tag(690, 560, "denylist"));
-parts.push(box(790, yBox, 280, 66, ["State 4 — denylisted", "“No events found”", "+ “Disagree?” link"], NONE));
+// 4. On the allowlist? -> State 4 (yes) / State 5 (no)
+parts.push(diamond(SPINE, 650, 210, 84, ["Host on the", "allowlist?"]));
+parts.push(line(355, 650, SLEFT, 612));
+parts.push(tag(444, 618, "yes"));
+parts.push(box(STATEX, 610, SW, 52, ["State 4 — allowlisted", "Show the event (no support ask)"], SHOW));
+parts.push(line(355, 650, SLEFT, 715));
+parts.push(tag(444, 700, "no"));
+parts.push(box(STATEX, 715, SW, 56, ["State 5 — unlisted", "Show the event + “Request support”"], SHOW));
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>

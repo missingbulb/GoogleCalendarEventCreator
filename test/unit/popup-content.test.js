@@ -5,13 +5,13 @@
 // The popup renders three things off chooseContent's { events, request,
 // policyLink }: event buttons, a "request support" button (seeded with an
 // event), and a quiet "Disagree?" link to the public policy doc. The five
-// states (issue #192):
+// states, in the order they're decided (issue #192):
 //
-//   1 supported host                        -> events only
-//   2 unsupported, no presentable fallback  -> policy link only
-//   3 unsupported, presentable, allowlisted -> events only (no support ask)
-//   4 unsupported, presentable, denylisted  -> policy link only (event suppressed)
-//   5 unsupported, presentable, unlisted    -> events + request button
+//   1 supported host                    -> events only
+//   2 denylisted host                   -> "No events found" (no link, no prompt)
+//   3 not denylisted, nothing complete  -> "No events found" + Disagree? link
+//   4 complete event, allowlisted       -> events only (no support ask)
+//   5 complete event, on neither list   -> events + request button
 //
 // This supersedes the strict #101 rule that an unsupported host must NEVER
 // surface a scraped event: #192 deliberately shows a *complete* fallback event
@@ -103,41 +103,55 @@ test("State 1 — supported host with no events: empty events, no extras", () =>
   assert.equal(view.policyLink, false);
 });
 
-test("State 2 — unsupported, nothing presentable (no location): policy link only", () => {
+test("State 2 — denylisted host: 'No events found' with NO link or prompt, even with a complete event", () => {
+  // The denylist decision holds regardless of what the fallback scraped.
+  const view = chooseContent({ events: [FULL], supported: false }, "deny");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false); // no "Disagree?" — the call was deliberate
+});
+
+test("State 2 — denylisted host with nothing scraped: still no link or prompt", () => {
+  const view = chooseContent({ events: [], supported: false }, "deny");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false);
+});
+
+test("State 3 — not denylisted, nothing complete (no location): policy link", () => {
   const view = chooseContent({ events: [NO_LOCATION], supported: false }, "none");
   assert.equal(view.events.length, 0);
   assert.equal(view.request, null);
   assert.equal(view.policyLink, true);
 });
 
-test("State 2 — unsupported, no events at all: policy link only", () => {
+test("State 3 — allowlisted but nothing complete: still the policy link (allow only matters once an event is found)", () => {
+  const view = chooseContent({ events: [NO_LOCATION], supported: false }, "allow");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.policyLink, true);
+});
+
+test("State 3 — not denylisted, no events at all: policy link", () => {
   const view = chooseContent({ events: [], supported: false }, "none");
   assert.equal(view.events.length, 0);
   assert.equal(view.policyLink, true);
 });
 
-test("State 3 — unsupported, presentable, allowlisted: events only, NO request", () => {
+test("State 4 — complete event, allowlisted: events only, NO request", () => {
   const view = chooseContent({ events: [FULL], supported: false }, "allow");
   assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, null);
   assert.equal(view.policyLink, false);
 });
 
-test("State 4 — unsupported, presentable, denylisted: event suppressed, policy link", () => {
-  const view = chooseContent({ events: [FULL], supported: false }, "deny");
-  assert.equal(view.events.length, 0);
-  assert.equal(view.request, null);
-  assert.equal(view.policyLink, true);
-});
-
-test("State 5 — unsupported, presentable, unlisted: events AND a request button seeded with the event", () => {
+test("State 5 — complete event, on neither list: events AND a request button seeded with the event", () => {
   const view = chooseContent({ events: [FULL], supported: false }, "none");
   assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, FULL);
   assert.equal(view.policyLink, false);
 });
 
-test("only presentable fallback events are shown; incomplete ones are dropped", () => {
+test("only complete fallback events are shown; incomplete ones are dropped", () => {
   const view = chooseContent({ events: [NO_LOCATION, FULL], supported: false }, "none");
   assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, FULL);
@@ -151,7 +165,7 @@ test("a failed injection (restricted page, no result) shows the policy link", ()
 });
 
 test("chooseContent defaults listing to 'none' when omitted", () => {
-  const view = chooseContent({ events: [FULL], supported: false }); // -> State 4
+  const view = chooseContent({ events: [FULL], supported: false }); // -> State 5
   assert.equal(view.request, FULL);
   assert.deepEqual(view.events, [FULL]);
 });

@@ -132,7 +132,11 @@ function toVDom(el) {
     style.display = "flex";
     if (!style.flexDirection) style.flexDirection = "column";
   }
-  const childProp = children.length === 1 ? children[0] : children;
+  // Pass a lone child unwrapped and an empty element no children at all: satori
+  // treats a children *array* (even length 0 or 1) as needing an explicit
+  // display, which an empty container (e.g. an events list with nothing in it)
+  // shouldn't.
+  const childProp = children.length === 0 ? undefined : children.length === 1 ? children[0] : children;
   return { type: "div", props: { style, children: childProp } };
 }
 

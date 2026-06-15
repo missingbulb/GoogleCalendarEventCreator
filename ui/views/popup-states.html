@@ -4,9 +4,10 @@
     <meta charset="utf-8" />
     <title>Popup states — visual reference</title>
     <!--
-      The five states the popup can render (see ui/popup.js's chooseContent and
-      docs/highLevelDesign.md). This file is the single visual reference for how
-      each one looks, and the input to the UI snapshot test
+      The five states the popup can render (issue #192; the same decision
+      ui/popup.js's chooseContent makes, see docs/highLevelDesign.md and
+      docs/popup-states-flowchart.png). This file is the single visual reference
+      for how each one looks, and the input to the UI snapshot test
       (test/ui/popup-snapshots.test.js), which renders each ".popup" block to an
       image. It is NOT shipped in the extension (see tools/shipping-files.js).
 
@@ -50,7 +51,7 @@
     <!-- State 1 — supported host (a per-site source matched): show its events.
          A listing page yields several, so this one shows two. -->
     <section class="state" data-state="1-supported">
-      <p class="caption">State 1 — supported host: show the extractor's events</p>
+      <p class="caption">State 1 — supported host: show the extractor’s events</p>
       <div class="popup">
         <p id="heading">2 events on this page</p>
         <div id="events">
@@ -72,10 +73,20 @@
       </div>
     </section>
 
-    <!-- State 2 — unsupported, the generic fallback found nothing presentable:
-         "No events found" plus the quiet "Disagree?" policy link. -->
-    <section class="state" data-state="2-no-events">
-      <p class="caption">State 2 — unsupported, nothing found: policy link only</p>
+    <!-- State 2 — denylisted host: show nothing and prompt for nothing. The
+         decision is deliberate, so no event, no request, not even the link. -->
+    <section class="state" data-state="2-denylisted">
+      <p class="caption">State 2 — denylisted host: “No events found” (no link, no prompt)</p>
+      <div class="popup">
+        <p id="heading">No events found on this page</p>
+        <div id="events"></div>
+      </div>
+    </section>
+
+    <!-- State 3 — not denylisted, and the fallback found nothing complete:
+         “No events found” plus the quiet “Disagree?” policy link. -->
+    <section class="state" data-state="3-nothing-found">
+      <p class="caption">State 3 — nothing found: “No events found” + “Disagree?” link</p>
       <div class="popup">
         <p id="heading">No events found on this page</p>
         <div id="events">
@@ -84,10 +95,10 @@
       </div>
     </section>
 
-    <!-- State 3 — unsupported, fallback found a complete event, host on the
-         allowlist: show it, but don't ask for support. -->
-    <section class="state" data-state="3-allowlisted">
-      <p class="caption">State 3 — unsupported, allowlisted: show the event, no support ask</p>
+    <!-- State 4 — a complete fallback event on an allowlisted host: show it,
+         with no support ask. -->
+    <section class="state" data-state="4-allowlisted">
+      <p class="caption">State 4 — allowlisted: show the event (no support request)</p>
       <div class="popup">
         <p id="heading">Add to Google Calendar</p>
         <div id="events">
@@ -102,22 +113,10 @@
       </div>
     </section>
 
-    <!-- State 4 — unsupported, fallback found a complete event but the host is
-         on the denylist: suppress it, same view as State 2. -->
-    <section class="state" data-state="4-denylisted">
-      <p class="caption">State 4 — unsupported, denylisted: event suppressed, policy link</p>
-      <div class="popup">
-        <p id="heading">No events found on this page</p>
-        <div id="events">
-          <a class="policy-link" href="#">Disagree?</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- State 5 — unsupported, fallback found a complete event, host on neither
-         list: show it AND offer to request first-class support. -->
-    <section class="state" data-state="5-request">
-      <p class="caption">State 5 — unsupported, unlisted: show the event + request support</p>
+    <!-- State 5 — a complete fallback event on a host that's on neither list:
+         show it AND offer to request first-class support. -->
+    <section class="state" data-state="5-unlisted">
+      <p class="caption">State 5 — unlisted: show the event + “Request support”</p>
       <div class="popup">
         <p id="heading">Add to Google Calendar</p>
         <div id="events">

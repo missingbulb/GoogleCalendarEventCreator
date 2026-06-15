@@ -124,10 +124,10 @@ The states are authored once, as static markup, in **`ui/views/popup-states.html
 the popup currently looks like:
 
 - **`popup-state-1-supported.png`** — supported host: the extractor's events (a 2-event listing).
-- **`popup-state-2-no-events.png`** — unsupported, nothing found: "No events found" + a "Disagree?" policy link.
-- **`popup-state-3-allowlisted.png`** — unsupported, a complete fallback event, allowlisted: the event only.
-- **`popup-state-4-denylisted.png`** — unsupported, a complete fallback event, denylisted: same as state 2.
-- **`popup-state-5-request.png`** — unsupported, a complete fallback event, unlisted: the event + a "request support" button.
+- **`popup-state-2-denylisted.png`** — denylisted host: "No events found", no link or prompt.
+- **`popup-state-3-nothing-found.png`** — not denylisted, nothing complete found: "No events found" + a "Disagree?" policy link.
+- **`popup-state-4-allowlisted.png`** — a complete fallback event, allowlisted: the event only.
+- **`popup-state-5-unlisted.png`** — a complete fallback event, on neither list: the event + a "request support" button.
 
 `test/ui/popup-renderer.js` renders each `.popup` block with `satori` +
 `@resvg/resvg-js` (no browser). satori has no CSS engine, so the renderer folds
