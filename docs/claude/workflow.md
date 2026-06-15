@@ -34,7 +34,8 @@ needs the stronger model — and extract any new guidelines or general instructi
 worth keeping, then add them to the doc that owns each one. Route by scope:
 project mechanics to the matching file under `docs/claude/` (workflow, testing,
 adding-a-source, auto-extractor); top-level architecture rules to
-`docs/architectureGuidelines.md`; project-agnostic practices to
+`docs/architectureGuidelines.md`; non-obvious codebase footguns to
+`docs/technicalGotchas.md`; project-agnostic practices to
 `docs/engineeringPractices.md`. Keep every addition terse. Project-specific
 guidance is good; broader engineering practices that generalize beyond this repo
 are better — prefer the most general file a lesson legitimately fits.

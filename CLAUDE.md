@@ -16,6 +16,11 @@ change.
 
 @docs/architectureGuidelines.md
 
+Non-obvious technical gotchas — codebase footguns that have cost real debugging
+time — live in `docs/technicalGotchas.md` (imported below).
+
+@docs/technicalGotchas.md
+
 General software-engineering practices that aren't specific to this project
 (verifying platform behavior, earning dependencies, test discipline) live in
 `docs/engineeringPractices.md` (imported below).

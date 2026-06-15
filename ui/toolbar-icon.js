@@ -55,11 +55,25 @@ const ready = fetch(chrome.runtime.getURL("pipeline/fallback-lists.json"))
 //   blue  — default, page not classified
 // Using the icon color rather than a badge avoids the badge pill overlapping the
 // glyph, and makes the signal visible even when the icon is small.
-const BLUE_ICON  = { 16: "icons/icon16.png",           32: "icons/icon32.png",           48: "icons/icon48.png",           128: "icons/icon128.png"           };
-const GREEN_ICON = { 16: "icons/icon16-supported.png", 32: "icons/icon32-supported.png", 48: "icons/icon48-supported.png", 128: "icons/icon128-supported.png" };
-const GRAY_ICON  = { 16: "icons/icon16-denied.png",    32: "icons/icon32-denied.png",    48: "icons/icon48-denied.png",    128: "icons/icon128-denied.png"    };
+//
+// The icon paths MUST be extension-root absolute (chrome.runtime.getURL), not the
+// bare "icons/..." relative form. This worker lives at ui/toolbar-icon.js, so
+// chrome.action.setIcon resolves a relative path against ui/ and then fails to
+// fetch ui/icons/... — setIcon rejects with "Failed to set icon: Failed to
+// fetch" and the icon never changes (the #204 symptom). It's the same
+// extension-root-vs-worker-dir trap as the importScripts leading slashes above
+// (#146); getURL makes the extension-root resolution explicit.
+const iconVariant = (suffix) => ({
+  16:  chrome.runtime.getURL(`icons/icon16${suffix}.png`),
+  32:  chrome.runtime.getURL(`icons/icon32${suffix}.png`),
+  48:  chrome.runtime.getURL(`icons/icon48${suffix}.png`),
+  128: chrome.runtime.getURL(`icons/icon128${suffix}.png`),
+});
+const BLUE_ICON  = iconVariant("");
+const GREEN_ICON = iconVariant("-supported");
+const GRAY_ICON  = iconVariant("-denied");
 
-// The toolbar icon for a given page URL.
+// The { size -> packaged icon URL } map for a given page URL.
 function availabilityIcon(url) {
   if (GCal.isSupportedHost(url)) return GREEN_ICON;
   if (GCal.isDeniedHost(url))    return GRAY_ICON;
@@ -77,8 +91,7 @@ async function updateIcon(tabId, url) {
 // Each listener is async and awaits its Chrome API calls so Chrome keeps the
 // service worker alive until the icon swap completes (MV3 service workers are
 // only kept alive for the duration of a returned Promise, not a callback).
-// `await ready` at the top of each handler ensures the fallback lists are
-// loaded before isDeniedHost() is consulted.
+// `await ready` ensures the denylist is loaded before isDeniedHost() is consulted.
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   await ready;
   const tab = await chrome.tabs.get(tabId).catch(() => null);
