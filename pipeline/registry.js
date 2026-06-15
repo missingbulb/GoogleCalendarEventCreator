@@ -27,12 +27,10 @@
 // persists between opens), so without it each source's `GCal.sources.push(...)`
 // would stack a duplicate matcher on every reopen.
 //
-// `GCal.sourceFallbackDenylist` / `GCal.sourceFallbackAllowlist` are set by
-// pipeline/fallback-lists.js (generated from pipeline/fallback-lists.json).
-// In the service worker, that file is loaded via importScripts before this one;
-// in the page-injection context they are not present (extractors don't need
-// them). isDeniedHost() below reads the list at call time, so it always sees
-// whatever was populated.
+// `GCal.sourceFallbackDenylist` is set asynchronously by the service worker
+// (ui/toolbar-icon.js fetches pipeline/fallback-lists.json at startup).
+// It is not available in the page-injection context — extractors don't need it.
+// isDeniedHost() reads it at call time via `|| []` so it degrades gracefully.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
   sources: [],
 

@@ -27,12 +27,9 @@ const OUTPUT = "pipeline/load-order.generated.json";
 
 const PINNED_FIRST = ["registry.js"]; // followed by helpers/*, added below
 const PINNED_LAST = ["assemble-events.js"]; // the orchestrator
-// Live in pipeline/ but are not injected into the page.
-const NOT_INJECTED = [
-  "build-calendar-url.js",  // loaded only by the popup document
-  "fallback-lists.js",       // generated service-worker wrapper; not a source
-  "fallback-lists.json",     // the source data; not a script
-];
+// Lives in pipeline/ but is loaded only by the popup document (not injected
+// into the page), so it is not part of the load order.
+const NOT_INJECTED = ["build-calendar-url.js"];
 
 const isJs = (f) => f.endsWith(".js");
 
@@ -69,34 +66,10 @@ function render(list) {
   return JSON.stringify(list, null, 2) + "\n";
 }
 
-// Generates pipeline/fallback-lists.js — the classic-script wrapper that the
-// service worker loads via importScripts (which can't import ES modules).
-// Source of truth is pipeline/fallback-lists.json; both this file and config.js
-// read from it, so updating the JSON is the only thing needed to change a list.
-const FALLBACK_LISTS_JSON = "pipeline/fallback-lists.json";
-const FALLBACK_LISTS_JS = "pipeline/fallback-lists.js";
-
-function renderFallbackLists(lists) {
-  return (
-    "// Generated from pipeline/fallback-lists.json — run `npm run index` to regenerate.\n" +
-    "// Loaded by the service worker (ui/toolbar-icon.js) via importScripts;\n" +
-    "// config.js imports the JSON directly.\n" +
-    `globalThis.GCal = Object.assign(globalThis.GCal || {}, ${JSON.stringify(
-      { sourceFallbackAllowlist: lists.allowlist, sourceFallbackDenylist: lists.denylist },
-      null,
-      2
-    )});\n`
-  );
-}
-
 if (require.main === module) {
   const list = computeLoadOrder();
   fs.writeFileSync(path.join(ROOT, OUTPUT), render(list));
   console.log(`Wrote ${OUTPUT} (${list.length} files)`);
-
-  const lists = JSON.parse(fs.readFileSync(path.join(ROOT, FALLBACK_LISTS_JSON), "utf8"));
-  fs.writeFileSync(path.join(ROOT, FALLBACK_LISTS_JS), renderFallbackLists(lists));
-  console.log(`Wrote ${FALLBACK_LISTS_JS}`);
 }
 
-module.exports = { computeLoadOrder, render, OUTPUT, renderFallbackLists, FALLBACK_LISTS_JSON, FALLBACK_LISTS_JS };
+module.exports = { computeLoadOrder, render, OUTPUT };

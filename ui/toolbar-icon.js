@@ -23,7 +23,6 @@
 // below register — leaving the toolbar with no availability signal at all.
 // See #146.
 importScripts(
-  "/pipeline/fallback-lists.js",
   "/pipeline/registry.js",
   "/pipeline/sources/bandsintown.js",
   "/pipeline/sources/edinburghfringe.js",
@@ -36,6 +35,18 @@ importScripts(
   "/pipeline/sources/thinkdrink.js",
   "/pipeline/sources/ticketmaster.js"
 );
+
+// Fetch the fallback allow/denylists from the JSON (single source of truth shared
+// with config.js). The fetch is async; every event handler awaits `ready` so
+// isDeniedHost() always sees the populated list, even on a cold worker start.
+// On fetch failure the lists stay empty and the gray icon simply won't appear.
+const ready = fetch(chrome.runtime.getURL("pipeline/fallback-lists.json"))
+  .then((r) => r.json())
+  .then((data) => {
+    GCal.sourceFallbackDenylist  = data.denylist  || [];
+    GCal.sourceFallbackAllowlist = data.allowlist || [];
+  })
+  .catch(() => {});
 
 // Availability is shown by swapping the toolbar icon between three tile variants:
 //   green — site has a first-class extractor (GCal.isSupportedHost)
@@ -65,18 +76,23 @@ async function updateIcon(tabId, url) {
 // Each listener is async and awaits its Chrome API calls so Chrome keeps the
 // service worker alive until the icon swap completes (MV3 service workers are
 // only kept alive for the duration of a returned Promise, not a callback).
+// `await ready` at the top of each handler ensures the fallback lists are
+// loaded before isDeniedHost() is consulted.
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  await ready;
   const tab = await chrome.tabs.get(tabId).catch(() => null);
   if (tab?.url) await updateIcon(tabId, tab.url);
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.url || changeInfo.status === "complete") {
+    await ready;
     await updateIcon(tabId, tab.url);
   }
 });
 
 async function updateAllTabIcons() {
+  await ready;
   for (const tab of await chrome.tabs.query({})) {
     await updateIcon(tab.id, tab.url);
   }

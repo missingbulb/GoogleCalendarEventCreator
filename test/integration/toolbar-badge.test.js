@@ -4,7 +4,7 @@
 // every other page gets the default blue tile icon.
 "use strict";
 
-const test = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -12,6 +12,7 @@ const vm = require("node:vm");
 
 const ROOT = path.join(__dirname, "..", "..");
 const WORKER = "ui/toolbar-icon.js";
+const FALLBACK_LISTS = path.join(ROOT, "pipeline/fallback-lists.json");
 
 // Resolve an importScripts() argument the way a real MV3 service worker does:
 // relative to the worker's own location (ui/), with a leading slash meaning the
@@ -25,21 +26,20 @@ function resolveImport(spec) {
     : path.resolve(ROOT, path.dirname(WORKER), spec);
 }
 
-// ui/toolbar-icon.js registers chrome listeners and importScripts()'s the
-// registry and every source at load time; stub just enough of the extension
-// APIs and run them in the same sandbox so availabilityIcon() sees GCal.sources
-// exactly as it does in the real extension. A bad importScripts path throws
-// here (file not found) just as it aborts the real worker.
+// ui/toolbar-icon.js fetches pipeline/fallback-lists.json at startup to populate
+// GCal.sourceFallbackDenylist. Stub fetch to return the real JSON so
+// availabilityIcon() sees the same lists as the production extension.
 function loadIconState() {
   const sandbox = {
     URL,
+    fetch: async () => ({ json: async () => JSON.parse(fs.readFileSync(FALLBACK_LISTS, "utf8")) }),
     chrome: {
       action: {
         onClicked: { addListener() {} },
         setIcon() {},
       },
       tabs: { onActivated: { addListener() {} }, onUpdated: { addListener() {} }, query: async () => [], get: async () => null },
-      runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
+      runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, getURL: (p) => p },
     },
     importScripts(...files) {
       for (const file of files) {
@@ -49,10 +49,15 @@ function loadIconState() {
   };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT, WORKER), "utf8"), sandbox);
-  return { availabilityIcon: sandbox.availabilityIcon };
+  return { availabilityIcon: sandbox.availabilityIcon, ready: sandbox.ready };
 }
 
-const { availabilityIcon } = loadIconState();
+let availabilityIcon;
+before(async () => {
+  const state = loadIconState();
+  await state.ready;
+  availabilityIcon = state.availabilityIcon;
+});
 
 // States: "supported" → green tile, "denied" → gray tile, "unknown" → blue tile.
 const CASES = [
