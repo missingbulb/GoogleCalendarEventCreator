@@ -1,0 +1,8 @@
+{
+  "what": "release zip filename — must match between build script and publish workflow",
+  "value": "google-calendar-event-creator.zip",
+  "counts": {
+    "tools/build-zip.js": 3,
+    ".github/workflows/publish-chrome-store.yml": 4
+  }
+}
