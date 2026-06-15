@@ -13,9 +13,16 @@
 const SHIPPING_PATHS = [
   "manifest.json",
   "config.js", // tunable product decisions; imported by the popup modules at runtime
+  "fallback-policy.js", // host classifier for the generic fallback; imported by the popup at runtime
   "pipeline", // the extraction pipeline + generated load list (popup fetches/injects)
   "ui", // popup (html/css/js + views) and the toolbar-icon service worker
   "icons", // toolbar icons: the per-size PNGs the manifest references
 ];
 
-module.exports = { SHIPPING_PATHS };
+// Files that live UNDER a shipped directory but must NOT ship — dev-only
+// artifacts the runtime never loads. Exact repo-relative paths.
+const SHIPPING_EXCLUDES = [
+  "ui/views/popup-states.html", // visual reference + UI-snapshot input; not loaded by the extension
+];
+
+module.exports = { SHIPPING_PATHS, SHIPPING_EXCLUDES };

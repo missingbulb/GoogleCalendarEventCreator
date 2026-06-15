@@ -30,11 +30,16 @@
 //                 <blank line>
 //                 full synopsis paragraph   (untruncated)
 //               Falls back to <meta og:description> when that block is absent.
-//   start       the first date option of the screening-date picker
+//   start       the date options of the screening-date picker
 //                 <select id="smdate_b"><option value="2026-06-17~20522">...
-//               (date portion before the "~"); screening times are loaded
-//               via AJAX and aren't present in the static page, so this
-//               becomes an all-day event
+//               (date portion before the "~"), one all-day event per date.
+//               Screening times load via AJAX into a second picker
+//                 <select id="smtime_b"><option ...>16:30</option>...
+//               only once a date is chosen, and only for the date currently
+//               selected in #smdate_b. When those times are present, that one
+//               date's all-day event is replaced by a timed event per show
+//               (e.g. 2026-06-17 -> 16:30 and 20:30); the other dates stay
+//               all-day
 //   location    the venue name (<meta property="og:site_name">, e.g.
 //               "סינמטק תל אביב") followed by the cinema's street address,
 //               shown in the page footer next to a location-pin icon
@@ -97,6 +102,27 @@
       .map((o) => o.value)
       .filter((v) => /^\d{4}-\d{2}-\d{2}~/.test(v))
       .map((v) => v.split("~")[0]);
+  }
+
+  // Screening times for the currently selected date, loaded via AJAX into the
+  // #smtime_b picker once a date is chosen; before any selection it holds only a
+  // "בחר שעה" ("choose a time") placeholder. Keep the options whose text is an
+  // "HH:MM" clock time, zero-padding the hour.
+  function screeningTimes() {
+    return [...document.querySelectorAll("#smtime_b option")]
+      .map((o) => clean(o.textContent))
+      .filter((t) => /^\d{1,2}:\d{2}$/.test(t))
+      .map((t) => t.replace(/^(\d):/, "0$1:"));
+  }
+
+  // The date those #smtime_b times belong to: the option currently selected in
+  // #smdate_b (a real browser reflects the chosen date in the select's value).
+  // "" when it's the "בחר תאריך" placeholder rather than a real
+  // "YYYY-MM-DD~<code>" date.
+  function selectedDate() {
+    const sel = document.querySelector("#smdate_b");
+    const v = sel ? sel.value : "";
+    return /^\d{4}-\d{2}-\d{2}~/.test(v) ? v.split("~")[0] : "";
   }
 
   function title() {
@@ -195,8 +221,18 @@
         return { title: t, description: desc, start: "", location: loc, ctz: "Asia/Jerusalem" };
       }
 
+      // Times are present only for the date currently selected in #smdate_b;
+      // that date becomes one timed event per show, the rest stay all-day.
+      const times = screeningTimes();
+      const selected = selectedDate();
+      const events = dates.flatMap((d) =>
+        times.length && d === selected
+          ? times.map((time) => ({ title: t, start: `${d}T${time}:00`, end: null, location: loc }))
+          : [{ title: t, start: d, end: null, location: loc }]
+      );
+
       return {
-        events: dates.map((d) => ({ title: t, start: d, end: null, location: loc })),
+        events,
         description: desc,
         ctz: "Asia/Jerusalem",
       };

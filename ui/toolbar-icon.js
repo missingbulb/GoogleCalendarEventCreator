@@ -27,6 +27,7 @@ importScripts(
   "/pipeline/sources/bandsintown.js",
   "/pipeline/sources/edinburghfringe.js",
   "/pipeline/sources/eventbrite.js",
+  "/pipeline/sources/eventim-co-il.js",
   "/pipeline/sources/facebook.js",
   "/pipeline/sources/luma.js",
   "/pipeline/sources/meetup.js",

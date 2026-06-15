@@ -43,6 +43,7 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       const types = [].concat(node["@type"] || []);
       if (types.some((t) => typeof t === "string" && /event$/i.test(t))) found.push(node);
       visit(node["@graph"]);
+      visit(node.subEvent);
       if (Array.isArray(node.itemListElement)) {
         visit(node.itemListElement.map((it) => (it && it.item) || it));
       }

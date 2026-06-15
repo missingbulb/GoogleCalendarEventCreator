@@ -117,34 +117,40 @@ from facebook.com, so it can't be cached as a live case.
 
 ### UI snapshot test
 
-**`test/ui/popup-snapshots.test.js`** renders approximations of the popup
-(`test/ui/popup-renderer.js`, using `satori` + `@resvg/resvg-js` — no browser) for
-fixed fixture data (`test/ui/popup-fixtures.js`), and compares each pixel-by-pixel
-(via `pixelmatch`) against a committed image. Two layouts are covered — open
-them on GitHub to see what the popup currently looks like:
+**`test/ui/popup-snapshots.test.js`** renders each of the popup's five states
+and compares it pixel-by-pixel (via `pixelmatch`) against a committed image.
+The states are authored once, as static markup, in **`ui/views/popup-states.html`**
+— the single visual reference; open it (or the PNGs below) on GitHub to see what
+the popup currently looks like:
 
-- **`test/ui/snapshots/popup-single-event.png`** — a single-event page: one ~60px
-  "Add to Google Calendar" button.
-- **`test/ui/snapshots/popup-multi-event.png`** — a listing/series page: one ~60px
-  button per event (6 here) under an "N events on this page" heading.
+- **`popup-state-1-supported.png`** — supported host: the extractor's events (a 2-event listing).
+- **`popup-state-2-denylisted.png`** — denylisted host: "No events found", no link or prompt.
+- **`popup-state-3-nothing-found.png`** — not denylisted, nothing complete found: "No events found" + a "Disagree?" policy link.
+- **`popup-state-4-allowlisted.png`** — a complete fallback event, allowlisted: the event only.
+- **`popup-state-5-unlisted.png`** — a complete fallback event, on neither list: the event + a "request support" button.
 
-Note this is **not a screenshot of the real popup**: satori only
-supports a constrained flexbox-based HTML/CSS subset, so `popup-renderer.js` is a
-hand-maintained tree mirroring `ui/popup.css`'s styles and the
-`ui/views/events-view.js` button layout. If the popup's markup/CSS or the
-events-view rendering change in ways that affect the rendered output (copy,
-layout, colors), update `buildTree()` in `popup-renderer.js` to match.
-This tradeoff was chosen for determinism and zero extra runtime
-dependencies (no browser download); a real-browser screenshot (e.g. via
-Playwright) would have higher fidelity but couldn't run in all environments
-— revisit if the approximation's fidelity becomes a problem.
+`test/ui/popup-renderer.js` renders each `.popup` block with `satori` +
+`@resvg/resvg-js` (no browser). satori has no CSS engine, so the renderer folds
+the **real `ui/popup.css`** onto the markup as inline styles first (parse rules,
+match with jsdom, inline every declaration) — one source of truth for the
+styling, no values duplicated in the states file. Nothing is cherry-picked:
+satori ignores what it doesn't use; the only adjustment is its one structural
+rule (a box with element children needs an explicit `display`) and swapping in
+the bundled font.
 
-Rendering is deterministic, so this is fast and dependency-light enough to
-run as part of `npm test`/`test:ui` everywhere, with no separate CI job or
-browser install step.
+Note this is **not a screenshot of the real popup**: satori supports a
+constrained flexbox-based HTML/CSS subset. The tradeoff buys determinism and
+zero extra runtime dependencies (no browser download); a real-browser
+screenshot (e.g. via Playwright) would have higher fidelity but couldn't run in
+all environments — revisit if the approximation's fidelity becomes a problem.
 
-After an intentional change to the popup's UI, run `npm run refresh:ui` to
-regenerate both `popup-single-event.png` and `popup-multi-event.png` and commit
-the updated PNGs so reviewers can see the before/after in the diff. On mismatch, the test
-writes `<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/`
-(gitignored; see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.
+Rendering is deterministic, so this is fast and dependency-light enough to run
+as part of `npm test`/`test:ui` everywhere, with no separate CI job or browser
+install step.
+
+After an intentional change to the popup — its markup (`ui/views/popup-states.html`,
+and the real views it mirrors) or its styling (`ui/popup.css`) — run
+`npm run refresh:ui` to regenerate the five `popup-state-*.png` images and commit
+them so reviewers see the before/after in the diff. On mismatch, the test writes
+`<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/` (gitignored;
+see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.

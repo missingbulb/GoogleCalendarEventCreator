@@ -16,7 +16,7 @@
 const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { SHIPPING_PATHS } = require("./shipping-files");
+const { SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("./shipping-files");
 
 const ROOT = path.join(__dirname, "..");
 const OUT_DIR = path.join(ROOT, "dist");
@@ -42,7 +42,10 @@ try {
   // `zip` paths are relative to ROOT so the archive has no leading repo dir —
   // it unzips straight to a folder containing manifest.json. -r recurses into
   // the listed directories; -X drops extra file attributes for a tidy archive.
-  execFileSync("zip", ["-rX", OUT_PATH, ...SHIPPING_PATHS], { cwd: ROOT, stdio: ["ignore", "ignore", "inherit"] });
+  // -x drops dev-only files that live under a shipped directory.
+  const args = ["-rX", OUT_PATH, ...SHIPPING_PATHS];
+  if (SHIPPING_EXCLUDES.length) args.push("-x", ...SHIPPING_EXCLUDES);
+  execFileSync("zip", args, { cwd: ROOT, stdio: ["ignore", "ignore", "inherit"] });
 } catch (e) {
   if (e.code === "ENOENT") fail("`zip` command not found — install zip (e.g. `apt-get install zip`).");
   fail(`zip failed: ${e.message}`);

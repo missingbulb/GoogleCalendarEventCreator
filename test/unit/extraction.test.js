@@ -210,6 +210,32 @@ test("Tel Aviv Cinematheque: location is the address text only, not <img>/<noscr
   assert.equal(ev.events[0].location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
 });
 
+test("Tel Aviv Cinematheque: screening times for the selected date become timed events", () => {
+  // Times aren't in the static page — they load via AJAX into #smtime_b only
+  // after a date is chosen, and only for that date. When present, the selected
+  // date's all-day event is replaced by one timed event per show; any other
+  // (unselected) date stays an all-day event.
+  const html = `
+    <meta property="og:title" content="Some Film - סינמטק תל אביב">
+    <select id="smdate_b">
+      <option value="2026-06-18~111">18-06-2026 חמישי</option>
+      <option value="2026-06-19~222" selected>19-06-2026 שישי</option>
+    </select>
+    <select id="smtime_b">
+      <option>בחר שעה</option>
+      <option value="333" data-time="16:30">16:30</option>
+      <option value="444" data-time="20:30">20:30</option>
+    </select>`;
+
+  const ev = extractFromHtml(html, "https://www.cinema.co.il/event/some-film/");
+  assert.deepEqual(
+    [...ev.events].map((e) => e.start),
+    ["2026-06-18", "2026-06-19T16:30:00", "2026-06-19T20:30:00"]
+  );
+  assert.equal(ev.events[1].title, "Some Film");
+  assert.equal(ev.events[1].ctz, "Asia/Jerusalem");
+});
+
 test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
   const nextData = {
     props: {

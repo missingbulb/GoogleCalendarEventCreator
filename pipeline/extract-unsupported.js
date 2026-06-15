@@ -1,9 +1,10 @@
 // The extractor for UNSUPPORTED sites — pages whose host has no per-site source
-// (pipeline/sources/<site>.js). Its only job is to scrape a best-effort event so
-// the popup can pre-fill the "request this source" form on a red-bordered page;
-// it never renders calendar buttons (assemble-events.js only calls it when no
-// source matched). It is not a "layer" that supported sources lean on: those are
-// self-contained.
+// (pipeline/sources/<site>.js). It scrapes a best-effort event from the page;
+// the popup then shows it as a calendar button when it's complete enough (title
+// + location + start) and the host isn't denylisted, and otherwise/also uses it
+// to pre-fill the "request this source" form — see ui/popup.js's chooseContent.
+// assemble-events.js only calls it when no source matched. It is not a "layer"
+// that supported sources lean on: those are self-contained.
 //
 // extract() returns an array of the page's best-effort events (empty when the
 // page describes none), which assemble-events.js normalizes and presents. It

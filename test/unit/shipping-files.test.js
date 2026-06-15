@@ -7,13 +7,14 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
-const { SHIPPING_PATHS } = require("../../tools/shipping-files");
+const { SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("../../tools/shipping-files");
 
 const ROOT = path.join(__dirname, "..", "..");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
 
-// True when `file` ships: either listed directly, or living under a listed dir.
+// True when `file` ships: under a listed path, and not specifically excluded.
 function isShipped(file) {
+  if (SHIPPING_EXCLUDES.includes(file)) return false;
   return SHIPPING_PATHS.some((p) => file === p || file.startsWith(p + "/"));
 }
 
@@ -78,4 +79,19 @@ test("dev/test-only paths do not ship", () => {
   for (const p of ["test", "data", "tools", "package.json", "package-lock.json", "README.md", "PRIVACY.md", "docs", ".github"]) {
     assert.ok(!isShipped(p), `${p} should not be in the shipping set`);
   }
+});
+
+test("excluded files exist and live under a shipped directory (else the exclude is stale)", () => {
+  for (const p of SHIPPING_EXCLUDES) {
+    assert.ok(fs.existsSync(path.join(ROOT, p)), `excluded path missing: ${p}`);
+    const underShipped = SHIPPING_PATHS.some((s) => p === s || p.startsWith(s + "/"));
+    assert.ok(underShipped, `excluded path ${p} is not under any shipping path — the exclude is pointless`);
+  }
+});
+
+test("the popup-states preview is excluded from the shipped set", () => {
+  assert.ok(
+    !isShipped("ui/views/popup-states.html"),
+    "ui/views/popup-states.html is a dev/preview artifact and must not ship"
+  );
 });
