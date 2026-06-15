@@ -12,7 +12,6 @@ project-specific test mechanics live in `docs/claude/testing.md`.)
 - Earn each dependency: prefer a built-in (or a few lines) for a narrow job, and drop one when the assumption that justified it lapses.
 - See a test fail before you trust it: write it red before the fix (green after), or break what it guards and watch it go red. A test that has never failed proves nothing.
 - A test that stubs the exact boundary where the bug lives can't catch that bug — it guards only the shape it asserts, not the runtime effect. Say what it can't catch.
-- Code that can be loaded into the same context more than once (injected scripts, re-imported modules) must reset or replace shared state at load, not append to it — and a load-twice test should guard it.
 - A new test must go green at least twice in CI before merging — one green run doesn't rule out a flake.
 - A test that can only run remotely (e.g. CI-only) must diagnose itself: on failure, dump the observed state, not just an assertion.
 - Resilience that swallows errors destroys observability — during development, before a solution is proven right, add debugging information first, and remove it later.
