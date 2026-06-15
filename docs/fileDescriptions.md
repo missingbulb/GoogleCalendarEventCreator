@@ -15,7 +15,7 @@ the rules of the road.
 | `ui/views/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
 | `ui/views/popup-states.html` | Static visual reference of the popup's five states; input to the UI snapshot test (not shipped — see `tools/shipping-files.js`) |
 | `docs/extraction-policy.md` | Short public "how this extension finds events" doc the "Disagree?" link opens |
-| `ui/toolbar-icon.js` | Background service worker: shows a green availability badge on the toolbar icon per tab (none on unsupported pages) |
+| `ui/toolbar-icon.js` | Background service worker: sets the toolbar icon's tile color per tab — green on supported hosts, blue elsewhere |
 | `pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
 | `pipeline/helpers/` | Shared utilities any extractor may use, split by concern: DOM, text (rich-text/`htmlToText`/`parts`), dates, timezones, timezone-names, merge, and `embedded-events` (the `GCal.embeddedEvents` schema.org JSON-LD reader) |
 | `pipeline/sources/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One self-contained scraper per supported event site, with hardcoded selectors + inline host matcher |

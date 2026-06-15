@@ -13,14 +13,16 @@ opened in a new tab, in one click.
 
 ## Toolbar icon
 
-The icon signals only whether the current page's host has first-class support:
+The icon signals how the current page's host is classified:
 
 - **green** — the host has a dedicated extractor;
+- **gray** — the host is on the fallback denylist, where we've deliberately
+  decided not to extract (the "denylisted host" popup state below);
 - **blue** — every other page.
 
-It reflects support, not whether an event was found — the icon can't read the
-page, so a page where the generic fallback later finds an event still shows the
-blue icon.
+It reflects the host's classification, not whether an event was found — the icon
+can't read the page, so a page where the generic fallback later finds an event
+still shows the blue icon.
 
 ## What the popup shows
 

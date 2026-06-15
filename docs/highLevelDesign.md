@@ -5,7 +5,7 @@ in [productRequirements.md](productRequirements.md); the per-file map is in
 [fileDescriptions.md](fileDescriptions.md); top-level rules of the road are in
 [architectureGuidelines.md](architectureGuidelines.md).
 
-`toolbar-icon.js` badges the icon by host (a source matches or it doesn't). On
+`toolbar-icon.js` colors the toolbar icon by host (a source matches or it doesn't). On
 click, `popup.js` injects `pipeline/` and runs `assemble-events.js`, which picks
 the matching `sources/<site>.js` (or `extract-unsupported.js`);
 `build-calendar-url.js` builds the URL `events-view.js` renders.
