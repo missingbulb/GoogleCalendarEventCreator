@@ -1,4 +1,18 @@
 {
   "allowlist": ["meetup.com"],
-  "denylist": ["barby.co.il"]
+  "denylist": ["barby.co.il"],
+  "supportedDomains": [
+    "bandsintown.com",
+    "cinema.co.il",
+    "edfringe.com",
+    "eventbrite.com",
+    "eventim.co.il",
+    "facebook.com",
+    "lu.ma",
+    "luma.com",
+    "meetup.com",
+    "secrettelaviv.com",
+    "thinkdrink.co.il",
+    "ticketmaster.co.il"
+  ]
 }
