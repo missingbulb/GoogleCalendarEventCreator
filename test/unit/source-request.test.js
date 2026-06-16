@@ -10,9 +10,9 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 // source-request-view.js is an ES module; import it before the tests run.
-let buildSourceRequestUrl, buildPolicyDocUrl;
+let buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill;
 before(async () => {
-  ({ buildSourceRequestUrl, buildPolicyDocUrl } = await import(
+  ({ buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "source-request-view.js"))
   ));
 });
@@ -62,6 +62,24 @@ test("the prefilled field ids match the template's field ids", () => {
   const templateIds = [...template.matchAll(/^\s*id:\s*(\S+)/gm)].map((m) => m[1]);
   const PARAM_KEYS = ["url", "name", "start", "end", "timezone", "location", "description"];
   assert.deepEqual(templateIds, PARAM_KEYS);
+});
+
+// The prefill seeds the timezone from the fallback event's ctz, but falls back
+// to the user's current zone when the fallback found none (so the form opens
+// with a sensible guess instead of a blank timezone).
+test("prefills the timezone from the extracted event's ctz", () => {
+  const p = sourceRequestPrefill(
+    { url: "https://example.com/e", title: "T" },
+    { ctz: "Europe/Paris" }
+  );
+  assert.equal(p.timezone, "Europe/Paris");
+});
+
+test("defaults the timezone to the user's current zone when the fallback found none", () => {
+  const here = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // No ctz on the event, and an event-less page, both default to the runtime zone.
+  assert.equal(sourceRequestPrefill({ url: "https://example.com/e" }, {}).timezone, here);
+  assert.equal(sourceRequestPrefill({ url: "https://example.com/e" }, null).timezone, here);
 });
 
 // The "Disagree?" policy link (makePolicyLink) opens the public policy doc.
