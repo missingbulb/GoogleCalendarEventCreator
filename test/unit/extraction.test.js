@@ -489,3 +489,35 @@ test("Page with a parseable date but no site/JSON-LD: still yields the event", (
   assert.equal(ev.events[0].title, "Block Party");
   assert.equal(ev.events[0].times[0].start, "2026-07-11T14:00:00");
 });
+
+// visit.tel-aviv.gov.il is a SharePoint/AngularJS SPA — all event data loads
+// via REST API at runtime. The cached HTML has only empty template bindings;
+// these unit tests use synthetic HTML that mimics the post-Angular DOM.
+test("Visit Tel Aviv: date range, address, description from Angular-rendered DOM", () => {
+  const html = `
+    <h1 class="EventLocationTitle">Savta Stories - An Intergenerational Activity at the City Museum</h1>
+    <div class="EventLocationActivity">14/07/2026 - 25/08/2026</div>
+    <div class="EventLocationOpenHours"><p>00:00 - 23:59</p></div>
+    <div class="EventLocationAddress">Bialik Street 27</div>
+    <div class="EventLocationDescription"><p>What happens when Tel Aviv memories meet a young imagination?</p></div>`;
+
+  const e = firstEvent(html, "https://visit.tel-aviv.gov.il/Pages/EventLocation.aspx?ListType=Events&ItemId=2173");
+  assert.equal(e.title, "Savta Stories - An Intergenerational Activity at the City Museum");
+  assert.equal(e.times[0].start, "2026-07-14T00:00:00");
+  assert.equal(e.times[0].end, "2026-08-25T23:59:00");
+  assert.equal(e.location, "Bialik Street 27");
+  assert.ok(e.description.includes("Tel Aviv memories"));
+  assert.equal(e.ctz, "Asia/Jerusalem");
+});
+
+test("Visit Tel Aviv: date-only range (no time div) parses as all-day start", () => {
+  const html = `
+    <h1 class="EventLocationTitle">City Walk</h1>
+    <div class="EventLocationActivity">01/08/2026 - 31/08/2026</div>
+    <div class="EventLocationAddress">Rothschild Blvd</div>`;
+
+  const e = firstEvent(html, "https://visit.tel-aviv.gov.il/Pages/EventLocation.aspx?ListType=Events&ItemId=999");
+  assert.equal(e.times[0].start, "2026-08-01");
+  assert.equal(e.times[0].end, "2026-08-31");
+  assert.equal(e.ctz, "Asia/Jerusalem");
+});
