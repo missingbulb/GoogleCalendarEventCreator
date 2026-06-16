@@ -29,7 +29,12 @@ body {
    min-height card plus its 8px bottom margin (60px); 7 full rows is ~420px, plus
    a generous peek of the next card ≈ 470px. */
 #events {
-  max-height: 470px;
+  max-height: 500px;
+  /* overflow:hidden clips; overflow-y:auto then re-enables vertical scrolling in
+     the browser (it wins for the y-axis). The redundant-looking hidden is what
+     makes the satori snapshot renderer clip the list to the cap instead of
+     painting the overflowing card onto the label below it. */
+  overflow: hidden;
   overflow-y: auto;
 }
 .event-btn {

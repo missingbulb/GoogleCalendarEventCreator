@@ -29,7 +29,7 @@ export const GCalConfig = {
   // Hard cap on how many events "show all" expands the list to — a guard
   // against pathological pages. Past this the bottom label reads
   // "N out of M events shown" with no "show all" link.
-  maxEventsExpanded: 100,
+  maxEventsExpanded: 99,
 
   // How many event rows fit in the popup before the list starts scrolling —
   // mirrors the height cap on #events in ui/popup.css. Used only to decide
