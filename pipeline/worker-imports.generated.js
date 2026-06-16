@@ -21,6 +21,7 @@ importScripts(
   "/pipeline/sources/luma.js",
   "/pipeline/sources/meetup.js",
   "/pipeline/sources/secrettelaviv.js",
+  "/pipeline/sources/seetickets.js",
   "/pipeline/sources/telavivcinematheque.js",
   "/pipeline/sources/thinkdrink.js",
   "/pipeline/sources/ticketmaster.js"
