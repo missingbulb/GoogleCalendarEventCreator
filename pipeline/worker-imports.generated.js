@@ -20,6 +20,7 @@ importScripts(
   "/pipeline/sources/facebook.js",
   "/pipeline/sources/luma.js",
   "/pipeline/sources/meetup.js",
+  "/pipeline/sources/seatgeek.js",
   "/pipeline/sources/secrettelaviv.js",
   "/pipeline/sources/telavivcinematheque.js",
   "/pipeline/sources/thinkdrink.js",
