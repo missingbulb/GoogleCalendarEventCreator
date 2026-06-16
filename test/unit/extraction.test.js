@@ -131,6 +131,33 @@ test("Generic site: a dotted date with an adjacent time becomes a timed event", 
   assert.equal(e.start, "2026-06-15T19:00:00");
 });
 
+test("Generic site: a date and time separated by a pipe become a timed event", () => {
+  // "Date | Time" is a common display format; the pipe is a date/time separator
+  // just like "at" or a comma, not a reason to fall back to an all-day event.
+  const html = `<h1>Trivia Night</h1><p>16 June 2026 | 6:30 pm</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/trivia");
+  assert.equal(e.start, "2026-06-16T18:30:00");
+});
+
+test("Generic site: a start–end time range fills the event end", () => {
+  // A "start - end" range next to the date yields both start and end; the end
+  // is the same date carried to the second time.
+  const html = `<h1>Open Studio</h1><p>16 June 2026 | 6:30 pm - 10:00 pm</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/studio");
+  assert.equal(e.start, "2026-06-16T18:30:00");
+  assert.equal(e.end, "2026-06-16T22:00:00");
+});
+
+test("Generic site: a time range that crosses midnight rolls the end to the next day", () => {
+  const html = `<h1>Late Set</h1><p>10 Aug 2026, 11:00 pm to 1:00 am</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/late");
+  assert.equal(e.start, "2026-08-10T23:00:00");
+  assert.equal(e.end, "2026-08-11T01:00:00");
+});
+
 test("Generic site: a day-first hyphenated date (DD-MM-YYYY) is parsed day-first", () => {
   // The same day-first reading as the dotted form, with "-" as the separator.
   const html = `<h1>Film Screening</h1><p>הקרנה 18-06-2026</p>`;
@@ -164,6 +191,20 @@ test("Generic site: location falls back to Open Graph place meta tags", () => {
   const e = firstEvent(html, "https://www.example.com/market");
   assert.equal(e.title, "Harvest Market");
   assert.equal(e.location, "500 Main St, Springfield, IL");
+});
+
+test("Generic site: location falls back to 'Event @ Venue' in the page title", () => {
+  // Listing/ticketing sites often title a page "Event @ Venue" (bandsintown,
+  // secrettelaviv, Songkick). With no microdata/<address>/venue-class/place
+  // meta, the part after " @ " in the title is the best-effort venue. The title
+  // itself is left intact (a per-site source decides whether to strip it).
+  const html = `
+    <meta property="og:title" content="Berry Sakharof @ Peace Forest, Jerusalem">
+    <p>16 June 2026 7:00 pm</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.title, "Berry Sakharof @ Peace Forest, Jerusalem");
+  assert.equal(e.location, "Peace Forest, Jerusalem");
 });
 
 test("Listing page with several events: every JSON-LD event is returned, in order", () => {

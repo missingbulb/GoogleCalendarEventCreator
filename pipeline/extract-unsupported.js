@@ -24,7 +24,7 @@
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
 (() => {
-  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, merge, embeddedEvents, parts } = GCal;
+  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts } = GCal;
 
   function extract() {
     const embedded = embeddedEvents.find();
@@ -65,14 +65,19 @@
       if (timeEl) out.start = normalizeDateValue(timeEl.getAttribute("datetime"));
     }
     if (!out.start) {
-      out.start = parseDateFromText(bodyText().slice(0, 8000));
+      const body = bodyText().slice(0, 8000);
+      out.start = parseDateFromText(body);
+      // A start scraped from text often sits next to its end as a time range
+      // ("6:30 pm - 10:00 pm"); recover the end when nothing structured gave one.
+      if (out.start && !out.end) out.end = endFromTimeRange(body, out.start);
     }
 
     out.location =
       text('[itemprop="location"]') ||
       text("address") ||
       shortText('[class*="venue" i], [class*="location" i], [id*="location" i]') ||
-      metaLocation();
+      metaLocation() ||
+      venueFromTitle(out.title);
 
     // Preserve the description's line breaks rather than flattening it.
     out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
@@ -110,6 +115,18 @@
     p.add(meta("og:postal-code") || meta("business:contact_data:postal_code"));
     p.add(meta("og:country-name") || meta("business:contact_data:country_name"));
     return p.join();
+  }
+
+  // Last-resort location: many event/listing pages title themselves
+  // "Event @ Venue" (bandsintown, secrettelaviv, Songkick, …). When nothing more
+  // structured exposed a location, take the part after the first " @ " in the
+  // page title as a best-effort venue. Bounded in length so a stray "@" in a
+  // long title doesn't turn a whole sentence into a location.
+  function venueFromTitle(title) {
+    const i = (title || "").indexOf(" @ ");
+    if (i < 0) return "";
+    const venue = clean(title.slice(i + 3));
+    return venue.length <= 80 ? venue : "";
   }
 
   // First element matching `sel` whose text is plausibly a venue string

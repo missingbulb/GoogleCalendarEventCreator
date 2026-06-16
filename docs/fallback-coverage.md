@@ -10,8 +10,8 @@ What the generic **fallback** extractor (`pipeline/extract-unsupported.js`) reco
 
 | Metric | Coverage | Hits / gradeable | Watermark (gate) |
 | --- | --: | --: | --: |
-| **Critical fields** (title + start + location) | **50%** | 30 / 60 | 50% |
-| **All fields** | **31.7%** | 40 / 126 | 31.7% |
+| **Critical fields** (title + start + location) | **53.3%** | 32 / 60 | 53.3% |
+| **All fields** | **34.1%** | 43 / 126 | 34.1% |
 | Event coverage *(informational)* | 22.1% | 15 / 68 | — |
 
 The two **field** percentages are gated by `test/integration/fallback-coverage.baseline.json`: the test fails if either drops below its stored high-watermark, and ratchets the watermark up (locally) when it improves. Event coverage — events the fallback found vs. the dedicated source — is reported but not gated; it is dominated by a few listing pages the fallback can't enumerate.
@@ -21,9 +21,9 @@ The two **field** percentages are gated by `test/integration/fallback-coverage.b
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
 | `title` **(critical)** | 20 | 14 | 1 | 5 | 70% |
-| `start` **(critical)** | 20 | 8 | 7 | 5 | 40% |
-| `end` | 15 | 8 | 0 | 7 | 53.3% |
-| `location` **(critical)** | 20 | 8 | 1 | 11 | 40% |
+| `start` **(critical)** | 20 | 9 | 6 | 5 | 45% |
+| `end` | 15 | 9 | 0 | 6 | 60% |
+| `location` **(critical)** | 20 | 9 | 1 | 10 | 45% |
 | `ctz` | 20 | 0 | 0 | 20 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
 | `description` | 20 | 2 | 8 | 10 | 10% |
@@ -39,7 +39,7 @@ The two **field** percentages are gated by `test/integration/fallback-coverage.b
 | `eventim.co.il` | 1 | 1/1 | 100% | 66.7% |
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
-| `secrettelaviv.com` | 1 | 1/1 | 33.3% | 16.7% |
+| `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
 | `ticketmaster.co.il` | 1 | 0/3 | 0% | 0% |
 
@@ -62,7 +62,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `meetup-fusion-la-israel` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-nyc-tech-mixer` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-startup-designers` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
-| `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | — | ~ |
+| `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `telavivcinematheque-left-handed-girl` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-poetry-bookstores` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-sentimental-value` | 0/3 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
