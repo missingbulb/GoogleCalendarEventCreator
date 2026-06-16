@@ -24,12 +24,12 @@ body {
    (light-blue) card so it reads as a pressable button: a calendar-style
    date chip on the left (month banner over day), then the title and a
    muted time (plus location, if any) on the right. */
-/* The list is height-capped to roughly 7 event rows plus a half-row peek of the
-   next one — a visual cue that there's more — and scrolls past that. A row is
-   the 52px min-height card plus its 8px bottom margin (60px); 7 full rows + half
-   a card ≈ 446px. */
+/* The list is height-capped to roughly 7 event rows plus a peek of the next one
+   — a visual cue that there's more — and scrolls past that. A row is the 52px
+   min-height card plus its 8px bottom margin (60px); 7 full rows is ~420px, plus
+   a generous peek of the next card ≈ 470px. */
 #events {
-  max-height: 446px;
+  max-height: 470px;
   overflow-y: auto;
 }
 .event-btn {
