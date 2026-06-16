@@ -52,7 +52,7 @@ from the repo owner is the merge signal (see `docs/claude/workflow.md`).
 
 | Secret | Purpose |
 |--------|---------|
-| `ANTHROPIC_API_KEY_DAILY_LEARNING` | Authenticate the `claude` CLI — **must be set**. A key dedicated to this workflow (separate from the extractor's `ANTHROPIC_API_KEY`) so its spend can be capped and tracked independently in the Anthropic Console. |
+| `ANTHROPIC_API_KEY_DAILY_LEARNING` | Authenticate the `claude` CLI — **must be set**. A key dedicated to this workflow (separate from the extractor's `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR`) so its spend can be capped and tracked independently in the Anthropic Console. |
 | `GITHUB_TOKEN` | Standard Actions token — automatic, no setup |
 
 Each active day spends one Opus run on `ANTHROPIC_API_KEY_DAILY_LEARNING`; set a
@@ -80,5 +80,5 @@ Actions tab) and the next day's run is independent.
 
 A failed run shows red in the **Actions** tab (there's no triggering issue to
 comment on). Common causes mirror the extractor workflow: a missing/expired
-`ANTHROPIC_API_KEY`, or the agent exhausting its turn budget. The next day's run
+`ANTHROPIC_API_KEY_DAILY_LEARNING`, or the agent exhausting its turn budget. The next day's run
 is independent, so a single failure self-heals.
