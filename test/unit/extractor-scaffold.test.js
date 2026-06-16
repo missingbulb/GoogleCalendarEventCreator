@@ -9,6 +9,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const vm = require("node:vm");
 const { sourceStub } = require("../../tools/scaffold-source");
+const { caseStub } = require("../../tools/scaffold-case");
 const { withDomain } = require("../../tools/add-supported-domain");
 
 const URL = "https://www.axs.com/event/629455-volleyball-tickets";
@@ -36,6 +37,13 @@ test("the scaffolded stub is loadable and registers a working matcher", () => {
   assert.ok(source.matches("axs.com"));
   assert.ok(source.matches("tickets.axs.com"));
   assert.ok(!source.matches("example.com"));
+});
+
+test("caseStub is a valid placeholder: empty events, host in the description", () => {
+  const stub = caseStub("axs.com");
+  assert.deepEqual(stub.expected, { events: [] }); // empty = "not filled yet" (bail signal)
+  assert.match(stub.description, /axs\.com/);
+  JSON.parse(JSON.stringify(stub)); // round-trips as JSON
 });
 
 test("withDomain adds, sorts, and de-duplicates", () => {

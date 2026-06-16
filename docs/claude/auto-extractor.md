@@ -59,32 +59,42 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    agent):** branches `claude/extractor/<slug>` off `main`; records the page
    inline (`data/<caseName>.url` + the empty `.html` signal → `npm run refresh`,
    asserted non-empty); **scaffolds** `pipeline/sources/<slug>.js` with its
-   `matches()` already filled (`tools/scaffold-source.js`); registers the host in
-   `supportedDomains` (`tools/add-supported-domain.js`); and runs `npm run index`
-   to regenerate the load lists. A baseline `npm run test:offline` must be green
-   before the agent is spent; then it commits and pushes. (A `GITHUB_TOKEN` push
-   doesn't fire `refresh-cache.yml`'s push trigger, so the page is recorded once.)
+   `matches()` already filled (`tools/scaffold-source.js`) **and the placeholder
+   case `test/extractors/custom/<caseName>.json`** with empty `events`
+   (`tools/scaffold-case.js`); registers the host in `supportedDomains`
+   (`tools/add-supported-domain.js`); and runs `npm run index` to regenerate the
+   load lists. A baseline `npm run test:offline` must be green before the agent is
+   spent; then it commits and pushes. (A `GITHUB_TOKEN` push doesn't fire
+   `refresh-cache.yml`'s push trigger, so the page is recorded once.)
 6. Interpolates the issue + the branch/slug/caseName/host/url into the prompt
    template and runs the agent (`claude … --model claude-sonnet-4-6 -p …`) on the
    prepared branch.
-7. **Finalizes — Phase 2, again in the workflow:** re-runs `test:live` +
-   `test:offline`, commits the agent's `extract()` + case, opens the PR
-   (`Closes #N`), dispatches `test.yml` against the branch, and comments the PR
-   link on the issue.
+7. **Finalizes — Phase 2, again in the workflow:** enforces the blast radius
+   (below), re-runs `test:live` + `test:offline`, commits the agent's two files,
+   opens the PR (`Closes #N`), dispatches `test.yml` against the branch, and
+   comments the PR link on the issue.
 
 So the agent owns only the judgment step (see `.github/agent-prompt-extractor.md`):
-read the real cached page, fill in `extract()` (and complete the source's header),
-write `test/extractors/custom/<caseName>.json` from the actual `npm run test:live`
-output, and confirm `test:live` + `test:offline` are green — then stop. It does
-**not** create the branch, edit `matches()` / `supportedDomains` / the load lists,
-commit, open the PR, or dispatch CI.
+read the real cached page, fill in `extract()` (and the source's header), fill the
+pre-created `test/extractors/custom/<caseName>.json` from the actual
+`npm run test:live` output, and confirm `test:live` + `test:offline` are green —
+then stop. It does **not** create the branch, edit `matches()` / `supportedDomains`
+/ the load lists, commit, open the PR, or dispatch CI.
+
+**The agent's write surface is exactly two pre-created files** — the source and the
+case. This is a containment guarantee, not just an instruction: Phase 2's
+blast-radius guard reverts any *other* tracked change the agent made (e.g. a shared
+helper) back to the scaffold commit and deletes anything it created, so a
+misbehaving agent can't reach the PR. (If the extractor genuinely depended on a
+reverted edit, the re-verify goes red and no PR opens — exactly right.) The prompt
+tells the agent to inline any helper logic into its own source IIFE, as
+`meetup.js` does, rather than touch `pipeline/helpers/`.
 
 Its one judgment escape hatch: if the cached `data/<caseName>.html` is a
 bot/CAPTCHA/login/SPA-shell page rather than the real event page (a 2xx the
-status-only probe can't see), it **stops and comments** instead of writing a case.
-The integration case is the agent's done-signal — Phase 2 opens a PR only if
-`test/extractors/custom/<caseName>.json` exists; absent it, the agent bailed and no
-PR is opened.
+status-only probe can't see), it **stops and comments** and **leaves the case's
+`events` empty**. A filled case is the agent's done-signal: Phase 2 opens a PR only
+when `events` is non-empty; a still-empty case means the agent bailed, so no PR.
 
 ### Why the workflow dispatches CI itself
 
