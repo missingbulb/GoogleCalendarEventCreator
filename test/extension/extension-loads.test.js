@@ -5,7 +5,7 @@
 // extension: a bad service-worker importScripts path (#146), a missing/renamed
 // injected file, or a syntax error in one. This is the deterministic,
 // dependency-light layer; the real-Chrome equivalent (the only thing that
-// exercises Chrome's actual extension loader) lives in test/e2e/ and runs in CI.
+// exercises Chrome's actual extension loader) lives in test/fullBrowserHeavyTests/ and runs in CI.
 "use strict";
 
 const test = require("node:test");

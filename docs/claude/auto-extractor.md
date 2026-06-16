@@ -66,7 +66,7 @@ in two phases, handling the HTML-cache step automatically:
 **Phase 2** (after the HTML is fetched)
 - Polls the GitHub API until the refresh workflow completes
 - Pulls the filled HTML file
-- Creates `test/integration/cases/<case-name>.json` with a placeholder `expected`
+- Creates `test/extractors/custom/<case-name>.json` with a placeholder `expected`
 - Runs `npm run test:live` to capture the actual extraction output
 - Updates the case with real expected values and confirms the tests pass
 - Runs `npm run test:offline` to catch regressions
@@ -134,7 +134,7 @@ In any of these cases, fall back to the manual process in
 
 The agent never merges the PR. A human must review:
 - The extractor logic in `pipeline/sources/<slug>.js`
-- The extracted values in `test/integration/cases/<case-name>.json`
+- The extracted values in `test/extractors/custom/<case-name>.json`
 - That `matches(host)` is correct for the target domain
 
 "LGTM" from the repo owner is the merge signal (see `docs/claude/workflow.md`).

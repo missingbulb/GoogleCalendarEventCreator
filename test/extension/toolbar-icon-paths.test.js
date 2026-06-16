@@ -8,7 +8,7 @@
 // hand setIcon chrome.runtime.getURL("icons/...") — the same extension-root trap
 // the importScripts list dodges with leading slashes (#146).
 //
-// toolbar-badge.test.js checks which variant availabilityIcon() picks; this fires
+// toolbar-icon-state.test.js checks which variant availabilityIcon() picks; this fires
 // the real tabs.onUpdated / tabs.onActivated listeners and asserts setIcon is
 // called with a `path` map whose entries are extension-root absolute (a relative
 // "icons/..." path — the regression — fails this). setIcon is stubbed, as it

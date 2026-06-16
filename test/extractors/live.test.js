@@ -7,7 +7,7 @@
 // real page makes the suite deterministic and runnable anywhere (no network),
 // while still reflecting each site's current markup.
 //
-// Each JSON file in test/integration/cases/ describes one scenario. The
+// Each JSON file in test/extractors/custom/ describes one scenario. The
 // extractor always returns a list of events, so `expected` is just that list:
 //
 //   {
@@ -49,7 +49,7 @@
 // (e.g. "GB" for edfringe.com), or null.
 //
 // To cover a new website or platform: add a data/<name>.url with the event
-// page URL and a case file (test/integration/cases/<name>.json) with its
+// page URL and a case file (test/extractors/custom/<name>.json) with its
 // `expected`, then record the cached HTML with `node data/refresh-cache.js`
 // (on a machine with internet) or let CI record it on the next run. Run the
 // suite once to see the actual extracted values in the failure output, then
@@ -63,7 +63,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { extractFromHtml } = require("../harness");
 
-const CASES_DIR = path.join(__dirname, "cases");
+const CASES_DIR = path.join(__dirname, "..", "extractors", "custom");
 const DATA_DIR = path.join(__dirname, "..", "..", "data");
 
 // build-calendar-url.js is an ES module; import it before the tests run.
