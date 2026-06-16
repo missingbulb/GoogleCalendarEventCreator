@@ -37,7 +37,8 @@ The agent (per `.github/agent-prompt-lessons.md`):
   `docs/architectureGuidelines.md`, mechanics → `docs/claude/*`), keeping every
   addition terse;
 - if it found at least one genuinely new lesson, opens a **PR for review** on a
-  `claude/lessons/<date>` branch and dispatches `test.yml` against it (a
+  `claude/lessons/<date>-<rand>` branch (the random suffix keeps two same-day runs
+  from colliding on one branch name) and dispatches `test.yml` against it (a
   `GITHUB_TOKEN` push doesn't trigger CI — see `docs/technicalGotchas.md`);
 - otherwise does nothing: **no branch, no PR, no edits.** Most days are no-ops by
   design — that's what keeps the digest worth reading.
@@ -62,7 +63,7 @@ Actions tab) and the next day's run is independent.
 
 ## Permissions the workflow uses
 
-- `contents: write` — push the `claude/lessons/<date>` branch
+- `contents: write` — push the `claude/lessons/<date>-<rand>` branch
 - `pull-requests: write` — open the PR
 - `issues: read` — read issue/PR activity in the window
 - `actions: write` — dispatch `test.yml` on the branch

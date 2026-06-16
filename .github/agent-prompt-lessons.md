@@ -70,7 +70,8 @@ point.
 
 ## 5. If — and only if — you have at least one genuinely new lesson
 
-1. Branch: `git checkout -b claude/lessons/$(date -u +%Y-%m-%d)`
+1. Branch (the `-$RANDOM` suffix keeps same-day / concurrent digests from
+   colliding on one branch name): `git checkout -b "claude/lessons/$(date -u +%Y-%m-%d)-$RANDOM"`
 2. Make the terse edits, routed per the table. **Markdown docs only** — never
    touch code, tests, or workflows.
 3. If you edited a doc that a test reads (e.g. one tracked in
