@@ -29,7 +29,7 @@ is the project-specific mechanics. Keep these decisions in mind:
   `test/fallback-coverage.js`) runs every case page through both the dedicated
   source and the sources-emptied fallback, grades the fallback's primary event
   field-by-field, and fails if the critical-field or all-field match percentage
-  drops below the high-watermark in `fallback-coverage.baseline.json`. That
+  drops below the high-watermark in `fallback-coverage.baseline.GENERATED.json`. That
   baseline stores the two percentages **plus the `cases` they were computed
   over**, and the gate compares the run to the watermark only over the cases they
   **share** — so a newly added case (absent from `cases`) is excluded and **adding
@@ -38,7 +38,7 @@ is the project-specific mechanics. Keep these decisions in mind:
   and re-anchors to the current aggregate when the set changes (a `data/` refresh
   that legitimately moves a source's ground truth re-anchors the same way; a
   removed/renamed case needs a local re-baseline). It rewrites
-  `docs/fallback-coverage.md` (per-host/field/case breakdown) locally — commit it
+  `docs/fallback-coverage.GENERATED.md` (per-host/field/case breakdown) locally — commit it
   like a UI snapshot; it's a read-only gate in CI. (Caveat: a single aggregate
   watermark means a regression bundled into the *same* change as a case-set change
   can be re-anchored over — don't commit a re-anchored baseline while the gate is

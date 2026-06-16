@@ -123,7 +123,7 @@ miss against the fallback's offset-bearing instant (a floating time read an hour
 off, or one that dropped its time, still is).
 
 The two percentages are a **high-watermark gate** stored in
-`test/integration/fallback-coverage.baseline.json`, which holds the percentages
+`test/integration/fallback-coverage.baseline.GENERATED.json`, which holds the percentages
 **plus the list of `cases` they were computed over**. The gate compares the
 current run to the watermark over the cases they **share**, so a newly added case
 (absent from `cases`) is excluded and **adding an extractor never fails the
@@ -136,7 +136,7 @@ error to fix. *Caveat:* with a single aggregate watermark, a regression bundled
 into the same change as a case-set change can be re-anchored over rather than
 caught — don't commit a re-anchored baseline while the gate is red.
 
-Running locally also rewrites the human-readable **`docs/fallback-coverage.md`**
+Running locally also rewrites the human-readable **`docs/fallback-coverage.GENERATED.md`**
 report (headline score, the shared-subset gate, and per-host / per-field-type /
 per-case tables — the per-case matrix stays committed so a gate failure shows
 which case/field regressed without re-running the old code) — commit it like the

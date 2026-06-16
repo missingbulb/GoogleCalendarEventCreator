@@ -17,7 +17,7 @@
 // primary event, and separately track how many events each found (the fallback
 // can't enumerate a listing page the way a dedicated source can). The result
 // feeds two consumers: test/integration/fallback-coverage.test.js (the
-// high-watermark gate) and the human-readable docs/fallback-coverage.md report.
+// high-watermark gate) and the human-readable docs/fallback-coverage.GENERATED.md report.
 //
 // This file owns the comparison logic only; it reads the same generated
 // load-order the popup injects and the harness uses, so it exercises the real,
@@ -386,7 +386,7 @@ function renderMarkdown(cov, watermark) {
   L.push("### Gate");
   L.push("");
   L.push(
-    "The gate (`test/integration/fallback-coverage.baseline.json`) compares the current run to the stored " +
+    "The gate (`test/integration/fallback-coverage.baseline.GENERATED.json`) compares the current run to the stored " +
       "watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's " +
       "excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark " +
       "ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes."
