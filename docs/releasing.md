@@ -67,7 +67,19 @@ To mint the OAuth credentials, follow
 [`chrome-webstore-upload`'s setup guide](https://github.com/fregante/chrome-webstore-upload/blob/main/How%20to%20generate%20Google%20API%20keys.md)
 (enable the Chrome Web Store API in a Google Cloud project, create an OAuth
 client, and exchange it for a refresh token), then add the four values as
-secrets.
+secrets. For a copy-pasteable, end-to-end walkthrough of that whole flow, see
+[the Chrome Web Store publishing tutorial](chrome-store-publishing-tutorial.md).
+
+Two gotchas that will bite you, learned the hard way:
+
+- **The out-of-band (`urn:ietf:wg:oauth:2.0:oob`) flow is now blocked by
+  Google.** Use a **Desktop app** OAuth client with `redirect_uri=http://localhost`
+  and read the `code=` parameter out of the (intentionally failing) redirect URL
+  in your browser's address bar.
+- **Publish the OAuth consent screen** (don't leave it in "Testing"). A
+  consent screen still in Testing only issues refresh tokens that **expire after
+  7 days**, which silently breaks the publish workflow a week later; a published
+  consent screen issues a non-expiring token.
 
 ## First publish to the Chrome Web Store
 
