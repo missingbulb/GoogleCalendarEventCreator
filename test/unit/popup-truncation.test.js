@@ -36,11 +36,20 @@ function render(shownCount, total) {
   return { el, link: el.querySelector(".show-all-link"), showAllCalls: () => showAllCalls };
 }
 
-test("everything shown: the label is hidden and empty", () => {
-  const { el, link } = render(20, 20);
+test("whole list fits unscrolled: the label is hidden and empty", () => {
+  const { el, link } = render(5, 5);
   assert.equal(el.hidden, true);
   assert.equal(el.textContent, "");
   assert.equal(link, null);
+});
+
+test("whole list shown but taller than fits: 'N events showing' scroll cue, no link, no 'out of'", () => {
+  const total = GCalConfig.eventsVisibleBeforeScroll + 1;
+  const { el, link } = render(total, total);
+  assert.equal(el.hidden, false);
+  assert.equal(el.textContent, `${total} events showing`);
+  assert.ok(!el.textContent.includes("out of"), "no 'out of' when everything is shown");
+  assert.equal(link, null, "no 'show all' when everything is already shown");
 });
 
 test("default cap reached, more remain: 'showing' with a 'show all' link", () => {
@@ -66,7 +75,10 @@ test("expanded to the hard cap, still more remain: 'shown' with NO link", () => 
   assert.equal(link, null, "no 'show all' once the hard cap is hit — it can't reveal more");
 });
 
-test("hard cap exactly equals the total: everything shown, label hidden", () => {
-  const { el } = render(GCalConfig.maxEventsExpanded, GCalConfig.maxEventsExpanded);
-  assert.equal(el.hidden, true);
+test("hard cap exactly equals the total: everything shown as a scroll cue, no link", () => {
+  const cap = GCalConfig.maxEventsExpanded;
+  const { el, link } = render(cap, cap);
+  assert.equal(el.hidden, false);
+  assert.equal(el.textContent, `${cap} events showing`);
+  assert.equal(link, null);
 });

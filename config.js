@@ -31,6 +31,13 @@ export const GCalConfig = {
   // "N out of M events shown" with no "show all" link.
   maxEventsExpanded: 100,
 
+  // How many event rows fit in the popup before the list starts scrolling —
+  // mirrors the height cap on #events in ui/popup.css. Used only to decide
+  // whether to show the bottom count cue: when the whole list is shown but is
+  // taller than this, the label reads "N events showing" (a scroll hint) rather
+  // than nothing.
+  eventsVisibleBeforeScroll: 7,
+
   // Hard cap on the whole Google Calendar template URL; only the trailing
   // details field is trimmed to fit (never the other fields).
   maxEventUrlLength: 6000,

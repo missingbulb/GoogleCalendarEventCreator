@@ -54,12 +54,16 @@ three of a title, a location, and a start time; anything less is "nothing found"
   A single film with several screening times stays one event.
 - Buttons are ordered by start time, so they read chronologically regardless of
   the order the page listed them in.
-- The list is scrollable, capped in height to roughly the first 7 rows plus a
-  half-row peek of the next as a "there's more" cue. It shows up to
-  `maxEventsShown` buttons at first; beyond that a bottom label reads
-  "N out of M events showing" with a "show all" link that expands the list to
-  `maxEventsExpanded`. Past that cap the label reads "N out of M events shown"
-  with no link.
+- The list is scrollable, capped in height to roughly the first
+  `eventsVisibleBeforeScroll` rows plus a peek of the next as a "there's more"
+  cue. It shows up to `maxEventsShown` buttons at first. A bottom label reflects
+  the state:
+  - whole list fits unscrolled — no label;
+  - whole list shown but taller than fits — "N events showing" (a scroll hint,
+    no "out of", no link);
+  - a prefix of a longer list shown — "N out of M events showing" with a
+    "show all" link that expands the list to `maxEventsExpanded`; past that cap
+    it reads "N out of M events shown" with no link.
 - Clicking a button opens that event's pre-filled Google Calendar template in a
   new tab.
 

@@ -63,23 +63,36 @@ async function init() {
   }
 }
 
-// The bottom-of-list count label. Hidden when every event is already shown.
-// Otherwise reads "N out of M events showing" with a "show all" link while the
-// list can still grow (we're showing fewer than the maxEventsExpanded cap), or
-// "N out of M events shown" with no link once it's capped — the link can't
-// reveal anything more. `onShowAll` re-renders the list at the expanded cap.
+// The bottom-of-list count label. Three cases:
+//   - whole list fits unscrolled (<= eventsVisibleBeforeScroll): nothing to say,
+//     so the label is hidden;
+//   - whole list shown but taller than that: "N events showing" — a scroll cue,
+//     no "out of", no link;
+//   - a prefix of a longer list shown: "N out of M events showing" with a
+//     "show all" link while the list can still grow (we're below the
+//     maxEventsExpanded cap), or "N out of M events shown" with no link once
+//     it's capped — the link can't reveal anything more.
+// `onShowAll` re-renders the list at the expanded cap.
 export function renderTruncation(el, shownCount, total, onShowAll) {
   el.replaceChildren();
-  if (shownCount >= total) {
+
+  const allShown = shownCount >= total;
+  if (allShown && total <= GCalConfig.eventsVisibleBeforeScroll) {
     el.hidden = true;
     return;
   }
 
-  const canExpand = shownCount < GCalConfig.maxEventsExpanded;
-
-  // Label on the left, "show all" link (when the list can still grow) pushed to
-  // the right — laid out as a row by #truncated's flexbox.
+  // Label on the left; the "show all" link (when present) is pushed to the
+  // right — laid out as a row by #truncated's flexbox.
   const label = document.createElement("span");
+  if (allShown) {
+    label.textContent = `${total} events showing`;
+    el.appendChild(label);
+    el.hidden = false;
+    return;
+  }
+
+  const canExpand = shownCount < GCalConfig.maxEventsExpanded;
   label.textContent = `${shownCount} out of ${total} events ${canExpand ? "showing" : "shown"}`;
   el.appendChild(label);
 
