@@ -1,7 +1,7 @@
 // Real-Chrome smoke test: load the unpacked extension and confirm its MV3
 // service worker actually registers and runs — the one layer that exercises
 // Chrome's *real* extension loader (the layer that broke in #146). The
-// deterministic Node-level equivalent is test/integration/extension-loads.test.js.
+// deterministic Node-level equivalent is test/extension/extension-loads.test.js.
 //
 // Zero dependencies: it drives Chrome straight over the DevTools Protocol using
 // Node's built-in WebSocket + child_process (no puppeteer). It needs a Chrome

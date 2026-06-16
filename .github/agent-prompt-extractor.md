@@ -44,7 +44,7 @@ clearly a rough guess shouldn't override what you read off the real page).
 All three of these paths use the same `<case-name>`:
 - `data/<case-name>.html`
 - `data/<case-name>.url`
-- `test/integration/cases/<case-name>.json`
+- `test/extractors/custom/<case-name>.json`
 
 ---
 
@@ -244,7 +244,7 @@ The file must be non-empty (typically tens of KB). If it is still 0 bytes, the r
 
 ## Step 13 — Bootstrap the integration case and see actual output
 
-Create `test/integration/cases/<case-name>.json` with a placeholder:
+Create `test/extractors/custom/<case-name>.json` with a placeholder:
 ```json
 {
   "description": "<Site>: <one-line description of what this case tests>",
@@ -265,7 +265,7 @@ Read the test failure output carefully. It shows what the extractor produced fro
 
 ## Step 14 — Update the case with real expected values
 
-Replace the `"expected"` object in `test/integration/cases/<case-name>.json` with the actual output from Step 13. Then confirm the tests pass:
+Replace the `"expected"` object in `test/extractors/custom/<case-name>.json` with the actual output from Step 13. Then confirm the tests pass:
 ```bash
 npm run test:live
 ```
@@ -282,7 +282,7 @@ npm run test:offline
 ## Step 15 — Commit Phase 2
 
 ```bash
-git add test/integration/cases/<case-name>.json
+git add test/extractors/custom/<case-name>.json
 git add pipeline/sources/<site-slug>.js   # include only if you modified it
 
 git commit -m "feat: add <site> integration test case (Refs #{{ISSUE_NUMBER}})"
@@ -305,7 +305,7 @@ gh pr create \
 - \`pipeline/load-order.generated.json\` — regenerated
 - \`ui/toolbar-icon.js\` — importScripts list updated
 - \`data/<case-name>.html\` + \`data/<case-name>.url\` — cached event page
-- \`test/integration/cases/<case-name>.json\` — integration case
+- \`test/extractors/custom/<case-name>.json\` — integration case
 
 Closes #{{ISSUE_NUMBER}}"
 ```
@@ -353,7 +353,7 @@ The integration case uses a real cached event page. Please review the extractor 
 ## Hard constraints
 
 - **Never auto-merge.** Open a PR; a human must review and approve.
-- **The three `<case-name>` files must match exactly**: `data/<name>.html`, `data/<name>.url`, `test/integration/cases/<name>.json`.
+- **The three `<case-name>` files must match exactly**: `data/<name>.html`, `data/<name>.url`, `test/extractors/custom/<name>.json`.
 - **No `url` field in the case JSON.** The URL lives in `data/<name>.url` only.
 - **`matches(host)` must be correct.** It is the gate that turns the toolbar icon green on supported pages.
 - **Integration case `expected` values must reflect real extraction** — copy them from the `npm run test:live` output, not from guessing.

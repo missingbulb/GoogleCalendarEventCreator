@@ -12,7 +12,7 @@
 //   - data/<name>.html is missing or empty (zero bytes).
 // A committed empty (zero-byte) data/<name>.html is the "fetch me" signal: pair
 // it with a data/<name>.url and the next refresh fills it in. That's also the
-// pre-case flow — record the HTML first, then add test/integration/cases/<name>.json
+// pre-case flow — record the HTML first, then add test/extractors/custom/<name>.json
 // once you can read the expected values off the committed file.
 //
 // A failed fetch KEEPS the previous cached HTML file and only warns — a site
