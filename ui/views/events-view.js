@@ -185,6 +185,7 @@ function makeSingleCard(event, it, tab, currentYear) {
   }
 
   btn.appendChild(body);
+  btn.appendChild(goChevron());
   btn.addEventListener("click", () => openTemplate(url, tab));
   return btn;
 }
@@ -252,6 +253,7 @@ function makeMultiDayCard(card, tab, currentYear) {
   body.appendChild(when);
 
   btn.appendChild(body);
+  btn.appendChild(goChevron());
   btn.addEventListener("click", () => openTemplate(url, tab));
   return btn;
 }
@@ -264,6 +266,18 @@ function instanceButton(event, it, label, tab) {
   btn.textContent = label;
   btn.addEventListener("click", () => openTemplate(url, tab));
   return btn;
+}
+
+// A trailing "tap to add" chevron for a whole-card button (single occurrence or
+// multi-day run): the resting-state cue that the ENTIRE card is the click target,
+// unlike a grouped card whose individual instance buttons are. Decorative, so
+// it's hidden from assistive tech.
+function goChevron() {
+  const el = document.createElement("span");
+  el.className = "e-go";
+  el.textContent = "›";
+  el.setAttribute("aria-hidden", "true");
+  return el;
 }
 
 async function openTemplate(url, tab) {
@@ -311,9 +325,10 @@ function chipEl({ month, day, year, yearPast }) {
   el.appendChild(monthEl);
 
   const dayEl = document.createElement("span");
-  // A day-RANGE (e.g. "5–7" on a month/multi-day card) is wider than a single
+  // A day-RANGE (e.g. "5-7" on a month/multi-day card) is wider than a single
   // day number, so it gets a tighter font — see .e-day.range in popup.css.
-  dayEl.className = day.includes("–") ? "e-day range" : "e-day";
+  // Detected by any non-digit (the range's hyphen), independent of the dash char.
+  dayEl.className = /\D/.test(day) ? "e-day range" : "e-day";
   dayEl.textContent = day;
   el.appendChild(dayEl);
 
@@ -408,7 +423,7 @@ export function monthRangeChip(instances, currentYear = new Date().getFullYear()
   const max = Math.max(...dayNums);
   return {
     month: dates[0].toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
-    day: min === max ? String(min) : `${min}–${max}`,
+    day: min === max ? String(min) : `${min}-${max}`,
     ...offYear(dates[0], currentYear),
   };
 }
@@ -423,11 +438,21 @@ function offYear(date, currentYear) {
   return { year: String(y), yearPast: y < currentYear };
 }
 
-// The button label inside a month card: just the day-of-month (the month lives
-// in the chip). "" when there's no usable date.
+// English ordinal for a day-of-month: 1 -> "1st", 2 -> "2nd", 3 -> "3rd",
+// 11 -> "11th", 21 -> "21st" (the 11–13 teens are all "th").
+function ordinalDay(n) {
+  const teen = n % 100;
+  const suffix = teen >= 11 && teen <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th";
+  return `${n}${suffix}`;
+}
+
+// The button label inside a month card: the day-of-month as an ordinal ("14th") —
+// the month lives in the chip. The ordinal (not a bare "14") gives the small,
+// date-only button enough body to read as a tap target. "" when there's no
+// usable date.
 export function dayOfMonthLabel(start) {
   const date = eventStart(start);
-  return date ? String(date.getDate()) : "";
+  return date ? ordinalDay(date.getDate()) : "";
 }
 
 // The "when" line for a multi-day card: "Jun 5 – 7" (same month) — the days the

@@ -123,10 +123,10 @@ test("sameDayLabel: an all-day instance is labeled All day", () => {
 
 const inst = (start) => ({ t: { start } });
 
-test("monthRangeChip: month over the spanned day-range", () => {
+test("monthRangeChip: month over the spanned day-range (short hyphen, fixed-width chip)", () => {
   const chip = monthRangeChip([inst("2026-06-14T19:00:00"), inst("2026-06-25T19:00:00")]);
   assert.match(chip.month, /^[A-Z]+$/);
-  assert.equal(chip.day, "14–25");
+  assert.equal(chip.day, "14-25");
 });
 
 test("monthRangeChip: a single shared day is just that day (no range)", () => {
@@ -135,7 +135,7 @@ test("monthRangeChip: a single shared day is just that day (no range)", () => {
 
 test("monthRangeChip: ranges by day-of-month, smallest to largest, not list order", () => {
   const chip = monthRangeChip([inst("2026-06-25T19:00:00"), inst("2026-06-05T19:00:00")]);
-  assert.equal(chip.day, "5–25");
+  assert.equal(chip.day, "5-25");
 });
 
 test("monthRangeChip: no usable date yields null", () => {
@@ -149,8 +149,11 @@ test("monthRangeChip: an off-year range carries its year, the current year omits
   assert.equal(monthRangeChip(there, 2026).year, "2027");
 });
 
-test("dayOfMonthLabel: just the day number, no month", () => {
-  assert.equal(dayOfMonthLabel("2026-06-05T19:00:00"), "5");
+test("dayOfMonthLabel: the day of month as an ordinal, no month", () => {
+  assert.equal(dayOfMonthLabel("2026-06-05T19:00:00"), "5th");
+  assert.equal(dayOfMonthLabel("2026-06-21T19:00:00"), "21st");
+  assert.equal(dayOfMonthLabel("2026-06-22T19:00:00"), "22nd");
+  assert.equal(dayOfMonthLabel("2026-06-11T19:00:00"), "11th"); // teen -> th
   assert.equal(dayOfMonthLabel(""), "");
 });
 

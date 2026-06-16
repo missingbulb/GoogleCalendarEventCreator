@@ -22,29 +22,35 @@ body {
   gap: 8px;
   margin: 0 0 10px;
 }
-/* The brand mark: a tiny "add to calendar" glyph echoing the date chips — a blue
-   banner bar over a blue "+". Built from styled boxes (no <img>/<svg>) so the
-   satori snapshot renderer paints it the same as the chips. */
+/* The brand mark: a tiny calendar glyph echoing the date chips — a blue banner
+   over a blue "+" on a bordered white "page". The border + page are what keep it
+   from vanishing as a white-on-white shape in the header. Built from styled boxes
+   (no <img>/<svg>) so the satori snapshot renderer paints it like the chips. */
 #brand {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   flex-shrink: 0;
-  width: 16px;
-  gap: 2px;
+  box-sizing: border-box;
+  width: 17px;
+  overflow: hidden;
+  background-color: #fff;
+  border: 1px solid #c6dafc;
+  border-radius: 3px;
 }
 .brand-banner {
   height: 5px;
   background-color: #1a73e8;
-  border-radius: 2px;
 }
 .brand-plus {
   display: flex;
   justify-content: center;
-  font-size: 13px;
+  align-items: center;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1;
   color: #1a73e8;
+  padding: 1px 0 2px;
 }
 /* The state heading is now the clear top of the hierarchy: near-black and
    semibold (it used to be quieter than the event titles). flex:1 so a
@@ -93,11 +99,14 @@ body {
    (opacity) only when popup.js detects scrollable content that way — the
    transition makes it fade in/out as you scroll. The fade is white because the
    popup body is white. */
+/* Taller than a single card row so a clipped card dissolves gradually instead of
+   reading as a hard horizontal slice (white cards on a white body made a short
+   fade look like a sharp cut). */
 .scroll-fade {
   position: absolute;
   left: 0;
   right: 0;
-  height: 36px;
+  height: 64px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s ease;
@@ -105,13 +114,17 @@ body {
 .scroll-fade.show {
   opacity: 1;
 }
+/* The gradient holds solid white for the first stretch at the very edge, then
+   eases to transparent — so a clipped card is fully hidden right at the boundary
+   and dissolves inward, instead of the thin edge-only fade that read as a hard
+   cut over white cards. */
 .scroll-fade.top {
   top: 0;
-  background-image: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0));
+  background-image: linear-gradient(to bottom, #fff 0%, #fff 28%, rgba(255, 255, 255, 0) 100%);
 }
 .scroll-fade.bottom {
   bottom: 0;
-  background-image: linear-gradient(to top, #fff, rgba(255, 255, 255, 0));
+  background-image: linear-gradient(to top, #fff 0%, #fff 28%, rgba(255, 255, 255, 0) 100%);
 }
 .event-btn {
   display: flex;
@@ -149,9 +162,23 @@ body {
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
   transform: translateY(0);
 }
+/* Trailing chevron on a single-event card: the resting-state cue that the WHOLE
+   card is one click target. A grouped (multi-instance) container never has one —
+   there you tap an individual instance button instead. Muted so it's a hint, not
+   a focal point. */
+.e-go {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  line-height: 1;
+  color: #bdc1c6;
+}
 /* Multi-instance card: an UNCLICKABLE container (a film with several screenings,
-   a nightly show) holding the same tonal look as a single-event button, but with
-   a button per instance inside it instead of one whole-card click target. */
+   a nightly show) holding the event's title/location plus a FILLED button per
+   instance — distinct from a single-event button, whose whole surface is one
+   click target (and which carries a trailing ".e-go" chevron the container
+   never does). */
 .event-group {
   display: flex;
   flex-direction: row;
@@ -162,12 +189,12 @@ body {
   margin-bottom: 8px;
   padding: 10px 12px;
   color: #202124;
-  /* Flat, faintly-tinted container with NO shadow — deliberately un-elevated so
-     it reads as a grouping surface, not a button. (Only its inner instance
-     buttons are clickable; the elevated single-event .event-btn above is the
-     pressable look.) */
-  background-color: #f6f8fc;
-  border: 1px solid #e8eaed;
+  /* Flat, tinted "panel" with NO shadow — deliberately un-elevated and a touch
+     grayer than the white single cards so it reads as a grouping surface, not a
+     button. (Only its inner instance buttons are clickable; the elevated
+     single-event .event-btn above is the pressable look.) */
+  background-color: #eef2f9;
+  border: 1px solid #dfe4ec;
   border-radius: 10px;
   /* The card itself is NOT a click target (unlike a single-event button) — only
      its inner instance buttons are; show the default cursor over the card. */
@@ -184,25 +211,28 @@ body {
   flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 2px;
+  margin-top: 6px;
 }
+/* A FILLED tonal-blue button, deliberately unlike the white calendar icon on the
+   left: these are the real click targets inside a grouped card, so they must read
+   as pressable buttons, not as another little date chip. */
 .instance-btn {
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 11px;
   font-weight: 600;
-  color: #1a73e8;
-  background-color: #fff;
-  border: 1px solid #c6dafc;
+  color: #174ea6;
+  background-color: #d2e3fc;
+  border: 1px solid #b3ccf5;
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 5px 10px;
   cursor: pointer;
   white-space: nowrap;
 }
 .instance-btn:hover {
-  background-color: #d2e3fc;
-  border-color: #aecbfa;
+  background-color: #aecbfa;
+  border-color: #8ab4f8;
 }
 /* Wrapper around the calendar icon when the event isn't in the current year:
    a positioned box so the year pill can sit over the month banner and jut
@@ -276,17 +306,23 @@ body {
 .event-group .e-day {
   display: flex;
   justify-content: center;
+  align-items: center;
+  /* Fixed height so a range chip ("5-7") is the SAME-size box as a single-day
+     chip ("7"): only the font shrinks to fit, the calendar icon never changes
+     size or proportion. */
+  height: 22px;
   font-size: 16px;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1;
   color: #1a73e8;
-  padding: 2px 0 3px;
 }
-/* A day-RANGE on a month/multi-day card ("5–7", "14–25") is wider than a single
-   day number, so it gets a tighter font to fit the chip's fixed width. */
+/* A day-RANGE on a month/multi-day card ("5-7", "14-25") is wider than a single
+   day number, so it gets a tighter font (and a short hyphen dash, joined in
+   events-view.js) to fit the chip's fixed width — within the SAME fixed height
+   above, so the icon stays identical to a single-day one. */
 .event-btn .e-day.range,
 .event-group .e-day.range {
-  font-size: 12px;
+  font-size: 11px;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
