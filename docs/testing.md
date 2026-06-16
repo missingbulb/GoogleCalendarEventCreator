@@ -128,9 +128,13 @@ drops below its watermark, and ratchets the watermark **up** when the fallback
 improves. So a change that quietly makes the generic extractor worse (or better)
 shows up here. Running locally also rewrites the human-readable
 **`docs/fallback-coverage.md`** report (per-host, per-field-type, and per-case
-tables, plus the notable value differences) — commit it like the UI snapshots;
-the test only writes the working tree, it never touches git. In CI the refresh
-is a no-op (the committed report and baseline are the reviewed truth). Because it
+tables — the per-case matrix stays committed so a gate failure shows which
+case/field regressed without re-running the old code) — commit it like the UI
+snapshots; the test only writes the working tree, it never touches git. The
+actual mismatched values are **printed as test output** (local and CI), not
+committed — reference material for improving the fallback. In CI the file
+refresh is a no-op (the committed report and baseline are the reviewed truth).
+Because it
 runs against the cached HTML, a `data/` refresh that legitimately moves a
 source's output can move these numbers — re-baseline by hand (lower the number
 in the baseline file) when that's the intended cause.

@@ -361,7 +361,9 @@ function renderMarkdown(cov, watermark) {
   }
   L.push("");
 
-  // By exemplar (matrix)
+  // By exemplar (matrix). Kept in the committed file on purpose: when the gate
+  // fails, this shows which case/field regressed without re-running the old
+  // version to find it.
   L.push("## By exemplar");
   L.push("");
   L.push("Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback didn't) · — source left it empty");
@@ -376,27 +378,27 @@ function renderMarkdown(cov, watermark) {
   }
   L.push("");
 
-  // Notable differences (the "summary of differences" the report is for)
-  L.push("## Notable differences");
-  L.push("");
-  L.push(
-    "Fields where the fallback produced a value that **differs** from the dedicated " +
-      "source (a wrong/weaker value, not merely a missing one) — the cases worth a look:"
-  );
-  L.push("");
+  return L.join("\n");
+}
+
+// The notable value differences — fields where the fallback produced a wrong or
+// weaker value rather than just missing one. Emitted as TEST OUTPUT (not written
+// to the committed report) so the actual mismatched values are there to guide
+// future fallback work without bloating the artifact. Returns "" when there are
+// none.
+function renderNotableDifferences(cov) {
+  const L = ["Fallback values that DIFFER from the dedicated source (wrong/weaker, not merely missing):"];
   let any = false;
   for (const c of cov.cases) {
     const diffs = ALL_FIELDS.filter((f) => c.cells[f].state === "diff");
     if (!diffs.length) continue;
     any = true;
-    L.push(`- **\`${c.name}\`**`);
+    L.push(`  ${c.name}`);
     for (const f of diffs) {
-      L.push(`  - \`${f}\` — custom: \`${cell(c.cells[f].custom)}\` · fallback: \`${cell(c.cells[f].fallback)}\``);
+      L.push(`    ${f}: custom [${cell(c.cells[f].custom)}]  vs  fallback [${cell(c.cells[f].fallback)}]`);
     }
   }
-  if (!any) L.push("_None._");
-  L.push("");
-
+  if (!any) L.push("  (none)");
   return L.join("\n");
 }
 
@@ -404,4 +406,4 @@ function fmtWm(watermark, key) {
   return watermark && typeof watermark[key] === "number" ? `${watermark[key]}%` : "—";
 }
 
-module.exports = { computeCoverage, renderMarkdown, ALL_FIELDS, CRITICAL_FIELDS, pct };
+module.exports = { computeCoverage, renderMarkdown, renderNotableDifferences, ALL_FIELDS, CRITICAL_FIELDS, pct };

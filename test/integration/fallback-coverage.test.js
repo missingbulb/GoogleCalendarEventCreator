@@ -30,7 +30,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { computeCoverage, renderMarkdown } = require("../fallback-coverage");
+const { computeCoverage, renderMarkdown, renderNotableDifferences } = require("../fallback-coverage");
 
 const BASELINE_PATH = path.join(__dirname, "fallback-coverage.baseline.json");
 const REPORT_PATH = path.join(__dirname, "..", "..", "docs", "fallback-coverage.md");
@@ -57,6 +57,13 @@ test("fallback-coverage report and watermark are refreshed (skipped in CI)", (t)
   }
   fs.writeFileSync(BASELINE_PATH, JSON.stringify(next, null, 2) + "\n");
   fs.writeFileSync(REPORT_PATH, renderMarkdown(coverage, next));
+});
+
+// The actual mismatched values, surfaced as test output (local and CI) rather
+// than committed to the report — reference material for improving the fallback,
+// and a record of what diverged when the gate fails. Informational; no assert.
+test("fallback value differences (informational)", () => {
+  console.log("\n" + renderNotableDifferences(coverage) + "\n");
 });
 
 for (const key of GATED) {
