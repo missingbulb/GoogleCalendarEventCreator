@@ -79,11 +79,11 @@ Multi-instance, one date: icon shows the date, instance buttons show the times (
 
 ![11-multi-instance-same-day-times](cases/11-multi-instance-same-day-times.png)
 
-## 12-split-by-date
+## 12-month-scattered-with-sameday
 
-Split by date: a day with two times is a same-day card; the other single-time days are plain cards
+Month grouping: two scattered single-show days fold into one month card; a two-show day stays a same-day card
 
-![12-split-by-date](cases/12-split-by-date.png)
+![12-month-scattered-with-sameday](cases/12-month-scattered-with-sameday.png)
 
 ## 13-same-day-three-screenings
 
@@ -91,11 +91,11 @@ Same day, three screenings: one same-day card with a button per time
 
 ![13-same-day-three-screenings](cases/13-same-day-three-screenings.png)
 
-## 14-split-allday-and-sameday
+## 14-month-allday-and-sameday
 
-Split by date with an all-day day, a two-show day, and a single-show day
+Month grouping with an all-day day and a timed day folding into one month card, plus a same-day card
 
-![14-split-allday-and-sameday](cases/14-split-allday-and-sameday.png)
+![14-month-allday-and-sameday](cases/14-month-allday-and-sameday.png)
 
 ## 15-mixed-single-and-multi-listing
 
@@ -108,3 +108,15 @@ A listing mixing a clickable single-occurrence card and an unclickable same-day 
 Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing
 
 ![16-events-outnumber-cards-count](cases/16-events-outnumber-cards-count.png)
+
+## 17-month-grouped-across-months
+
+Month grouping across months: three scattered June dates become one JUN card (5/14/25), the July date a single card
+
+![17-month-grouped-across-months](cases/17-month-grouped-across-months.png)
+
+## 18-consecutive-run-multiday
+
+Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card
+
+![18-consecutive-run-multiday](cases/18-consecutive-run-multiday.png)
