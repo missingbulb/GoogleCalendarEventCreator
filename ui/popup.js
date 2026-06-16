@@ -35,17 +35,21 @@ async function init() {
   if (allEvents.length) {
     headingEl.textContent = "Add to Google Calendar";
 
-    const truncEl = document.getElementById("truncated");
     const { makeButton } = await import("./views/events-view.js");
 
-    // Render the first `limit` events into the (height-capped, scrollable) list
-    // and refresh the bottom count label. "show all" re-renders with the bigger
-    // cap. The list shows maxEventsShown at first; "show all" expands it to the
-    // maxEventsExpanded hard cap.
+    // Render the first `limit` events into the (height-capped, scrollable) list.
+    // The count label is appended as the list's LAST item — so it scrolls with
+    // the cards and is only seen once you've scrolled to the end. "show all"
+    // re-renders with the bigger cap; the list shows maxEventsShown at first and
+    // "show all" expands it to the maxEventsExpanded hard cap.
     const renderList = (limit) => {
       const shown = allEvents.slice(0, limit);
-      eventsEl.replaceChildren(...shown.map((event) => makeButton(event, tab)));
-      renderTruncation(truncEl, shown.length, allEvents.length, () => renderList(GCalConfig.maxEventsExpanded));
+      const items = shown.map((event) => makeButton(event, tab));
+      const label = makeTruncationLabel(shown.length, allEvents.length, () =>
+        renderList(GCalConfig.maxEventsExpanded)
+      );
+      if (label) items.push(label);
+      eventsEl.replaceChildren(...items);
     };
 
     renderList(GCalConfig.maxEventsShown);
@@ -63,9 +67,10 @@ async function init() {
   }
 }
 
-// The bottom-of-list count label. Three cases:
-//   - whole list fits unscrolled (<= eventsVisibleBeforeScroll): nothing to say,
-//     so the label is hidden;
+// Build the count label that sits as the LAST item inside the scrollable list
+// (so it's only seen once scrolled to the end), or null when there's nothing to
+// say. Three cases:
+//   - whole list fits unscrolled (<= eventsVisibleBeforeScroll): null;
 //   - whole list shown but taller than that: "N events showing" — a scroll cue,
 //     no "out of", no link;
 //   - a prefix of a longer list shown: "N out of M events showing" with a
@@ -73,14 +78,12 @@ async function init() {
 //     maxEventsExpanded cap), or "N out of M events shown" with no link once
 //     it's capped — the link can't reveal anything more.
 // `onShowAll` re-renders the list at the expanded cap.
-export function renderTruncation(el, shownCount, total, onShowAll) {
-  el.replaceChildren();
-
+export function makeTruncationLabel(shownCount, total, onShowAll) {
   const allShown = shownCount >= total;
-  if (allShown && total <= GCalConfig.eventsVisibleBeforeScroll) {
-    el.hidden = true;
-    return;
-  }
+  if (allShown && total <= GCalConfig.eventsVisibleBeforeScroll) return null;
+
+  const el = document.createElement("p");
+  el.id = "truncated";
 
   // Label on the left; the "show all" link (when present) is pushed to the
   // right — laid out as a row by #truncated's flexbox.
@@ -88,8 +91,7 @@ export function renderTruncation(el, shownCount, total, onShowAll) {
   if (allShown) {
     label.textContent = `${total} events showing`;
     el.appendChild(label);
-    el.hidden = false;
-    return;
+    return el;
   }
 
   const canExpand = shownCount < GCalConfig.maxEventsExpanded;
@@ -108,7 +110,7 @@ export function renderTruncation(el, shownCount, total, onShowAll) {
     el.appendChild(link);
   }
 
-  el.hidden = false;
+  return el;
 }
 
 // THE one decision behind what the popup renders, given the injected extraction

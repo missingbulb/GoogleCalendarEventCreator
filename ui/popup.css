@@ -129,9 +129,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Count label below the (scrollable) list — "N out of M events showing/shown" —
-   with an optional inline "show all" link. Muted so it reads as a footnote, not
-   a warning. */
+/* Count label — "N events showing" / "N out of M events showing/shown", with an
+   optional "show all" link. It's the LAST item INSIDE the scrollable list (not a
+   sibling below it), so it scrolls with the cards and is seen only at the end.
+   Muted so it reads as a footnote, not a warning. */
 #truncated {
   display: flex;
   justify-content: space-between;

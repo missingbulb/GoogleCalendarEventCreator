@@ -13,7 +13,7 @@
 //   4-allowlisted   — complete fallback event, allowlisted: the event only
 //   5-unlisted      — complete fallback event, on neither list: event + request button
 //   6-truncated     — long listing capped: bottom count label + "show all" link
-//   7-eight-events  — eight events: scrollable list, no count label
+//   7-eight-events  — eight events: scrollable list; count label is its last item
 "use strict";
 
 const { test } = require("node:test");

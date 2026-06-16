@@ -56,8 +56,9 @@ three of a title, a location, and a start time; anything less is "nothing found"
   the order the page listed them in.
 - The list is scrollable, capped in height to roughly the first
   `eventsVisibleBeforeScroll` rows plus a peek of the next as a "there's more"
-  cue. It shows up to `maxEventsShown` buttons at first. A bottom label reflects
-  the state:
+  cue. It shows up to `maxEventsShown` buttons at first. A count label is the
+  **last item inside the scrollable list** (so it's only seen once scrolled to
+  the end), reflecting the state:
   - whole list fits unscrolled — no label;
   - whole list shown but taller than fits — "N events showing" (a scroll hint,
     no "out of", no link);
