@@ -82,6 +82,11 @@ is the project-specific mechanics. Keep these decisions in mind:
   change run `npm run refresh:ui` and commit the PNGs so the diff shows the
   before/after (deterministic — satori + resvg, no browser/network — so whoever
   makes the change regenerates on their branch; no CI workflow for it).
+- **The snapshot gallery is reviewable from GitHub: `test/ui/README.md`** embeds
+  every `cases/*.png` with its case `description`, so the current (or changed)
+  popup state shows in the file viewer's diff. It's hand-maintained;
+  `test/ui/readme-coverage.test.js` (in the default `npm test` glob) fails if any
+  `cases/*.png` isn't embedded, so add a section for each new UI case.
 - **A case's `action` is a `(document) => void` gesture** applied to the rendered
   DOM before snapshotting — for things plain data can't express. satori is a
   *static* layout engine (no scrolling), so "scroll all the way down" is expressed
