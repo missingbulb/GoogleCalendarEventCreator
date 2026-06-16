@@ -54,6 +54,29 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
   assert.equal(e.location, "Oregon Convention Center, Portland, OR");
 });
 
+test("SeeTickets: title from h1, start from time[datetime], location assembled from venue elements", () => {
+  // seetickets.com blocks automated fetchers (HTTP 403 from GitHub Actions),
+  // so there is no cached integration case — this unit test uses synthetic HTML
+  // that represents the site's event-page structure.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "MusicEvent", "name": "The Mary Wallopers",
+      "startDate": "2026-10-13T18:00:00Z",
+      "location": { "@type": "Place", "name": "Edinburgh Corn Exchange",
+                    "address": { "addressLocality": "Edinburgh", "addressCountry": "GB" } } }
+    </script>
+    <h1>The Mary Wallopers</h1>
+    <time datetime="2026-10-13T18:00:00Z">Tuesday 13 October 2026</time>
+    <div class="venue-name">Edinburgh Corn Exchange</div>
+    <div class="venue-location">Edinburgh</div>`;
+
+  const e = firstEvent(html, "https://www.seetickets.com/tour/the-mary-wallopers");
+  assert.equal(e.title, "The Mary Wallopers");
+  assert.equal(e.times[0].start, "2026-10-13T18:00:00Z");
+  assert.ok(e.location.includes("Edinburgh Corn Exchange"));
+  assert.ok(e.location.includes("Edinburgh"));
+});
+
 test("Facebook: title from <h1>, date parsed from visible text", () => {
   const html = `
     <title>Summer Rooftop Party | Facebook</title>
