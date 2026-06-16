@@ -43,80 +43,56 @@ Unlisted: show the event + a right-aligned 'Suggest Correction' link
 
 ![05-unlisted](cases/05-unlisted.png)
 
-## 06-fits-no-fade
-
-Short listing that fits: no scroll, no edge fades
-
-![06-fits-no-fade](cases/06-fits-no-fade.png)
-
-## 07-overflow-bottom-fade
+## 06-overflow-bottom-fade
 
 Overflowing list, top of scroll: bottom edge fades out (more below)
 
-![07-overflow-bottom-fade](cases/07-overflow-bottom-fade.png)
+![06-overflow-bottom-fade](cases/06-overflow-bottom-fade.png)
 
-## 08-scrolled-top-fade
-
-Scrolled to the bottom: top edge fades out, no bottom fade
-
-![08-scrolled-top-fade](cases/08-scrolled-top-fade.png)
-
-## 09-scrolled-middle-both-fades
+## 07-scrolled-middle-both-fades
 
 Scrolled to the middle of a long list: both edges fade out
 
-![09-scrolled-middle-both-fades](cases/09-scrolled-middle-both-fades.png)
+![07-scrolled-middle-both-fades](cases/07-scrolled-middle-both-fades.png)
 
-## 10-scrolled-bottom-count
+## 08-scrolled-bottom-count
 
 Long capped list scrolled to the bottom: 'N out of M' + top fade only
 
-![10-scrolled-bottom-count](cases/10-scrolled-bottom-count.png)
+![08-scrolled-bottom-count](cases/08-scrolled-bottom-count.png)
 
-## 11-multi-instance-same-day-times
-
-Multi-instance, one date: icon shows the date, instance buttons show the times (with ranges)
-
-![11-multi-instance-same-day-times](cases/11-multi-instance-same-day-times.png)
-
-## 12-month-scattered-with-sameday
+## 09-month-scattered-with-sameday
 
 Month grouping: two scattered single-show days fold into one month card; a two-show day stays a same-day card
 
-![12-month-scattered-with-sameday](cases/12-month-scattered-with-sameday.png)
+![09-month-scattered-with-sameday](cases/09-month-scattered-with-sameday.png)
 
-## 13-same-day-three-screenings
+## 10-same-day-three-screenings
 
 Same day, three screenings: one same-day card with a button per time
 
-![13-same-day-three-screenings](cases/13-same-day-three-screenings.png)
+![10-same-day-three-screenings](cases/10-same-day-three-screenings.png)
 
-## 14-month-allday-and-sameday
+## 11-month-allday-and-sameday
 
 Month grouping with an all-day day and a timed day folding into one month card, plus a same-day card
 
-![14-month-allday-and-sameday](cases/14-month-allday-and-sameday.png)
+![11-month-allday-and-sameday](cases/11-month-allday-and-sameday.png)
 
-## 15-mixed-single-and-multi-listing
-
-A listing mixing a clickable single-occurrence card and an unclickable same-day card
-
-![15-mixed-single-and-multi-listing](cases/15-mixed-single-and-multi-listing.png)
-
-## 16-events-outnumber-cards-count
+## 12-events-outnumber-cards-count
 
 Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing
 
-![16-events-outnumber-cards-count](cases/16-events-outnumber-cards-count.png)
+![12-events-outnumber-cards-count](cases/12-events-outnumber-cards-count.png)
 
-## 17-month-grouped-across-months
+## 13-month-grouped-across-months
 
 Month grouping across months: three scattered June dates become one JUN card (5/14/25), the July date a single card
 
-![17-month-grouped-across-months](cases/17-month-grouped-across-months.png)
+![13-month-grouped-across-months](cases/13-month-grouped-across-months.png)
 
-## 18-consecutive-run-multiday
+## 14-consecutive-run-multiday
 
 Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card
 
-![18-consecutive-run-multiday](cases/18-consecutive-run-multiday.png)
+![14-consecutive-run-multiday](cases/14-consecutive-run-multiday.png)
