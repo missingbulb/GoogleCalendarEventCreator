@@ -5,12 +5,15 @@
 // the snapshots track the shipped styling. Run `npm run refresh:ui` to
 // regenerate after an intentional change to the popup markup or ui/popup.css.
 //
-// The five states (issue #192; see ui/popup.js's chooseContent):
+// The chooseContent states (issue #192; see ui/popup.js's chooseContent), plus a
+// truncation variant:
 //   1-supported     — supported host: the extractor's events (a 2-event listing)
 //   2-denylisted    — denylisted host: "No events found" (no link, no prompt)
 //   3-nothing-found — not denylisted, nothing complete: "No events found" + Disagree? link
 //   4-allowlisted   — complete fallback event, allowlisted: the event only
 //   5-unlisted      — complete fallback event, on neither list: event + request button
+//   6-truncated     — long listing capped: bottom count label + "show all" link
+//   7-eight-events  — eight events: scrollable list; count label is its last item
 "use strict";
 
 const { test } = require("node:test");
@@ -71,8 +74,8 @@ async function compareToSnapshot(name, pngBuffer) {
 
 const STATES = loadStatePopups();
 
-test("the gallery has all five states", () => {
-  assert.equal(STATES.length, 5, "ui/views/popup-states.html should define five .state sections");
+test("the gallery has all seven states", () => {
+  assert.equal(STATES.length, 7, "ui/views/popup-states.html should define seven .state sections");
 });
 
 for (const { name, popup } of STATES) {

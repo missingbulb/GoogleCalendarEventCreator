@@ -53,7 +53,7 @@
     <section class="state" data-state="1-supported">
       <p class="caption">State 1 — supported host: show the extractor’s events</p>
       <div class="popup">
-        <p id="heading">2 events on this page</p>
+        <p id="heading">Add to Google Calendar</p>
         <div id="events">
           <button class="event-btn">
             <span class="e-date"><span class="e-month">JUN</span><span class="e-day">25</span></span>
@@ -125,6 +125,111 @@
               <span class="e-when">9 AM · Riverside Park boathouse</span>
             </span>
           </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Truncated list — a long listing capped to maxEventsShown: the list
+         scrolls, and a bottom "N out of M events showing" label carries a
+         "show all" link that expands it to the maxEventsExpanded cap. (The peek
+         of the next row is a CSS scroll cue, not shown in this static render.) -->
+    <section class="state" data-state="6-truncated">
+      <p class="caption">Truncated listing — bottom count label + “show all” link</p>
+      <div class="popup">
+        <p id="heading">Add to Google Calendar</p>
+        <div id="events">
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">25</span></span>
+            <span class="e-body">
+              <span class="e-title">NYC Tech Mixer 2026</span>
+              <span class="e-when">6 PM – 9 PM · The Williamsburg Hotel Bar, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">26</span></span>
+            <span class="e-body">
+              <span class="e-title">Designers & Founders Coffee</span>
+              <span class="e-when">9 AM · Devoción, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">27</span></span>
+            <span class="e-body">
+              <span class="e-title">Open Source Saturday</span>
+              <span class="e-when">11 AM · Pioneer Works, Brooklyn</span>
+            </span>
+          </button>
+          <p id="truncated"><span>31 out of 40 events showing</span><a class="show-all-link" href="#">show all</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Eight events — under maxEventsShown, so the "8 events showing" label is
+         the last item INSIDE the scrollable list (only seen once scrolled to the
+         end). At the top of the scroll, satori shows the first rows plus a peek
+         of the next; the label sits below the fold. -->
+    <section class="state" data-state="7-eight-events">
+      <p class="caption">Eight events — scrollable; count label is the list's last item</p>
+      <div class="popup">
+        <p id="heading">Add to Google Calendar</p>
+        <div id="events">
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">25</span></span>
+            <span class="e-body">
+              <span class="e-title">NYC Tech Mixer 2026</span>
+              <span class="e-when">6 PM – 9 PM · The Williamsburg Hotel Bar, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">26</span></span>
+            <span class="e-body">
+              <span class="e-title">Designers & Founders Coffee</span>
+              <span class="e-when">9 AM · Devoción, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">27</span></span>
+            <span class="e-body">
+              <span class="e-title">Open Source Saturday</span>
+              <span class="e-when">11 AM · Pioneer Works, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">28</span></span>
+            <span class="e-body">
+              <span class="e-title">Sunday Morning Run Club</span>
+              <span class="e-when">8 AM · Prospect Park, Grand Army Plaza</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUN</span><span class="e-day">30</span></span>
+            <span class="e-body">
+              <span class="e-title">Indie Game Night</span>
+              <span class="e-when">7 PM · Wonderville, Brooklyn</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUL</span><span class="e-day">1</span></span>
+            <span class="e-body">
+              <span class="e-title">Rooftop Jazz Sessions</span>
+              <span class="e-when">8 PM · The Brooklyn Grange</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUL</span><span class="e-day">3</span></span>
+            <span class="e-body">
+              <span class="e-title">First Friday Gallery Walk</span>
+              <span class="e-when">6 PM · DUMBO galleries</span>
+            </span>
+          </button>
+          <button class="event-btn">
+            <span class="e-date"><span class="e-month">JUL</span><span class="e-day">4</span></span>
+            <span class="e-body">
+              <span class="e-title">Independence Day Fireworks Picnic</span>
+              <span class="e-when">7 PM · Brooklyn Bridge Park, Pier 1</span>
+            </span>
+          </button>
+          <p id="truncated"><span>8 events showing</span></p>
         </div>
       </div>
     </section>
