@@ -58,8 +58,7 @@ in two phases, handling the HTML-cache step automatically:
 **Phase 1** (before the HTML is fetched)
 - Creates branch `claude/extractor/<site-slug>`
 - Writes `pipeline/sources/<slug>.js` using `pipeline/sources/meetup.js` as the template
-- Runs `npm run index` to regenerate `pipeline/load-order.generated.json`
-- Updates the `importScripts(...)` list in `ui/toolbar-icon.js`
+- Runs `npm run index` to regenerate both load lists (`pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js`; the service worker's imports are generated, not hand-edited)
 - Commits two placeholder files (`data/<case-name>.html` (empty) + `data/<case-name>.url`)
 - Pushes the branch, then triggers the **Refresh cached HTML files** workflow via the GitHub API
 

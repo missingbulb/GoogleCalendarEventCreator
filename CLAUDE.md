@@ -7,6 +7,7 @@ own file under `docs/claude/` and is imported here:
 @docs/claude/workflow.md
 @docs/claude/adding-a-source.md
 @docs/claude/testing.md
+@docs/claude/merge-conflicts.md
 @docs/claude/auto-extractor.md
 @docs/claude/auto-lessons.md
 

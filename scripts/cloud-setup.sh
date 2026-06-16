@@ -27,3 +27,16 @@ cd /home/user/GoogleCalendarEventCreator
 # starting (per the platform's setup-script guidance). A session that never runs
 # the tests is unaffected, and Claude can reinstall mid-session if needed.
 npm ci || true
+
+# Conflict-resolution hygiene for the generated/derived artifacts that every
+# parallel branch regenerates (the load lists, UI snapshots, coverage baseline).
+# Two per-clone git settings the committed .gitattributes relies on (see
+# docs/claude/merge-conflicts.md). Both are idempotent, so re-running is safe.
+#   - rerere: record how a conflict was resolved and replay it automatically when
+#     the same conflict recurs — and these recur in the same shape across branches.
+#   - the `ours` merge driver .gitattributes maps the generated files to, so a
+#     conflict in one keeps a side automatically and you just `npm run regen`.
+# git config (local) writes the repo's .git/config, which persists with the
+# environment's cached filesystem alongside node_modules above.
+git config rerere.enabled true
+git config merge.ours.driver true

@@ -12,7 +12,8 @@
     "build": "node tools/build-zip.js",
     "index": "node tools/index.js",
     "refresh": "node data/refresh-cache.js",
-    "refresh:ui": "node test/ui/refresh-popup-snapshots.js"
+    "refresh:ui": "node test/ui/refresh-popup-snapshots.js",
+    "regen": "node tools/index.js && node test/ui/refresh-popup-snapshots.js && node --test test/extractors/fallback/fallback-coverage.test.js"
   },
   "license": "MIT",
   "devDependencies": {

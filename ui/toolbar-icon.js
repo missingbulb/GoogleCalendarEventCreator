@@ -9,33 +9,22 @@
 // DOM-free files only — the sources register their matchers at load and the
 // worker never calls extract().
 //
-// This list is checked against pipeline/load-order.generated.json by
-// test/unit/load-order-generated.test.js: an MV3 service worker can only
-// importScripts synchronously at startup (it can't read the generated JSON
-// first), so the list is explicit here, and that test fails if a source is
-// added without updating it.
+// The registry + source list this worker loads is GENERATED into
+// pipeline/worker-imports.generated.js by `npm run index` (an MV3 worker can
+// only importScripts synchronously at startup, so it can't read
+// load-order.generated.json first). Importing the generated file keeps the
+// worker's list a single source of truth with the sources on disk — adding a
+// source touches no file here, and there's no hand-list to conflict on. A drift
+// guard (test/unit/load-order-generated.test.js) fails if it goes stale.
 //
-// Leading-slash (extension-root) paths: an MV3 service worker resolves an
+// Leading-slash (extension-root) path: an MV3 service worker resolves an
 // importScripts path relative to the worker's OWN location, which is ui/ — but
-// the pipeline files live at the extension root, so each path needs the leading
+// the pipeline files live at the extension root, so the path needs the leading
 // slash to point there. Without it the import resolves to ui/pipeline/… , fails
 // to load, and that first failure aborts the whole worker before the listeners
 // below register — leaving the toolbar with no availability signal at all.
-// See #146.
-importScripts(
-  "/pipeline/registry.js",
-  "/pipeline/sources/bandsintown.js",
-  "/pipeline/sources/edinburghfringe.js",
-  "/pipeline/sources/eventbrite.js",
-  "/pipeline/sources/eventim-co-il.js",
-  "/pipeline/sources/facebook.js",
-  "/pipeline/sources/luma.js",
-  "/pipeline/sources/meetup.js",
-  "/pipeline/sources/secrettelaviv.js",
-  "/pipeline/sources/telavivcinematheque.js",
-  "/pipeline/sources/thinkdrink.js",
-  "/pipeline/sources/ticketmaster.js"
-);
+// See #146. (The generated file's own imports are leading-slash absolute too.)
+importScripts("/pipeline/worker-imports.generated.js");
 
 // Fetch the fallback allow/denylists from the JSON (single source of truth shared
 // with config.js). The fetch is async; every event handler awaits `ready` so
