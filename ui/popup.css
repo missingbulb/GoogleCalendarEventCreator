@@ -128,14 +128,18 @@ body {
    with an optional inline "show all" link. Muted so it reads as a footnote, not
    a warning. */
 #truncated {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
   font-size: 11px;
   color: #5f6368;
   margin: 8px 0 0;
 }
-/* The inline "show all" link in the count label: same understated treatment as
-   the heading-line links. */
+/* The right-aligned "show all" link on the count line: same understated
+   treatment as the heading-line links. */
 .show-all-link {
-  margin-left: 4px;
+  flex-shrink: 0;
   color: #1a73e8;
   text-decoration: none;
   cursor: pointer;

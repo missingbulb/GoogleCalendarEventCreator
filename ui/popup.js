@@ -33,8 +33,7 @@ async function init() {
   const { events: allEvents, request, policyLink } = chooseContent(data, classifyHost(tab.url));
 
   if (allEvents.length) {
-    headingEl.textContent =
-      allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
+    headingEl.textContent = "Add to Google Calendar";
 
     const truncEl = document.getElementById("truncated");
     const { makeButton } = await import("./views/events-view.js");
@@ -77,7 +76,12 @@ export function renderTruncation(el, shownCount, total, onShowAll) {
   }
 
   const canExpand = shownCount < GCalConfig.maxEventsExpanded;
-  el.textContent = `${shownCount} out of ${total} events ${canExpand ? "showing" : "shown"}`;
+
+  // Label on the left, "show all" link (when the list can still grow) pushed to
+  // the right — laid out as a row by #truncated's flexbox.
+  const label = document.createElement("span");
+  label.textContent = `${shownCount} out of ${total} events ${canExpand ? "showing" : "shown"}`;
+  el.appendChild(label);
 
   if (canExpand) {
     const link = document.createElement("a");
@@ -88,7 +92,7 @@ export function renderTruncation(el, shownCount, total, onShowAll) {
       e.preventDefault();
       onShowAll();
     });
-    el.append(" ", link);
+    el.appendChild(link);
   }
 
   el.hidden = false;

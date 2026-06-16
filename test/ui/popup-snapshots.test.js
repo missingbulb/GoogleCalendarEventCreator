@@ -13,6 +13,7 @@
 //   4-allowlisted   — complete fallback event, allowlisted: the event only
 //   5-unlisted      — complete fallback event, on neither list: event + request button
 //   6-truncated     — long listing capped: bottom count label + "show all" link
+//   7-eight-events  — eight events: scrollable list, no count label
 "use strict";
 
 const { test } = require("node:test");
@@ -73,8 +74,8 @@ async function compareToSnapshot(name, pngBuffer) {
 
 const STATES = loadStatePopups();
 
-test("the gallery has all six states", () => {
-  assert.equal(STATES.length, 6, "ui/views/popup-states.html should define six .state sections");
+test("the gallery has all seven states", () => {
+  assert.equal(STATES.length, 7, "ui/views/popup-states.html should define seven .state sections");
 });
 
 for (const { name, popup } of STATES) {
