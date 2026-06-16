@@ -69,6 +69,34 @@ test("Facebook: title from <h1>, date parsed from visible text", () => {
   assert.ok(e.description.includes("Sunset views"));
 });
 
+test("SeatGeek: title + start/end/location from JSON-LD, title from DOM as fallback", () => {
+  // SeatGeek blocks automated fetches from GitHub Actions (HTTP 403), so this
+  // is a unit test with synthetic HTML that matches the JSON-LD structure
+  // SeatGeek publishes on event detail pages.
+  const html = `
+    <h1 data-testid="event-header">The R&B Tour - Starring Usher Raymond &amp; Chris Brown</h1>
+    <script type="application/ld+json">
+    { "@type": "MusicEvent",
+      "name": "The R&B Tour - Starring Usher Raymond &amp; Chris Brown",
+      "startDate": "2026-07-11T19:00:00-04:00",
+      "endDate":   "2026-07-12T00:00:00-04:00",
+      "location": { "@type": "Place",
+                    "name": "Northwest Stadium",
+                    "address": { "streetAddress": "1600 Ring Rd",
+                                 "addressLocality": "Landover",
+                                 "addressRegion": "MD",
+                                 "postalCode": "20785" } },
+      "description": "USHER &amp; Chris Brown is on tour in Landover on Saturday July 11th, 2026." }
+    </script>`;
+
+  const e = firstEvent(html, "https://seatgeek.com/the-rb-tour-tickets/landover-maryland/northwest-stadium-2026-07-11-7-pm/concert/6027854");
+  assert.equal(e.title, "The R&B Tour - Starring Usher Raymond & Chris Brown");
+  assert.equal(e.times[0].start, "2026-07-11T19:00:00-04:00");
+  assert.equal(e.times[0].end, "2026-07-12T00:00:00-04:00");
+  assert.equal(e.location, "Northwest Stadium, 1600 Ring Rd, Landover, MD, 20785");
+  assert.ok(e.description.includes("Landover"));
+});
+
 test("Generic site: JSON-LD inside @graph, location flattened, HTML stripped", () => {
   const html = `
     <script type="application/ld+json">
