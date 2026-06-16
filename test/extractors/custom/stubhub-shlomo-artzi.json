@@ -1,0 +1,20 @@
+{
+  "description": "StubHub: MusicEvent JSON-LD extraction from event listing page",
+  "expected": {
+    "events": [
+      {
+        "title": "Shlomo Artzi",
+        "location": "Anaba Park Modiin, HaHashmonaim Ave St, Modi'in-Maccabim-Re'ut, IL",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for June 23 at Anaba Park Modiin in Modi'in-Maccabim-Re'ut at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-06-23T20:30:00+03:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
+  }
+}
