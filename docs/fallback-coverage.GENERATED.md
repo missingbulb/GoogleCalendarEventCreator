@@ -18,7 +18,7 @@ Headline coverage over all 20 cases in the corpus:
 
 ### Gate
 
-The gate (`test/integration/fallback-coverage.baseline.json`) compares the current run to the stored watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes.
+The gate (`test/integration/fallback-coverage.baseline.GENERATED.json`) compares the current run to the stored watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes.
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
