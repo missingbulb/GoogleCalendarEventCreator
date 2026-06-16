@@ -11,13 +11,51 @@
 // way down" view, which is the only way to see the count label that lives as the
 // list's last item. (satori behavior is verified by rendering, not reasoned
 // about — see docs/claude/testing.md.)
+//
+// The same staticness applies to the edge fades (popup.css's .scroll-fade): the
+// real popup toggles them from live scroll metrics (popup.js), which read 0 under
+// jsdom, so a case's action sets the fade state explicitly to match the scroll it
+// simulates — the gesture half, just like the scroll itself.
 "use strict";
 
+// Reveal/hide the top and bottom edge fades to match a simulated scroll position.
+function setFades(doc, { top, bottom }) {
+  const t = doc.querySelector(".scroll-fade.top");
+  const b = doc.querySelector(".scroll-fade.bottom");
+  if (t) t.classList.toggle("show", !!top);
+  if (b) b.classList.toggle("show", !!bottom);
+}
+
+// At rest at the top of an overflowing list: only the bottom fade (more below).
+function restAtTop(doc) {
+  setFades(doc, { top: false, bottom: true });
+}
+
 // Show the very bottom of the (overflowing, height-capped) event list, as if the
-// user scrolled to the end.
+// user scrolled to the end: pin content to the end and show only the top fade
+// (there's nothing more below).
 function scrollToBottom(doc) {
   const events = doc.getElementById("events");
   if (events) events.style.justifyContent = "flex-end";
+  setFades(doc, { top: true, bottom: false });
 }
 
-module.exports = { scrollToBottom };
+// Show the middle of a long list, as if scrolled partway: keep a middle window of
+// rows (satori can't scroll, and resvg panics on a too-tall SVG — same bound as
+// the renderer's clampOverflowingList) with the top row cropped so it bleeds
+// under the top fade, and show both fades (more list either way).
+function scrollToMiddle(doc) {
+  const events = doc.getElementById("events");
+  if (events) {
+    const rows = [...events.children];
+    const windowRows = 11; // > the ~8 rows that fill the 500px viewport (>=60px/row)
+    const start = Math.max(0, Math.floor((rows.length - windowRows) / 2));
+    rows.forEach((row, i) => {
+      if (i < start || i >= start + windowRows) events.removeChild(row);
+    });
+    if (events.firstChild) events.firstChild.style.marginTop = "-30px";
+  }
+  setFades(doc, { top: true, bottom: true });
+}
+
+module.exports = { setFades, restAtTop, scrollToBottom, scrollToMiddle };
