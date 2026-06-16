@@ -46,7 +46,7 @@ const WIDTH = 304;
 
 const POPUP_CSS = fs.readFileSync(path.join(ROOT, "ui", "popup.css"), "utf8");
 const POPUP_HTML = fs.readFileSync(path.join(ROOT, "ui", "popup.html"), "utf8");
-const CASES_DIR = path.join(__dirname, "cases");
+const { loadCases, CASES_DIR } = require("./cases");
 
 // Stub tab the cases render against. Only the calendar-URL/link hrefs read it
 // (never shown in a snapshot) and the title backstops an event with no title; a
@@ -232,16 +232,6 @@ async function renderCasePng(testCase) {
   }
 }
 
-// The UI cases, in stable (filename) order: [{ name, description, data, ... }].
-// Each test/ui/cases/<name>.case.js is a plain module; <name> is the stem shared
-// with its reference PNG (test/ui/cases/<name>.png). Named *.case.js so the test
-// runner's *.test.js glob never picks them up as tests.
-function loadCases() {
-  return fs
-    .readdirSync(CASES_DIR)
-    .filter((f) => f.endsWith(".case.js"))
-    .sort()
-    .map((f) => ({ name: f.replace(/\.case\.js$/, ""), ...require(path.join(CASES_DIR, f)) }));
-}
-
+// loadCases/CASES_DIR live in ./cases (kept free of the rendering stack);
+// re-exported here so the renderer's existing callers import them from one place.
 module.exports = { renderCasePng, loadCases, CASES_DIR };
