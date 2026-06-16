@@ -23,5 +23,6 @@ importScripts(
   "/pipeline/sources/secrettelaviv.js",
   "/pipeline/sources/telavivcinematheque.js",
   "/pipeline/sources/thinkdrink.js",
-  "/pipeline/sources/ticketmaster.js"
+  "/pipeline/sources/ticketmaster.js",
+  "/pipeline/sources/visit-tel-aviv.js"
 );
