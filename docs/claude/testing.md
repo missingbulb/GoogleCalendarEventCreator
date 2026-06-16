@@ -29,12 +29,20 @@ is the project-specific mechanics. Keep these decisions in mind:
   `test/fallback-coverage.js`) runs every case page through both the dedicated
   source and the sources-emptied fallback, grades the fallback's primary event
   field-by-field, and fails if the critical-field or all-field match percentage
-  drops below the high-watermark in `fallback-coverage.baseline.json` (the
-  watermark only ratchets up). It rewrites `docs/fallback-coverage.md`
-  (per-host/field/case breakdown) locally — commit it like a UI snapshot; it's a
-  read-only gate in CI. A `data/` refresh that legitimately changes a source's
-  output can move the numbers, so re-baseline by hand (lower the baseline) when
-  that's the cause, the same way you'd update a live case's `expected`.
+  drops below the high-watermark in `fallback-coverage.baseline.json`. That
+  baseline stores the two percentages **plus the `cases` they were computed
+  over**, and the gate compares the run to the watermark only over the cases they
+  **share** — so a newly added case (absent from `cases`) is excluded and **adding
+  an extractor never fails the gate** (#240), while every pre-existing case is
+  still held to the bar. The watermark ratchets **up** on an unchanged case set
+  and re-anchors to the current aggregate when the set changes (a `data/` refresh
+  that legitimately moves a source's ground truth re-anchors the same way; a
+  removed/renamed case needs a local re-baseline). It rewrites
+  `docs/fallback-coverage.md` (per-host/field/case breakdown) locally — commit it
+  like a UI snapshot; it's a read-only gate in CI. (Caveat: a single aggregate
+  watermark means a regression bundled into the *same* change as a case-set change
+  can be re-anchored over — don't commit a re-anchored baseline while the gate is
+  red.)
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
   textContent`) returns `textContent` in tests — including `<select>`/`<option>`
   and hidden text a real browser's `innerText` omits. A generic visible-text

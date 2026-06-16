@@ -256,6 +256,61 @@ function pct(hits, gradeable) {
   return Math.round((hits / gradeable) * 1000) / 10;
 }
 
+// --- High-watermark gate over a CHANGING case set ---------------------------
+// The baseline stores the two aggregate percentages AND the list of cases they
+// were computed over. The gate compares the current run to the watermark over
+// the cases they SHARE, so a newly added case (absent from the watermark's list)
+// is excluded and can't drag the aggregate below the bar — adding an extractor
+// never fails the gate. See docs/claude/testing.md for the accepted masking
+// caveat (a regression bundled with a case-set change can be re-anchored over).
+
+// Aggregate critical/all coverage over a named subset of the run's cases.
+function subsetScore(cov, names) {
+  const want = new Set(names);
+  const sel = cov.cases.filter((c) => want.has(c.name));
+  const sum = (k) => sel.reduce((n, c) => n + c[k], 0);
+  return {
+    cases: sel.length,
+    criticalFieldsPct: pct(sum("criticalHits"), sum("criticalGradeable")),
+    allFieldsPct: pct(sum("allHits"), sum("allGradeable")),
+  };
+}
+
+// What the gate sees: the cases shared with the committed watermark (graded),
+// the cases newly added since it (excluded until re-baselined), and any the
+// watermark lists that are now gone (a removal — the watermark is stale).
+function gateStatus(committed, cov) {
+  const present = new Set(cov.cases.map((c) => c.name));
+  // An old/first-run baseline without `cases` grades over the whole current run.
+  const baselineCases = Array.isArray(committed.cases) ? committed.cases : [...present];
+  const baseSet = new Set(baselineCases);
+  return {
+    shared: baselineCases.filter((n) => present.has(n)),
+    removed: baselineCases.filter((n) => !present.has(n)),
+    added: [...present].filter((n) => !baseSet.has(n)).sort(),
+    current: subsetScore(cov, baselineCases.filter((n) => present.has(n))),
+  };
+}
+
+// The next baseline to persist: ratchet the watermark UP on an unchanged case
+// set (never down), or re-anchor to the current full-set aggregate when the set
+// changed (a new/removed case means the old watermark no longer describes this
+// corpus). Always records the current case list, sorted.
+function nextBaseline(committed, cov) {
+  const currentNames = cov.cases.map((c) => c.name).sort();
+  const prev = Array.isArray(committed.cases) ? [...committed.cases].sort() : null;
+  const sameSet = prev && prev.length === currentNames.length && prev.every((n, i) => n === currentNames[i]);
+  return {
+    criticalFieldsPct: sameSet
+      ? Math.max(committed.criticalFieldsPct ?? 0, cov.scores.criticalFieldsPct)
+      : cov.scores.criticalFieldsPct,
+    allFieldsPct: sameSet
+      ? Math.max(committed.allFieldsPct ?? 0, cov.scores.allFieldsPct)
+      : cov.scores.allFieldsPct,
+    cases: currentNames,
+  };
+}
+
 // --- Markdown report --------------------------------------------------------
 // Short, single-line column labels for the per-exemplar matrix.
 const FIELD_LABELS = {
@@ -307,31 +362,58 @@ function renderMarkdown(cov, watermark) {
   );
   L.push("");
 
-  // Score / gate
+  // Score
+  const gate = gateStatus(watermark, cov);
+  const tenths = (x) => Math.round((x || 0) * 10);
+  const passSym = (cur, mark) => (tenths(cur) >= tenths(mark) ? "✓" : "✗");
   L.push("## Score");
   L.push("");
-  L.push("| Metric | Coverage | Hits / gradeable | Watermark (gate) |");
-  L.push("| --- | --: | --: | --: |");
+  L.push(`Headline coverage over all ${cov.cases.length} cases in the corpus:`);
+  L.push("");
+  L.push("| Metric | Coverage | Hits / gradeable |");
+  L.push("| --- | --: | --: |");
   L.push(
     `| **Critical fields** (title + start + location) | **${cov.scores.criticalFieldsPct}%** | ` +
-      `${cov.totals.criticalHits} / ${cov.totals.criticalGradeable} | ${fmtWm(watermark, "criticalFieldsPct")} |`
+      `${cov.totals.criticalHits} / ${cov.totals.criticalGradeable} |`
+  );
+  L.push(`| **All fields** | **${cov.scores.allFieldsPct}%** | ${cov.totals.allHits} / ${cov.totals.allGradeable} |`);
+  L.push(
+    `| Event coverage *(informational)* | ${cov.scores.eventCoveragePct}% | ${cov.totals.eventsCovered} / ${cov.totals.customEvents} |`
+  );
+  L.push("");
+
+  // Gate (shared-subset high-watermark)
+  L.push("### Gate");
+  L.push("");
+  L.push(
+    "The gate (`test/integration/fallback-coverage.baseline.json`) compares the current run to the stored " +
+      "watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's " +
+      "excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark " +
+      "ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes."
+  );
+  L.push("");
+  L.push("| Metric | Watermark | Current (shared) | |");
+  L.push("| --- | --: | --: | :-: |");
+  L.push(
+    `| Critical fields | ${fmtWm(watermark, "criticalFieldsPct")} | ${gate.current.criticalFieldsPct}% | ` +
+      `${passSym(gate.current.criticalFieldsPct, watermark.criticalFieldsPct)} |`
   );
   L.push(
-    `| **All fields** | **${cov.scores.allFieldsPct}%** | ${cov.totals.allHits} / ${cov.totals.allGradeable} | ` +
-      `${fmtWm(watermark, "allFieldsPct")} |`
-  );
-  L.push(
-    `| Event coverage *(informational)* | ${cov.scores.eventCoveragePct}% | ${cov.totals.eventsCovered} / ${cov.totals.customEvents} | — |`
+    `| All fields | ${fmtWm(watermark, "allFieldsPct")} | ${gate.current.allFieldsPct}% | ` +
+      `${passSym(gate.current.allFieldsPct, watermark.allFieldsPct)} |`
   );
   L.push("");
   L.push(
-    "The two **field** percentages are gated by " +
-      "`test/integration/fallback-coverage.baseline.json`: the test fails if either " +
-      "drops below its stored high-watermark, and ratchets the watermark up (locally) " +
-      "when it improves. Event coverage — events the fallback found vs. the dedicated " +
-      "source — is reported but not gated; it is dominated by a few listing pages the " +
-      "fallback can't enumerate."
+    `Gated over **${gate.shared.length}** shared case(s).` +
+      (gate.added.length
+        ? ` ${gate.added.length} newly added, excluded until re-baselined: ${gate.added.map((a) => "`" + a + "`").join(", ")}.`
+        : "") +
+      (gate.removed.length
+        ? ` ⚠️ ${gate.removed.length} watermark case(s) no longer present — re-baseline needed: ${gate.removed.map((a) => "`" + a + "`").join(", ")}.`
+        : "")
   );
+  L.push("");
+  L.push("Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).");
   L.push("");
 
   // By field type
@@ -406,4 +488,14 @@ function fmtWm(watermark, key) {
   return watermark && typeof watermark[key] === "number" ? `${watermark[key]}%` : "—";
 }
 
-module.exports = { computeCoverage, renderMarkdown, renderNotableDifferences, ALL_FIELDS, CRITICAL_FIELDS, pct };
+module.exports = {
+  computeCoverage,
+  renderMarkdown,
+  renderNotableDifferences,
+  gateStatus,
+  nextBaseline,
+  subsetScore,
+  ALL_FIELDS,
+  CRITICAL_FIELDS,
+  pct,
+};
