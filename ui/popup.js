@@ -37,7 +37,10 @@ async function init() {
 // with fake data by the UI snapshot tests (test/ui/), which pass `data`, a stub
 // `tab`, and the host `listing` directly. Builds into the global `document` (the
 // popup document in the extension; a jsdom document under test).
-export async function render({ data, tab, listing }) {
+// `currentYear` (the year against which a card decides whether to show a year
+// pill — see events-view's chip helpers) defaults to the real current year; the
+// UI snapshot tests pass a fixed one so their PNGs stay deterministic.
+export async function render({ data, tab, listing, currentYear = new Date().getFullYear() }) {
   const headingEl = document.getElementById("heading");
   const eventsEl = document.getElementById("events");
 
@@ -66,7 +69,7 @@ export async function render({ data, tab, listing }) {
     // "show all" expands to maxCardsExpanded.
     const renderList = (limit) => {
       const shown = cards.slice(0, limit);
-      const items = shown.map((card) => renderCard(card, tab));
+      const items = shown.map((card) => renderCard(card, tab, currentYear));
       const shownEvents = shown.reduce((n, c) => n + c.instances.length, 0);
       const label = makeTruncationLabel(
         shown.length,

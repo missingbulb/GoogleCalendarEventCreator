@@ -137,21 +137,24 @@ function pushInto(map, key, value) {
 
 // Render one card descriptor into a DOM node: a clickable button for a single
 // occurrence or a multi-day run, or an unclickable grouped card (same-day or
-// month) with a button per showing.
-export function renderCard(card, tab) {
+// month) with a button per showing. `currentYear` decides which cards get a year
+// pill on their chip (any year but this one — see chipEl); it defaults to the
+// real current year and is threaded down from render() so the UI snapshots can
+// pin it deterministically.
+export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
   switch (card.kind) {
     case "single":
-      return makeSingleCard(card.event, card.instances[0], tab);
+      return makeSingleCard(card.event, card.instances[0], tab, currentYear);
     case "multiDay":
-      return makeMultiDayCard(card, tab);
+      return makeMultiDayCard(card, tab, currentYear);
     case "month":
       return makeGroupCard(card, tab, {
-        chip: monthRangeChip(card.instances),
+        chip: monthRangeChip(card.instances, currentYear),
         instanceLabel: (it) => dayOfMonthLabel(it.t.start),
       });
     default: // "sameDay"
       return makeGroupCard(card, tab, {
-        chip: dateChip(card.instances[0].t.start),
+        chip: dateChip(card.instances[0].t.start, currentYear),
         instanceLabel: (it) => sameDayLabel(it.t),
       });
   }
@@ -160,13 +163,13 @@ export function renderCard(card, tab) {
 // A single clickable event button. A calendar-style date chip on the left, then
 // the title over a muted time (plus location); clicking opens the instance's
 // Calendar template.
-function makeSingleCard(event, it, tab) {
+function makeSingleCard(event, it, tab, currentYear) {
   const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, it.i);
 
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = dateChip(it.t.start);
+  const chip = dateChip(it.t.start, currentYear);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
@@ -225,7 +228,7 @@ function makeGroupCard(card, tab, { chip, instanceLabel }) {
 // clickable like a single occurrence. The chip shows the month over the
 // day-range; the line reads "Jun 5 – 7 · <location>". Clicking schedules one
 // calendar event spanning the whole run.
-function makeMultiDayCard(card, tab) {
+function makeMultiDayCard(card, tab, currentYear) {
   const { event, instances } = card;
   const first = instances[0].t;
   const last = instances[instances.length - 1].t;
@@ -235,7 +238,7 @@ function makeMultiDayCard(card, tab) {
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = monthRangeChip(instances);
+  const chip = monthRangeChip(instances, currentYear);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
@@ -293,8 +296,12 @@ function titleEl(event, tab) {
   return el;
 }
 
-// Build the left date-chip element from { month, day }.
-function chipEl({ month, day }) {
+// Build the left date-chip element from { month, day, year }. `year` is set only
+// for an off-current-year chip (see dateChip/monthRangeChip): when present, the
+// calendar icon gets a small year pill sitting on top of it, and the chip is
+// wrapped so the pill can stack above the icon. A current-year chip (no `year`)
+// returns the bare calendar box, unchanged.
+function chipEl({ month, day, year, yearPast }) {
   const el = document.createElement("span");
   el.className = "e-date";
 
@@ -310,7 +317,16 @@ function chipEl({ month, day }) {
   dayEl.textContent = day;
   el.appendChild(dayEl);
 
-  return el;
+  if (!year) return el;
+
+  const wrap = document.createElement("span");
+  wrap.className = "e-cal";
+  wrap.appendChild(el);
+  const yearEl = document.createElement("span");
+  yearEl.className = yearPast ? "e-year past" : "e-year future";
+  yearEl.textContent = year;
+  wrap.appendChild(yearEl);
+  return wrap;
 }
 
 // The instance's effective end as a Date: its explicit end, or start +
@@ -367,20 +383,24 @@ function eventStart(start) {
 }
 
 // The left date chip's two lines (short month + day-of-month), or null when
-// there's no usable date — then the button shows just title + "when" text.
-export function dateChip(start) {
+// there's no usable date — then the button shows just title + "when" text. A
+// chip whose year isn't `currentYear` also carries that year (rendered as a pill
+// on top of the calendar icon); a current-year chip omits it.
+export function dateChip(start, currentYear = new Date().getFullYear()) {
   const date = eventStart(start);
   if (!date) return null;
   return {
     month: date.toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: String(date.getDate()),
+    ...offYear(date, currentYear),
   };
 }
 
 // The chip for a month or multi-day card: the short month of the earliest
 // instance over the spanned day-range ("14–25", or just "14" if they share a
-// day). null when none of the instances has a usable date.
-export function monthRangeChip(instances) {
+// day). null when none of the instances has a usable date. (A card's instances
+// are grouped by month AND year — see monthKey — so they share one year.)
+export function monthRangeChip(instances, currentYear = new Date().getFullYear()) {
   const dates = instances.map((it) => eventStart(it.t.start)).filter(Boolean);
   if (!dates.length) return null;
   const dayNums = dates.map((d) => d.getDate());
@@ -389,7 +409,18 @@ export function monthRangeChip(instances) {
   return {
     month: dates[0].toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: min === max ? String(min) : `${min}–${max}`,
+    ...offYear(dates[0], currentYear),
   };
+}
+
+// The chip's year-pill fields when `date` falls outside `currentYear`: { year }
+// plus `yearPast` true for a past year (rendered as a gray pill) vs false for a
+// future one (an accent pill). An empty object for a current-year date, so the
+// chip carries no `year` and shows no pill.
+function offYear(date, currentYear) {
+  const y = date.getFullYear();
+  if (y === currentYear) return {};
+  return { year: String(y), yearPast: y < currentYear };
 }
 
 // The button label inside a month card: just the day-of-month (the month lives
