@@ -2,6 +2,7 @@
   "allowlist": ["meetup.com"],
   "denylist": ["barby.co.il"],
   "supportedDomains": [
+    "axs.com",
     "bandsintown.com",
     "cinema.co.il",
     "edfringe.com",

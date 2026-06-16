@@ -54,6 +54,28 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
   assert.equal(e.location, "Oregon Convention Center, Portland, OR");
 });
 
+test("AXS: title from h1, start from time[datetime], location from JSON-LD", () => {
+  // AXS.com is bot-blocked from GitHub Actions (HTTP 403), so there is no
+  // cached HTML fixture — this synthetic case exercises the DOM selectors.
+  const html = `
+    <h1>Ohio Bobcats at Penn State Nittany Lions Womens Volleyball</h1>
+    <time datetime="2026-09-12T19:59:00-04:00">Sat, Sep 12, 2026</time>
+    <script type="application/ld+json">
+    { "@type": "Event",
+      "name": "Ohio Bobcats at Penn State Nittany Lions Womens Volleyball",
+      "startDate": "2026-09-12T19:59:00-04:00",
+      "location": { "@type": "Place", "name": "Recreation Hall - Penn State",
+                    "address": { "streetAddress": "Burrowes Rd",
+                                 "addressLocality": "University Park",
+                                 "addressRegion": "PA" } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.axs.com/event/629455-volleyball-university-park-tickets");
+  assert.equal(e.title, "Ohio Bobcats at Penn State Nittany Lions Womens Volleyball");
+  assert.equal(e.times[0].start, "2026-09-12T19:59:00-04:00");
+  assert.ok(e.location.includes("Recreation Hall"));
+});
+
 test("Facebook: title from <h1>, date parsed from visible text", () => {
   const html = `
     <title>Summer Rooftop Party | Facebook</title>
