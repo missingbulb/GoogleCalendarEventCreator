@@ -5,7 +5,18 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <p id="heading">Reading page&hellip;</p>
+    <!-- Header row that anchors every state with a face: a CSS-drawn calendar +
+         "+" brand mark (the date-chip motif) next to the state heading. The mark
+         is drawn from styled boxes, not an <img>/<svg>, so the satori snapshot
+         renderer paints it too. #heading carries the State-5 "Suggest Correction"
+         link when present (see popup.js). -->
+    <header id="header">
+      <span id="brand" aria-hidden="true">
+        <span class="brand-banner"></span>
+        <span class="brand-plus">+</span>
+      </span>
+      <p id="heading">Reading page&hellip;</p>
+    </header>
     <!-- Positioned wrapper so the edge fades overlay the scroller. The fades are
          scroll cues: shown only when there's more list in that direction (toggled
          in popup.js's render). -->
