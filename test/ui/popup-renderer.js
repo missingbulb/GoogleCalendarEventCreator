@@ -222,9 +222,16 @@ async function renderCasePng(testCase) {
       display: "flex",
       flexDirection: "column",
       fontFamily: FONT_FAMILY,
+      // The popup body has no explicit background, so it's white (and square) in
+      // Chrome. satori would otherwise leave the box transparent — making the PNG
+      // look like rounded cards floating on nothing — so paint it white here to
+      // match the browser. A test-only choice; it doesn't touch ui/popup.html.
+      backgroundColor: "#fff",
     });
     const svg = await satori(vdom, { width: WIDTH, fonts: FONTS });
-    return new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
+    // background fills any canvas the satori box doesn't cover, so the PNG has no
+    // transparent pixels at all (square white corners, like the popup window).
+    return new Resvg(svg, { font: { loadSystemFonts: false }, background: "#ffffff" }).render().asPng();
   } finally {
     global.document = prevDoc;
     global.window = prevWin;

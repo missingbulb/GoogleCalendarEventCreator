@@ -43,20 +43,32 @@ Unlisted: show the event + a right-aligned 'Suggest Correction' link
 
 ![05-unlisted](cases/05-unlisted.png)
 
-## 06-long-listing-top
+## 06-fits-no-fade
 
-Long listing, top of scroll: capped list, count label below the fold
+Short listing that fits: no scroll, no edge fades
 
-![06-long-listing-top](cases/06-long-listing-top.png)
+![06-fits-no-fade](cases/06-fits-no-fade.png)
 
-## 07-long-listing-scrolled
+## 07-overflow-bottom-fade
 
-Long listing, scrolled to bottom: 'N out of M events showing' + 'show all' link
+Overflowing list, top of scroll: bottom edge fades out (more below)
 
-![07-long-listing-scrolled](cases/07-long-listing-scrolled.png)
+![07-overflow-bottom-fade](cases/07-overflow-bottom-fade.png)
 
-## 08-all-shown-scrolled
+## 08-scrolled-top-fade
 
-Eight events, scrolled to bottom: the plain 'N events showing' cue (no link)
+Scrolled to the bottom: top edge fades out, no bottom fade
 
-![08-all-shown-scrolled](cases/08-all-shown-scrolled.png)
+![08-scrolled-top-fade](cases/08-scrolled-top-fade.png)
+
+## 09-scrolled-middle-both-fades
+
+Scrolled to the middle of a long list: both edges fade out
+
+![09-scrolled-middle-both-fades](cases/09-scrolled-middle-both-fades.png)
+
+## 10-scrolled-bottom-count
+
+Long capped list scrolled to the bottom: 'N out of M' + top fade only
+
+![10-scrolled-bottom-count](cases/10-scrolled-bottom-count.png)

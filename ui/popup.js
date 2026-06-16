@@ -61,9 +61,18 @@ export async function render({ data, tab, listing }) {
       );
       if (label) items.push(label);
       eventsEl.replaceChildren(...items);
+      // Refresh the edge fades for the new content (also after a "show all"
+      // re-render, which grows the list).
+      updateScrollFades();
     };
 
     renderList(GCalConfig.maxEventsShown);
+
+    // Edge fades: a scroll cue that there's more list above/below. Keep them in
+    // sync as the user scrolls. In a real browser the scroll metrics are live;
+    // under the static snapshot renderer they're 0, so a case drives the fade
+    // state via its action instead (see test/ui/actions.js).
+    eventsEl.addEventListener("scroll", updateScrollFades);
   } else {
     headingEl.textContent = "No events found on this page";
   }
@@ -76,6 +85,18 @@ export async function render({ data, tab, listing }) {
     headingEl.classList.add("with-link");
     headingEl.appendChild(request ? view.makeSourceRequestLink(tab, request) : view.makePolicyLink(tab));
   }
+}
+
+// Show/hide the top and bottom edge fades from the scroller's current position:
+// the top fade once scrolled away from the top, the bottom fade while there's
+// still list below the fold. A 1px slack absorbs sub-pixel scroll metrics.
+function updateScrollFades() {
+  const events = document.getElementById("events");
+  const top = document.querySelector(".scroll-fade.top");
+  const bottom = document.querySelector(".scroll-fade.bottom");
+  if (!events || !top || !bottom) return;
+  top.classList.toggle("show", events.scrollTop > 1);
+  bottom.classList.toggle("show", events.scrollTop + events.clientHeight < events.scrollHeight - 1);
 }
 
 // Build the count label that sits as the LAST item inside the scrollable list

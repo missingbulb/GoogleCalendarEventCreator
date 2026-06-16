@@ -6,7 +6,14 @@
   </head>
   <body>
     <p id="heading">Reading page&hellip;</p>
-    <div id="events"></div>
+    <!-- Positioned wrapper so the edge fades overlay the scroller. The fades are
+         scroll cues: shown only when there's more list in that direction (toggled
+         in popup.js's render). -->
+    <div id="events-viewport">
+      <div id="events"></div>
+      <div class="scroll-fade top"></div>
+      <div class="scroll-fade bottom"></div>
+    </div>
     <script type="module" src="popup.js"></script>
   </body>
 </html>

@@ -37,6 +37,37 @@ body {
   overflow: hidden;
   overflow-y: auto;
 }
+/* Positioned wrapper for the edge fades — sized to #events, which sets the box's
+   height (the fades are out of flow). */
+#events-viewport {
+  position: relative;
+}
+/* Soft white-to-transparent gradient at the top/bottom edge of the scroller, a
+   scroll cue that there's more list in that direction. pointer-events:none so it
+   never blocks a click on the card beneath it; hidden by default and revealed
+   (opacity) only when popup.js detects scrollable content that way — the
+   transition makes it fade in/out as you scroll. The fade is white because the
+   popup body is white. */
+.scroll-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 36px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.scroll-fade.show {
+  opacity: 1;
+}
+.scroll-fade.top {
+  top: 0;
+  background-image: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0));
+}
+.scroll-fade.bottom {
+  bottom: 0;
+  background-image: linear-gradient(to top, #fff, rgba(255, 255, 255, 0));
+}
 .event-btn {
   display: flex;
   flex-direction: row;
