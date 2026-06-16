@@ -58,7 +58,7 @@ const tenths = (x) => Math.round((x || 0) * 10);
 
 const BASELINE_COMMENT =
   "High-watermark gate for the generic fallback extractor's coverage, asserted by " +
-  "fallback-coverage.test.js and explained in docs/fallback-coverage.GENERATED.md. criticalFieldsPct/" +
+  "fallback-coverage.test.js and explained in test/extractors/fallback/fallback-coverage.GENERATED.md. criticalFieldsPct/" +
   "allFieldsPct are the best field-match percentages reached against the dedicated sources, and " +
   "cases is the list they were computed over. The gate compares the current run to these over the " +
   "SHARED cases, so adding a new case never fails it; the watermark ratchets up on an unchanged " +
