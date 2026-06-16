@@ -82,6 +82,15 @@ is the project-specific mechanics. Keep these decisions in mind:
   change run `npm run refresh:ui` and commit the PNGs so the diff shows the
   before/after (deterministic — satori + resvg, no browser/network — so whoever
   makes the change regenerates on their branch; no CI workflow for it).
+- **The snapshot gallery `test/ui/README.md` is GENERATED, not hand-maintained.**
+  `test/ui/build-readme.js` derives it from the cases (each case's `description` +
+  its `cases/<name>.png`); `npm run refresh:ui` rewrites it alongside the PNGs, and
+  `test/ui/readme.test.js` refreshes it locally / asserts it in CI (the same
+  refresh-or-gate pattern as `fallback-coverage`). So you never edit it by hand —
+  edit the case's `description` and regenerate. It's named plain `README.md` (not
+  the repo's usual `*.GENERATED.md`) on purpose: GitHub only auto-renders a literal
+  `README.md` as a folder's landing page, which is the whole point of the gallery —
+  the do-not-edit banner + the CI gate stand in for the missing GENERATED cue.
 - **A case's `action` is a `(document) => void` gesture** applied to the rendered
   DOM before snapshotting — for things plain data can't express. satori is a
   *static* layout engine (no scrolling), so "scroll all the way down" is expressed
