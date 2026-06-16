@@ -44,6 +44,12 @@ const FONTS = [
 // popup.css's body is 280px wide + 12px padding each side.
 const WIDTH = 304;
 
+// The "current year" the cases render against. Pinned (not the real year) so a
+// card's year-pill decision — and therefore every snapshot — is deterministic
+// forever: a case dated this year shows no pill, off-year dates do. The existing
+// cases all use 2026 dates, so 2026 keeps them pill-free.
+const REFERENCE_YEAR = 2026;
+
 const POPUP_CSS = fs.readFileSync(path.join(ROOT, "ui", "popup.css"), "utf8");
 const POPUP_HTML = fs.readFileSync(path.join(ROOT, "ui", "popup.html"), "utf8");
 const { loadCases, CASES_DIR } = require("./cases");
@@ -208,7 +214,7 @@ async function renderCasePng(testCase) {
   global.document = doc;
   global.window = dom.window;
   try {
-    await render({ data: testCase.data, tab, listing: testCase.listing || "none" });
+    await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR });
     if (testCase.action) testCase.action(doc);
 
     inlinePopupCss(doc.body);

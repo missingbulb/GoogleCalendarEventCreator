@@ -79,6 +79,12 @@ test("dateChip: no usable date yields null (button then shows no chip)", () => {
   assert.equal(dateChip(""), null);
 });
 
+test("dateChip: an off-year date carries its year, the current year omits it", () => {
+  assert.equal(dateChip("2026-06-17T20:00:00", 2026).year, undefined);
+  assert.equal(dateChip("2025-06-17T20:00:00", 2026).year, "2025"); // past
+  assert.equal(dateChip("2027-06-17T20:00:00", 2026).year, "2027"); // future
+});
+
 test("summarize: eventLengthInMinutes with no end shows a time range", () => {
   const text = summarize({ start: ROUND, eventLengthInMinutes: 90 });
   assert.ok(text.includes("–"), `expected a range in "${text}"`);
@@ -134,6 +140,13 @@ test("monthRangeChip: ranges by day-of-month, smallest to largest, not list orde
 
 test("monthRangeChip: no usable date yields null", () => {
   assert.equal(monthRangeChip([inst(""), inst(undefined)]), null);
+});
+
+test("monthRangeChip: an off-year range carries its year, the current year omits it", () => {
+  const here = [inst("2026-06-14T19:00:00"), inst("2026-06-25T19:00:00")];
+  const there = [inst("2027-06-14T19:00:00"), inst("2027-06-25T19:00:00")];
+  assert.equal(monthRangeChip(here, 2026).year, undefined);
+  assert.equal(monthRangeChip(there, 2026).year, "2027");
 });
 
 test("dayOfMonthLabel: just the day number, no month", () => {

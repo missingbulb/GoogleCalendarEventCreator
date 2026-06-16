@@ -153,6 +153,32 @@ body {
   background-color: #d2e3fc;
   border-color: #aecbfa;
 }
+/* Wrapper around the calendar icon when the event isn't in the current year:
+   stacks the year pill on top of the icon, centered over it. (Only present for
+   an off-year chip — a current-year chip is the bare .e-date below.) */
+.event-btn .e-cal,
+.event-group .e-cal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+}
+/* The year pill sitting on top of the calendar icon, shown only for a past or
+   future year (the current year is implied and omitted). */
+.event-btn .e-year,
+.event-group .e-year {
+  display: flex;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  color: #fff;
+  background-color: #d93025;
+  border-radius: 8px;
+  padding: 2px 6px;
+}
 /* Left date chip styled like a calendar icon: a blue month banner over
    the day-of-month on a white "page". */
 .event-btn .e-date,
