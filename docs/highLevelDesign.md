@@ -14,10 +14,12 @@ the matching `sources/<site>.js` (or `extract-unsupported.js`);
 
 Everything — the popup and the tests alike — runs through one top-level
 extractor, `GCal.extract()`, which selects the per-URL source internally and
-returns `{ events, supported }`. Each event is self-described (title, date/time,
-location, description, timezone), so a caller can build a Calendar URL for any of
-them without consulting page-level state. It picks a path by whether the page's
-host has a per-site source:
+returns `{ events, supported }`. Each event is self-described (title, location,
+description, timezone, and its timing in `times[]` — one instance per showing,
+each with its own start/end/duration), so a caller can build a Calendar URL for
+any instance without consulting page-level state. Events that match on every
+non-time field are folded into one multi-instance event by the assembler. It
+picks a path by whether the page's host has a per-site source:
 
 1. **Supported host** — a **self-contained site scraper** in `pipeline/sources/`.
    It produces every field of its events itself; no other extractor's output is
@@ -50,9 +52,10 @@ timezone normalization all live in helpers, applied uniformly — except where i
 must encode its own host's constraints (which elements to read, a fixed `ctz`, a
 yearless date format). So the product rules in
 [productRequirements.md](productRequirements.md) — line-break-preserving
-descriptions, chronological one-button-per-event, floating vs. absolute times,
-the default duration and events cap — are implemented once, in helpers and
-`config.js`, never per source.
+descriptions, chronological one-card-per-event, multi-instance grouping (an
+event's showings carried in `times[]` and folded into one card), floating vs.
+absolute times, the default duration and the card cap — are implemented once, in
+helpers, `pipeline/assemble-events.js`, and `config.js`, never per source.
 
 ## Timezone handling
 

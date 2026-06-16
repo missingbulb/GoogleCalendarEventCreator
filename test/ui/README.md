@@ -72,3 +72,39 @@ Scrolled to the middle of a long list: both edges fade out
 Long capped list scrolled to the bottom: 'N out of M' + top fade only
 
 ![10-scrolled-bottom-count](cases/10-scrolled-bottom-count.png)
+
+## 11-multi-instance-same-day-times
+
+Multi-instance, one date: icon shows the date, instance buttons show the times (with ranges)
+
+![11-multi-instance-same-day-times](cases/11-multi-instance-same-day-times.png)
+
+## 12-split-by-date
+
+Split by date: a day with two times is a same-day card; the other single-time days are plain cards
+
+![12-split-by-date](cases/12-split-by-date.png)
+
+## 13-same-day-three-screenings
+
+Same day, three screenings: one same-day card with a button per time
+
+![13-same-day-three-screenings](cases/13-same-day-three-screenings.png)
+
+## 14-split-allday-and-sameday
+
+Split by date with an all-day day, a two-show day, and a single-show day
+
+![14-split-allday-and-sameday](cases/14-split-allday-and-sameday.png)
+
+## 15-mixed-single-and-multi-listing
+
+A listing mixing a clickable single-occurrence card and an unclickable same-day card
+
+![15-mixed-single-and-multi-listing](cases/15-mixed-single-and-multi-listing.png)
+
+## 16-events-outnumber-cards-count
+
+Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing
+
+![16-events-outnumber-cards-count](cases/16-events-outnumber-cards-count.png)

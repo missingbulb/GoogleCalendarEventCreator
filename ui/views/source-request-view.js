@@ -103,11 +103,14 @@ export function makePolicyLink(tab) {
 // chrome.tabs/document, so the tests exercise the prefill directly).
 export function sourceRequestPrefill(tab, event) {
   event = event || {};
+  // The event carries its timing in times[] (the multi-instance model); seed the
+  // form from the first instance. A flat { start, end } event is tolerated too.
+  const instance = (event.times && event.times[0]) || event;
   return {
     url: tab.url || "",
     name: event.title || tab.title || "",
-    start: event.start || "",
-    end: event.end || "",
+    start: instance.start || "",
+    end: instance.end || "",
     // When the fallback couldn't read a timezone off the page, default to the
     // user's current zone — a sensible guess they can correct in the form
     // (the event page they're on is usually in their own zone), better than blank.

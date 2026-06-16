@@ -4,48 +4,36 @@
     "events": [
       {
         "title": "Kristen Schaal: The Legend of Crystal Shell",
-        "start": "2026-08-12T19:00:00",
-        "end": "2026-08-12T20:00:00",
         "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
         "ctz": "GB",
-        "eventLengthInMinutes": 60,
-        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
-      },
-      {
-        "title": "Kristen Schaal: The Legend of Crystal Shell",
-        "start": "2026-08-13T19:00:00",
-        "end": "2026-08-13T20:00:00",
-        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
-        "ctz": "GB",
-        "eventLengthInMinutes": 60,
-        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
-      },
-      {
-        "title": "Kristen Schaal: The Legend of Crystal Shell",
-        "start": "2026-08-14T19:00:00",
-        "end": "2026-08-14T20:00:00",
-        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
-        "ctz": "GB",
-        "eventLengthInMinutes": 60,
-        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
-      },
-      {
-        "title": "Kristen Schaal: The Legend of Crystal Shell",
-        "start": "2026-08-15T19:00:00",
-        "end": "2026-08-15T20:00:00",
-        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
-        "ctz": "GB",
-        "eventLengthInMinutes": 60,
-        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
-      },
-      {
-        "title": "Kristen Schaal: The Legend of Crystal Shell",
-        "start": "2026-08-16T19:00:00",
-        "end": "2026-08-16T20:00:00",
-        "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ",
-        "ctz": "GB",
-        "eventLengthInMinutes": 60,
-        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner."
+        "details": "https://www.edfringe.com/tickets/whats-on/kristen-schaal-the-legend-of-crystal-shell\n\nThe brand new comedy play from Kristen Schaal (Bob's Burgers, BoJack Horseman, Flight of the Conchords) comes to Edinburgh for five nights only. Co-starring John Roberts (Bob's Burgers), with music by Big Black Delta and directed by Frank Smith. The Legend Of Crystal Shell is about an extraordinary soul who has been hiding from the world because of a fantastic secret. She now prepares to execute her long-held dream: a solo dance interpretation of Tchaikovsky's Swan Lake. Kristen Schaal is an Edinburgh Comedy Award nominee and Melbourne Best Show winner.",
+        "times": [
+          {
+            "start": "2026-08-12T19:00:00",
+            "end": "2026-08-12T20:00:00",
+            "eventLengthInMinutes": 60
+          },
+          {
+            "start": "2026-08-13T19:00:00",
+            "end": "2026-08-13T20:00:00",
+            "eventLengthInMinutes": 60
+          },
+          {
+            "start": "2026-08-14T19:00:00",
+            "end": "2026-08-14T20:00:00",
+            "eventLengthInMinutes": 60
+          },
+          {
+            "start": "2026-08-15T19:00:00",
+            "end": "2026-08-15T20:00:00",
+            "eventLengthInMinutes": 60
+          },
+          {
+            "start": "2026-08-16T19:00:00",
+            "end": "2026-08-16T20:00:00",
+            "eventLengthInMinutes": 60
+          }
+        ]
       }
     ]
   }

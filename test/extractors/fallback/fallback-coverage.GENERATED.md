@@ -14,7 +14,7 @@ Headline coverage over all 20 cases in the corpus:
 | --- | --: | --: |
 | **Critical fields** (title + start + location) | **53.3%** | 32 / 60 |
 | **All fields** | **34.1%** | 43 / 126 |
-| Event coverage *(informational)* | 22.1% | 15 / 68 |
+| Event coverage *(informational)* | 60% | 15 / 25 |
 
 ### Gate
 
@@ -46,15 +46,15 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | Host | Cases | Events found (fb/custom) | Critical % | All % |
 | --- | --: | --: | --: | --: |
 | `bandsintown.com` | 1 | 1/1 | 66.7% | 66.7% |
-| `cinema.co.il` | 4 | 0/11 | 0% | 0% |
-| `edfringe.com` | 5 | 5/44 | 33.3% | 14.3% |
+| `cinema.co.il` | 4 | 0/9 | 0% | 0% |
+| `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
 | `eventbrite.com` | 2 | 2/2 | 100% | 57.1% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 66.7% |
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
-| `ticketmaster.co.il` | 1 | 0/3 | 0% | 0% |
+| `ticketmaster.co.il` | 1 | 0/1 | 0% | 0% |
 
 ## By exemplar
 
@@ -64,10 +64,10 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | `bandsintown-berry-sakharof` | 1/1 | ~ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `edinburghfringe-kristen-schaal` | 1/5 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `edinburghfringe-kristen-schaal` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-mr-chonkers` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `edinburghfringe-richard-herring-rhlstp` | 1/14 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `edinburghfringe-sophie-duker` | 1/23 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `edinburghfringe-richard-herring-rhlstp` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `edinburghfringe-sophie-duker` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `eventbrite-1989775742810` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ~ |
 | `eventbrite-games-for-change` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ~ |
 | `eventim-co-il-the90sshow` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
@@ -78,7 +78,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `telavivcinematheque-left-handed-girl` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-poetry-bookstores` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
-| `telavivcinematheque-sentimental-value` | 0/3 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
+| `telavivcinematheque-sentimental-value` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-taiwan-week` | 0/6 | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `thinkdrink-quantum-lecture` | 1/1 | ✓ | ~ | — | ✓ | ✗ | — | ~ |
-| `ticketmaster-ravid-plotnik` | 0/3 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
+| `ticketmaster-ravid-plotnik` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |

@@ -49,24 +49,45 @@ three of a title, a location, and a start time; anything less is "nothing found"
 
 ## Events
 
-- One button per distinct event on the page. An ordinary event page yields one;
-  a listing or series page (a film week, a festival) yields one button per event.
-  A single film with several screening times stays one event.
-- Buttons are ordered by start time, so they read chronologically regardless of
-  the order the page listed them in.
+- One **card** per distinct event on the page. An ordinary event page yields one;
+  a listing or series page (a film week, a festival) yields one card per event.
+- **Multi-instance events.** A single event with several showings — a film with
+  several screenings, a show that runs nightly, a multi-night concert — is *one*
+  event with several **instances** (each its own start/end). What folds into one
+  event is showings matching on title, location, description, and timezone
+  (differing only in time); distinct events that merely share a title stay
+  separate. That event's instances are then split into **cards strictly by
+  date** — one card per distinct day:
+  - A **day with a single time** is a plain single-occurrence card: the whole
+    card is clickable, exactly like an ordinary event.
+  - A **day with two or more times** is a *same-day card*: the card itself is
+    **not** clickable (only an ordinary single card is); its icon shows that
+    date and it holds a small **clickable button per time**, each opening that
+    showing's Calendar template.
+
+  Because every card is a single day, cards order cleanly by date and none spans
+  several days — so a card can never "jump ahead" of a later one. For example,
+  Jun 10 (one show) / Jun 11 (two shows) / Jun 12 (one show) renders as three
+  cards in date order: a plain Jun 10 card, a Jun 11 same-day card with two time
+  buttons, and a plain Jun 12 card.
+- Cards are ordered by their earliest instance's start time, and an event's
+  instances are ordered within the card, so everything reads chronologically
+  regardless of the order the page listed it in.
 - The list is scrollable, capped in height to roughly the first
-  `eventsVisibleBeforeScroll` rows plus a peek of the next as a "there's more"
-  cue. It shows up to `maxEventsShown` buttons at first. A count label is the
-  **last item inside the scrollable list** (so it's only seen once scrolled to
-  the end), reflecting the state:
+  `cardsVisibleBeforeScroll` rows plus a peek of the next as a "there's more"
+  cue. It shows up to `maxCardsShown` **cards** at first (the cap is on cards
+  because it's a height limit). A count label is the **last item inside the
+  scrollable list** (so it's only seen once scrolled to the end) and reports
+  **event instances** (a card can stand for several), so its numbers can exceed
+  the card count:
   - whole list fits unscrolled — no label;
-  - whole list shown but taller than fits — "N events showing" (a scroll hint,
+  - all cards shown but taller than fits — "N events showing" (a scroll hint,
     no "out of", no link);
-  - a prefix of a longer list shown — "N out of M events showing" with a
-    "show all" link that expands the list to `maxEventsExpanded`; past that cap
+  - a prefix of the cards shown — "N out of M events showing" with a "show all"
+    link that expands the list to the `maxCardsExpanded` card cap; past that cap
     it reads "N out of M events shown" with no link.
-- Clicking a button opens that event's pre-filled Google Calendar template in a
-  new tab.
+- Clicking a card (or, for a multi-instance event, one of its instance buttons)
+  opens that event/showing's pre-filled Google Calendar template in a new tab.
 
 ## Event fields
 

@@ -71,6 +71,15 @@ function hostOf(url) {
 
 const str = (v) => (v == null ? "" : String(v));
 
+// Flatten an event's first instance (times[0]) onto the event so the per-field
+// grading below can read start/end/eventLengthInMinutes alongside the non-time
+// fields. Returns {} for a missing event.
+function flattenPrimary(event) {
+  if (!event) return {};
+  const t0 = (Array.isArray(event.times) && event.times[0]) || {};
+  return { ...event, start: t0.start, end: t0.end, eventLengthInMinutes: t0.eventLengthInMinutes };
+}
+
 // --- Date equivalence -------------------------------------------------------
 // A dedicated source localizes a known-timezone event to a FLOATING wall-clock
 // plus a ctz; the fallback (no ctz) keeps the absolute instant. These are the
@@ -155,8 +164,11 @@ function computeCoverage() {
 
     const custom = runExtract(html, url, false);
     const fallback = runExtract(html, url, true);
-    const c0 = (custom.events || [])[0] || {};
-    const f0 = (fallback.events || [])[0] || null;
+    // Grade the PRIMARY instance: events carry their timing in times[] (the
+    // multi-instance model), so flatten the first instance's start/end/duration
+    // onto the event before comparing the start/end/len fields field-by-field.
+    const c0 = flattenPrimary((custom.events || [])[0]);
+    const f0 = (fallback.events || [])[0] ? flattenPrimary((fallback.events || [])[0]) : null;
 
     const cells = {};
     let criticalHits = 0;

@@ -170,3 +170,67 @@ test("buildCalendarUrl: passes eventLengthInMinutes through to dates param", () 
   );
   assert.equal(paramsOf(url).get("dates"), "20260614T100000/20260614T113000");
 });
+
+// --- Per-instance URL creation (the multi-instance times[] model) -----------
+// A multi-instance event keeps its timing in times[]; buildCalendarUrl(event,
+// tab, i) schedules the i-th instance. Only the `dates` param varies between
+// instances — title/location/ctz/details come from the event and are identical.
+
+// A film screened on three dates: an all-day showing, then two timed shows on a
+// later day (the kind of set the Tel Aviv Cinematheque source produces).
+const MULTI = {
+  title: "Some Film",
+  location: "Cinematheque",
+  ctz: "Asia/Jerusalem",
+  description: "A film.",
+  times: [
+    { start: "2026-06-18", end: null, eventLengthInMinutes: null },
+    { start: "2026-06-19T16:30:00", end: null, eventLengthInMinutes: 90 },
+    { start: "2026-06-19T20:30:00", end: "2026-06-19T22:30:00", eventLengthInMinutes: null },
+  ],
+};
+
+test("instance 0: the all-day showing builds an all-day dates param", () => {
+  assert.equal(paramsOf(buildCalendarUrl(MULTI, TAB, 0)).get("dates"), "20260618/20260619");
+});
+
+test("instance 1: the timed showing uses its own eventLengthInMinutes for the end", () => {
+  assert.equal(paramsOf(buildCalendarUrl(MULTI, TAB, 1)).get("dates"), "20260619T163000/20260619T180000");
+});
+
+test("instance 2: the timed showing with an explicit end uses it", () => {
+  assert.equal(paramsOf(buildCalendarUrl(MULTI, TAB, 2)).get("dates"), "20260619T203000/20260619T223000");
+});
+
+test("instance index defaults to the first instance", () => {
+  assert.equal(
+    paramsOf(buildCalendarUrl(MULTI, TAB)).get("dates"),
+    paramsOf(buildCalendarUrl(MULTI, TAB, 0)).get("dates")
+  );
+});
+
+test("every instance shares the event's non-time fields (only dates differ)", () => {
+  const a = paramsOf(buildCalendarUrl(MULTI, TAB, 0));
+  const b = paramsOf(buildCalendarUrl(MULTI, TAB, 2));
+  for (const key of ["text", "ctz", "location", "details"]) assert.equal(a.get(key), b.get(key));
+  assert.notEqual(a.get("dates"), b.get("dates"));
+  assert.equal(a.get("ctz"), "Asia/Jerusalem");
+});
+
+test("an out-of-range instance index yields no dates param (no crash)", () => {
+  // Defensive: selecting a non-existent instance falls back to the event's own
+  // (absent) flat timing, so there's simply no date — never a throw.
+  assert.equal(paramsOf(buildCalendarUrl(MULTI, TAB, 9)).get("dates"), null);
+});
+
+test("offset-bearing instances are each pinned to their own UTC instant", () => {
+  const event = {
+    title: "Tour",
+    times: [
+      { start: "2026-06-14T19:00:00-04:00", end: "2026-06-14T21:00:00-04:00" },
+      { start: "2026-06-15T19:00:00-04:00", end: "2026-06-15T21:00:00-04:00" },
+    ],
+  };
+  assert.equal(paramsOf(buildCalendarUrl(event, TAB, 0)).get("dates"), "20260614T230000Z/20260615T010000Z");
+  assert.equal(paramsOf(buildCalendarUrl(event, TAB, 1)).get("dates"), "20260615T230000Z/20260616T010000Z");
+});

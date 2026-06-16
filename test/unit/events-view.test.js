@@ -14,9 +14,9 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
-let formatWhen, summarize, dateChip;
+let formatWhen, summarize, dateChip, sameDayLabel, toCards;
 before(async () => {
-  ({ formatWhen, summarize, dateChip } = await import(
+  ({ formatWhen, summarize, dateChip, sameDayLabel, toCards } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))
   ));
 });
@@ -79,4 +79,122 @@ test("summarize: eventLengthInMinutes with no end shows a time range", () => {
 test("summarize: eventLengthInMinutes is ignored for all-day events", () => {
   const text = summarize({ start: "2026-06-17", eventLengthInMinutes: 90 });
   assert.equal(text, "All day");
+});
+
+test("summarize: reads the first instance of a multi-instance (times[]) event", () => {
+  const event = { location: "Hall", times: [{ start: ROUND }, { start: "2026-06-18T20:00:00" }] };
+  assert.equal(summarize(event), summarize({ start: ROUND, location: "Hall" }));
+});
+
+// --- sameDayLabel: the button text inside a same-day card. The icon carries the
+// date, so the button shows just the time (a range when there's an end).
+
+test("sameDayLabel: shows just the time, not the date", () => {
+  const label = sameDayLabel({ start: ODD });
+  assert.ok(label.includes("30"), `expected a time in "${label}"`);
+  assert.ok(!/jun|17/i.test(label), `did not expect a date in "${label}"`);
+});
+
+test("sameDayLabel: a timed instance with an end shows a range", () => {
+  const label = sameDayLabel({ start: ROUND, end: "2026-06-17T22:00:00" });
+  assert.ok(label.includes("–"), `expected a range in "${label}"`);
+});
+
+test("sameDayLabel: an all-day instance is labeled All day", () => {
+  assert.equal(sameDayLabel({ start: "2026-06-17" }), "All day");
+});
+
+// --- toCards: instances split into cards STRICTLY by date (one card per day).
+
+const card = (events) => toCards(events);
+const ev = (title, times) => ({ title, location: "Hall", ctz: "", times });
+
+test("toCards: a single-occurrence event is one 'single' card", () => {
+  const cards = card([ev("Talk", [{ start: ROUND }])]);
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].kind, "single");
+});
+
+test("toCards: different days, one time each -> one single card per day (no '?' card)", () => {
+  // Jun 10 9PM / Jun 11 9PM / Jun 12 9PM -> three single cards, one per day.
+  const cards = card([
+    ev("Run", [
+      { start: "2026-06-10T21:00:00" },
+      { start: "2026-06-11T21:00:00" },
+      { start: "2026-06-12T21:00:00" },
+    ]),
+  ]);
+  assert.equal(cards.length, 3);
+  assert.ok(cards.every((c) => c.kind === "single"));
+});
+
+test("toCards: different months, one time each -> three single cards too (still by date)", () => {
+  const cards = card([
+    ev("Tour", [
+      { start: "2026-06-10T21:00:00" },
+      { start: "2026-07-11T21:00:00" },
+      { start: "2026-08-12T21:00:00" },
+    ]),
+  ]);
+  assert.equal(cards.length, 3);
+  assert.ok(cards.every((c) => c.kind === "single"));
+});
+
+test("toCards: a day with two times -> a same-day card for that day", () => {
+  // Jun 10 8PM / Jun 10 9PM / Jun 11 9PM -> same-day card (Jun 10) + single (Jun 11).
+  const cards = card([
+    ev("Fest", [
+      { start: "2026-06-10T20:00:00" },
+      { start: "2026-06-10T21:00:00" },
+      { start: "2026-06-11T21:00:00" },
+    ]),
+  ]);
+  assert.deepEqual(cards.map((c) => c.kind), ["sameDay", "single"]);
+  assert.equal(cards[0].instances.length, 2);
+});
+
+test("toCards: the four-instance example splits into single / same-day / single, ordered by date", () => {
+  // Jun 10 8PM / Jun 11 9PM / Jun 11 11PM / Jun 12 11PM.
+  const cards = card([
+    ev("Series", [
+      { start: "2026-06-10T20:00:00" },
+      { start: "2026-06-11T21:00:00" },
+      { start: "2026-06-11T23:00:00" },
+      { start: "2026-06-12T23:00:00" },
+    ]),
+  ]);
+  assert.equal(cards.length, 3);
+  assert.deepEqual(cards.map((c) => c.kind), ["single", "sameDay", "single"]);
+  // The middle (Jun 11) card holds both of that day's times; the others one each.
+  assert.deepEqual(cards.map((c) => c.instances.length), [1, 2, 1]);
+});
+
+test("toCards: no card spans several days, so cards never jump ahead of a later one", () => {
+  // Each card is one day -> the card order is exactly the date order.
+  const cards = card([
+    ev("Series", [
+      { start: "2026-06-10T20:00:00" },
+      { start: "2026-06-11T21:00:00" },
+      { start: "2026-06-11T23:00:00" },
+      { start: "2026-06-12T23:00:00" },
+    ]),
+  ]);
+  const cardDays = cards.map((c) => c.instances[0].t.start.slice(0, 10));
+  assert.deepEqual(cardDays, ["2026-06-10", "2026-06-11", "2026-06-12"]);
+});
+
+test("toCards: instances keep their original times[] index (for the right URL)", () => {
+  const cards = card([
+    ev("Fest", [
+      { start: "2026-06-11T21:00:00" }, // index 0, but later in time
+      { start: "2026-06-10T20:00:00" }, // index 1
+      { start: "2026-06-10T21:00:00" }, // index 2
+    ]),
+  ]);
+  const sameDay = cards.find((c) => c.kind === "sameDay");
+  assert.deepEqual(
+    sameDay.instances.map((it) => it.i).sort(),
+    [1, 2],
+    "the Jun 10 card carries the original indices 1 and 2"
+  );
 });
