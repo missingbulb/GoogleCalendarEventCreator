@@ -189,6 +189,12 @@ body {
   color: #1a73e8;
   padding: 2px 0 3px;
 }
+/* A day-RANGE on a month/multi-day card ("5–7", "14–25") is wider than a single
+   day number, so it gets a tighter font to fit the chip's fixed width. */
+.event-btn .e-day.range,
+.event-group .e-day.range {
+  font-size: 12px;
+}
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
 .event-btn .e-body,

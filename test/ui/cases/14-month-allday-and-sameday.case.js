@@ -1,9 +1,11 @@
-// A multi-instance event split by date, mixing an all-day day, a two-show day,
-// and a single-show day: Jun 17 (all-day) and Jun 21 (one timed show) are plain
-// single cards, Jun 19 (two shows) is a same-day card — three cards in date
-// order, the all-day one reading just like an ordinary single event.
+// Month grouping where the scattered days mix an ALL-DAY day and a timed day:
+// Jun 17 (all-day) and Jun 21 (one timed show) each have a single instance, so
+// they fold into one month card as plain day buttons (17, 21) — the all-day-ness
+// isn't shown on the button, only the day. Jun 19 (two shows) stays its own
+// same-day card.
 module.exports = {
-  description: "Split by date with an all-day day, a two-show day, and a single-show day",
+  description:
+    "Month grouping with an all-day day and a timed day folding into one month card, plus a same-day card",
   data: {
     supported: true,
     events: [
