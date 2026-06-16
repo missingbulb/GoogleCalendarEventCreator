@@ -36,20 +36,41 @@ jobs:
           node-version: 22
           cache: npm
 
-      # Pre-flight triage: if the requested host is already on config.js's
-      # fallback allow/denylist, it was already decided — close the issue and
-      # skip the (expensive) agent run. Needs only Node + the repo (no deps), so
-      # it runs before `npm ci`. The issue body/title come from the event
-      # payload via env, so free-form text isn't shell-interpolated.
-      - name: Triage against the fallback allow/denylist
+      # Gather the OTHER open requests with this label so the triage can close a
+      # duplicate request for a host that's already in flight: an in-review PR
+      # keeps its issue OPEN (the PR only `Closes #N` on merge), so an open
+      # issue for the same host means the work is already happening. The network
+      # call lives here, in the workflow, so the triage script stays offline and
+      # unit-testable. gh is preinstalled on the runner; no npm deps needed yet.
+      - name: Gather in-flight extractor requests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue list \
+            --repo "${{ github.repository }}" \
+            --label extractor-request \
+            --state open \
+            --json number,title,body \
+            --limit 100 \
+            > /tmp/open-requests.json || echo '[]' > /tmp/open-requests.json
+          node -e "console.log('Gathered', JSON.parse(require('fs').readFileSync('/tmp/open-requests.json','utf8')).length, 'open request(s).')"
+
+      # Pre-flight triage: close + skip the (expensive) agent run when the
+      # request is already settled — the host already has a dedicated source,
+      # it's on config.js's fallback allow/denylist, or it duplicates an
+      # in-flight request. Needs only Node + the repo (no deps), so it runs
+      # before `npm ci`. The issue fields come from the event payload via env,
+      # so free-form text isn't shell-interpolated.
+      - name: Triage the request
         id: triage
         env:
-          ISSUE_BODY:  ${{ github.event.issue.body }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY:   ${{ github.event.issue.body }}
+          ISSUE_TITLE:  ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: node tools/triage-extractor-request.js
 
-      - name: Close a request whose host is already listed
-        if: steps.triage.outputs.hostInDenyList == 'true' || steps.triage.outputs.hostInAllowList == 'true'
+      - name: Close a triaged request (supported / listed / duplicate)
+        if: steps.triage.outputs.skipAgent == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -58,15 +79,15 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
       - name: Install npm dependencies
-        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
+        if: steps.triage.outputs.skipAgent != 'true'
         run: npm ci
 
       - name: Install Claude Code CLI
-        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
+        if: steps.triage.outputs.skipAgent != 'true'
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Configure git
-        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
+        if: steps.triage.outputs.skipAgent != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -74,7 +95,7 @@ jobs:
       # Fetch the issue via API (avoids shell-escaping issues with free-form bodies)
       # and interpolate it into the static prompt template.
       - name: Build agent prompt
-        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
+        if: steps.triage.outputs.skipAgent != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -110,7 +131,7 @@ jobs:
           PYEOF
 
       - name: Run Claude agent
-        if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
+        if: steps.triage.outputs.skipAgent != 'true'
         timeout-minutes: 75
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR }}

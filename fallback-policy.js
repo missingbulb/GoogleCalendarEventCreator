@@ -24,7 +24,28 @@ export function isPresentableFallbackEvent(event) {
 // True when `host` equals `entry` or is a subdomain of it — the same shape of
 // host match GCal.isSupportedHost uses for sources.
 function hostMatchesList(host, list) {
-  return list.some((entry) => host === entry || host.endsWith("." + entry));
+  return (list || []).some((entry) => host === entry || host.endsWith("." + entry));
+}
+
+// The www-stripped host of a URL, or "" when it isn't a parseable http(s) URL
+// (a new tab, a chrome:// page, …). Shared by the classifiers below.
+function hostFromUrl(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch (e) {
+    return "";
+  }
+}
+
+// True when `url`'s host already has a dedicated per-site source, per
+// config.js's supportedDomains. That list is a static mirror of the sources'
+// own matches(); the runtime truth is GCal.isSupportedHost (pipeline/
+// registry.js), which runs the matchers directly. Used ONLY by the
+// auto-extractor triage to close a request for a site we already cover before
+// spending an agent run. Subdomain-aware, same host match as the allow/deny
+// lists. `lists` defaults to the shipped config; tests pass their own.
+export function isSupportedDomain(url, lists = GCalConfig) {
+  return hostMatchesList(hostFromUrl(url), lists.supportedDomains);
 }
 
 // Classify a host against config.js's fallback lists:
@@ -35,12 +56,8 @@ function hostMatchesList(host, list) {
 // Deny wins if a host is somehow on both lists. `lists` defaults to the shipped
 // config; tests pass their own.
 export function classifyHost(url, lists = GCalConfig) {
-  let host;
-  try {
-    host = new URL(url).hostname.replace(/^www\./, "");
-  } catch (e) {
-    return "none"; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
-  }
+  const host = hostFromUrl(url);
+  if (host === "") return "none"; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
   if (hostMatchesList(host, lists.sourceFallbackDenylist)) return "deny";
   if (hostMatchesList(host, lists.sourceFallbackAllowlist)) return "allow";
   return "none";
