@@ -123,17 +123,27 @@ miss against the fallback's offset-bearing instant (a floating time read an hour
 off, or one that dropped its time, still is).
 
 The two percentages are a **high-watermark gate** stored in
-`test/integration/fallback-coverage.baseline.json`: the test fails if either
-drops below its watermark, and ratchets the watermark **up** when the fallback
-improves. So a change that quietly makes the generic extractor worse (or better)
-shows up here. Running locally also rewrites the human-readable
-**`docs/fallback-coverage.md`** report (per-host, per-field-type, and per-case
-tables — the per-case matrix stays committed so a gate failure shows which
-case/field regressed without re-running the old code) — commit it like the UI
-snapshots; the test only writes the working tree, it never touches git. The
+`test/integration/fallback-coverage.baseline.json`, which holds the percentages
+**plus the list of `cases` they were computed over**. The gate compares the
+current run to the watermark over the cases they **share**, so a newly added case
+(absent from `cases`) is excluded and **adding an extractor never fails the
+gate** (#240) — while a pre-existing case that regresses still does. The watermark
+**ratchets up** on an unchanged case set, and **re-anchors** to the current
+aggregate when the set changes (a new/removed case, or a `data/` refresh that
+moves a source's ground truth). A removed/renamed case the watermark still lists
+makes it stale: the local refresh re-anchors it (commit that); in CI it's an
+error to fix. *Caveat:* with a single aggregate watermark, a regression bundled
+into the same change as a case-set change can be re-anchored over rather than
+caught — don't commit a re-anchored baseline while the gate is red.
+
+Running locally also rewrites the human-readable **`docs/fallback-coverage.md`**
+report (headline score, the shared-subset gate, and per-host / per-field-type /
+per-case tables — the per-case matrix stays committed so a gate failure shows
+which case/field regressed without re-running the old code) — commit it like the
+UI snapshots; the test only writes the working tree, it never touches git. The
 actual mismatched values are **printed as test output** (local and CI), not
-committed — reference material for improving the fallback. In CI the file
-refresh is a no-op (the committed report and baseline are the reviewed truth).
+committed — reference material for improving the fallback. In CI the file refresh
+is a no-op (the committed report and baseline are the reviewed truth).
 Because it
 runs against the cached HTML, a `data/` refresh that legitimately moves a
 source's output can move these numbers — re-baseline by hand (lower the number

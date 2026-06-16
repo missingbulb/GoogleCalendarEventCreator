@@ -8,13 +8,26 @@ What the generic **fallback** extractor (`pipeline/extract-unsupported.js`) reco
 
 ## Score
 
-| Metric | Coverage | Hits / gradeable | Watermark (gate) |
-| --- | --: | --: | --: |
-| **Critical fields** (title + start + location) | **53.3%** | 32 / 60 | 53.3% |
-| **All fields** | **34.1%** | 43 / 126 | 34.1% |
-| Event coverage *(informational)* | 22.1% | 15 / 68 | — |
+Headline coverage over all 20 cases in the corpus:
 
-The two **field** percentages are gated by `test/integration/fallback-coverage.baseline.json`: the test fails if either drops below its stored high-watermark, and ratchets the watermark up (locally) when it improves. Event coverage — events the fallback found vs. the dedicated source — is reported but not gated; it is dominated by a few listing pages the fallback can't enumerate.
+| Metric | Coverage | Hits / gradeable |
+| --- | --: | --: |
+| **Critical fields** (title + start + location) | **53.3%** | 32 / 60 |
+| **All fields** | **34.1%** | 43 / 126 |
+| Event coverage *(informational)* | 22.1% | 15 / 68 |
+
+### Gate
+
+The gate (`test/integration/fallback-coverage.baseline.json`) compares the current run to the stored watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes.
+
+| Metric | Watermark | Current (shared) | |
+| --- | --: | --: | :-: |
+| Critical fields | 53.3% | 53.3% | ✓ |
+| All fields | 34.1% | 34.1% | ✓ |
+
+Gated over **20** shared case(s).
+
+Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
 ## By field type
 
