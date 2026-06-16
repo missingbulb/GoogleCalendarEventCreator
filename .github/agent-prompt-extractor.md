@@ -13,74 +13,61 @@ Issue body:
 
 Repository: `{{REPO}}`
 
+## What the workflow has already done for you
+
+You do **not** need to create a branch, write the URL file, or fetch/cache the page — the workflow already did Phase 1:
+
+- **Branch `{{BRANCH}}` is checked out.** Do all your work here.
+- **The event page is already recorded** at `data/{{CASE_NAME}}.html` (and its URL is in `data/{{CASE_NAME}}.url`). It was fetched and verified non-empty before you started. **Read it** — it's the real markup your extractor must handle.
+- Target event URL: `{{EVENT_URL}}`  (host: `{{HOST}}`)
+
+These names are fixed; use them exactly:
+- **Slug:** `{{SLUG}}` → `pipeline/sources/{{SLUG}}.js`
+- **Case name:** `{{CASE_NAME}}` → `data/{{CASE_NAME}}.html`, `data/{{CASE_NAME}}.url`, `test/extractors/custom/{{CASE_NAME}}.json`
+
+The issue body (from the **Event source request** form) may also carry user-supplied name/time/location/description. Only the URL is authoritative — treat the rest as **hints to sanity-check your extraction against**, not values to copy.
+
 ---
 
 ## Overview
 
-GoogleCalendarEventCreator is a Chrome extension that reads event pages and creates Google Calendar events. Site-specific extractors live in `pipeline/sources/<site>.js`. Three extraction layers merge (site-specific → schema.org JSON-LD → generic heuristics), first non-empty value per field winning — so a new extractor only needs to supply the fields the other layers get wrong or miss.
+Site-specific extractors live in `pipeline/sources/<slug>.js`. Three extraction layers merge (site-specific → schema.org JSON-LD → generic heuristics), first non-empty value per field winning — so a new extractor only needs to supply the fields the other layers get wrong or miss.
 
-You will:
-1. Parse the issue to identify the target event URL and derive names from it
-2. Create the extractor file, update the load order and service-worker imports
-3. Commit placeholder data files and trigger the cache-refresh workflow
-4. After the cache is filled, write and verify an integration test case
-5. Open a pull request — **never auto-merge**
+You will: inspect the cached page → write the extractor → regenerate the load lists + supported-domains list → write and verify the integration case against the cached page → open a PR. **Never auto-merge.**
 
 ---
 
-## Step 1 — Parse the issue and derive slugs
-
-From the issue body extract:
-- **Event URL** — the full URL of a specific event page (e.g. `https://www.example.com/events/abc-123`)
-- **Site slug** — short, lowercase, hyphens only, no dots (e.g. `example`)
-- **Case name** — identifies the cached HTML + integration case; format: `<site-slug>-<brief-event-descriptor>` (e.g. `example-rust-workshop`). Keep it concise and filesystem-safe.
-
-The issue is filed from the **Event source request** form, so the body may also
-carry user-supplied values for the event's name, start/end time, timezone,
-location, and description. Only the URL is authoritative — treat the rest as
-**hints to sanity-check your extraction against** (a field that's blank or
-clearly a rough guess shouldn't override what you read off the real page).
-
-All three of these paths use the same `<case-name>`:
-- `data/<case-name>.html`
-- `data/<case-name>.url`
-- `test/extractors/custom/<case-name>.json`
-
----
-
-## Step 2 — Create a feature branch
+## Step 1 — Sanity-check the cached page first
 
 ```bash
-git checkout -b claude/extractor/<site-slug>
+wc -c data/{{CASE_NAME}}.html
 ```
+
+Open `data/{{CASE_NAME}}.html` and confirm it is the **real event page**. If instead it is a bot/CAPTCHA challenge, a login wall, a cookie/consent interstitial, or an empty single-page-app shell with no event data in the HTML, then there is nothing to extract from a static fetch. **Stop now**: do not write a synthetic page or hand-author expected values. Comment on the issue describing what the cached page actually contains, and exit without opening a PR. (Recording a real fetchable page is the workflow's job; faking one defeats the test.)
+
+Otherwise, note where the title, date/time, location, and description live in the markup.
 
 ---
 
-## Step 3 — Study the template and available helpers
+## Step 2 — Study the template and helpers
 
-Read `pipeline/sources/meetup.js` carefully — it is the canonical template. Pay attention to:
+Read `pipeline/sources/meetup.js` — the canonical template. Note:
 - The IIFE wrapper `(() => { ... })()`
-- The header comment format (expected HTML, field sources)
+- The header comment format (expected HTML, where each field comes from)
 - `GCal.sources.push({ name, matches, extract })`
-- `matches(host)` — regex that covers bare domain AND subdomains: `/(^|\\.)<escaped-domain>$/.test(host)`
+- `matches(host)` — a regex covering the bare domain AND subdomains: `/(^|\\.)<escaped-domain>$/.test(host)`
 - `extract()` — returns a partial object with only the fields this site needs
 - `merge(dom, embeddedEvents.toEvent(...))` — lets JSON-LD fill any gaps
 
-Also skim `pipeline/helpers/dom.js`, `pipeline/helpers/text.js`, and `pipeline/helpers/dates.js` to understand the shared helpers available on `GCal`.
+Also skim `pipeline/helpers/dom.js`, `pipeline/helpers/text.js`, and `pipeline/helpers/dates.js` for the shared helpers on `GCal`.
 
 ---
 
-## Step 4 — Create `pipeline/sources/<site-slug>.js`
+## Step 3 — Write `pipeline/sources/{{SLUG}}.js`
 
-Follow the meetup.js pattern exactly. Write the best extractor you can using:
-- General knowledge of the site's page structure, OR
-- Common fallback selectors (`h1` for title, `time[datetime]` for start, etc.)
-
-The integration test in Step 12 will show you what is actually extracted from the real HTML, so you can improve the extractor at that point if needed.
-
-Skeleton to follow:
+Follow the meetup.js pattern, writing selectors that match what you saw in `data/{{CASE_NAME}}.html`. Skeleton:
 ```js
-// <Site> event pages: https://<site>/<path-pattern>
+// {{HOST}} event pages: {{EVENT_URL}}
 //
 // Expected HTML input (simplified):
 //   <h1>Event Title</h1>
@@ -95,7 +82,7 @@ Skeleton to follow:
   const { text, firstText, blockText, normalizeDateValue, merge, embeddedEvents } = GCal;
 
   GCal.sources.push({
-    name: "<site-slug>",
+    name: "{{SLUG}}",
     matches: (host) => /(^|\\.)<escaped-domain>$/.test(host),
     extract() {
       const dom = {
@@ -112,205 +99,96 @@ Skeleton to follow:
 })();
 ```
 
+`matches()` must accept `{{HOST}}` (and its subdomains). It is the gate that turns the toolbar icon green on supported pages.
+
 ---
 
-## Step 5 — Regenerate the load lists
+## Step 4 — Register the host and regenerate the load lists
 
+Add `"{{HOST}}"` to `supportedDomains` in `pipeline/fallback-lists.json` (keep the array sorted). This static list is what the triage uses to recognise an already-supported host; `test/unit/supported-domains.test.js` asserts every entry is accepted by some source's `matches()` and vice-versa, so the domain you add **must** be one your `matches()` accepts.
+
+Then regenerate both load lists:
 ```bash
 npm run index
 ```
 
-Verify both generated lists now include your new source: `pipeline/load-order.generated.json` (the sorted injection order) and `pipeline/worker-imports.generated.js` (the service worker's startup imports). `npm run index` regenerates **both** — you do not hand-edit `ui/toolbar-icon.js`, which just imports the generated file.
+Confirm `pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js` now include `pipeline/sources/{{SLUG}}.js`. You never hand-edit those generated files or `ui/toolbar-icon.js`.
 
 ---
 
-## Step 6 — Create placeholder data files
+## Step 5 — Write the integration case and see the real output
 
-```bash
-# Zero-byte placeholder — the refresh script fills this in
-touch data/<case-name>.html
-
-# URL file — contains just the event URL, nothing else
-printf '%s' '<event-url>' > data/<case-name>.url
-```
-
-The empty HTML file is the signal for the refresh script; do not put any content in it.
-
----
-
-## Step 7 — Commit and push (Phase 1)
-
-```bash
-git add \
-  pipeline/sources/<site-slug>.js \
-  pipeline/load-order.generated.json \
-  pipeline/worker-imports.generated.js \
-  data/<case-name>.html \
-  data/<case-name>.url
-
-git commit -m "feat: add <site> extractor stub (Refs #{{ISSUE_NUMBER}})"
-git push -u origin claude/extractor/<site-slug>
-```
-
----
-
-## Step 8 — Trigger the "Refresh cached HTML files" workflow
-
-```bash
-curl -s -X POST \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Accept: application/vnd.github+json" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  "https://api.github.com/repos/{{REPO}}/actions/workflows/refresh-cache.yml/dispatches" \
-  -d "{\"ref\":\"claude/extractor/<site-slug>\"}"
-
-echo "Triggered refresh-cache on branch claude/extractor/<site-slug>"
-```
-
----
-
-## Step 9 — Find the run ID
-
-Wait 15 seconds for the workflow run to be registered, then get its ID:
-
-```bash
-sleep 15
-
-RUNS=$(curl -s \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/{{REPO}}/actions/runs?branch=claude/extractor/<site-slug>&event=workflow_dispatch&per_page=10")
-
-RUN_ID=$(echo "$RUNS" | python3 -c "
-import json, sys
-d = json.load(sys.stdin)
-runs = [r for r in d.get('workflow_runs', []) if 'refresh' in r['name'].lower()]
-print(runs[0]['id'] if runs else '')
-")
-
-echo "Refresh-cache run ID: $RUN_ID"
-```
-
-If `RUN_ID` is empty, wait another 15 seconds and retry the curl command — the run may not have been created yet.
-
----
-
-## Step 10 — Poll until the refresh workflow completes
-
-```bash
-while true; do
-  DATA=$(curl -s \
-    -H "Authorization: Bearer $GH_TOKEN" \
-    -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/repos/{{REPO}}/actions/runs/$RUN_ID")
-
-  STATUS=$(echo "$DATA"     | python3 -c "import json,sys; r=json.load(sys.stdin); print(r.get('status',''))")
-  CONCLUSION=$(echo "$DATA" | python3 -c "import json,sys; r=json.load(sys.stdin); print(r.get('conclusion') or '')")
-
-  echo "$(date -u +%H:%M:%S)  status=$STATUS  conclusion=$CONCLUSION"
-  [ "$STATUS" = "completed" ] && break
-  sleep 30
-done
-
-if [ "$CONCLUSION" != "success" ]; then
-  echo "ERROR: refresh-cache workflow ended with conclusion=$CONCLUSION"
-  echo "Run: https://github.com/{{REPO}}/actions/runs/$RUN_ID"
-  exit 1
-fi
-echo "Refresh succeeded."
-```
-
----
-
-## Step 11 — Pull the filled HTML
-
-```bash
-git pull origin claude/extractor/<site-slug>
-wc -c data/<case-name>.html
-```
-
-The file must be non-empty (typically tens of KB). If it is still 0 bytes, the refresh failed silently — check the workflow run logs.
-
----
-
-## Step 12 — Bootstrap the integration case and see actual output
-
-Create `test/extractors/custom/<case-name>.json` with a placeholder:
+Create `test/extractors/custom/{{CASE_NAME}}.json` with a placeholder:
 ```json
 {
-  "description": "<Site>: <one-line description of what this case tests>",
-  "expected": {
-    "events": []
-  }
+  "description": "{{HOST}}: <one-line description of what this case tests>",
+  "expected": { "events": [] }
 }
 ```
 
-Run the live tests — they will fail on your new case but print the **actual extracted values**:
+Run the live tests — your new case fails but prints the **actual extracted values** from the cached page:
 ```bash
 npm run test:live 2>&1
 ```
 
-Read the test failure output carefully. It shows what the extractor produced from the real HTML.
+There is **no `url` field** in the case JSON — the URL lives in `data/{{CASE_NAME}}.url`.
 
 ---
 
-## Step 13 — Update the case with real expected values
+## Step 6 — Fill in the real expected values and verify
 
-Replace the `"expected"` object in `test/extractors/custom/<case-name>.json` with the actual output from Step 12. Then confirm the tests pass:
+Replace `"expected"` with the actual output from Step 5 (copy it — never guess). If the important fields (title, start, location) are wrong or empty, fix the selectors in `pipeline/sources/{{SLUG}}.js` against the markup in `data/{{CASE_NAME}}.html`, then re-run:
 ```bash
 npm run test:live
-```
-
-If important fields (title, start, location) are wrong or empty, examine `data/<case-name>.html` to find the correct selectors and update `pipeline/sources/<site-slug>.js`, then re-run `npm run test:live`.
-
-Also run the full offline suite to catch regressions:
-```bash
 npm run test:offline
 ```
 
+Both must pass before you continue.
+
 ---
 
-## Step 14 — Commit Phase 2
+## Step 7 — Commit
 
 ```bash
-git add test/extractors/custom/<case-name>.json
-git add pipeline/sources/<site-slug>.js   # include only if you modified it
+git add \
+  pipeline/sources/{{SLUG}}.js \
+  pipeline/fallback-lists.json \
+  pipeline/load-order.generated.json \
+  pipeline/worker-imports.generated.js \
+  test/extractors/custom/{{CASE_NAME}}.json
 
-git commit -m "feat: add <site> integration test case (Refs #{{ISSUE_NUMBER}})"
+git commit -m "feat: add {{SLUG}} extractor (Refs #{{ISSUE_NUMBER}})"
 git push
 ```
 
+(The cached `data/{{CASE_NAME}}.*` files are already committed by the workflow.)
+
 ---
 
-## Step 15 — Open a pull request
+## Step 8 — Open a pull request
 
 ```bash
 gh pr create \
   --base main \
-  --head "claude/extractor/<site-slug>" \
-  --title "feat: add <site> extractor" \
-  --body "Implements the extractor for <site>.
+  --head "{{BRANCH}}" \
+  --title "feat: add {{SLUG}} extractor" \
+  --body "Implements the extractor for {{HOST}}.
 
 ## Changes
-- \`pipeline/sources/<site-slug>.js\` — site-specific extractor
-- \`pipeline/load-order.generated.json\` — regenerated
-- \`pipeline/worker-imports.generated.js\` — regenerated
-- \`data/<case-name>.html\` + \`data/<case-name>.url\` — cached event page
-- \`test/extractors/custom/<case-name>.json\` — integration case
+- \`pipeline/sources/{{SLUG}}.js\` — site-specific extractor
+- \`pipeline/fallback-lists.json\` — \`{{HOST}}\` added to supportedDomains
+- \`pipeline/load-order.generated.json\` / \`pipeline/worker-imports.generated.js\` — regenerated
+- \`data/{{CASE_NAME}}.html\` + \`data/{{CASE_NAME}}.url\` — real cached event page (recorded by the workflow)
+- \`test/extractors/custom/{{CASE_NAME}}.json\` — integration case asserting the real extraction
 
 Closes #{{ISSUE_NUMBER}}"
 ```
 
 ---
 
-## Step 16 — Trigger CI on the branch
+## Step 9 — Trigger CI on the branch
 
-A push or PR made with the workflow's `GITHUB_TOKEN` does **not** start the
-`Tests` workflow — GitHub suppresses workflow runs triggered by `GITHUB_TOKEN`
-to prevent recursion. The one exception is `workflow_dispatch`. `test.yml` has a
-`workflow_dispatch:` trigger, so dispatch it explicitly against your branch; the
-resulting run executes against the branch's head commit, so its checks attach to
-that commit and show up on the PR for the reviewer.
+A push or PR made with the workflow's `GITHUB_TOKEN` does **not** start the `Tests` workflow — GitHub suppresses runs triggered by `GITHUB_TOKEN` to prevent recursion. The one exception is `workflow_dispatch`. `test.yml` has a `workflow_dispatch:` trigger, so dispatch it against your branch; the run executes against the branch head, so its checks attach there and show on the PR.
 
 ```bash
 curl -s -X POST \
@@ -318,33 +196,31 @@ curl -s -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/{{REPO}}/actions/workflows/test.yml/dispatches" \
-  -d "{\"ref\":\"claude/extractor/<site-slug>\"}"
+  -d "{\"ref\":\"{{BRANCH}}\"}"
 
-echo "Triggered Tests workflow on claude/extractor/<site-slug>"
+echo "Triggered Tests workflow on {{BRANCH}}"
 ```
 
-Do not wait for this run to finish or merge based on it — opening the PR is the
-end of the agent's job. The reviewer reads the CI result on the PR.
+Don't wait for this run or merge based on it — opening the PR is the end of your job. The reviewer reads the CI result on the PR.
 
 ---
 
-## Step 17 — Comment on the issue
+## Step 10 — Comment on the issue
 
 ```bash
-PR_URL=$(gh pr view "claude/extractor/<site-slug>" --json url -q .url 2>/dev/null || echo "(see Actions run)")
+PR_URL=$(gh pr view "{{BRANCH}}" --json url -q .url 2>/dev/null || echo "(see Actions run)")
 
 gh issue comment {{ISSUE_NUMBER}} \
   --body "The extractor has been implemented. PR ready for review: $PR_URL
 
-The integration case uses a real cached event page. Please review the extractor logic and the extracted field values before merging."
+The integration case asserts against the real cached event page. Please review the extractor logic and the extracted field values before merging."
 ```
 
 ---
 
 ## Hard constraints
 
-- **Never auto-merge.** Open a PR; a human must review and approve.
-- **The three `<case-name>` files must match exactly**: `data/<name>.html`, `data/<name>.url`, `test/extractors/custom/<name>.json`.
-- **No `url` field in the case JSON.** The URL lives in `data/<name>.url` only.
-- **`matches(host)` must be correct.** It is the gate that turns the toolbar icon green on supported pages.
-- **Integration case `expected` values must reflect real extraction** — copy them from the `npm run test:live` output, not from guessing.
+- **Never auto-merge.** Open a PR; a human reviews and approves.
+- **Never fabricate input or output.** Don't hand-write HTML, and don't invent `expected` values — copy them from the `npm run test:live` run against the real cached page. If the cached page isn't a usable event page (Step 1), stop and comment instead of opening a PR.
+- **The three `{{CASE_NAME}}` files must match exactly**: `data/{{CASE_NAME}}.html`, `data/{{CASE_NAME}}.url`, `test/extractors/custom/{{CASE_NAME}}.json`. No `url` field inside the case JSON.
+- **`{{HOST}}` in `supportedDomains` must be accepted by your `matches(host)`** — `test/unit/supported-domains.test.js` checks both directions.

@@ -17,8 +17,8 @@ use to sanity-check its extraction.
 This is the **same form the extension's popup opens** from its "Request support
 for this site" button (`ui/views/source-request-view.js`), so an end-user
 request flows straight into the pipeline — submitting it is what fires the agent.
-Because every submission spends an Opus run, keep an Anthropic spend cap set (see
-the secret note below).
+Because every submission that gets past triage + the URL probe spends an agent
+run, keep an Anthropic spend cap set (see the secret note below).
 
 You can also trigger it on any existing issue by adding the `extractor-request`
 label by hand, as long as the issue body contains an event page URL the agent
@@ -26,71 +26,79 @@ can parse.
 
 ## What the workflow does
 
-The workflow is `.github/workflows/auto-implement-extractor.yml`. It:
+The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
 
 1. Checks out the repo.
-2. **Triages the request first** (`tools/triage-extractor-request.js`): pulls the
-   event URL from the issue and decides whether the request is already settled.
-   It closes the issue as "not planned" and **skips every remaining step** (no
-   `npm ci`, no agent run) for any of four reasons:
-   - **supported** — the host already has a dedicated source, per
-     `config.js`'s `supportedDomains` (a static mirror of the sources' own
-     `matches()`, kept honest by `test/unit/supported-domains.test.js`);
+2. **Triages the request** (`tools/triage-extractor-request.js`): pulls the event
+   URL from the issue and decides whether the request is already settled. It
+   closes the issue as "not planned" and **skips every remaining step** (no probe,
+   no `npm ci`, no agent run) for any of four reasons:
+   - **supported** — the host already has a dedicated source, per `config.js`'s
+     `supportedDomains` (a static mirror of the sources' own `matches()`, kept
+     honest by `test/unit/supported-domains.test.js`);
    - **deny** / **allow** — the host is on the fallback denylist/allowlist (the
      same `classifyHost` the popup uses, via `fallback-policy.js`);
    - **duplicate** — another **open** `extractor-request` issue already targets
-     this host. A request's issue stays open through review (the PR only
-     `Closes #N` on merge), so an open peer means the work is in flight; a
-     prior step gathers those peers with `gh` and passes them in (so the script
-     stays offline). Two near-simultaneous requests are broken by **lowest
-     issue number wins** — the elder proceeds, the rest defer to it.
+     this host (lowest issue number wins; a prior step gathers the open peers
+     with `gh` and passes them in, so the script stays offline).
 
-   This runs before `npm ci` so a triaged request costs almost nothing. It fails
-   open: any error (or no match) proceeds to the agent.
-3. Otherwise installs dependencies, fetches the issue, and interpolates it into
-   the agent prompt template (`.github/agent-prompt-extractor.md`).
-4. Runs a Claude agent (`claude --dangerously-skip-permissions -p ...`) with
-   full Bash access.
+   It also emits the event `url`, `host`, and the deterministic `slug`/`caseName`
+   (`tools/extractor-naming.js`) the later steps consume. Runs before `npm ci`, so
+   a triaged request costs almost nothing, and fails **open** — any error proceeds.
+3. **Probes the event URL** (`tools/probe-url.js`): fetches it the same way the
+   recorder will (shared `data/fetch-page.js` — browser headers + retries) and
+   **stops the run on anything but a 2xx**, or when the URL is missing. If the
+   page can't be fetched from CI — non-200, unreachable, or behind a login/bot
+   wall — there is no real page to record a case against, so an agent run would
+   only produce synthetic coverage; better to stop and tell the requester. Runs
+   before `npm ci`. Reusing the recorder's exact headers is the whole point: a
+   bare `curl` is rejected by sites that serve a real browser, which would
+   false-reject requests the recorder could actually fulfil.
+4. Installs dependencies + the `claude` CLI and configures git.
+5. **Prepares the branch and records the page** — Phase 1, in the workflow (not
+   the agent): branches `claude/extractor/<slug>` off `main`, writes
+   `data/<caseName>.url` + the empty `data/<caseName>.html` signal, runs
+   `npm run refresh` to record the page inline, asserts it's non-empty, commits,
+   and pushes. (A push made with `GITHUB_TOKEN` doesn't fire `refresh-cache.yml`'s
+   push trigger, so the page is recorded exactly once.)
+6. Fetches the issue and interpolates it — plus the branch/slug/caseName/host/url
+   — into the prompt template (`.github/agent-prompt-extractor.md`), then runs a
+   Claude agent (`claude --dangerously-skip-permissions --model claude-sonnet-4-6
+   -p ...`) with full Bash access, **on the prepared branch**.
 
-The agent itself does everything described in `docs/claude/adding-a-source.md`
-in two phases, handling the HTML-cache step automatically:
+Because the cache step is done before the agent starts, the agent has a single,
+much simpler job (no branch creation, no dispatch/poll/pull — see
+`.github/agent-prompt-extractor.md`):
 
-**Phase 1** (before the HTML is fetched)
-- Creates branch `claude/extractor/<site-slug>`
-- Writes `pipeline/sources/<slug>.js` using `pipeline/sources/meetup.js` as the template
-- Runs `npm run index` to regenerate both load lists (`pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js`; the service worker's imports are generated, not hand-edited)
-- Commits two placeholder files (`data/<case-name>.html` (empty) + `data/<case-name>.url`)
-- Pushes the branch, then triggers the **Refresh cached HTML files** workflow via the GitHub API
-
-**Phase 2** (after the HTML is fetched)
-- Polls the GitHub API until the refresh workflow completes
-- Pulls the filled HTML file
-- Creates `test/extractors/custom/<case-name>.json` with a placeholder `expected`
-- Runs `npm run test:live` to capture the actual extraction output
-- Updates the case with real expected values and confirms the tests pass
-- Runs `npm run test:offline` to catch regressions
-- Opens a pull request referencing the issue
-- Dispatches the `Tests` workflow against the branch so CI actually runs (see
-  note below)
-- Posts a comment on the issue with the PR link
+- **Sanity-checks the cached `data/<caseName>.html` first** — if it's a
+  bot/CAPTCHA/login/SPA-shell page rather than the real event page, it **stops and
+  comments** instead of fabricating a case. (A 2xx that's a bot-challenge or empty
+  SPA shell slips past the status-only probe; this is the catch for it.)
+- Writes `pipeline/sources/<slug>.js` from the `meetup.js` template.
+- Adds the host to `supportedDomains` in `pipeline/fallback-lists.json` and runs
+  `npm run index` to regenerate both load lists (`pipeline/load-order.generated.json`
+  and `pipeline/worker-imports.generated.js`; the worker imports are generated,
+  not hand-edited).
+- Writes `test/extractors/custom/<caseName>.json`, runs `npm run test:live` to
+  capture the real extraction, fills in `expected`, and confirms `test:live` +
+  `test:offline` pass.
+- Commits, opens a pull request (`Closes #N`), dispatches `test.yml` against the
+  branch (see below), and comments on the issue with the PR link.
 
 ### Why the agent has to dispatch CI itself
 
 GitHub deliberately **does not start a workflow run for events triggered by the
 built-in `GITHUB_TOKEN`** (this prevents a workflow from recursively triggering
-itself). So the agent's `git push` (a `push` event) and `gh pr create` (a
-`pull_request` event) do **not** kick off `test.yml` the way a human push would
-— the PR would otherwise open with an empty checks section.
+itself). So the agent's `git push` and `gh pr create` do **not** kick off
+`test.yml` the way a human push would — the PR would otherwise open with an empty
+checks section.
 
 The one documented exception is `workflow_dispatch` (and `repository_dispatch`).
-That is why two things in this pipeline use the Actions dispatch API rather than
-relying on the push/PR triggers:
-
-1. The Phase 1 → Phase 2 handoff dispatches `refresh-cache.yml`.
-2. After opening the PR, the agent dispatches `test.yml` (which has a
-   `workflow_dispatch:` trigger) against its branch. The run executes against
-   the branch's head commit, so its check results attach to that commit and
-   appear on the PR for the reviewer.
+So after opening the PR, the agent dispatches `test.yml` (which has a
+`workflow_dispatch:` trigger) against its branch; the run executes against the
+branch's head commit, so its checks attach to that commit and appear on the PR
+for the reviewer. (The same `GITHUB_TOKEN` rule is what keeps Phase 1's inline
+`git push` from re-firing `refresh-cache.yml` — so the page is recorded once.)
 
 ## Required secrets
 
@@ -105,26 +113,33 @@ Repository secrets**.
 ## Permissions the workflow uses
 
 The workflow's `permissions:` block grants the `GITHUB_TOKEN`:
-- `contents: write` — push the feature branch
+- `contents: write` — push the feature branch (Phase 1 + the agent)
 - `pull-requests: write` — open the PR
-- `issues: write` — post the completion comment
-- `actions: write` — trigger the `workflow_dispatch` on `refresh-cache.yml`
+- `issues: write` — post the progress / failure comment
+- `actions: write` — the agent dispatches `test.yml` on the branch
 
 ## Timeout
 
 The workflow job times out at 90 minutes. The agent step itself is capped at
-75 minutes. Most runs finish in 20–40 minutes (the bulk is waiting for the
-refresh-cache workflow to fetch and commit the HTML).
+75 minutes. Recording the page inline is quick now (it used to be the bulk of the
+wait, via the separate refresh workflow), so most of the elapsed time is the
+agent.
 
 ## On failure
 
-If the agent step fails, the workflow posts a comment on the issue with a link
-to the failed run so a maintainer can investigate. Common causes:
+The workflow posts a comment on the issue on failure. It comes in two shapes:
 
-- `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` secret is missing or expired
-- The event URL in the issue is behind a login wall or returns 403/404
-- The `refresh-cache` workflow itself fails (e.g., the site blocks the fetcher)
-- The agent exhausted its turn budget before completing
+- **Unfetchable page** — the URL probe stopped the run: the event URL was missing,
+  returned a non-2xx, was unreachable, or sits behind a login/bot wall. **No agent
+  run was started.** The comment says so and links the run log for the exact
+  status. Add the site by hand (`docs/claude/adding-a-source.md`).
+- **Any later failure** — a generic comment with a run link. Common causes:
+  - `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` missing/expired, or its Anthropic
+    **spend cap reached** (the `claude` CLI returns a usage-limit error and the
+    step fails — this is what stalled the first batch of requests);
+  - the agent exhausted its turn budget;
+  - the agent **stopped on purpose** because the recorded page wasn't a real event
+    page (it comments separately before exiting — see the Step 1 sanity check).
 
 In any of these cases, fall back to the manual process in
 `docs/claude/adding-a-source.md`.
@@ -142,6 +157,8 @@ CI must go green at least twice before merging a branch that adds new tests.
 ## Updating the agent prompt
 
 The prompt template is `.github/agent-prompt-extractor.md`. The placeholders
-`{{ISSUE_NUMBER}}`, `{{ISSUE_TITLE}}`, `{{ISSUE_BODY}}`, and `{{REPO}}` are
-substituted at runtime by the "Build agent prompt" step. Edit that file to
-change what the agent does or add site-specific guidance.
+`{{ISSUE_NUMBER}}`, `{{ISSUE_TITLE}}`, `{{ISSUE_BODY}}`, `{{REPO}}`, `{{BRANCH}}`,
+`{{SLUG}}`, `{{CASE_NAME}}`, `{{HOST}}`, and `{{EVENT_URL}}` are substituted at
+runtime by the "Build agent prompt" step (the last five come from the triage
+step's outputs). Edit that file to change what the agent does or add site-specific
+guidance.

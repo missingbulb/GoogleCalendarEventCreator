@@ -1,8 +1,10 @@
 name: Auto-implement extractor
 
 # Triggered when the 'extractor-request' label is added to an issue.
-# Launches a Claude agent that implements the extractor, fills the HTML cache,
-# and opens a pull request — following the steps in docs/claude/adding-a-source.md.
+# Triages the request, probes the event URL, and — only when the page is
+# actually fetchable — prepares a branch with the page already cached, then
+# launches a Claude agent to write the extractor and open a pull request.
+# See docs/claude/auto-extractor.md for the full flow.
 #
 # Required repository secrets:
 #   ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR — Claude API key for the agent
@@ -13,10 +15,10 @@ on:
     types: [labeled]
 
 permissions:
-  contents: write       # create / push feature branch
-  pull-requests: write  # open PR
-  issues: write         # post progress comment
-  actions: write        # trigger refresh-cache workflow_dispatch
+  contents: write       # create / push the feature branch
+  pull-requests: write  # the agent opens the PR
+  issues: write         # post progress / failure comment
+  actions: write        # the agent dispatches test.yml on the branch
 
 jobs:
   implement:
@@ -27,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          # Use the token so git pushes from inside the agent step are authorised.
+          # Use the token so git pushes from this job (and the agent) are authorised.
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
@@ -42,7 +44,7 @@ jobs:
       # issue for the same host means the work is already happening. The network
       # call lives here, in the workflow, so the triage script stays offline and
       # unit-testable. gh is preinstalled on the runner; no npm deps needed yet.
-      - name: Gather in-flight extractor requests
+      - name: Gather in-flight requests
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -58,9 +60,10 @@ jobs:
       # Pre-flight triage: close + skip the (expensive) agent run when the
       # request is already settled — the host already has a dedicated source,
       # it's on config.js's fallback allow/denylist, or it duplicates an
-      # in-flight request. Needs only Node + the repo (no deps), so it runs
-      # before `npm ci`. The issue fields come from the event payload via env,
-      # so free-form text isn't shell-interpolated.
+      # in-flight request. Also emits the event URL plus the deterministic
+      # slug/caseName the probe and Phase-1 steps below use. Needs only Node +
+      # the repo (no deps), so it runs before `npm ci`. The issue fields come
+      # from the event payload via env, so free-form text isn't shell-interpolated.
       - name: Triage the request
         id: triage
         env:
@@ -78,28 +81,82 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" --body-file /tmp/triage-message.md
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
+      # Pre-flight URL probe. Fetch the event page the same way the recorder will
+      # (tools/probe-url.js → data/fetch-page.js: browser headers + retries). If
+      # it isn't fetchable — URL missing, non-2xx, unreachable, or behind a
+      # login/bot wall — there is no real page to record a case against, so an
+      # agent run would only produce synthetic coverage. Stop instead. Runs
+      # before `npm ci` (probe-url.js uses only Node built-ins). Every step below
+      # is gated on success(), so a failure here skips them all and the run ends
+      # with the failure comment.
+      - name: Probe the event URL
+        id: probe
+        if: success() && steps.triage.outputs.skipAgent != 'true'
+        env:
+          EVENT_URL: ${{ steps.triage.outputs.url }}
+        run: |
+          if [ -z "$EVENT_URL" ]; then
+            echo "No event URL found in the issue — nothing to probe." >&2
+            exit 1
+          fi
+          node tools/probe-url.js "$EVENT_URL"
+
       - name: Install npm dependencies
-        if: steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         run: npm ci
 
       - name: Install Claude Code CLI
-        if: steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Configure git
-        if: steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Fetch the issue via API (avoids shell-escaping issues with free-form bodies)
-      # and interpolate it into the static prompt template.
+      # Phase 1, done in the workflow (not the agent): branch off the checked-out
+      # main, write the download-instruction files, and RECORD the page inline
+      # with the same fetcher the probe used. The agent then starts on a branch
+      # that already has the cached HTML — which removes its most fragile steps
+      # (dispatching + polling the refresh workflow, then pulling). A push made
+      # with GITHUB_TOKEN doesn't fire refresh-cache.yml's push trigger, so the
+      # page is recorded exactly once.
+      - name: Prepare branch and record the event page
+        id: prepare
+        if: success() && steps.triage.outputs.skipAgent != 'true'
+        env:
+          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
+          CASE_NAME:    ${{ steps.triage.outputs.caseName }}
+          EVENT_URL:    ${{ steps.triage.outputs.url }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          git checkout -b "$BRANCH"
+          printf '%s' "$EVENT_URL" > "data/$CASE_NAME.url"
+          : > "data/$CASE_NAME.html"            # empty file = the recorder's "fetch me" signal
+          npm run refresh                        # records the page; a non-2xx/unreachable page exits non-zero
+          test -s "data/$CASE_NAME.html"         # the page must have actually been recorded
+          git add "data/$CASE_NAME.url" "data/$CASE_NAME.html"
+          git commit -m "chore: cache $CASE_NAME event page (Refs #$ISSUE_NUMBER)"
+          # One branch per host; a re-label of the same issue re-records onto it,
+          # so this run owns the branch and force is intentional.
+          git push -u --force origin "$BRANCH"
+
+      # Fetch the issue via API (avoids shell-escaping issues with free-form
+      # bodies) and interpolate it, plus the branch/slug/caseName/host/url the
+      # workflow derived, into the static prompt template.
       - name: Build agent prompt
-        if: steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO:         ${{ github.repository }}
+          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
+          SLUG:         ${{ steps.triage.outputs.slug }}
+          CASE_NAME:    ${{ steps.triage.outputs.caseName }}
+          HOST:         ${{ steps.triage.outputs.host }}
+          EVENT_URL:    ${{ steps.triage.outputs.url }}
         run: |
           python3 - << 'PYEOF'
           import json, os, urllib.request
@@ -124,14 +181,19 @@ jobs:
               .replace("{{ISSUE_NUMBER}}", issue_number)
               .replace("{{ISSUE_TITLE}}",  issue["title"])
               .replace("{{ISSUE_BODY}}",   issue["body"] or "")
-              .replace("{{REPO}}",         repo))
+              .replace("{{REPO}}",         repo)
+              .replace("{{BRANCH}}",       os.environ["BRANCH"])
+              .replace("{{SLUG}}",         os.environ["SLUG"])
+              .replace("{{CASE_NAME}}",    os.environ["CASE_NAME"])
+              .replace("{{HOST}}",         os.environ["HOST"])
+              .replace("{{EVENT_URL}}",    os.environ["EVENT_URL"]))
 
           open("/tmp/agent-prompt.txt", "w").write(prompt)
           print(f"Prompt length: {len(prompt)} chars")
           PYEOF
 
       - name: Run Claude agent
-        if: steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         timeout-minutes: 75
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR }}
@@ -144,12 +206,20 @@ jobs:
             --model claude-sonnet-4-6 \
             -p "$(cat /tmp/agent-prompt.txt)"
 
+      # One comment for any failure. If the probe stopped the run, say why
+      # (unfetchable page) rather than the generic message — the two have very
+      # different fixes.
       - name: Comment on failure
         if: failure()
         env:
-          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER:  ${{ github.event.issue.number }}
+          RUN_URL:       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PROBE_OUTCOME: ${{ steps.probe.outcome }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" \
-            --body "⚠️ The auto-implement workflow failed. [View run]($RUN_URL). Manual implementation may be needed."
+          if [ "$PROBE_OUTCOME" = "failure" ]; then
+            BODY="🚫 Couldn't auto-implement this extractor: the event URL is missing, or its page couldn't be fetched from CI (non-success HTTP status, unreachable, or behind a login/bot wall). There's no real page to record a test case against, so no agent run was started. See the [run log]($RUN_URL) for the exact status. The site can still be added by hand — see docs/claude/adding-a-source.md."
+          else
+            BODY="⚠️ The auto-implement workflow failed. [View run]($RUN_URL). Manual implementation may be needed."
+          fi
+          gh issue comment "$ISSUE_NUMBER" --body "$BODY"

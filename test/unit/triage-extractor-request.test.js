@@ -44,6 +44,15 @@ test("an unlisted host is NOT triaged — the agent proceeds", async () => {
   assert.equal(res.message, "");
 });
 
+test("the result carries the deterministic slug/caseName the workflow needs", async () => {
+  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [] };
+  const res = await runTriage({ body: bodyWith("https://www.unknown.example/events/9") }, lists);
+  assert.equal(res.url, "https://www.unknown.example/events/9");
+  assert.equal(res.host, "unknown.example");
+  assert.equal(res.slug, "unknown");
+  assert.equal(res.caseName, "unknown");
+});
+
 test("falls back to the URL in the title when the body has none", async () => {
   const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: ["bad.example"] };
   const res = await runTriage(
