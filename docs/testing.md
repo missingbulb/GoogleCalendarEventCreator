@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`test/integration/`, `test/unit/`, and `test/ui/`:
+`test/extractors/`, `test/extension/`, `test/unit/`, and `test/ui/`:
 
 ```sh
 npm install
@@ -15,7 +15,7 @@ npm test               # everything above (offline + live + UI)
 
 ### Integration tests — the ones you review
 
-**`test/integration/live.test.js`** is driven by declarative JSON files in
+**`test/extractors/live.test.js`** is driven by declarative JSON files in
 `test/extractors/custom/` — the values the extractor must produce for a page.
 These are the assertions a human reviews to confirm each site is handled
 correctly.

@@ -25,7 +25,7 @@ the rules of the road.
 | `test/extractors/custom/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
 | `data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
-| `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
+| `test/extractors/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
 | `test/extractors/fallback/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |

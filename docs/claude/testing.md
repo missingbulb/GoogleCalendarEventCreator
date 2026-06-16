@@ -116,12 +116,12 @@ is the project-specific mechanics. Keep these decisions in mind:
   a bad service-worker `importScripts` path (#146), a missing/renamed injected
   file, a syntax error in one — must fail a test, not just surface when someone
   loads the unpacked extension:
-  - `test/integration/extension-loads.test.js` (always-on, no browser) boots the
+  - `test/extension/extension-loads.test.js` (always-on, no browser) boots the
     manifest's service worker through a Chrome-faithful `importScripts`
     (relative to the worker's dir, leading slash = extension root) and asserts it
     wires up, every injected file parses, and every manifest-referenced file
     exists. It runs in the default suite and in `test:offline`.
-  - `test/e2e/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
+  - `test/fullBrowserHeavyTests/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
     unpacked extension and asserts the MV3 service worker registers and `GCal` is
     built inside it. It has **no npm dependency** — it drives Chrome straight over
     the DevTools Protocol with Node's built-in `WebSocket`. It needs a Chrome that

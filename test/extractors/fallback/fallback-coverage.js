@@ -5,7 +5,7 @@
 // For every test/extractors/custom/*.json page we run GCal.extract() twice
 // against the same cached HTML (data/<name>.html):
 //   - custom:   the normal pipeline, with the matching site source registered.
-//               This is the reviewed-correct extraction (test/integration/
+//               This is the reviewed-correct extraction (test/extractors/
 //               live.test.js pins it to the case's `expected`).
 //   - fallback: the SAME pipeline with GCal.sources emptied, which forces the
 //               unsupported-host path (assemble-events.js -> fallbackEvents),
