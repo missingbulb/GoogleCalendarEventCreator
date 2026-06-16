@@ -301,7 +301,7 @@ function titleEl(event, tab) {
 // calendar icon gets a small year pill sitting on top of it, and the chip is
 // wrapped so the pill can stack above the icon. A current-year chip (no `year`)
 // returns the bare calendar box, unchanged.
-function chipEl({ month, day, year }) {
+function chipEl({ month, day, year, yearPast }) {
   const el = document.createElement("span");
   el.className = "e-date";
 
@@ -321,11 +321,11 @@ function chipEl({ month, day, year }) {
 
   const wrap = document.createElement("span");
   wrap.className = "e-cal";
+  wrap.appendChild(el);
   const yearEl = document.createElement("span");
-  yearEl.className = "e-year";
+  yearEl.className = yearPast ? "e-year past" : "e-year future";
   yearEl.textContent = year;
   wrap.appendChild(yearEl);
-  wrap.appendChild(el);
   return wrap;
 }
 
@@ -392,7 +392,7 @@ export function dateChip(start, currentYear = new Date().getFullYear()) {
   return {
     month: date.toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: String(date.getDate()),
-    year: offYear(date, currentYear),
+    ...offYear(date, currentYear),
   };
 }
 
@@ -409,15 +409,18 @@ export function monthRangeChip(instances, currentYear = new Date().getFullYear()
   return {
     month: dates[0].toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: min === max ? String(min) : `${min}–${max}`,
-    year: offYear(dates[0], currentYear),
+    ...offYear(dates[0], currentYear),
   };
 }
 
-// The chip's year label string when `date` falls outside `currentYear` (past or
-// future), or undefined for a current-year date (which shows no year pill).
+// The chip's year-pill fields when `date` falls outside `currentYear`: { year }
+// plus `yearPast` true for a past year (rendered as a gray pill) vs false for a
+// future one (an accent pill). An empty object for a current-year date, so the
+// chip carries no `year` and shows no pill.
 function offYear(date, currentYear) {
   const y = date.getFullYear();
-  return y === currentYear ? undefined : String(y);
+  if (y === currentYear) return {};
+  return { year: String(y), yearPast: y < currentYear };
 }
 
 // The button label inside a month card: just the day-of-month (the month lives

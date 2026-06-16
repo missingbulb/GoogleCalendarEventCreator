@@ -154,30 +154,44 @@ body {
   border-color: #aecbfa;
 }
 /* Wrapper around the calendar icon when the event isn't in the current year:
-   stacks the year pill on top of the icon, centered over it. (Only present for
-   an off-year chip — a current-year chip is the bare .e-date below.) */
+   a positioned box so the year pill can sit over the month banner and jut
+   partially off the side. (Only present for an off-year chip — a current-year
+   chip is the bare .e-date below.) */
 .event-btn .e-cal,
 .event-group .e-cal {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   flex-shrink: 0;
-  gap: 2px;
 }
-/* The year pill sitting on top of the calendar icon, shown only for a past or
-   future year (the current year is implied and omitted). */
+/* The small year pill, overlaid on the month banner and overhanging the icon's
+   right edge, tilted 30° clockwise like a sticker. Shown only for a past or
+   future year — the current year is implied. The background color is set ONLY
+   on the .past/.future variant (red future, gray past), never on the base
+   class: the UI snapshot renderer inlines CSS without selector specificity
+   (last-declared wins), so a base-class background would override the variant's
+   in the snapshot. */
 .event-btn .e-year,
 .event-group .e-year {
+  position: absolute;
+  top: -3px;
+  right: -8px;
   display: flex;
   justify-content: center;
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 700;
-  letter-spacing: 0.3px;
   line-height: 1;
   color: #fff;
+  border-radius: 6px;
+  padding: 1px 4px;
+  transform: rotate(30deg);
+}
+.event-btn .e-year.future,
+.event-group .e-year.future {
   background-color: #d93025;
-  border-radius: 8px;
-  padding: 2px 6px;
+}
+.event-btn .e-year.past,
+.event-group .e-year.past {
+  background-color: #80868b;
 }
 /* Left date chip styled like a calendar icon: a blue month banner over
    the day-of-month on a white "page". */
