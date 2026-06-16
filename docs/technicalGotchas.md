@@ -78,3 +78,12 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   the full-page `data/*.html` test fixtures dwarf the source by bytes.
   `.gitattributes` marks `data/*.html linguist-vendored` so Linguist ignores them;
   do the same for any future large generated/fixture files. (#78)
+- **satori clamps a box to `max-height` but still *paints* overflow onto the next
+  sibling — pair `overflow-y: auto` with `overflow: hidden`.** A scroll container
+  (`#events { max-height; overflow-y: auto }`) renders fine in Chrome, but the UI
+  snapshot renderer (satori) clips the box's *height* yet paints the overflowing
+  card past it, overlapping the element below (the in-list count label). Add
+  `overflow: hidden` alongside `overflow-y: auto`: satori honors `hidden` as a
+  paint clip, and the browser still scrolls because `overflow-y: auto` wins for
+  the y-axis. The overlap is satori-only (Chrome's scroll container never had it),
+  but the snapshot is the reviewed reference, so it has to render clean. (#238)
