@@ -5,7 +5,7 @@ name: Auto-implement extractor
 # and opens a pull request — following the steps in docs/claude/adding-a-source.md.
 #
 # Required repository secrets:
-#   ANTHROPIC_API_KEY — Claude API key for the agent
+#   ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR — Claude API key for the agent
 #
 # The GITHUB_TOKEN is standard and always available.
 on:
@@ -113,7 +113,7 @@ jobs:
         if: steps.triage.outputs.hostInDenyList != 'true' && steps.triage.outputs.hostInAllowList != 'true'
         timeout-minutes: 75
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR }}
           GH_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
           REPO:              ${{ github.repository }}

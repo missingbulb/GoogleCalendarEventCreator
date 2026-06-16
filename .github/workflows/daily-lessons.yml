@@ -8,7 +8,7 @@ name: Daily lessons digest
 #
 # Required repository secret:
 #   ANTHROPIC_API_KEY_DAILY_LEARNING — Claude API key for this agent. Kept
-#   separate from the extractor workflow's ANTHROPIC_API_KEY so this job's spend
+#   separate from the extractor workflow's ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR so this job's spend
 #   can be capped/controlled independently.
 # The GITHUB_TOKEN is standard and always available.
 

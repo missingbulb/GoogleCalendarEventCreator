@@ -87,10 +87,10 @@ relying on the push/PR triggers:
 
 | Secret | Purpose |
 |--------|---------|
-| `ANTHROPIC_API_KEY` | Authenticate the `claude` CLI — **must be set** before this workflow can run |
+| `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` | Authenticate the `claude` CLI — **must be set** before this workflow can run |
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
 
-Add `ANTHROPIC_API_KEY` under **Settings → Secrets and variables → Actions →
+Add `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` under **Settings → Secrets and variables → Actions →
 Repository secrets**.
 
 ## Permissions the workflow uses
@@ -112,7 +112,7 @@ refresh-cache workflow to fetch and commit the HTML).
 If the agent step fails, the workflow posts a comment on the issue with a link
 to the failed run so a maintainer can investigate. Common causes:
 
-- `ANTHROPIC_API_KEY` secret is missing or expired
+- `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` secret is missing or expired
 - The event URL in the issue is behind a login wall or returns 403/404
 - The `refresh-cache` workflow itself fails (e.g., the site blocks the fetcher)
 - The agent exhausted its turn budget before completing
