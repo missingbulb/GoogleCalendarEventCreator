@@ -14,7 +14,8 @@ already works.
 
 When the repo owner says "LGTM" on a change, treat it as approval to merge
 that branch's pull request into `main` (the test-flakiness gate in
-`docs/engineeringPractices.md` still applies before merging).
+`docs/engineeringPractices.md` still applies before merging). After merging,
+also run **"learned lessons"** on the conversation before closing out.
 
 When the repo owner says **"bump version"**, treat it as a defined instruction
 (like "LGTM"): raise the extension's version by editing the `version` field in
