@@ -102,6 +102,39 @@ also need occasional gardening: when an event page is eventually taken down,
 point `data/<name>.url` at a newer event (and refresh its cached HTML the same
 way).
 
+### Fallback-coverage gate — how the generic extractor stacks up
+
+**`test/integration/fallback-coverage.test.js`** (part of `test:live`) measures
+what the generic **fallback** extractor (`pipeline/extract-unsupported.js`)
+recovers on each cached case page, relative to that page's **dedicated source**
+— the reviewed-correct ground truth. The comparison logic lives in
+**`test/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
+— once normally, once with `GCal.sources` emptied (the documented way to force
+the unsupported-host path) — and grades the fallback's **primary event**
+(`events[0]` after the chronological sort) field-by-field against the custom
+one, counting a field only when the dedicated source filled it.
+
+It produces two gated percentages — **critical fields** (title + start +
+location, the popup's presentability threshold) and **all fields** — plus an
+informational event-coverage number (the fallback can't enumerate a listing
+page). `start`/`end` count as a match when byte-identical **or** the same
+absolute instant, so a source's `ctz`-localized floating time isn't scored as a
+miss against the fallback's offset-bearing instant (a floating time read an hour
+off, or one that dropped its time, still is).
+
+The two percentages are a **high-watermark gate** stored in
+`test/integration/fallback-coverage.baseline.json`: the test fails if either
+drops below its watermark, and ratchets the watermark **up** when the fallback
+improves. So a change that quietly makes the generic extractor worse (or better)
+shows up here. Running locally also rewrites the human-readable
+**`docs/fallback-coverage.md`** report (per-host, per-field-type, and per-case
+tables, plus the notable value differences) — commit it like the UI snapshots;
+the test only writes the working tree, it never touches git. In CI the refresh
+is a no-op (the committed report and baseline are the reviewed truth). Because it
+runs against the cached HTML, a `data/` refresh that legitimately moves a
+source's output can move these numbers — re-baseline by hand (lower the number
+in the baseline file) when that's the intended cause.
+
 ### Unit tests — the internal safety net
 
 **`test/unit/extraction.test.js`** pins down the extraction logic (site

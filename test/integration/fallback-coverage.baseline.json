@@ -1,0 +1,5 @@
+{
+  "_comment": "High-watermark gate for the generic fallback extractor's coverage, asserted by fallback-coverage.test.js and explained in docs/fallback-coverage.md. Each number is the best (highest) field-match percentage the fallback has reached against the dedicated sources; the test fails if the current run drops below one, and ratchets it up (locally) when the fallback improves. Re-baseline by hand only when a deliberate change (a cached-page refresh, a reworked source) legitimately moves the ground truth.",
+  "criticalFieldsPct": 50,
+  "allFieldsPct": 31.7
+}

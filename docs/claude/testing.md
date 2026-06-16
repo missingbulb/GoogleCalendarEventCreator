@@ -24,6 +24,17 @@ is the project-specific mechanics. Keep these decisions in mind:
   dedicated source localizing to floating time via its hardcoded `ctz` (same
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically.
+- **The fallback's coverage is gated, not just inspectable.**
+  `test/integration/fallback-coverage.test.js` (in `test:live`, logic in
+  `test/fallback-coverage.js`) runs every case page through both the dedicated
+  source and the sources-emptied fallback, grades the fallback's primary event
+  field-by-field, and fails if the critical-field or all-field match percentage
+  drops below the high-watermark in `fallback-coverage.baseline.json` (the
+  watermark only ratchets up). It rewrites `docs/fallback-coverage.md`
+  (per-host/field/case breakdown) locally — commit it like a UI snapshot; it's a
+  read-only gate in CI. A `data/` refresh that legitimately changes a source's
+  output can move the numbers, so re-baseline by hand (lower the baseline) when
+  that's the cause, the same way you'd update a live case's `expected`.
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
   textContent`) returns `textContent` in tests — including `<select>`/`<option>`
   and hidden text a real browser's `innerText` omits. A generic visible-text
