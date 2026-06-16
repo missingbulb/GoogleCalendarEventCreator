@@ -24,12 +24,12 @@ Files under this rule (kept in sync with `.gitattributes`):
 
 - `pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js`
   — both from `npm run index`.
-- `test/ui/cases/*.png` — from `npm run refresh:ui`.
-- `test/integration/fallback-coverage.baseline.GENERATED.json` and
-  `docs/fallback-coverage.GENERATED.md` — from the fallback-coverage test, which
-  `npm run regen` runs (it rewrites them locally; in CI the gate is read-only).
-  If `regen` reports a coverage regression here, that's the real gate firing —
-  review it, don't paper over it.
+- `test/ui/cases/*.png` and `test/ui/README.md` — from `npm run refresh:ui`.
+- `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
+  `test/extractors/fallback/fallback-coverage.GENERATED.md` — from the
+  fallback-coverage test, which `npm run regen` runs (it rewrites them locally;
+  in CI the gate is read-only). If `regen` reports a coverage regression here,
+  that's the real gate firing — review it, don't paper over it.
 
 ## One-time local git setup
 

@@ -6,7 +6,7 @@ self-diagnosing remote tests — lives in `docs/engineeringPractices.md`; this f
 is the project-specific mechanics. Keep these decisions in mind:
 
 - **Integration cases are the reviewed contract.** A person reads
-  `test/integration/cases/` to confirm the behavior is right; nobody reviews the
+  `test/extractors/custom/` to confirm the behavior is right; nobody reviews the
   unit tests. So every required change or bugfix must be covered by an
   integration case — add or update one whenever you add/change support for a
   site or fix an extraction bug (one real, focused event page per distinct
@@ -25,8 +25,8 @@ is the project-specific mechanics. Keep these decisions in mind:
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically.
 - **The fallback's coverage is gated, not just inspectable.**
-  `test/integration/fallback-coverage.test.js` (in `test:live`, logic in
-  `test/fallback-coverage.js`) runs every case page through both the dedicated
+  `test/extractors/fallback/fallback-coverage.test.js` (in `test:live`, logic in
+  `test/extractors/fallback/fallback-coverage.js`) runs every case page through both the dedicated
   source and the sources-emptied fallback, grades the fallback's primary event
   field-by-field, and fails if the critical-field or all-field match percentage
   drops below the high-watermark in `fallback-coverage.baseline.GENERATED.json`. That
@@ -38,7 +38,7 @@ is the project-specific mechanics. Keep these decisions in mind:
   and re-anchors to the current aggregate when the set changes (a `data/` refresh
   that legitimately moves a source's ground truth re-anchors the same way; a
   removed/renamed case needs a local re-baseline). It rewrites
-  `docs/fallback-coverage.GENERATED.md` (per-host/field/case breakdown) locally — commit it
+  `test/extractors/fallback/fallback-coverage.GENERATED.md` (per-host/field/case breakdown) locally — commit it
   like a UI snapshot; it's a read-only gate in CI. (Caveat: a single aggregate
   watermark means a regression bundled into the *same* change as a case-set change
   can be re-anchored over — don't commit a re-anchored baseline while the gate is
@@ -65,7 +65,7 @@ is the project-specific mechanics. Keep these decisions in mind:
      automatically (the push adds a `data/` file), fills in the empty
      `data/<name>.html`, and commits it back to the branch; `test:live` stays
      green because no case asserts it yet.
-  3. Pull, then add `test/integration/cases/<name>.json` (same `<name>`, just
+  3. Pull, then add `test/extractors/custom/<name>.json` (same `<name>`, just
      `description` + `expected`, no `url`) and run `npm run test:live` — it now
      runs against the local cached HTML, so its output gives you the exact
      `expected` to paste in. Commit and push.
@@ -82,6 +82,15 @@ is the project-specific mechanics. Keep these decisions in mind:
   change run `npm run refresh:ui` and commit the PNGs so the diff shows the
   before/after (deterministic — satori + resvg, no browser/network — so whoever
   makes the change regenerates on their branch; no CI workflow for it).
+- **The snapshot gallery `test/ui/README.md` is GENERATED, not hand-maintained.**
+  `test/ui/build-readme.js` derives it from the cases (each case's `description` +
+  its `cases/<name>.png`); `npm run refresh:ui` rewrites it alongside the PNGs, and
+  `test/ui/readme.test.js` refreshes it locally / asserts it in CI (the same
+  refresh-or-gate pattern as `fallback-coverage`). So you never edit it by hand —
+  edit the case's `description` and regenerate. It's named plain `README.md` (not
+  the repo's usual `*.GENERATED.md`) on purpose: GitHub only auto-renders a literal
+  `README.md` as a folder's landing page, which is the whole point of the gallery —
+  the do-not-edit banner + the CI gate stand in for the missing GENERATED cue.
 - **A case's `action` is a `(document) => void` gesture** applied to the rendered
   DOM before snapshotting — for things plain data can't express. satori is a
   *static* layout engine (no scrolling), so "scroll all the way down" is expressed
@@ -116,12 +125,12 @@ is the project-specific mechanics. Keep these decisions in mind:
   a bad service-worker `importScripts` path (#146), a missing/renamed injected
   file, a syntax error in one — must fail a test, not just surface when someone
   loads the unpacked extension:
-  - `test/integration/extension-loads.test.js` (always-on, no browser) boots the
+  - `test/extension/extension-loads.test.js` (always-on, no browser) boots the
     manifest's service worker through a Chrome-faithful `importScripts`
     (relative to the worker's dir, leading slash = extension root) and asserts it
     wires up, every injected file parses, and every manifest-referenced file
     exists. It runs in the default suite and in `test:offline`.
-  - `test/e2e/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
+  - `test/fullBrowserHeavyTests/extension-load.chrome.test.js` (`npm run test:e2e`) loads the real
     unpacked extension and asserts the MV3 service worker registers and `GCal` is
     built inside it. It has **no npm dependency** — it drives Chrome straight over
     the DevTools Protocol with Node's built-in `WebSocket`. It needs a Chrome that

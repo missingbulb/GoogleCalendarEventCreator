@@ -23,16 +23,16 @@ the rules of the road.
 | `pipeline/assemble-events.js` | Orchestrator `GCal.extract()`: runs the matched self-contained source, else the unsupported-site fallback; normalizes/sorts events and reports `supported` |
 | `pipeline/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `pipeline/worker-imports.generated.js` | Generated (`npm run index`) `importScripts` of registry + every source; the service worker (`ui/toolbar-icon.js`) loads it at startup, so its list is never hand-maintained |
-| `test/integration/cases/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
+| `test/extractors/custom/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
 | `data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
-| `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
+| `test/extractors/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
-| `test/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
-| `test/integration/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `docs/fallback-coverage.GENERATED.md` and ratchets the baseline locally |
-| `test/integration/fallback-coverage.baseline.GENERATED.json` | Stored high-watermark percentages the coverage gate asserts against (test-rewritten; `GENERATED` in the name flags it — don't hand-merge) |
-| `docs/fallback-coverage.GENERATED.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
+| `test/extractors/fallback/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
+| `test/extractors/fallback/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `test/extractors/fallback/fallback-coverage.GENERATED.md` and ratchets the baseline locally |
+| `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` | Stored high-watermark percentages the coverage gate asserts against (test-rewritten; `GENERATED` in the name flags it — don't hand-merge) |
+| `test/extractors/fallback/fallback-coverage.GENERATED.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
 | `test/ui/cases/<name>.case.js` | One UI snapshot case: fake data (`{ description, data, listing?, tab?, action? }`) fed to the popup's real `render()`. Its scenario lives only here — no shared gallery |
 | `test/ui/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
 | `test/ui/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |
