@@ -29,6 +29,10 @@ the rules of the road.
 | `test/integration/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
+| `test/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
+| `test/integration/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `docs/fallback-coverage.md` and ratchets the baseline locally |
+| `test/integration/fallback-coverage.baseline.json` | Stored high-watermark percentages the coverage gate asserts against |
+| `docs/fallback-coverage.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
 | `test/ui/popup-renderer.js` | Renders each popup state from `ui/views/popup-states.html` to PNG (satori + resvg, no browser), inlining the real `ui/popup.css` onto the markup first |
 | `test/ui/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
