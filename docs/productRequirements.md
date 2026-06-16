@@ -56,20 +56,20 @@ three of a title, a location, and a start time; anything less is "nothing found"
   event with several **instances** (each its own start/end). What folds into one
   event is showings matching on title, location, description, and timezone
   (differing only in time); distinct events that merely share a title stay
-  separate. That event's instances are then **aggregated by date into cards** so
-  the left calendar icon stays meaningful:
-  - A **day with two or more times** is a *same-day card*: the icon shows that
-    date and each button shows a **time** (e.g. Jun 10 with "8 PM" / "9 PM").
-  - The remaining **single-time days** group by **month**: a month with two or
-    more such days is a *multi-date card* — the icon shows that month with a
-    **"?"** for the day, and each button shows the **day-of-month** (with the
-    time, e.g. "10th, 9 PM"); a month with a single day is just a plain card.
+  separate. That event's instances are then split into **cards strictly by
+  date** — one card per distinct day:
+  - A **day with a single time** is a plain single-occurrence card: the whole
+    card is clickable, exactly like an ordinary event.
+  - A **day with two or more times** is a *same-day card*: the card itself is
+    **not** clickable (only an ordinary single card is); its icon shows that
+    date and it holds a small **clickable button per time**, each opening that
+    showing's Calendar template.
 
-  So three showings in one month is one "?" card; the same three spread across
-  three months is three plain cards; a day with two showings plus another day
-  with one is a same-day card plus a plain card. A grouped card isn't clickable
-  itself — each button opens that showing's Calendar template — while a plain
-  single-occurrence card is clickable as a whole, exactly as before.
+  Because every card is a single day, cards order cleanly by date and none spans
+  several days — so a card can never "jump ahead" of a later one. For example,
+  Jun 10 (one show) / Jun 11 (two shows) / Jun 12 (one show) renders as three
+  cards in date order: a plain Jun 10 card, a Jun 11 same-day card with two time
+  buttons, and a plain Jun 12 card.
 - Cards are ordered by their earliest instance's start time, and an event's
   instances are ordered within the card, so everything reads chronologically
   regardless of the order the page listed it in.

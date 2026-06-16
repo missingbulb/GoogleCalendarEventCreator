@@ -79,32 +79,32 @@ Multi-instance, one date: icon shows the date, instance buttons show the times (
 
 ![11-multi-instance-same-day-times](cases/11-multi-instance-same-day-times.png)
 
-## 12-multi-instance-different-dates-timed
+## 12-split-by-date
 
-Multi-instance, same month / different days: one 'month + ?' card; buttons show the day + time
+Split by date: a day with two times is a same-day card; the other single-time days are plain cards
 
-![12-multi-instance-different-dates-timed](cases/12-multi-instance-different-dates-timed.png)
+![12-split-by-date](cases/12-split-by-date.png)
 
-## 13-multi-instance-different-dates-allday
+## 13-same-day-three-screenings
 
-Multi-instance, same month / all-day days: one 'month + ?' card; buttons show the days
+Same day, three screenings: one same-day card with a button per time
 
-![13-multi-instance-different-dates-allday](cases/13-multi-instance-different-dates-allday.png)
+![13-same-day-three-screenings](cases/13-same-day-three-screenings.png)
 
-## 14-multi-instance-mixed
+## 14-split-allday-and-sameday
 
-Multi-instance aggregation split: a same-day card (one day, two times) + a multi-date 'month + ?' card
+Split by date with an all-day day, a two-show day, and a single-show day
 
-![14-multi-instance-mixed](cases/14-multi-instance-mixed.png)
+![14-split-allday-and-sameday](cases/14-split-allday-and-sameday.png)
 
 ## 15-mixed-single-and-multi-listing
 
-A listing mixing a single-occurrence card and a multi-date 'month + ?' card
+A listing mixing a clickable single-occurrence card and an unclickable same-day card
 
 ![15-mixed-single-and-multi-listing](cases/15-mixed-single-and-multi-listing.png)
 
 ## 16-events-outnumber-cards-count
 
-Count cue counts events, not cards: 8 cards (two multi-instance) -> more events than cards
+Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing
 
 ![16-events-outnumber-cards-count](cases/16-events-outnumber-cards-count.png)

@@ -118,6 +118,9 @@ body {
   border: 1px solid #d2e3fc;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+  /* The card itself is NOT a click target (unlike a single-event button) — only
+     its inner instance buttons are; show the default cursor over the card. */
+  cursor: default;
 }
 .event-group:last-child {
   margin-bottom: 0;
@@ -185,12 +188,6 @@ body {
   line-height: 1.1;
   color: #1a73e8;
   padding: 2px 0 3px;
-}
-/* The "?" chip for a multi-date group: the blue banner shows the shared month
-   (like any chip), and the day cell shows a question mark instead of a number —
-   the date isn't a single day, the buttons carry it. */
-.event-group .e-date.unknown .e-day {
-  color: #1a73e8;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */

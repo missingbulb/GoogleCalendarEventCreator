@@ -1,11 +1,9 @@
-// A multi-instance event mixing it all, to show the date aggregation split: one
-// day (Jun 19) carries two timed shows, while two other days (an all-day Jun 17
-// and a timed Jun 21) carry one each. So it renders as TWO cards — a same-day
-// card for Jun 19's two times, and a multi-date "month + ?" card folding the two
-// single-time days — the real shape a cinema's screening picker produces.
+// A multi-instance event split by date, mixing an all-day day, a two-show day,
+// and a single-show day: Jun 17 (all-day) and Jun 21 (one timed show) are plain
+// single cards, Jun 19 (two shows) is a same-day card — three cards in date
+// order, the all-day one reading just like an ordinary single event.
 module.exports = {
-  description:
-    "Multi-instance aggregation split: a same-day card (one day, two times) + a multi-date 'month + ?' card",
+  description: "Split by date with an all-day day, a two-show day, and a single-show day",
   data: {
     supported: true,
     events: [

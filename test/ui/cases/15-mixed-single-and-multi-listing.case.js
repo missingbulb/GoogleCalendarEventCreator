@@ -1,8 +1,9 @@
-// A listing that mixes both card kinds: a plain single-occurrence event (a
-// clickable card) alongside a multi-instance event whose same-month nightly run
-// folds into one multi-date "month + ?" card. Shows how the two read together.
+// A listing that mixes both card kinds: a plain single-occurrence event (the
+// whole card clickable) alongside a multi-instance card (a film with two
+// screenings on one day — only its inner time buttons are clickable). Shows how
+// the two read together.
 module.exports = {
-  description: "A listing mixing a single-occurrence card and a multi-date 'month + ?' card",
+  description: "A listing mixing a clickable single-occurrence card and an unclickable same-day card",
   data: {
     supported: true,
     events: [
@@ -16,9 +17,8 @@ module.exports = {
         location: "Pleasance Courtyard, Edinburgh",
         ctz: "GB",
         times: [
+          { start: "2026-06-18T17:00:00", end: "2026-06-18T18:30:00" },
           { start: "2026-06-18T20:30:00", end: "2026-06-18T22:00:00" },
-          { start: "2026-06-19T20:30:00", end: "2026-06-19T22:00:00" },
-          { start: "2026-06-20T20:30:00", end: "2026-06-20T22:00:00" },
         ],
       },
     ],
