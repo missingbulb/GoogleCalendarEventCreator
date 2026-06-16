@@ -79,7 +79,6 @@ meetup.com), and the default blue icon elsewhere.
 - [File descriptions](docs/fileDescriptions.md) — the per-file map.
 - [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](docs/releasing.md) — building the zip and publishing to the Chrome Web Store.
-- [Chrome Web Store publishing tutorial](docs/chrome-store-publishing-tutorial.md) — terse, copy-pasteable from-scratch walkthrough (registration, OAuth, secrets, publish).
 - [Resources](docs/resources.md) — external references relevant to the project.
 - [Security review](docs/security-review.md) — attack surface, trust boundaries, and known risks.
 - Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `docs/claude/`).

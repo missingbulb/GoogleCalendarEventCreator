@@ -63,23 +63,41 @@ the workflow fails fast with a clear message if any are missing:
 | `CHROME_CLIENT_SECRET` | …same OAuth client |
 | `CHROME_REFRESH_TOKEN` | generated once for that client |
 
-To mint the OAuth credentials, follow
-[`chrome-webstore-upload`'s setup guide](https://github.com/fregante/chrome-webstore-upload/blob/main/How%20to%20generate%20Google%20API%20keys.md)
-(enable the Chrome Web Store API in a Google Cloud project, create an OAuth
-client, and exchange it for a refresh token), then add the four values as
-secrets. For a copy-pasteable, end-to-end walkthrough of that whole flow, see
-[the Chrome Web Store publishing tutorial](chrome-store-publishing-tutorial.md).
+To mint the OAuth credentials, follow the upstream
+[`chrome-webstore-upload-keys` guide](https://github.com/fregante/chrome-webstore-upload-keys):
+in a Google Cloud project, enable the Chrome Web Store API and create a
+**Desktop app** OAuth client, then let its helper do the token exchange for you —
 
-Two gotchas that will bite you, learned the hard way:
+```sh
+npx chrome-webstore-upload-keys
+```
 
-- **The out-of-band (`urn:ietf:wg:oauth:2.0:oob`) flow is now blocked by
-  Google.** Use a **Desktop app** OAuth client with `redirect_uri=http://localhost`
-  and read the `code=` parameter out of the (intentionally failing) redirect URL
-  in your browser's address bar.
-- **Publish the OAuth consent screen** (don't leave it in "Testing"). A
-  consent screen still in Testing only issues refresh tokens that **expire after
-  7 days**, which silently breaks the publish workflow a week later; a published
-  consent screen issues a non-expiring token.
+It launches a local server, walks you through the consent screen, and prints the
+`CHROME_CLIENT_ID` / `CHROME_CLIENT_SECRET` / `CHROME_REFRESH_TOKEN`. Prefer this
+over doing the OAuth flow by hand. Add those three plus `CHROME_EXTENSION_ID`
+(from the dashboard URL) as the four secrets.
+
+Two gotchas that will bite you regardless of how you mint the token (learned the
+hard way during the first publish):
+
+- **The out-of-band (`urn:ietf:wg:oauth:2.0:oob`) flow is blocked by Google.**
+  This is why a Desktop client (loopback `http://localhost` redirect) is required;
+  the helper above uses it automatically. If you ever do the flow by hand, read
+  the `code=` parameter out of the (intentionally failing) `localhost` redirect
+  URL in the address bar.
+- **Publish the OAuth consent screen** (don't leave it in "Testing"). A consent
+  screen still in Testing only issues refresh tokens that **expire after 7 days**,
+  which silently breaks the publish workflow a week later; a published consent
+  screen issues a non-expiring token.
+
+If minting fails, the symptoms map to fixes like this:
+
+| Symptom | Fix |
+| --- | --- |
+| `access_denied` / "app is being tested" | Add yourself as a test user, or **publish** the consent screen. |
+| `invalid_request` / "OOB flow blocked" | Use a Desktop client (`http://localhost` redirect), not `urn:ietf:wg:oauth:2.0:oob`. |
+| `500` on the consent page | Retry in an incognito window signed into a single account. |
+| `invalid_grant` at token exchange | The authorization code is stale/used — restart the flow for a fresh one. |
 
 ## First publish to the Chrome Web Store
 
