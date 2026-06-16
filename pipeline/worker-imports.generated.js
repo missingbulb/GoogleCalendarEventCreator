@@ -13,6 +13,7 @@
 // import resolves to ui/pipeline/… and aborts the worker (#146).
 importScripts(
   "/pipeline/registry.js",
+  "/pipeline/sources/axs.js",
   "/pipeline/sources/bandsintown.js",
   "/pipeline/sources/edinburghfringe.js",
   "/pipeline/sources/eventbrite.js",
