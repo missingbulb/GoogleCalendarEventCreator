@@ -22,6 +22,7 @@ the rules of the road.
 | `pipeline/build-calendar-url.js` | Builds the pre-filled Google Calendar template URL (incl. markdown→HTML for details) |
 | `pipeline/assemble-events.js` | Orchestrator `GCal.extract()`: runs the matched self-contained source, else the unsupported-site fallback; normalizes/sorts events and reports `supported` |
 | `pipeline/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
+| `pipeline/worker-imports.generated.js` | Generated (`npm run index`) `importScripts` of registry + every source; the service worker (`ui/toolbar-icon.js`) loads it at startup, so its list is never hand-maintained |
 | `test/integration/cases/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
 | `data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |

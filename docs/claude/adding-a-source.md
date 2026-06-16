@@ -13,12 +13,12 @@ the generic/JSON-LD layers get wrong or miss. The flow:
    the template, including the header comment describing the HTML it expects.
    Use the shared helpers on `GCal` (see `pipeline/helpers/`); return only the
    fields this site needs.
-2. Run `npm run index` to regenerate `pipeline/load-order.generated.json` (the
-   single source of truth the popup injects and the tests read). The generator
-   pins `registry.js`/`helpers/` first and `assemble-events.js` last and sorts
-   the rest, so you never hand-edit the list; a CI test fails if it's stale.
-3. Add the new source to the `importScripts(...)` list in `ui/toolbar-icon.js`
-   (the service worker can't read the generated JSON synchronously at startup,
-   so its list is explicit; a CI test fails if it drifts from the generated
-   sources).
-4. Add an integration case for a real page on the site (see `docs/testing.md`).
+2. Run `npm run index` to regenerate the two load lists from the sources on
+   disk: `pipeline/load-order.generated.json` (the single source of truth the
+   popup injects and the tests read) and `pipeline/worker-imports.generated.js`
+   (the registry + sources the toolbar service worker importScripts at startup,
+   since an MV3 worker can't read the JSON synchronously). The generator pins
+   `registry.js`/`helpers/` first and `assemble-events.js` last and sorts the
+   rest, so you never hand-edit either list — and adding a source touches no file
+   in `ui/`; a CI test fails if either is stale.
+3. Add an integration case for a real page on the site (see `docs/testing.md`).

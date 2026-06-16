@@ -114,26 +114,17 @@ Skeleton to follow:
 
 ---
 
-## Step 5 — Regenerate the load order
+## Step 5 — Regenerate the load lists
 
 ```bash
 npm run index
 ```
 
-Verify `pipeline/load-order.generated.json` now includes your new source file in the sorted list.
+Verify both generated lists now include your new source: `pipeline/load-order.generated.json` (the sorted injection order) and `pipeline/worker-imports.generated.js` (the service worker's startup imports). `npm run index` regenerates **both** — you do not hand-edit `ui/toolbar-icon.js`, which just imports the generated file.
 
 ---
 
-## Step 6 — Add to `ui/toolbar-icon.js`
-
-Open `ui/toolbar-icon.js`. Inside the `importScripts(...)` call, add the new source **in alphabetical order** among the other sources:
-```js
-"/pipeline/sources/<site-slug>.js",
-```
-
----
-
-## Step 7 — Create placeholder data files
+## Step 6 — Create placeholder data files
 
 ```bash
 # Zero-byte placeholder — the refresh script fills this in
@@ -147,13 +138,13 @@ The empty HTML file is the signal for the refresh script; do not put any content
 
 ---
 
-## Step 8 — Commit and push (Phase 1)
+## Step 7 — Commit and push (Phase 1)
 
 ```bash
 git add \
   pipeline/sources/<site-slug>.js \
   pipeline/load-order.generated.json \
-  ui/toolbar-icon.js \
+  pipeline/worker-imports.generated.js \
   data/<case-name>.html \
   data/<case-name>.url
 
@@ -163,7 +154,7 @@ git push -u origin claude/extractor/<site-slug>
 
 ---
 
-## Step 9 — Trigger the "Refresh cached HTML files" workflow
+## Step 8 — Trigger the "Refresh cached HTML files" workflow
 
 ```bash
 curl -s -X POST \
@@ -178,7 +169,7 @@ echo "Triggered refresh-cache on branch claude/extractor/<site-slug>"
 
 ---
 
-## Step 10 — Find the run ID
+## Step 9 — Find the run ID
 
 Wait 15 seconds for the workflow run to be registered, then get its ID:
 
@@ -204,7 +195,7 @@ If `RUN_ID` is empty, wait another 15 seconds and retry the curl command — the
 
 ---
 
-## Step 11 — Poll until the refresh workflow completes
+## Step 10 — Poll until the refresh workflow completes
 
 ```bash
 while true; do
@@ -231,7 +222,7 @@ echo "Refresh succeeded."
 
 ---
 
-## Step 12 — Pull the filled HTML
+## Step 11 — Pull the filled HTML
 
 ```bash
 git pull origin claude/extractor/<site-slug>
@@ -242,7 +233,7 @@ The file must be non-empty (typically tens of KB). If it is still 0 bytes, the r
 
 ---
 
-## Step 13 — Bootstrap the integration case and see actual output
+## Step 12 — Bootstrap the integration case and see actual output
 
 Create `test/integration/cases/<case-name>.json` with a placeholder:
 ```json
@@ -263,9 +254,9 @@ Read the test failure output carefully. It shows what the extractor produced fro
 
 ---
 
-## Step 14 — Update the case with real expected values
+## Step 13 — Update the case with real expected values
 
-Replace the `"expected"` object in `test/integration/cases/<case-name>.json` with the actual output from Step 13. Then confirm the tests pass:
+Replace the `"expected"` object in `test/integration/cases/<case-name>.json` with the actual output from Step 12. Then confirm the tests pass:
 ```bash
 npm run test:live
 ```
@@ -279,7 +270,7 @@ npm run test:offline
 
 ---
 
-## Step 15 — Commit Phase 2
+## Step 14 — Commit Phase 2
 
 ```bash
 git add test/integration/cases/<case-name>.json
@@ -291,7 +282,7 @@ git push
 
 ---
 
-## Step 16 — Open a pull request
+## Step 15 — Open a pull request
 
 ```bash
 gh pr create \
@@ -303,7 +294,7 @@ gh pr create \
 ## Changes
 - \`pipeline/sources/<site-slug>.js\` — site-specific extractor
 - \`pipeline/load-order.generated.json\` — regenerated
-- \`ui/toolbar-icon.js\` — importScripts list updated
+- \`pipeline/worker-imports.generated.js\` — regenerated
 - \`data/<case-name>.html\` + \`data/<case-name>.url\` — cached event page
 - \`test/integration/cases/<case-name>.json\` — integration case
 
@@ -312,7 +303,7 @@ Closes #{{ISSUE_NUMBER}}"
 
 ---
 
-## Step 17 — Trigger CI on the branch
+## Step 16 — Trigger CI on the branch
 
 A push or PR made with the workflow's `GITHUB_TOKEN` does **not** start the
 `Tests` workflow — GitHub suppresses workflow runs triggered by `GITHUB_TOKEN`
@@ -337,7 +328,7 @@ end of the agent's job. The reviewer reads the CI result on the PR.
 
 ---
 
-## Step 18 — Comment on the issue
+## Step 17 — Comment on the issue
 
 ```bash
 PR_URL=$(gh pr view "claude/extractor/<site-slug>" --json url -q .url 2>/dev/null || echo "(see Actions run)")
