@@ -20,9 +20,8 @@ const SHIPPING_PATHS = [
 ];
 
 // Files that live UNDER a shipped directory but must NOT ship — dev-only
-// artifacts the runtime never loads. Exact repo-relative paths.
-const SHIPPING_EXCLUDES = [
-  "ui/views/popup-states.html", // visual reference + UI-snapshot input; not loaded by the extension
-];
+// artifacts the runtime never loads. Exact repo-relative paths. Currently none:
+// the UI-snapshot inputs live under test/ (already unshipped), not under ui/.
+const SHIPPING_EXCLUDES = [];
 
 module.exports = { SHIPPING_PATHS, SHIPPING_EXCLUDES };

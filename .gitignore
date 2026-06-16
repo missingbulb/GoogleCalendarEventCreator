@@ -4,5 +4,5 @@ node_modules/
 dist/
 
 # UI snapshot test failure artifacts (.actual.png / .diff.png), written here
-# by the tests on a mismatch (see test/ui/artifacts-dir.js).
+# by the tests on a mismatch (see test/ui/snapshot-artifacts-dir.js).
 test/ui/.artifacts/
