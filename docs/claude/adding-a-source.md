@@ -1,9 +1,12 @@
 # Adding a site extractor
 
-Extraction merges three layers (site-specific → schema.org JSON-LD → generic
-heuristics), first non-empty value per field winning — see
-`pipeline/assemble-events.js`. So a new source only needs to supply the fields
-the generic/JSON-LD layers get wrong or miss. The flow:
+When a site source's `matches(host)` is true, that source is the **only**
+extractor the orchestrator runs for the page (`pipeline/assemble-events.js`) — it
+must produce every field itself; the generic fallback heuristics run only for
+*unsupported* hosts and are never merged over a site source. What a source *can*
+lean on is the page's own schema.org JSON-LD: the convention is to return
+`merge(domFields, embeddedEvents.toEvent(embeddedEvents.find()[0]))`, so the
+source's DOM values win and JSON-LD fills the gaps they leave. The flow:
 
 1. Add `pipeline/sources/<site>.js` that pushes onto `GCal.sources` with
    `name`, an inline `matches(hostname)`, and an `extract()` returning a partial

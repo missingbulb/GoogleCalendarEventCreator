@@ -17,6 +17,10 @@
 //               Equal to the slug for the first, auto-recorded case; additional
 //               cases for the same host are added by hand later with their own
 //               descriptive names.
+//   matchesRegex — the source's `matches(host)` regex literal, as text to drop
+//               into the scaffolded source: `/(^|\.)<escaped-host>$/` (covers the
+//               host and its subdomains). Deterministic from the host, so the
+//               workflow writes it and the agent never hand-rolls the escaping.
 "use strict";
 
 // Multi-label public suffixes we'd otherwise mistake for "name + TLD". Not a
@@ -66,11 +70,21 @@ function slugFor(url) {
   return sanitize(nameLabels(host).join("-"));
 }
 
-// { host, slug, caseName } for a URL; all "" when the URL doesn't parse.
+// The `matches(host)` regex literal for a host, as source text:
+// `/(^|\.)visit\.tel-aviv\.gov\.il$/` — matches the host and any subdomain. ""
+// when the URL doesn't parse. Only "." needs escaping in a hostname (the rest is
+// [a-z0-9-]); "\" is escaped too for safety though hosts never contain it.
+function matchesRegexFor(url) {
+  const host = hostname(url);
+  if (!host) return "";
+  return `/(^|\\.)${host.replace(/[.\\]/g, "\\$&")}$/`;
+}
+
+// { host, slug, caseName, matchesRegex } for a URL; all "" when it doesn't parse.
 function namesFor(url) {
   const host = hostname(url);
   const slug = slugFor(url);
-  return { host, slug, caseName: slug };
+  return { host, slug, caseName: slug, matchesRegex: matchesRegexFor(url) };
 }
 
-module.exports = { hostname, slugFor, namesFor };
+module.exports = { hostname, slugFor, matchesRegexFor, namesFor };

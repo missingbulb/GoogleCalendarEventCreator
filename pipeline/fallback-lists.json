@@ -1,6 +1,10 @@
 {
-  "allowlist": ["meetup.com"],
-  "denylist": ["barby.co.il"],
+  "allowlist": [
+    "meetup.com"
+  ],
+  "denylist": [
+    "barby.co.il"
+  ],
   "supportedDomains": [
     "bandsintown.com",
     "cinema.co.il",

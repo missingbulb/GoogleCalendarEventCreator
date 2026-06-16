@@ -2,9 +2,11 @@ name: Auto-implement extractor
 
 # Triggered when the 'extractor-request' label is added to an issue.
 # Triages the request, probes the event URL, and — only when the page is
-# actually fetchable — prepares a branch with the page already cached, then
-# launches a Claude agent to write the extractor and open a pull request.
-# See docs/claude/auto-extractor.md for the full flow.
+# actually fetchable — prepares a branch with the page cached AND the extractor
+# scaffolded (matches(), supportedDomains, load lists), runs a Claude agent to
+# write just extract() + the test case, then commits and opens the PR itself.
+# The agent owns only the judgment step; everything deterministic is hard-coded
+# here. See docs/claude/auto-extractor.md.
 #
 # Required repository secrets:
 #   ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR — Claude API key for the agent
@@ -16,9 +18,9 @@ on:
 
 permissions:
   contents: write       # create / push the feature branch
-  pull-requests: write  # the agent opens the PR
+  pull-requests: write  # open the PR
   issues: write         # post progress / failure comment
-  actions: write        # the agent dispatches test.yml on the branch
+  actions: write        # dispatch test.yml on the branch
 
 jobs:
   implement:
@@ -115,37 +117,47 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Phase 1, done in the workflow (not the agent): branch off the checked-out
-      # main, write the download-instruction files, and RECORD the page inline
-      # with the same fetcher the probe used. The agent then starts on a branch
-      # that already has the cached HTML — which removes its most fragile steps
-      # (dispatching + polling the refresh workflow, then pulling). A push made
+      # Phase 1 — everything deterministic, done in the workflow (not the agent):
+      # branch off main, record the page inline (same fetcher the probe used),
+      # scaffold the source with its matches() filled, register the host in
+      # supportedDomains, and regenerate the load lists. A baseline test:offline
+      # must be green before we spend the agent. If the agent later fails, the
+      # whole branch is discarded, so these pre-edits cost nothing. (A push made
       # with GITHUB_TOKEN doesn't fire refresh-cache.yml's push trigger, so the
-      # page is recorded exactly once.
-      - name: Prepare branch and record the event page
+      # page is recorded exactly once.)
+      - name: Prepare branch — record page + scaffold extractor
         id: prepare
         if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
           BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
+          SLUG:         ${{ steps.triage.outputs.slug }}
           CASE_NAME:    ${{ steps.triage.outputs.caseName }}
+          HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           set -euo pipefail
           git checkout -b "$BRANCH"
+
           printf '%s' "$EVENT_URL" > "data/$CASE_NAME.url"
           : > "data/$CASE_NAME.html"            # empty file = the recorder's "fetch me" signal
-          npm run refresh                        # records the page; a non-2xx/unreachable page exits non-zero
-          test -s "data/$CASE_NAME.html"         # the page must have actually been recorded
-          git add "data/$CASE_NAME.url" "data/$CASE_NAME.html"
-          git commit -m "chore: cache $CASE_NAME event page (Refs #$ISSUE_NUMBER)"
+          npm run refresh
+          test -s "data/$CASE_NAME.html"        # the page must have actually been recorded
+
+          node tools/scaffold-source.js "$EVENT_URL"
+          node tools/add-supported-domain.js "$HOST"
+          npm run index
+          npm run test:offline                  # baseline must be green before the agent
+
+          git add -A
+          git commit -m "chore: scaffold $SLUG extractor + cache page (Refs #$ISSUE_NUMBER)"
           # One branch per host; a re-label of the same issue re-records onto it,
           # so this run owns the branch and force is intentional.
           git push -u --force origin "$BRANCH"
 
       # Fetch the issue via API (avoids shell-escaping issues with free-form
-      # bodies) and interpolate it, plus the branch/slug/caseName/host/url the
-      # workflow derived, into the static prompt template.
+      # bodies) and interpolate it, plus the branch/slug/caseName/host/url, into
+      # the static prompt template.
       - name: Build agent prompt
         if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
@@ -205,6 +217,66 @@ jobs:
             --dangerously-skip-permissions \
             --model claude-sonnet-4-6 \
             -p "$(cat /tmp/agent-prompt.txt)"
+
+      # Phase 2 — deterministic wrap-up, done in the workflow (not the agent):
+      # the agent's done-signal is the integration case it wrote. If it's absent,
+      # the agent judged the page unextractable and commented — no PR. Otherwise
+      # re-verify (don't trust the agent), commit its extract() + case, open the
+      # PR, and dispatch CI so checks attach to it.
+      - name: Finalize — verify, commit, open PR
+        if: success() && steps.triage.outputs.skipAgent != 'true'
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
+          SLUG:         ${{ steps.triage.outputs.slug }}
+          CASE_NAME:    ${{ steps.triage.outputs.caseName }}
+          HOST:         ${{ steps.triage.outputs.host }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO:         ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          CASE_FILE="test/extractors/custom/$CASE_NAME.json"
+          if [ ! -f "$CASE_FILE" ]; then
+            echo "No integration case at $CASE_FILE — the agent judged the page unextractable and commented. No PR."
+            exit 0
+          fi
+
+          # Don't trust the agent — re-verify before opening a PR.
+          npm run test:live
+          npm run test:offline
+
+          git add "pipeline/sources/$SLUG.js" "$CASE_FILE"
+          if ! git diff --cached --quiet; then
+            git commit -m "feat: add $SLUG extractor (Refs #$ISSUE_NUMBER)"
+            git push origin "$BRANCH"
+          fi
+
+          cat > /tmp/pr-body.md <<EOF
+          Implements the extractor for \`$HOST\`.
+
+          The workflow scaffolded the branch — the \`matches()\` gate, the \`supportedDomains\` entry, the regenerated load lists, and the real cached event page (\`data/$CASE_NAME.html\`). The agent wrote \`extract()\` and the integration case asserting the real extraction.
+
+          Closes #$ISSUE_NUMBER
+          EOF
+
+          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "feat: add $SLUG extractor" --body-file /tmp/pr-body.md
+          fi
+
+          # A GITHUB_TOKEN push/PR doesn't start test.yml; dispatch it so checks
+          # attach to the branch head and show on the PR. Best-effort: the PR is
+          # already open, so a dispatch hiccup mustn't fail the run (which would
+          # post a misleading "workflow failed" comment).
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPO/actions/workflows/test.yml/dispatches" \
+            -d "{\"ref\":\"$BRANCH\"}" || echo "warning: test.yml dispatch failed — dispatch it manually"
+
+          PR_URL=$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo "")
+          gh issue comment "$ISSUE_NUMBER" --body "✅ Extractor implemented — PR ready for review: $PR_URL  (asserts against the real cached page; review the \`extract()\` logic and field values before merging)."
 
       # One comment for any failure. If the probe stopped the run, say why
       # (unfetchable page) rather than the generic message — the two have very

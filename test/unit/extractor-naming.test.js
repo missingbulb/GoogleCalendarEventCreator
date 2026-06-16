@@ -6,7 +6,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { hostname, slugFor, namesFor } = require("../../tools/extractor-naming");
+const { hostname, slugFor, matchesRegexFor, namesFor } = require("../../tools/extractor-naming");
 
 test("slugFor strips www + a single TLD", () => {
   assert.equal(slugFor("https://www.axs.com/event/123"), "axs");
@@ -34,13 +34,28 @@ test("a host with no name in front of the TLD degrades gracefully", () => {
 test("an unparseable URL yields empty names (the workflow stops on empty)", () => {
   assert.equal(slugFor("not a url"), "");
   assert.equal(hostname("not a url"), "");
-  assert.deepEqual(namesFor("not a url"), { host: "", slug: "", caseName: "" });
+  assert.deepEqual(namesFor("not a url"), { host: "", slug: "", caseName: "", matchesRegex: "" });
 });
 
-test("namesFor returns host + slug + caseName, with caseName equal to slug", () => {
+test("matchesRegexFor escapes dots and covers host + subdomains", () => {
+  assert.equal(matchesRegexFor("https://www.axs.com/event/1"), "/(^|\\.)axs\\.com$/");
+  assert.equal(
+    matchesRegexFor("https://visit.tel-aviv.gov.il/x?ItemId=1"),
+    "/(^|\\.)visit\\.tel-aviv\\.gov\\.il$/"
+  );
+  // The produced literal, evaluated, must accept the bare host and a subdomain
+  // and reject the parent — and accept the supportedDomains entry (= the host).
+  const re = eval(matchesRegexFor("https://www.axs.com/e")); // eslint-disable-line no-eval
+  assert.ok(re.test("axs.com"));
+  assert.ok(re.test("tickets.axs.com"));
+  assert.ok(!re.test("notaxs.com"));
+});
+
+test("namesFor returns host + slug + caseName + matchesRegex", () => {
   assert.deepEqual(namesFor("https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500"), {
     host: "stubhub.com",
     slug: "stubhub",
     caseName: "stubhub",
+    matchesRegex: "/(^|\\.)stubhub\\.com$/",
   });
 });

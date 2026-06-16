@@ -55,49 +55,50 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    bare `curl` is rejected by sites that serve a real browser, which would
    false-reject requests the recorder could actually fulfil.
 4. Installs dependencies + the `claude` CLI and configures git.
-5. **Prepares the branch and records the page** — Phase 1, in the workflow (not
-   the agent): branches `claude/extractor/<slug>` off `main`, writes
-   `data/<caseName>.url` + the empty `data/<caseName>.html` signal, runs
-   `npm run refresh` to record the page inline, asserts it's non-empty, commits,
-   and pushes. (A push made with `GITHUB_TOKEN` doesn't fire `refresh-cache.yml`'s
-   push trigger, so the page is recorded exactly once.)
-6. Fetches the issue and interpolates it — plus the branch/slug/caseName/host/url
-   — into the prompt template (`.github/agent-prompt-extractor.md`), then runs a
-   Claude agent (`claude --dangerously-skip-permissions --model claude-sonnet-4-6
-   -p ...`) with full Bash access, **on the prepared branch**.
+5. **Prepares the branch — Phase 1, all deterministic, in the workflow (not the
+   agent):** branches `claude/extractor/<slug>` off `main`; records the page
+   inline (`data/<caseName>.url` + the empty `.html` signal → `npm run refresh`,
+   asserted non-empty); **scaffolds** `pipeline/sources/<slug>.js` with its
+   `matches()` already filled (`tools/scaffold-source.js`); registers the host in
+   `supportedDomains` (`tools/add-supported-domain.js`); and runs `npm run index`
+   to regenerate the load lists. A baseline `npm run test:offline` must be green
+   before the agent is spent; then it commits and pushes. (A `GITHUB_TOKEN` push
+   doesn't fire `refresh-cache.yml`'s push trigger, so the page is recorded once.)
+6. Interpolates the issue + the branch/slug/caseName/host/url into the prompt
+   template and runs the agent (`claude … --model claude-sonnet-4-6 -p …`) on the
+   prepared branch.
+7. **Finalizes — Phase 2, again in the workflow:** re-runs `test:live` +
+   `test:offline`, commits the agent's `extract()` + case, opens the PR
+   (`Closes #N`), dispatches `test.yml` against the branch, and comments the PR
+   link on the issue.
 
-Because the cache step is done before the agent starts, the agent has a single,
-much simpler job (no branch creation, no dispatch/poll/pull — see
-`.github/agent-prompt-extractor.md`):
+So the agent owns only the judgment step (see `.github/agent-prompt-extractor.md`):
+read the real cached page, fill in `extract()` (and complete the source's header),
+write `test/extractors/custom/<caseName>.json` from the actual `npm run test:live`
+output, and confirm `test:live` + `test:offline` are green — then stop. It does
+**not** create the branch, edit `matches()` / `supportedDomains` / the load lists,
+commit, open the PR, or dispatch CI.
 
-- **Sanity-checks the cached `data/<caseName>.html` first** — if it's a
-  bot/CAPTCHA/login/SPA-shell page rather than the real event page, it **stops and
-  comments** instead of fabricating a case. (A 2xx that's a bot-challenge or empty
-  SPA shell slips past the status-only probe; this is the catch for it.)
-- Writes `pipeline/sources/<slug>.js` from the `meetup.js` template.
-- Adds the host to `supportedDomains` in `pipeline/fallback-lists.json` and runs
-  `npm run index` to regenerate both load lists (`pipeline/load-order.generated.json`
-  and `pipeline/worker-imports.generated.js`; the worker imports are generated,
-  not hand-edited).
-- Writes `test/extractors/custom/<caseName>.json`, runs `npm run test:live` to
-  capture the real extraction, fills in `expected`, and confirms `test:live` +
-  `test:offline` pass.
-- Commits, opens a pull request (`Closes #N`), dispatches `test.yml` against the
-  branch (see below), and comments on the issue with the PR link.
+Its one judgment escape hatch: if the cached `data/<caseName>.html` is a
+bot/CAPTCHA/login/SPA-shell page rather than the real event page (a 2xx the
+status-only probe can't see), it **stops and comments** instead of writing a case.
+The integration case is the agent's done-signal — Phase 2 opens a PR only if
+`test/extractors/custom/<caseName>.json` exists; absent it, the agent bailed and no
+PR is opened.
 
-### Why the agent has to dispatch CI itself
+### Why the workflow dispatches CI itself
 
 GitHub deliberately **does not start a workflow run for events triggered by the
 built-in `GITHUB_TOKEN`** (this prevents a workflow from recursively triggering
-itself). So the agent's `git push` and `gh pr create` do **not** kick off
+itself). So the Phase-2 `git push` and `gh pr create` do **not** kick off
 `test.yml` the way a human push would — the PR would otherwise open with an empty
 checks section.
 
 The one documented exception is `workflow_dispatch` (and `repository_dispatch`).
-So after opening the PR, the agent dispatches `test.yml` (which has a
-`workflow_dispatch:` trigger) against its branch; the run executes against the
-branch's head commit, so its checks attach to that commit and appear on the PR
-for the reviewer. (The same `GITHUB_TOKEN` rule is what keeps Phase 1's inline
+So after opening the PR, Phase 2 dispatches `test.yml` (which has a
+`workflow_dispatch:` trigger) against the branch; the run executes against the
+branch's head commit, so its checks attach to that commit and appear on the PR for
+the reviewer. (The same `GITHUB_TOKEN` rule is what keeps Phase 1's inline
 `git push` from re-firing `refresh-cache.yml` — so the page is recorded once.)
 
 ## Required secrets
@@ -116,7 +117,7 @@ The workflow's `permissions:` block grants the `GITHUB_TOKEN`:
 - `contents: write` — push the feature branch (Phase 1 + the agent)
 - `pull-requests: write` — open the PR
 - `issues: write` — post the progress / failure comment
-- `actions: write` — the agent dispatches `test.yml` on the branch
+- `actions: write` — Phase 2 dispatches `test.yml` on the branch
 
 ## Timeout
 
