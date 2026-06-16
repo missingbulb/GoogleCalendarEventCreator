@@ -88,10 +88,3 @@ test("excluded files exist and live under a shipped directory (else the exclude 
     assert.ok(underShipped, `excluded path ${p} is not under any shipping path — the exclude is pointless`);
   }
 });
-
-test("the popup-states preview is excluded from the shipped set", () => {
-  assert.ok(
-    !isShipped("ui/views/popup-states.html"),
-    "ui/views/popup-states.html is a dev/preview artifact and must not ship"
-  );
-});

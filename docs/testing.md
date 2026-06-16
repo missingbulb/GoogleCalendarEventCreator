@@ -164,26 +164,45 @@ from facebook.com, so it can't be cached as a live case.
 
 ### UI snapshot test
 
-**`test/ui/popup-snapshots.test.js`** renders each of the popup's five states
-and compares it pixel-by-pixel (via `pixelmatch`) against a committed image.
-The states are authored once, as static markup, in **`ui/views/popup-states.html`**
-— the single visual reference; open it (or the PNGs below) on GitHub to see what
-the popup currently looks like:
+**`test/ui/popup-snapshots.test.js`** renders each UI *case* and compares it
+pixel-by-pixel (via `pixelmatch`) against a committed image. Crucially, the
+rendered DOM is the popup's **real output**: a case supplies only fake data, and
+the renderer feeds it to `ui/popup.js`'s exported `render({ data, tab, listing })`
+— the same `chooseContent` + `events-view.js`/`source-request-view.js` code the
+extension runs. There is no hand-copied markup to drift, so a change to a view is
+caught automatically. (`render()` is split out of `init()` for exactly this: init
+does the chrome/fetch I/O to gather the data, render builds the DOM from it.)
 
-- **`popup-state-1-supported.png`** — supported host: the extractor's events (a 2-event listing).
-- **`popup-state-2-denylisted.png`** — denylisted host: "No events found", no link or prompt.
-- **`popup-state-3-nothing-found.png`** — not denylisted, nothing complete found: "No events found" + a "Disagree?" policy link.
-- **`popup-state-4-allowlisted.png`** — a complete fallback event, allowlisted: the event only.
-- **`popup-state-5-unlisted.png`** — a complete fallback event, on neither list: the event + a "request support" button.
+Each case is a self-contained tuple in **`test/ui/cases/`** — open the PNGs on
+GitHub to see what the popup currently looks like:
 
-`test/ui/popup-renderer.js` renders each `.popup` block with `satori` +
-`@resvg/resvg-js` (no browser). satori has no CSS engine, so the renderer folds
-the **real `ui/popup.css`** onto the markup as inline styles first (parse rules,
-match with jsdom, inline every declaration) — one source of truth for the
-styling, no values duplicated in the states file. Nothing is cherry-picked:
-satori ignores what it doesn't use; the only adjustment is its one structural
-rule (a box with element children needs an explicit `display`) and swapping in
-the bundled font.
+- **`01-supported-listing.png`** — supported host: the extractor's events (a 2-event listing).
+- **`02-denylisted.png`** — denylisted host: "No events found", no link or prompt (even a complete event is suppressed).
+- **`03-nothing-found.png`** — not denylisted, nothing complete found: "No events found" + a "Disagree?" policy link.
+- **`04-allowlisted.png`** — a complete fallback event, allowlisted: the event only.
+- **`05-unlisted.png`** — a complete fallback event, on neither list: the event + a "Suggest Correction" link.
+- **`06-long-listing-top.png`** — a long listing at rest: the capped list, count label below the fold.
+- **`07-long-listing-scrolled.png`** — the same list scrolled to the bottom: "N out of M events showing" + "show all".
+- **`08-all-shown-scrolled.png`** — eight events scrolled to the bottom: the plain "N events showing" cue (no link).
+
+`<name>.case.js` exports `{ description, data, listing?, tab?, action? }`. `data`
+is the fake extraction result (`{ supported, events: [...] }`); `listing` is the
+host classification (`none`/`allow`/`deny`); `action` is an optional
+`(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
+from `test/ui/actions.js`, since satori can't actually scroll (it pins `#events`
+to its end so the bottom-anchored count label is painted).
+
+`test/ui/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
+browser). satori has no CSS engine, so the renderer folds the **real
+`ui/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
+with jsdom, inline every declaration) — one source of truth for the styling, no
+duplicated values. Nothing is cherry-picked: satori ignores what it doesn't use;
+the only adjustments are its one structural rule (a box with element children
+needs an explicit `display`) and swapping in the bundled font. Two non-obvious
+constraints: resvg panics on a very tall SVG, so the renderer prunes event rows
+outside the visible window before rasterizing (they're clipped anyway); and the
+date/time copy is locale-sensitive, so snapshots are authored in **en-US** (a
+guard test enforces it). See `docs/claude/testing.md` for both.
 
 Note this is **not a screenshot of the real popup**: satori supports a
 constrained flexbox-based HTML/CSS subset. The tradeoff buys determinism and
@@ -195,9 +214,9 @@ Rendering is deterministic, so this is fast and dependency-light enough to run
 as part of `npm test`/`test:ui` everywhere, with no separate CI job or browser
 install step.
 
-After an intentional change to the popup — its markup (`ui/views/popup-states.html`,
-and the real views it mirrors) or its styling (`ui/popup.css`) — run
-`npm run refresh:ui` to regenerate the five `popup-state-*.png` images and commit
-them so reviewers see the before/after in the diff. On mismatch, the test writes
-`<name>.actual.png` and `<name>.diff.png` to `test/ui/.artifacts/` (gitignored;
-see `test/ui/snapshot-artifacts-dir.js`) and prints their full paths.
+After an intentional change to the popup — its views (`ui/popup.js`,
+`ui/views/*.js`) or its styling (`ui/popup.css`) — run `npm run refresh:ui` to
+regenerate the `test/ui/cases/*.png` images and commit them so reviewers see the
+before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
+`<name>.diff.png` to `test/ui/.artifacts/` (gitignored; see
+`test/ui/snapshot-artifacts-dir.js`) and prints their full paths.

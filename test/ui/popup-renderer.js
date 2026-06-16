@@ -1,24 +1,32 @@
-// Renders each of the popup's five states (ui/views/popup-states.html) to a PNG
-// via satori (HTML/CSS-subset -> SVG, no browser) and resvg (SVG -> PNG).
+// Renders a UI test case to a PNG via satori (HTML/CSS-subset -> SVG, no
+// browser) and resvg (SVG -> PNG). Unlike a screenshot, this is a faithful,
+// deterministic approximation driven by the SHIPPED code and styles — built for
+// catching unintended layout/copy changes, not pixel-perfect fidelity.
+//
+// The key property: the DOM rendered here is the popup's REAL output. Each case
+// (test/ui/cases/<name>.case.js) supplies only fake data — an extraction result,
+// a stub tab, a host listing, and an optional DOM action (e.g. "scroll to the
+// bottom"). We feed that to ui/popup.js's real `render()`, which runs the same
+// chooseContent + events-view + source-request-view + truncation code the
+// extension runs, into a jsdom document seeded from the real ui/popup.html. So
+// there is NO hand-maintained copy of the popup markup anywhere: change a view
+// and the snapshots move with it.
 //
 // satori has no CSS engine — it ignores <style>/<link> and reads only inline
 // styles — so we keep ONE source of truth for the popup's look (the real
-// ui/popup.css) and fold the WHOLE stylesheet onto the static markup here
-// before rendering: parse popup.css into rules, match each against the state's
-// DOM with jsdom (the engine the popup runs in), and inline EVERY declaration.
-// Nothing is cherry-picked: satori quietly ignores what it doesn't use (cursor,
-// transition, -webkit-* line clamp, …). The only adjustment is satori's one
-// structural requirement — an element with >1 child needs an explicit
-// flex/none/contents display — plus swapping in the bundled font. Interaction
-// rules (:hover/:active) match nothing in a static tree, so they're skipped.
-//
-// This is NOT a screenshot of the real popup — satori supports a constrained
-// flexbox style subset — but it's a faithful, deterministic approximation
-// driven by the shipped CSS, for catching unintended layout/copy changes.
+// ui/popup.css) and fold the WHOLE stylesheet onto the rendered DOM before
+// drawing: parse popup.css into rules, match each against the DOM with jsdom (the
+// engine the popup runs in), and inline EVERY declaration. Nothing is
+// cherry-picked: satori quietly ignores what it doesn't use (cursor, transition,
+// -webkit-* line clamp, …). The only adjustments are satori's one structural
+// requirement — an element with >1 child needs an explicit flex/none/contents
+// display — plus swapping in the bundled font. Interaction rules (:hover/:active)
+// match nothing in a static tree, so they're skipped.
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
 const { JSDOM } = require("jsdom");
@@ -37,7 +45,24 @@ const FONTS = [
 const WIDTH = 304;
 
 const POPUP_CSS = fs.readFileSync(path.join(ROOT, "ui", "popup.css"), "utf8");
-const STATES_HTML_PATH = path.join(ROOT, "ui", "views", "popup-states.html");
+const POPUP_HTML = fs.readFileSync(path.join(ROOT, "ui", "popup.html"), "utf8");
+const CASES_DIR = path.join(__dirname, "cases");
+
+// Stub tab the cases render against. Only the calendar-URL/link hrefs read it
+// (never shown in a snapshot) and the title backstops an event with no title; a
+// case can override any field via its `tab`.
+const DEFAULT_TAB = { url: "https://example.com/events", title: "Example event page", index: 0 };
+
+// Import the real popup controller's render() once, BEFORE any case installs a
+// global `document` — popup.js's init() guard only fires when a document already
+// exists, so importing it document-less keeps it side-effect-free.
+let renderPromise;
+function loadRender() {
+  if (!renderPromise) {
+    renderPromise = import(pathToFileURL(path.join(ROOT, "ui", "popup.js")).href).then((m) => m.render);
+  }
+  return renderPromise;
+}
 
 // Parse flat CSS into { selector, body } rules (comma-separated selectors split
 // out). popup.css has no media queries or nesting, so this stays simple.
@@ -56,21 +81,21 @@ function parseCssRules(css) {
 const RULES = parseCssRules(POPUP_CSS);
 const BODY_RULE = RULES.find((r) => r.selector === "body");
 
-// Fold popup.css onto a popup subtree as inline styles. The element's own inline
-// style is appended last so it wins. The preview's ".popup" div stands in for
-// the popup's <body>, so it takes the body rule directly.
-function inlinePopupCss(popupEl) {
+// Fold popup.css onto the popup's <body> subtree as inline styles. The element's
+// own inline style is appended last so it wins (so a case's action that sets an
+// inline style — e.g. scroll-to-bottom — overrides the stylesheet).
+function inlinePopupCss(bodyEl) {
   for (const { selector, body } of RULES) {
     if (selector === "body") continue;
     let matched;
     try {
-      matched = popupEl.querySelectorAll(selector);
+      matched = bodyEl.querySelectorAll(selector);
     } catch (e) {
       continue; // a selector jsdom can't evaluate (e.g. some pseudo) — skip
     }
     for (const el of matched) el.setAttribute("style", `${body};${el.getAttribute("style") || ""}`);
   }
-  if (BODY_RULE) popupEl.setAttribute("style", `${BODY_RULE.body};${popupEl.getAttribute("style") || ""}`);
+  if (BODY_RULE) bodyEl.setAttribute("style", `${BODY_RULE.body};${bodyEl.getAttribute("style") || ""}`);
 }
 
 const camel = (p) => p.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
@@ -104,6 +129,31 @@ function styleObject(styleAttr) {
     out[key] = coerceValue(value);
   }
   return out;
+}
+
+// The popup's #events box is height-capped (popup.css) and clips its overflow,
+// so a long list's off-screen rows never show — but satori still draws every one
+// into the SVG, and resvg panics rasterizing the resulting huge SVG (~20+ event
+// cards). Drop the rows that fall outside the visible window before rendering:
+// purely a rasterization bound, the painted result is identical because the
+// dropped rows are clipped anyway. A card is >= its 52px min-height + 8px margin
+// = 60px, so this many rows always more than fills (and overflows) the cap.
+const EVENTS_VIEWPORT_PX = 500; // mirrors #events max-height in ui/popup.css
+const MIN_ROW_PX = 60;
+const VISIBLE_ROWS = Math.ceil(EVENTS_VIEWPORT_PX / MIN_ROW_PX) + 3; // + safety/peek
+
+// Keep only the rows in the visible window of an overflowing #events list,
+// anchored to wherever the list is scrolled: the tail when an action pinned it to
+// the bottom (justify-content: flex-end), otherwise the head. No-op for a list
+// that already fits.
+function clampOverflowingList(doc) {
+  const events = doc.getElementById("events");
+  if (!events) return;
+  const rows = [...events.children];
+  if (rows.length <= VISIBLE_ROWS) return;
+  const pinnedToBottom = /flex-end/.test(events.getAttribute("style") || "");
+  const keep = new Set(pinnedToBottom ? rows.slice(-VISIBLE_ROWS) : rows.slice(0, VISIBLE_ROWS));
+  for (const row of rows) if (!keep.has(row)) events.removeChild(row);
 }
 
 const FLEXY_DISPLAY = ["flex", "none", "contents"];
@@ -140,31 +190,58 @@ function toVDom(el) {
   return { type: "div", props: { style, children: childProp } };
 }
 
-// Render one state's ".popup" element (a jsdom node) to a PNG buffer.
-async function renderStatePng(popupEl) {
-  inlinePopupCss(popupEl);
-  const vdom = toVDom(popupEl);
-  // Root scaffolding: fixed popup width, and the bundled font (the CSS
-  // font-family stack was dropped so satori uses the one we loaded).
-  Object.assign(vdom.props.style, {
-    width: WIDTH,
-    boxSizing: "border-box",
-    display: "flex",
-    flexDirection: "column",
-    fontFamily: FONT_FAMILY,
-  });
-  const svg = await satori(vdom, { width: WIDTH, fonts: FONTS });
-  return new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
+// Build one case's popup DOM with the REAL render(), apply its optional action,
+// and rasterize the <body> to a PNG buffer. Cases run one at a time (the views
+// build into the global `document`), so the global swap is restored in finally.
+async function renderCasePng(testCase) {
+  const render = await loadRender(); // imported while document-less (no init())
+
+  const tab = { ...DEFAULT_TAB, ...(testCase.tab || {}) };
+  const dom = new JSDOM(POPUP_HTML, { url: tab.url });
+  const doc = dom.window.document;
+  // The shell's inert <script src="popup.js"> never runs under jsdom, but strip
+  // it so it isn't laid out as a stray empty box.
+  for (const s of doc.querySelectorAll("script")) s.remove();
+
+  const prevDoc = global.document;
+  const prevWin = global.window;
+  global.document = doc;
+  global.window = dom.window;
+  try {
+    await render({ data: testCase.data, tab, listing: testCase.listing || "none" });
+    if (testCase.action) testCase.action(doc);
+
+    inlinePopupCss(doc.body);
+    clampOverflowingList(doc); // after styling, so :last-child etc. reflect the true list
+    const vdom = toVDom(doc.body);
+    // Root scaffolding: fixed popup width, and the bundled font (the CSS
+    // font-family stack was dropped so satori uses the one we loaded).
+    Object.assign(vdom.props.style, {
+      width: WIDTH,
+      boxSizing: "border-box",
+      display: "flex",
+      flexDirection: "column",
+      fontFamily: FONT_FAMILY,
+    });
+    const svg = await satori(vdom, { width: WIDTH, fonts: FONTS });
+    return new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
+  } finally {
+    global.document = prevDoc;
+    global.window = prevWin;
+    dom.window.close();
+  }
 }
 
-// The five state popups from the static gallery, in document order:
-// [{ name, popup }], where `name` is the section's data-state.
-function loadStatePopups() {
-  const dom = new JSDOM(fs.readFileSync(STATES_HTML_PATH, "utf8"));
-  return [...dom.window.document.querySelectorAll(".state")].map((section) => ({
-    name: section.getAttribute("data-state"),
-    popup: section.querySelector(".popup"),
-  }));
+// The UI cases, in stable (filename) order: [{ name, description, data, ... }].
+// Each test/ui/cases/<name>.case.js is a plain module; <name> is the stem shared
+// with its reference PNG (test/ui/cases/<name>.png). Named *.case.js so the test
+// runner's *.test.js glob never picks them up as tests.
+function loadCases() {
+  return fs
+    .readdirSync(CASES_DIR)
+    .filter((f) => f.endsWith(".case.js"))
+    .sort()
+    .map((f) => ({ name: f.replace(/\.case\.js$/, ""), ...require(path.join(CASES_DIR, f)) }));
 }
 
-module.exports = { renderStatePng, loadStatePopups };
+module.exports = { renderCasePng, loadCases, CASES_DIR };

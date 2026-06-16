@@ -8,9 +8,6 @@ import { GCalConfig } from "../config.js";
 import { classifyHost, isPresentableFallbackEvent } from "../fallback-policy.js";
 
 async function init() {
-  const headingEl = document.getElementById("heading");
-  const eventsEl = document.getElementById("events");
-
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   // The files to inject (and their order) come from the generated load list,
@@ -30,7 +27,21 @@ async function init() {
     console.warn("Could not extract from page:", e);
   }
 
-  const { events: allEvents, request, policyLink } = chooseContent(data, classifyHost(tab.url));
+  await render({ data, tab, listing: classifyHost(tab.url) });
+}
+
+// Render the popup's content from the one chooseContent() decision: the heading
+// text, the (height-capped, scrollable) event list with its bottom count label,
+// and at most one heading-line link. Split out from init() — which does the
+// chrome/fetch I/O to gather `data` — so the SAME real view code can be driven
+// with fake data by the UI snapshot tests (test/ui/), which pass `data`, a stub
+// `tab`, and the host `listing` directly. Builds into the global `document` (the
+// popup document in the extension; a jsdom document under test).
+export async function render({ data, tab, listing }) {
+  const headingEl = document.getElementById("heading");
+  const eventsEl = document.getElementById("events");
+
+  const { events: allEvents, request, policyLink } = chooseContent(data, listing);
 
   if (allEvents.length) {
     headingEl.textContent = "Add to Google Calendar";
