@@ -81,25 +81,25 @@ Multi-instance, one date: icon shows the date, instance buttons show the times (
 
 ## 12-multi-instance-different-dates-timed
 
-Multi-instance, different dates (timed): icon is a '?', instance buttons show date · time
+Multi-instance, same month / different days: one 'month + ?' card; buttons show the day + time
 
 ![12-multi-instance-different-dates-timed](cases/12-multi-instance-different-dates-timed.png)
 
 ## 13-multi-instance-different-dates-allday
 
-Multi-instance, different dates (all-day): icon is a '?', instance buttons show the dates
+Multi-instance, same month / all-day days: one 'month + ?' card; buttons show the days
 
 ![13-multi-instance-different-dates-allday](cases/13-multi-instance-different-dates-allday.png)
 
 ## 14-multi-instance-mixed
 
-Multi-instance, mixed: several dates incl. an all-day one and a date with two times; icon is a '?'
+Multi-instance aggregation split: a same-day card (one day, two times) + a multi-date 'month + ?' card
 
 ![14-multi-instance-mixed](cases/14-multi-instance-mixed.png)
 
 ## 15-mixed-single-and-multi-listing
 
-A listing mixing a single-occurrence card and a multi-instance card
+A listing mixing a single-occurrence card and a multi-date 'month + ?' card
 
 ![15-mixed-single-and-multi-listing](cases/15-mixed-single-and-multi-listing.png)
 

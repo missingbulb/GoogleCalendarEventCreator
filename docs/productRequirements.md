@@ -53,17 +53,23 @@ three of a title, a location, and a start time; anything less is "nothing found"
   a listing or series page (a film week, a festival) yields one card per event.
 - **Multi-instance events.** A single event with several showings — a film with
   several screenings, a show that runs nightly, a multi-night concert — is *one*
-  event with several **instances** (each its own start/end). It renders as one
-  card holding a small clickable button per instance (the card itself isn't
-  clickable; each button opens that showing's Calendar template). Instances are
-  aggregated by date: when every instance falls on **one** day the card's left
-  calendar icon shows that date and the instance buttons show their **times**;
-  when the instances span **several** days the icon is a **question mark** and the
-  buttons show their **dates** (with the time appended when there is one). A
-  single-instance event is just a plain clickable card, exactly as before.
-  Distinct events that happen to share a title still read as separate cards;
-  what folds into one card is showings that match on title, location,
-  description, and timezone (differing only in time).
+  event with several **instances** (each its own start/end). What folds into one
+  event is showings matching on title, location, description, and timezone
+  (differing only in time); distinct events that merely share a title stay
+  separate. That event's instances are then **aggregated by date into cards** so
+  the left calendar icon stays meaningful:
+  - A **day with two or more times** is a *same-day card*: the icon shows that
+    date and each button shows a **time** (e.g. Jun 10 with "8 PM" / "9 PM").
+  - The remaining **single-time days** group by **month**: a month with two or
+    more such days is a *multi-date card* — the icon shows that month with a
+    **"?"** for the day, and each button shows the **day-of-month** (with the
+    time, e.g. "10th, 9 PM"); a month with a single day is just a plain card.
+
+  So three showings in one month is one "?" card; the same three spread across
+  three months is three plain cards; a day with two showings plus another day
+  with one is a same-day card plus a plain card. A grouped card isn't clickable
+  itself — each button opens that showing's Calendar template — while a plain
+  single-occurrence card is clickable as a whole, exactly as before.
 - Cards are ordered by their earliest instance's start time, and an event's
   instances are ordered within the card, so everything reads chronologically
   regardless of the order the page listed it in.

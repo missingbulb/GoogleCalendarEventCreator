@@ -46,25 +46,32 @@ export async function render({ data, tab, listing }) {
   if (allEvents.length) {
     headingEl.textContent = "Add to Google Calendar";
 
-    const { makeEventCard } = await import("./views/events-view.js");
+    const { toCards, renderCard } = await import("./views/events-view.js");
+
+    // Turn the events into cards: a single occurrence is one clickable card, and
+    // a multi-instance event is aggregated by date into one or more cards (a
+    // same-day card with a button per time, a multi-date "?" card, or plain
+    // single cards — see events-view.js's toCards). So one event can yield
+    // several cards, and a card can stand for several event instances.
+    const cards = toCards(allEvents);
+    const totalEvents = cards.reduce((n, c) => n + c.instances.length, 0);
 
     // Render the first `limit` CARDS into the (height-capped, scrollable) list.
-    // Each event is one card — a clickable button for a single occurrence, or a
-    // grouped card (a button per showing) for a multi-instance event — so a card
-    // can stand for several event instances. The cap is on cards (a layout/height
-    // limit), but the count label counts event instances (what the user is
-    // choosing between), so the two numbers can differ. The label is appended as
-    // the list's LAST item — so it scrolls with the cards and is only seen once
-    // you've scrolled to the end. "show all" re-renders with the bigger cap; the
-    // list shows maxCardsShown at first and "show all" expands to maxCardsExpanded.
+    // The cap is on cards (a layout/height limit), but the count label counts
+    // event instances (what the user picks between), so the two numbers can
+    // differ. The label is appended as the list's LAST item — so it scrolls with
+    // the cards and is only seen once you've scrolled to the end. "show all"
+    // re-renders with the bigger cap; the list shows maxCardsShown at first and
+    // "show all" expands to maxCardsExpanded.
     const renderList = (limit) => {
-      const shown = allEvents.slice(0, limit);
-      const items = shown.map((event) => makeEventCard(event, tab));
+      const shown = cards.slice(0, limit);
+      const items = shown.map((card) => renderCard(card, tab));
+      const shownEvents = shown.reduce((n, c) => n + c.instances.length, 0);
       const label = makeTruncationLabel(
         shown.length,
-        allEvents.length,
-        countInstances(shown),
-        countInstances(allEvents),
+        cards.length,
+        shownEvents,
+        totalEvents,
         () => renderList(GCalConfig.maxCardsExpanded)
       );
       if (label) items.push(label);
@@ -105,13 +112,6 @@ function updateScrollFades() {
   if (!events || !top || !bottom) return;
   top.classList.toggle("show", events.scrollTop > 1);
   bottom.classList.toggle("show", events.scrollTop + events.clientHeight < events.scrollHeight - 1);
-}
-
-// Total event instances across a list of cards: a single-occurrence card is one
-// event, a multi-instance card is one per showing. The count label talks in
-// these (what the user actually picks between), while the list cap is on cards.
-function countInstances(events) {
-  return events.reduce((n, e) => n + (Array.isArray(e.times) && e.times.length ? e.times.length : 1), 0);
 }
 
 // Build the count label that sits as the LAST item inside the scrollable list

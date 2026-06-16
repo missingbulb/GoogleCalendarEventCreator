@@ -186,14 +186,11 @@ body {
   color: #1a73e8;
   padding: 2px 0 3px;
 }
-/* The "?" chip for a group whose instances span several dates: the blue banner
-   keeps the calendar look, and the day cell shows a question mark instead of a
-   number. A little taller a banner so the empty banner still reads as one. */
-.event-group .e-date.unknown .e-month {
-  padding: 5px 0;
-}
+/* The "?" chip for a multi-date group: the blue banner shows the shared month
+   (like any chip), and the day cell shows a question mark instead of a number —
+   the date isn't a single day, the buttons carry it. */
 .event-group .e-date.unknown .e-day {
-  font-size: 18px;
+  color: #1a73e8;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */

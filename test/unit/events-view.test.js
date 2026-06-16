@@ -14,9 +14,9 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
-let formatWhen, summarize, dateChip, instanceLabel;
+let formatWhen, summarize, dateChip, sameDayLabel, multiDateLabel, toCards;
 before(async () => {
-  ({ formatWhen, summarize, dateChip, instanceLabel } = await import(
+  ({ formatWhen, summarize, dateChip, sameDayLabel, multiDateLabel, toCards } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))
   ));
 });
@@ -86,38 +86,125 @@ test("summarize: reads the first instance of a multi-instance (times[]) event", 
   assert.equal(summarize(event), summarize({ start: ROUND, location: "Hall" }));
 });
 
-// --- instanceLabel: the small button text inside a grouped multi-instance card.
-// When the card spans several dates (multiDate=true), the date leads so the
-// buttons distinguish themselves by day; when every instance shares one date
-// (multiDate=false), the date is in the icon, so the button shows just the time.
+// --- sameDayLabel / multiDateLabel: the button text inside a grouped card.
+// A same-day card's icon carries the date, so its buttons show just the time;
+// a multi-date card's icon carries the month, so its buttons lead with the
+// ordinal day and append the time.
 
-test("instanceLabel (same date): shows just the time, not the date", () => {
-  const label = instanceLabel({ start: ODD }, false);
+test("sameDayLabel: shows just the time, not the date", () => {
+  const label = sameDayLabel({ start: ODD });
   assert.ok(label.includes("30"), `expected a time in "${label}"`);
   assert.ok(!/jun|17/i.test(label), `did not expect a date in "${label}"`);
 });
 
-test("instanceLabel (same date): a timed instance with an end shows a range", () => {
-  const label = instanceLabel({ start: ROUND, end: "2026-06-17T22:00:00" }, false);
+test("sameDayLabel: a timed instance with an end shows a range", () => {
+  const label = sameDayLabel({ start: ROUND, end: "2026-06-17T22:00:00" });
   assert.ok(label.includes("–"), `expected a range in "${label}"`);
 });
 
-test("instanceLabel (multi date): leads with the date and appends the time", () => {
-  const label = instanceLabel({ start: ODD }, true);
-  assert.ok(/17/.test(label), `expected the day-of-month in "${label}"`);
+test("sameDayLabel: an all-day instance is labeled All day", () => {
+  assert.equal(sameDayLabel({ start: "2026-06-17" }), "All day");
+});
+
+test("multiDateLabel: leads with the ordinal day and appends the time", () => {
+  const label = multiDateLabel({ start: ODD });
+  assert.match(label, /^17th,/, `expected an ordinal day in "${label}"`);
   assert.ok(label.includes("30"), `expected the time appended in "${label}"`);
 });
 
-test("instanceLabel (multi date): an all-day instance shows just the date", () => {
-  const label = instanceLabel({ start: "2026-06-17" }, true);
-  assert.ok(/17/.test(label), `expected the day-of-month in "${label}"`);
-  assert.ok(!/:|AM|PM/i.test(label), `did not expect a time in "${label}"`);
+test("multiDateLabel: an all-day instance shows just the ordinal day", () => {
+  const label = multiDateLabel({ start: "2026-06-17" });
+  assert.equal(label, "17th");
 });
 
-test("instanceLabel (same date): an all-day instance is labeled All day", () => {
-  assert.equal(instanceLabel({ start: "2026-06-17" }, false), "All day");
+test("multiDateLabel: ordinal suffixes are correct (1st, 2nd, 3rd, 21st)", () => {
+  assert.equal(multiDateLabel({ start: "2026-06-01" }), "1st");
+  assert.equal(multiDateLabel({ start: "2026-06-02" }), "2nd");
+  assert.equal(multiDateLabel({ start: "2026-06-03" }), "3rd");
+  assert.equal(multiDateLabel({ start: "2026-06-21" }), "21st");
 });
 
-test("instanceLabel: an instance with no start is labeled, not blank", () => {
-  assert.equal(instanceLabel({ start: "" }, false), "TBD");
+// --- toCards: the date aggregation that turns events into cards.
+
+const card = (events) => toCards(events);
+const ev = (title, times) => ({ title, location: "Hall", ctz: "", times });
+
+test("toCards: a single-occurrence event is one 'single' card", () => {
+  const cards = card([ev("Talk", [{ start: ROUND }])]);
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].kind, "single");
+});
+
+test("toCards: same month, different days, one time each -> ONE multi-date card", () => {
+  // Jun 10 9PM / Jun 11 9PM / Jun 12 9PM.
+  const cards = card([
+    ev("Run", [
+      { start: "2026-06-10T21:00:00" },
+      { start: "2026-06-11T21:00:00" },
+      { start: "2026-06-12T21:00:00" },
+    ]),
+  ]);
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].kind, "multiDate");
+  assert.equal(cards[0].instances.length, 3);
+});
+
+test("toCards: different months -> THREE plain single cards", () => {
+  // Jun 10 9PM / Jul 11 9PM / Aug 12 9PM.
+  const cards = card([
+    ev("Tour", [
+      { start: "2026-06-10T21:00:00" },
+      { start: "2026-07-11T21:00:00" },
+      { start: "2026-08-12T21:00:00" },
+    ]),
+  ]);
+  assert.equal(cards.length, 3);
+  assert.ok(cards.every((c) => c.kind === "single"));
+});
+
+test("toCards: a day with two times + another day with one -> a same-day card + a single card", () => {
+  // Jun 10 8PM / Jun 10 9PM / Jun 11 9PM.
+  const cards = card([
+    ev("Fest", [
+      { start: "2026-06-10T20:00:00" },
+      { start: "2026-06-10T21:00:00" },
+      { start: "2026-06-11T21:00:00" },
+    ]),
+  ]);
+  assert.equal(cards.length, 2);
+  // Ordered by earliest instance: the Jun 10 same-day card first.
+  assert.equal(cards[0].kind, "sameDay");
+  assert.equal(cards[0].instances.length, 2);
+  assert.equal(cards[1].kind, "single");
+  assert.equal(cards[1].instances.length, 1);
+});
+
+test("toCards: instances keep their original times[] index (for the right URL)", () => {
+  const cards = card([
+    ev("Fest", [
+      { start: "2026-06-11T21:00:00" }, // index 0, but later in time
+      { start: "2026-06-10T20:00:00" }, // index 1
+      { start: "2026-06-10T21:00:00" }, // index 2
+    ]),
+  ]);
+  const sameDay = cards.find((c) => c.kind === "sameDay");
+  assert.deepEqual(
+    sameDay.instances.map((it) => it.i).sort(),
+    [1, 2],
+    "the Jun 10 card carries the original indices 1 and 2"
+  );
+});
+
+test("toCards: a multi-time day and other single days in the same month split correctly", () => {
+  // Jun 10 (two times) + Jun 11 + Jun 12 -> same-day card (Jun 10) + multi-date card (11,12).
+  const cards = card([
+    ev("Mix", [
+      { start: "2026-06-10T18:00:00" },
+      { start: "2026-06-10T20:00:00" },
+      { start: "2026-06-11T20:00:00" },
+      { start: "2026-06-12T20:00:00" },
+    ]),
+  ]);
+  assert.deepEqual(cards.map((c) => c.kind), ["sameDay", "multiDate"]);
+  assert.equal(cards[1].instances.length, 2);
 });

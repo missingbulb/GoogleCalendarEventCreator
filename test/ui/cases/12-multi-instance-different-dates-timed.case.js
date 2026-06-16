@@ -1,10 +1,10 @@
-// A multi-instance event whose showings are on DIFFERENT dates (a multi-night
-// concert run, one show per night): the left icon is a question mark (the card
-// has no single date), and each instance button leads with its date, with the
-// time appended.
+// A multi-instance event whose showings are different days of the SAME month,
+// one show per night (a multi-night run): the days fold into one card whose icon
+// shows the month with a "?" for the day, and each button leads with the ordinal
+// day, with the time appended.
 module.exports = {
   description:
-    "Multi-instance, different dates (timed): icon is a '?', instance buttons show date · time",
+    "Multi-instance, same month / different days: one 'month + ?' card; buttons show the day + time",
   data: {
     supported: true,
     events: [

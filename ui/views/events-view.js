@@ -1,14 +1,25 @@
-// Events view: renders one card per extracted event. A single-occurrence event
-// is a clickable button that opens its pre-filled Google Calendar template; a
-// multi-instance event (a showing with several dates/times — the times[] model
-// in pipeline/assemble-events.js) is an UNCLICKABLE card holding one small
-// clickable button per instance, each opening that instance's template.
+// Events view: turns the extracted events into the popup's cards. An event keeps
+// its showings in times[] (the multi-instance model in
+// pipeline/assemble-events.js); this module decides how those instances become
+// cards and renders them. Loaded on demand by the popup controller (popup.js)
+// via dynamic import().
 //
-// An ES module, loaded on demand by the popup controller (popup.js) via
-// dynamic import() when there are events to show. `makeEventCard` is the
-// controller's entry point; the pure display helpers (formatWhen, summarize,
-// dateChip, instanceLabel) are also exported for the unit tests and the
-// UI-snapshot renderer.
+// Aggregation (toCards): an event's instances are grouped for display so the
+// left calendar icon stays meaningful:
+//   1. Instances on the SAME day with 2+ times -> one "same-day" card: the icon
+//      shows that date, and each button shows a time.
+//   2. The remaining single-time days are grouped by (year, month). A month with
+//      2+ such days -> one "multi-date" card: the icon shows that month with a
+//      "?" for the day, and each button shows its day-of-month (and time). A
+//      month with a single day -> a plain single-occurrence card.
+// So a 3-night run in one month is one "?" card; the same run spread across
+// three months is three plain cards; a day with two showings plus another day
+// with one is a same-day card plus a plain card. Cards are ordered by their
+// earliest instance.
+//
+// `toCards` and `renderCard` are the controller's entry points; the pure display
+// helpers (formatWhen, summarize, dateChip, sameDayLabel, multiDateLabel) are
+// also exported for the unit tests and the UI-snapshot renderer.
 import { buildCalendarUrl } from "../../pipeline/build-calendar-url.js";
 import { GCalConfig } from "../../config.js";
 
@@ -20,31 +31,97 @@ function instancesOf(event) {
   return [{ start: event.start, end: event.end, eventLengthInMinutes: event.eventLengthInMinutes }];
 }
 
-// Top-level entry: build the card for one event. Single instance -> a clickable
-// button; several instances -> a grouped card with a button per instance.
-export function makeEventCard(event, tab) {
-  const times = instancesOf(event);
-  return times.length > 1 ? makeGroup(event, times, tab) : makeButton(event, tab);
+// Lexicographic start compare with empty/absent sorting last (matches the
+// assembler's instance/event ordering).
+function cmpStart(a, b) {
+  if (!a) return b ? 1 : 0;
+  if (!b) return -1;
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
-// One clickable event button (the single-instance card). A calendar-style date
-// chip on the left, then the title over a muted time (plus location) on the
-// right; clicking opens the event's Calendar template.
-export function makeButton(event, tab) {
-  const instance = instancesOf(event)[0];
-  const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, 0);
+// Split every event's instances into card descriptors, ordered by each card's
+// earliest instance. A descriptor is { event, kind, instances } where instances
+// is an array of { t, i } (the instance and its original index in event.times,
+// so buildCalendarUrl can schedule exactly that showing). kind is one of
+// "single" | "sameDay" | "multiDate".
+export function toCards(events) {
+  const cards = events.flatMap(eventCards);
+  for (const c of cards) c.instances.sort((a, b) => cmpStart(a.t.start, b.t.start));
+  cards.sort((a, b) => cmpStart(earliest(a), earliest(b)));
+  return cards;
+}
+
+function earliest(card) {
+  return card.instances.reduce(
+    (min, it) => (min === null || cmpStart(it.t.start, min) < 0 ? it.t.start : min),
+    null
+  );
+}
+
+// The card descriptors for one event (see toCards for the rule).
+function eventCards(event) {
+  const instances = instancesOf(event).map((t, i) => ({ t, i }));
+
+  const byDate = new Map();
+  const dateless = [];
+  for (const it of instances) {
+    const key = dateKey(it.t.start);
+    if (!key) dateless.push(it);
+    else pushInto(byDate, key, it);
+  }
+
+  const cards = [];
+  const singleDays = [];
+  for (const group of byDate.values()) {
+    if (group.length >= 2) cards.push({ event, kind: "sameDay", instances: group });
+    else singleDays.push(group[0]);
+  }
+
+  // Single-time days fold together only within the same (year, month).
+  const byMonth = new Map();
+  for (const it of singleDays) pushInto(byMonth, monthKey(dateKey(it.t.start)), it);
+  for (const group of byMonth.values()) {
+    if (group.length >= 2) cards.push({ event, kind: "multiDate", instances: group });
+    else cards.push({ event, kind: "single", instances: group });
+  }
+
+  // Instances with no usable date render as plain single cards.
+  for (const it of dateless) cards.push({ event, kind: "single", instances: [it] });
+
+  return cards;
+}
+
+function pushInto(map, key, value) {
+  const list = map.get(key);
+  if (list) list.push(value);
+  else map.set(key, [value]);
+}
+
+// Render one card descriptor into a DOM node: a clickable button for a single
+// occurrence, or an unclickable grouped card with a button per showing.
+export function renderCard(card, tab) {
+  return card.kind === "single"
+    ? makeSingleCard(card.event, card.instances[0], tab)
+    : makeGroupCard(card, tab);
+}
+
+// A single clickable event button. A calendar-style date chip on the left, then
+// the title over a muted time (plus location); clicking opens the instance's
+// Calendar template.
+function makeSingleCard(event, it, tab) {
+  const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, it.i);
 
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = dateChip(instance.start);
+  const chip = dateChip(it.t.start);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
   body.className = "e-body";
   body.appendChild(titleEl(event, tab));
 
-  const whenText = summarize(event);
+  const whenText = summarizeInstance(event, it.t);
   if (whenText) {
     const when = document.createElement("span");
     when.className = "e-when";
@@ -53,28 +130,22 @@ export function makeButton(event, tab) {
   }
 
   btn.appendChild(body);
-
-  btn.addEventListener("click", async () => {
-    await chrome.tabs.create({ url, index: tab.index + 1 });
-    window.close();
-  });
+  btn.addEventListener("click", () => openTemplate(url, tab));
   return btn;
 }
 
-// The multi-instance card: an unclickable container with the title, the
-// location, and one small clickable button per instance. Instances are
-// aggregated by DATE for the left icon: when every instance falls on the SAME
-// day the icon shows that date and the instance buttons show their times; when
-// the instances span SEVERAL days the icon is a question mark and the buttons
-// show their dates (with the time appended when there is one).
-function makeGroup(event, times, tab) {
-  const card = document.createElement("div");
-  card.className = "event-group";
+// The grouped card: an unclickable container with the title, the location, and a
+// clickable button per instance. A "sameDay" card's icon is the shared date and
+// its buttons are times; a "multiDate" card's icon is the shared month with a
+// "?" and its buttons are day-of-month (with the time).
+function makeGroupCard(card, tab) {
+  const { event, kind, instances } = card;
 
-  const multiDate = distinctDates(times).length > 1;
+  const cardEl = document.createElement("div");
+  cardEl.className = "event-group";
 
-  const chip = multiDate ? { month: "", day: "?", unknown: true } : dateChip(times[0].start);
-  if (chip) card.appendChild(chipEl(chip));
+  const icon = kind === "multiDate" ? monthChip(instances[0].t.start) : dateChip(instances[0].t.start);
+  if (icon) cardEl.appendChild(chipEl(icon));
 
   const body = document.createElement("span");
   body.className = "e-body";
@@ -89,46 +160,53 @@ function makeGroup(event, times, tab) {
 
   const list = document.createElement("span");
   list.className = "e-instances";
-  times.forEach((instance, i) => list.appendChild(instanceButton(event, instance, i, multiDate, tab)));
+  for (const it of instances) {
+    const label = kind === "multiDate" ? multiDateLabel(it.t) : sameDayLabel(it.t);
+    list.appendChild(instanceButton(event, it, label, tab));
+  }
   body.appendChild(list);
 
-  card.appendChild(body);
-  return card;
+  cardEl.appendChild(body);
+  return cardEl;
 }
 
 // One small clickable button for a single instance inside a grouped card.
-function instanceButton(event, instance, index, multiDate, tab) {
-  const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, index);
+function instanceButton(event, it, label, tab) {
+  const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, it.i);
   const btn = document.createElement("button");
   btn.className = "instance-btn";
-  btn.textContent = instanceLabel(instance, multiDate);
-  btn.addEventListener("click", async () => {
-    await chrome.tabs.create({ url, index: tab.index + 1 });
-    window.close();
-  });
+  btn.textContent = label;
+  btn.addEventListener("click", () => openTemplate(url, tab));
   return btn;
 }
 
-// The label on a grouped card's instance button. When the card spans several
-// dates the date leads (so the buttons distinguish themselves by day), with the
-// time appended for a timed instance; when every instance shares one date the
-// date is already in the icon, so the button shows just the time (range).
-export function instanceLabel(instance, multiDate) {
-  const start = instance.start;
-  if (!start) return "TBD";
-  const date = eventStart(start);
-  const allDay = isAllDay(start);
-  if (multiDate) {
-    const dateStr = date ? date.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : start;
-    return allDay ? dateStr : `${dateStr} · ${formatTime(date)}`;
-  }
+async function openTemplate(url, tab) {
+  await chrome.tabs.create({ url, index: tab.index + 1 });
+  window.close();
+}
+
+// The button label inside a same-day card: the time (range), or "All day".
+export function sameDayLabel(instance) {
   return timeRange(instance) || "All day";
 }
 
-// Second line of a single-instance button: the date/time, plus the location
+// The button label inside a multi-date card: the ordinal day-of-month, with the
+// time appended for a timed instance ("10th, 9 PM"; "18th" when all-day). The
+// month already lives in the card's icon.
+export function multiDateLabel(instance) {
+  const date = eventStart(instance.start);
+  if (!date) return "TBD";
+  const day = ordinal(date.getDate());
+  return isAllDay(instance.start) ? day : `${day}, ${formatTime(date)}`;
+}
+
+// Second line of a single-occurrence button: the date/time, plus the location
 // when there's one.
 export function summarize(event) {
-  const instance = instancesOf(event)[0];
+  return summarizeInstance(event, instancesOf(event)[0]);
+}
+
+function summarizeInstance(event, instance) {
   const when = formatWhen(instance.start, effectiveEnd(instance));
   if (event.location) return `${when} · ${event.location}`;
   return when;
@@ -143,7 +221,7 @@ function titleEl(event, tab) {
 }
 
 // Build the left date-chip element from { month, day } (or the { unknown }
-// question-mark variant for a multi-date group).
+// month + "?" variant for a multi-date card).
 function chipEl({ month, day, unknown }) {
   const el = document.createElement("span");
   el.className = unknown ? "e-date unknown" : "e-date";
@@ -187,10 +265,16 @@ function dateKey(start) {
   return isAllDay(start) ? start : start.slice(0, 10);
 }
 
-// The distinct days an event's instances fall on — what decides whether the
-// group icon is a shared date or a question mark.
-function distinctDates(times) {
-  return [...new Set(times.map((t) => dateKey(t.start)).filter(Boolean))];
+// The (year, month) of a day key — what folds single-time days into one card.
+function monthKey(dk) {
+  return dk ? dk.slice(0, 7) : "";
+}
+
+// "1st", "2nd", "3rd", "10th", "21st" — the day-of-month in a multi-date button.
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 // Parse an event start into a Date, or null when it's absent/unparseable. A
@@ -213,6 +297,16 @@ export function dateChip(start) {
   };
 }
 
+// The multi-date card's icon: the shared month with a "?" for the day.
+function monthChip(start) {
+  const date = eventStart(start);
+  return {
+    month: date ? date.toLocaleDateString(undefined, { month: "short" }).toUpperCase() : "",
+    day: "?",
+    unknown: true,
+  };
+}
+
 // Format a clock time, dropping ":00" for round hours ("10 AM", not
 // "10:00 AM"; "6:30 PM" stays as-is).
 function formatTime(date) {
@@ -221,7 +315,7 @@ function formatTime(date) {
 }
 
 // The time (range) for a timed instance — "6:30 PM" or "6:30 PM – 8:30 PM" —
-// or "" for an all-day/dateless instance (used in the same-date group buttons,
+// or "" for an all-day/dateless instance (used in the same-day card buttons,
 // where the date lives in the icon).
 function timeRange(instance) {
   const start = instance.start;

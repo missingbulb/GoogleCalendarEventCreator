@@ -1,8 +1,8 @@
 // A listing that mixes both card kinds: a plain single-occurrence event (a
-// clickable card) alongside a multi-instance event (an unclickable card with a
-// button per showing). Shows how the two read together in one list.
+// clickable card) alongside a multi-instance event whose same-month nightly run
+// folds into one multi-date "month + ?" card. Shows how the two read together.
 module.exports = {
-  description: "A listing mixing a single-occurrence card and a multi-instance card",
+  description: "A listing mixing a single-occurrence card and a multi-date 'month + ?' card",
   data: {
     supported: true,
     events: [
