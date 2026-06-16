@@ -121,6 +121,15 @@ is the project-specific mechanics. Keep these decisions in mind:
   flex; justify-content: center` (not `text-align`) to center a box's content; and
   a bundled font (the CSS font stack won't match a loaded font). Drop only a
   `display` value satori rejects (e.g. `inline-block`).
+- **The snapshot renderer inlines CSS with NO selector specificity — last
+  declaration wins.** It folds every matching rule's declarations inline in
+  stylesheet order, so a property set on BOTH a base class and a more-specific
+  variant resolves to whichever rule appears *later in the file*, not the more
+  specific one (real CSS picks the variant regardless of order). So a property a
+  variant must override belongs ONLY on the variant, never also on the base —
+  e.g. the year pill's background lives on `.e-year.past`/`.e-year.future`, never
+  on `.e-year`, because a base-class background overrode the variant and rendered
+  every past pill red in the snapshot (right in a real browser). (#274)
 - **"Does the extension load?" is guarded in two layers.** A startup failure —
   a bad service-worker `importScripts` path (#146), a missing/renamed injected
   file, a syntax error in one — must fail a test, not just surface when someone
