@@ -98,15 +98,31 @@ export function makePolicyLink(tab) {
 // any event details extraction managed to find. On an unsupported page that's
 // often just the URL and title (no event was parsed), so the user completes
 // the rest in the form itself.
-function sourceRequestPrefill(tab, event) {
+//
+// Exported for the unit tests (the make* link builders that call it touch
+// chrome.tabs/document, so the tests exercise the prefill directly).
+export function sourceRequestPrefill(tab, event) {
   event = event || {};
   return {
     url: tab.url || "",
     name: event.title || tab.title || "",
     start: event.start || "",
     end: event.end || "",
-    timezone: event.ctz || "",
+    // When the fallback couldn't read a timezone off the page, default to the
+    // user's current zone — a sensible guess they can correct in the form
+    // (the event page they're on is usually in their own zone), better than blank.
+    timezone: event.ctz || currentTimezone(),
     location: event.location || "",
     description: event.description || "",
   };
+}
+
+// The user's current IANA timezone (e.g. "America/New_York"), or "" if the
+// runtime can't resolve one.
+function currentTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+  } catch (e) {
+    return "";
+  }
 }
