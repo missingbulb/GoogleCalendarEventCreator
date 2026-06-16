@@ -43,23 +43,11 @@ Unlisted: show the event + a right-aligned 'Suggest Correction' link
 
 ![05-unlisted](cases/05-unlisted.png)
 
-## 06-fits-no-fade
-
-Short listing that fits: no scroll, no edge fades
-
-![06-fits-no-fade](cases/06-fits-no-fade.png)
-
 ## 07-overflow-bottom-fade
 
 Overflowing list, top of scroll: bottom edge fades out (more below)
 
 ![07-overflow-bottom-fade](cases/07-overflow-bottom-fade.png)
-
-## 08-scrolled-top-fade
-
-Scrolled to the bottom: top edge fades out, no bottom fade
-
-![08-scrolled-top-fade](cases/08-scrolled-top-fade.png)
 
 ## 09-scrolled-middle-both-fades
 
@@ -72,12 +60,6 @@ Scrolled to the middle of a long list: both edges fade out
 Long capped list scrolled to the bottom: 'N out of M' + top fade only
 
 ![10-scrolled-bottom-count](cases/10-scrolled-bottom-count.png)
-
-## 11-multi-instance-same-day-times
-
-Multi-instance, one date: icon shows the date, instance buttons show the times (with ranges)
-
-![11-multi-instance-same-day-times](cases/11-multi-instance-same-day-times.png)
 
 ## 12-month-scattered-with-sameday
 
@@ -96,12 +78,6 @@ Same day, three screenings: one same-day card with a button per time
 Month grouping with an all-day day and a timed day folding into one month card, plus a same-day card
 
 ![14-month-allday-and-sameday](cases/14-month-allday-and-sameday.png)
-
-## 15-mixed-single-and-multi-listing
-
-A listing mixing a clickable single-occurrence card and an unclickable same-day card
-
-![15-mixed-single-and-multi-listing](cases/15-mixed-single-and-multi-listing.png)
 
 ## 16-events-outnumber-cards-count
 
