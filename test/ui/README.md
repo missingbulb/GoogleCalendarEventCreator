@@ -72,3 +72,39 @@ Scrolled to the middle of a long list: both edges fade out
 Long capped list scrolled to the bottom: 'N out of M' + top fade only
 
 ![10-scrolled-bottom-count](cases/10-scrolled-bottom-count.png)
+
+## 11-multi-instance-same-day-times
+
+Multi-instance, one date: icon shows the date, instance buttons show the times (with ranges)
+
+![11-multi-instance-same-day-times](cases/11-multi-instance-same-day-times.png)
+
+## 12-multi-instance-different-dates-timed
+
+Multi-instance, different dates (timed): icon is a '?', instance buttons show date · time
+
+![12-multi-instance-different-dates-timed](cases/12-multi-instance-different-dates-timed.png)
+
+## 13-multi-instance-different-dates-allday
+
+Multi-instance, different dates (all-day): icon is a '?', instance buttons show the dates
+
+![13-multi-instance-different-dates-allday](cases/13-multi-instance-different-dates-allday.png)
+
+## 14-multi-instance-mixed
+
+Multi-instance, mixed: several dates incl. an all-day one and a date with two times; icon is a '?'
+
+![14-multi-instance-mixed](cases/14-multi-instance-mixed.png)
+
+## 15-mixed-single-and-multi-listing
+
+A listing mixing a single-occurrence card and a multi-instance card
+
+![15-mixed-single-and-multi-listing](cases/15-mixed-single-and-multi-listing.png)
+
+## 16-events-outnumber-cards-count
+
+Count cue counts events, not cards: 8 cards (two multi-instance) -> more events than cards
+
+![16-events-outnumber-cards-count](cases/16-events-outnumber-cards-count.png)

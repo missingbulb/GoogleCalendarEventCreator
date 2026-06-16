@@ -46,18 +46,26 @@ export async function render({ data, tab, listing }) {
   if (allEvents.length) {
     headingEl.textContent = "Add to Google Calendar";
 
-    const { makeButton } = await import("./views/events-view.js");
+    const { makeEventCard } = await import("./views/events-view.js");
 
-    // Render the first `limit` events into the (height-capped, scrollable) list.
-    // The count label is appended as the list's LAST item — so it scrolls with
-    // the cards and is only seen once you've scrolled to the end. "show all"
-    // re-renders with the bigger cap; the list shows maxEventsShown at first and
-    // "show all" expands it to the maxEventsExpanded hard cap.
+    // Render the first `limit` CARDS into the (height-capped, scrollable) list.
+    // Each event is one card — a clickable button for a single occurrence, or a
+    // grouped card (a button per showing) for a multi-instance event — so a card
+    // can stand for several event instances. The cap is on cards (a layout/height
+    // limit), but the count label counts event instances (what the user is
+    // choosing between), so the two numbers can differ. The label is appended as
+    // the list's LAST item — so it scrolls with the cards and is only seen once
+    // you've scrolled to the end. "show all" re-renders with the bigger cap; the
+    // list shows maxCardsShown at first and "show all" expands to maxCardsExpanded.
     const renderList = (limit) => {
       const shown = allEvents.slice(0, limit);
-      const items = shown.map((event) => makeButton(event, tab));
-      const label = makeTruncationLabel(shown.length, allEvents.length, () =>
-        renderList(GCalConfig.maxEventsExpanded)
+      const items = shown.map((event) => makeEventCard(event, tab));
+      const label = makeTruncationLabel(
+        shown.length,
+        allEvents.length,
+        countInstances(shown),
+        countInstances(allEvents),
+        () => renderList(GCalConfig.maxCardsExpanded)
       );
       if (label) items.push(label);
       eventsEl.replaceChildren(...items);
@@ -66,7 +74,7 @@ export async function render({ data, tab, listing }) {
       updateScrollFades();
     };
 
-    renderList(GCalConfig.maxEventsShown);
+    renderList(GCalConfig.maxCardsShown);
 
     // Edge fades: a scroll cue that there's more list above/below. Keep them in
     // sync as the user scrolls. In a real browser the scroll metrics are live;
@@ -99,20 +107,29 @@ function updateScrollFades() {
   bottom.classList.toggle("show", events.scrollTop + events.clientHeight < events.scrollHeight - 1);
 }
 
+// Total event instances across a list of cards: a single-occurrence card is one
+// event, a multi-instance card is one per showing. The count label talks in
+// these (what the user actually picks between), while the list cap is on cards.
+function countInstances(events) {
+  return events.reduce((n, e) => n + (Array.isArray(e.times) && e.times.length ? e.times.length : 1), 0);
+}
+
 // Build the count label that sits as the LAST item inside the scrollable list
 // (so it's only seen once scrolled to the end), or null when there's nothing to
-// say. Three cases:
-//   - whole list fits unscrolled (<= eventsVisibleBeforeScroll): null;
-//   - whole list shown but taller than that: "N events showing" — a scroll cue,
-//     no "out of", no link;
-//   - a prefix of a longer list shown: "N out of M events showing" with a
-//     "show all" link while the list can still grow (we're below the
-//     maxEventsExpanded cap), or "N out of M events shown" with no link once
-//     it's capped — the link can't reveal anything more.
-// `onShowAll` re-renders the list at the expanded cap.
-export function makeTruncationLabel(shownCount, total, onShowAll) {
-  const allShown = shownCount >= total;
-  if (allShown && total <= GCalConfig.eventsVisibleBeforeScroll) return null;
+// say. The list is capped by CARDS (`shownCards` of `totalCards`), but the label
+// reports EVENT instances (`shownEvents` of `totalEvents`) — a card can hold
+// several — so the two pairs can differ. Three cases:
+//   - every card fits unscrolled (totalCards <= cardsVisibleBeforeScroll): null;
+//   - every card shown but the list is taller than that: "N events showing" — a
+//     scroll cue, no "out of", no link;
+//   - a prefix of the cards shown: "N out of M events showing" with a "show all"
+//     link while the list can still grow (we're below the maxCardsExpanded cap),
+//     or "N out of M events shown" with no link once it's capped — the link
+//     can't reveal anything more.
+// `onShowAll` re-renders the list at the expanded card cap.
+export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEvents, onShowAll) {
+  const allShown = shownCards >= totalCards;
+  if (allShown && totalCards <= GCalConfig.cardsVisibleBeforeScroll) return null;
 
   const el = document.createElement("p");
   el.id = "truncated";
@@ -121,13 +138,13 @@ export function makeTruncationLabel(shownCount, total, onShowAll) {
   // right — laid out as a row by #truncated's flexbox.
   const label = document.createElement("span");
   if (allShown) {
-    label.textContent = `${total} events showing`;
+    label.textContent = `${totalEvents} events showing`;
     el.appendChild(label);
     return el;
   }
 
-  const canExpand = shownCount < GCalConfig.maxEventsExpanded;
-  label.textContent = `${shownCount} out of ${total} events ${canExpand ? "showing" : "shown"}`;
+  const canExpand = shownCards < GCalConfig.maxCardsExpanded;
+  label.textContent = `${shownEvents} out of ${totalEvents} events ${canExpand ? "showing" : "shown"}`;
   el.appendChild(label);
 
   if (canExpand) {

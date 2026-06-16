@@ -14,9 +14,9 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
-let formatWhen, summarize, dateChip;
+let formatWhen, summarize, dateChip, instanceLabel;
 before(async () => {
-  ({ formatWhen, summarize, dateChip } = await import(
+  ({ formatWhen, summarize, dateChip, instanceLabel } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))
   ));
 });
@@ -79,4 +79,45 @@ test("summarize: eventLengthInMinutes with no end shows a time range", () => {
 test("summarize: eventLengthInMinutes is ignored for all-day events", () => {
   const text = summarize({ start: "2026-06-17", eventLengthInMinutes: 90 });
   assert.equal(text, "All day");
+});
+
+test("summarize: reads the first instance of a multi-instance (times[]) event", () => {
+  const event = { location: "Hall", times: [{ start: ROUND }, { start: "2026-06-18T20:00:00" }] };
+  assert.equal(summarize(event), summarize({ start: ROUND, location: "Hall" }));
+});
+
+// --- instanceLabel: the small button text inside a grouped multi-instance card.
+// When the card spans several dates (multiDate=true), the date leads so the
+// buttons distinguish themselves by day; when every instance shares one date
+// (multiDate=false), the date is in the icon, so the button shows just the time.
+
+test("instanceLabel (same date): shows just the time, not the date", () => {
+  const label = instanceLabel({ start: ODD }, false);
+  assert.ok(label.includes("30"), `expected a time in "${label}"`);
+  assert.ok(!/jun|17/i.test(label), `did not expect a date in "${label}"`);
+});
+
+test("instanceLabel (same date): a timed instance with an end shows a range", () => {
+  const label = instanceLabel({ start: ROUND, end: "2026-06-17T22:00:00" }, false);
+  assert.ok(label.includes("–"), `expected a range in "${label}"`);
+});
+
+test("instanceLabel (multi date): leads with the date and appends the time", () => {
+  const label = instanceLabel({ start: ODD }, true);
+  assert.ok(/17/.test(label), `expected the day-of-month in "${label}"`);
+  assert.ok(label.includes("30"), `expected the time appended in "${label}"`);
+});
+
+test("instanceLabel (multi date): an all-day instance shows just the date", () => {
+  const label = instanceLabel({ start: "2026-06-17" }, true);
+  assert.ok(/17/.test(label), `expected the day-of-month in "${label}"`);
+  assert.ok(!/:|AM|PM/i.test(label), `did not expect a time in "${label}"`);
+});
+
+test("instanceLabel (same date): an all-day instance is labeled All day", () => {
+  assert.equal(instanceLabel({ start: "2026-06-17" }, false), "All day");
+});
+
+test("instanceLabel: an instance with no start is labeled, not blank", () => {
+  assert.equal(instanceLabel({ start: "" }, false), "TBD");
 });

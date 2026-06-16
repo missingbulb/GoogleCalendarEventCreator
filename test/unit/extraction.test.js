@@ -3,8 +3,10 @@
 // the extractor's behavior deterministically; test/extractors/live.test.js
 // is the suite that checks the real sites still serve parseable markup.
 //
-// extractFromHtml returns { events: [...] }; `firstEvent` grabs the single
-// (or suggested first) event for the common single-event assertions.
+// extractFromHtml returns { events: [...] }, where each event carries its timing
+// in times[] (the multi-instance model). `firstEvent` grabs the suggested first
+// event; its start/end/duration live on its first instance (`firstEvent(...).
+// times[0]`), while title/location/description/ctz stay on the event itself.
 "use strict";
 
 const test = require("node:test");
@@ -27,8 +29,9 @@ test("Meetup: hardcoded selectors (title, time, venue, details)", () => {
   const ev = extractFromHtml(html, "https://www.meetup.com/brooklyn-rustaceans/events/304218765/");
   assert.equal(ev.events.length, 1); // a single event still yields one entry
   const e = ev.events[0];
+  assert.equal(e.times.length, 1); // with a single instance
   assert.equal(e.title, "Intro to Rust Workshop");
-  assert.equal(e.start, "2026-07-08T18:30:00-04:00");
+  assert.equal(e.times[0].start, "2026-07-08T18:30:00-04:00");
   assert.equal(e.location, "Brooklyn Public Library");
   assert.ok(e.description.includes("ownership and borrowing"));
 });
@@ -46,8 +49,8 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
 
   const e = firstEvent(html, "https://www.eventbrite.com/e/coffee-festival-tickets-998877665544");
   assert.equal(e.title, "Coffee Festival");
-  assert.equal(e.start, "2026-09-12T10:00:00-07:00");
-  assert.equal(e.end, "2026-09-12T16:00:00-07:00"); // only present in JSON-LD
+  assert.equal(e.times[0].start, "2026-09-12T10:00:00-07:00");
+  assert.equal(e.times[0].end, "2026-09-12T16:00:00-07:00"); // only present in JSON-LD
   assert.equal(e.location, "Oregon Convention Center, Portland, OR");
 });
 
@@ -62,7 +65,7 @@ test("Facebook: title from <h1>, date parsed from visible text", () => {
 
   const e = firstEvent(html, "https://www.facebook.com/events/1234567890123456/");
   assert.equal(e.title, "Summer Rooftop Party");
-  assert.equal(e.start, "2026-06-20T19:00:00");
+  assert.equal(e.times[0].start, "2026-06-20T19:00:00");
   assert.ok(e.description.includes("Sunset views"));
 });
 
@@ -81,7 +84,7 @@ test("Generic site: JSON-LD inside @graph, location flattened, HTML stripped", (
 
   const e = firstEvent(html, "https://www.bluedoorhall.example/shows/jazz-night");
   assert.equal(e.title, "Late Night Jazz");
-  assert.equal(e.start, "2026-07-01T20:00:00+02:00");
+  assert.equal(e.times[0].start, "2026-07-01T20:00:00+02:00");
   assert.equal(e.location, "Blue Door Hall, Hauptstr. 12, Berlin");
   assert.equal(e.description, "An intimate evening of jazz.");
 });
@@ -109,7 +112,7 @@ test("Generic site with no structured data: heuristics only", () => {
 
   const e = firstEvent(html, "https://www.riversideneighbors.example/news/spring-cleanup");
   assert.equal(e.title, "Annual Neighborhood Cleanup");
-  assert.equal(e.start, "2026-04-19T09:00:00");
+  assert.equal(e.times[0].start, "2026-04-19T09:00:00");
   assert.equal(e.location, "Riverside Park boathouse, 120 River Rd");
   assert.equal(e.description, "Gloves and trash grabbers provided.");
 });
@@ -121,14 +124,14 @@ test("Generic site: a day-first dotted date (D.M.YYYY) yields an all-day event",
 
   const e = firstEvent(html, "https://www.example.com/standup");
   assert.equal(e.title, "Standup Night");
-  assert.equal(e.start, "2026-06-15");
+  assert.equal(e.times[0].start, "2026-06-15");
 });
 
 test("Generic site: a dotted date with an adjacent time becomes a timed event", () => {
   const html = `<h1>Standup Night</h1><p>15.6.2026 19:00</p>`;
 
   const e = firstEvent(html, "https://www.example.com/standup");
-  assert.equal(e.start, "2026-06-15T19:00:00");
+  assert.equal(e.times[0].start, "2026-06-15T19:00:00");
 });
 
 test("Generic site: a date and time separated by a pipe become a timed event", () => {
@@ -137,7 +140,7 @@ test("Generic site: a date and time separated by a pipe become a timed event", (
   const html = `<h1>Trivia Night</h1><p>16 June 2026 | 6:30 pm</p>`;
 
   const e = firstEvent(html, "https://www.example.com/trivia");
-  assert.equal(e.start, "2026-06-16T18:30:00");
+  assert.equal(e.times[0].start, "2026-06-16T18:30:00");
 });
 
 test("Generic site: a start–end time range fills the event end", () => {
@@ -146,16 +149,16 @@ test("Generic site: a start–end time range fills the event end", () => {
   const html = `<h1>Open Studio</h1><p>16 June 2026 | 6:30 pm - 10:00 pm</p>`;
 
   const e = firstEvent(html, "https://www.example.com/studio");
-  assert.equal(e.start, "2026-06-16T18:30:00");
-  assert.equal(e.end, "2026-06-16T22:00:00");
+  assert.equal(e.times[0].start, "2026-06-16T18:30:00");
+  assert.equal(e.times[0].end, "2026-06-16T22:00:00");
 });
 
 test("Generic site: a time range that crosses midnight rolls the end to the next day", () => {
   const html = `<h1>Late Set</h1><p>10 Aug 2026, 11:00 pm to 1:00 am</p>`;
 
   const e = firstEvent(html, "https://www.example.com/late");
-  assert.equal(e.start, "2026-08-10T23:00:00");
-  assert.equal(e.end, "2026-08-11T01:00:00");
+  assert.equal(e.times[0].start, "2026-08-10T23:00:00");
+  assert.equal(e.times[0].end, "2026-08-11T01:00:00");
 });
 
 test("Generic site: a day-first hyphenated date (DD-MM-YYYY) is parsed day-first", () => {
@@ -163,7 +166,7 @@ test("Generic site: a day-first hyphenated date (DD-MM-YYYY) is parsed day-first
   const html = `<h1>Film Screening</h1><p>הקרנה 18-06-2026</p>`;
 
   const e = firstEvent(html, "https://www.example.com/screening");
-  assert.equal(e.start, "2026-06-18");
+  assert.equal(e.times[0].start, "2026-06-18");
 });
 
 test("Generic site: og:title's trailing site-name suffix is stripped", () => {
@@ -223,9 +226,9 @@ test("Listing page with several events: every JSON-LD event is returned, in orde
     [...ev.events].map((e) => e.title),
     ["Sculpture Fair", "Poetry Slam", "Chamber Music"]
   );
-  assert.equal(ev.events[0].start, "2026-10-03"); // date-only -> all-day event
+  assert.equal(ev.events[0].times[0].start, "2026-10-03"); // date-only -> all-day event
   assert.equal(ev.events[0].location, "Market Square");
-  assert.equal(ev.events[1].start, "2026-10-10T19:00:00");
+  assert.equal(ev.events[1].times[0].start, "2026-10-10T19:00:00");
 });
 
 test("Several events listed out of order are returned sorted by start time", () => {
@@ -240,7 +243,7 @@ test("Several events listed out of order are returned sorted by start time", () 
 
   const ev = extractFromHtml(html, "https://www.festival.example/run");
   assert.deepEqual(
-    [...ev.events].map((e) => e.start),
+    [...ev.events].map((e) => e.times[0].start),
     ["2026-08-07T20:00:00", "2026-08-08T14:00:00", "2026-08-08T17:30:00", "2026-08-09T11:00:00"]
   );
 });
@@ -275,19 +278,21 @@ test("Tel Aviv Cinematheque series page: one event per film card", () => {
     [...ev.events].map((e) => e.title),
     ["First Film", "Second Film", "Third Film"]
   );
-  assert.equal(ev.events[0].start, "2026-06-18T20:00:00");
-  assert.equal(ev.events[1].start, "2026-06-19T20:00:00");
-  assert.equal(ev.events[2].start, "2026-06-20T20:00:00");
-  assert.equal(ev.events[0].end, "2026-06-18T21:30:00");
-  assert.equal(ev.events[1].end, "2026-06-19T21:30:00");
-  assert.equal(ev.events[2].end, "2026-06-20T21:30:00");
+  // Distinct films (different title + description) stay separate single-instance
+  // events; only identical-detail showings would group into one card.
+  assert.equal(ev.events[0].times[0].start, "2026-06-18T20:00:00");
+  assert.equal(ev.events[1].times[0].start, "2026-06-19T20:00:00");
+  assert.equal(ev.events[2].times[0].start, "2026-06-20T20:00:00");
+  assert.equal(ev.events[0].times[0].end, "2026-06-18T21:30:00");
+  assert.equal(ev.events[1].times[0].end, "2026-06-19T21:30:00");
+  assert.equal(ev.events[2].times[0].end, "2026-06-20T21:30:00");
   // Each film's description is assembled from its own box content; ctz is page-level.
   assert.equal(ev.events[0].ctz, "Asia/Jerusalem");
   assert.equal(
     ev.events[0].description,
     "First Film\n18-06-2026 , חמישי / 20:00 / אולם 1\n\nIsrael / 2026 / אורך: 90"
   );
-  assert.equal(ev.events[0].eventLengthInMinutes, 90);
+  assert.equal(ev.events[0].times[0].eventLengthInMinutes, 90);
   assert.ok(ev.events[0].location.includes("סינמטק תל אביב"));
 });
 
@@ -307,11 +312,13 @@ test("Tel Aviv Cinematheque: location is the address text only, not <img>/<noscr
   assert.equal(ev.events[0].location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
 });
 
-test("Tel Aviv Cinematheque: screening times for the selected date become timed events", () => {
+test("Tel Aviv Cinematheque: a film's screenings group into one multi-instance event", () => {
   // Times aren't in the static page — they load via AJAX into #smtime_b only
   // after a date is chosen, and only for that date. When present, the selected
-  // date's all-day event is replaced by one timed event per show; any other
-  // (unselected) date stays an all-day event.
+  // date's all-day showing is replaced by one timed showing per time; any other
+  // (unselected) date stays all-day. All these showings share the film's
+  // title/location/description, so they fold into ONE event whose times[] holds
+  // every screening (the all-day date plus the two timed shows).
   const html = `
     <meta property="og:title" content="Some Film - סינמטק תל אביב">
     <select id="smdate_b">
@@ -325,12 +332,14 @@ test("Tel Aviv Cinematheque: screening times for the selected date become timed 
     </select>`;
 
   const ev = extractFromHtml(html, "https://www.cinema.co.il/event/some-film/");
+  assert.equal(ev.events.length, 1); // one event...
+  const e = ev.events[0];
   assert.deepEqual(
-    [...ev.events].map((e) => e.start),
-    ["2026-06-18", "2026-06-19T16:30:00", "2026-06-19T20:30:00"]
+    [...e.times].map((t) => t.start),
+    ["2026-06-18", "2026-06-19T16:30:00", "2026-06-19T20:30:00"] // ...with every screening
   );
-  assert.equal(ev.events[1].title, "Some Film");
-  assert.equal(ev.events[1].ctz, "Asia/Jerusalem");
+  assert.equal(e.title, "Some Film");
+  assert.equal(e.ctz, "Asia/Jerusalem");
 });
 
 test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
@@ -356,14 +365,14 @@ test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
   // The source instants are UTC; with ctz GB (BST in August) they're stored as
   // floating local wall-clock time, so 22:55Z reads as 23:55 and rolls the end
   // past midnight.
-  assert.equal(e.start, "2026-08-10T23:55:00");
-  assert.equal(e.end, "2026-08-11T00:55:00");
+  assert.equal(e.times[0].start, "2026-08-10T23:55:00");
+  assert.equal(e.times[0].end, "2026-08-11T00:55:00");
   assert.equal(e.location, "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR");
   assert.ok(e.description.includes("vague energy"));
   assert.equal(e.ctz, "GB");
 });
 
-test("Edinburgh Fringe: a multi-performance show yields one event per performance", () => {
+test("Edinburgh Fringe: a multi-performance show groups into one multi-instance event", () => {
   const nextData = {
     props: {
       pageProps: {
@@ -386,12 +395,16 @@ test("Edinburgh Fringe: a multi-performance show yields one event per performanc
   const html = `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify(nextData)}</script>`;
 
   const ev = extractFromHtml(html, "https://www.edfringe.com/tickets/whats-on/sophie-duker-hot-beef-injection");
-  assert.equal(ev.events.length, 3);
+  // Every performance shares the show's title/location/description, so they fold
+  // into one event whose times[] holds all three nights.
+  assert.equal(ev.events.length, 1);
+  const e = ev.events[0];
+  assert.equal(e.times.length, 3);
   // 19:30Z reads as 20:30 local (GB is BST in August).
-  assert.equal(ev.events[0].start, "2026-08-05T20:30:00");
-  assert.equal(ev.events[1].start, "2026-08-06T20:30:00");
-  assert.equal(ev.events[2].start, "2026-08-07T20:30:00");
-  assert.equal(ev.events[0].ctz, "GB");
+  assert.equal(e.times[0].start, "2026-08-05T20:30:00");
+  assert.equal(e.times[1].start, "2026-08-06T20:30:00");
+  assert.equal(e.times[2].start, "2026-08-07T20:30:00");
+  assert.equal(e.ctz, "GB");
 });
 
 test("Edinburgh Fringe: a page with no event JSON yields no event", () => {
@@ -425,7 +438,7 @@ test("Meetup: ctz read from the group's timezone embedded in page scripts", () =
   assert.equal(e.ctz, "America/New_York");
   // With the timezone known, the offset start is stored as floating local
   // wall-clock time in that zone (the ctz param then places it).
-  assert.equal(e.start, "2026-07-08T18:30:00");
+  assert.equal(e.times[0].start, "2026-07-08T18:30:00");
 });
 
 test("Meetup: an unrecognized timezone string is ignored", () => {
@@ -474,5 +487,5 @@ test("Page with a parseable date but no site/JSON-LD: still yields the event", (
   const ev = extractFromHtml(html, "https://www.blog.example/block-party");
   assert.equal(ev.events.length, 1);
   assert.equal(ev.events[0].title, "Block Party");
-  assert.equal(ev.events[0].start, "2026-07-11T14:00:00");
+  assert.equal(ev.events[0].times[0].start, "2026-07-11T14:00:00");
 });

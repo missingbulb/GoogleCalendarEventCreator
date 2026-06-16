@@ -100,11 +100,14 @@ export function makePolicyLink(tab) {
 // the rest in the form itself.
 function sourceRequestPrefill(tab, event) {
   event = event || {};
+  // The event carries its timing in times[] (the multi-instance model); seed the
+  // form from the first instance. A flat { start, end } event is tolerated too.
+  const instance = (event.times && event.times[0]) || event;
   return {
     url: tab.url || "",
     name: event.title || tab.title || "",
-    start: event.start || "",
-    end: event.end || "",
+    start: instance.start || "",
+    end: instance.end || "",
     timezone: event.ctz || "",
     location: event.location || "",
     description: event.description || "",

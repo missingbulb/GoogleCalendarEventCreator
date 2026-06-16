@@ -9,14 +9,24 @@ import { GCalConfig } from "../config.js";
 
 const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 
-export function buildCalendarUrl(data, tab) {
+// Build the Calendar template URL for one event INSTANCE. An event carries its
+// timing in `times[]` (the multi-instance model); `instanceIndex` selects which
+// showing to schedule — the only field that varies between an event's instances
+// is the date/time, so title/location/description/ctz come from the event and
+// only the `dates` param changes per instance. A flat event ({ start, end,
+// eventLengthInMinutes } on the object itself) is still accepted — it's treated
+// as its own single instance — so existing single-occurrence callers and tests
+// need no change.
+export function buildCalendarUrl(data, tab, instanceIndex = 0) {
+  const instance = (data.times && data.times[instanceIndex]) || data;
+
   const params = new URLSearchParams();
   params.set("action", "TEMPLATE");
 
   const title = data.title || tab.title || GCalConfig.fallbackEventTitle;
   params.set("text", title);
 
-  const dates = formatDatesParam(data.start, data.end, data.eventLengthInMinutes);
+  const dates = formatDatesParam(instance.start, instance.end, instance.eventLengthInMinutes);
   if (dates) params.set("dates", dates);
   if (data.ctz) params.set("ctz", data.ctz);
   if (data.location) params.set("location", data.location);

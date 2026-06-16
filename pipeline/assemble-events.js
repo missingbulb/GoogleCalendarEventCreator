@@ -8,13 +8,30 @@
 // The result is always { events: [...], supported } — `events` holds the
 // extracted events (possibly empty) and `supported` is true when a registered
 // source matched this page's host. Each event is fully self-described —
-// { title, start, end, location, description, ctz, eventLengthInMinutes? } — so
-// a caller (the popup) can build a Google Calendar URL for any of them without
-// consulting page-level state. `eventLengthInMinutes` is only present when a
-// site extractor found an explicit duration on the page (not derived from the
-// difference of start and end). An ordinary event page yields one event; a
-// listing/series page (e.g. a film week with several different films) yields one
-// per event.
+// { title, location, description, ctz, times: [ { start, end,
+// eventLengthInMinutes? }, ... ] } — so a caller (the popup) can build a Google
+// Calendar URL for any of its instances without consulting page-level state.
+//
+// THE MULTI-INSTANCE MODEL: an event's timing lives in `times`, an array of one
+// or more instances (showings), each carrying its own { start, end,
+// eventLengthInMinutes? }. A plain single-occurrence event is just `times` of
+// length 1; a film with several screenings, a nightly show, or a multi-night
+// concert run is one event with several instances. `eventLengthInMinutes` is
+// only present on an instance when a site extractor found an explicit duration
+// (not derived from start/end). start/end follow the same string contract as
+// before ("YYYY-MM-DD" all-day, "YYYY-MM-DDTHH:MM[:SS]" floating, or an exact
+// instant with offset/Z).
+//
+// Sources still emit the FLAT shape per occurrence ({ title, start, end, ... },
+// or an `events` array of them) — keeping "add a source" a single self-contained
+// file (docs/architectureGuidelines.md). norm() wraps each into a one-instance
+// event, and group() then folds together any events that share every non-time
+// field (title + location + description + ctz), concatenating their instances.
+// So a listing/series page's per-showing emissions (Edinburgh Fringe
+// performances, Ticketmaster nights, a film's screening dates) collapse into one
+// multi-instance event, while genuinely distinct events (a film week's different
+// films) stay separate. A source that wants to may also return `times[]` on an
+// event directly — norm() takes it as-is.
 //
 // The popup reads `supported` (with the events) to decide what to render: a
 // supported host shows its events; an unsupported host shows the generic
@@ -54,34 +71,87 @@
     // When the event's timezone is known, store start/end as floating local
     // wall-clock times in that timezone rather than UTC instants: the Calendar
     // URL's `ctz` then places them, and the times read as the event's city shows.
+    // Each occurrence is normalized into one `times` instance; a source that
+    // already returns `times[]` has its instances normalized in place.
+    const normInstance = (t, ctz) => {
+      const out = {
+        start: GCal.localizeToZone(t.start || "", ctz),
+        end: t.end ? GCal.localizeToZone(t.end, ctz) : null,
+      };
+      if (t.eventLengthInMinutes != null) out.eventLengthInMinutes = t.eventLengthInMinutes;
+      return out;
+    };
     const norm = (e) => {
       const ctz = e.ctz || "";
-      const out = {
+      const instances = Array.isArray(e.times) && e.times.length
+        ? e.times
+        : [{ start: e.start, end: e.end, eventLengthInMinutes: e.eventLengthInMinutes }];
+      return {
         title: e.title || "",
-        start: GCal.localizeToZone(e.start || "", ctz),
-        end: e.end ? GCal.localizeToZone(e.end, ctz) : null,
         location: e.location || "",
         description: e.description || "",
         ctz,
+        times: instances.map((t) => normInstance(t, ctz)),
       };
-      if (e.eventLengthInMinutes != null) out.eventLengthInMinutes = e.eventLengthInMinutes;
-      return out;
     };
 
-    const events = site ? supportedEvents(site, norm) : fallbackEvents(norm);
+    const events = group(site ? supportedEvents(site, norm) : fallbackEvents(norm));
 
-    // Present events in chronological order regardless of the order the page (or
-    // a site extractor's performance list) happened to give them in. start is an
-    // ISO-ish string ("2026-08-05T14:00:00" or a date-only "2026-08-05"), so a
-    // lexicographic compare sorts chronologically; events with no start sort
-    // last. The sort is stable, so events sharing a start keep their order.
-    events.sort((a, b) => {
-      if (!a.start) return b.start ? 1 : 0;
-      if (!b.start) return -1;
-      return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
-    });
+    // Present everything chronologically regardless of the order the page (or a
+    // site extractor's performance list) gave it in. start is an ISO-ish string
+    // ("2026-08-05T14:00:00" or a date-only "2026-08-05"), so a lexicographic
+    // compare sorts chronologically and an empty start sorts last. Each event's
+    // instances are sorted, then the events by their earliest instance. Both
+    // sorts are stable, so equal starts keep their order.
+    for (const e of events) e.times.sort((a, b) => cmpStart(a.start, b.start));
+    events.sort((a, b) => cmpStart(a.times[0].start, b.times[0].start));
 
     return { events, supported: Boolean(site) };
+  }
+
+  // Lexicographic start compare with empty/absent sorting last.
+  function cmpStart(a, b) {
+    if (!a) return b ? 1 : 0;
+    if (!b) return -1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
+  // Fold events that describe the same thing at different times into one
+  // multi-instance event. The grouping key is every NON-time field
+  // (title + location + description + ctz): two events that match on all of them
+  // are the same event's separate showings, so their `times` are concatenated
+  // (exact-duplicate instances dropped). Events that differ in any of those —
+  // e.g. the different films on a series page — stay separate. Encounter order
+  // is preserved (the later chronological sort orders them anyway).
+  function group(events) {
+    const byKey = new Map();
+    const out = [];
+    for (const e of events) {
+      const key = JSON.stringify([e.title, e.location, e.description, e.ctz]);
+      const existing = byKey.get(key);
+      if (existing) {
+        existing.times.push(...e.times);
+      } else {
+        const copy = { ...e, times: [...e.times] };
+        byKey.set(key, copy);
+        out.push(copy);
+      }
+    }
+    for (const e of out) e.times = dedupeInstances(e.times);
+    return out;
+  }
+
+  // Drop instances that are byte-identical to one already kept (same start, end,
+  // and duration) — a page listing the same showing twice shouldn't yield two
+  // buttons for it. Distinct showings (any field differs) are all kept.
+  function dedupeInstances(times) {
+    const seen = new Set();
+    return times.filter((t) => {
+      const k = JSON.stringify([t.start, t.end, t.eventLengthInMinutes ?? null]);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
   }
 
   // Supported host: the matching source is self-contained. Use its result as-is
@@ -99,7 +169,7 @@
     // the host's og/footer metadata but describes no specific event. Treat it as
     // a real event only when the source actually parsed a date.
     const event = norm(result);
-    return event.start ? [event] : [];
+    return event.times.some((t) => t.start) ? [event] : [];
   }
 
   // Unsupported host: no per-site extractor, so defer to the unsupported-site

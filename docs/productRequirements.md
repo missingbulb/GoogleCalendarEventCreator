@@ -49,24 +49,39 @@ three of a title, a location, and a start time; anything less is "nothing found"
 
 ## Events
 
-- One button per distinct event on the page. An ordinary event page yields one;
-  a listing or series page (a film week, a festival) yields one button per event.
-  A single film with several screening times stays one event.
-- Buttons are ordered by start time, so they read chronologically regardless of
-  the order the page listed them in.
+- One **card** per distinct event on the page. An ordinary event page yields one;
+  a listing or series page (a film week, a festival) yields one card per event.
+- **Multi-instance events.** A single event with several showings — a film with
+  several screenings, a show that runs nightly, a multi-night concert — is *one*
+  event with several **instances** (each its own start/end). It renders as one
+  card holding a small clickable button per instance (the card itself isn't
+  clickable; each button opens that showing's Calendar template). Instances are
+  aggregated by date: when every instance falls on **one** day the card's left
+  calendar icon shows that date and the instance buttons show their **times**;
+  when the instances span **several** days the icon is a **question mark** and the
+  buttons show their **dates** (with the time appended when there is one). A
+  single-instance event is just a plain clickable card, exactly as before.
+  Distinct events that happen to share a title still read as separate cards;
+  what folds into one card is showings that match on title, location,
+  description, and timezone (differing only in time).
+- Cards are ordered by their earliest instance's start time, and an event's
+  instances are ordered within the card, so everything reads chronologically
+  regardless of the order the page listed it in.
 - The list is scrollable, capped in height to roughly the first
-  `eventsVisibleBeforeScroll` rows plus a peek of the next as a "there's more"
-  cue. It shows up to `maxEventsShown` buttons at first. A count label is the
-  **last item inside the scrollable list** (so it's only seen once scrolled to
-  the end), reflecting the state:
+  `cardsVisibleBeforeScroll` rows plus a peek of the next as a "there's more"
+  cue. It shows up to `maxCardsShown` **cards** at first (the cap is on cards
+  because it's a height limit). A count label is the **last item inside the
+  scrollable list** (so it's only seen once scrolled to the end) and reports
+  **event instances** (a card can stand for several), so its numbers can exceed
+  the card count:
   - whole list fits unscrolled — no label;
-  - whole list shown but taller than fits — "N events showing" (a scroll hint,
+  - all cards shown but taller than fits — "N events showing" (a scroll hint,
     no "out of", no link);
-  - a prefix of a longer list shown — "N out of M events showing" with a
-    "show all" link that expands the list to `maxEventsExpanded`; past that cap
+  - a prefix of the cards shown — "N out of M events showing" with a "show all"
+    link that expands the list to the `maxCardsExpanded` card cap; past that cap
     it reads "N out of M events shown" with no link.
-- Clicking a button opens that event's pre-filled Google Calendar template in a
-  new tab.
+- Clicking a card (or, for a multi-instance event, one of its instance buttons)
+  opens that event/showing's pre-filled Google Calendar template in a new tab.
 
 ## Event fields
 

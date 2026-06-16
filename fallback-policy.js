@@ -16,9 +16,13 @@ import { GCalConfig } from "./config.js";
 
 // A host with no per-site source yields only best-effort guesses, so we present
 // a fallback event only when it carries all three main fields — a title, a
-// location AND a start time — not on a date alone.
+// location AND a start time (on at least one of its instances) — not on a date
+// alone. Reads the multi-instance `times[]` model, but also tolerates a flat
+// { start } event so callers/tests can pass either shape.
 export function isPresentableFallbackEvent(event) {
-  return Boolean(event && event.title && event.location && event.start);
+  if (!event || !event.title || !event.location) return false;
+  const times = Array.isArray(event.times) ? event.times : [event];
+  return times.some((t) => t && t.start);
 }
 
 // True when `host` equals `entry` or is a subdomain of it — the same shape of

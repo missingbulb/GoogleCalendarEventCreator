@@ -101,9 +101,59 @@ body {
   box-shadow: 0 1px 1px rgba(60, 64, 67, 0.2);
   transform: translateY(0);
 }
+/* Multi-instance card: an UNCLICKABLE container (a film with several screenings,
+   a nightly show) holding the same tonal look as a single-event button, but with
+   a button per instance inside it instead of one whole-card click target. */
+.event-group {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  color: #202124;
+  background-color: #e8f0fe;
+  border: 1px solid #d2e3fc;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+}
+.event-group:last-child {
+  margin-bottom: 0;
+}
+/* The instance buttons, laid out as a wrapping row of small pills under the
+   title/location. Each is individually clickable (opens that showing's
+   template); the card around them is not. */
+.e-instances {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.instance-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a73e8;
+  background-color: #fff;
+  border: 1px solid #c6dafc;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.instance-btn:hover {
+  background-color: #d2e3fc;
+  border-color: #aecbfa;
+}
 /* Left date chip styled like a calendar icon: a blue month banner over
    the day-of-month on a white "page". */
-.event-btn .e-date {
+.event-btn .e-date,
+.event-group .e-date {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -115,7 +165,8 @@ body {
   border-radius: 5px;
   text-align: center;
 }
-.event-btn .e-month {
+.event-btn .e-month,
+.event-group .e-month {
   display: flex;
   justify-content: center;
   font-size: 9px;
@@ -125,7 +176,8 @@ body {
   background-color: #1a73e8;
   padding: 2px 0;
 }
-.event-btn .e-day {
+.event-btn .e-day,
+.event-group .e-day {
   display: flex;
   justify-content: center;
   font-size: 16px;
@@ -134,9 +186,19 @@ body {
   color: #1a73e8;
   padding: 2px 0 3px;
 }
+/* The "?" chip for a group whose instances span several dates: the blue banner
+   keeps the calendar look, and the day cell shows a question mark instead of a
+   number. A little taller a banner so the empty banner still reads as one. */
+.event-group .e-date.unknown .e-month {
+  padding: 5px 0;
+}
+.event-group .e-date.unknown .e-day {
+  font-size: 18px;
+}
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
-.event-btn .e-body {
+.event-btn .e-body,
+.event-group .e-body {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -144,7 +206,8 @@ body {
   flex: 1;
   min-width: 0;
 }
-.event-btn .e-title {
+.event-btn .e-title,
+.event-group .e-title {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
@@ -153,7 +216,8 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-.event-btn .e-when {
+.event-btn .e-when,
+.event-group .e-when {
   font-size: 11px;
   color: #5f6368;
   white-space: nowrap;
