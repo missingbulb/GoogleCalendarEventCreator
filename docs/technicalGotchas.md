@@ -5,6 +5,14 @@ debugging time, recorded so they bite only once. Overarching architecture rules
 live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
 engineering practices in [engineeringPractices.md](engineeringPractices.md).
 
+- **Day-boundary date math must use UTC component math, not local-midnight +
+  `toISOString()`.** Compute an adjacent day with `Date.UTC(y, m-1, d+1)` then
+  `getUTC*` (as `nextDay` in `build-calendar-url.js` and `isNextDay` in
+  `ui/views/events-view.js` do). `new Date("YYYY-MM-DDT00:00:00")` is *local*
+  midnight, which under a positive UTC offset is the previous UTC day, so
+  `toISOString()` reports the wrong adjacent date. The UTC/`C.UTF-8`
+  sandbox/CI default parses floating times as UTC, so a unit test there won't
+  surface the shift — it only shows in a positive-offset locale.
 - **Service-worker paths must be extension-root absolute.** The background service
   worker runs from `ui/toolbar-icon.js`, so any path it hands a Chrome API
   (`importScripts`, `action.setIcon`) or `fetch` must be extension-root absolute —
