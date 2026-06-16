@@ -68,6 +68,13 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   through the block helpers (`blockText` / `normalizeBlock` / `htmlToText`), which
   preserve `<br>` and literal newlines; line-break handling is generic, not a
   per-source choice.
+- **Body text has no separators between abutting elements — don't use `\b` in
+  body-text regexes.** Adjacent block/inline elements concatenate with nothing
+  between them (`<span>Night</span><span>15.6.2026</span>` → `"Night15.6.2026"`),
+  so a word-boundary `\b` anchor fails when a letter abuts the value you're
+  matching. Anchor on the actual neighbour instead — e.g. a digit
+  lookbehind/lookahead `(?<!\d)…(?!\d)` so an abutting letter is fine but a
+  neighbouring digit (part of a longer number) still rules it out (#216).
 - **A supported/registered host is necessary but not sufficient for "an event."**
   Gating "is this an event?" on `Boolean(site)` made every page on a supported
   host count as one, surfacing a phantom event (og:title + a footer location +
