@@ -4,9 +4,9 @@
   "description": "Chrome extension that creates a pre-filled Google Calendar event from the event details on the current web page.",
   "private": true,
   "scripts": {
-    "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\" \"test/ui/**/*.test.js\" \"test/uber/**/*.test.js\"",
+    "test": "node --test \"test/unit/**/*.test.js\" \"test/integration/**/*.test.js\" \"test/extractors/**/*.test.js\" \"test/ui/**/*.test.js\" \"test/uber/**/*.test.js\"",
     "test:offline": "node --test test/unit/extraction.test.js test/unit/calendar-url.test.js test/unit/source-request.test.js test/unit/shipping-files.test.js test/unit/load-order-generated.test.js test/unit/load-order.test.js test/unit/popup-content.test.js test/unit/popup-truncation.test.js test/unit/events-view.test.js test/unit/triage-extractor-request.test.js test/unit/supported-domains.test.js test/integration/toolbar-badge.test.js test/integration/toolbar-icon-paths.test.js test/integration/extension-loads.test.js test/uber/shared-constants.test.js",
-    "test:live": "node --test test/integration/live.test.js test/integration/fallback-coverage.test.js",
+    "test:live": "node --test test/integration/live.test.js test/extractors/fallback/fallback-coverage.test.js",
     "test:ui": "node --test test/ui/popup-snapshots.test.js",
     "test:e2e": "node --test \"test/e2e/**/*.test.js\"",
     "build": "node tools/build-zip.js",
