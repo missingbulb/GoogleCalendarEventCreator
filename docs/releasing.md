@@ -63,28 +63,41 @@ the workflow fails fast with a clear message if any are missing:
 | `CHROME_CLIENT_SECRET` | …same OAuth client |
 | `CHROME_REFRESH_TOKEN` | generated once for that client |
 
-To mint the OAuth credentials, follow the upstream
-[`chrome-webstore-upload-keys` guide](https://github.com/fregante/chrome-webstore-upload-keys):
-in a Google Cloud project, enable the Chrome Web Store API and create a
-**Desktop app** OAuth client, then let its helper do the token exchange for you —
+To mint the OAuth credentials, in a Google Cloud project: enable the **Chrome Web
+Store API**, **publish** the OAuth consent screen (External is fine — see the
+gotcha below about leaving it in "Testing"), and create a **Desktop app** OAuth
+client. That gives you `CHROME_CLIENT_ID` and `CHROME_CLIENT_SECRET`. Then do the
+OAuth exchange by hand (this is the flow used for the first publish):
 
 ```sh
-npx chrome-webstore-upload-keys
+export CHROME_CLIENT_ID="…"
+export CHROME_CLIENT_SECRET="…"
+
+# 1. Open this URL (incognito, signed into only the developer account), approve.
+echo "https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&access_type=offline&prompt=consent&redirect_uri=http://localhost&client_id=${CHROME_CLIENT_ID}"
+
+# 2. The browser redirects to http://localhost/?code=… and FAILS TO LOAD (expected).
+#    Copy the code= value out of the address bar.
+export CHROME_AUTH_CODE="…"
+
+# 3. Exchange it for the refresh token (the code is single-use).
+curl -s "https://accounts.google.com/o/oauth2/token" \
+  -d "client_id=${CHROME_CLIENT_ID}" \
+  -d "client_secret=${CHROME_CLIENT_SECRET}" \
+  -d "code=${CHROME_AUTH_CODE}" \
+  -d "grant_type=authorization_code" \
+  -d "redirect_uri=http://localhost" | jq -r .refresh_token
 ```
 
-It launches a local server, walks you through the consent screen, and prints the
-`CHROME_CLIENT_ID` / `CHROME_CLIENT_SECRET` / `CHROME_REFRESH_TOKEN`. Prefer this
-over doing the OAuth flow by hand. Add those three plus `CHROME_EXTENSION_ID`
-(from the dashboard URL) as the four secrets.
+The printed string is `CHROME_REFRESH_TOKEN`. Add those three plus
+`CHROME_EXTENSION_ID` (from the dashboard URL) as the four secrets.
 
-Two gotchas that will bite you regardless of how you mint the token (learned the
-hard way during the first publish):
+Two gotchas that will bite you (learned the hard way during the first publish):
 
 - **The out-of-band (`urn:ietf:wg:oauth:2.0:oob`) flow is blocked by Google.**
-  This is why a Desktop client (loopback `http://localhost` redirect) is required;
-  the helper above uses it automatically. If you ever do the flow by hand, read
-  the `code=` parameter out of the (intentionally failing) `localhost` redirect
-  URL in the address bar.
+  That's why a Desktop client with the `http://localhost` redirect is required,
+  and why step 2 reads the `code=` out of the failing redirect URL instead of a
+  copy/paste screen.
 - **Publish the OAuth consent screen** (don't leave it in "Testing"). A consent
   screen still in Testing only issues refresh tokens that **expire after 7 days**,
   which silently breaks the publish workflow a week later; a published consent
