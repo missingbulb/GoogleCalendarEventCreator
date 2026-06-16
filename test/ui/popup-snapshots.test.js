@@ -1,19 +1,14 @@
-// UI snapshot tests: render each of the popup's five states
-// (ui/views/popup-states.html) to a PNG and compare against the stored image in
-// test/ui/snapshots/. The states file is the single visual reference; the real
-// ui/popup.css is inlined onto it before rendering (see popup-renderer.js), so
-// the snapshots track the shipped styling. Run `npm run refresh:ui` to
-// regenerate after an intentional change to the popup markup or ui/popup.css.
+// UI snapshot tests. Each case (test/ui/cases/<name>.case.js) supplies fake data
+// (and an optional DOM action); the renderer feeds it to the popup's REAL
+// render() — the same chooseContent + view code the extension runs — and
+// rasterizes the result, which is compared pixel-by-pixel (via pixelmatch)
+// against the committed reference PNG (test/ui/cases/<name>.png). So the
+// snapshots track the shipped views and styles directly; there is no
+// hand-maintained copy of the popup markup. Run `npm run refresh:ui` to
+// regenerate after an intentional change to the popup, the views, or ui/popup.css.
 //
-// The chooseContent states (issue #192; see ui/popup.js's chooseContent), plus a
-// truncation variant:
-//   1-supported     — supported host: the extractor's events (a 2-event listing)
-//   2-denylisted    — denylisted host: "No events found" (no link, no prompt)
-//   3-nothing-found — not denylisted, nothing complete: "No events found" + Disagree? link
-//   4-allowlisted   — complete fallback event, allowlisted: the event only
-//   5-unlisted      — complete fallback event, on neither list: event + request button
-//   6-truncated     — long listing capped: bottom count label + "show all" link
-//   7-eight-events  — eight events: scrollable list; count label is its last item
+// A case is a self-contained scenario: its data lives only in the case file
+// (never in production code, never in a shared gallery). See docs/claude/testing.md.
 "use strict";
 
 const { test } = require("node:test");
@@ -22,10 +17,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
-const { renderStatePng, loadStatePopups } = require("./popup-renderer");
+const { renderCasePng, loadCases, CASES_DIR } = require("./popup-renderer");
 const { artifactPath } = require("./snapshot-artifacts-dir");
-
-const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 
 // Rendering is deterministic (no browser/fonts involved beyond the bundled
 // ones), so pixels should match run to run; allow a tiny tolerance for any
@@ -33,7 +26,7 @@ const SNAPSHOTS_DIR = path.join(__dirname, "snapshots");
 const MAX_DIFF_RATIO = 0.005;
 
 async function compareToSnapshot(name, pngBuffer) {
-  const snapshotPath = path.join(SNAPSHOTS_DIR, `${name}.png`);
+  const snapshotPath = path.join(CASES_DIR, `${name}.png`);
   const actualPath = artifactPath(`${name}.actual.png`);
   const diffPath = artifactPath(`${name}.diff.png`);
 
@@ -72,14 +65,29 @@ async function compareToSnapshot(name, pngBuffer) {
   }
 }
 
-const STATES = loadStatePopups();
+const CASES = loadCases();
 
-test("the gallery has all seven states", () => {
-  assert.equal(STATES.length, 7, "ui/views/popup-states.html should define seven .state sections");
+test("there is at least one UI case", () => {
+  assert.ok(CASES.length > 0, "no test/ui/cases/*.case.js found");
 });
 
-for (const { name, popup } of STATES) {
-  test(`popup state "${name}" matches the stored snapshot`, async () => {
-    await compareToSnapshot(`popup-state-${name}`, await renderStatePng(popup));
+// The popup's date/time copy comes from the real views' toLocale* calls, which
+// follow the runtime's default locale. The committed PNGs are authored in en-US
+// (Node's fallback when LANG is unset or C.UTF-8 — the CI/sandbox default). Guard
+// it so a maintainer on a non-English shell gets an actionable message instead of
+// a baffling text-only pixel diff.
+test("the environment resolves to the en-US locale the snapshots assume", () => {
+  const locale = new Intl.DateTimeFormat().resolvedOptions().locale;
+  assert.equal(
+    locale,
+    "en-US",
+    `UI snapshots are authored in en-US, but this environment resolves to "${locale}". ` +
+      `Unset LANG/LC_ALL (or set LANG=C.UTF-8) when running/regenerating the UI snapshots.`
+  );
+});
+
+for (const testCase of CASES) {
+  test(`UI case "${testCase.name}" (${testCase.description}) matches its snapshot`, async () => {
+    await compareToSnapshot(testCase.name, await renderCasePng(testCase));
   });
 }

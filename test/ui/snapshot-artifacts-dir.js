@@ -1,6 +1,6 @@
 // Where the UI snapshot tests write their <name>.actual.png / <name>.diff.png
 // debugging artifacts when a comparison fails. This is a single dir separate
-// from the committed reference PNGs in test/ui/snapshots/, ignored by one
+// from the committed reference PNGs in test/ui/cases/, ignored by one
 // .gitignore line, so adding cases never adds per-file ignore entries. Keeping
 // it in-repo (rather than the system temp dir) lets CI collect the diffs as
 // build artifacts on failure. Failure messages print the full path.

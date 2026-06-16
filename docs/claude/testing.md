@@ -61,19 +61,41 @@ is the project-specific mechanics. Keep these decisions in mind:
      `description` + `expected`, no `url`) and run `npm run test:live` — it now
      runs against the local cached HTML, so its output gives you the exact
      `expected` to paste in. Commit and push.
-- **UI changes** (popup or toolbar icon) need their snapshot captured for future
-  comparison: regenerate the stored PNGs with `npm run refresh:ui` and commit
-  them so the diff shows the before/after. (The render is deterministic — satori
-  + resvg, no browser or network — so whoever makes the UI change generates them
-  on their own branch; there's no CI workflow for it.) The popup's states are
-  authored as static markup in `ui/views/popup-states.html`, styled by the real
-  `ui/popup.css` (the renderer inlines it — no duplicated style values); edit
-  that file (and the views it mirrors) for a UI change, then regenerate. A new
-  popup state needs a new `.state` section there and its own snapshot.
+- **UI snapshots render the popup's REAL output, never a hand-copied mock.** Each
+  case is a self-contained tuple in `test/ui/cases/`: `<name>.case.js` (a module
+  exporting `{ description, data, listing?, tab?, action? }` — only *fake data*)
+  plus its reference `<name>.png`. The renderer feeds that data to `ui/popup.js`'s
+  exported `render({ data, tab, listing })` — the same `chooseContent` + views the
+  extension runs — so a change to any view moves the snapshots automatically.
+  Adding/altering a state is just dropping in (or editing) the `.case.js` and
+  regenerating; there's no central gallery to keep in sync. `render()` is split
+  out of `init()` precisely so the tests can drive it with fake data (init does
+  the chrome/fetch I/O; render builds the DOM). After an intentional popup/view/CSS
+  change run `npm run refresh:ui` and commit the PNGs so the diff shows the
+  before/after (deterministic — satori + resvg, no browser/network — so whoever
+  makes the change regenerates on their branch; no CI workflow for it).
+- **A case's `action` is a `(document) => void` gesture** applied to the rendered
+  DOM before snapshotting — for things plain data can't express. satori is a
+  *static* layout engine (no scrolling), so "scroll all the way down" is expressed
+  as layout: `test/ui/actions.js`'s `scrollToBottom` pins `#events` to its end
+  (`justify-content: flex-end`) so satori clips the top and paints the bottom —
+  the only way to snapshot the count label that lives as the list's last item.
+- **resvg panics rasterizing a tall SVG (~20+ event cards),** even though the
+  `#events` box clips the overflow — satori still *draws* every off-screen row.
+  So the renderer prunes rows outside the visible window before rasterizing
+  (`clampOverflowingList`, anchored to head or — when pinned — tail); the painted
+  result is identical because those rows are clipped anyway. Don't remove it to
+  render a giant list "for real": it'll crash.
+- **UI snapshots are authored in the en-US locale.** The popup's date/time copy
+  comes from the views' `toLocale*` calls, which follow the runtime default; Node
+  resolves to `en-US` whenever `LANG` is unset or `C.UTF-8` (the CI/sandbox
+  default). A guard test asserts this so a non-English shell fails with an
+  actionable message, not a baffling text-only pixel diff; regenerate with
+  `LANG` unset. (Event *times* are floating, so they're timezone-independent.)
 - **The snapshot renderer works within satori's limits** (`test/ui/popup-renderer.js`),
   which aren't obvious — verify a markup/CSS change by running `npm run refresh:ui`,
   don't reason about it. satori has no CSS engine (it ignores `<style>`/`<link>`),
-  so the renderer inlines `ui/popup.css` onto the markup itself (parse rules →
+  so the renderer inlines `ui/popup.css` onto the rendered DOM itself (parse rules →
   match with jsdom → fold into inline styles); don't cherry-pick properties —
   satori silently ignores what it can't use. What it *does* require: an explicit
   `display: flex` (or `none`/`contents`) on any box with element children — a lone

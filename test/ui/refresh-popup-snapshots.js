@@ -1,19 +1,18 @@
-// Regenerates the popup state snapshots (test/ui/snapshots/popup-state-*.png)
-// from ui/views/popup-states.html, using the same rendering as the snapshot
-// test (see popup-renderer.js). Run after an intentional change to the popup
-// markup (ui/views/popup-states.html) or its styling (ui/popup.css).
+// Regenerates the UI snapshots (test/ui/cases/<name>.png) from the cases in
+// test/ui/cases/*.case.js, using the same rendering as the snapshot test (each
+// case's fake data through the popup's real render() — see popup-renderer.js).
+// Run after an intentional change to the popup, its views, or ui/popup.css, and
+// commit the PNGs so reviewers see the before/after in the diff.
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { renderStatePng, loadStatePopups } = require("./popup-renderer");
+const { renderCasePng, loadCases, CASES_DIR } = require("./popup-renderer");
 
 (async () => {
-  const outDir = path.join(__dirname, "snapshots");
-  fs.mkdirSync(outDir, { recursive: true });
-  for (const { name, popup } of loadStatePopups()) {
-    const outPath = path.join(outDir, `popup-state-${name}.png`);
-    fs.writeFileSync(outPath, await renderStatePng(popup));
+  for (const testCase of loadCases()) {
+    const outPath = path.join(CASES_DIR, `${testCase.name}.png`);
+    fs.writeFileSync(outPath, await renderCasePng(testCase));
     console.log(`Wrote ${outPath}`);
   }
 })();
