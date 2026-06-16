@@ -13,62 +13,22 @@ body {
   background-color: #fff;
   border-radius: 12px;
 }
-/* Header row: the brand mark + the state heading, vertically centered. Gives
-   every state — including the empty ones — a consistent face. */
-#header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 10px;
-}
-/* The brand mark: a tiny calendar glyph echoing the date chips — a blue banner
-   over a blue "+" on a bordered white "page". The border + page are what keep it
-   from vanishing as a white-on-white shape in the header. Built from styled boxes
-   (no <img>/<svg>) so the satori snapshot renderer paints it like the chips. */
-#brand {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  width: 17px;
-  overflow: hidden;
-  background-color: #fff;
-  border: 1px solid #c6dafc;
-  border-radius: 3px;
-}
-.brand-banner {
-  height: 5px;
-  background-color: #1a73e8;
-}
-.brand-plus {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  color: #1a73e8;
-  padding: 1px 0 2px;
-}
-/* The state heading is now the clear top of the hierarchy: near-black and
-   semibold (it used to be quieter than the event titles). flex:1 so a
-   heading-line link is pushed to the right edge. */
+/* The state heading: the clear top of the hierarchy — near-black and semibold
+   (it used to be quieter than the event titles). */
 #heading {
-  flex: 1;
-  min-width: 0;
   font-size: 13px;
   font-weight: 600;
   color: #202124;
-  margin: 0;
+  margin: 0 0 10px;
 }
 /* When the popup carries the State-5 "Suggest Correction" link, lay the heading
-   out as a row: text on the left, link on the right. */
+   out as a row: text on the left, link on the right. align-items:center (not
+   baseline) so the 13px title and the smaller 11px link sit on a shared center
+   line — baseline alignment left the differently-sized link looking offset. */
 #heading.with-link {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
 }
 /* One button per distinct event found on the page. A compact, tonal
@@ -138,27 +98,30 @@ body {
   padding: 10px 12px;
   text-align: start;
   color: #202124;
-  /* A white, softly-elevated card: elevation (shadow), not fill, is the
-     "pressable" signal — the unclickable .event-group below is flat. The hairline
-     border keeps the white card legible against the white popup body. */
-  background-color: #fff;
-  border: 1px solid #e8eaed;
+  /* A single-event card is the HEAVIER of the two: its WHOLE surface is one click
+     target, so it carries the weight — a soft diagonal tint (not banal
+     white-on-white) plus elevation. The grouped container below is lighter and
+     flat, since only its inner buttons click. (background-color is a solid
+     fallback for the gradient.) */
+  background-color: #eef4fe;
+  background-image: linear-gradient(135deg, #ffffff 0%, #e6effe 100%);
+  border: 1px solid #d4e2f7;
   border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.12), 0 1px 3px rgba(60, 64, 67, 0.06);
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.14), 0 2px 4px rgba(60, 64, 67, 0.08);
   cursor: pointer;
-  transition: box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
+  transition: box-shadow 0.12s ease, border-color 0.12s ease, background-image 0.12s ease, transform 0.12s ease;
 }
 .event-btn:last-child {
   margin-bottom: 0;
 }
 .event-btn:hover {
-  background-color: #f8faff;
-  border-color: #d2e3fc;
-  box-shadow: 0 3px 8px rgba(60, 64, 67, 0.2);
+  background-image: linear-gradient(135deg, #f3f8ff 0%, #d7e6fd 100%);
+  border-color: #aecbfa;
+  box-shadow: 0 3px 10px rgba(60, 64, 67, 0.22);
   transform: translateY(-1px);
 }
 .event-btn:active {
-  background-color: #eef3fe;
+  background-image: linear-gradient(135deg, #e9f1fe 0%, #cfe0fc 100%);
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
   transform: translateY(0);
 }
@@ -175,26 +138,22 @@ body {
   color: #bdc1c6;
 }
 /* Multi-instance card: an UNCLICKABLE container (a film with several screenings,
-   a nightly show) holding the event's title/location plus a FILLED button per
-   instance — distinct from a single-event button, whose whole surface is one
-   click target (and which carries a trailing ".e-go" chevron the container
-   never does). */
+   a nightly show). It stacks a header row (date icon + title/location) over a
+   full-width row of FILLED instance buttons. Deliberately the LIGHTER of the two
+   card types — flat and barely tinted, with no shadow and no whole-card click —
+   so the heavier, elevated single-event button reads as the thing you press, and
+   here you press an individual instance button instead. (It also never carries
+   the single card's trailing ".e-go" chevron.) */
 .event-group {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
   box-sizing: border-box;
   width: 100%;
   margin-bottom: 8px;
   padding: 10px 12px;
   color: #202124;
-  /* Flat, tinted "panel" with NO shadow — deliberately un-elevated and a touch
-     grayer than the white single cards so it reads as a grouping surface, not a
-     button. (Only its inner instance buttons are clickable; the elevated
-     single-event .event-btn above is the pressable look.) */
-  background-color: #eef2f9;
-  border: 1px solid #dfe4ec;
+  background-color: #f7f8fa;
+  border: 1px solid #e6e8ec;
   border-radius: 10px;
   /* The card itself is NOT a click target (unlike a single-event button) — only
      its inner instance buttons are; show the default cursor over the card. */
@@ -203,15 +162,27 @@ body {
 .event-group:last-child {
   margin-bottom: 0;
 }
-/* The instance buttons, laid out as a wrapping row of small pills under the
-   title/location. Each is individually clickable (opens that showing's
-   template); the card around them is not. */
+/* The header row of a grouped card: the date icon next to the title/location,
+   above the full-width instance-button row. */
+.e-group-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+/* The instance buttons: a wrapping row spanning the FULL card width (under the
+   date icon too, not just under the text) and centered, below the header. Each is
+   individually clickable (opens that showing's template); the card around them is
+   not. */
 .e-instances {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
-  margin-top: 6px;
+  width: 100%;
+  margin-top: 8px;
 }
 /* A FILLED tonal-blue button, deliberately unlike the white calendar icon on the
    left: these are the real click targets inside a grouped card, so they must read
@@ -317,12 +288,12 @@ body {
   color: #1a73e8;
 }
 /* A day-RANGE on a month/multi-day card ("5-7", "14-25") is wider than a single
-   day number, so it gets a tighter font (and a short hyphen dash, joined in
-   events-view.js) to fit the chip's fixed width — within the SAME fixed height
-   above, so the icon stays identical to a single-day one. */
+   day number, so it gets a much tighter font (and a short hyphen dash, joined in
+   events-view.js) to sit comfortably inside the chip's fixed width — within the
+   SAME fixed height above, so the icon stays identical to a single-day one. */
 .event-btn .e-day.range,
 .event-group .e-day.range {
-  font-size: 11px;
+  font-size: 9px;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */

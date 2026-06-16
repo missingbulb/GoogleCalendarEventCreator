@@ -191,17 +191,22 @@ function makeSingleCard(event, it, tab, currentYear) {
 }
 
 // A grouped card: an UNCLICKABLE container (no whole-card click target — unlike a
-// single-occurrence card) with the title, the location, and a clickable button
-// per showing. The caller supplies the left `chip` (a same-day card's shared
-// date, or a month card's month + day-range) and an `instanceLabel` (the time
-// for a same-day card, the day-of-month for a month card).
+// single-occurrence card) laid out as a header row (the date icon next to the
+// title/location) over a full-width, centered row of instance buttons — so the
+// buttons sit under the icon too, not just under the text. The caller supplies
+// the left `chip` (a same-day card's shared date, or a month card's month +
+// day-range) and an `instanceLabel` (the time for a same-day card, the
+// day-of-month for a month card).
 function makeGroupCard(card, tab, { chip, instanceLabel }) {
   const { event, instances } = card;
 
   const cardEl = document.createElement("div");
   cardEl.className = "event-group";
 
-  if (chip) cardEl.appendChild(chipEl(chip));
+  // Header row: the date icon next to the title/location.
+  const header = document.createElement("span");
+  header.className = "e-group-header";
+  if (chip) header.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
   body.className = "e-body";
@@ -213,15 +218,18 @@ function makeGroupCard(card, tab, { chip, instanceLabel }) {
     loc.textContent = event.location;
     body.appendChild(loc);
   }
+  header.appendChild(body);
+  cardEl.appendChild(header);
 
+  // Instance buttons: a full-width, centered row below the header (spanning under
+  // the icon too).
   const list = document.createElement("span");
   list.className = "e-instances";
   for (const it of instances) {
     list.appendChild(instanceButton(event, it, instanceLabel(it), tab));
   }
-  body.appendChild(list);
+  cardEl.appendChild(list);
 
-  cardEl.appendChild(body);
   return cardEl;
 }
 

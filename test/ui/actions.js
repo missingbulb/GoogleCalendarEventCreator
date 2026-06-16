@@ -19,11 +19,19 @@
 "use strict";
 
 // Reveal/hide the top and bottom edge fades to match a simulated scroll position.
+// Sets INLINE opacity rather than toggling the popup's `.show` class: the snapshot
+// renderer inlines popup.css with no selector specificity (last-declared-in-file
+// wins), so the base `.scroll-fade { opacity: 0 }` would override `.show`'s
+// `opacity: 1` and the fade would render invisible — i.e. as the very "hard cut"
+// the fade exists to soften. An element's own inline style is applied last by the
+// inliner, so an inline opacity here actually takes effect. (The live popup still
+// toggles the class for its CSS transition; this is the static-snapshot stand-in,
+// like the justify-content the scroll actions set.)
 function setFades(doc, { top, bottom }) {
   const t = doc.querySelector(".scroll-fade.top");
   const b = doc.querySelector(".scroll-fade.bottom");
-  if (t) t.classList.toggle("show", !!top);
-  if (b) b.classList.toggle("show", !!bottom);
+  if (t) t.style.opacity = top ? "1" : "0";
+  if (b) b.style.opacity = bottom ? "1" : "0";
 }
 
 // At rest at the top of an overflowing list: only the bottom fade (more below).
