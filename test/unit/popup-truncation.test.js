@@ -1,0 +1,72 @@
+// Contract for popup.js's renderTruncation() — the bottom-of-list count label
+// and its "show all" affordance. The popup lists up to maxEventsShown events at
+// first (in a height-capped, scrollable box); this label tells the user how many
+// of the total are showing and, while the list can still grow, offers a "show
+// all" link that expands it to the maxEventsExpanded hard cap.
+//
+// renderTruncation builds DOM, so the test gives popup.js a jsdom document to
+// build into (it reads the thresholds straight from the real config.js, so the
+// edges below — 31, 100 — track the shipped values).
+"use strict";
+
+const { test, before } = require("node:test");
+const assert = require("node:assert/strict");
+const path = require("node:path");
+const { pathToFileURL } = require("node:url");
+const { JSDOM } = require("jsdom");
+
+let renderTruncation, GCalConfig;
+before(async () => {
+  // popup.js's renderTruncation uses the global `document`; importing the module
+  // is side-effect-free (init() only runs when a real document already exists),
+  // but the helper needs one when called, so install a jsdom document first.
+  global.document = new JSDOM("<!doctype html><body></body>").window.document;
+  ({ renderTruncation } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "ui", "popup.js"))
+  ));
+  ({ GCalConfig } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "config.js"))
+  ));
+});
+
+function render(shownCount, total) {
+  const el = document.createElement("p");
+  let showAllCalls = 0;
+  renderTruncation(el, shownCount, total, () => showAllCalls++);
+  return { el, link: el.querySelector(".show-all-link"), showAllCalls: () => showAllCalls };
+}
+
+test("everything shown: the label is hidden and empty", () => {
+  const { el, link } = render(20, 20);
+  assert.equal(el.hidden, true);
+  assert.equal(el.textContent, "");
+  assert.equal(link, null);
+});
+
+test("default cap reached, more remain: 'showing' with a 'show all' link", () => {
+  const { el, link } = render(GCalConfig.maxEventsShown, 40);
+  assert.equal(el.hidden, false);
+  assert.match(el.textContent, new RegExp(`^${GCalConfig.maxEventsShown} out of 40 events showing`));
+  assert.ok(link, "expected a 'show all' link while the list can still grow");
+});
+
+test("clicking 'show all' invokes the expand callback (and suppresses navigation)", () => {
+  const { link, showAllCalls } = render(GCalConfig.maxEventsShown, 40);
+  let defaultPrevented = false;
+  link.addEventListener("click", (e) => (defaultPrevented = e.defaultPrevented));
+  link.dispatchEvent(new document.defaultView.MouseEvent("click", { bubbles: true, cancelable: true }));
+  assert.equal(showAllCalls(), 1);
+  assert.equal(defaultPrevented, true);
+});
+
+test("expanded to the hard cap, still more remain: 'shown' with NO link", () => {
+  const { el, link } = render(GCalConfig.maxEventsExpanded, 500);
+  assert.equal(el.hidden, false);
+  assert.match(el.textContent, new RegExp(`^${GCalConfig.maxEventsExpanded} out of 500 events shown`));
+  assert.equal(link, null, "no 'show all' once the hard cap is hit — it can't reveal more");
+});
+
+test("hard cap exactly equals the total: everything shown, label hidden", () => {
+  const { el } = render(GCalConfig.maxEventsExpanded, GCalConfig.maxEventsExpanded);
+  assert.equal(el.hidden, true);
+});

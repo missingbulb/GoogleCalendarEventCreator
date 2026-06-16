@@ -20,9 +20,16 @@ export const GCalConfig = {
   // all-day events stay all-day. Applied only at Calendar-URL build time.
   defaultEventDurationMs: 2 * 60 * 60 * 1000,
 
-  // Most events the popup lists from one page; beyond this it shows
-  // "Showing first N of M".
-  maxEventsShown: 7,
+  // Events the popup lists from one page before its scrollable list is capped.
+  // The list shows up to this many at first (in a height-limited, scrollable
+  // box); beyond it, a bottom "N out of M events showing" label offers a
+  // "show all" link that expands to maxEventsExpanded.
+  maxEventsShown: 31,
+
+  // Hard cap on how many events "show all" expands the list to — a guard
+  // against pathological pages. Past this the bottom label reads
+  // "N out of M events shown" with no "show all" link.
+  maxEventsExpanded: 100,
 
   // Hard cap on the whole Google Calendar template URL; only the trailing
   // details field is trimmed to fit (never the other fields).

@@ -30,24 +30,26 @@ async function init() {
     console.warn("Could not extract from page:", e);
   }
 
-  const MAX_EVENTS = GCalConfig.maxEventsShown;
   const { events: allEvents, request, policyLink } = chooseContent(data, classifyHost(tab.url));
-  const events = allEvents.slice(0, MAX_EVENTS);
 
-  if (events.length) {
+  if (allEvents.length) {
     headingEl.textContent =
       allEvents.length > 1 ? `${allEvents.length} events on this page` : "Add to Google Calendar";
 
-    if (allEvents.length > MAX_EVENTS) {
-      const truncEl = document.getElementById("truncated");
-      truncEl.textContent = `Showing first ${MAX_EVENTS} of ${allEvents.length}`;
-      truncEl.hidden = false;
-    }
-
+    const truncEl = document.getElementById("truncated");
     const { makeButton } = await import("./views/events-view.js");
-    events.forEach((event) => {
-      eventsEl.appendChild(makeButton(event, tab));
-    });
+
+    // Render the first `limit` events into the (height-capped, scrollable) list
+    // and refresh the bottom count label. "show all" re-renders with the bigger
+    // cap. The list shows maxEventsShown at first; "show all" expands it to the
+    // maxEventsExpanded hard cap.
+    const renderList = (limit) => {
+      const shown = allEvents.slice(0, limit);
+      eventsEl.replaceChildren(...shown.map((event) => makeButton(event, tab)));
+      renderTruncation(truncEl, shown.length, allEvents.length, () => renderList(GCalConfig.maxEventsExpanded));
+    };
+
+    renderList(GCalConfig.maxEventsShown);
   } else {
     headingEl.textContent = "No events found on this page";
   }
@@ -60,6 +62,36 @@ async function init() {
     headingEl.classList.add("with-link");
     headingEl.appendChild(request ? view.makeSourceRequestLink(tab, request) : view.makePolicyLink(tab));
   }
+}
+
+// The bottom-of-list count label. Hidden when every event is already shown.
+// Otherwise reads "N out of M events showing" with a "show all" link while the
+// list can still grow (we're showing fewer than the maxEventsExpanded cap), or
+// "N out of M events shown" with no link once it's capped — the link can't
+// reveal anything more. `onShowAll` re-renders the list at the expanded cap.
+export function renderTruncation(el, shownCount, total, onShowAll) {
+  el.replaceChildren();
+  if (shownCount >= total) {
+    el.hidden = true;
+    return;
+  }
+
+  const canExpand = shownCount < GCalConfig.maxEventsExpanded;
+  el.textContent = `${shownCount} out of ${total} events ${canExpand ? "showing" : "shown"}`;
+
+  if (canExpand) {
+    const link = document.createElement("a");
+    link.className = "show-all-link";
+    link.href = "#";
+    link.textContent = "show all";
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      onShowAll();
+    });
+    el.append(" ", link);
+  }
+
+  el.hidden = false;
 }
 
 // THE one decision behind what the popup renders, given the injected extraction

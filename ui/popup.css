@@ -24,6 +24,14 @@ body {
    (light-blue) card so it reads as a pressable button: a calendar-style
    date chip on the left (month banner over day), then the title and a
    muted time (plus location, if any) on the right. */
+/* The list is height-capped to roughly 7 event rows plus a half-row peek of the
+   next one — a visual cue that there's more — and scrolls past that. A row is
+   the 52px min-height card plus its 8px bottom margin (60px); 7 full rows + half
+   a card ≈ 446px. */
+#events {
+  max-height: 446px;
+  overflow-y: auto;
+}
 .event-btn {
   display: flex;
   flex-direction: row;
@@ -116,13 +124,24 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Count label below the (scrollable) list — "N out of M events showing/shown" —
+   with an optional inline "show all" link. Muted so it reads as a footnote, not
+   a warning. */
 #truncated {
   font-size: 11px;
-  color: #7d5500;
-  background-color: #fef3c7;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin: 0 0 8px;
+  color: #5f6368;
+  margin: 8px 0 0;
+}
+/* The inline "show all" link in the count label: same understated treatment as
+   the heading-line links. */
+.show-all-link {
+  margin-left: 4px;
+  color: #1a73e8;
+  text-decoration: none;
+  cursor: pointer;
+}
+.show-all-link:hover {
+  text-decoration: underline;
 }
 /* The small right-aligned link on the popup's heading line ("Suggest Correction"
    on an unlisted host with an event, or "Disagree?" when there's nothing to
