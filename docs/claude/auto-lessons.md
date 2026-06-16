@@ -52,10 +52,13 @@ from the repo owner is the merge signal (see `docs/claude/workflow.md`).
 
 | Secret | Purpose |
 |--------|---------|
-| `ANTHROPIC_API_KEY` | Authenticate the `claude` CLI — **must be set** |
+| `ANTHROPIC_API_KEY_DAILY_LEARNING` | Authenticate the `claude` CLI — **must be set**. A key dedicated to this workflow (separate from the extractor's `ANTHROPIC_API_KEY`) so its spend can be capped and tracked independently in the Anthropic Console. |
 | `GITHUB_TOKEN` | Standard Actions token — automatic, no setup |
 
-Each active day spends one Opus run, so keep an Anthropic **spend cap** set.
+Each active day spends one Opus run on `ANTHROPIC_API_KEY_DAILY_LEARNING`; set a
+hard monthly **spend cap** on that key in the Anthropic Console to bound this
+workflow's cost on its own. If the cap is hit, the run fails loudly (red in the
+Actions tab) and the next day's run is independent.
 
 ## Permissions the workflow uses
 

@@ -7,7 +7,9 @@ name: Daily lessons digest
 # (docs/claude/workflow.md). Full description: docs/claude/auto-lessons.md.
 #
 # Required repository secret:
-#   ANTHROPIC_API_KEY — Claude API key for the agent (keep a spend cap set)
+#   ANTHROPIC_API_KEY_DAILY_LEARNING — Claude API key for this agent. Kept
+#   separate from the extractor workflow's ANTHROPIC_API_KEY so this job's spend
+#   can be capped/controlled independently.
 # The GITHUB_TOKEN is standard and always available.
 
 on:
@@ -105,7 +107,7 @@ jobs:
         if: steps.activity.outputs.active == 'true'
         timeout-minutes: 20
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_DAILY_LEARNING }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
