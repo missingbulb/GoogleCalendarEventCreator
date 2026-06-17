@@ -46,9 +46,10 @@ const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "locat
 // Not a full public-suffix list — just the suffixes worth special-casing for a
 // human-readable issue title; everything else takes the last two labels.
 const COMPOUND_SUFFIXES = new Set([
-  "co.uk", "org.uk", "gov.uk", "ac.uk", "co.il", "org.il", "co.jp", "co.kr",
-  "co.nz", "co.za", "com.au", "net.au", "org.au", "com.br", "com.mx",
-  "com.tr", "com.sg", "com.hk", "com.cn",
+  "co.uk", "org.uk", "gov.uk", "ac.uk",
+  "co.il", "org.il", "gov.il", "ac.il", "muni.il", "k12.il", "idf.il", "net.il",
+  "co.jp", "co.kr", "co.nz", "co.za", "com.au", "net.au", "org.au",
+  "com.br", "com.mx", "com.tr", "com.sg", "com.hk", "com.cn",
 ]);
 
 // The registrable "apex" domain of a URL for display in the issue title:
