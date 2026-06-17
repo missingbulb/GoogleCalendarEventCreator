@@ -41,22 +41,24 @@ const POLICY_DOC_PATH = "docs/extraction-policy.md";
 // param matching its id.
 const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "location", "description"];
 
-// A short, two-label registrable apex domain for a common compound public
-// suffix (so `events.company.co.uk` strips to `company.co.uk`, not `co.uk`).
-// Not a full public-suffix list — just the suffixes worth special-casing for a
-// human-readable issue title; everything else takes the last two labels.
-const COMPOUND_SUFFIXES = new Set([
-  "co.uk", "org.uk", "gov.uk", "ac.uk",
-  "co.il", "org.il", "gov.il", "ac.il", "muni.il", "k12.il", "idf.il", "net.il",
-  "co.jp", "co.kr", "co.nz", "co.za", "com.au", "net.au", "org.au",
-  "com.br", "com.mx", "com.tr", "com.sg", "com.hk", "com.cn",
+// Generic registry labels that, sitting directly under a two-letter
+// country-code TLD, form a compound public suffix: `co.uk`, `com.au`, `gov.il`,
+// `co.jp`, `ac.uk`, … Keying on this small generic set plus *any* 2-letter
+// ccTLD keeps the apex extraction country-independent — there's no per-country
+// list to maintain (the gap that let `gov.il` slip through, #313). Correctly
+// resolving every compound suffix needs the full Public Suffix List, which is
+// far too heavy to bundle for a cosmetic issue title; this rule covers the
+// overwhelmingly common shape without it.
+const REGISTRY_SLDS = new Set([
+  "co", "com", "net", "org", "gov", "gob", "edu", "ac", "mil", "sch",
 ]);
 
 // The registrable "apex" domain of a URL for display in the issue title:
 // hostname with the protocol/path/query and any subdomains stripped down to the
-// registrable domain (`https://dash.datadoghq.com/?utm=...` -> `datadoghq.com`).
-// Falls back to the raw value when it can't parse a host (so a malformed URL
-// still produces a title).
+// registrable domain (`https://dash.datadoghq.com/?utm=...` -> `datadoghq.com`,
+// `https://visit.tel-aviv.gov.il/...` -> `tel-aviv.gov.il`). Falls back to the
+// raw value when it can't parse a host (so a malformed URL still produces a
+// title).
 function apexDomain(url) {
   let host;
   try {
@@ -67,8 +69,11 @@ function apexDomain(url) {
   const labels = host.split(".");
   // An IP address or a bare single-label host has no apex to strip to.
   if (labels.length <= 2 || /^\d+$/.test(labels[labels.length - 1])) return host;
-  const lastTwo = labels.slice(-2).join(".");
-  const take = COMPOUND_SUFFIXES.has(lastTwo) ? 3 : 2;
+  // A compound public suffix (co.uk, com.au, gov.il, …): a generic registry
+  // label under a two-letter country-code TLD. Keep three labels; else two.
+  const tld = labels[labels.length - 1];
+  const sld = labels[labels.length - 2];
+  const take = tld.length === 2 && REGISTRY_SLDS.has(sld) ? 3 : 2;
   return labels.slice(-take).join(".");
 }
 
