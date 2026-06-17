@@ -197,7 +197,7 @@ jobs:
         run: |
           claude \
             --dangerously-skip-permissions \
-            --model claude-sonnet-4-6 \
+            --model claude-haiku-4-5 \
             -p "$(cat /tmp/agent-prompt.txt)"
 
       # Phase 2 — deterministic wrap-up, done in the workflow (not the agent):

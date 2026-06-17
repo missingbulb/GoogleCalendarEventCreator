@@ -41,15 +41,52 @@ const POLICY_DOC_PATH = "docs/extraction-policy.md";
 // param matching its id.
 const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "location", "description"];
 
+// Generic registry labels that, sitting directly under a two-letter
+// country-code TLD, form a compound public suffix: `co.uk`, `com.au`, `gov.il`,
+// `co.jp`, `ac.uk`, … Keying on this small generic set plus *any* 2-letter
+// ccTLD keeps the apex extraction country-independent — there's no per-country
+// list to maintain (the gap that let `gov.il` slip through, #313). Correctly
+// resolving every compound suffix needs the full Public Suffix List, which is
+// far too heavy to bundle for a cosmetic issue title; this rule covers the
+// overwhelmingly common shape without it.
+const REGISTRY_SLDS = new Set([
+  "co", "com", "net", "org", "gov", "gob", "edu", "ac", "mil", "sch",
+]);
+
+// The registrable "apex" domain of a URL for display in the issue title:
+// hostname with the protocol/path/query and any subdomains stripped down to the
+// registrable domain (`https://dash.datadoghq.com/?utm=...` -> `datadoghq.com`,
+// `https://visit.tel-aviv.gov.il/...` -> `tel-aviv.gov.il`). Falls back to the
+// raw value when it can't parse a host (so a malformed URL still produces a
+// title).
+function apexDomain(url) {
+  let host;
+  try {
+    host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch (e) {
+    return url || "";
+  }
+  const labels = host.split(".");
+  // An IP address or a bare single-label host has no apex to strip to.
+  if (labels.length <= 2 || /^\d+$/.test(labels[labels.length - 1])) return host;
+  // A compound public suffix (co.uk, com.au, gov.il, …): a generic registry
+  // label under a two-letter country-code TLD. Keep three labels; else two.
+  const tld = labels[labels.length - 1];
+  const sld = labels[labels.length - 2];
+  const take = tld.length === 2 && REGISTRY_SLDS.has(sld) ? 3 : 2;
+  return labels.slice(-take).join(".");
+}
+
 // Build the GitHub issue-form URL for a source request, prefilled from the
 // current page's details (`prefill` keyed by SOURCE_REQUEST_FIELDS). The title
-// carries the page URL; each non-empty field seeds the matching form field
+// carries the page's apex domain (not the noisy full URL — the URL itself
+// seeds the `url` field); each non-empty field seeds the matching form field
 // (empty ones are left for the user to complete). The `extractor-request` label
 // is applied by both the template and this param.
 export function buildSourceRequestUrl(prefill) {
   const params = new URLSearchParams({
     template: SOURCE_REQUEST_TEMPLATE,
-    title: `Event source request - ${prefill.url}`,
+    title: `Event source request - ${apexDomain(prefill.url)}`,
     labels: SOURCE_REQUEST_LABEL,
   });
   for (const id of SOURCE_REQUEST_FIELDS) {

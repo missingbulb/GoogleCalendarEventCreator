@@ -34,9 +34,43 @@ test("opens the repo's issue form, labeled extractor-request", () => {
   assert.equal(u.searchParams.get("labels"), "extractor-request");
 });
 
-test("prefills the issue title with the page URL", () => {
+test("prefills the issue title with the page's apex domain, not the full URL", () => {
   const title = new URL(buildSourceRequestUrl(PREFILL)).searchParams.get("title");
-  assert.equal(title, `Event source request - ${PREFILL.url}`);
+  // PREFILL.url is https://example.com/events/picnic -> apex example.com.
+  assert.equal(title, "Event source request - example.com");
+});
+
+test("strips subdomains and tracking params from the title down to the apex domain", () => {
+  const url = "https://dash.datadoghq.com/?utm_source=events&_gl=1*16jytk3";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - datadoghq.com");
+});
+
+// The compound-suffix rule is country-independent: a generic registry label
+// (co/com/gov/ac/...) under any two-letter ccTLD keeps three labels, so these
+// all resolve without naming a single country in the code.
+test("keeps a compound public suffix in the apex domain (co.uk)", () => {
+  const url = "https://events.company.co.uk/whats-on";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - company.co.uk");
+});
+
+test("keeps a gov.il compound suffix without a country-specific list", () => {
+  const url = "https://visit.tel-aviv.gov.il/Pages/EventLocation.aspx?ItemId=2173";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - tel-aviv.gov.il");
+});
+
+test("keeps a com.au compound suffix (same generic rule, different country)", () => {
+  const url = "https://tickets.somevenue.com.au/show/42";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - somevenue.com.au");
+});
+
+test("treats a two-letter ccTLD used as a plain gTLD as a normal apex (dice.fm)", () => {
+  const url = "https://dice.fm/event/abc-some-show-tickets";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - dice.fm");
 });
 
 test("prefills each form field from the matching prefill value", () => {
