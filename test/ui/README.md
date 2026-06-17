@@ -15,7 +15,7 @@ current (or changed) state is reviewable straight from GitHub.
 
 ## 01-supported-listing
 
-Supported host: events across past, current, and future years (off-year cards get a year pill)
+Supported host: events across past, current, and future years (off-year cards get a year pill); the current-year event's times carry a UTC offset shown as wall-clock
 
 ![01-supported-listing](cases/01-supported-listing.png)
 
@@ -96,9 +96,3 @@ Month grouping across months: three scattered June dates become one JUN card (5/
 Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card
 
 ![14-consecutive-run-multiday](cases/14-consecutive-run-multiday.png)
-
-## 15-offset-times-wall-clock
-
-Offset start times show the page's wall-clock day & time (the +02:00/-02:00 offset is stripped at render, not re-zoned across midnight)
-
-![15-offset-times-wall-clock](cases/15-offset-times-wall-clock.png)
