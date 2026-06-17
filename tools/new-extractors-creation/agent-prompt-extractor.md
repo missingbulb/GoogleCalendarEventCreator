@@ -74,9 +74,15 @@ wc -c data/{{CASE_NAME}}.html
 Open it and confirm it's the **real event page**. If it's a bot/CAPTCHA challenge,
 a login wall, a cookie interstitial, or an empty single-page-app shell with no
 event data in the HTML, then there's nothing to extract from a static fetch.
-**Stop here**: comment on the issue describing what the page actually contains, and
-**leave the test case's `events` empty**. (The workflow opens no PR for an unfilled
-case. Don't fabricate a page or hand-write values.)
+**Stop here**: write a one-sentence diagnosis of what the page actually contains
+to the file `{{BAIL_REASON_FILE}}`, and **leave the test case's `events` empty**.
+Do **not** comment on the issue yourself — the workflow reads that file and posts
+the comment for you. (The workflow opens no PR for an unfilled case. Don't
+fabricate a page or hand-write values.)
+
+```bash
+echo "This page is an AWS WAF bot-challenge interstitial, not the event page — no event data is present in the static HTML." > {{BAIL_REASON_FILE}}
+```
 
 Otherwise, note where the title, date/time, location, and description live.
 
@@ -125,5 +131,6 @@ opens the PR, and comments on the issue.
   page, or the shared helpers. Don't commit or open a PR.
 - **Never fabricate input or output.** Don't hand-write HTML, and don't invent
   `expected` values — copy them from the real `npm run test:live` run. If the page
-  isn't usable (Step 1), comment and leave the case empty instead.
+  isn't usable (Step 1), write the diagnosis to `{{BAIL_REASON_FILE}}` and leave
+  the case empty instead — don't comment on the issue yourself.
 - **No `url` field** inside the case JSON — it lives in `data/{{CASE_NAME}}.url`.

@@ -38,7 +38,11 @@ prompt = (template
     .replace("{{SLUG}}", os.environ["SLUG"])
     .replace("{{CASE_NAME}}", os.environ["CASE_NAME"])
     .replace("{{HOST}}", os.environ["HOST"])
-    .replace("{{EVENT_URL}}", os.environ["EVENT_URL"]))
+    .replace("{{EVENT_URL}}", os.environ["EVENT_URL"])
+    # Where the agent writes its diagnosis when it judges the page unextractable;
+    # phase2-finalize.sh reads it to post the bail comment. /tmp so the
+    # blast-radius `git clean` can't delete it. Defaulted so a local run works.
+    .replace("{{BAIL_REASON_FILE}}", os.environ.get("BAIL_REASON_FILE", "/tmp/agent-bail-reason.md")))
 
 open("/tmp/agent-prompt.txt", "w").write(prompt)
 print(f"Prompt length: {len(prompt)} chars")

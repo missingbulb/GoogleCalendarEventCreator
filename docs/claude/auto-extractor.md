@@ -78,13 +78,22 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    a triaged request costs almost nothing, and fails **open** — any error proceeds.
 3. **Probes the event URL** (`tools/new-extractors-creation/probe-url.js`): fetches it the same way the
    recorder will (shared `data/fetch-page.js` — browser headers + retries) and
-   **stops the run on anything but a 2xx**, or when the URL is missing. If the
-   page can't be fetched from CI — non-200, unreachable, or behind a login/bot
-   wall — there is no real page to record a case against, so an agent run would
-   only produce synthetic coverage; better to stop and tell the requester. Runs
-   before `npm ci`. Reusing the recorder's exact headers is the whole point: a
-   bare `curl` is rejected by sites that serve a real browser, which would
-   false-reject requests the recorder could actually fulfil.
+   decides whether the page is **usable** as a static case. Not usable when: the
+   URL is missing; the fetch returns anything but a 2xx (unreachable, login/bot
+   wall); **or** it returns a 2xx whose body is actually a bot-challenge /
+   interstitial rather than the event page — `probe-url.js`'s `detectChallenge`
+   sniffs the body for known vendor markers (AWS WAF, Cloudflare, DataDome,
+   PerimeterX, Imperva, reCAPTCHA/hCaptcha) and a suspiciously-small size, the one
+   soft-200 block we can catch cheaply before spending the agent (#279 StubHub).
+   In every not-usable case there is no real page to record against, so the run
+   **stops** — but stopping is an **expected outcome, not a failure**: the probe
+   step records its decision in the `proceed` step-output, the downstream steps
+   gate on `proceed == 'true'`, and the run ends **green** with a "page not usable"
+   comment naming the reason. (A JS-rendered SPA shell that returns a full-but-empty
+   page still slips past — it's a real 2xx with no markers — and is caught later by
+   the agent's judgment step.) Runs before `npm ci`. Reusing the recorder's exact
+   headers is the whole point: a bare `curl` is rejected by sites that serve a real
+   browser, which would false-reject requests the recorder could actually fulfil.
 4. Installs dependencies + the `claude` CLI and configures git.
 5. **Prepares the branch — Phase 1, all deterministic, in the workflow
    (`tools/new-extractors-creation/phase1-prepare.sh`, not the agent):** branches `claude/extractor/<slug>`
@@ -124,10 +133,17 @@ tells the agent to inline any helper logic into its own source IIFE, as
 `meetup.js` does, rather than touch `pipeline/helpers/`.
 
 Its one judgment escape hatch: if the cached `data/<caseName>.html` is a
-bot/CAPTCHA/login/SPA-shell page rather than the real event page (a 2xx the
-status-only probe can't see), it **stops and comments** and **leaves the case's
-`events` empty**. A filled case is the agent's done-signal: Phase 2 opens a PR only
-when `events` is non-empty; a still-empty case means the agent bailed, so no PR.
+bot/CAPTCHA/login/SPA-shell page rather than the real event page (a soft 2xx the
+probe's `detectChallenge` didn't catch — typically a JS-rendered SPA shell), it
+**stops**, writes a one-sentence diagnosis to `BAIL_REASON_FILE` (`/tmp`, so the
+blast-radius `git clean` can't delete it), and **leaves the case's `events`
+empty** — it does **not** comment itself. A filled case is the agent's done-signal:
+Phase 2 opens a PR only when `events` is non-empty. A still-empty case means the
+agent bailed, so **Phase 2 posts the comment** — quoting the diagnosis file when
+present, a generic note otherwise — so an issue the agent actually worked always
+gets a reply, and exits **green** (a bail is expected, not a failure). The earlier
+design trusted the agent to comment; it didn't reliably (#277), so the comment is
+now the workflow's job.
 
 ### Why the workflow dispatches CI itself
 
@@ -169,21 +185,31 @@ The workflow job times out at 90 minutes. The agent step itself is capped at
 wait, via the separate refresh workflow), so most of the elapsed time is the
 agent.
 
-## On failure
+## Outcomes and comments
 
-The workflow posts a comment on the issue on failure. It comes in two shapes:
+Every run that touches an issue leaves exactly one comment. Three of the shapes
+are **expected stops that finish green** — not failures — and one is a genuine
+failure (red):
 
-- **Unfetchable page** — the URL probe stopped the run: the event URL was missing,
-  returned a non-2xx, was unreachable, or sits behind a login/bot wall. **No agent
-  run was started.** The comment says so and links the run log for the exact
-  status. Add the site by hand (`docs/claude/adding-a-source.md`).
-- **Any later failure** — a generic comment with a run link. Common causes:
+- **Page not usable** (green) — the URL probe stopped the run: the event URL was
+  missing, returned a non-2xx, sits behind a login/bot wall, or came back as a
+  bot-challenge / interstitial (`detectChallenge`). **No agent run was started.**
+  The comment names the reason and links the run log. Add the site by hand
+  (`docs/claude/adding-a-source.md`).
+- **Worked it, no PR** (green) — the agent ran but judged the page unextractable
+  (e.g. a JS-rendered SPA shell the probe couldn't see), so it left the case empty.
+  Phase 2 posts the agent's diagnosis (or a generic note) and opens no PR. The
+  scaffolding stays on the branch for follow-up.
+- **PR opened** (green) — the normal success path: Phase 2 commits, opens the PR,
+  and comments the link.
+- **Unexpected failure** (red) — only a genuine break reaches the `failure()`
+  comment now (the expected stops above no longer fail the job). A generic comment
+  links the run. Common causes:
   - `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` missing/expired, or its Anthropic
     **spend cap reached** (the `claude` CLI returns a usage-limit error and the
     step fails — this is what stalled the first batch of requests);
   - the agent exhausted its turn budget;
-  - the agent **stopped on purpose** because the recorded page wasn't a real event
-    page (it comments separately before exiting — see the Step 1 sanity check).
+  - the scaffold baseline or the Phase-2 re-verify went red.
 
 In any of these cases, fall back to the manual process in
 `docs/claude/adding-a-source.md`.
