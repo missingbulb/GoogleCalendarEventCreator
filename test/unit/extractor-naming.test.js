@@ -1,4 +1,4 @@
-// Unit tests for tools/extractor-naming.js — the deterministic slug/caseName
+// Unit tests for tools/new-extractors-creation/extractor-naming.js — the deterministic slug/caseName
 // the auto-implement-extractor workflow derives from an event URL (so the
 // branch + cache files can be created before the agent runs). Pure host logic,
 // no I/O.
@@ -6,7 +6,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { hostname, slugFor, matchesRegexFor, namesFor } = require("../../tools/extractor-naming");
+const { hostname, slugFor, matchesRegexFor, namesFor } = require("../../tools/new-extractors-creation/extractor-naming");
 
 test("slugFor strips www + a single TLD", () => {
   assert.equal(slugFor("https://www.axs.com/event/123"), "axs");

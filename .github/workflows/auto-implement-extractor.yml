@@ -72,7 +72,7 @@ jobs:
           ISSUE_BODY:   ${{ github.event.issue.body }}
           ISSUE_TITLE:  ${{ github.event.issue.title }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: node tools/triage-extractor-request.js
+        run: node tools/new-extractors-creation/triage-extractor-request.js
 
       - name: Close a triaged request (supported / listed / duplicate)
         if: steps.triage.outputs.skipAgent == 'true'
@@ -84,7 +84,7 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
       # Pre-flight URL probe. Fetch the event page the same way the recorder will
-      # (tools/probe-url.js → data/fetch-page.js: browser headers + retries). If
+      # (tools/new-extractors-creation/probe-url.js → data/fetch-page.js: browser headers + retries). If
       # it isn't fetchable — URL missing, non-2xx, unreachable, or behind a
       # login/bot wall — there is no real page to record a case against, so an
       # agent run would only produce synthetic coverage. Stop instead. Runs
@@ -101,7 +101,7 @@ jobs:
             echo "No event URL found in the issue — nothing to probe." >&2
             exit 1
           fi
-          node tools/probe-url.js "$EVENT_URL"
+          node tools/new-extractors-creation/probe-url.js "$EVENT_URL"
 
       - name: Install npm dependencies
         if: success() && steps.triage.outputs.skipAgent != 'true'
@@ -135,26 +135,7 @@ jobs:
           HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          set -euo pipefail
-          git checkout -b "$BRANCH"
-
-          printf '%s' "$EVENT_URL" > "data/$CASE_NAME.url"
-          : > "data/$CASE_NAME.html"            # empty file = the recorder's "fetch me" signal
-          npm run refresh
-          test -s "data/$CASE_NAME.html"        # the page must have actually been recorded
-
-          node tools/scaffold-source.js "$EVENT_URL"
-          node tools/scaffold-case.js "$CASE_NAME" "$HOST"   # the agent FILLS this; it never creates a file
-          node tools/add-supported-domain.js "$HOST"
-          npm run index
-          npm run test:offline                  # baseline must be green before the agent
-
-          git add -A
-          git commit -m "chore: scaffold $SLUG extractor + cache page (Refs #$ISSUE_NUMBER)"
-          # One branch per host; a re-label of the same issue re-records onto it,
-          # so this run owns the branch and force is intentional.
-          git push -u --force origin "$BRANCH"
+        run: bash tools/new-extractors-creation/phase1-prepare.sh
 
       # Fetch the issue via API (avoids shell-escaping issues with free-form
       # bodies) and interpolate it, plus the branch/slug/caseName/host/url, into
@@ -170,40 +151,7 @@ jobs:
           CASE_NAME:    ${{ steps.triage.outputs.caseName }}
           HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
-        run: |
-          python3 - << 'PYEOF'
-          import json, os, urllib.request
-
-          repo         = os.environ["REPO"]
-          issue_number = os.environ["ISSUE_NUMBER"]
-          token        = os.environ["GH_TOKEN"]
-
-          req = urllib.request.Request(
-              f"https://api.github.com/repos/{repo}/issues/{issue_number}",
-              headers={
-                  "Authorization": f"Bearer {token}",
-                  "Accept": "application/vnd.github+json",
-                  "X-GitHub-Api-Version": "2022-11-28",
-              },
-          )
-          with urllib.request.urlopen(req) as r:
-              issue = json.load(r)
-
-          template = open(".github/agent-prompt-extractor.md").read()
-          prompt = (template
-              .replace("{{ISSUE_NUMBER}}", issue_number)
-              .replace("{{ISSUE_TITLE}}",  issue["title"])
-              .replace("{{ISSUE_BODY}}",   issue["body"] or "")
-              .replace("{{REPO}}",         repo)
-              .replace("{{BRANCH}}",       os.environ["BRANCH"])
-              .replace("{{SLUG}}",         os.environ["SLUG"])
-              .replace("{{CASE_NAME}}",    os.environ["CASE_NAME"])
-              .replace("{{HOST}}",         os.environ["HOST"])
-              .replace("{{EVENT_URL}}",    os.environ["EVENT_URL"]))
-
-          open("/tmp/agent-prompt.txt", "w").write(prompt)
-          print(f"Prompt length: {len(prompt)} chars")
-          PYEOF
+        run: python3 tools/new-extractors-creation/build-prompt.py
 
       - name: Run Claude agent
         if: success() && steps.triage.outputs.skipAgent != 'true'
@@ -220,10 +168,10 @@ jobs:
             -p "$(cat /tmp/agent-prompt.txt)"
 
       # Phase 2 — deterministic wrap-up, done in the workflow (not the agent):
-      # the agent's done-signal is the integration case it wrote. If it's absent,
-      # the agent judged the page unextractable and commented — no PR. Otherwise
-      # re-verify (don't trust the agent), commit its extract() + case, open the
-      # PR, and dispatch CI so checks attach to it.
+      # enforce the two-file blast radius, then read the agent's done-signal — a
+      # FILLED case. A still-empty case means it judged the page unextractable and
+      # commented, so no PR. Otherwise re-verify (don't trust the agent), commit
+      # its extract() + case, open the PR, and dispatch CI so checks attach to it.
       - name: Finalize — verify, commit, open PR
         if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
@@ -234,70 +182,7 @@ jobs:
           HOST:         ${{ steps.triage.outputs.host }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO:         ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          SRC="pipeline/sources/$SLUG.js"
-          CASE_FILE="test/extractors/custom/$CASE_NAME.json"
-
-          # Blast-radius guard: the agent's whole write surface is two pre-created
-          # files (the source + the case). Revert any OTHER tracked edit (e.g. a
-          # shared helper) back to the scaffold commit, and delete anything it
-          # created, so a misbehaving agent can't reach the PR. (If the extractor
-          # truly depended on a reverted helper edit, the re-verify below goes red
-          # and no PR opens — exactly what we want.)
-          mapfile -t CHANGED < <(git diff --name-only HEAD)
-          for f in "${CHANGED[@]}"; do
-            if [ "$f" != "$SRC" ] && [ "$f" != "$CASE_FILE" ]; then
-              echo "blast-radius guard: reverting unexpected change to $f"
-              git checkout HEAD -- "$f"
-            fi
-          done
-          git clean -fd >/dev/null 2>&1 || true
-
-          # The agent's done-signal is a FILLED case. A still-empty `events` means
-          # it judged the page unextractable (and commented) — no PR.
-          N=$(CASE_FILE="$CASE_FILE" node -e "try{const e=require('./'+process.env.CASE_FILE).expected.events;process.stdout.write(String(Array.isArray(e)?e.length:0))}catch(_){process.stdout.write('0')}")
-          if [ "$N" = "0" ]; then
-            echo "Integration case still empty — the agent judged the page unextractable and commented. No PR."
-            exit 0
-          fi
-
-          # Don't trust the agent — re-verify before opening a PR.
-          npm run test:live
-          npm run test:offline
-
-          git add "$SRC" "$CASE_FILE"
-          if ! git diff --cached --quiet; then
-            git commit -m "feat: add $SLUG extractor (Refs #$ISSUE_NUMBER)"
-            git push origin "$BRANCH"
-          fi
-
-          cat > /tmp/pr-body.md <<EOF
-          Implements the extractor for \`$HOST\`.
-
-          The workflow scaffolded the branch — the \`matches()\` gate, the \`supportedDomains\` entry, the regenerated load lists, and the real cached event page (\`data/$CASE_NAME.html\`). The agent wrote \`extract()\` and the integration case asserting the real extraction.
-
-          Closes #$ISSUE_NUMBER
-          EOF
-
-          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
-            gh pr create --base main --head "$BRANCH" \
-              --title "feat: add $SLUG extractor" --body-file /tmp/pr-body.md
-          fi
-
-          # A GITHUB_TOKEN push/PR doesn't start test.yml; dispatch it so checks
-          # attach to the branch head and show on the PR. Best-effort: the PR is
-          # already open, so a dispatch hiccup mustn't fail the run (which would
-          # post a misleading "workflow failed" comment).
-          curl -s -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$REPO/actions/workflows/test.yml/dispatches" \
-            -d "{\"ref\":\"$BRANCH\"}" || echo "warning: test.yml dispatch failed — dispatch it manually"
-
-          PR_URL=$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo "")
-          gh issue comment "$ISSUE_NUMBER" --body "✅ Extractor implemented — PR ready for review: $PR_URL  (asserts against the real cached page; review the \`extract()\` logic and field values before merging)."
+        run: bash tools/new-extractors-creation/phase2-finalize.sh
 
       # One comment for any failure. If the probe stopped the run, say why
       # (unfetchable page) rather than the generic message — the two have very

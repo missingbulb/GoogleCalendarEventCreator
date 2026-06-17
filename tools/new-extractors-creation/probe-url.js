@@ -9,10 +9,10 @@
 // stop instead. A throw from fetchPage (which covers non-2xx) is the "stop"
 // signal; its message (e.g. "HTTP 403") goes to stderr for the failure comment.
 //
-// Usage: node tools/probe-url.js "<url>"   # exit 0 = reachable, 1 = not
+// Usage: node tools/new-extractors-creation/probe-url.js "<url>"   # exit 0 = reachable, 1 = not
 "use strict";
 
-const { fetchPage } = require("../data/fetch-page");
+const { fetchPage } = require("../../data/fetch-page");
 
 const url = process.argv[2];
 

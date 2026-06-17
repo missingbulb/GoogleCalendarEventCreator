@@ -1,5 +1,5 @@
 {
-  "what": "extractor-request trigger label (workflow count: 3 label refs — header comment, trigger guard, the `gh issue list --label` filter — plus the triage script filename tools/triage-extractor-request.js)",
+  "what": "extractor-request trigger label (workflow count: 3 label refs — header comment, trigger guard, the `gh issue list --label` filter — plus the triage script filename tools/new-extractors-creation/triage-extractor-request.js)",
   "value": "extractor-request",
   "counts": {
     ".github/ISSUE_TEMPLATE/extractor-request.yml": 1,

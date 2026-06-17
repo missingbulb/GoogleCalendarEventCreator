@@ -115,7 +115,7 @@ function skipMessage(reason, { host, duplicateOf }) {
 // (for the duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
   const { classifyHost, isSupportedDomain } = await import(
-    pathToFileURL(path.join(__dirname, "..", "fallback-policy.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "fallback-policy.js"))
   );
 
   const url = firstUrl(body) || firstUrl(title);

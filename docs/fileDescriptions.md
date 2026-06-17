@@ -45,6 +45,7 @@ the rules of the road.
 | `tools/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
 | `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |
 | `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
-| `tools/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
+| `tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the agent prompt, the deterministic Node steps (triage, probe, naming, scaffold-source/case, add-supported-domain), and the workflow's extracted phase scripts (`phase1-prepare.sh`, `build-prompt.py`, `phase2-finalize.sh`). See `docs/claude/auto-extractor.md` |
+| `tools/new-extractors-creation/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
 | `tools/gen-states-flowchart.js` | Regenerates `docs/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
 | `test/unit/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |

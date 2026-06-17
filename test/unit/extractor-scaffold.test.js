@@ -1,16 +1,16 @@
 // Unit tests for the deterministic Phase-1 scaffolding the auto-implement-
 // extractor workflow does before the agent runs: the source stub
-// (tools/scaffold-source.js) and the supportedDomains insert
-// (tools/add-supported-domain.js). Pure-function level; the CLIs that wrap them
-// just do file I/O.
+// (tools/new-extractors-creation/scaffold-source.js) and the supportedDomains insert
+// (tools/new-extractors-creation/add-supported-domain.js). Pure-function level; the CLIs that
+// wrap them just do file I/O.
 "use strict";
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const vm = require("node:vm");
-const { sourceStub } = require("../../tools/scaffold-source");
-const { caseStub } = require("../../tools/scaffold-case");
-const { withDomain } = require("../../tools/add-supported-domain");
+const { sourceStub } = require("../../tools/new-extractors-creation/scaffold-source");
+const { caseStub } = require("../../tools/new-extractors-creation/scaffold-case");
+const { withDomain } = require("../../tools/new-extractors-creation/add-supported-domain");
 
 const URL = "https://www.axs.com/event/629455-volleyball-tickets";
 

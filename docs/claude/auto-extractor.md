@@ -24,12 +24,43 @@ You can also trigger it on any existing issue by adding the `extractor-request`
 label by hand, as long as the issue body contains an event page URL the agent
 can parse.
 
+## Where the pieces live
+
+Almost everything for this pipeline is one self-contained folder,
+`tools/new-extractors-creation/`:
+
+- `agent-prompt-extractor.md` — the agent's prompt template (Step 6 fills its
+  placeholders).
+- `triage-extractor-request.js`, `probe-url.js`, `extractor-naming.js`,
+  `scaffold-source.js`, `scaffold-case.js`, `add-supported-domain.js` — the
+  deterministic Node steps the workflow runs around the agent.
+- `phase1-prepare.sh`, `build-prompt.py`, `phase2-finalize.sh` — the bash/python
+  the workflow used to inline. The YAML now just calls them, so it reads as a
+  **thin orchestrator**: triggers, permissions, per-step `env:` wiring, and one
+  script invocation per step.
+
+Two files **must** live under `.github/` because GitHub pins them there. They
+stay put and refer back to the folder:
+
+- `.github/workflows/auto-implement-extractor.yml` — the workflow. Workflows only
+  run from `.github/workflows/`; this one calls every script above, so the
+  substance lives in the folder and the YAML is just wiring.
+- `.github/ISSUE_TEMPLATE/extractor-request.yml` — the issue form. It's a
+  declarative template GitHub renders for the "New issue" UI (and the popup opens
+  it by filename via `?template=`), so it can't be relocated or factored out.
+
+Shared infrastructure the scripts lean on stays where it's shared, **not** in the
+folder: `data/fetch-page.js` (also used by `refresh-cache`), `config.js` /
+`fallback-policy.js` (the popup's host classifier), and `tools/index.js`
+(`npm run index`, run by every source addition). The pipeline *consumes* these;
+it doesn't own them.
+
 ## What the workflow does
 
 The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
 
 1. Checks out the repo.
-2. **Triages the request** (`tools/triage-extractor-request.js`): pulls the event
+2. **Triages the request** (`tools/new-extractors-creation/triage-extractor-request.js`): pulls the event
    URL from the issue and decides whether the request is already settled. It
    closes the issue as "not planned" and **skips every remaining step** (no probe,
    no `npm ci`, no agent run) for any of four reasons:
@@ -43,9 +74,9 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
      with `gh` and passes them in, so the script stays offline).
 
    It also emits the event `url`, `host`, and the deterministic `slug`/`caseName`
-   (`tools/extractor-naming.js`) the later steps consume. Runs before `npm ci`, so
+   (`tools/new-extractors-creation/extractor-naming.js`) the later steps consume. Runs before `npm ci`, so
    a triaged request costs almost nothing, and fails **open** — any error proceeds.
-3. **Probes the event URL** (`tools/probe-url.js`): fetches it the same way the
+3. **Probes the event URL** (`tools/new-extractors-creation/probe-url.js`): fetches it the same way the
    recorder will (shared `data/fetch-page.js` — browser headers + retries) and
    **stops the run on anything but a 2xx**, or when the URL is missing. If the
    page can't be fetched from CI — non-200, unreachable, or behind a login/bot
@@ -55,26 +86,28 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    bare `curl` is rejected by sites that serve a real browser, which would
    false-reject requests the recorder could actually fulfil.
 4. Installs dependencies + the `claude` CLI and configures git.
-5. **Prepares the branch — Phase 1, all deterministic, in the workflow (not the
-   agent):** branches `claude/extractor/<slug>` off `main`; records the page
-   inline (`data/<caseName>.url` + the empty `.html` signal → `npm run refresh`,
-   asserted non-empty); **scaffolds** `pipeline/sources/<slug>.js` with its
-   `matches()` already filled (`tools/scaffold-source.js`) **and the placeholder
-   case `test/extractors/custom/<caseName>.json`** with empty `events`
-   (`tools/scaffold-case.js`); registers the host in `supportedDomains`
-   (`tools/add-supported-domain.js`); and runs `npm run index` to regenerate the
+5. **Prepares the branch — Phase 1, all deterministic, in the workflow
+   (`tools/new-extractors-creation/phase1-prepare.sh`, not the agent):** branches `claude/extractor/<slug>`
+   off `main`; records the page inline (`data/<caseName>.url` + the empty `.html`
+   signal → `npm run refresh`, asserted non-empty); **scaffolds**
+   `pipeline/sources/<slug>.js` with its `matches()` already filled
+   (`tools/new-extractors-creation/scaffold-source.js`) **and the placeholder case
+   `test/extractors/custom/<caseName>.json`** with empty `events`
+   (`tools/new-extractors-creation/scaffold-case.js`); registers the host in `supportedDomains`
+   (`tools/new-extractors-creation/add-supported-domain.js`); and runs `npm run index` to regenerate the
    load lists. A baseline `npm run test:offline` must be green before the agent is
    spent; then it commits and pushes. (A `GITHUB_TOKEN` push doesn't fire
    `refresh-cache.yml`'s push trigger, so the page is recorded once.)
 6. Interpolates the issue + the branch/slug/caseName/host/url into the prompt
-   template and runs the agent (`claude … --model claude-sonnet-4-6 -p …`) on the
-   prepared branch.
-7. **Finalizes — Phase 2, again in the workflow:** enforces the blast radius
-   (below), re-runs `test:live` + `test:offline`, commits the agent's two files,
-   opens the PR (`Closes #N`), dispatches `test.yml` against the branch, and
-   comments the PR link on the issue.
+   template (`tools/new-extractors-creation/build-prompt.py`) and runs the agent
+   (`claude … --model claude-sonnet-4-6 -p …`) on the prepared branch.
+7. **Finalizes — Phase 2, again in the workflow
+   (`tools/new-extractors-creation/phase2-finalize.sh`):** enforces the blast radius (below), re-runs
+   `test:live` + `test:offline`, commits the agent's two files, opens the PR
+   (`Closes #N`), dispatches `test.yml` against the branch, and comments the PR
+   link on the issue.
 
-So the agent owns only the judgment step (see `.github/agent-prompt-extractor.md`):
+So the agent owns only the judgment step (see `tools/new-extractors-creation/agent-prompt-extractor.md`):
 read the real cached page, fill in `extract()` (and the source's header), fill the
 pre-created `test/extractors/custom/<caseName>.json` from the actual
 `npm run test:live` output, and confirm `test:live` + `test:offline` are green —
@@ -167,9 +200,9 @@ CI must go green at least twice before merging a branch that adds new tests.
 
 ## Updating the agent prompt
 
-The prompt template is `.github/agent-prompt-extractor.md`. The placeholders
+The prompt template is `tools/new-extractors-creation/agent-prompt-extractor.md`. The placeholders
 `{{ISSUE_NUMBER}}`, `{{ISSUE_TITLE}}`, `{{ISSUE_BODY}}`, `{{REPO}}`, `{{BRANCH}}`,
 `{{SLUG}}`, `{{CASE_NAME}}`, `{{HOST}}`, and `{{EVENT_URL}}` are substituted at
-runtime by the "Build agent prompt" step (the last five come from the triage
-step's outputs). Edit that file to change what the agent does or add site-specific
-guidance.
+runtime by the "Build agent prompt" step (`tools/new-extractors-creation/build-prompt.py`; the last
+five come from the triage step's outputs). Edit that file to change what the agent
+does or add site-specific guidance.

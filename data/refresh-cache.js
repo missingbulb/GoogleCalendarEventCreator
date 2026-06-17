@@ -27,7 +27,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 // The fetch itself (browser headers, retries, timeout) lives in fetch-page.js
-// so tools/probe-url.js can fetch identically — see that file's header.
+// so tools/new-extractors-creation/probe-url.js can fetch identically — see that file's header.
 const { fetchPage } = require("./fetch-page");
 
 const DATA_DIR = __dirname;

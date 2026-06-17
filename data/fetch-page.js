@@ -4,8 +4,8 @@
 //
 // Two callers share it so they can never disagree:
 //   - data/refresh-cache.js  RECORDS a page into the data/ cache.
-//   - tools/probe-url.js      PROBES a URL before the auto-implement-extractor
-//                             workflow spends an agent run on it.
+//   - tools/new-extractors-creation/probe-url.js  PROBES a URL before the
+//                             auto-implement-extractor workflow spends an agent run on it.
 // Because the probe fetches exactly the way the recorder does, a green probe
 // predicts a green record. That matters specifically because event sites reject
 // clients that don't look like a browser: a bare `curl` (default User-Agent)
