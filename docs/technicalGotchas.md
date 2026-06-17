@@ -5,6 +5,21 @@ debugging time, recorded so they bite only once. Overarching architecture rules
 live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
 engineering practices in [engineeringPractices.md](engineeringPractices.md).
 
+- **The popup's ES modules need `--disable-warning=MODULE_TYPELESS_PACKAGE_JSON`
+  in the test scripts, not `"type": "module"`.** A handful of files form the
+  popup's browser module graph and use real `import`/`export` (`config.js`,
+  `fallback-policy.js`, `pipeline/build-calendar-url.js`, `ui/popup.js`,
+  `ui/views/*.js`); the rest of the repo is CommonJS. When a test `import()`s one,
+  Node logs `MODULE_TYPELESS_PACKAGE_JSON` because `package.json` declares no
+  `type`. The two textbook fixes don't fit: adding `"type": "module"` would break
+  the CJS majority, and renaming the ESM files to `.mjs` changes how Chrome serves
+  them in the shipped extension (unverifiable without a real browser). So the
+  `node` invocations in `package.json` that import these files pass
+  `--disable-warning=MODULE_TYPELESS_PACKAGE_JSON` — it silences *only* that one
+  advisory code, leaving every other warning visible. (`package.json` can't carry
+  a comment, so the rationale lives here.) Needs Node ≥ 21.3 for the flag; the
+  repo already assumes Node 22+.
+
 - **Day-boundary date math must use UTC component math, not local-midnight +
   `toISOString()`.** Compute an adjacent day with `Date.UTC(y, m-1, d+1)` then
   `getUTC*` (as `nextDay` in `build-calendar-url.js` and `isNextDay` in

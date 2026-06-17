@@ -12,6 +12,13 @@ Confirm a behavior isn't already provided before building a mechanism for it —
 verify the gap against a real run first; the cheapest fix is often that it
 already works.
 
+Fix build/test/CI warnings, don't tolerate them: a clean run with no warnings
+makes a genuinely new warning or error stand out, so noise here costs detection
+later. Prefer a small, targeted fix in the same change. When a warning can't be
+fixed now without hindering current work (e.g. it's waiting on an upstream
+release, or the real fix is a larger refactor), open a dedicated issue for it
+(unless one is already open) so it's tracked and not lost — then move on.
+
 Whenever a change regenerates the UI snapshots (`test/ui/cases/*.png`, via
 `npm run refresh:ui`), surface them to the reviewer in the same turn you commit
 them: show the changed PNGs inline in the chat and link the branch's
