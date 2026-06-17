@@ -1,16 +1,20 @@
-// The common-time header on a month card (#324). Three events, each a run of
-// scattered single-show days that fold into one month card, exercise all three
-// branches of commonTime side by side:
-//   - SAME times: Jun 5/14/25 all at 7 PM -> the header reads "7 PM · <location>"
-//     (the time the day chips can't show, surfaced above the icons).
-//   - DIFFERENT times: Jul 5/14/25 at 6/7/8 PM -> no single time to share, so the
-//     header is just the location and each chip becomes a TIME chip (date banner
-//     over that day's time) so no time is lost.
-//   - NO times (all-day): Aug 5/14/25 with date-only starts -> no time to share,
-//     header is just the location.
+// The month card's header, all three commonTime branches side by side. A month
+// card folds an event's scattered single-show days into one card (a button per
+// day); what its header and chips show depends on those days' times:
+//   - SHARED time (Hebrew Conversation Club, Jun 5/14/25 all 7 PM): the shared
+//     time leads the header ("7 PM · <location>") and each chip is a bare DAY chip
+//     (month banner + day) — the time the day chips can't show, surfaced once.
+//   - DIFFERENT times (Rotating Recital Series, Jul 5/14/25 at 6/7/8 PM): no time
+//     to share, so the header is just the location and each chip becomes a TIME
+//     chip (date banner + that day's time) so no time is lost.
+//   - ALL-DAY (Open Studios Month, Aug 5/14/25, date-only): no time to share, so
+//     the header is just the location, with plain day chips.
+// One event per branch — each earns its place.
+"use strict";
+
 module.exports = {
   description:
-    "Month card common-time header: scattered dates that share one start time show it above the icons; differing-time and all-day month cards show only the location",
+    "Month card surfaces a shared start time in its header (day chips), else drops to per-day time chips, else shows just the location (all-day dates)",
   data: {
     supported: true,
     events: [

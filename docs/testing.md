@@ -173,17 +173,12 @@ extension runs. There is no hand-copied markup to drift, so a change to a view i
 caught automatically. (`render()` is split out of `init()` for exactly this: init
 does the chrome/fetch I/O to gather the data, render builds the DOM from it.)
 
-Each case is a self-contained tuple in **`test/ui/cases/`** — open the PNGs on
-GitHub to see what the popup currently looks like:
-
-- **`01-supported-listing.png`** — supported host: the extractor's events (a 2-event listing).
-- **`02-denylisted.png`** — denylisted host: "No events found", no link or prompt (even a complete event is suppressed).
-- **`03-nothing-found.png`** — not denylisted, nothing complete found: "No events found" + a "Disagree?" policy link.
-- **`04-allowlisted.png`** — a complete fallback event, allowlisted: the event only.
-- **`05-unlisted.png`** — a complete fallback event, on neither list: the event + a "Suggest Correction" link.
-- **`06-long-listing-top.png`** — a long listing at rest: the capped list, count label below the fold.
-- **`07-long-listing-scrolled.png`** — the same list scrolled to the bottom: "N out of M events showing" + "show all".
-- **`08-all-shown-scrolled.png`** — eight events scrolled to the bottom: the plain "N events showing" cue (no link).
+Each case is a self-contained tuple in **`test/ui/cases/`**. The cases are
+feature-focused — one popup state or rendering feature per image, with that
+feature's variations shown together in the one picture, named for the scenario
+and its expected outcome. For the current set with every reference image inline,
+see the generated gallery **[`test/ui/README.md`](../test/ui/README.md)** — it's
+derived from the cases (so it can't drift) and is the one-page review surface.
 
 `<name>.case.js` exports `{ description, data, listing?, tab?, action? }`. `data`
 is the fake extraction result (`{ supported, events: [...] }`); `listing` is the
