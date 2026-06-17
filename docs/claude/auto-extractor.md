@@ -109,7 +109,10 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    `refresh-cache.yml`'s push trigger, so the page is recorded once.)
 6. Interpolates the issue + the branch/slug/caseName/host/url into the prompt
    template (`tools/new-extractors-creation/build-prompt.py`) and runs the agent
-   (`claude … --model claude-haiku-4-5 -p …`) on the prepared branch.
+   (`claude … --model claude-sonnet-4-6 -p …`) on the prepared branch. (Sonnet,
+   not Haiku: the one judgment the agent owns — recognising a listing/index page
+   and bailing, vs. shipping a degenerate single-event case — needs the stronger
+   model; Haiku shipped a bare-title case off a multi-date tour page, #283.)
 7. **Finalizes — Phase 2, again in the workflow
    (`tools/new-extractors-creation/phase2-finalize.sh`):** enforces the blast radius (below), re-runs
    `test:live` + `test:offline`, commits the agent's two files, opens the PR
@@ -132,18 +135,25 @@ reverted edit, the re-verify goes red and no PR opens — exactly right.) The pr
 tells the agent to inline any helper logic into its own source IIFE, as
 `meetup.js` does, rather than touch `pipeline/helpers/`.
 
-Its one judgment escape hatch: if the cached `data/<caseName>.html` is a
-bot/CAPTCHA/login/SPA-shell page rather than the real event page (a soft 2xx the
-probe's `detectChallenge` didn't catch — typically a JS-rendered SPA shell), it
-**stops**, writes a one-sentence diagnosis to `BAIL_REASON_FILE` (`/tmp`, so the
+Its one judgment escape hatch: if the cached `data/<caseName>.html` isn't **one
+specific event** — a bot/CAPTCHA/login/SPA-shell page, or a listing/index/artist/
+tour page showing many dates (a soft 2xx the probe's `detectChallenge` can't see),
+it **stops**, writes a one-sentence diagnosis to `BAIL_REASON_FILE` (`/tmp`, so the
 blast-radius `git clean` can't delete it), and **leaves the case's `events`
-empty** — it does **not** comment itself. A filled case is the agent's done-signal:
-Phase 2 opens a PR only when `events` is non-empty. A still-empty case means the
-agent bailed, so **Phase 2 posts the comment** — quoting the diagnosis file when
-present, a generic note otherwise — so an issue the agent actually worked always
-gets a reply, and exits **green** (a bail is expected, not a failure). The earlier
-design trusted the agent to comment; it didn't reliably (#277), so the comment is
-now the workflow's job.
+empty** — it does **not** comment itself.
+
+A filled case is the agent's done-signal, but Phase 2 doesn't trust it blindly: it
+runs a deterministic **quality floor** (`tools/new-extractors-creation/case-quality.js`)
+before opening a PR. The verdict is `empty` (the agent bailed), `degenerate` (a
+filled case whose event has **no location** — the signature of a listing page that
+yielded only a bare title, #283 livenation), or `ok`. For `empty` and `degenerate`
+**Phase 2 posts the comment itself** — quoting the diagnosis file for a bail, a
+"looks like a listing page" note for a degenerate one — so an issue the agent
+worked always gets a reply, and exits **green** (both are expected, not failures);
+only `ok` opens a PR. Two earlier misses drove this: the agent didn't reliably
+comment on a bail (#277, so the comment is now the workflow's job), and Haiku
+shipped a degenerate bare-title case off a listing page (#283, so the floor
+rejects it and the agent now runs on **Sonnet**).
 
 ### Why the workflow dispatches CI itself
 
@@ -196,10 +206,12 @@ failure (red):
   bot-challenge / interstitial (`detectChallenge`). **No agent run was started.**
   The comment names the reason and links the run log. Add the site by hand
   (`docs/claude/adding-a-source.md`).
-- **Worked it, no PR** (green) — the agent ran but judged the page unextractable
-  (e.g. a JS-rendered SPA shell the probe couldn't see), so it left the case empty.
-  Phase 2 posts the agent's diagnosis (or a generic note) and opens no PR. The
-  scaffolding stays on the branch for follow-up.
+- **Worked it, no PR** (green) — the agent ran but the case didn't clear the
+  Phase-2 quality floor: either it bailed and left the case empty (e.g. a JS-rendered
+  SPA shell the probe couldn't see), or it produced a `degenerate` event with no
+  location (a listing/tour page, #283). Phase 2 posts the diagnosis (a bail) or a
+  "looks like a listing page" note (degenerate) and opens no PR. The scaffolding
+  stays on the branch for follow-up.
 - **PR opened** (green) — the normal success path: Phase 2 commits, opens the PR,
   and comments the link.
 - **Unexpected failure** (red) — only a genuine break reaches the `failure()`

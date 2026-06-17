@@ -31,16 +31,21 @@ for f in "${CHANGED[@]}"; do
 done
 git clean -fd >/dev/null 2>&1 || true
 
-# The agent's done-signal is a FILLED case. A still-empty `events` means it judged
-# the page unextractable — no PR. The agent ran (work started on this issue), so
-# we ALWAYS leave a comment here rather than trusting the agent to have posted one
-# (it doesn't reliably). The agent writes its diagnosis to BAIL_REASON_FILE (in
-# /tmp, outside the repo, so the blast-radius `git clean` above can't delete it);
-# we quote it when present and fall back to a generic note when it isn't. This is
-# an expected outcome, not a failure: comment and exit 0 (green).
+# Quality floor before a PR (tools/new-extractors-creation/case-quality.js). The
+# agent ran — work started on this issue — so we ALWAYS leave a comment here
+# rather than trusting the agent to have posted one (it doesn't reliably). Two
+# non-PR verdicts, both expected outcomes (comment + exit 0 green, not a failure):
+#   empty      — the agent judged the page unextractable and left the case empty.
+#                It writes its diagnosis to BAIL_REASON_FILE (in /tmp, outside the
+#                repo, so the blast-radius `git clean` above can't delete it); we
+#                quote it when present, generic note otherwise.
+#   degenerate — a filled case whose event has no location: the signature of a
+#                listing/index/tour page that yielded only a bare title, not a
+#                single event (#283). Don't ship it as a PR.
 BAIL_REASON_FILE="${BAIL_REASON_FILE:-/tmp/agent-bail-reason.md}"
-N=$(CASE_FILE="$CASE_FILE" node -e "try{const e=require('./'+process.env.CASE_FILE).expected.events;process.stdout.write(String(Array.isArray(e)?e.length:0))}catch(_){process.stdout.write('0')}")
-if [ "$N" = "0" ]; then
+VERDICT=$(CASE_FILE="$CASE_FILE" node tools/new-extractors-creation/case-quality.js)
+
+if [ "$VERDICT" = "empty" ]; then
   echo "Integration case still empty — the agent judged the page unextractable. No PR; commenting."
   if [ -s "$BAIL_REASON_FILE" ]; then
     DIAGNOSIS="$(cat "$BAIL_REASON_FILE")"
@@ -50,6 +55,14 @@ if [ "$N" = "0" ]; then
   gh issue comment "$ISSUE_NUMBER" --body "🛑 Looked into this, but didn't open a PR: $DIAGNOSIS
 
 No dedicated extractor was added. The site can still be added by hand — see docs/claude/adding-a-source.md. (Scaffolding is left on branch \`$BRANCH\` for follow-up.)"
+  exit 0
+fi
+
+if [ "$VERDICT" = "degenerate" ]; then
+  echo "Extraction is degenerate (an event has no location) — likely a listing/index page, not a single event. No PR; commenting."
+  gh issue comment "$ISSUE_NUMBER" --body "🛑 Looked into this, but didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue.
+
+No dedicated extractor was added. Point the request at one specific event page on this site, or add it by hand — see docs/claude/adding-a-source.md. (Scaffolding is left on branch \`$BRANCH\` for follow-up.)"
   exit 0
 fi
 
