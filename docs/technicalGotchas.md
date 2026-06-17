@@ -9,9 +9,15 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
   in real headless Chrome (`data/render-page.js`) only when `data/spa-shell.js`'s
   `shouldRender` is true — a positive conjunction (`isSpaShell &&
-  !hasExtractableData`), not "the body is small", so it never fires on a generic
-  error body or a content-rich framework page, and bot-challenge pages are
-  excluded for free (no framework-root marker). Two traps: (a) the URL is
+  !hasEventData`), not "the body is small", so it never fires on a generic
+  error body or a page that already carries an event date, and bot-challenge pages
+  are excluded for free (no framework-root marker). The trigger keys on a
+  **machine-readable start date** (`<time datetime>` / JSON-LD `startDate`), *not*
+  on og:title or visible-text length: an SPA shell can carry the event name in
+  og:title and kilobytes of nav/footer chrome yet hide every date+venue behind JS,
+  which silently skipped the render for the motivating #277 page (#328). The
+  separate `hasExtractableData` predicate (og:title / JSON-LD / text) is the
+  *keep* check — whether a finished render gained content — not the trigger. Two traps: (a) the URL is
   user-supplied, so this runs *attacker-influenceable* JS — unlike
   `extension-load.chrome.test.js` (our own extension), it keeps Chrome's sandbox
   ON by default; `RENDER_NO_SANDBOX=1` is only for runners that can't support it,
