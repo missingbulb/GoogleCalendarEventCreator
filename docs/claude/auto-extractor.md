@@ -94,11 +94,17 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    the agent's judgment step.) Runs before `npm ci`. Reusing the recorder's exact
    headers is the whole point: a bare `curl` is rejected by sites that serve a real
    browser, which would false-reject requests the recorder could actually fulfil.
-4. Installs dependencies + the `claude` CLI and configures git.
+4. Installs dependencies + the `claude` CLI, configures git, and sets up a
+   Chrome for Testing binary (`CHROME_PATH` + `RENDER_NO_SANDBOX`, mirroring
+   `refresh-cache.yml`) so the inline `npm run refresh` below can render a
+   JS single-page-app shell instead of recording an empty one (#334; without it
+   every SPA — barby #325, visit.tel-aviv #277 — records a shell and the agent
+   bails).
 5. **Prepares the branch — Phase 1, all deterministic, in the workflow
    (`tools/new-extractors-creation/phase1-prepare.sh`, not the agent):** branches `claude/extractor/<slug>`
    off `main`; records the page inline (`data/<caseName>.url` + the empty `.html`
-   signal → `npm run refresh`, asserted non-empty); **scaffolds**
+   signal → `npm run refresh`, which renders an SPA shell via headless Chrome when
+   `data/spa-shell.js` flags one, asserted non-empty); **scaffolds**
    `pipeline/sources/<slug>.js` with its `matches()` already filled
    (`tools/new-extractors-creation/scaffold-source.js`) **and the placeholder case
    `test/extractors/custom/<caseName>.json`** with empty `events`

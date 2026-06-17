@@ -87,8 +87,9 @@ Read the file when you touch it; the one-liners here are just a map.
   `test/fullBrowserHeavyTests/extension-load.chrome.test.js` (`npm run test:e2e` —
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
-- **SPA-shell render fallback** (#310) — the detector (`data/spa-shell.js`,
-  `shouldRender = isSpaShell && !hasExtractableData`) is pure and unit-tested
+- **SPA-shell render fallback** (#310, #328) — the detector (`data/spa-shell.js`,
+  `shouldRender = isSpaShell && !hasEventData`, keying on a machine start date)
+  is pure and unit-tested
   offline in `test/unit/spa-shell.test.js`; the headless render itself
   (`data/render-page.js`, sharing the DevTools client `data/cdp-client.js` with
   the extension-load test) is exercised by

@@ -1,30 +1,38 @@
 // Explicit detection of a JS single-page-app *shell*: an HTTP 200 whose static
-// HTML carries none of the event data we extract — only an empty framework root
-// that JavaScript would populate at runtime. This is the ONLY signal that
-// justifies the headless-render fallback (data/render-page.js), so it must be
-// narrow. See issue #310 (visit.tel-aviv.gov.il / #277 is the concrete case: a
-// SharePoint/AngularJS SPA whose recorded HTML had only empty Angular bindings).
+// HTML lacks the event data we extract — only an empty framework root that
+// JavaScript would populate at runtime. This is the ONLY signal that justifies
+// the headless-render fallback (data/render-page.js), so it must be narrow. See
+// issue #310 (visit.tel-aviv.gov.il / #277 is the concrete case: a SharePoint/
+// AngularJS SPA whose recorded HTML had only empty Angular bindings).
 //
-// The trigger is a positive conjunction, NOT "the body is small":
+// TWO different questions, TWO predicates — do NOT conflate them (#328):
 //
-//   shouldRender(html) === isSpaShell(html) && !hasExtractableData(html)
+//   shouldRender(html) === isSpaShell(html) && !hasEventData(html)
+//     The render TRIGGER. Render a framework shell that has no machine-readable
+//     start date. The date is the event-defining field a static extractor needs
+//     and an SPA shell omits; it's also the only language-agnostic signal (the
+//     #277 page is Hebrew, so prose-date matching is out). Crucially we do NOT
+//     gate on og:title or visible-text length here: a page can carry an og:title
+//     (the event *name*) and kilobytes of nav/footer chrome yet still hide every
+//     date+venue behind JS — that was the #277 regression (og:title + 1615 chars
+//     of menu text made the old shared predicate read "has data" and skipped the
+//     render). Named bot-challenge pages carry no framework marker, so isSpaShell
+//     is false and they're excluded for free (the probe also stops them upstream).
 //
-//   (A) !hasExtractableData — no JSON-LD, no og:title, and little visible text;
-//   (B) isSpaShell        — a framework-root / runtime marker is present.
+//   hasExtractableData(html)
+//     The KEEP question, used by refresh-cache.js's maybeRender (and the
+//     CHROME_PATH render test): after rendering, did we gain content worth
+//     keeping? Here og:title / JSON-LD / substantial visible text all count as
+//     "the render produced something", because any is an improvement over an
+//     empty shell. A render is kept only if it improves on the static HTML, so a
+//     content-based check is right for KEEP even though it's wrong for TRIGGER.
 //
-// Both must hold, so it never fires on a generic small/error body (no framework
-// marker) nor on a content-rich framework page (a fully-rendered Angular page
-// matches (B) but has body text, so (A) is false → no render). Named
-// bot-challenge pages (Cloudflare "Just a moment", AWS WAF, …) are excluded for
-// free: they carry no framework-root marker, so (B) is false — and in the
-// auto-extractor flow the probe already stops them upstream. These are cheap
-// string checks (no jsdom), matching the probe's detectChallenge style.
+// These are cheap string checks (no jsdom), matching the probe's detectChallenge
+// style.
 "use strict";
 
-// Visible-text length at or above which the static HTML already carries enough
-// content to extract generically — so it isn't a data-less shell, even with no
-// structured data. (A shell has a near-empty body; a server-rendered page does
-// not.)
+// Visible-text length at or above which rendered HTML carries enough content to
+// be worth keeping over an empty shell (the KEEP side only — see hasExtractableData).
 const TEXT_THRESHOLD = 500;
 
 // Framework-root / runtime markers that only a JS-rendered app emits. Presence
@@ -42,6 +50,12 @@ const SPA_MARKERS = [
   /window\.__INITIAL_STATE__/i, // common SPA bootstrap
 ];
 
+// A machine-readable START DATE — the event-defining field. Either a
+// <time datetime="YYYY-MM-DD…"> element or a JSON-LD "startDate": "YYYY-MM-DD…".
+// ISO-anchored so it's language-agnostic (the #277 page is Hebrew).
+const TIME_DATETIME = /<time[^>]+datetime\s*=\s*["']\s*\d{4}-\d{2}-\d{2}/i;
+const JSONLD_START_DATE = /["']startDate["']\s*:\s*["']?\s*\d{4}-\d{2}-\d{2}/i;
+
 // Strip scripts/styles/tags and collapse whitespace to approximate the page's
 // visible text length. Deliberately crude — we only need "near-empty vs. not".
 function visibleText(html) {
@@ -54,9 +68,17 @@ function visibleText(html) {
     .trim();
 }
 
-// Does the static HTML already contain something an extractor can use? Structured
-// data (JSON-LD / og:title) or enough visible text. If true, there is nothing to
-// gain from rendering.
+// TRIGGER side: does the static HTML already carry a usable event start date?
+// If so, there is nothing the render needs to recover — don't render. (A name in
+// og:title or a body full of site chrome is NOT event data: see #328.)
+function hasEventData(html) {
+  const body = typeof html === "string" ? html : "";
+  return TIME_DATETIME.test(body) || JSONLD_START_DATE.test(body);
+}
+
+// KEEP side: does this HTML contain something an extractor can use — structured
+// data (JSON-LD / og:title) or enough visible text? Used to decide whether a
+// freshly-rendered page improved on the shell, NOT whether to render.
 function hasExtractableData(html) {
   const body = typeof html === "string" ? html : "";
   const jsonLd = /<script[^>]+type=["']application\/ld\+json["'][^>]*>\s*[^\s<]/i;
@@ -71,14 +93,15 @@ function isSpaShell(html) {
   return SPA_MARKERS.some((re) => re.test(body));
 }
 
-// The render decision: a framework shell with no extractable static data.
+// The render decision: a framework shell with no static event date to extract.
 function shouldRender(html) {
-  return isSpaShell(html) && !hasExtractableData(html);
+  return isSpaShell(html) && !hasEventData(html);
 }
 
 module.exports = {
   shouldRender,
   isSpaShell,
+  hasEventData,
   hasExtractableData,
   visibleText,
   TEXT_THRESHOLD,
