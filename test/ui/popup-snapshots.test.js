@@ -20,10 +20,11 @@ const pixelmatch = require("pixelmatch").default;
 const { renderCasePng, loadCases, CASES_DIR } = require("./popup-renderer");
 const { artifactPath } = require("./snapshot-artifacts-dir");
 
-// Rendering is deterministic (no browser/fonts involved beyond the bundled
-// ones), so pixels should match run to run; allow a tiny tolerance for any
-// platform-dependent rasterization differences.
-const MAX_DIFF_RATIO = 0.005;
+// Rendering is deterministic (satori + resvg + bundled fonts, no browser), so a
+// snapshot must match its reference EXACTLY — any differing pixel is a real,
+// intentional-or-not change to the popup. If cross-platform rasterization noise
+// ever makes this flap, revisit a small tolerance then rather than pre-emptively.
+const MAX_DIFF_RATIO = 0;
 
 async function compareToSnapshot(name, pngBuffer) {
   const snapshotPath = path.join(CASES_DIR, `${name}.png`);

@@ -347,12 +347,12 @@ function chipEl({ banner, body, kind = "day", year, yearPast }) {
 // eventLengthInMinutes for a timed instance, else null.
 function effectiveEnd(instance) {
   if (instance.end) {
-    const d = new Date(instance.end);
+    const d = new Date(floatLocal(instance.end));
     return isNaN(d) ? null : d;
   }
   if (instance.eventLengthInMinutes != null && instance.start && !isAllDay(instance.start)) {
-    const s = new Date(instance.start);
-    if (!isNaN(s)) return new Date(s.getTime() + instance.eventLengthInMinutes * 60000);
+    const s = eventStart(instance.start);
+    if (s) return new Date(s.getTime() + instance.eventLengthInMinutes * 60000);
   }
   return null;
 }
@@ -387,12 +387,27 @@ function isNextDay(dayA, dayB) {
   return key === dayB;
 }
 
+// Strip a trailing UTC offset (`+01:00`) or `Z` from a timed value so it parses
+// as floating local time — a PRESENTATION-only step. The card/button should show
+// the wall-clock time as written on the page (e.g. 21:00 from
+// `2026-12-07T21:00:00+01:00`), not re-zoned to the runtime's timezone by
+// toLocale*. This mirrors GCal.localizeToZone but needs no tz: it keeps the
+// literal clock digits. The Calendar URL still gets the original instant (the
+// `ctz` param places it) — build-calendar-url.js is untouched. All-day,
+// already-floating, and empty values pass through unchanged.
+function floatLocal(value) {
+  if (typeof value !== "string") return value;
+  return value.replace(/(?:Z|[+-]\d{2}:?\d{2})$/i, "");
+}
+
 // Parse an event start into a Date, or null when it's absent/unparseable. A
 // bare YYYY-MM-DD (all-day) is anchored to local midnight so the day is right.
+// A timed value's offset/Z is stripped first (see floatLocal) so the displayed
+// time/day match the page rather than the runtime's timezone.
 function eventStart(start) {
   if (!start) return null;
   if (isAllDay(start)) return new Date(`${start}T00:00:00`);
-  const date = new Date(start);
+  const date = new Date(floatLocal(start));
   return isNaN(date) ? null : date;
 }
 
@@ -515,7 +530,9 @@ export function formatWhen(start, end) {
 
   let text = formatTime(startDate);
 
-  const endDate = end ? new Date(end) : null;
+  // `end` may be a string (with an offset/Z to strip) or an already-floating
+  // Date from effectiveEnd; floatLocal passes a Date through untouched.
+  const endDate = end ? new Date(floatLocal(end)) : null;
   if (endDate && !isNaN(endDate) && endDate > startDate) {
     text += ` – ${formatTime(endDate)}`;
   }

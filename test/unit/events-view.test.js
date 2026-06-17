@@ -58,6 +58,41 @@ test("formatWhen: an end that isn't after the start is ignored (single time)", (
   assert.equal(formatWhen(ROUND, "2026-06-17T19:00:00"), formatWhen(ROUND));
 });
 
+// --- Offset/Z starts show the WALL-CLOCK time as written on the page, not
+// re-zoned to the runtime's timezone (presentation-only floatLocal). Each check
+// compares the offset/Z value to its floating equivalent, so it holds in any
+// runtime timezone and locale.
+
+test("formatWhen: a +01:00 offset is dropped, showing the literal clock time", () => {
+  assert.equal(formatWhen("2026-12-07T21:00:00+01:00"), formatWhen("2026-12-07T21:00:00"));
+});
+
+test("formatWhen: a trailing Z is dropped, showing the literal clock time", () => {
+  assert.equal(formatWhen("2026-12-07T21:00:00Z"), formatWhen("2026-12-07T21:00:00"));
+});
+
+test("formatWhen: an offset end is also shown as its literal clock time", () => {
+  assert.equal(
+    formatWhen("2026-12-07T21:00:00+01:00", "2026-12-07T23:00:00+01:00"),
+    formatWhen("2026-12-07T21:00:00", "2026-12-07T23:00:00")
+  );
+});
+
+test("dateChip: an offset that would shift the UTC day still shows the page's day", () => {
+  // 00:30 +02:00 is the previous day in UTC; the chip must read the written day.
+  assert.deepEqual(
+    dateChip("2026-12-07T00:30:00+02:00", 2026),
+    dateChip("2026-12-07T00:30:00", 2026)
+  );
+});
+
+test("sameDayLabel: an offset start shows the literal clock time", () => {
+  assert.equal(
+    sameDayLabel({ start: "2026-12-07T21:00:00+01:00" }),
+    sameDayLabel({ start: "2026-12-07T21:00:00" })
+  );
+});
+
 test("summarize: appends the location after the time with a separator", () => {
   const text = summarize({ start: ROUND, location: "Blue Door Hall" });
   assert.ok(text.includes("Blue Door Hall"));

@@ -15,7 +15,7 @@ current (or changed) state is reviewable straight from GitHub.
 
 ## 01-supported-listing
 
-Supported host: events across past, current, and future years (off-year cards get a year pill)
+Supported host: events across past, current, and future years (off-year cards get a year pill); the current-year event's times carry a UTC offset shown as wall-clock
 
 ![01-supported-listing](cases/01-supported-listing.png)
 
