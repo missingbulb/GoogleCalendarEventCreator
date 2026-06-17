@@ -234,7 +234,10 @@ The agent never merges the PR. A human must review:
 - That `matches(host)` is correct for the target domain
 
 "LGTM" from the repo owner is the merge signal (see `docs/claude/workflow.md`).
-CI must go green at least twice before merging a branch that adds new tests.
+CI must go green before merging; the extractor branch adds a deterministic
+offline integration case (not an e2e/heavy-browser test), so one green run
+suffices — the twice-green flakiness gate applies only to e2e/heavy-browser
+changes (`docs/engineeringPractices.md`).
 
 ## Updating the agent prompt
 

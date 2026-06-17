@@ -39,7 +39,8 @@ one-page review.
 
 When the repo owner says "LGTM" on a change, treat it as approval to merge
 that branch's pull request into `main` (the test-flakiness gate in
-`docs/engineeringPractices.md` still applies before merging). Merge via
+`docs/engineeringPractices.md` still applies before merging — but only when the
+change adds or touches an e2e/heavy-browser test). Merge via
 **squash**, appending the PR number to the title as `(#N)` — matching `main`'s
 linear, one-commit-per-PR history. After merging, also run **"learned lessons"**
 on the conversation before closing out.
