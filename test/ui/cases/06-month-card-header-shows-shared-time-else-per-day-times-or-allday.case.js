@@ -1,20 +1,21 @@
-// The month card's header, all three commonTime branches side by side. A month
-// card folds an event's scattered single-show days into one card (a button per
-// day); what its header and chips show depends on those days' times:
-//   - SHARED time (Hebrew Conversation Club, Jun 5/14/25 all 7 PM): the shared
-//     time leads the header ("7 PM · <location>") and each chip is a bare DAY chip
-//     (month banner + day) — the time the day chips can't show, surfaced once.
+// The month card's header AND its chip row, packed. A month card folds an event's
+// scattered single-show days into one card (a button per day); the three events
+// here cover all three commonTime branches side by side, and the first also
+// exercises chip-row WRAPPING and the consecutive-days-aren't-merged rule (#330):
+//   - SHARED time (Hebrew Conversation Club, Jun 5/6/7/12/19 all 7 PM): the shared
+//     time leads the header ("7 PM · <location>"); the five bare DAY chips (month
+//     banner + day) wrap to a second row, and the consecutive 5/6/7 stay three
+//     separate chips — never collapsed into a range.
 //   - DIFFERENT times (Rotating Recital Series, Jul 5/14/25 at 6/7/8 PM): no time
 //     to share, so the header is just the location and each chip becomes a TIME
 //     chip (date banner + that day's time) so no time is lost.
 //   - ALL-DAY (Open Studios Month, Aug 5/14/25, date-only): no time to share, so
 //     the header is just the location, with plain day chips.
-// One event per branch — each earns its place.
 "use strict";
 
 module.exports = {
   description:
-    "Month card surfaces a shared start time in its header (day chips), else drops to per-day time chips, else shows just the location (all-day dates)",
+    "Month card surfaces a shared start time in its header (day chips that wrap when many, consecutive days not merged), else per-day time chips, else just the location (all-day dates)",
   data: {
     supported: true,
     events: [
@@ -24,8 +25,10 @@ module.exports = {
         ctz: "Asia/Jerusalem",
         times: [
           { start: "2026-06-05T19:00:00", end: null },
-          { start: "2026-06-14T19:00:00", end: null },
-          { start: "2026-06-25T19:00:00", end: null },
+          { start: "2026-06-06T19:00:00", end: null },
+          { start: "2026-06-07T19:00:00", end: null },
+          { start: "2026-06-12T19:00:00", end: null },
+          { start: "2026-06-19T19:00:00", end: null },
         ],
       },
       {

@@ -39,24 +39,36 @@ Denylisted host suppresses even a complete event: the empty glyph with no link o
 
 ## 05-same-day-screenings-each-become-their-own-time-button
 
-Same-day screenings each become their own time button: one same-day card with a chip per showing
+Same-day screenings each become their own time button: one same-day card, a chip per showing (single times and a time range)
 
 ![05-same-day-screenings-each-become-their-own-time-button](cases/05-same-day-screenings-each-become-their-own-time-button.png)
 
 ## 06-month-card-header-shows-shared-time-else-per-day-times-or-allday
 
-Month card surfaces a shared start time in its header (day chips), else drops to per-day time chips, else shows just the location (all-day dates)
+Month card surfaces a shared start time in its header (day chips that wrap when many, consecutive days not merged), else per-day time chips, else just the location (all-day dates)
 
 ![06-month-card-header-shows-shared-time-else-per-day-times-or-allday](cases/06-month-card-header-shows-shared-time-else-per-day-times-or-allday.png)
 
-## 07-capped-list-scrolled-to-end-shows-count-and-show-all-link
+## 07-one-event-splits-into-month-same-day-and-single-cards
+
+One event splits into several cards: a month card (its single-show June days), a same-day card (the two-show day), and a single card (the lone July day)
+
+![07-one-event-splits-into-month-same-day-and-single-cards](cases/07-one-event-splits-into-month-same-day-and-single-cards.png)
+
+## 08-capped-list-scrolled-to-end-shows-count-and-show-all-link
 
 Capped list scrolled to the end: the 'N out of M events showing' count, a 'show all' link, and the top edge fade
 
-![07-capped-list-scrolled-to-end-shows-count-and-show-all-link](cases/07-capped-list-scrolled-to-end-shows-count-and-show-all-link.png)
+![08-capped-list-scrolled-to-end-shows-count-and-show-all-link](cases/08-capped-list-scrolled-to-end-shows-count-and-show-all-link.png)
 
-## 08-overflowing-list-at-rest-fades-out-its-bottom-edge
+## 09-count-label-counts-event-instances-not-cards
+
+The count cue counts event instances, not cards: a mixed list of 8 cards (two of them same-day cards) holds 13 events, so the end reads '13 events showing'
+
+![09-count-label-counts-event-instances-not-cards](cases/09-count-label-counts-event-instances-not-cards.png)
+
+## 10-overflowing-list-at-rest-fades-out-its-bottom-edge
 
 Overflowing list at rest at the top: the bottom edge fades out to cue there's more below
 
-![08-overflowing-list-at-rest-fades-out-its-bottom-edge](cases/08-overflowing-list-at-rest-fades-out-its-bottom-edge.png)
+![10-overflowing-list-at-rest-fades-out-its-bottom-edge](cases/10-overflowing-list-at-rest-fades-out-its-bottom-edge.png)
