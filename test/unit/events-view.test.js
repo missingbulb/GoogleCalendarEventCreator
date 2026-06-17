@@ -15,7 +15,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
-let monthRangeChip, dayOfMonthLabel, formatDateRange;
+let monthRangeChip, formatDateRange;
 before(async () => {
   ({
     formatWhen,
@@ -24,7 +24,6 @@ before(async () => {
     sameDayLabel,
     toCards,
     monthRangeChip,
-    dayOfMonthLabel,
     formatDateRange,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
 });
@@ -158,10 +157,10 @@ test("sameDayLabel: an all-day instance is labeled All day", () => {
 
 const inst = (start) => ({ t: { start } });
 
-test("monthRangeChip: month over the spanned day-range", () => {
+test("monthRangeChip: month over the spanned day-range (short hyphen, fixed-width chip)", () => {
   const chip = monthRangeChip([inst("2026-06-14T19:00:00"), inst("2026-06-25T19:00:00")]);
   assert.match(chip.month, /^[A-Z]+$/);
-  assert.equal(chip.day, "14–25");
+  assert.equal(chip.day, "14-25");
 });
 
 test("monthRangeChip: a single shared day is just that day (no range)", () => {
@@ -170,7 +169,7 @@ test("monthRangeChip: a single shared day is just that day (no range)", () => {
 
 test("monthRangeChip: ranges by day-of-month, smallest to largest, not list order", () => {
   const chip = monthRangeChip([inst("2026-06-25T19:00:00"), inst("2026-06-05T19:00:00")]);
-  assert.equal(chip.day, "5–25");
+  assert.equal(chip.day, "5-25");
 });
 
 test("monthRangeChip: no usable date yields null", () => {
@@ -182,11 +181,6 @@ test("monthRangeChip: an off-year range carries its year, the current year omits
   const there = [inst("2027-06-14T19:00:00"), inst("2027-06-25T19:00:00")];
   assert.equal(monthRangeChip(here, 2026).year, undefined);
   assert.equal(monthRangeChip(there, 2026).year, "2027");
-});
-
-test("dayOfMonthLabel: just the day number, no month", () => {
-  assert.equal(dayOfMonthLabel("2026-06-05T19:00:00"), "5");
-  assert.equal(dayOfMonthLabel(""), "");
 });
 
 test("formatDateRange: 'Mon d – d' across days, no time", () => {

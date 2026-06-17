@@ -12,6 +12,13 @@ Confirm a behavior isn't already provided before building a mechanism for it —
 verify the gap against a real run first; the cheapest fix is often that it
 already works.
 
+Whenever a change regenerates the UI snapshots (`test/ui/cases/*.png`, via
+`npm run refresh:ui`), surface them to the reviewer in the same turn you commit
+them: show the changed PNGs inline in the chat and link the branch's
+`test/ui/README.md` (the rendered gallery of every case —
+`https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md`) for
+one-page review.
+
 When the repo owner says "LGTM" on a change, treat it as approval to merge
 that branch's pull request into `main` (the test-flakiness gate in
 `docs/engineeringPractices.md` still applies before merging). Merge via

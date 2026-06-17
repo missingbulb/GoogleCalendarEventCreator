@@ -32,7 +32,9 @@ async function init() {
 
 // Render the popup's content from the one chooseContent() decision: the heading
 // text, the (height-capped, scrollable) event list with its bottom count label,
-// and at most one heading-line link. Split out from init() — which does the
+// the State-5 "Suggest Correction" heading-line link when an event is shown, or
+// (when there's nothing to show) an empty-state glyph with the State-3
+// "Disagree?" link beneath it. Split out from init() — which does the
 // chrome/fetch I/O to gather `data` — so the SAME real view code can be driven
 // with fake data by the UI snapshot tests (test/ui/), which pass `data`, a stub
 // `tab`, and the host `listing` directly. Builds into the global `document` (the
@@ -92,18 +94,50 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     // under the static snapshot renderer they're 0, so a case drives the fade
     // state via its action instead (see test/ui/actions.js).
     eventsEl.addEventListener("scroll", updateScrollFades);
+
+    // State 5: a complete fallback event on an unlisted host — a quiet
+    // right-aligned "Suggest Correction" link next to the heading text. (Only
+    // fires when events are shown, so it lives on the heading line.)
+    if (request) {
+      const view = await import("./views/source-request-view.js");
+      headingEl.classList.add("with-link");
+      headingEl.appendChild(view.makeSourceRequestLink(tab, request));
+    }
   } else {
     headingEl.textContent = "No events found on this page";
-  }
 
-  // A heading-line link on an unlisted host, right-aligned next to the heading
-  // text: "Suggest Correction" when a complete event is shown (State 5), or
-  // "Disagree?" when there's nothing to show (State 3). At most one fires.
-  if (request || policyLink) {
-    const view = await import("./views/source-request-view.js");
-    headingEl.classList.add("with-link");
-    headingEl.appendChild(request ? view.makeSourceRequestLink(tab, request) : view.makePolicyLink(tab));
+    // Empty state: a muted calendar glyph that gives the popup a face instead of
+    // a bare line. State 3 (non-denylisted, nothing complete) adds the quiet
+    // "Disagree?" policy link beneath the glyph; State 2 (denylist) and an
+    // event-less supported host (policyLink false) show the glyph alone.
+    let policyLinkEl = null;
+    if (policyLink) {
+      const view = await import("./views/source-request-view.js");
+      policyLinkEl = view.makePolicyLink(tab);
+    }
+    eventsEl.appendChild(makeEmptyState(policyLinkEl));
   }
+}
+
+// The empty-state block rendered into the (otherwise empty) event list when
+// there's nothing to add: a muted, CSS-drawn calendar glyph — the same
+// box-only construction as the header brand mark, so the satori snapshot
+// renderer paints it — with an optional quiet link beneath it (the "Disagree?"
+// policy link on State 3; nothing on a denylisted host).
+function makeEmptyState(linkEl) {
+  const wrap = document.createElement("div");
+  wrap.className = "empty-state";
+
+  const cal = document.createElement("span");
+  cal.className = "empty-cal";
+  cal.setAttribute("aria-hidden", "true");
+  const banner = document.createElement("span");
+  banner.className = "empty-cal-banner";
+  cal.appendChild(banner);
+  wrap.appendChild(cal);
+
+  if (linkEl) wrap.appendChild(linkEl);
+  return wrap;
 }
 
 // Show/hide the top and bottom edge fades from the scroller's current position:
