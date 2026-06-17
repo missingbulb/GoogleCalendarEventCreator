@@ -23,8 +23,8 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   render no-ops locally and is verified only in CI (#310).
 - **Day-boundary date math must use UTC component math, not local-midnight +
   `toISOString()`.** Compute an adjacent day with `Date.UTC(y, m-1, d+1)` then
-  `getUTC*` (as `nextDay` in `build-calendar-url.js` and `isNextDay` in
-  `ui/views/events-view.js` do). `new Date("YYYY-MM-DDT00:00:00")` is *local*
+  `getUTC*` (as `nextDay` in `build-calendar-url.js` does).
+  `new Date("YYYY-MM-DDT00:00:00")` is *local*
   midnight, which under a positive UTC offset is the previous UTC day, so
   `toISOString()` reports the wrong adjacent date. The UTC/`C.UTF-8`
   sandbox/CI default parses floating times as UTC, so a unit test there won't

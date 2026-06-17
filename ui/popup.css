@@ -243,7 +243,7 @@ body {
 }
 /* THE calendar chip — the popup's single "addable event" motif: a colored banner
    (the shared context — a month, or a full date) over a prominent body (the pick
-   — a day, a day-range, or a time) on a white "page". It's a single card's left
+   — a day or a time) on a white "page". It's a single card's left
    indicator AND, wrapped in .chip-btn, a grouped card's instance button, so an
    addable event looks the same either way. min-width keeps a one-digit day chip
    from collapsing; a wider body (a time) grows the chip past it. */
@@ -294,11 +294,6 @@ body {
 .e-chip-body.time {
   font-size: 11px;
   white-space: nowrap;
-}
-/* A day-range ("5-7") gets a smaller font than a single day so it stays
-   comfortably inside the chip rather than straining its width. */
-.e-chip-body.range {
-  font-size: 13px;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
