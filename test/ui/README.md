@@ -117,6 +117,6 @@ Many mixed-grouping instances scrolled to the bottom: count cue sums instances a
 
 ## 18-many-instances-one-card
 
-Many instances in ONE card: a single event's dozen scattered dates fold into one month card with a button per day
+Many instances in ONE card, each at a different hour: one month card whose chips all become date+time chips (no common-time header)
 
 ![18-many-instances-one-card](cases/18-many-instances-one-card.png)
