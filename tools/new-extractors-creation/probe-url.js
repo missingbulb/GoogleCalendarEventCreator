@@ -1,32 +1,95 @@
 #!/usr/bin/env node
 // Pre-flight URL probe for the auto-implement-extractor workflow. Given an event
 // URL, fetch it the same way data/refresh-cache.js records pages (shared
-// data/fetch-page.js — browser headers, retries) and exit 0 only on a 2xx.
+// data/fetch-page.js — browser headers, retries), then decide whether the page
+// is actually usable as a static test case.
 //
-// The workflow runs this BEFORE npm ci and the agent: if the page can't be
-// fetched (non-2xx, DNS failure, timeout, login wall), there's nothing to
-// record, so an agent run would only produce synthetic/hand-written coverage —
-// stop instead. A throw from fetchPage (which covers non-2xx) is the "stop"
-// signal; its message (e.g. "HTTP 403") goes to stderr for the failure comment.
+// The workflow runs this BEFORE npm ci and the agent. Two ways a page is "not
+// usable", both of which mean an agent run would only produce synthetic/
+// hand-written coverage — so stop instead and tell the requester:
+//   1. The fetch fails outright (non-2xx, DNS failure, timeout, login wall).
+//      fetchPage throws; its message (e.g. "HTTP 403") is the reason.
+//   2. The fetch returns 2xx but the body is a bot-challenge / CAPTCHA
+//      interstitial, not the real page (e.g. StubHub's AWS WAF page, #279).
+//      A status-only probe can't see this, so detectChallenge() sniffs the body
+//      for known vendor markers + a suspiciously-small size. This is the only
+//      soft-200 case we can catch cheaply here; a JS-rendered SPA shell that
+//      returns a full-but-empty page still falls through to the agent's
+//      judgment step (it bails and the workflow opens no PR).
 //
-// Usage: node tools/new-extractors-creation/probe-url.js "<url>"   # exit 0 = reachable, 1 = not
+// Exit codes: 0 = usable (proceed), 1 = not usable (the reason is on stdout for
+// the workflow to quote in its issue comment), 2 = misuse (no URL).
+//
+// Usage: node tools/new-extractors-creation/probe-url.js "<url>"
 "use strict";
 
 const { fetchPage } = require("../../data/fetch-page");
 
-const url = process.argv[2];
+// Real event pages are tens to hundreds of KB. A 2xx body smaller than this is
+// almost never a real page — it's an interstitial/stub — so treat it as a
+// challenge even when no named marker matches (a backstop for unknown vendors).
+const MIN_REAL_PAGE_BYTES = 1500;
 
-if (!url) {
-  console.error("probe-url: no URL given");
-  process.exit(2);
+// Substrings that only appear on a bot-challenge / CAPTCHA / interstitial page,
+// not a real event page. Each pairs a vendor name (for the human-readable
+// reason) with a marker distinctive enough to keep false positives near zero.
+const CHALLENGE_MARKERS = [
+  ["AWS WAF", /AwsWafIntegration/i],
+  ["AWS WAF", /aws-waf-token/i],
+  ["Cloudflare", /Just a moment\.\.\./i],
+  ["Cloudflare", /\/cdn-cgi\/challenge-platform\//i],
+  ["Cloudflare", /_cf_chl_opt/i],
+  ["Cloudflare", /cf-browser-verification/i],
+  ["Cloudflare", /Checking your browser before accessing/i],
+  ["Imperva/Incapsula", /_Incapsula_Resource/i],
+  ["Imperva/PerimeterX", /Pardon Our Interruption/i],
+  ["DataDome", /geo\.captcha-delivery\.com/i],
+  ["PerimeterX", /px-captcha/i],
+  ["reCAPTCHA", /g-recaptcha/i],
+  ["hCaptcha", /\bhcaptcha\b/i],
+  ["generic interstitial", /Enable JavaScript and cookies to continue/i],
+];
+
+// Inspect a fetched 2xx body. Returns a human-readable reason string if it looks
+// like a challenge/interstitial rather than a real page, or null if it's usable.
+function detectChallenge(html) {
+  const body = typeof html === "string" ? html : "";
+  for (const [vendor, marker] of CHALLENGE_MARKERS) {
+    if (marker.test(body)) {
+      return `the page is a bot-challenge / interstitial, not the event page (${vendor} marker found)`;
+    }
+  }
+  if (body.length < MIN_REAL_PAGE_BYTES) {
+    return `the response is only ${body.length} bytes — too small to be a real event page (likely an interstitial or empty stub)`;
+  }
+  return null;
 }
 
-fetchPage(url)
-  .then(() => {
-    console.log(`probe-url: ${url} is reachable (2xx)`);
-    process.exit(0);
-  })
-  .catch((err) => {
-    console.error(`probe-url: ${url} not fetchable — ${err.message}`);
-    process.exit(1);
-  });
+function main() {
+  const url = process.argv[2];
+  if (!url) {
+    console.error("probe-url: no URL given");
+    process.exit(2);
+  }
+
+  fetchPage(url)
+    .then((html) => {
+      const reason = detectChallenge(html);
+      if (reason) {
+        console.log(reason);
+        process.exit(1);
+      }
+      console.log(`reachable (2xx, ${html.length} bytes)`);
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.log(`it couldn't be fetched (${err.message})`);
+      process.exit(1);
+    });
+}
+
+if (require.main === module) {
+  main();
+}
+
+module.exports = { detectChallenge, CHALLENGE_MARKERS, MIN_REAL_PAGE_BYTES };

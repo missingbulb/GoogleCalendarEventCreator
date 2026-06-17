@@ -32,10 +32,24 @@ done
 git clean -fd >/dev/null 2>&1 || true
 
 # The agent's done-signal is a FILLED case. A still-empty `events` means it judged
-# the page unextractable (and commented) — no PR.
+# the page unextractable — no PR. The agent ran (work started on this issue), so
+# we ALWAYS leave a comment here rather than trusting the agent to have posted one
+# (it doesn't reliably). The agent writes its diagnosis to BAIL_REASON_FILE (in
+# /tmp, outside the repo, so the blast-radius `git clean` above can't delete it);
+# we quote it when present and fall back to a generic note when it isn't. This is
+# an expected outcome, not a failure: comment and exit 0 (green).
+BAIL_REASON_FILE="${BAIL_REASON_FILE:-/tmp/agent-bail-reason.md}"
 N=$(CASE_FILE="$CASE_FILE" node -e "try{const e=require('./'+process.env.CASE_FILE).expected.events;process.stdout.write(String(Array.isArray(e)?e.length:0))}catch(_){process.stdout.write('0')}")
 if [ "$N" = "0" ]; then
-  echo "Integration case still empty — the agent judged the page unextractable and commented. No PR."
+  echo "Integration case still empty — the agent judged the page unextractable. No PR; commenting."
+  if [ -s "$BAIL_REASON_FILE" ]; then
+    DIAGNOSIS="$(cat "$BAIL_REASON_FILE")"
+  else
+    DIAGNOSIS="The cached page didn't contain the event data a static extractor needs (e.g. a bot/CAPTCHA wall, a login wall, or a JavaScript-rendered single-page-app shell)."
+  fi
+  gh issue comment "$ISSUE_NUMBER" --body "🛑 Looked into this, but didn't open a PR: $DIAGNOSIS
+
+No dedicated extractor was added. The site can still be added by hand — see docs/claude/adding-a-source.md. (Scaffolding is left on branch \`$BRANCH\` for follow-up.)"
   exit 0
 fi
 

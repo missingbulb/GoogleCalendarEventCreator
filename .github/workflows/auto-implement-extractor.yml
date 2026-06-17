@@ -84,13 +84,16 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
       # Pre-flight URL probe. Fetch the event page the same way the recorder will
-      # (tools/new-extractors-creation/probe-url.js → data/fetch-page.js: browser headers + retries). If
-      # it isn't fetchable — URL missing, non-2xx, unreachable, or behind a
-      # login/bot wall — there is no real page to record a case against, so an
-      # agent run would only produce synthetic coverage. Stop instead. Runs
-      # before `npm ci` (probe-url.js uses only Node built-ins). Every step below
-      # is gated on success(), so a failure here skips them all and the run ends
-      # with the failure comment.
+      # (tools/new-extractors-creation/probe-url.js → data/fetch-page.js: browser headers + retries) and
+      # judge whether it's usable as a static case — a 2xx that's actually a
+      # bot-challenge / interstitial counts as NOT usable (probe-url.js sniffs the
+      # body). If it isn't usable — URL missing, non-2xx, unreachable, behind a
+      # login/bot wall, or a challenge page — an agent run would only produce
+      # synthetic coverage, so we STOP. But stopping here is an EXPECTED outcome,
+      # not a failure: this step never fails the job; it records the decision in
+      # `proceed` (and a human-readable `reason`), the downstream steps gate on
+      # `proceed == 'true'`, and the run ends GREEN via the "page not usable"
+      # comment below. Runs before `npm ci` (probe-url.js uses only Node built-ins).
       - name: Probe the event URL
         id: probe
         if: success() && steps.triage.outputs.skipAgent != 'true'
@@ -98,21 +101,51 @@ jobs:
           EVENT_URL: ${{ steps.triage.outputs.url }}
         run: |
           if [ -z "$EVENT_URL" ]; then
-            echo "No event URL found in the issue — nothing to probe." >&2
-            exit 1
+            {
+              echo "proceed=false"
+              echo "reason=no event URL was found in the issue body"
+            } >> "$GITHUB_OUTPUT"
+            echo "No event URL found in the issue — nothing to probe."
+            exit 0
           fi
-          node tools/new-extractors-creation/probe-url.js "$EVENT_URL"
+          set +e
+          REASON="$(node tools/new-extractors-creation/probe-url.js "$EVENT_URL")"
+          CODE=$?
+          set -e
+          echo "$REASON"
+          if [ "$CODE" -eq 0 ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "proceed=false"
+              echo "reason=$REASON"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      # The probe decided the page can't back a static case (unfetchable, a
+      # bot-challenge, or no URL). That's a handled, expected outcome — tell the
+      # requester and let the run finish GREEN. (Genuine failures below still go
+      # red via "Comment on failure".)
+      - name: Comment — page not usable (expected stop)
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed != 'true'
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REASON:       ${{ steps.probe.outputs.reason }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started. The site can still be added by hand — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
 
       - name: Install npm dependencies
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         run: npm ci
 
       - name: Install Claude Code CLI
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Configure git
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -127,7 +160,7 @@ jobs:
       # page is recorded exactly once.)
       - name: Prepare branch — record page + scaffold extractor
         id: prepare
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
           BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
           SLUG:         ${{ steps.triage.outputs.slug }}
@@ -141,7 +174,7 @@ jobs:
       # bodies) and interpolate it, plus the branch/slug/caseName/host/url, into
       # the static prompt template.
       - name: Build agent prompt
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -154,7 +187,7 @@ jobs:
         run: python3 tools/new-extractors-creation/build-prompt.py
 
       - name: Run Claude agent
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         timeout-minutes: 75
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR }}
@@ -173,7 +206,7 @@ jobs:
       # commented, so no PR. Otherwise re-verify (don't trust the agent), commit
       # its extract() + case, open the PR, and dispatch CI so checks attach to it.
       - name: Finalize — verify, commit, open PR
-        if: success() && steps.triage.outputs.skipAgent != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
@@ -184,20 +217,16 @@ jobs:
           REPO:         ${{ github.repository }}
         run: bash tools/new-extractors-creation/phase2-finalize.sh
 
-      # One comment for any failure. If the probe stopped the run, say why
-      # (unfetchable page) rather than the generic message — the two have very
-      # different fixes.
+      # One comment for a GENUINE failure only. An expected stop (unfetchable /
+      # challenge page, or the agent judging the page unextractable) no longer
+      # fails the job — those are handled green by their own comment steps above /
+      # in phase2-finalize.sh. So reaching here means something actually broke
+      # (npm ci, scaffolding, the agent crashed, re-verify went red, …).
       - name: Comment on failure
         if: failure()
         env:
           GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER:  ${{ github.event.issue.number }}
           RUN_URL:       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          PROBE_OUTCOME: ${{ steps.probe.outcome }}
         run: |
-          if [ "$PROBE_OUTCOME" = "failure" ]; then
-            BODY="🚫 Couldn't auto-implement this extractor: the event URL is missing, or its page couldn't be fetched from CI (non-success HTTP status, unreachable, or behind a login/bot wall). There's no real page to record a test case against, so no agent run was started. See the [run log]($RUN_URL) for the exact status. The site can still be added by hand — see docs/claude/adding-a-source.md."
-          else
-            BODY="⚠️ The auto-implement workflow failed. [View run]($RUN_URL). Manual implementation may be needed."
-          fi
-          gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed unexpectedly. [View run]($RUN_URL). Manual implementation may be needed — see docs/claude/adding-a-source.md."
