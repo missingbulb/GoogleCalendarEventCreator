@@ -5,18 +5,18 @@
 // via dynamic import().
 //
 // Aggregation (toCards): an event's instances are grouped BY MONTH (same
-// calendar month and year). What a month becomes depends on its days:
+// calendar month and year). Instances are NEVER merged — a card built from X
+// instances always exposes X addable buttons (a genuinely multi-day event is a
+// SINGLE instance whose start/end span days, shown as a range; it is not N
+// separate dates collapsed into one). What a month becomes depends on its days:
 //   - One day, one time -> a plain single-occurrence card (the whole card is
 //     clickable, like an ordinary event).
 //   - One day, two or more times -> a "same-day" card (NOT clickable) whose left
 //     icon shows that date and whose buttons each open one of that day's times.
-//   - A run of two or more CONSECUTIVE days with a single time each -> a
-//     "multi-day" card (clickable): the icon shows the month over the day-range
-//     (e.g. JUN / 5–7) and the line reads "Jun 5 – 7 · <location>".
-//   - Whatever single-time days are left (scattered, non-consecutive) -> one
-//     "month" card (NOT clickable): the icon shows the month over the spanned
-//     day-range (JUN / 14–25) and a button per day (5, 14, 25). A lone leftover
-//     day is just a single card.
+//   - Two or more single-time days (consecutive or scattered) -> one "month"
+//     card (NOT clickable): a title/location header (plus a shared time when the
+//     days all share one) over a button per day. A lone leftover day is just a
+//     single card.
 // Cards still order by their earliest instance, so a month with a same-day card
 // interleaved among scattered days can read out of strict day order — the
 // month grouping is the deliberate trade.
@@ -47,7 +47,7 @@ function cmpStart(a, b) {
 // descriptor is { event, kind, instances } where instances is an array of
 // { t, i } (the instance and its original index in event.times, so
 // buildCalendarUrl can schedule exactly that showing). kind is "single",
-// "sameDay", "multiDay", or "month".
+// "sameDay", or "month".
 export function toCards(events) {
   const cards = events.flatMap(eventCards);
   for (const c of cards) c.instances.sort((a, b) => cmpStart(a.t.start, b.t.start));
@@ -83,44 +83,24 @@ function eventCards(event) {
   return cards;
 }
 
-// The card(s) for one month's worth of an event's instances. A month with a
-// single day is the unchanged single/same-day card; a month spanning several
-// days peels off each run of consecutive single-time days as a multi-day card
-// and collects whatever single-time days remain into one month card (a lone
-// leftover stays a single card).
+// The card(s) for one month's worth of an event's instances. Each day with two
+// or more times is its own same-day card; every single-time day (consecutive or
+// scattered) folds into one month card of per-day buttons — a lone single-time
+// day is just a single card. Instances are never merged: every date keeps its
+// own button.
 function monthCards(event, instances) {
   const byDay = new Map();
   for (const it of instances) pushInto(byDay, dateKey(it.t.start), it);
   const days = [...byDay.keys()].sort();
 
-  // One-day month: unchanged behavior (single occurrence, or a same-day card).
-  if (days.length === 1) {
-    const group = byDay.get(days[0]);
-    return [{ event, kind: group.length >= 2 ? "sameDay" : "single", instances: group }];
-  }
-
   const cards = [];
   const leftover = [];
-  for (let i = 0; i < days.length; ) {
-    const group = byDay.get(days[i]);
-    if (group.length >= 2) {
-      // A day with several times stays its own same-day card.
-      cards.push({ event, kind: "sameDay", instances: group });
-      i++;
-      continue;
-    }
-    // A single-time day: extend a run of consecutive single-time days.
-    let j = i;
-    while (j + 1 < days.length && byDay.get(days[j + 1]).length === 1 && isNextDay(days[j], days[j + 1])) {
-      j++;
-    }
-    if (j > i) {
-      const run = days.slice(i, j + 1).map((d) => byDay.get(d)[0]);
-      cards.push({ event, kind: "multiDay", instances: run });
-    } else {
-      leftover.push(group[0]);
-    }
-    i = j + 1;
+  for (const day of days) {
+    const group = byDay.get(day);
+    // A day with several times stays its own same-day card; a single-time day
+    // joins the leftover set folded into one month (or single) card below.
+    if (group.length >= 2) cards.push({ event, kind: "sameDay", instances: group });
+    else leftover.push(group[0]);
   }
 
   if (leftover.length >= 2) cards.push({ event, kind: "month", instances: leftover });
@@ -136,18 +116,16 @@ function pushInto(map, key, value) {
 }
 
 // Render one card descriptor into a DOM node. The calendar CHIP is the popup's
-// single "addable event" motif: on a single occurrence or a multi-day run it's
-// the date indicator and the WHOLE card is the click target; on a grouped card
-// (same-day or month) each showing is its OWN chip BUTTON — a day chip per date
-// (month card) or a time chip per showing (same-day card). `currentYear` decides
-// which chips carry a year pill (any year but this one); it defaults to the real
-// current year and is threaded down from render() so the UI snapshots can pin it.
+// single "addable event" motif: on a single occurrence it's the date indicator
+// and the WHOLE card is the click target; on a grouped card (same-day or month)
+// each showing is its OWN chip BUTTON — a day chip per date (month card) or a
+// time chip per showing (same-day card). `currentYear` decides which chips carry
+// a year pill (any year but this one); it defaults to the real current year and
+// is threaded down from render() so the UI snapshots can pin it.
 export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
   switch (card.kind) {
     case "single":
       return makeSingleCard(card.event, card.instances[0], tab, currentYear);
-    case "multiDay":
-      return makeMultiDayCard(card, tab, currentYear);
     case "month":
       // Scattered days. When they all share one time, that time leads the header
       // (commonTime) and each chip is a bare DAY chip (month banner + day). When
@@ -236,39 +214,6 @@ function makeGroupCard(card, tab, chipFor) {
   return cardEl;
 }
 
-// The multi-day card: a run of consecutive single-time days read as one event,
-// clickable like a single occurrence. The chip shows the month over the
-// day-range; the line reads "Jun 5 – 7 · <location>". Clicking schedules one
-// calendar event spanning the whole run.
-function makeMultiDayCard(card, tab, currentYear) {
-  const { event, instances } = card;
-  const first = instances[0].t;
-  const last = instances[instances.length - 1].t;
-  const span = { ...event, title: event.title || tab.title, times: null, start: first.start, end: last.end || last.start, eventLengthInMinutes: null };
-  const url = buildCalendarUrl(span, tab);
-
-  const btn = document.createElement("button");
-  btn.className = "event-btn";
-
-  const chip = rangeChip(instances, currentYear);
-  if (chip) btn.appendChild(chipEl(chip));
-
-  const body = document.createElement("span");
-  body.className = "e-body";
-  body.appendChild(titleEl(event, tab));
-
-  const when = document.createElement("span");
-  when.className = "e-when";
-  const range = formatDateRange(first.start, last.start);
-  when.textContent = event.location ? `${range} · ${event.location}` : range;
-  body.appendChild(when);
-
-  btn.appendChild(body);
-  btn.appendChild(goChevron());
-  btn.addEventListener("click", () => openTemplate(url, tab));
-  return btn;
-}
-
 // One instance rendered AS a clickable calendar chip — a grouped card's button.
 // Same chip motif as a single card's date indicator, so "an event you can add"
 // looks the same whether it's a whole card or one of several buttons.
@@ -281,10 +226,10 @@ function chipButton(event, it, chip, tab) {
   return btn;
 }
 
-// A trailing "tap to add" chevron for a whole-card button (single occurrence or
-// multi-day run): the resting-state cue that the ENTIRE card is the click target,
-// unlike a grouped card whose individual instance buttons are. Decorative, so
-// it's hidden from assistive tech.
+// A trailing "tap to add" chevron for a whole-card button (a single occurrence):
+// the resting-state cue that the ENTIRE card is the click target, unlike a
+// grouped card whose individual instance buttons are. Decorative, so it's hidden
+// from assistive tech.
 function goChevron() {
   const el = document.createElement("span");
   el.className = "e-go";
@@ -325,9 +270,9 @@ function titleEl(event, tab) {
 
 // Build a calendar chip from a descriptor { banner, body, kind, year?, yearPast? }
 // — the popup's single "addable event" motif: a colored banner (the shared
-// context — a month, or a full date) over a prominent body (the pick — a day, a
-// day-range, or a time). `kind` ("day" | "range" | "time") tunes the body font
-// (see .e-chip-body.* in popup.css). An off-`currentYear` chip carries a small
+// context — a month, or a full date) over a prominent body (the pick — a day or
+// a time). `kind` ("day" | "time") tunes the body font (see .e-chip-body.* in
+// popup.css). An off-`currentYear` chip carries a small
 // year pill stacked on its corner (then the chip is wrapped so the pill can sit
 // over it); a current-year chip returns the bare chip.
 function chipEl({ banner, body, kind = "day", year, yearPast }) {
@@ -390,16 +335,6 @@ function monthKey(start) {
   return key ? key.slice(0, 7) : "";
 }
 
-// True when dayB (a "YYYY-MM-DD" key) is the calendar day right after dayA.
-// Date.UTC arithmetic so it's immune to local-timezone/DST shifts.
-function isNextDay(dayA, dayB) {
-  const [y, m, d] = dayA.split("-").map(Number);
-  const next = new Date(Date.UTC(y, m - 1, d + 1));
-  const pad = (n) => String(n).padStart(2, "0");
-  const key = `${next.getUTCFullYear()}-${pad(next.getUTCMonth() + 1)}-${pad(next.getUTCDate())}`;
-  return key === dayB;
-}
-
 // Strip a trailing UTC offset (`+01:00`) or `Z` from a timed value so it parses
 // as floating local time — a PRESENTATION-only step. The card/button should show
 // the wall-clock time as written on the page (e.g. 21:00 from
@@ -438,38 +373,14 @@ export function dateChip(start, currentYear = new Date().getFullYear()) {
   };
 }
 
-// The chip for a month or multi-day card: the short month of the earliest
-// instance over the spanned day-range ("14–25", or just "14" if they share a
-// day). null when none of the instances has a usable date. (A card's instances
-// are grouped by month AND year — see monthKey — so they share one year.)
-export function monthRangeChip(instances, currentYear = new Date().getFullYear()) {
-  const dates = instances.map((it) => eventStart(it.t.start)).filter(Boolean);
-  if (!dates.length) return null;
-  const dayNums = dates.map((d) => d.getDate());
-  const min = Math.min(...dayNums);
-  const max = Math.max(...dayNums);
-  return {
-    month: dates[0].toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
-    day: min === max ? String(min) : `${min}-${max}`,
-    ...offYear(dates[0], currentYear),
-  };
-}
-
-// --- Chip descriptors: map the tested chip data (dateChip / monthRangeChip /
-// sameDayLabel) onto the { banner, body, kind } the chipEl renderer takes. ---
+// --- Chip descriptors: map the tested chip data (dateChip / sameDayLabel) onto
+// the { banner, body, kind } the chipEl renderer takes. ---
 
 // A single day: month banner over the day-of-month body. Used as a single card's
 // indicator and as each per-date button on a month card. null with no date.
 function dayChip(start, currentYear) {
   const c = dateChip(start, currentYear);
   return c && { banner: c.month, body: c.day, kind: "day", year: c.year, yearPast: c.yearPast };
-}
-
-// A multi-day run: month banner over the day-range body ("5-7"), at a tighter
-// "range" font. A lone shared day renders as a plain day chip. null with no date.
-function rangeChip(instances, currentYear) {
-  const c = monthRangeChip(instances, currentYear);
-  return c && { banner: c.month, body: c.day, kind: /\D/.test(c.day) ? "range" : "day", year: c.year, yearPast: c.yearPast };
 }
 
 // One showing among several on the same date: the DATE is the banner (the shared
@@ -494,17 +405,6 @@ function offYear(date, currentYear) {
   const y = date.getFullYear();
   if (y === currentYear) return {};
   return { year: String(y), yearPast: y < currentYear };
-}
-
-// The "when" line for a multi-day card: "Jun 5 – 7" (same month) — the days the
-// run spans, with no times (a multi-day run reads as one span, not a schedule).
-export function formatDateRange(firstStart, lastStart) {
-  const first = eventStart(firstStart);
-  const last = eventStart(lastStart);
-  if (!first) return "";
-  const month = first.toLocaleDateString(undefined, { month: "short" });
-  if (!last || last.getDate() === first.getDate()) return `${month} ${first.getDate()}`;
-  return `${month} ${first.getDate()} – ${last.getDate()}`;
 }
 
 // Format a clock time, dropping ":00" for round hours ("10 AM", not

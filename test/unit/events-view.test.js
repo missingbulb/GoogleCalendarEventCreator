@@ -15,7 +15,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
-let monthRangeChip, formatDateRange, commonTime, showPerDayTimes;
+let commonTime, showPerDayTimes;
 before(async () => {
   ({
     formatWhen,
@@ -23,8 +23,6 @@ before(async () => {
     dateChip,
     sameDayLabel,
     toCards,
-    monthRangeChip,
-    formatDateRange,
     commonTime,
     showPerDayTimes,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
@@ -154,46 +152,7 @@ test("sameDayLabel: an all-day instance is labeled All day", () => {
   assert.equal(sameDayLabel({ start: "2026-06-17" }), "All day");
 });
 
-// --- monthRangeChip / dayOfMonthLabel / formatDateRange: the month/multi-day
-// card's display helpers (the chip and the day-button/when text).
-
 const inst = (start) => ({ t: { start } });
-
-test("monthRangeChip: month over the spanned day-range (short hyphen, fixed-width chip)", () => {
-  const chip = monthRangeChip([inst("2026-06-14T19:00:00"), inst("2026-06-25T19:00:00")]);
-  assert.match(chip.month, /^[A-Z]+$/);
-  assert.equal(chip.day, "14-25");
-});
-
-test("monthRangeChip: a single shared day is just that day (no range)", () => {
-  assert.equal(monthRangeChip([inst("2026-06-14T19:00:00")]).day, "14");
-});
-
-test("monthRangeChip: ranges by day-of-month, smallest to largest, not list order", () => {
-  const chip = monthRangeChip([inst("2026-06-25T19:00:00"), inst("2026-06-05T19:00:00")]);
-  assert.equal(chip.day, "5-25");
-});
-
-test("monthRangeChip: no usable date yields null", () => {
-  assert.equal(monthRangeChip([inst(""), inst(undefined)]), null);
-});
-
-test("monthRangeChip: an off-year range carries its year, the current year omits it", () => {
-  const here = [inst("2026-06-14T19:00:00"), inst("2026-06-25T19:00:00")];
-  const there = [inst("2027-06-14T19:00:00"), inst("2027-06-25T19:00:00")];
-  assert.equal(monthRangeChip(here, 2026).year, undefined);
-  assert.equal(monthRangeChip(there, 2026).year, "2027");
-});
-
-test("formatDateRange: 'Mon d – d' across days, no time", () => {
-  const text = formatDateRange("2026-06-05T19:00:00", "2026-06-07T19:00:00");
-  assert.match(text, /^[A-Za-z]+ 5 – 7$/);
-  assert.ok(!/:|PM|AM/i.test(text), `expected no time in "${text}"`);
-});
-
-test("formatDateRange: a single day shows just that day", () => {
-  assert.match(formatDateRange("2026-06-05T19:00:00", "2026-06-05T19:00:00"), /^[A-Za-z]+ 5$/);
-});
 
 // --- commonTime: the time a group card's sessions all share, shown in the
 // header above the icons — only when every instance resolves to the same time.
@@ -245,9 +204,10 @@ test("showPerDayTimes: any all-day/dateless session -> false (plain day chips)",
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
-// with one day keeps the single/same-day behavior; scattered single-time days in
-// a month fold into one "month" card; a run of consecutive single-time days
-// becomes a "multiDay" card.
+// with one single-time day is a "single" card; one day with several times is a
+// "sameDay" card; every other single-time day (consecutive or scattered) folds
+// into one "month" card. Instances are NEVER merged — each date keeps its own
+// button (a card built from X instances exposes X buttons).
 
 const card = (events) => toCards(events);
 const ev = (title, times) => ({ title, location: "Hall", ctz: "", times });
@@ -276,8 +236,9 @@ test("toCards: scattered single-time days in a month fold into one 'month' card"
   );
 });
 
-test("toCards: a run of consecutive single-time days is one 'multiDay' card", () => {
-  // Jun 5,6,7 (consecutive) + Jun 14,25 -> a multi-day card + a month card.
+test("toCards: consecutive single-time days are NOT merged — one 'month' card, a button per day (#330)", () => {
+  // Jun 5,6,7 (consecutive) + Jun 14,25 -> a single month card holding all five
+  // days as their own buttons, never collapsed into a multi-day span.
   const cards = card([
     ev("Fest", [
       { start: "2026-06-05T19:00:00" },
@@ -287,19 +248,18 @@ test("toCards: a run of consecutive single-time days is one 'multiDay' card", ()
       { start: "2026-06-25T19:00:00" },
     ]),
   ]);
-  assert.deepEqual(cards.map((c) => c.kind), ["multiDay", "month"]);
+  assert.deepEqual(cards.map((c) => c.kind), ["month"]);
   assert.deepEqual(
     cards[0].instances.map((it) => it.t.start.slice(0, 10)),
-    ["2026-06-05", "2026-06-06", "2026-06-07"]
+    ["2026-06-05", "2026-06-06", "2026-06-07", "2026-06-14", "2026-06-25"]
   );
-  assert.deepEqual(cards[1].instances.map((it) => it.t.start.slice(0, 10)), ["2026-06-14", "2026-06-25"]);
 });
 
-test("toCards: two consecutive single-time days are already a multi-day card", () => {
+test("toCards: two consecutive single-time days are a 'month' card with both days (#330)", () => {
   const cards = card([
     ev("Run", [{ start: "2026-06-05T19:00:00" }, { start: "2026-06-06T19:00:00" }]),
   ]);
-  assert.deepEqual(cards.map((c) => c.kind), ["multiDay"]);
+  assert.deepEqual(cards.map((c) => c.kind), ["month"]);
   assert.equal(cards[0].instances.length, 2);
 });
 

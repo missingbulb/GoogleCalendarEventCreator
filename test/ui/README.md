@@ -91,11 +91,11 @@ Month grouping across months: three scattered June dates become one JUN card (5/
 
 ![13-month-grouped-across-months](cases/13-month-grouped-across-months.png)
 
-## 14-consecutive-run-multiday
+## 14-consecutive-run-instances
 
-Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card
+Consecutive days aren't merged: Jun 5–7 + scattered Jun 14/25 are one month card with a button per day; July is a single card
 
-![14-consecutive-run-multiday](cases/14-consecutive-run-multiday.png)
+![14-consecutive-run-instances](cases/14-consecutive-run-instances.png)
 
 ## 15-month-common-time-header
 
