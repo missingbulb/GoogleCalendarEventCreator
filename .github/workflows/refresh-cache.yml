@@ -7,9 +7,9 @@ name: Refresh cached HTML files
 # It runs automatically when you push a branch (other than main) that adds or
 # removes a data/ file — a new data/<name>.url, or a deleted data/<name>.html you
 # want re-recorded. So the flow is just "push the branch"; there's no manual step
-# and no separate "force" mode. It's also runnable from the Actions tab, and the
-# auto-implement-extractor workflow dispatches it via the API (its GITHUB_TOKEN
-# push doesn't fire the push trigger — see that workflow).
+# and no separate "force" mode. It's also runnable from the Actions tab. (The
+# auto-implement-extractor workflow doesn't use it — it records the page inline in
+# Phase 1; see tools/new-extractors-creation/phase1-prepare.sh.)
 #
 # It never runs on main: a commit to main goes through a PR under branch
 # protection, and by merge time the cached HTML is already filled on the branch.

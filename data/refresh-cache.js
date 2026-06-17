@@ -26,39 +26,11 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+// The fetch itself (browser headers, retries, timeout) lives in fetch-page.js
+// so tools/new-extractors-creation/probe-url.js can fetch identically — see that file's header.
+const { fetchPage } = require("./fetch-page");
 
 const DATA_DIR = __dirname;
-
-const FETCH_ATTEMPTS = 3;
-const FETCH_TIMEOUT_MS = 20_000;
-// Event sites tend to reject clients that don't look like a browser.
-const BROWSER_HEADERS = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
-  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-  "Accept-Language": "en-US,en;q=0.9",
-};
-
-async function fetchPage(url) {
-  let lastError;
-  for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
-    try {
-      const res = await fetch(url, {
-        headers: BROWSER_HEADERS,
-        redirect: "follow",
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.text();
-    } catch (err) {
-      lastError = err;
-      if (attempt < FETCH_ATTEMPTS) {
-        await new Promise((r) => setTimeout(r, 2000 * attempt));
-      }
-    }
-  }
-  throw new Error(`${lastError.message} (after ${FETCH_ATTEMPTS} attempts)`);
-}
 
 function isEmptyOrMissing(filePath) {
   try {

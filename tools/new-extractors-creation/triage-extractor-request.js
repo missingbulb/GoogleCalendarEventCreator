@@ -31,6 +31,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const { namesFor } = require("./extractor-naming");
 
 const MESSAGE_PATH = "/tmp/triage-message.md";
 const OPEN_REQUESTS_PATH = process.env.OPEN_REQUESTS_FILE || "/tmp/open-requests.json";
@@ -114,7 +115,7 @@ function skipMessage(reason, { host, duplicateOf }) {
 // (for the duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
   const { classifyHost, isSupportedDomain } = await import(
-    pathToFileURL(path.join(__dirname, "..", "fallback-policy.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "fallback-policy.js"))
   );
 
   const url = firstUrl(body) || firstUrl(title);
@@ -132,9 +133,14 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
   else if ((duplicateOf = earlierDuplicate(host, currentNumber, openRequests))) reason = "duplicate";
 
   const triaged = reason !== "";
+  // Deterministic branch/cache names the workflow uses when it proceeds (does
+  // Phase 1 itself). Derived here so the URL is parsed once, in one place.
+  const { slug, caseName } = namesFor(url);
   return {
     url,
     host,
+    slug,
+    caseName,
     listing,
     reason,
     duplicateOf,
@@ -176,7 +182,17 @@ if (require.main === module) {
           : "No URL found in the issue — proceeding to the agent."
       );
     }
-    writeOutputs({ skipAgent: res.triaged, reason: res.reason });
+    // url/host/slug/caseName feed the workflow's probe + Phase-1 steps when it
+    // proceeds (skipAgent=false). Empty when the body had no parseable URL — the
+    // probe step then stops the run with a "no event URL" message.
+    writeOutputs({
+      skipAgent: res.triaged,
+      reason: res.reason,
+      url: res.url,
+      host: res.host,
+      slug: res.slug,
+      caseName: res.caseName,
+    });
   })().catch((e) => {
     console.error("Triage check errored — proceeding to the agent (fail open):", e);
     writeOutputs({ skipAgent: false, reason: "" });
