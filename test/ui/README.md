@@ -96,3 +96,9 @@ Month grouping across months: three scattered June dates become one JUN card (5/
 Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card
 
 ![14-consecutive-run-multiday](cases/14-consecutive-run-multiday.png)
+
+## 15-month-common-time-header
+
+Month card common-time header: scattered dates that share one start time show it above the icons; differing-time and all-day month cards show only the location
+
+![15-month-common-time-header](cases/15-month-common-time-header.png)
