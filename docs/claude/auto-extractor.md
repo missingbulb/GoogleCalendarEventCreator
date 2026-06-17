@@ -100,7 +100,7 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    `refresh-cache.yml`'s push trigger, so the page is recorded once.)
 6. Interpolates the issue + the branch/slug/caseName/host/url into the prompt
    template (`tools/new-extractors-creation/build-prompt.py`) and runs the agent
-   (`claude … --model claude-sonnet-4-6 -p …`) on the prepared branch.
+   (`claude … --model claude-haiku-4-5 -p …`) on the prepared branch.
 7. **Finalizes — Phase 2, again in the workflow
    (`tools/new-extractors-creation/phase2-finalize.sh`):** enforces the blast radius (below), re-runs
    `test:live` + `test:offline`, commits the agent's two files, opens the PR
