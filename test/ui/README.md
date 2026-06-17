@@ -96,3 +96,9 @@ Month grouping across months: three scattered June dates become one JUN card (5/
 Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card
 
 ![14-consecutive-run-multiday](cases/14-consecutive-run-multiday.png)
+
+## 15-offset-times-wall-clock
+
+Offset start times show the page's wall-clock day & time (the +02:00/-02:00 offset is stripped at render, not re-zoned across midnight)
+
+![15-offset-times-wall-clock](cases/15-offset-times-wall-clock.png)
