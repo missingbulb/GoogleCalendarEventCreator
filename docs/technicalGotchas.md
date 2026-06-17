@@ -47,6 +47,13 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   `pipeline/build-calendar-url.js` translates the Markdown that survives
   extraction (Meetup / JSON-LD descriptions) into HTML for exactly this reason.
   (#91, #102)
+- **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
+  textContent`) returns `textContent` in tests — including `<select>`/`<option>`
+  and hidden text a real browser's `innerText` omits. A generic visible-text
+  extraction can therefore pass against cached HTML yet find nothing in Chrome;
+  treat body-text results as jsdom-optimistic, and don't add an integration case
+  that only passes because of this (same jsdom-vs-Chrome class as the `<noscript>`
+  gotcha below, and the note in `sources/telavivcinematheque.js`).
 - **jsdom's default `runScripts: "outside-only"` parses `<noscript>` into live DOM
   — the opposite of a real browser.** With scripting off, jsdom turns `<noscript>`
   content into real elements, so a `textContent` read looks clean in a test but
