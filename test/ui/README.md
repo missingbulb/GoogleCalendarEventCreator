@@ -114,3 +114,9 @@ Many instances of mixed grouping styles (single, same-day, month, all-day) overf
 Many mixed-grouping instances scrolled to the bottom: count cue sums instances across single, same-day, and month cards; top fade only
 
 ![17-mixed-grouping-scrolled-bottom](cases/17-mixed-grouping-scrolled-bottom.png)
+
+## 18-many-instances-one-card
+
+Many instances in ONE card: a single event's dozen scattered dates fold into one month card with a button per day
+
+![18-many-instances-one-card](cases/18-many-instances-one-card.png)
