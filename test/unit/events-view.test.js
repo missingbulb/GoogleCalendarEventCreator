@@ -15,7 +15,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
-let monthRangeChip, formatDateRange;
+let monthRangeChip, formatDateRange, commonTime, showPerDayTimes;
 before(async () => {
   ({
     formatWhen,
@@ -25,6 +25,8 @@ before(async () => {
     toCards,
     monthRangeChip,
     formatDateRange,
+    commonTime,
+    showPerDayTimes,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
 });
 
@@ -191,6 +193,55 @@ test("formatDateRange: 'Mon d – d' across days, no time", () => {
 
 test("formatDateRange: a single day shows just that day", () => {
   assert.match(formatDateRange("2026-06-05T19:00:00", "2026-06-05T19:00:00"), /^[A-Za-z]+ 5$/);
+});
+
+// --- commonTime: the time a group card's sessions all share, shown in the
+// header above the icons — only when every instance resolves to the same time.
+
+test("commonTime: scattered dates that all share one start time return that time", () => {
+  const time = commonTime([inst("2026-06-05T19:00:00"), inst("2026-06-25T19:00:00")]);
+  assert.equal(time, sameDayLabel({ start: "2026-06-05T19:00:00" }));
+});
+
+test("commonTime: sessions with different times share none ('')", () => {
+  assert.equal(commonTime([inst("2026-06-05T19:00:00"), inst("2026-06-25T20:00:00")]), "");
+});
+
+test("commonTime: a shared start AND end returns the full range", () => {
+  const times = [
+    { t: { start: "2026-06-05T19:00:00", end: "2026-06-05T21:00:00" } },
+    { t: { start: "2026-06-25T19:00:00", end: "2026-06-25T21:00:00" } },
+  ];
+  assert.ok(commonTime(times).includes("–"), `expected a range in "${commonTime(times)}"`);
+});
+
+test("commonTime: a same start but differing end is not common ('')", () => {
+  const times = [
+    { t: { start: "2026-06-05T19:00:00", end: "2026-06-05T21:00:00" } },
+    { t: { start: "2026-06-25T19:00:00", end: "2026-06-25T22:00:00" } },
+  ];
+  assert.equal(commonTime(times), "");
+});
+
+test("commonTime: any all-day or dateless instance yields no common time ('')", () => {
+  assert.equal(commonTime([inst("2026-06-05T19:00:00"), inst("2026-06-17")]), "");
+  assert.equal(commonTime([inst("2026-06-05T19:00:00"), inst("")]), "");
+});
+
+// --- showPerDayTimes: whether a month card's days carry different times that
+// each deserve a per-day time chip (vs. a shared time in the header, or all-day).
+
+test("showPerDayTimes: differing timed sessions -> true (each day shows its time)", () => {
+  assert.equal(showPerDayTimes([inst("2026-07-05T18:00:00"), inst("2026-07-25T20:00:00")]), true);
+});
+
+test("showPerDayTimes: one shared time -> false (the header carries it instead)", () => {
+  assert.equal(showPerDayTimes([inst("2026-06-05T19:00:00"), inst("2026-06-25T19:00:00")]), false);
+});
+
+test("showPerDayTimes: any all-day/dateless session -> false (plain day chips)", () => {
+  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("2026-08-25")]), false);
+  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("")]), false);
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month

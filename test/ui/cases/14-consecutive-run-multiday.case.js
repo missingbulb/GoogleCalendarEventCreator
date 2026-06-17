@@ -3,7 +3,9 @@
 // the 5–7 range, the line reading "Jun 5 – 7 · <location>" (a span, no times) —
 // while the remaining scattered June days (14, 25) fold into a separate month
 // card and the lone July date is its own single card. All four card kinds the
-// grouping can produce, side by side: multi-day, month, and single.
+// grouping can produce, side by side: multi-day, month, and single. Every date
+// starts at 8:30 PM, so the month card's header carries that shared time above
+// the icons ("8:30 PM · <location>", #324).
 module.exports = {
   description:
     "Consecutive run: Jun 5–7 collapse into one clickable multi-day card; scattered Jun 14/25 stay a month card; July a single card",

@@ -149,8 +149,18 @@ export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
     case "multiDay":
       return makeMultiDayCard(card, tab, currentYear);
     case "month":
-      // Scattered days: one DAY chip (month banner + day) per date.
-      return makeGroupCard(card, tab, (it) => dayChip(it.t.start, currentYear));
+      // Scattered days. When they all share one time, that time leads the header
+      // (commonTime) and each chip is a bare DAY chip (month banner + day). When
+      // the days have DIFFERENT times, there's no header time to show, so each
+      // chip becomes a TIME chip (date banner + that day's time) so no time is
+      // lost. Days with any all-day/dateless session fall back to plain day chips.
+      return makeGroupCard(
+        card,
+        tab,
+        showPerDayTimes(card.instances)
+          ? (it) => timeChip(it.t, currentYear)
+          : (it) => dayChip(it.t.start, currentYear)
+      );
     default: // "sameDay"
       // Several showings on one date: one TIME chip (date banner + time) each.
       return makeGroupCard(card, tab, (it) => timeChip(it.t, currentYear));
@@ -200,14 +210,17 @@ function makeGroupCard(card, tab, chipFor) {
   const cardEl = document.createElement("div");
   cardEl.className = "event-group";
 
-  // Header: the title over the location, full width.
+  // Header: the title over the "when · where" line, full width. When every
+  // session shares one time (a month card whose scattered dates all start — and
+  // end — alike), that common time leads the line; otherwise just the location.
   const head = document.createElement("span");
   head.className = "e-group-head";
   head.appendChild(titleEl(event, tab));
-  if (event.location) {
+  const detail = [commonTime(instances), event.location].filter(Boolean).join(" · ");
+  if (detail) {
     const loc = document.createElement("span");
     loc.className = "e-when";
-    loc.textContent = event.location;
+    loc.textContent = detail;
     head.appendChild(loc);
   }
   cardEl.appendChild(head);
@@ -513,6 +526,30 @@ function timeRange(instance) {
   const end = effectiveEnd(instance);
   if (end && end > startDate) text += ` – ${formatTime(end)}`;
   return text;
+}
+
+// The time a group card's sessions all share, for the header above the icons —
+// only when EVERY instance is timed and resolves to the same time(s)
+// (e.g. scattered dates that all start at 7 PM). "" when the sessions differ, or
+// any is all-day/dateless (no single time to show), so the header then carries
+// just the location, unchanged. A same-day card's instances have distinct times
+// by construction, so this naturally yields "" there — the time lives on each
+// chip instead.
+export function commonTime(instances) {
+  const times = instances.map((it) => timeRange(it.t));
+  if (times.some((t) => !t)) return "";
+  return times.every((t) => t === times[0]) ? times[0] : "";
+}
+
+// True when a month card's days carry DIFFERENT times that all deserve showing:
+// every session is timed (no all-day/dateless one to muddy it) and they aren't
+// all the same time. Then each chip shows its day's own time (a time chip)
+// rather than a bare day; a shared time goes in the header via commonTime
+// instead, and a mix with an all-day session keeps plain day chips.
+export function showPerDayTimes(instances) {
+  const times = instances.map((it) => timeRange(it.t));
+  if (times.some((t) => !t)) return false;
+  return !times.every((t) => t === times[0]);
 }
 
 // Human-readable date/time line for the popup (separate from

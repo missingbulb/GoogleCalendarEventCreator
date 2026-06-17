@@ -2,7 +2,8 @@
 // days across two months. The three June dates (5, 14, 25) fold into ONE month
 // card — icon JUN over the 5–25 range, a button per day — and the lone July date
 // is its own plain single card. (Compare the old behavior: four separate single
-// cards, one per date.)
+// cards, one per date.) All three dates start at 7 PM, so the month card's header
+// surfaces that shared time above the icons ("7 PM · <location>", #324).
 module.exports = {
   description:
     "Month grouping across months: three scattered June dates become one JUN card (5/14/25), the July date a single card",
