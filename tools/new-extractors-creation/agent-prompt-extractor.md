@@ -45,7 +45,12 @@ just wastes your effort.)
 
 The issue body (from the **Event source request** form) may carry user-supplied
 name/time/location/description. Only the URL is authoritative — treat the rest as
-**hints to sanity-check your extraction against**, never values to copy in.
+**hints to sanity-check your extraction against**, never values to copy in. Those
+hints are a **generic auto-scrape and are often wrong or garbage** (e.g. a US
+venue for a `.de` URL, `[object Object]`, a date that doesn't match the page). A
+**large divergence** between your extraction and the hints — different country,
+date, or venue — is a **red flag to re-examine whether this is really one specific
+event page**, not a cue to reconcile by copying the hints in.
 
 ## How extraction works (so you write the right thing)
 
@@ -65,26 +70,40 @@ the rest. Read `pipeline/sources/meetup.js` as the canonical example, and skim
 
 ---
 
-## Step 1 — Is the cached page real?
+## Step 1 — Is the cached page one specific event?
 
 ```bash
 wc -c data/{{CASE_NAME}}.html
 ```
 
-Open it and confirm it's the **real event page**. If it's a bot/CAPTCHA challenge,
-a login wall, a cookie interstitial, or an empty single-page-app shell with no
-event data in the HTML, then there's nothing to extract from a static fetch.
-**Stop here**: write a one-sentence diagnosis of what the page actually contains
-to the file `{{BAIL_REASON_FILE}}`, and **leave the test case's `events` empty**.
-Do **not** comment on the issue yourself — the workflow reads that file and posts
-the comment for you. (The workflow opens no PR for an unfilled case. Don't
-fabricate a page or hand-write values.)
+Open it and confirm it's a page for **one specific event** — a single title with a
+single date and a single venue. **Stop and bail** in any of these cases, because
+there's nothing a static extractor can turn into one calendar event:
+
+- a bot/CAPTCHA challenge, a login wall, or a cookie interstitial;
+- an empty single-page-app shell with no event data in the HTML;
+- **a listing / index / search / artist / tour page** — it shows **multiple dates
+  or multiple events** rather than one (tell-tales: several `<time>` elements with
+  *different* dates, a list of venues, or the only title you can get is the bare
+  **artist or venue name** with no single date+venue). This is a real, common trap
+  (#283: a livenation.de artist page with five tour dates produced just title
+  `"Muse"`, no location).
+
+To bail: write a one-sentence diagnosis of what the page actually is to the file
+`{{BAIL_REASON_FILE}}`, and **leave the test case's `events` empty**. Do **not**
+comment on the issue yourself — the workflow reads that file and posts the comment.
+(The workflow opens no PR for an unfilled case. Don't fabricate a page or
+hand-write values, and don't ship a bare-title event off a listing page just to
+produce *something*.)
 
 ```bash
 echo "This page is an AWS WAF bot-challenge interstitial, not the event page — no event data is present in the static HTML." > {{BAIL_REASON_FILE}}
 ```
 
-Otherwise, note where the title, date/time, location, and description live.
+Otherwise, note where the title, date/time, location, and description live. A
+valid single event must yield a **real title, a specific start, and a venue/
+location** — if you can't get a location, suspect a listing page and bail (the
+workflow rejects a location-less event anyway).
 
 ## Step 2 — Fill in `extract()`
 
