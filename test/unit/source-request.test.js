@@ -34,9 +34,22 @@ test("opens the repo's issue form, labeled extractor-request", () => {
   assert.equal(u.searchParams.get("labels"), "extractor-request");
 });
 
-test("prefills the issue title with the page URL", () => {
+test("prefills the issue title with the page's apex domain, not the full URL", () => {
   const title = new URL(buildSourceRequestUrl(PREFILL)).searchParams.get("title");
-  assert.equal(title, `Event source request - ${PREFILL.url}`);
+  // PREFILL.url is https://example.com/events/picnic -> apex example.com.
+  assert.equal(title, "Event source request - example.com");
+});
+
+test("strips subdomains and tracking params from the title down to the apex domain", () => {
+  const url = "https://dash.datadoghq.com/?utm_source=events&_gl=1*16jytk3";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - datadoghq.com");
+});
+
+test("keeps a compound public suffix in the apex domain", () => {
+  const url = "https://events.company.co.uk/whats-on";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - company.co.uk");
 });
 
 test("prefills each form field from the matching prefill value", () => {
