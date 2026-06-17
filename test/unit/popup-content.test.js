@@ -81,9 +81,9 @@ test("classifyHost: an unparseable URL is unclassified (none)", () => {
   assert.equal(classifyHost("", LISTS), "none");
 });
 
-test("classifyHost uses the shipped config by default (meetup.com allow, barby.co.il deny)", () => {
+test("classifyHost uses the shipped config by default (meetup.com allow, cnn.com deny)", () => {
   assert.equal(classifyHost("https://www.meetup.com/some-group/events/123/"), "allow");
-  assert.equal(classifyHost("https://barby.co.il/event/42"), "deny");
+  assert.equal(classifyHost("https://cnn.com/2026/01/01/some-article"), "deny");
   assert.equal(classifyHost("https://unlisted.example/e/1"), "none");
 });
 
