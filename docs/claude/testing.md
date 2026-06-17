@@ -109,6 +109,17 @@ is the project-specific mechanics. Keep these decisions in mind:
   default). A guard test asserts this so a non-English shell fails with an
   actionable message, not a baffling text-only pixel diff; regenerate with
   `LANG` unset. (Event *times* are floating, so they're timezone-independent.)
+- **UI snapshot diffs are exact (`MAX_DIFF_RATIO = 0`).** The render is
+  deterministic (satori + resvg + bundled fonts, no browser), so a reference must
+  match pixel-for-pixel — don't author a case engineered to clear a tolerance, and
+  don't grow the tolerance to mask a real change. To gate the popup's wall-clock
+  display of an *absolute* start (one carrying a UTC offset, e.g. `…+02:00` — its
+  tz wasn't resolved at extraction, so the offset survives to the card), give an
+  existing timed case a non-zero offset: the presentation-only `floatLocal` in
+  `events-view.js` strips it, so the offset renders identical to its floating
+  equivalent (PNG unchanged) while a regression that re-zoned it would shift the
+  pixels and fail. A trailing `Z` can't gate a snapshot in the UTC sandbox (it
+  renders identically there) — cover the `Z` shape with a unit test instead.
 - **The snapshot renderer works within satori's limits** (`test/ui/popup-renderer.js`),
   which aren't obvious — verify a markup/CSS change by running `npm run refresh:ui`,
   don't reason about it. satori has no CSS engine (it ignores `<style>`/`<link>`),
