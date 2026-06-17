@@ -1,6 +1,20 @@
 {
-  "description": "livenation.de: TODO(agent) — one line on what this case tests",
+  "description": "livenation.de: Muse international tour event page with artist title and first performance date",
   "expected": {
-    "events": []
+    "events": [
+      {
+        "title": "Muse",
+        "location": "",
+        "ctz": null,
+        "details": "https://www.livenation.de/muse-tickets-adp647#international",
+        "times": [
+          {
+            "start": "2026-11-18T00:00:00.000Z",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
   }
 }
