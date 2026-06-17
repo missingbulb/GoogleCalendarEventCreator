@@ -5,6 +5,22 @@ debugging time, recorded so they bite only once. Overarching architecture rules
 live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
 engineering practices in [engineeringPractices.md](engineeringPractices.md).
 
+- **The SPA-shell render fallback executes untrusted page JS — never give it the
+  e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
+  in real headless Chrome (`data/render-page.js`) only when `data/spa-shell.js`'s
+  `shouldRender` is true — a positive conjunction (`isSpaShell &&
+  !hasExtractableData`), not "the body is small", so it never fires on a generic
+  error body or a content-rich framework page, and bot-challenge pages are
+  excluded for free (no framework-root marker). Two traps: (a) the URL is
+  user-supplied, so this runs *attacker-influenceable* JS — unlike
+  `extension-load.chrome.test.js` (our own extension), it keeps Chrome's sandbox
+  ON by default; `RENDER_NO_SANDBOX=1` is only for runners that can't support it,
+  consciously leaning on the ephemeral CI runner as the boundary. (b) SPA output
+  isn't deterministic, so a re-record can legitimately shift a live case's
+  `expected` — treat a render-fallback case's drift like a site markup change, and
+  prefer extracting JSON-LD/`og:` (which SPAs often still inject) over brittle DOM
+  positions. CI-only: the cloud sandbox can't even download Chrome (below), so the
+  render no-ops locally and is verified only in CI (#310).
 - **Day-boundary date math must use UTC component math, not local-midnight +
   `toISOString()`.** Compute an adjacent day with `Date.UTC(y, m-1, d+1)` then
   `getUTC*` (as `nextDay` in `build-calendar-url.js` and `isNextDay` in

@@ -29,6 +29,13 @@ const path = require("node:path");
 // The fetch itself (browser headers, retries, timeout) lives in fetch-page.js
 // so tools/new-extractors-creation/probe-url.js can fetch identically — see that file's header.
 const { fetchPage } = require("./fetch-page");
+// A plain fetch can return a data-less JS single-page-app shell (a real 2xx with
+// nothing for a static extractor — #277). When spa-shell.js detects exactly that,
+// re-record through a headless browser (render-page.js) so the rendered HTML is
+// cached instead. CI-only: without a Chrome binary the render step no-ops and we
+// keep the static HTML. See issue #310.
+const { shouldRender, hasExtractableData } = require("./spa-shell");
+const { renderPage } = require("./render-page");
 
 const DATA_DIR = __dirname;
 
@@ -38,6 +45,29 @@ function isEmptyOrMissing(filePath) {
   } catch {
     return true;
   }
+}
+
+// If the fetched HTML is a data-less SPA shell, try to render it with a headless
+// browser and use the rendered HTML only if it now has extractable data — so a
+// render can only help, never replace a known shell with a differently-broken
+// one. Any render failure (including no Chrome) keeps the static HTML.
+async function maybeRender(name, url, html) {
+  if (!shouldRender(html)) return html;
+  try {
+    const rendered = await renderPage(url);
+    if (hasExtractableData(rendered)) {
+      console.log(`${name}: SPA shell rendered via headless Chrome`);
+      return rendered;
+    }
+    console.warn(`${name}: rendered but still no extractable data — keeping static HTML`);
+  } catch (err) {
+    const why =
+      err.code === "NO_CHROME"
+        ? "no Chrome available (set CHROME_PATH)"
+        : `render failed (${err.message})`;
+    console.warn(`${name}: SPA shell detected but ${why} — keeping static HTML`);
+  }
+  return html;
 }
 
 async function main() {
@@ -67,7 +97,8 @@ async function main() {
     }
 
     try {
-      const html = await fetchPage(url);
+      let html = await fetchPage(url);
+      html = await maybeRender(name, url, html);
       fs.writeFileSync(htmlPath, html);
       console.log(`${name}: refreshed (${reason})`);
     } catch (err) {
