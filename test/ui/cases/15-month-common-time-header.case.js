@@ -3,8 +3,9 @@
 // branches of commonTime side by side:
 //   - SAME times: Jun 5/14/25 all at 7 PM -> the header reads "7 PM · <location>"
 //     (the time the day chips can't show, surfaced above the icons).
-//   - DIFFERENT times: Jul 5/14/25 at 6/7/8 PM -> no single shared time, so the
-//     header is just the location, unchanged.
+//   - DIFFERENT times: Jul 5/14/25 at 6/7/8 PM -> no single time to share, so the
+//     header is just the location and each chip becomes a TIME chip (date banner
+//     over that day's time) so no time is lost.
 //   - NO times (all-day): Aug 5/14/25 with date-only starts -> no time to share,
 //     header is just the location.
 module.exports = {

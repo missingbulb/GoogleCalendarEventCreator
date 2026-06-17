@@ -149,8 +149,18 @@ export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
     case "multiDay":
       return makeMultiDayCard(card, tab, currentYear);
     case "month":
-      // Scattered days: one DAY chip (month banner + day) per date.
-      return makeGroupCard(card, tab, (it) => dayChip(it.t.start, currentYear));
+      // Scattered days. When they all share one time, that time leads the header
+      // (commonTime) and each chip is a bare DAY chip (month banner + day). When
+      // the days have DIFFERENT times, there's no header time to show, so each
+      // chip becomes a TIME chip (date banner + that day's time) so no time is
+      // lost. Days with any all-day/dateless session fall back to plain day chips.
+      return makeGroupCard(
+        card,
+        tab,
+        showPerDayTimes(card.instances)
+          ? (it) => timeChip(it.t, currentYear)
+          : (it) => dayChip(it.t.start, currentYear)
+      );
     default: // "sameDay"
       // Several showings on one date: one TIME chip (date banner + time) each.
       return makeGroupCard(card, tab, (it) => timeChip(it.t, currentYear));
@@ -529,6 +539,17 @@ export function commonTime(instances) {
   const times = instances.map((it) => timeRange(it.t));
   if (times.some((t) => !t)) return "";
   return times.every((t) => t === times[0]) ? times[0] : "";
+}
+
+// True when a month card's days carry DIFFERENT times that all deserve showing:
+// every session is timed (no all-day/dateless one to muddy it) and they aren't
+// all the same time. Then each chip shows its day's own time (a time chip)
+// rather than a bare day; a shared time goes in the header via commonTime
+// instead, and a mix with an all-day session keeps plain day chips.
+export function showPerDayTimes(instances) {
+  const times = instances.map((it) => timeRange(it.t));
+  if (times.some((t) => !t)) return false;
+  return !times.every((t) => t === times[0]);
 }
 
 // Human-readable date/time line for the popup (separate from

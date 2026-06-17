@@ -15,7 +15,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
-let monthRangeChip, formatDateRange, commonTime;
+let monthRangeChip, formatDateRange, commonTime, showPerDayTimes;
 before(async () => {
   ({
     formatWhen,
@@ -26,6 +26,7 @@ before(async () => {
     monthRangeChip,
     formatDateRange,
     commonTime,
+    showPerDayTimes,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
 });
 
@@ -225,6 +226,22 @@ test("commonTime: a same start but differing end is not common ('')", () => {
 test("commonTime: any all-day or dateless instance yields no common time ('')", () => {
   assert.equal(commonTime([inst("2026-06-05T19:00:00"), inst("2026-06-17")]), "");
   assert.equal(commonTime([inst("2026-06-05T19:00:00"), inst("")]), "");
+});
+
+// --- showPerDayTimes: whether a month card's days carry different times that
+// each deserve a per-day time chip (vs. a shared time in the header, or all-day).
+
+test("showPerDayTimes: differing timed sessions -> true (each day shows its time)", () => {
+  assert.equal(showPerDayTimes([inst("2026-07-05T18:00:00"), inst("2026-07-25T20:00:00")]), true);
+});
+
+test("showPerDayTimes: one shared time -> false (the header carries it instead)", () => {
+  assert.equal(showPerDayTimes([inst("2026-06-05T19:00:00"), inst("2026-06-25T19:00:00")]), false);
+});
+
+test("showPerDayTimes: any all-day/dateless session -> false (plain day chips)", () => {
+  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("2026-08-25")]), false);
+  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("")]), false);
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
