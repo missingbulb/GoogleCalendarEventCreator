@@ -18,6 +18,7 @@ importScripts(
   "/pipeline/sources/eventbrite.js",
   "/pipeline/sources/eventim-co-il.js",
   "/pipeline/sources/facebook.js",
+  "/pipeline/sources/livenation.js",
   "/pipeline/sources/luma.js",
   "/pipeline/sources/meetup.js",
   "/pipeline/sources/secrettelaviv.js",
