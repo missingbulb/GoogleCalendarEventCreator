@@ -52,6 +52,12 @@ test("keeps a compound public suffix in the apex domain", () => {
   assert.equal(title, "Event source request - company.co.uk");
 });
 
+test("keeps an Israeli gov.il second-level suffix in the apex domain", () => {
+  const url = "https://visit.tel-aviv.gov.il/Pages/EventLocation.aspx?ItemId=2173";
+  const title = new URL(buildSourceRequestUrl({ ...PREFILL, url })).searchParams.get("title");
+  assert.equal(title, "Event source request - tel-aviv.gov.il");
+});
+
 test("prefills each form field from the matching prefill value", () => {
   const p = new URL(buildSourceRequestUrl(PREFILL)).searchParams;
   assert.equal(p.get("url"), PREFILL.url);
