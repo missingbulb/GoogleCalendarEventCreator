@@ -81,12 +81,7 @@ is the project-specific mechanics. Keep these decisions in mind:
   the chrome/fetch I/O; render builds the DOM). After an intentional popup/view/CSS
   change run `npm run refresh:ui` and commit the PNGs so the diff shows the
   before/after (deterministic — satori + resvg, no browser/network — so whoever
-  makes the change regenerates on their branch; no CI workflow for it). Whenever
-  you commit regenerated snapshots in a session, surface them to the reviewer in
-  that turn: show the changed PNGs inline in the chat and link the branch's
-  `test/ui/README.md` (the rendered gallery of every case —
-  `https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md`) for
-  one-page review.
+  makes the change regenerates on their branch; no CI workflow for it).
 - **The snapshot gallery `test/ui/README.md` is GENERATED, not hand-maintained.**
   `test/ui/build-readme.js` derives it from the cases (each case's `description` +
   its `cases/<name>.png`); `npm run refresh:ui` rewrites it alongside the PNGs, and
