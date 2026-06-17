@@ -69,8 +69,8 @@ const CASES = [
   { url: "https://www.edfringe.com/tickets/whats-on/some-show",      state: "supported" },
   { url: "https://www.ticketmaster.co.il/event/MR330/ALL/iw",        state: "supported" },
   // Denylisted hosts → gray tile (generic extraction is noise there).
-  { url: "https://www.barby.co.il/event/123",                        state: "denied" },
-  { url: "https://barby.co.il/event/123",                            state: "denied" },
+  { url: "https://www.cnn.com/2026/01/01/some-article",              state: "denied" },
+  { url: "https://cnn.com/2026/01/01/some-article",                  state: "denied" },
   // Everything else → blue tile.
   { url: "https://www.example.com/some-page",                        state: "unknown" },
   // Regression (#101): an unsupported event site shows no indicator — its popup must

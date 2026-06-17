@@ -44,6 +44,14 @@ that branch's pull request into `main` (the test-flakiness gate in
 linear, one-commit-per-PR history. After merging, also run **"learned lessons"**
 on the conversation before closing out.
 
+"LGTM" (like any approval) applies **only backward**, to the work already in
+front of the owner when it's given — never to anything requested or done
+*after* it. A later follow-up, even a fix to the just-merged change, needs its
+own explicit "LGTM" before it may be merged; don't carry one approval forward,
+and don't treat a chosen answer to an `AskUserQuestion` as merge authorization
+because an option's wording happened to mention merging. When in doubt, open the
+PR, get CI green, and wait for a fresh "LGTM".
+
 When the repo owner says **"bump version"**, treat it as a defined instruction
 (like "LGTM"): raise the extension's version by editing the `version` field in
 **both** `manifest.json` and `package.json` (they must stay in sync), update the `value` in `test/uber/shared_constants/version-sync.json` to match, on a
