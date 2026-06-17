@@ -28,3 +28,8 @@ General software-engineering practices that aren't specific to this project
 `docs/engineeringPractices.md` (imported below).
 
 @docs/engineeringPractices.md
+
+Best practices specific to building and running AI agents (as opposed to general
+software engineering) live in `docs/agenticBestPractices.md` (imported below).
+
+@docs/agenticBestPractices.md

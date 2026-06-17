@@ -78,7 +78,8 @@ for it — never extract from a conversation unprompted; the owner decides when 
 do it. Route by scope: project mechanics to the matching file under
 `docs/claude/` (workflow, testing, adding-a-source, auto-extractor); top-level
 architecture rules to `docs/architectureGuidelines.md`; non-obvious codebase
-footguns to `docs/technicalGotchas.md`; project-agnostic practices to
+footguns to `docs/technicalGotchas.md`; AI-agent-specific best practices to
+`docs/agenticBestPractices.md`; other project-agnostic practices to
 `docs/engineeringPractices.md`. Keep every addition terse. Project-specific
 guidance is good; broader engineering practices that generalize beyond this repo
 are better — prefer the most general file a lesson legitimately fits.
