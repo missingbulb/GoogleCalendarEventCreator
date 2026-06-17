@@ -135,12 +135,13 @@ function pushInto(map, key, value) {
   else map.set(key, [value]);
 }
 
-// Render one card descriptor into a DOM node: a clickable button for a single
-// occurrence or a multi-day run, or an unclickable grouped card (same-day or
-// month) with a button per showing. `currentYear` decides which cards get a year
-// pill on their chip (any year but this one — see chipEl); it defaults to the
-// real current year and is threaded down from render() so the UI snapshots can
-// pin it deterministically.
+// Render one card descriptor into a DOM node. The calendar CHIP is the popup's
+// single "addable event" motif: on a single occurrence or a multi-day run it's
+// the date indicator and the WHOLE card is the click target; on a grouped card
+// (same-day or month) each showing is its OWN chip BUTTON — a day chip per date
+// (month card) or a time chip per showing (same-day card). `currentYear` decides
+// which chips carry a year pill (any year but this one); it defaults to the real
+// current year and is threaded down from render() so the UI snapshots can pin it.
 export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
   switch (card.kind) {
     case "single":
@@ -148,15 +149,11 @@ export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
     case "multiDay":
       return makeMultiDayCard(card, tab, currentYear);
     case "month":
-      return makeGroupCard(card, tab, {
-        chip: monthRangeChip(card.instances, currentYear),
-        instanceLabel: (it) => dayOfMonthLabel(it.t.start),
-      });
+      // Scattered days: one DAY chip (month banner + day) per date.
+      return makeGroupCard(card, tab, (it) => dayChip(it.t.start, currentYear));
     default: // "sameDay"
-      return makeGroupCard(card, tab, {
-        chip: dateChip(card.instances[0].t.start, currentYear),
-        instanceLabel: (it) => sameDayLabel(it.t),
-      });
+      // Several showings on one date: one TIME chip (date banner + time) each.
+      return makeGroupCard(card, tab, (it) => timeChip(it.t, currentYear));
   }
 }
 
@@ -169,7 +166,7 @@ function makeSingleCard(event, it, tab, currentYear) {
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = dateChip(it.t.start, currentYear);
+  const chip = dayChip(it.t.start, currentYear);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
@@ -190,43 +187,36 @@ function makeSingleCard(event, it, tab, currentYear) {
   return btn;
 }
 
-// A grouped card: an UNCLICKABLE container (no whole-card click target — unlike a
-// single-occurrence card) laid out as a header row (the date icon next to the
-// title/location) over a full-width, centered row of instance buttons — so the
-// buttons sit under the icon too, not just under the text. The caller supplies
-// the left `chip` (a same-day card's shared date, or a month card's month +
-// day-range) and an `instanceLabel` (the time for a same-day card, the
-// day-of-month for a month card).
-function makeGroupCard(card, tab, { chip, instanceLabel }) {
+// A grouped card: an UNCLICKABLE container for an event with several showings —
+// a title/location header over a centered, full-width row of per-instance
+// calendar-chip BUTTONS (built by `chipFor`). There is NO left indicator icon:
+// the instance chips ARE the calendar visuals here (a day chip per date on a
+// month card, a time chip per showing on a same-day card), so the same chip
+// motif marks the addable events whether the card is one whole-card button or a
+// row of several.
+function makeGroupCard(card, tab, chipFor) {
   const { event, instances } = card;
 
   const cardEl = document.createElement("div");
   cardEl.className = "event-group";
 
-  // Header row: the date icon next to the title/location.
-  const header = document.createElement("span");
-  header.className = "e-group-header";
-  if (chip) header.appendChild(chipEl(chip));
-
-  const body = document.createElement("span");
-  body.className = "e-body";
-  body.appendChild(titleEl(event, tab));
-
+  // Header: the title over the location, full width.
+  const head = document.createElement("span");
+  head.className = "e-group-head";
+  head.appendChild(titleEl(event, tab));
   if (event.location) {
     const loc = document.createElement("span");
     loc.className = "e-when";
     loc.textContent = event.location;
-    body.appendChild(loc);
+    head.appendChild(loc);
   }
-  header.appendChild(body);
-  cardEl.appendChild(header);
+  cardEl.appendChild(head);
 
-  // Instance buttons: a full-width, centered row below the header (spanning under
-  // the icon too).
+  // The instance chip-buttons: a wrapping, centered, full-width row.
   const list = document.createElement("span");
   list.className = "e-instances";
   for (const it of instances) {
-    list.appendChild(instanceButton(event, it, instanceLabel(it), tab));
+    list.appendChild(chipButton(event, it, chipFor(it), tab));
   }
   cardEl.appendChild(list);
 
@@ -247,7 +237,7 @@ function makeMultiDayCard(card, tab, currentYear) {
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = monthRangeChip(instances, currentYear);
+  const chip = rangeChip(instances, currentYear);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
@@ -266,12 +256,14 @@ function makeMultiDayCard(card, tab, currentYear) {
   return btn;
 }
 
-// One small clickable button for a single instance inside a grouped card.
-function instanceButton(event, it, label, tab) {
+// One instance rendered AS a clickable calendar chip — a grouped card's button.
+// Same chip motif as a single card's date indicator, so "an event you can add"
+// looks the same whether it's a whole card or one of several buttons.
+function chipButton(event, it, chip, tab) {
   const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, it.i);
   const btn = document.createElement("button");
-  btn.className = "instance-btn";
-  btn.textContent = label;
+  btn.className = "chip-btn";
+  btn.appendChild(chipEl(chip));
   btn.addEventListener("click", () => openTemplate(url, tab));
   return btn;
 }
@@ -318,27 +310,26 @@ function titleEl(event, tab) {
   return el;
 }
 
-// Build the left date-chip element from { month, day, year }. `year` is set only
-// for an off-current-year chip (see dateChip/monthRangeChip): when present, the
-// calendar icon gets a small year pill sitting on top of it, and the chip is
-// wrapped so the pill can stack above the icon. A current-year chip (no `year`)
-// returns the bare calendar box, unchanged.
-function chipEl({ month, day, year, yearPast }) {
+// Build a calendar chip from a descriptor { banner, body, kind, year?, yearPast? }
+// — the popup's single "addable event" motif: a colored banner (the shared
+// context — a month, or a full date) over a prominent body (the pick — a day, a
+// day-range, or a time). `kind` ("day" | "range" | "time") tunes the body font
+// (see .e-chip-body.* in popup.css). An off-`currentYear` chip carries a small
+// year pill stacked on its corner (then the chip is wrapped so the pill can sit
+// over it); a current-year chip returns the bare chip.
+function chipEl({ banner, body, kind = "day", year, yearPast }) {
   const el = document.createElement("span");
-  el.className = "e-date";
+  el.className = "e-chip";
 
-  const monthEl = document.createElement("span");
-  monthEl.className = "e-month";
-  monthEl.textContent = month;
-  el.appendChild(monthEl);
+  const bannerEl = document.createElement("span");
+  bannerEl.className = "e-chip-banner";
+  bannerEl.textContent = banner;
+  el.appendChild(bannerEl);
 
-  const dayEl = document.createElement("span");
-  // A day-RANGE (e.g. "5-7" on a month/multi-day card) is wider than a single
-  // day number, so it gets a tighter font — see .e-day.range in popup.css.
-  // Detected by any non-digit (the range's hyphen), independent of the dash char.
-  dayEl.className = /\D/.test(day) ? "e-day range" : "e-day";
-  dayEl.textContent = day;
-  el.appendChild(dayEl);
+  const bodyEl = document.createElement("span");
+  bodyEl.className = `e-chip-body ${kind}`;
+  bodyEl.textContent = body;
+  el.appendChild(bodyEl);
 
   if (!year) return el;
 
@@ -436,6 +427,37 @@ export function monthRangeChip(instances, currentYear = new Date().getFullYear()
   };
 }
 
+// --- Chip descriptors: map the tested chip data (dateChip / monthRangeChip /
+// sameDayLabel) onto the { banner, body, kind } the chipEl renderer takes. ---
+
+// A single day: month banner over the day-of-month body. Used as a single card's
+// indicator and as each per-date button on a month card. null with no date.
+function dayChip(start, currentYear) {
+  const c = dateChip(start, currentYear);
+  return c && { banner: c.month, body: c.day, kind: "day", year: c.year, yearPast: c.yearPast };
+}
+
+// A multi-day run: month banner over the day-range body ("5-7"), at a tighter
+// "range" font. A lone shared day renders as a plain day chip. null with no date.
+function rangeChip(instances, currentYear) {
+  const c = monthRangeChip(instances, currentYear);
+  return c && { banner: c.month, body: c.day, kind: /\D/.test(c.day) ? "range" : "day", year: c.year, yearPast: c.yearPast };
+}
+
+// One showing among several on the same date: the DATE is the banner (the shared
+// context) and the TIME is the body (what tells the showings apart) — e.g.
+// "JUN 19" over "4:30 PM – 6:18 PM". Falls back to a bare time when undated.
+function timeChip(instance, currentYear) {
+  const c = dateChip(instance.start, currentYear);
+  return {
+    banner: c ? `${c.month} ${c.day}` : "",
+    body: sameDayLabel(instance),
+    kind: "time",
+    year: c && c.year,
+    yearPast: c && c.yearPast,
+  };
+}
+
 // The chip's year-pill fields when `date` falls outside `currentYear`: { year }
 // plus `yearPast` true for a past year (rendered as a gray pill) vs false for a
 // future one (an accent pill). An empty object for a current-year date, so the
@@ -444,23 +466,6 @@ function offYear(date, currentYear) {
   const y = date.getFullYear();
   if (y === currentYear) return {};
   return { year: String(y), yearPast: y < currentYear };
-}
-
-// English ordinal for a day-of-month: 1 -> "1st", 2 -> "2nd", 3 -> "3rd",
-// 11 -> "11th", 21 -> "21st" (the 11–13 teens are all "th").
-function ordinalDay(n) {
-  const teen = n % 100;
-  const suffix = teen >= 11 && teen <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th";
-  return `${n}${suffix}`;
-}
-
-// The button label inside a month card: the day-of-month as an ordinal ("14th") —
-// the month lives in the chip. The ordinal (not a bare "14") gives the small,
-// date-only button enough body to read as a tap target. "" when there's no
-// usable date.
-export function dayOfMonthLabel(start) {
-  const date = eventStart(start);
-  return date ? ordinalDay(date.getDate()) : "";
 }
 
 // The "when" line for a multi-day card: "Jun 5 – 7" (same month) — the days the

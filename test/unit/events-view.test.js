@@ -15,7 +15,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
-let monthRangeChip, dayOfMonthLabel, formatDateRange;
+let monthRangeChip, formatDateRange;
 before(async () => {
   ({
     formatWhen,
@@ -24,7 +24,6 @@ before(async () => {
     sameDayLabel,
     toCards,
     monthRangeChip,
-    dayOfMonthLabel,
     formatDateRange,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
 });
@@ -147,14 +146,6 @@ test("monthRangeChip: an off-year range carries its year, the current year omits
   const there = [inst("2027-06-14T19:00:00"), inst("2027-06-25T19:00:00")];
   assert.equal(monthRangeChip(here, 2026).year, undefined);
   assert.equal(monthRangeChip(there, 2026).year, "2027");
-});
-
-test("dayOfMonthLabel: the day of month as an ordinal, no month", () => {
-  assert.equal(dayOfMonthLabel("2026-06-05T19:00:00"), "5th");
-  assert.equal(dayOfMonthLabel("2026-06-21T19:00:00"), "21st");
-  assert.equal(dayOfMonthLabel("2026-06-22T19:00:00"), "22nd");
-  assert.equal(dayOfMonthLabel("2026-06-11T19:00:00"), "11th"); // teen -> th
-  assert.equal(dayOfMonthLabel(""), "");
 });
 
 test("formatDateRange: 'Mon d – d' across days, no time", () => {

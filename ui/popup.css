@@ -162,53 +162,47 @@ body {
 .event-group:last-child {
   margin-bottom: 0;
 }
-/* The header row of a grouped card: the date icon next to the title/location,
-   above the full-width instance-button row. */
-.e-group-header {
+/* The header of a grouped card: the title over the location, full width. There's
+   no left icon — the per-instance chip buttons below carry the dates. */
+.e-group-head {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+  gap: 2px;
   width: 100%;
 }
-/* The instance buttons: a wrapping row spanning the FULL card width (under the
-   date icon too, not just under the text) and centered, below the header. Each is
-   individually clickable (opens that showing's template); the card around them is
-   not. */
+/* The instance chip-buttons: a wrapping row spanning the FULL card width and
+   centered, below the header. Each is its own calendar-chip click target. */
 .e-instances {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 10px;
 }
-/* A FILLED tonal-blue button, deliberately unlike the white calendar icon on the
-   left: these are the real click targets inside a grouped card, so they must read
-   as pressable buttons, not as another little date chip. */
-.instance-btn {
+/* An instance rendered as a clickable calendar chip — a grouped card's button.
+   A bare button that just holds the chip and adds the press affordance (cursor,
+   a slight lift); the .e-chip inside carries the look, so a button reads as the
+   same "addable event" motif as a single card's chip. */
+.chip-btn {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #174ea6;
-  background-color: #d2e3fc;
-  border: 1px solid #b3ccf5;
-  border-radius: 6px;
-  padding: 5px 10px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
   cursor: pointer;
-  white-space: nowrap;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.16);
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
 }
-.instance-btn:hover {
-  background-color: #aecbfa;
-  border-color: #8ab4f8;
+.chip-btn:hover {
+  box-shadow: 0 3px 8px rgba(60, 64, 67, 0.26);
+  transform: translateY(-1px);
 }
-/* Wrapper around the calendar icon when the event isn't in the current year:
-   a positioned box so the year pill can sit over the month banner and jut
-   partially off the side. (Only present for an off-year chip — a current-year
-   chip is the bare .e-date below.) */
+/* Wrapper around a chip when the event isn't in the current year: a positioned
+   box so the year pill can sit over the banner and jut partially off the side.
+   (Only present for an off-year chip — a current-year chip is the bare .e-chip
+   below.) */
 .event-btn .e-cal,
 .event-group .e-cal {
   position: relative;
@@ -247,23 +241,29 @@ body {
 .event-group .e-year.past {
   background-color: #80868b;
 }
-/* Left date chip styled like a calendar icon: a blue month banner over
-   the day-of-month on a white "page". */
-.event-btn .e-date,
-.event-group .e-date {
+/* THE calendar chip — the popup's single "addable event" motif: a colored banner
+   (the shared context — a month, or a full date) over a prominent body (the pick
+   — a day, a day-range, or a time) on a white "page". It's a single card's left
+   indicator AND, wrapped in .chip-btn, a grouped card's instance button, so an
+   addable event looks the same either way. min-width keeps a one-digit day chip
+   from collapsing; a wider body (a time) grows the chip past it. */
+.event-btn .e-chip,
+.event-group .e-chip {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   flex-shrink: 0;
-  width: 38px;
+  box-sizing: border-box;
+  min-width: 48px;
   overflow: hidden;
   background-color: #fff;
   border: 1px solid #c6dafc;
-  border-radius: 5px;
+  border-radius: 8px;
   text-align: center;
 }
-.event-btn .e-month,
-.event-group .e-month {
+/* The chip's top strip: the shared context (a month "JUN", or a date "JUN 19"). */
+.event-btn .e-chip-banner,
+.event-group .e-chip-banner {
   display: flex;
   justify-content: center;
   font-size: 9px;
@@ -271,29 +271,34 @@ body {
   letter-spacing: 0.5px;
   color: #fff;
   background-color: #1a73e8;
-  padding: 2px 0;
+  padding: 3px 7px;
+  white-space: nowrap;
 }
-.event-btn .e-day,
-.event-group .e-day {
+/* The chip's body: the pick, on the white page. A fixed height keeps every chip
+   the same height regardless of which body font (set per kind below) it carries. */
+.event-btn .e-chip-body,
+.event-group .e-chip-body {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Fixed height so a range chip ("5-7") is the SAME-size box as a single-day
-     chip ("7"): only the font shrinks to fit, the calendar icon never changes
-     size or proportion. */
-  height: 22px;
-  font-size: 16px;
+  height: 26px;
   font-weight: 700;
-  line-height: 1;
   color: #1a73e8;
+  padding: 0 7px;
 }
-/* A day-RANGE on a month/multi-day card ("5-7", "14-25") is wider than a single
-   day number, so it gets a much tighter font (and a short hyphen dash, joined in
-   events-view.js) to sit comfortably inside the chip's fixed width — within the
-   SAME fixed height above, so the icon stays identical to a single-day one. */
-.event-btn .e-day.range,
-.event-group .e-day.range {
-  font-size: 9px;
+/* A day number is the prominent pick — big. */
+.e-chip-body.day {
+  font-size: 18px;
+}
+/* A time ("9 PM", "4:30 PM – 6:18 PM") sits on one line at a tighter size. */
+.e-chip-body.time {
+  font-size: 11px;
+  white-space: nowrap;
+}
+/* A day-range ("5-7") gets a smaller font than a single day so it stays
+   comfortably inside the chip rather than straining its width. */
+.e-chip-body.range {
+  font-size: 13px;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
