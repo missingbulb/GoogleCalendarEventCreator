@@ -77,7 +77,7 @@ before(async () => {
 
 const CASES = [
   { description: "supported host (meetup) → green tile", url: "https://www.meetup.com/g/events/1/", suffix: "-supported" },
-  { description: "denied host (barby) → gray tile",      url: "https://barby.co.il/event/1",       suffix: "-denied" },
+  { description: "denied host (cnn) → gray tile",        url: "https://cnn.com/2026/01/01/article", suffix: "-denied" },
   { description: "unknown host (example) → blue tile",   url: "https://www.example.com/x",          suffix: "" },
 ];
 

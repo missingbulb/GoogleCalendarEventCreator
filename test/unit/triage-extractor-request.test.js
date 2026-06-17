@@ -72,10 +72,10 @@ test("no URL at all: not triaged (the agent handles the missing-URL case)", asyn
   assert.equal(res.host, "");
 });
 
-test("the shipped config triages its seeded hosts (meetup.com allow, barby.co.il deny)", async () => {
+test("the shipped config triages its seeded hosts (meetup.com allow, cnn.com deny)", async () => {
   // No injected lists -> classifyHost reads the real config.js.
   assert.equal((await runTriage({ body: bodyWith("https://www.meetup.com/g/events/1/") })).listing, "allow");
-  assert.equal((await runTriage({ body: bodyWith("https://barby.co.il/event/2") })).listing, "deny");
+  assert.equal((await runTriage({ body: bodyWith("https://cnn.com/2026/01/01/some-article") })).listing, "deny");
   assert.equal((await runTriage({ body: bodyWith("https://unlisted.example/e/3") })).triaged, false);
 });
 

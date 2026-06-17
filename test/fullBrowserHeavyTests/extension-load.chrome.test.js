@@ -18,53 +18,20 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+// The DevTools Protocol client is shared with data/render-page.js (issue #310);
+// Node has shipped a global WebSocket since v22 (global fetch since v18).
+const { connectCDP } = require("../../data/cdp-client");
 
 const ROOT = path.join(__dirname, "..", "..");
 
 const chromePath = [process.env.CHROME_PATH, process.env.PUPPETEER_EXECUTABLE_PATH].find(
   (p) => p && fs.existsSync(p)
 );
-// Node has shipped a global WebSocket since v22 (global fetch since v18).
 const skip = !chromePath
   ? "no extension-capable Chrome given (set CHROME_PATH to a Chrome for Testing binary)"
   : typeof WebSocket === "undefined"
     ? "global WebSocket unavailable (needs Node >= 22)"
     : false;
-
-// Minimal DevTools Protocol client over one WebSocket. Flat sessions (a
-// sessionId per message) let us talk to the browser and to an attached target
-// through the same socket.
-function connectCDP(url) {
-  const ws = new WebSocket(url);
-  const pending = new Map();
-  const listeners = new Set();
-  let nextId = 0;
-  ws.addEventListener("message", (ev) => {
-    const msg = JSON.parse(typeof ev.data === "string" ? ev.data : ev.data.toString());
-    if (msg.id != null && pending.has(msg.id)) {
-      const { resolve, reject } = pending.get(msg.id);
-      pending.delete(msg.id);
-      msg.error ? reject(new Error(msg.error.message)) : resolve(msg.result);
-    } else if (msg.method) {
-      for (const fn of listeners) fn(msg);
-    }
-  });
-  const ready = new Promise((resolve, reject) => {
-    ws.addEventListener("open", () => resolve(), { once: true });
-    ws.addEventListener("error", () => reject(new Error("CDP socket error")), { once: true });
-  });
-  return {
-    ready,
-    on: (fn) => listeners.add(fn),
-    send: (method, params = {}, sessionId) =>
-      new Promise((resolve, reject) => {
-        const id = ++nextId;
-        pending.set(id, { resolve, reject });
-        ws.send(JSON.stringify({ id, method, params, sessionId }));
-      }),
-    close: () => ws.close(),
-  };
-}
 
 // Launch Chrome with the unpacked extension and resolve its DevTools WebSocket
 // endpoint (printed to stderr for --remote-debugging-port=0).
