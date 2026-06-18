@@ -39,17 +39,11 @@ const POLICY_DOC_PATH = "docs/extraction-policy.md";
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query
 // param matching its id. GitHub prefills only TEXT fields (`input`/`textarea`)
-// this way — NOT `dropdown` or `checkboxes` — so "single-event" is a plain text
-// input whose value we set to one of SINGLE_EVENT_OPTIONS below.
+// this way — NOT `dropdown` or `checkboxes` — so "event-count" is a plain text
+// input we seed with the number of events the popup detected.
 const SOURCE_REQUEST_FIELDS = [
-  "url", "name", "start", "end", "timezone", "location", "description", "single-event",
+  "url", "name", "start", "end", "timezone", "location", "description", "event-count",
 ];
-
-// The two values the popup writes into the `single-event` text field — the same
-// strings the agent prompt and the template's guidance use, so they read
-// consistently everywhere. A unit test asserts the template's default value is
-// one of these, so the wording can't drift apart silently.
-export const SINGLE_EVENT_OPTIONS = { single: "Single event", multiple: "Multiple events" };
 
 // Generic registry labels that, sitting directly under a two-letter
 // country-code TLD, form a compound public suffix: `co.uk`, `com.au`, `gov.il`,
@@ -151,9 +145,9 @@ export function makePolicyLink(tab) {
 // the rest in the form itself.
 //
 // `eventCount` is how many complete events the popup found on the page (the
-// fallback's presentable events); >1 pre-selects the "Multiple events" dropdown
-// option so the agent extracts them all, telling it not to bail on a multi-date
-// page. The hint fields below still describe just the first event.
+// fallback's presentable events); it seeds the form's "event-count" field, so a
+// count >1 tells the agent the page is a multi-event listing to extract whole,
+// not to bail on. The hint fields below still describe just the first event.
 //
 // Exported for the unit tests (the make* link builders that call it touch
 // chrome.tabs/document, so the tests exercise the prefill directly).
@@ -173,7 +167,8 @@ export function sourceRequestPrefill(tab, event, eventCount = 1) {
     timezone: event.ctz || currentTimezone(),
     location: event.location || "",
     description: event.description || "",
-    "single-event": eventCount > 1 ? SINGLE_EVENT_OPTIONS.multiple : SINGLE_EVENT_OPTIONS.single,
+    // At least 1 — the link only shows once a complete event was found.
+    "event-count": String(Math.max(1, eventCount || 1)),
   };
 }
 

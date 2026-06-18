@@ -113,33 +113,27 @@ test("the prefilled field ids match the template's prefillable field ids", () =>
     .map((f) => f.id)
     .sort();
   const PARAM_KEYS = [
-    "url", "name", "start", "end", "timezone", "location", "description", "single-event",
+    "url", "name", "start", "end", "timezone", "location", "description", "event-count",
   ].sort();
   assert.deepEqual(prefillableIds, PARAM_KEYS);
 });
 
-test("the single-event field is a prefillable text input whose default is a known option", async () => {
-  const { SINGLE_EVENT_OPTIONS } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "source-request-view.js"))
-  );
-  const field = templateFields().find((f) => f.id === "single-event");
+test("the event-count field is a prefillable text input defaulting to 1", () => {
+  const field = templateFields().find((f) => f.id === "event-count");
   // GitHub only prefills text fields, so this must be an `input` (a dropdown's
   // query-param prefill is silently ignored).
   assert.equal(field.type, "input");
-  // Its default value must be one of the constants the popup writes, so the
-  // template wording and the popup can't drift apart.
   const value = (field.block.match(/^\s*value:\s*"([^"]*)"/m) || [])[1];
-  assert.ok(
-    Object.values(SINGLE_EVENT_OPTIONS).includes(value),
-    `template default value "${value}" is not a known single-event option`
-  );
+  assert.equal(value, "1");
 });
 
-test("pre-selects the single-event option from the event count", () => {
-  assert.equal(sourceRequestPrefill(PREFILL, {}, 1)["single-event"], "Single event");
-  assert.equal(sourceRequestPrefill(PREFILL, {}, 3)["single-event"], "Multiple events");
-  // Defaults to single when no count is given.
-  assert.equal(sourceRequestPrefill(PREFILL, {})["single-event"], "Single event");
+test("prefills the detected event count, defaulting to 1", () => {
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 1)["event-count"], "1");
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 3)["event-count"], "3");
+  // Never below 1 — the link only appears once a complete event was found.
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 0)["event-count"], "1");
+  // Defaults to 1 when no count is given.
+  assert.equal(sourceRequestPrefill(PREFILL, {})["event-count"], "1");
 });
 
 // The prefill seeds the timezone from the fallback event's ctz, but falls back

@@ -74,19 +74,21 @@ venue for a `.de` URL, `[object Object]`, a date that doesn't match the page). A
 date, or venue — is a **red flag to re-examine whether this is really one usable
 event page**, not a cue to reconcile by copying the hints in.
 
-The form also has a **"Single event page" field** (its value is `Single event` or
-`Multiple events`; the extension fills it in from what the popup detected).
-When it's **`Single event`**, the page is expected to describe one specific event,
-and a multi-date listing is a sign something's off (re-examine, then bail per
-Step 1). When it's **`Multiple events`**, the submitter (or the popup) is telling
-you the page legitimately shows several events (a listing, calendar, or tour with
-multiple dates) — so **extract them all** into a `result.events` array (see
-Step 2). In that case the single-event hints describe just one of the events on
-the page, so your extraction *should* contain more than one event and *will*
-diverge from those hints — that divergence is expected and the multi-event result
-is still a valid contribution, not a reason to bail. If the field is absent (an
-older issue or a hand-applied label), default to treating the page as you actually
-find it: extract every genuine event it carries.
+The form also has a **"Number of events on the page" field** (a count the
+extension fills in from what the popup detected, defaulting to 1). When it's **1**,
+the page is expected to describe one specific event, and a multi-date listing is a
+sign something's off (re-examine, then bail per Step 1). When it's **greater than
+1**, the submitter (or the popup) is telling you the page legitimately shows
+several events (a listing, calendar, or tour with multiple dates) — so **extract
+them all** into a `result.events` array (see Step 2). In that case the
+single-event hints describe just one of the events on the page, so your extraction
+*should* contain more than one event and *will* diverge from those hints — that
+divergence is expected and the multi-event result is still a valid contribution,
+not a reason to bail. Treat the count as a **hint, not a quota**: it's a generic
+detection that can undercount, so extract every genuine event the page actually
+carries even if that's more than the number given. If the field is absent (an
+older issue or a hand-applied label), default the same way: extract every genuine
+event you find.
 
 ## How extraction works (so you write the right thing)
 
@@ -126,14 +128,14 @@ when there's nothing a static extractor can turn into a calendar event:
 
 A page that shows **multiple events** is **not** itself a reason to bail — the
 pipeline supports a source returning many events (Step 2). Decide by what each
-entry yields, and let the "Single event page" field guide you:
+entry yields, and let the "Number of events on the page" count guide you:
 
 - The page is **one specific event** (single title, date, venue) — extract that
-  one event. If the field said `Multiple events` yet you find only one, that's
-  fine; extract the one.
+  one event. If the count was greater than 1 yet you find only one, that's fine;
+  extract the one.
 - The page is a **listing / calendar / tour** where each entry is a complete event
   (its own title — or a shared title — plus its own date *and* a venue) — extract
-  **all of them** into `result.events`. This is the case `Multiple events`
+  **all of them** into `result.events`. This is the case a count greater than 1
   signals.
 - The page is a listing whose entries are **not** complete events (bare
   artist/venue names, dates with no venue) — bail per the third bullet above; there
@@ -151,8 +153,8 @@ from), mirroring `meetup.js`. Supply only the fields the page needs; let
 `merge(...)` fold in JSON-LD for the rest. Leave `matches()` alone.
 
 **For a single event**, return one partial event object (the scaffold's
-`merge(dom, …)` shape). **For a multi-event page** (Step 1 — the `Multiple
-events` case), return an object with an `events` array instead — one entry per
+`merge(dom, …)` shape). **For a multi-event page** (Step 1 — the count-greater-
+than-1 case), return an object with an `events` array instead — one entry per
 event, each with its own `title`/`start`/`location`/… — plus optional page-level
 `description`/`ctz` that fill any field an individual event didn't carry. The
 orchestrator folds same-titled showings into one multi-instance event on its own,
