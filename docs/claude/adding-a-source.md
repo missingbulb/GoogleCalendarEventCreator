@@ -16,12 +16,16 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    the template, including the header comment describing the HTML it expects.
    Use the shared helpers on `GCal` (see `pipeline/helpers/`); return only the
    fields this site needs.
-2. Run `npm run index` to regenerate the two load lists from the sources on
-   disk: `pipeline/load-order.generated.json` (the single source of truth the
-   popup injects and the tests read) and `pipeline/worker-imports.generated.js`
-   (the registry + sources the toolbar service worker importScripts at startup,
-   since an MV3 worker can't read the JSON synchronously). The generator pins
-   `registry.js`/`helpers/` first and `assemble-events.js` last and sorts the
-   rest, so you never hand-edit either list — and adding a source touches no file
-   in `ui/`; a CI test fails if either is stale.
-3. Add an integration case for a real page on the site (see `docs/testing.md`).
+2. Run `npm run index` to regenerate the load list from the sources on disk:
+   `pipeline/load-order.generated.json` (the single source of truth the popup
+   injects and the tests read). The generator pins `registry.js`/`helpers/`
+   first and `assemble-events.js` last and sorts the rest, so you never hand-edit
+   the list — and adding a source touches no file in `ui/`; a CI test fails if
+   it's stale.
+3. Add the new host to `supportedDomains` in `pipeline/fallback-lists.json`. This
+   static list is the static mirror of the sources' `matches()`
+   (`test/unit/supported-domains.test.js` fails if it drifts), and the toolbar
+   service worker (`ui/toolbar-icon.js`) builds its `chrome.declarativeContent`
+   icon rules from it — so the green "supported" icon only appears once the host
+   is listed here.
+4. Add an integration case for a real page on the site (see `docs/testing.md`).

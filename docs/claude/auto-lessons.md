@@ -30,5 +30,20 @@ If it found at least one genuinely new lesson, it opens a **PR for review** on a
 `claude/lessons/<date>-<rand>` branch (the random suffix keeps two same-day runs
 from colliding on one branch name). It never merges: a human reviews the PR — the
 docs are guidance everyone reads, so a hallucinated or duplicative "lesson" is
-worse than nothing — and "LGTM" from the repo owner is the merge signal (see
-`docs/claude/github.md`).
+worse than nothing — and from there it merges through the usual flow (see
+`docs/claude/github.md`). The PR references this routine's tracking issue (see
+below), so its activity is collected there.
+
+## Tracking: log each run under the routine's own issue
+
+When a run produces a PR, **find this routine's standing tracking issue** — the
+open *Daily routine log: "lessons" digest* issue (currently **#365**) — and
+**create a sub-issue on it** for the run, so the issue accumulates an
+at-a-glance checklist of every run over time; also reference it from the PR
+(`Refs #365`). If that tracking issue doesn't exist, open it first (long-lived,
+stays open, never closed). Each daily automated routine keeps its **own** such
+issue — a running self-improvement log of what it did over time. **This applies
+to future daily routines too:** when a new one is added, open its own tracking
+issue and have its output logged the same way (e.g. the fallback extractor
+coverage routine logs to #366 — see
+[auto-fallback-coverage.md](auto-fallback-coverage.md)).

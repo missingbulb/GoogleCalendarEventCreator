@@ -169,6 +169,25 @@ test("Generic site: a day-first hyphenated date (DD-MM-YYYY) is parsed day-first
   assert.equal(e.times[0].start, "2026-06-18");
 });
 
+test("Generic site: a Hebrew month date with bullet-separated time is parsed", () => {
+  // Israeli sites write dates as "4 ביולי 2026•21:00" — day, Hebrew month name,
+  // year, bullet separator, 24-hour time. V8 can't parse Hebrew months with new
+  // Date(), so we build the date from parts, as with day-first numeric dates.
+  // The bullet (•) is already in SEP; the month lookup covers all 12 Hebrew names.
+  const html = `<h1>רביד פלוטניק</h1><span>4 ביולי 2026•21:00</span>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.times[0].start, "2026-07-04T21:00:00");
+});
+
+test("Generic site: a Hebrew month date without a time is all-day", () => {
+  // Also covers the ב-prefixed form ("בינואר" = "in January") — both are used on Israeli sites.
+  const html = `<h1>תערוכה</h1><p>17 בינואר 2027</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/exhibition");
+  assert.equal(e.times[0].start, "2027-01-17");
+});
+
 test("Generic site: og:title's trailing site-name suffix is stripped", () => {
   // og:site_name appended to og:title ("Event - Site") is dropped, so the
   // generic title is the event alone — matching what a per-site source reads.

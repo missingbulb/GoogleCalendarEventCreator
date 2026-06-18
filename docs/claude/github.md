@@ -1,7 +1,7 @@
 # GitHub procedures
 
-How we drive GitHub: the issue → branch → PR → merge lifecycle, the merge
-signal, the branch/commit-history rules for PR work, the CI-interaction
+How we drive GitHub: the issue → branch → PR → merge lifecycle, the
+merge-to-main command, the branch/commit-history rules for PR work, the CI-interaction
 practices that keep a merge cheap in wall time and tokens, and how we keep
 merge-conflict churn cheap across parallel branches. The two owner-triggered
 defined instructions that also land through this PR flow — "bump version" and
@@ -18,24 +18,22 @@ For every new task in this repo:
 3. Update the issue's status (comments / close) as work progresses and when it's
    done.
 
-## The merge signal — "LGTM"
+## Merge to main command
 
-When the repo owner says "LGTM" on a change, treat it as approval to merge that
-branch's pull request into `main`. Merge via **squash**, appending the PR number
-to the title as `(#N)` — matching `main`'s linear, one-commit-per-PR history. CI
-must be green first; the test-flakiness gate in
+When the repo owner asks to merge a change to `main`, merge that branch's pull
+request via **squash**, appending the PR number to the title as `(#N)` — matching
+`main`'s linear, one-commit-per-PR history. CI must be green first; the
+test-flakiness gate in
 [../engineeringPractices.md](../engineeringPractices.md) (twice-green) applies
-only when the change adds or touches an e2e/heavy-browser test. After merging,
-also run **"learned lessons"** (see [workflow.md](workflow.md)) on the
-conversation before closing out.
+only when the change adds or touches an e2e/heavy-browser test.
 
-"LGTM" (like any approval) applies **only backward**, to the work already in
-front of the owner when it's given — never to anything requested or done *after*
-it. A later follow-up, even a fix to the just-merged change, needs its own
-explicit "LGTM" before it may be merged; don't carry one approval forward, and
-don't treat a chosen answer to an `AskUserQuestion` as merge authorization
-because an option's wording happened to mention merging. When in doubt, open the
-PR, get CI green, and wait for a fresh "LGTM".
+A merge approval (like any approval) applies **only backward**, to the work
+already in front of the owner when it's given — never to anything requested or
+done *after* it. A later follow-up, even a fix to the just-merged change, needs
+its own explicit approval before it may be merged; don't carry one approval
+forward, and don't treat a chosen answer to an `AskUserQuestion` as merge
+authorization because an option's wording happened to mention merging. When in
+doubt, open the PR, get CI green, and wait for a fresh approval.
 
 ## Branch and commit history
 
@@ -52,6 +50,21 @@ PR, get CI green, and wait for a fresh "LGTM".
   (`git rebase origin/main`, which drops the commit as an already-applied
   cherry-pick, or a hard reset): it's your own un-merged branch, so this is the
   amend-your-own-commits case above, not rewriting shared history.
+
+## Open the PR early when a change touches e2e / heavy / UI tests
+
+The usual default is to hold a PR until asked. **Reverse that when a change adds
+or modifies an e2e/heavy-browser (`test/fullBrowserHeavyTests/`) or UI-snapshot
+(`test/ui/`) test**: those can't be exercised locally (the sandbox has no Chrome;
+see [../technicalGotchas.md](../technicalGotchas.md)), and their reviewable
+artifacts only exist on a PR — CI runs the heavy/e2e suites against the branch,
+and a UI change's reviewable output (the pixel diff GitHub renders, and the
+rendered gallery linked via the branch's `test/ui/README.md`) needs a branch
+pushed to GitHub to view at all. So opening the PR *is* how you see the change
+working and surface failures; doing it up front (rather than after a round of
+local-only iteration that proves nothing for these classes) is the faster path to
+a working, reviewable result. Each CI iteration costs a full round-trip, so get
+the first one running as early as possible.
 
 ## A push or PR made with the Actions `GITHUB_TOKEN` does not start another workflow
 
@@ -83,8 +96,9 @@ true`), then `--add-label`. (The download-failure hand-off in
 
 ## Driving a merge cheaply (wall time + tokens)
 
-Getting from "LGTM" to a merged PR wastes both if CI is treated as a fixed
-poll-and-sleep ritual. These came out of a post-mortem on exactly that gap:
+Getting from a merge-to-main request to a merged PR wastes both if CI is treated
+as a fixed poll-and-sleep ritual. These came out of a post-mortem on exactly that
+gap:
 
 - **Merge on an already-green check; don't trigger or wait for a duplicate
   run.** A branch `git push` already runs `test.yml` on the head commit. Opening
@@ -122,14 +136,13 @@ npm run regen   # load lists + UI snapshots + fallback-coverage baseline/report
 The committed `.gitattributes` maps each generated file to the `ours` merge
 driver, so git keeps one side automatically and `npm run regen` reproduces the
 correct merged result from the (normally-merged) source files. A stale artifact
-can't slip through — its own test fails: the load-order/worker-imports drift
-guard (`test/unit/load-order-generated.test.js`), the UI snapshot pixel diff, or
+can't slip through — its own test fails: the load-order drift guard
+(`test/unit/load-order-generated.test.js`), the UI snapshot pixel diff, or
 the fallback-coverage gate.
 
 Files under this rule (kept in sync with `.gitattributes`):
 
-- `pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js`
-  — both from `npm run index`.
+- `pipeline/load-order.generated.json` — from `npm run index`.
 - `test/ui/cases/*.png` and `test/ui/README.md` — from `npm run refresh:ui`.
 - `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
   `test/extractors/fallback/fallback-coverage.GENERATED.md` — from the
@@ -158,7 +171,7 @@ Conflict size scales with how long a branch lives and how far it drifts from
 `git merge origin/main` (or rebase) and `npm run regen` first, so the branch
 carries the latest sources and freshly-generated artifacts instead of
 discovering the gap at merge time. The one-commit-per-PR squash history (the
-merge signal above) keeps each branch a single reviewable unit, so
+merge-to-main command above) keeps each branch a single reviewable unit, so
 shorter-lived branches are the norm.
 
 ### Merging across a file relocation
@@ -168,3 +181,14 @@ does *not* fix *references* to the moved paths — an npm script, a `.gitattribu
 glob, or a doc link naming the old location keeps pointing there and breaks with
 no conflict (a green local test on the old layout won't catch it either). After
 such a merge, grep the files your branch touched for the old paths.
+
+### Merging in content that predates a branch-wide invariant
+
+When your branch establishes a cross-cutting invariant — a renamed term, a
+"mentioned only in X" containment rule — a branch you merge in that *predates* it
+can silently reintroduce violations: its independent additions (a new file, a new
+section) auto-merge clean, no conflict, while still using the old form. Resolving
+the marked conflicts isn't enough. Re-run the check that *defines* the invariant
+(the grep) over the whole tree after the merge, not just the conflicted files.
+(Merging `main` reintroduced a trigger-phrase term this branch had confined to a
+single doc, via a newly-added doc that merged with no conflict.)

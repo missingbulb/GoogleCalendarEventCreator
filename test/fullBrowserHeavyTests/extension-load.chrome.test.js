@@ -80,8 +80,10 @@ function launchChrome(userDataDir, timeoutMs) {
 }
 
 test(
-  "the unpacked extension loads in Chrome: the service worker registers and GCal is built",
-  { skip },
+  "the unpacked extension loads in Chrome: the service worker registers its declarativeContent icon rules",
+  // A hard cap so a CI-only hang (e.g. an unsettled CDP await) fails fast with
+  // this test's own diagnostics instead of burning the whole job's timeout.
+  { skip, timeout: 120000 },
   async () => {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "gcal-e2e-"));
     const { proc, endpoint } = launchChrome(userDataDir, 30000);
@@ -90,11 +92,9 @@ test(
       cdp = connectCDP(await endpoint);
       await cdp.ready;
 
-      // Find the extension's MV3 background as a service_worker target. It only
-      // appears once the worker has registered — i.e. once its first
-      // importScripts succeeded (#146). Opening a page wakes the lazy worker by
-      // firing the extension's chrome.tabs listeners. Collect every target for a
-      // useful failure message.
+      // Find the extension's MV3 background as a service_worker target. The target
+      // exists once the worker is registered (even while stopped); attaching to it
+      // below starts it. Collect every target for a useful failure message.
       const seen = [];
       let onWorker;
       const swTargetId = new Promise((resolve, reject) => {
@@ -114,11 +114,18 @@ test(
       });
       cdp.on(onWorker);
       await cdp.send("Target.setDiscoverTargets", { discover: true });
-      await cdp.send("Target.createTarget", { url: "about:blank" }); // wake the worker
+      await cdp.send("Target.createTarget", { url: "about:blank" }); // a page, so the target set is non-empty
       const targetId = await swTargetId;
 
-      // Attach and run code *inside the worker*: importScripts succeeded iff GCal
-      // got built, and the supported-host decision must work end to end.
+      // Attach and read the worker's `iconRulesReady` promise — the readiness
+      // signal it exposes at top level, resolving to the number of
+      // declarativeContent icon rules it registered. Awaiting that promise
+      // exercises the real startup path (fetch the host lists, decode the packaged
+      // icons via OffscreenCanvas, register the rules) and resolves through plain
+      // fetch/OffscreenCanvas promises — not the `chrome.*` rule callbacks, which
+      // don't reliably settle when awaited over CDP. We read an explicit
+      // `globalThis` property (a bare top-level function name isn't reachable from
+      // an injected Runtime.evaluate the way `globalThis.x` is).
       const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
       const evaluate = async (expression) => {
         const { result, exceptionDetails } = await cdp.send(
@@ -131,30 +138,45 @@ test(
         }
         return result.value;
       };
-      // The service_worker target can appear before its top-level script has
-      // finished importScripts()-ing the pipeline, so poll until GCal is built
-      // rather than racing a single read (then let the assertion report the
-      // last value seen).
-      const evaluateUntil = async (expression, want, timeoutMs = 10000) => {
-        const deadline = Date.now() + timeoutMs;
-        let value;
+
+      // The probe always settles (the await is bounded by a timeout) and returns a
+      // diagnostic string, so a CI-only failure reports the observed state instead
+      // of hanging the job — see docs/engineeringPractices.md.
+      const probe = `(async () => {
+        const withTimeout = (p, ms, tag) =>
+          Promise.race([Promise.resolve(p), new Promise((r) => setTimeout(() => r(tag), ms))]);
+        try {
+          if (typeof globalThis.iconRulesReady === "undefined") return "no-iconRulesReady";
+          const count = await withTimeout(globalThis.iconRulesReady, 8000, "ready-timeout");
+          return "rules:" + count;
+        } catch (e) {
+          return "error:" + (e && e.message ? e.message : e);
+        }
+      })()`;
+
+      // Poll: a dormant MV3 worker has no globals until it (re)runs its top level.
+      // Attaching/evaluating starts it, but the first read can race that startup —
+      // so keep reading until `iconRulesReady` exists (anything other than
+      // "no-iconRulesReady"), then let the assertion judge the resolved value.
+      const probeUntil = async (deadlineMs = 20000) => {
+        const deadline = Date.now() + deadlineMs;
+        let result;
         do {
-          value = await evaluate(expression);
-          if (value === want) break;
-          await new Promise((r) => setTimeout(r, 100));
+          result = await evaluate(probe);
+          if (result !== "no-iconRulesReady") break;
+          await new Promise((r) => setTimeout(r, 300));
         } while (Date.now() < deadline);
-        return value;
+        return result;
       };
 
-      assert.equal(
-        await evaluateUntil("typeof globalThis.GCal?.isSupportedHost", "function"),
-        "function",
-        "importScripts must have run inside the worker and built GCal.isSupportedHost"
-      );
-      assert.equal(
-        await evaluate('GCal.isSupportedHost("https://www.meetup.com/group/events/1/")'),
-        true,
-        "a known supported host must read as supported inside the live worker"
+      // The worker ran its startup path end to end iff it registered at least one
+      // icon rule (gray for the denylist, green for supported hosts). "rules:0" / a
+      // timeout / an error / "no-iconRulesReady" all fail with the observed value.
+      const result = await probeUntil();
+      assert.match(
+        result,
+        /^rules:[1-9]/,
+        `the worker's startup must register declarativeContent icon rules inside the live worker (iconRulesReady returned "${result}")`
       );
     } finally {
       if (cdp) cdp.close();

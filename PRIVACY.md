@@ -48,8 +48,10 @@ The extension requests only the minimum permissions needed to work:
 - `activeTab` and `scripting` — to read the content of the current tab **only
   when you explicitly click the extension**, so it can extract the event
   details from that page.
-- `tabs` — to open the pre-filled Google Calendar event in a new tab and to
-  update the toolbar icon to indicate whether the current page is supported.
+- `declarativeContent` — to let the browser color the toolbar icon (green on a
+  supported site, blue elsewhere) by matching the page's host against a fixed
+  list of patterns. The extension never reads your browsing history or your
+  tabs' URLs.
 
 These permissions are used solely for the functionality described above.
 
