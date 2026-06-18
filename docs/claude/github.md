@@ -113,9 +113,12 @@ gap:
   aren't callable from Bash. So you can't "wait on the condition" from a script —
   only the MCP `get_check_runs`/`get_status` poll sees the state. A single padded
   `sleep N` over- or under-shoots a run of unknown length (a blind 75s wait for a
-  ~45s run was the post-mortem trigger); instead loop **MCP poll → short (~15s)
-  background sleep → MCP poll**, until the check leaves `in_progress`, then merge —
-  it wakes within one short interval of completion, never by a minute. And do
+  ~45s run was the post-mortem trigger); instead loop **MCP poll → background sleep
+  → MCP poll**, until the check leaves `in_progress`, then merge. Back off the
+  sleep on a rolling schedule — **5s, 10s, 15s, 30s, then 30s** repeating — so a
+  fast-ending run wakes you within a few seconds while a slow one doesn't tight-poll;
+  always wait for the sleep's completion notification before the next poll (firing a
+  poll right after *launching* the sleep is the back-to-back waste below). And do
   **not** reach for `subscribe_pr_activity` to wait for green: its webhooks never
   deliver CI **success** (only failures/comments/reviews), so the green transition
   you're waiting for never arrives — it's for babysitting a PR, not merge-on-green.
