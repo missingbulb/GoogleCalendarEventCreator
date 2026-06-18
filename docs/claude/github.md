@@ -181,3 +181,14 @@ does *not* fix *references* to the moved paths — an npm script, a `.gitattribu
 glob, or a doc link naming the old location keeps pointing there and breaks with
 no conflict (a green local test on the old layout won't catch it either). After
 such a merge, grep the files your branch touched for the old paths.
+
+### Merging in content that predates a branch-wide invariant
+
+When your branch establishes a cross-cutting invariant — a renamed term, a
+"mentioned only in X" containment rule — a branch you merge in that *predates* it
+can silently reintroduce violations: its independent additions (a new file, a new
+section) auto-merge clean, no conflict, while still using the old form. Resolving
+the marked conflicts isn't enough. Re-run the check that *defines* the invariant
+(the grep) over the whole tree after the merge, not just the conflicted files.
+(Merging `main` reintroduced a trigger-phrase term this branch had confined to a
+single doc, via a newly-added doc that merged with no conflict.)
