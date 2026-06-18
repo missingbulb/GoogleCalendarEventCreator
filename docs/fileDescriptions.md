@@ -7,14 +7,14 @@ the rules of the road.
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
-| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `tabs` permissions) |
+| `manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `declarativeContent` permissions) |
 | `config.js` | Tunable product decisions (durations, the event cap, the fallback host allow/denylist); imported by the popup modules |
 | `fallback-policy.js` | The generic fallback's host classifier (`classifyHost`) + presentability gate, shared by the popup and the auto-extractor triage |
 | `ui/popup.html`, `ui/popup.css`, `ui/popup.js` | Toolbar popup: controller that runs the extractor, picks a view (`chooseContent`), and renders it (markup + extracted styles) |
 | `ui/views/events-view.js` | Renders one card per event — a clickable button for a single occurrence, or a grouped card with a button per showing for a multi-instance event (loaded on demand via `import()`) |
 | `ui/views/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
 | `docs/extraction-policy.md` | Short public "how this extension finds events" doc the "Disagree?" link opens |
-| `ui/toolbar-icon.js` | Background service worker: sets the toolbar icon's tile color per tab — green on supported hosts, blue elsewhere |
+| `ui/toolbar-icon.js` | Background service worker: registers `chrome.declarativeContent` rules (from `fallback-lists.json`) so the browser colors the toolbar icon by host pattern — green on supported hosts, gray on denylisted ones, blue elsewhere — without the extension reading any tab URL |
 | `pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
 | `pipeline/helpers/` | Shared utilities any extractor may use, split by concern: DOM, text (rich-text/`htmlToText`/`parts`), dates, timezones, timezone-names, merge, and `embedded-events` (the `GCal.embeddedEvents` schema.org JSON-LD reader) |
 | `pipeline/sources/meetup.js`, `facebook.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js` | One self-contained scraper per supported event site, with hardcoded selectors + inline host matcher |
@@ -22,7 +22,6 @@ the rules of the road.
 | `pipeline/build-calendar-url.js` | Builds the pre-filled Google Calendar template URL (incl. markdown→HTML for details) |
 | `pipeline/assemble-events.js` | Orchestrator `GCal.extract()`: runs the matched self-contained source, else the unsupported-site fallback; normalizes/sorts events and reports `supported` |
 | `pipeline/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
-| `pipeline/worker-imports.generated.js` | Generated (`npm run index`) `importScripts` of registry + every source; the service worker (`ui/toolbar-icon.js`) loads it at startup, so its list is never hand-maintained |
 | `test/extractors/custom/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
 | `data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |

@@ -45,14 +45,42 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   #1262029) that say `setIcon({path})` is a silent no-op in a worker needing an
   `OffscreenCanvas`/`ImageData` workaround — here it *throws* "Failed to fetch",
   and the fix is the extension-root URL, not decoding the PNG to ImageData.
+  (The toolbar worker no longer calls `setIcon` at all — it registers
+  `chrome.declarativeContent` rules instead, see the next gotcha — but the
+  extension-root-path rule still governs its `fetch(getURL(...))` calls.)
+- **`chrome.declarativeContent.SetIcon` reliably needs `imageData`, not `path` —
+  and a DOM-less MV3 worker must decode the PNG via `OffscreenCanvas`.** The API
+  *documents* a `path` option, but in practice it's unreliable (silently leaves
+  the icon unset / "Could not load icon"); the robust route is `imageData`. The
+  reason is structural: `declarativeContent` rules are evaluated by the browser
+  process, so the icon must be reduced to raw pixels and baked into the rule at
+  registration time. Building that `imageData` in the service worker can't use a
+  DOM `<canvas>`/`<img>` (there's no DOM) — decode the packaged PNG with
+  `fetch(getURL(icon)) → blob → createImageBitmap → OffscreenCanvas.drawImage →
+  getImageData`. (Used by `ui/toolbar-icon.js` to color the icon without the
+  `tabs` permission. Also: a bare `hostSuffix: "example.com"` matcher also matches
+  `evilexample.com` — pair `hostEquals: "example.com"` with
+  `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
+  URL→icon match runs inside Chrome, so it's verified only by the CI-only
+  real-Chrome test (`test/fullBrowserHeavyTests/extension-load.chrome.test.js`).
+- **Introspecting an MV3 service worker over CDP (the real-Chrome test) has three
+  traps that each cost a CI round-trip.** When `Runtime.evaluate`-ing inside the
+  worker to verify its startup: (a) **`chrome.*` callback APIs don't reliably
+  settle when awaited under `awaitPromise: true`** — `declarativeContent…getRules`
+  hung forever (no internal timeout) until the whole job timed out; build the
+  awaited signal from plain promises (`fetch`/`OffscreenCanvas`), not chrome.*
+  callbacks. (b) **A bare top-level `function`/`const` name isn't reachable** from
+  an injected evaluate — expose what the test reads as an explicit
+  `globalThis.x = …` (the worker publishes an `iconRulesReady` promise this way).
+  (c) **A dormant worker has no globals** until it re-runs its top level; with no
+  tab/event listeners a test can trigger, attaching to the target is what starts
+  it, and the first read still races startup — so **poll** until the global
+  appears. (Bound every probe and add a test-level timeout regardless, per the
+  hang-proofing rule in [engineeringPractices.md](engineeringPractices.md).)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
-  workflow.** GitHub suppresses workflow runs triggered by the built-in
-  `GITHUB_TOKEN` to prevent recursion, so a workflow's own `git push` or
-  `gh pr create` won't fire `test.yml` or `refresh-cache.yml`. The one exception is
-  `workflow_dispatch` / `repository_dispatch` — which is why the auto-extractor
-  pipeline dispatches `refresh-cache.yml` and `test.yml` explicitly (see
-  `docs/claude/auto-extractor.md`). A run dispatched against a branch executes on
-  its head commit, so its checks still attach to the PR.
+  workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
+  with the rest of the GitHub procedures in
+  [claude/github.md](claude/github.md).
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `test/harness.js`.

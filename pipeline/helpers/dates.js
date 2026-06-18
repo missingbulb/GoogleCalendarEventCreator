@@ -75,6 +75,30 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       return m[5] != null ? `${day}T${pad(+m[5])}:${m[6]}:00` : day;
     }
 
+    // Hebrew month names, day-first: "4 ביולי 2026" / "4 ביולי 2026•21:00"
+    // Widely used across Israeli websites. Built from parts (V8 can't parse Hebrew
+    // month names with new Date()), mirroring the day-first numeric path above.
+    const HEB = {
+      ינואר: 1, פברואר: 2, מרץ: 3, אפריל: 4, מאי: 5, יוני: 6,
+      יולי: 7, אוגוסט: 8, ספטמבר: 9, אוקטובר: 10, נובמבר: 11, דצמבר: 12,
+    };
+    // ב? absorbs the Hebrew preposition "in" that appears before months in dates
+    // ("4 ביולי" = "4 in-July"); the capturing group captures the month alone for HEB[].
+    const HEB_MONTH = "ב?(ינואר|פברואר|מרץ|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר)";
+    for (const m of s.matchAll(
+      new RegExp(`(?<!\\d)(\\d{1,2})\\s+${HEB_MONTH}\\s+(\\d{4})(?!\\d)(?:\\s*${SEP}?\\s*(${TIME}))?`, "g")
+    )) {
+      const dd = +m[1];
+      const mm = HEB[m[2]];
+      const yyyy = +m[3];
+      if (dd < 1 || dd > 31 || !mm) continue;
+      const day = `${yyyy}-${pad(mm)}-${pad(dd)}`;
+      if (m[4] == null) return day;
+      const tm = timeToMinutes(m[4]);
+      if (tm == null) return day;
+      return `${day}T${pad(Math.floor(tm / 60))}:${pad(tm % 60)}:00`;
+    }
+
     const patterns = [
       // "June 14, 2026 at 7:00 PM" / "Jun 14 2026, 19:00" / "June 14, 2026 from 7 PM"
       new RegExp(`${MONTH}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}(?:\\s*${SEP}?\\s*(${TIME}))?`, "i"),

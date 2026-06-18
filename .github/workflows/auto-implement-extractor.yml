@@ -120,14 +120,21 @@ jobs:
               echo "proceed=false"
               echo "reason=$REASON"
             } >> "$GITHUB_OUTPUT"
+            # Exit 3 = the HTML couldn't be downloaded at all (403 / unreachable).
+            # That's not something a re-run or the agent can fix, so flag it for
+            # the hand-off-to-a-human step below.
+            if [ "$CODE" -eq 3 ]; then
+              echo "downloadFailed=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
-      # The probe decided the page can't back a static case (unfetchable, a
-      # bot-challenge, or no URL). That's a handled, expected outcome — tell the
+      # The probe decided the page can't back a static case (a bot-challenge or
+      # no URL — but NOT an outright download failure, which the dedicated
+      # hand-off step below owns). That's a handled, expected outcome — tell the
       # requester and let the run finish GREEN. (Genuine failures below still go
       # red via "Comment on failure".)
       - name: Comment — page not usable (expected stop)
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed != 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed != 'true' && steps.probe.outputs.downloadFailed != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -135,6 +142,26 @@ jobs:
           REASON:       ${{ steps.probe.outputs.reason }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started. The site can still be added by hand — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+
+      # The probe couldn't download the HTML at all (a 403 / unreachable / bot
+      # wall — exit 3). Unlike a soft-200 challenge this can't be retried into a
+      # usable page, so hand the issue to a human: drop the trigger label (so
+      # the automation won't re-fire) and add a "human involvement required"
+      # label. The comment makes the blocker explicit —
+      # the HTML couldn't be downloaded — so the reason is unmistakable. Still an
+      # EXPECTED stop, so the run finishes GREEN.
+      - name: Hand off to a human — HTML couldn't be downloaded
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.downloadFailed == 'true'
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REASON:       ${{ steps.probe.outputs.reason }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+          # Make sure the label exists before adding it (idempotent — ignore "already exists").
+          gh label create "human involvement required" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
+          gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-request" --add-label "human involvement required"
 
       - name: Install npm dependencies
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'

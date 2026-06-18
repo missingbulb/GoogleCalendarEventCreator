@@ -5,11 +5,12 @@ different files instead of colliding in one monolith. Each section lives in its
 own file under `docs/claude/` and is imported here:
 
 @docs/claude/workflow.md
+@docs/claude/github.md
 @docs/claude/adding-a-source.md
 @docs/claude/testing.md
-@docs/claude/merge-conflicts.md
 @docs/claude/auto-extractor.md
 @docs/claude/auto-lessons.md
+@docs/claude/auto-fallback-coverage.md
 
 The project's top-level architectural rules of the road live in
 `docs/architectureGuidelines.md` (imported below). Whenever we agree on a new or
@@ -33,3 +34,10 @@ Best practices specific to building and running AI agents (as opposed to general
 software engineering) live in `docs/agenticBestPractices.md` (imported below).
 
 @docs/agenticBestPractices.md
+
+The repo owner's personal interaction preferences (tone, end-of-turn
+conventions, and the trigger phrases for owner-triggered commands — not project
+conventions) live in `docs/ownerPreferences.md` (imported below). This is a
+temporary home until they move to the owner's own persistent environment.
+
+@docs/ownerPreferences.md

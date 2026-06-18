@@ -8,12 +8,11 @@ data/*.html linguist-vendored
 # rerun the generator and commit the result, so there's nothing to resolve by
 # hand (and the PNGs are binary — they can't be 3-way merged at all). The driver
 # is per-clone git config set by scripts/cloud-setup.sh (and the one-time local
-# setup in docs/claude/merge-conflicts.md); a clone without it just falls back to
+# setup in docs/claude/github.md); a clone without it just falls back to
 # a normal conflicting merge — still resolvable, only manual. A stale artifact
 # can't slip through: its own test fails (the load-order drift guard, the UI
-# snapshot pixel diff, the coverage gate). See docs/claude/merge-conflicts.md.
+# snapshot pixel diff, the coverage gate). See docs/claude/github.md.
 pipeline/load-order.generated.json                                  merge=ours
-pipeline/worker-imports.generated.js                                merge=ours
 test/extractors/fallback/fallback-coverage.baseline.GENERATED.json  merge=ours
 test/extractors/fallback/fallback-coverage.GENERATED.md             merge=ours
 test/ui/cases/*.png                                                 merge=ours
