@@ -31,16 +31,18 @@ doc, when the mechanics change.
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically. (This is the
   same comparison the fallback-coverage gate automates — see below.)
-- **A UI snapshot verifies pixels, not logic — so before pruning a snapshot case,
-  audit the distinct *visual* it uniquely shows.** The popup's behavior is already
-  covered by unit tests (`popup-content` / `events-view` / `popup-truncation`), so
-  each `test/ui/cases/` image earns its keep by a visual treatment no other case
-  shows — a time-range inside a chip, a wrapping chip row, one event splitting into
-  month + same-day + single cards, the count cue counting instances not cards.
-  Slimming the set by deduping *logic* silently drops those visuals while every
-  unit test stays green. Reorganize by feature (all of a feature's variations in
-  one image, named scenario→expectation), but treat each removal as a coverage
-  question, not a dedupe.
+- **A UI snapshot checks pixels *against a UI requirement*: does the popup render
+  the right appearance for this scenario? — not whether some appearance can be
+  produced.** The popup's logic is already pinned by unit tests (`popup-content` /
+  `events-view` / `popup-truncation`); a `test/ui/cases/` image earns its keep by
+  fixing what one scenario *should* look like (named scenario→expectation), and its
+  reference PNG only means something once a human has confirmed it matches the
+  actual requirement — not whatever the code happened to draw. So when adding or
+  pruning a case, the question is "which requirement's correct rendering does this
+  verify?", not "can these pixels be generated?"; deduping cases against the unit
+  tests silently drops a requirement's pixel check while every unit test stays
+  green. Reorganize by feature (a feature's variations together in one image), but
+  treat each removal as a coverage question, not a dedupe.
 
 ## Adding a cached integration case
 
