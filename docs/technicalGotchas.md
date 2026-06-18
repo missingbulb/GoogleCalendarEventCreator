@@ -138,6 +138,15 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   host count as one, surfacing a phantom event (og:title + a footer location +
   "No date found") on e.g. the site's home page (#133). A real event must require
   actual data — JSON-LD or a parsed date — not merely a host match.
+- **A GitHub issue-form field is prefillable from a URL query param only when
+  it's a text field (`input`/`textarea`) — never a `dropdown` or `checkboxes`.**
+  GitHub's docs are explicit that query params "fill custom text fields" in issue
+  forms; a `?field-id=value` for a dropdown or checkbox is silently ignored (no
+  error, the control just keeps its default). So the popup's "Suggest Correction"
+  link (`ui/views/source-request-view.js`, prefilling
+  `.github/ISSUE_TEMPLATE/extractor-request.yml`) can only seed text inputs — a
+  single-vs-multiple signal had to be a plain text count field, not the nicer
+  checkbox/dropdown control, to be prefillable from the popup's detection.
 - **Large cached HTML fixtures skew GitHub's language stats — mark them
   `linguist-vendored`.** GitHub reported this JS extension as "mostly HTML" because
   the full-page `data/*.html` test fixtures dwarf the source by bytes.
