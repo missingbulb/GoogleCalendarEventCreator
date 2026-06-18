@@ -37,6 +37,24 @@ doubt, open the PR, get CI green, and wait for a fresh approval.
 
 ## Branch and commit history
 
+### Commit often, in layers
+
+While working a branch, commit frequently rather than landing one big commit at
+the end — small, ordered commits let the owner follow the work as it develops.
+Use commits to *layer* the work in the order you'd want it reviewed:
+
+- Write the failing test(s) first, commit them, **then** implement the feature —
+  so the history shows the contract before the code that satisfies it (and you've
+  seen the test fail before trusting it, per
+  [../engineeringPractices.md](../engineeringPractices.md)).
+- Keep any documentation update as its own commit *after* the feature, not folded
+  into it.
+
+There's no cost to a branch carrying many commits: the merge-to-main command
+**squashes** them into one commit on `main` (see above), so `main`'s
+one-commit-per-PR history is unaffected no matter how granularly the branch is
+committed.
+
 - Don't rewrite published/shared history to satisfy a tooling or authorship
   check (e.g. a hook flagging "unverified" commits): only amend your own
   un-pushed branch commits. Commits already on a shared branch — including ones
