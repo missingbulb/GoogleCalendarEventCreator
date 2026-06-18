@@ -46,9 +46,8 @@ const WIDTH = 304;
 
 // The "current year" the cases render against. Pinned (not the real year) so a
 // card's year-pill decision — and therefore every snapshot — is deterministic
-// forever: a card dated this year shows no pill, off-year dates do. Most cases use
-// 2026 dates (so they stay pill-free and focused on their own feature); case 01
-// deliberately mixes 2025/2026/2027 to exercise the past/none/future pills.
+// forever: a case dated this year shows no pill, off-year dates do. The existing
+// cases all use 2026 dates, so 2026 keeps them pill-free.
 const REFERENCE_YEAR = 2026;
 
 const POPUP_CSS = fs.readFileSync(path.join(ROOT, "ui", "popup.css"), "utf8");

@@ -48,4 +48,22 @@ function scrollToBottom(doc) {
   setFades(doc, { top: true, bottom: false });
 }
 
-module.exports = { setFades, restAtTop, scrollToBottom };
+// Show the middle of a long list, as if scrolled partway: keep a middle window of
+// rows (satori can't scroll, and resvg panics on a too-tall SVG — same bound as
+// the renderer's clampOverflowingList) with the top row cropped so it bleeds
+// under the top fade, and show both fades (more list either way).
+function scrollToMiddle(doc) {
+  const events = doc.getElementById("events");
+  if (events) {
+    const rows = [...events.children];
+    const windowRows = 11; // > the ~8 rows that fill the 500px viewport (>=60px/row)
+    const start = Math.max(0, Math.floor((rows.length - windowRows) / 2));
+    rows.forEach((row, i) => {
+      if (i < start || i >= start + windowRows) events.removeChild(row);
+    });
+    if (events.firstChild) events.firstChild.style.marginTop = "-30px";
+  }
+  setFades(doc, { top: true, bottom: true });
+}
+
+module.exports = { setFades, restAtTop, scrollToBottom, scrollToMiddle };

@@ -1,12 +1,8 @@
-// The bottom count cue counts EVENT INSTANCES, not cards. The card cap is a layout
-// limit, but the label sums showings — so a list with same-day cards reports MORE
-// events than it has cards. Here six single-show meetups plus two films that each
+// The count cue counts EVENT INSTANCES, not cards: the cap is on cards, but the
+// label sums showings. Here six single-show meetups plus two films that each
 // screen several times on ONE day (one same-day card each) make 8 cards but 13
-// events; scrolled to the end, the list's last item reads "13 events showing" (no
-// "show all" — every card is already shown, so the label is just a scroll cue).
-// Doubles as the realistic mixed list: single cards interleaved with same-day cards.
-"use strict";
-
+// events. Scrolled to the bottom, the list's last item reads "13 events
+// showing".
 const { scrollToBottom } = require("../actions");
 
 const single = (n, day) => ({
@@ -24,7 +20,7 @@ const screenings = (title, day, times) => ({
 
 module.exports = {
   description:
-    "The count cue counts event instances, not cards: a mixed list of 8 cards (two of them same-day cards) holds 13 events, so the end reads '13 events showing'",
+    "Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing",
   data: {
     supported: true,
     events: [

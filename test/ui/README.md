@@ -13,62 +13,92 @@ rasterizes the result, so these images track the shipped popup directly. See
 The gallery below shows every case's reference image with its description, so the
 current (or changed) state is reviewable straight from GitHub.
 
-## 01-off-year-single-cards-get-a-year-pill-past-gray-future-green
+## 01-supported-listing
 
-Off-year single cards get a year pill: a past year (2025) a gray pill, the current year (2026) none, a future year (2027) a green pill
+Supported host: events across past, current, and future years (off-year cards get a year pill); the current-year event's times carry a UTC offset shown as wall-clock
 
-![01-off-year-single-cards-get-a-year-pill-past-gray-future-green](cases/01-off-year-single-cards-get-a-year-pill-past-gray-future-green.png)
+![01-supported-listing](cases/01-supported-listing.png)
 
-## 02-unlisted-host-shows-event-plus-suggest-correction-link
+## 02-denylisted
 
-Unlisted host with a complete event: show it plus a right-aligned 'Suggest Correction' link
+Denylisted host: 'No events found' (no link, no prompt) — even a complete event is suppressed
 
-![02-unlisted-host-shows-event-plus-suggest-correction-link](cases/02-unlisted-host-shows-event-plus-suggest-correction-link.png)
+![02-denylisted](cases/02-denylisted.png)
 
-## 03-no-events-found-shows-glyph-and-disagree-link
+## 03-nothing-found
 
-No events found: the empty calendar glyph and a 'Disagree?' policy link
+Nothing found: 'No events found' + a right-aligned 'Disagree?' link
 
-![03-no-events-found-shows-glyph-and-disagree-link](cases/03-no-events-found-shows-glyph-and-disagree-link.png)
+![03-nothing-found](cases/03-nothing-found.png)
 
-## 04-denylisted-host-suppresses-even-a-complete-event
+## 04-allowlisted
 
-Denylisted host suppresses even a complete event: the empty glyph with no link or prompt
+Allowlisted: show the event (no support request)
 
-![04-denylisted-host-suppresses-even-a-complete-event](cases/04-denylisted-host-suppresses-even-a-complete-event.png)
+![04-allowlisted](cases/04-allowlisted.png)
 
-## 05-same-day-screenings-each-become-their-own-time-button
+## 05-unlisted
 
-Same-day screenings each become their own time button: one same-day card, a chip per showing (single times and a time range)
+Unlisted: show the event + a right-aligned 'Suggest Correction' link
 
-![05-same-day-screenings-each-become-their-own-time-button](cases/05-same-day-screenings-each-become-their-own-time-button.png)
+![05-unlisted](cases/05-unlisted.png)
 
-## 06-month-card-header-shows-shared-time-else-per-day-times-or-allday
+## 06-overflow-bottom-fade
 
-Month card surfaces a shared start time in its header (day chips that wrap when many, consecutive days not merged), else per-day time chips, else just the location (all-day dates)
+Overflowing list, top of scroll: bottom edge fades out (more below)
 
-![06-month-card-header-shows-shared-time-else-per-day-times-or-allday](cases/06-month-card-header-shows-shared-time-else-per-day-times-or-allday.png)
+![06-overflow-bottom-fade](cases/06-overflow-bottom-fade.png)
 
-## 07-one-event-splits-into-month-same-day-and-single-cards
+## 07-scrolled-middle-both-fades
 
-One event splits into several cards: a month card (its single-show June days), a same-day card (the two-show day), and a single card (the lone July day)
+Scrolled to the middle of a long list: both edges fade out
 
-![07-one-event-splits-into-month-same-day-and-single-cards](cases/07-one-event-splits-into-month-same-day-and-single-cards.png)
+![07-scrolled-middle-both-fades](cases/07-scrolled-middle-both-fades.png)
 
-## 08-capped-list-scrolled-to-end-shows-count-and-show-all-link
+## 08-scrolled-bottom-count
 
-Capped list scrolled to the end: the 'N out of M events showing' count, a 'show all' link, and the top edge fade
+Long capped list scrolled to the bottom: 'N out of M' + top fade only
 
-![08-capped-list-scrolled-to-end-shows-count-and-show-all-link](cases/08-capped-list-scrolled-to-end-shows-count-and-show-all-link.png)
+![08-scrolled-bottom-count](cases/08-scrolled-bottom-count.png)
 
-## 09-count-label-counts-event-instances-not-cards
+## 09-month-scattered-with-sameday
 
-The count cue counts event instances, not cards: a mixed list of 8 cards (two of them same-day cards) holds 13 events, so the end reads '13 events showing'
+Month grouping: two scattered single-show days fold into one month card; a two-show day stays a same-day card
 
-![09-count-label-counts-event-instances-not-cards](cases/09-count-label-counts-event-instances-not-cards.png)
+![09-month-scattered-with-sameday](cases/09-month-scattered-with-sameday.png)
 
-## 10-overflowing-list-at-rest-fades-out-its-bottom-edge
+## 10-same-day-three-screenings
 
-Overflowing list at rest at the top: the bottom edge fades out to cue there's more below
+Same day, three screenings: one same-day card with a button per time
 
-![10-overflowing-list-at-rest-fades-out-its-bottom-edge](cases/10-overflowing-list-at-rest-fades-out-its-bottom-edge.png)
+![10-same-day-three-screenings](cases/10-same-day-three-screenings.png)
+
+## 11-month-allday-and-sameday
+
+Month grouping with an all-day day and a timed day folding into one month card, plus a same-day card
+
+![11-month-allday-and-sameday](cases/11-month-allday-and-sameday.png)
+
+## 12-events-outnumber-cards-count
+
+Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing
+
+![12-events-outnumber-cards-count](cases/12-events-outnumber-cards-count.png)
+
+## 13-month-grouped-across-months
+
+Month grouping across months: three scattered June dates become one JUN card (5/14/25), the July date a single card
+
+![13-month-grouped-across-months](cases/13-month-grouped-across-months.png)
+
+## 14-consecutive-run-instances
+
+Consecutive days aren't merged: Jun 5–7 + scattered Jun 14/25 are one month card with a button per day; July is a single card
+
+![14-consecutive-run-instances](cases/14-consecutive-run-instances.png)
+
+## 15-month-common-time-header
+
+Month card common-time header: scattered dates that share one start time show it above the icons; differing-time and all-day month cards show only the location
+
+![15-month-common-time-header](cases/15-month-common-time-header.png)
