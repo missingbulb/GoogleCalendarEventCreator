@@ -79,7 +79,7 @@ unlike applying an already-defined label, GitHub won't create it on demand, so a
 workflow that introduces a new label breaks the first time it runs. Create it
 idempotently before the edit (`gh label create "<name>" --color … 2>/dev/null ||
 true`), then `--add-label`. (The download-failure hand-off in
-`auto-implement-extractor.yml` adds `human involvement required` this way.)
+`auto-implement-extractor.yml` adds `extractor-blocked-needs-human` this way.)
 
 ## Driving a merge cheaply (wall time + tokens)
 

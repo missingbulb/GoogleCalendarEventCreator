@@ -12,7 +12,7 @@ extractor-request      → prepare workflow (auto-implement-extractor.yml)
 extractor-agent-ready  → Claude Code web routine (the agent)
                            writes extract() + the case, pushes, then re-labels:
                            success → −extractor-agent-ready +extractor-agent-done
-                           bail    → comment + −extractor-agent-ready +human involvement required
+                           bail    → comment + −extractor-agent-ready +extractor-blocked-needs-human
 extractor-agent-done   → finalize workflow (finalize-extractor.yml)
                            blast-radius guard + quality floor + re-verify + PR,
                            then clears extractor-agent-done
@@ -111,7 +111,7 @@ doesn't own them.
    (`probe-url.js` exit 3 — a 403 / unreachable host / login or bot wall, where the
    HTML never downloaded), the probe sets a `downloadFailed` output. A re-run can't
    coax HTML out of a refusing server, so that path hands the issue to a human — it
-   **drops `extractor-request` and adds `human involvement required`**, with a
+   **drops `extractor-request` and adds `extractor-blocked-needs-human`**, with a
    comment naming the download failure. (A JS-rendered SPA shell that returns a
    full-but-empty page still slips past — a real 2xx with no markers — and is
    caught later by the agent's judgment.) Runs before `npm ci`.
@@ -158,7 +158,7 @@ must push for the finalize workflow to see its work), then re-labels:
   SPA-shell page, or a listing/index/artist/tour page showing many dates — a soft
   2xx the probe's `detectChallenge` can't see). It leaves the case's `events`
   empty, **posts a one-sentence diagnosis comment itself**, removes
-  `extractor-agent-ready`, and adds `human involvement required`. It does **not**
+  `extractor-agent-ready`, and adds `extractor-blocked-needs-human`. It does **not**
   add `extractor-agent-done`, so finalize never runs.
 
 The two-file surface is a *containment guarantee*, not just an instruction, but the
@@ -188,10 +188,10 @@ doesn't control, so the blast-radius guard is a guarantee rather than a request
    bail judgment. Verdicts: `empty` (case has no events), `degenerate` (a filled
    case whose event has **no location** — the signature of a listing page that
    yielded only a bare title, #283 livenation), or `ok`. A clean bail goes through
-   the agent's own Stage-2 path (`human involvement required`) and never reaches
+   the agent's own Stage-2 path (`extractor-blocked-needs-human`) and never reaches
    here, so `empty`/`degenerate` arriving on `extractor-agent-done` are anomalies:
    Phase 2 **comments, hands the issue to a human** (clears `extractor-agent-done`,
-   adds `human involvement required`), and exits **green** — no PR. Only `ok`
+   adds `extractor-blocked-needs-human`), and exits **green** — no PR. Only `ok`
    proceeds.
 5. **Re-verifies** (`npm ci` + `test:live` + `test:offline` — don't trust the
    agent), pushes any blast-radius revert, **opens the PR** (`Closes #N`),
@@ -258,16 +258,16 @@ green** — only a genuine break is red:
 
 - **HTML couldn't be downloaded → handed to a human** (green, prepare) — the
   probe's fetch failed outright (exit 3). No agent involved; the workflow removes
-  `extractor-request`, adds `human involvement required`, and names the blocker.
+  `extractor-request`, adds `extractor-blocked-needs-human`, and names the blocker.
 - **Page not usable** (green, prepare) — the probe stopped for a *fetched* but
   unusable page (missing URL, or a 2xx bot-challenge). No agent involved; the
   comment names the reason and links the run.
 - **Bailed — not a single event** (green, Stage 2) — the agent judged the cached
   page a bot wall / SPA shell / listing page, commented its diagnosis, and set
-  `human involvement required`. No PR; scaffolding stays on the branch.
+  `extractor-blocked-needs-human`. No PR; scaffolding stays on the branch.
 - **Anomaly handed to a human** (green, finalize) — `extractor-agent-done` arrived
   but the case is `empty` or `degenerate` (quality floor). Phase 2 comments and
-  sets `human involvement required`. No PR.
+  sets `extractor-blocked-needs-human`. No PR.
 - **PR opened** (green, finalize) — the success path: re-verify passes, the PR
   opens, the link is commented, `extractor-agent-done` is cleared.
 - **Unexpected failure** (red) — only a genuine break reaches a `failure()`

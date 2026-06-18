@@ -33,12 +33,12 @@ git checkout -B "$BRANCH" "origin/$BRANCH"
 # Hand the issue to a human: drop the trigger label and flag for a maintainer,
 # with an explanatory comment. Used for both non-PR verdicts below. ($1 = comment)
 hand_off_to_human() {
-  gh label create "human involvement required" --color B60205 \
+  gh label create "extractor-blocked-needs-human" --color B60205 \
     --description "Automation could not proceed; a maintainer needs to take this over by hand" \
     2>/dev/null || true
   gh issue comment "$ISSUE_NUMBER" --body "$1"
   gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-agent-done" \
-    --add-label "human involvement required"
+    --add-label "extractor-blocked-needs-human"
 }
 
 # The scaffold commit = Phase 1's commit on this branch (off main). Match it by
@@ -73,7 +73,7 @@ fi
 
 # Quality floor before a PR (tools/new-extractors-creation/case-quality.js). The
 # agent signals success by filling the case AND adding `extractor-agent-done`; a
-# bail goes the other way (it comments + labels `human involvement required`
+# bail goes the other way (it comments + labels `extractor-blocked-needs-human`
 # itself and never reaches here). So two non-PR verdicts are anomalies we still
 # guard against, both handed to a human (comment + relabel, exit 0 green):
 #   empty      — the agent marked the work done but left the case empty.

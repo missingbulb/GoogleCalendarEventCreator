@@ -171,8 +171,8 @@ If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page:
    actually is, e.g. *"This is a livenation.de artist page listing five tour dates,
    not a single event page — there's no one date+venue a static extractor could
    turn into a calendar event."*
-3. On the issue, **remove the `extractor-agent-ready` label and add `human
-   involvement required`.** Do not add `extractor-agent-done` (that's the
+3. On the issue, **remove the `extractor-agent-ready` label and add
+   `extractor-blocked-needs-human`.** Do not add `extractor-agent-done` (that's the
    success signal). Then stop.
 
 ---
@@ -187,4 +187,4 @@ If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page:
   isn't usable (Step 1), bail via Step 5b instead.
 - **No `url` field** inside the case JSON — it lives in `data/<slug>.url`.
 - **Re-label, don't open the PR.** Success → `extractor-agent-done`; bail →
-  `human involvement required`. The finalize workflow opens the PR.
+  `extractor-blocked-needs-human`. The finalize workflow opens the PR.

@@ -23,7 +23,7 @@
 // downloaded at all (the fetch threw — non-2xx like 403, DNS failure, timeout,
 // login wall). The workflow treats 3 specially: an outright download failure is
 // not something a re-run or the agent can fix, so it hands the issue to a human
-// (drops the trigger label, adds "human involvement required").
+// (drops the trigger label, adds "extractor-blocked-needs-human").
 //
 // Usage: node tools/new-extractors-creation/probe-url.js "<url>"
 "use strict";
