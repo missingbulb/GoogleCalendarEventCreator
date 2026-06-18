@@ -31,15 +31,16 @@ If it found at least one genuinely new lesson, it opens a **PR for review** on a
 from colliding on one branch name). It never merges: a human reviews the PR — the
 docs are guidance everyone reads, so a hallucinated or duplicative "lesson" is
 worse than nothing — and "LGTM" from the repo owner is the merge signal (see
-`docs/claude/github.md`). The PR references the daily-routines parent issue (see
+`docs/claude/github.md`). The PR references this routine's tracking issue (see
 below), so its activity is collected there.
 
-## Tracking under the daily-routines parent issue
+## Tracking under the routine's own log issue
 
-Every daily automated routine tracks the changes it produces under one long-lived
-**parent / tracking issue** (#360), so there's a single feed of what the daily
-routines did. A routine's PR/commit references that issue (`Refs #360`) — and may
-be attached as a sub-issue for an at-a-glance checklist; the parent issue stays
-open as a standing tracker. **This applies to future daily routines too:** when a
-new one is added, list it on the parent issue and have its output reference the
-issue the same way.
+Each daily automated routine has **its own** long-lived tracking issue — a
+running self-improvement log of what that routine did over time (the lessons
+digest's is **#365**). A run that produces a change references its routine's
+issue (`Refs #365` here) — and may be attached as a sub-issue for an at-a-glance
+checklist; the issue stays open as a standing log, never closed. **This applies
+to future daily routines too:** when a new one is added, open its own tracking
+issue and have its output reference that issue the same way (e.g. the fallback
+extractor coverage routine logs to #366).
