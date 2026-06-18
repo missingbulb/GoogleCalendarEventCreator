@@ -8,13 +8,13 @@ What the generic **fallback** extractor (`pipeline/extract-unsupported.js`) reco
 
 ## Score
 
-Headline coverage over all 21 cases in the corpus:
+Headline coverage over all 22 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **57.1%** | 36 / 63 |
-| **All fields** | **35.6%** | 47 / 132 |
-| Event coverage *(informational)* | 65.4% | 17 / 26 |
+| **Critical fields** (title + start + location) | **54.5%** | 36 / 66 |
+| **All fields** | **34.3%** | 47 / 137 |
+| Event coverage *(informational)* | 63% | 17 / 27 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) 
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 57.1% | 57.1% | ✓ |
-| All fields | 35.6% | 35.6% | ✓ |
+| Critical fields | 54.5% | 54.5% | ✓ |
+| All fields | 34.3% | 34.3% | ✓ |
 
-Gated over **21** shared case(s).
+Gated over **22** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
@@ -33,19 +33,20 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 21 | 16 | 1 | 4 | 76.2% |
-| `start` **(critical)** | 21 | 10 | 7 | 4 | 47.6% |
+| `title` **(critical)** | 22 | 16 | 1 | 5 | 72.7% |
+| `start` **(critical)** | 22 | 10 | 7 | 5 | 45.5% |
 | `end` | 16 | 9 | 0 | 7 | 56.3% |
-| `location` **(critical)** | 21 | 10 | 2 | 9 | 47.6% |
-| `ctz` | 21 | 0 | 0 | 21 | 0% |
+| `location` **(critical)** | 22 | 10 | 2 | 10 | 45.5% |
+| `ctz` | 22 | 0 | 0 | 22 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 21 | 2 | 10 | 9 | 9.5% |
+| `description` | 22 | 2 | 10 | 10 | 9.1% |
 
 ## By host
 
 | Host | Cases | Events found (fb/custom) | Critical % | All % |
 | --- | --: | --: | --: | --: |
 | `bandsintown.com` | 1 | 1/1 | 66.7% | 66.7% |
+| `barby.co.il` | 1 | 0/1 | 0% | 0% |
 | `cinema.co.il` | 4 | 0/9 | 0% | 0% |
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
 | `eventbrite.com` | 2 | 2/2 | 100% | 57.1% |
@@ -64,6 +65,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | Case | Events fb/custom | title | start | end | loc | ctz | len | desc |
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | `bandsintown-berry-sakharof` | 1/1 | ~ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
+| `barby` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-kristen-schaal` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-mr-chonkers` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
