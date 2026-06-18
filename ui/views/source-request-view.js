@@ -38,8 +38,12 @@ const POLICY_DOC_PATH = "docs/extraction-policy.md";
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query
-// param matching its id.
-const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "location", "description"];
+// param matching its id. GitHub prefills only TEXT fields (`input`/`textarea`)
+// this way — NOT `dropdown` or `checkboxes` — so "event-count" is a plain text
+// input we seed with the number of events the popup detected.
+const SOURCE_REQUEST_FIELDS = [
+  "url", "name", "start", "end", "timezone", "location", "description", "event-count",
+];
 
 // Generic registry labels that, sitting directly under a two-letter
 // country-code TLD, form a compound public suffix: `co.uk`, `com.au`, `gov.il`,
@@ -121,8 +125,12 @@ function headingLink(text, url, tab) {
 // State 5: a complete fallback event on an unlisted host. A "Suggest Correction"
 // link that opens the prefilled GitHub "Event source request" issue, seeded with
 // the scraped event — a logged-in user just submits the already-filled form.
-export function makeSourceRequestLink(tab, event) {
-  return headingLink("Suggest Correction", buildSourceRequestUrl(sourceRequestPrefill(tab, event)), tab);
+export function makeSourceRequestLink(tab, event, eventCount = 1) {
+  return headingLink(
+    "Suggest Correction",
+    buildSourceRequestUrl(sourceRequestPrefill(tab, event, eventCount)),
+    tab
+  );
 }
 
 // State 3: nothing to show on a non-denylisted host. A quiet "Disagree?" link to
@@ -136,9 +144,14 @@ export function makePolicyLink(tab) {
 // often just the URL and title (no event was parsed), so the user completes
 // the rest in the form itself.
 //
+// `eventCount` is how many complete events the popup found on the page (the
+// fallback's presentable events); it seeds the form's "event-count" field, so a
+// count >1 tells the agent the page is a multi-event listing to extract whole,
+// not to bail on. The hint fields below still describe just the first event.
+//
 // Exported for the unit tests (the make* link builders that call it touch
 // chrome.tabs/document, so the tests exercise the prefill directly).
-export function sourceRequestPrefill(tab, event) {
+export function sourceRequestPrefill(tab, event, eventCount = 1) {
   event = event || {};
   // The event carries its timing in times[] (the multi-instance model); seed the
   // form from the first instance. A flat { start, end } event is tolerated too.
@@ -154,6 +167,8 @@ export function sourceRequestPrefill(tab, event) {
     timezone: event.ctz || currentTimezone(),
     location: event.location || "",
     description: event.description || "",
+    // At least 1 — the link only shows once a complete event was found.
+    "event-count": String(Math.max(1, eventCount || 1)),
   };
 }
 

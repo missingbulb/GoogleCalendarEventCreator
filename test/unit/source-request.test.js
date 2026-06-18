@@ -88,14 +88,52 @@ test("omits empty fields so the user fills them in on the form", () => {
   assert.equal(new URL(buildSourceRequestUrl(PREFILL)).searchParams.has("end"), false);
 });
 
-test("the prefilled field ids match the template's field ids", () => {
+// Parse the template's fields into { type, id } records (type precedes id in
+// each "- type:" block).
+function templateFields() {
   const template = fs.readFileSync(
     path.join(__dirname, "..", "..", ".github", "ISSUE_TEMPLATE", "extractor-request.yml"),
     "utf8"
   );
-  const templateIds = [...template.matchAll(/^\s*id:\s*(\S+)/gm)].map((m) => m[1]);
-  const PARAM_KEYS = ["url", "name", "start", "end", "timezone", "location", "description"];
-  assert.deepEqual(templateIds, PARAM_KEYS);
+  return template
+    .split(/^\s*-\s*type:\s*/m)
+    .slice(1)
+    .map((block) => {
+      const type = block.split("\n")[0].trim();
+      const id = (block.match(/^\s*id:\s*(\S+)/m) || [])[1];
+      return { type, id, block };
+    });
+}
+
+test("the prefilled field ids match the template's prefillable field ids", () => {
+  // input/textarea/dropdown fields accept a URL-prefilled value (a checkboxes
+  // field would not); each such id must be a prefill key and vice versa.
+  const prefillableIds = templateFields()
+    .filter((f) => ["input", "textarea", "dropdown"].includes(f.type))
+    .map((f) => f.id)
+    .sort();
+  const PARAM_KEYS = [
+    "url", "name", "start", "end", "timezone", "location", "description", "event-count",
+  ].sort();
+  assert.deepEqual(prefillableIds, PARAM_KEYS);
+});
+
+test("the event-count field is a prefillable text input defaulting to 1", () => {
+  const field = templateFields().find((f) => f.id === "event-count");
+  // GitHub only prefills text fields, so this must be an `input` (a dropdown's
+  // query-param prefill is silently ignored).
+  assert.equal(field.type, "input");
+  const value = (field.block.match(/^\s*value:\s*"([^"]*)"/m) || [])[1];
+  assert.equal(value, "1");
+});
+
+test("prefills the detected event count, defaulting to 1", () => {
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 1)["event-count"], "1");
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 3)["event-count"], "3");
+  // Never below 1 — the link only appears once a complete event was found.
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 0)["event-count"], "1");
+  // Defaults to 1 when no count is given.
+  assert.equal(sourceRequestPrefill(PREFILL, {})["event-count"], "1");
 });
 
 // The prefill seeds the timezone from the fallback event's ctz, but falls back

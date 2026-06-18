@@ -101,7 +101,9 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     if (request) {
       const view = await import("./views/source-request-view.js");
       headingEl.classList.add("with-link");
-      headingEl.appendChild(view.makeSourceRequestLink(tab, request));
+      // allEvents here is the fallback's presentable events; its length tells the
+      // form whether the page carries multiple events (pre-selects the dropdown).
+      headingEl.appendChild(view.makeSourceRequestLink(tab, request, allEvents.length));
     }
   } else {
     headingEl.textContent = "No events found on this page";

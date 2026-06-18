@@ -21,6 +21,19 @@ body:
     validations:
       required: true
   - type: input
+    id: event-count
+    attributes:
+      label: Number of events on the page
+      description: >-
+        How many distinct events does this page show? Leave it at 1 for a single
+        event page; enter a higher number for a listing, calendar, or a tour with
+        multiple dates — the agent then extracts every event it finds rather than
+        treating the page as unusable. (The extension fills in the count it
+        detected when you open the form from its popup. It's a plain text field
+        because GitHub only prefills text fields from the popup's link, not
+        dropdowns or checkboxes.)
+      value: "1"
+  - type: input
     id: name
     attributes:
       label: Name
