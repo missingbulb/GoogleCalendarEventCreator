@@ -1,0 +1,87 @@
+name: Finalize extractor (Phase 2)
+
+# Triggered when the 'extractor-agent-done' label is added to an issue — the
+# signal the Claude Code on the web routine raises after it has written extract()
+# + the integration case and pushed them to the scaffolded branch. This is the
+# deterministic wrap-up that used to be a step in auto-implement-extractor.yml,
+# split out because the agent now runs in its own environment (web), not inside
+# Actions. It re-derives the branch from the issue, enforces the agent's two-file
+# blast radius against the scaffold commit, runs the quality floor, re-verifies,
+# opens the PR, and dispatches test.yml. See docs/claude/auto-extractor.md.
+#
+# Why a label (not the agent calling the script directly): Phase 2 is the EXTERNAL
+# enforcement of the agent's containment — the blast-radius guard reverts whatever
+# the agent committed outside its two files. Running it here, in a runner the agent
+# doesn't control, keeps that a guarantee rather than a request (see
+# docs/architectureGuidelines.md). The label fires this workflow because the agent
+# adds it with the Claude GitHub App's token, not the Actions GITHUB_TOKEN whose
+# events are suppressed (docs/claude/github.md).
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write       # push the blast-radius revert commit
+  pull-requests: write  # open the PR
+  issues: write         # comment + clear the label
+  actions: write        # dispatch test.yml on the branch
+
+jobs:
+  finalize:
+    if: github.event.label.name == 'extractor-agent-done'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      # Re-derive the deterministic slug / caseName / host from the issue's event
+      # URL — the same names Phase 1 used — so this workflow knows which branch and
+      # files to finalize without the agent passing them back.
+      - name: Derive names from the issue
+        id: names
+        env:
+          ISSUE_BODY:  ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: node tools/new-extractors-creation/derive-names.js
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Phase 2 — deterministic wrap-up (not the agent): check out the agent's
+      # branch, enforce the two-file blast radius against the scaffold commit, run
+      # the quality floor, re-verify, commit any revert, open the PR, dispatch CI,
+      # and clear the trigger label. npm ci runs inside the script before the
+      # re-verify (the quality floor + git work above it need no deps).
+      - name: Finalize — verify, commit, open PR
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          BRANCH:       claude/extractor/${{ steps.names.outputs.slug }}
+          SLUG:         ${{ steps.names.outputs.slug }}
+          CASE_NAME:    ${{ steps.names.outputs.caseName }}
+          HOST:         ${{ steps.names.outputs.host }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO:         ${{ github.repository }}
+        run: bash tools/new-extractors-creation/phase2-finalize.sh
+
+      # A genuine break only (an expected non-PR verdict — empty / degenerate — is
+      # handled green inside the script). Reaching here means npm ci, the
+      # re-verify, or the git/PR work actually failed.
+      - name: Comment on failure
+        if: failure()
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The finalize-extractor workflow failed unexpectedly. [View run]($RUN_URL). The agent's work is on its branch; manual finalization may be needed — see docs/claude/adding-a-source.md."

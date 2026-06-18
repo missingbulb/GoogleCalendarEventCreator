@@ -1,0 +1,10 @@
+{
+  "what": "extractor-agent-ready label — the hand-off trigger for the Claude Code web routine. The prepare workflow's hand-off script ADDS it (handoff-to-agent.sh) and the agent REMOVES it (agent-prompt-extractor.md); the web-routine trigger that consumes it is configured outside this repo. Counts include comments.",
+  "value": "extractor-agent-ready",
+  "counts": {
+    ".github/workflows/auto-implement-extractor.yml": 3,
+    "tools/new-extractors-creation/handoff-to-agent.sh": 4,
+    "tools/new-extractors-creation/phase2-finalize.sh": 1,
+    "tools/new-extractors-creation/agent-prompt-extractor.md": 4
+  }
+}

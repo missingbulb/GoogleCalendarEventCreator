@@ -1,26 +1,26 @@
-name: Auto-implement extractor
+name: Auto-implement extractor (prepare)
 
 # Triggered when the 'extractor-request' label is added to an issue.
 # Triages the request, probes the event URL, and — only when the page is
 # actually fetchable — prepares a branch with the page cached AND the extractor
-# scaffolded (matches(), supportedDomains, load lists), runs a Claude agent to
-# write just extract() + the test case, then commits and opens the PR itself.
-# The agent owns only the judgment step; everything deterministic is hard-coded
-# here. See docs/claude/auto-extractor.md.
+# scaffolded (matches(), supportedDomains, load lists). It does NOT run the agent
+# any more: the implementation step is a Claude Code on the web routine wired to
+# the `extractor-agent-ready` label, so the last thing this workflow does is swap
+# `extractor-request` → `extractor-agent-ready` (the hand-off). When the agent
+# finishes it adds `extractor-agent-done`, which fires finalize-extractor.yml
+# (Phase 2: blast-radius guard, re-verify, PR). Everything deterministic stays in
+# the workflows; the agent owns only the judgment step. See
+# docs/claude/auto-extractor.md.
 #
-# Required repository secrets:
-#   ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR — Claude API key for the agent
-#
-# The GITHUB_TOKEN is standard and always available.
+# The GITHUB_TOKEN is standard and always available; no other secret is needed
+# (the agent runs in Claude Code on the web, not here).
 on:
   issues:
     types: [labeled]
 
 permissions:
   contents: write       # create / push the feature branch
-  pull-requests: write  # open the PR
-  issues: write         # post progress / failure comment
-  actions: write        # dispatch test.yml on the branch
+  issues: write         # post progress / failure comment, swap labels
 
 jobs:
   implement:
@@ -146,7 +146,7 @@ jobs:
       # The probe couldn't download the HTML at all (a 403 / unreachable / bot
       # wall — exit 3). Unlike a soft-200 challenge this can't be retried into a
       # usable page, so hand the issue to a human: drop the trigger label (so
-      # the automation won't re-fire) and add a "human involvement required"
+      # the automation won't re-fire) and add a "extractor-blocked-needs-human"
       # label. The comment makes the blocker explicit —
       # the HTML couldn't be downloaded — so the reason is unmistakable. Still an
       # EXPECTED stop, so the run finishes GREEN.
@@ -160,16 +160,12 @@ jobs:
         run: |
           gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
           # Make sure the label exists before adding it (idempotent — ignore "already exists").
-          gh label create "human involvement required" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
-          gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-request" --add-label "human involvement required"
+          gh label create "extractor-blocked-needs-human" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
+          gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-request" --add-label "extractor-blocked-needs-human"
 
       - name: Install npm dependencies
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         run: npm ci
-
-      - name: Install Claude Code CLI
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        run: npm install -g @anthropic-ai/claude-code
 
       - name: Configure git
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
@@ -218,10 +214,10 @@ jobs:
       # branch off main, record the page inline (same fetcher the probe used),
       # scaffold the source with its matches() filled, register the host in
       # supportedDomains, and regenerate the load lists. A baseline test:offline
-      # must be green before we spend the agent. If the agent later fails, the
-      # whole branch is discarded, so these pre-edits cost nothing. (A push made
-      # with GITHUB_TOKEN doesn't fire refresh-cache.yml's push trigger, so the
-      # page is recorded exactly once.)
+      # must be green before handing off. The commit message is `chore: scaffold
+      # <slug> extractor …` — the finalize workflow finds the scaffold commit by
+      # it. (A push made with GITHUB_TOKEN doesn't fire refresh-cache.yml's push
+      # trigger, so the page is recorded exactly once.)
       - name: Prepare branch — record page + scaffold extractor
         id: prepare
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
@@ -234,58 +230,23 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: bash tools/new-extractors-creation/phase1-prepare.sh
 
-      # Fetch the issue via API (avoids shell-escaping issues with free-form
-      # bodies) and interpolate it, plus the branch/slug/caseName/host/url, into
-      # the static prompt template.
-      - name: Build agent prompt
+      # Hand off to the agent: the branch is scaffolded + pushed, so swap the
+      # label — remove `extractor-request`, add `extractor-agent-ready`. Adding
+      # that label is what triggers the Claude Code on the web routine that writes
+      # extract() + the case (it derives the branch/file names from the issue URL
+      # itself). The agent then adds `extractor-agent-done`, firing
+      # finalize-extractor.yml. See tools/new-extractors-creation/handoff-to-agent.sh.
+      - name: Hand off to the implementation agent
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          REPO:         ${{ github.repository }}
-          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
-          SLUG:         ${{ steps.triage.outputs.slug }}
-          CASE_NAME:    ${{ steps.triage.outputs.caseName }}
-          HOST:         ${{ steps.triage.outputs.host }}
-          EVENT_URL:    ${{ steps.triage.outputs.url }}
-        run: python3 tools/new-extractors-creation/build-prompt.py
-
-      - name: Run Claude agent
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        timeout-minutes: 75
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR }}
-          GH_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
-          REPO:              ${{ github.repository }}
-        run: |
-          claude \
-            --dangerously-skip-permissions \
-            --model claude-sonnet-4-6 \
-            -p "$(cat /tmp/agent-prompt.txt)"
-
-      # Phase 2 — deterministic wrap-up, done in the workflow (not the agent):
-      # enforce the two-file blast radius, then read the agent's done-signal — a
-      # FILLED case. A still-empty case means it judged the page unextractable and
-      # commented, so no PR. Otherwise re-verify (don't trust the agent), commit
-      # its extract() + case, open the PR, and dispatch CI so checks attach to it.
-      - name: Finalize — verify, commit, open PR
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        env:
-          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
-          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
-          SLUG:         ${{ steps.triage.outputs.slug }}
-          CASE_NAME:    ${{ steps.triage.outputs.caseName }}
-          HOST:         ${{ steps.triage.outputs.host }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          REPO:         ${{ github.repository }}
-        run: bash tools/new-extractors-creation/phase2-finalize.sh
+        run: bash tools/new-extractors-creation/handoff-to-agent.sh
 
       # One comment for a GENUINE failure only. An expected stop (unfetchable /
-      # challenge page, or the agent judging the page unextractable) no longer
-      # fails the job — those are handled green by their own comment steps above /
-      # in phase2-finalize.sh. So reaching here means something actually broke
-      # (npm ci, scaffolding, the agent crashed, re-verify went red, …).
+      # challenge page) no longer fails the job — those are handled green by their
+      # own comment steps above. So reaching here means something actually broke
+      # (npm ci, scaffolding, the page recording, …).
       - name: Comment on failure
         if: failure()
         env:
