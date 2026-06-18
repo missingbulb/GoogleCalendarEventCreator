@@ -102,3 +102,21 @@ Consecutive days aren't merged: Jun 5–7 + scattered Jun 14/25 are one month ca
 Month card common-time header: scattered dates that share one start time show it above the icons; differing-time and all-day month cards show only the location
 
 ![15-month-common-time-header](cases/15-month-common-time-header.png)
+
+## 16-mixed-grouping-overflow-top
+
+Many instances of mixed grouping styles (single, same-day, month, all-day) overflowing at the top of scroll: bottom fade only
+
+![16-mixed-grouping-overflow-top](cases/16-mixed-grouping-overflow-top.png)
+
+## 17-mixed-grouping-scrolled-bottom
+
+Many mixed-grouping instances scrolled to the bottom: count cue sums instances across single, same-day, and month cards; top fade only
+
+![17-mixed-grouping-scrolled-bottom](cases/17-mixed-grouping-scrolled-bottom.png)
+
+## 18-many-instances-one-card
+
+Many instances in ONE card, each at a different hour: one month card whose chips all become date+time chips (no common-time header)
+
+![18-many-instances-one-card](cases/18-many-instances-one-card.png)
