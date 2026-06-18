@@ -70,20 +70,15 @@ test("the background service worker loads without error", () => {
   assert.doesNotThrow(bootServiceWorker, "the worker's top-level script must parse and run");
 });
 
-test("the service worker registers its install/startup listeners", () => {
-  const { registered } = bootServiceWorker();
-  // The declarativeContent rules are (re)installed on install and on startup;
-  // if neither registered, the toolbar icon would never reflect page support.
-  for (const name of ["runtime.onInstalled", "runtime.onStartup"]) {
-    assert.ok(registered.includes(name), `worker must register ${name}`);
-  }
+test("the worker registers icon rules at startup, with no tab access", async () => {
+  const { sandbox, registered, addedRules } = bootServiceWorker();
+  // Registration kicks off at top level (and is refreshed on install); awaiting
+  // the readiness promise lets the async fetch/decode/addRules path settle.
+  const count = await sandbox.iconRulesReady;
+  assert.ok(count >= 1, "iconRulesReady must resolve to the number of registered rules");
+  assert.ok(addedRules.length, "the worker must add declarativeContent rules");
+  assert.ok(registered.includes("runtime.onInstalled"), "worker must register runtime.onInstalled");
   assert.ok(!registered.includes("tabs.onActivated"), "worker must not read tabs (no 'tabs' permission)");
-});
-
-test("installing registers declarativeContent icon rules (no tab URL read)", async () => {
-  const { handlers, addedRules } = bootServiceWorker();
-  await handlers["runtime.onInstalled"]();
-  assert.ok(addedRules.length, "the install handler must add declarativeContent rules");
 });
 
 test("every injected pipeline file parses as a script", () => {

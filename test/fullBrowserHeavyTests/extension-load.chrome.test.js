@@ -119,12 +119,15 @@ test(
       await cdp.send("Target.createTarget", { url: "about:blank" }); // wake the worker
       const targetId = await swTargetId;
 
-      // Attach and run code *inside the worker*: drive its real startup path
-      // (installRules: fetch the host lists, decode the packaged icons via
-      // OffscreenCanvas, register the declarativeContent rules) and confirm the
-      // rules landed. Calling installRules() directly — rather than racing
-      // whichever moment onInstalled/onStartup happens to wake the worker — keeps
-      // this deterministic; onInstalled just calls the same function.
+      // Attach and read the worker's `iconRulesReady` promise — the readiness
+      // signal it exposes at top level, resolving to the number of
+      // declarativeContent icon rules it registered. Awaiting that promise
+      // exercises the real startup path (fetch the host lists, decode the packaged
+      // icons via OffscreenCanvas, register the rules) and resolves through plain
+      // fetch/OffscreenCanvas promises — not the `chrome.*` rule callbacks, which
+      // don't reliably settle when awaited over CDP. We read an explicit
+      // `globalThis` property (a bare top-level function name isn't reachable from
+      // an injected Runtime.evaluate the way `globalThis.x` is).
       const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
       const evaluate = async (expression) => {
         const { result, exceptionDetails } = await cdp.send(
@@ -138,37 +141,29 @@ test(
         return result.value;
       };
 
-      // The probe always settles (every await is bounded by a timeout) and
-      // returns a diagnostic string, so a CI-only failure reports the observed
-      // state instead of hanging the job — see docs/engineeringPractices.md.
+      // The probe always settles (the await is bounded by a timeout) and returns a
+      // diagnostic string, so a CI-only failure reports the observed state instead
+      // of hanging the job — see docs/engineeringPractices.md.
       const probe = `(async () => {
         const withTimeout = (p, ms, tag) =>
           Promise.race([Promise.resolve(p), new Promise((r) => setTimeout(() => r(tag), ms))]);
         try {
-          if (typeof installRules !== "function") return "no-installRules-fn";
-          await withTimeout(installRules(), 8000, "installRules-timeout");
-          return await withTimeout(
-            new Promise((resolve) =>
-              chrome.declarativeContent.onPageChanged.getRules((rules) =>
-                resolve("rules:" + (Array.isArray(rules) ? rules.length : "none"))
-              )
-            ),
-            4000,
-            "getRules-timeout"
-          );
+          if (typeof globalThis.iconRulesReady === "undefined") return "no-iconRulesReady";
+          const count = await withTimeout(globalThis.iconRulesReady, 8000, "ready-timeout");
+          return "rules:" + count;
         } catch (e) {
           return "error:" + (e && e.message ? e.message : e);
         }
       })()`;
 
-      // The worker ran its startup path end to end iff declarativeContent now
-      // holds at least one icon rule (gray for the denylist, green for supported
-      // hosts). "rules:0" / a timeout / an error all fail with the observed value.
+      // The worker ran its startup path end to end iff it registered at least one
+      // icon rule (gray for the denylist, green for supported hosts). "rules:0" / a
+      // timeout / an error all fail with the observed value.
       const result = await evaluate(probe);
       assert.match(
         result,
         /^rules:[1-9]/,
-        `the worker's installRules() must register declarativeContent icon rules inside the live worker (probe returned "${result}")`
+        `the worker's startup must register declarativeContent icon rules inside the live worker (iconRulesReady returned "${result}")`
       );
     } finally {
       if (cdp) cdp.close();

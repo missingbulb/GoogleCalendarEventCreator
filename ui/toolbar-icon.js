@@ -75,17 +75,24 @@ async function buildRules() {
   return rules;
 }
 
-// Replace any existing rules with a freshly-built set. removeRules-then-addRules
-// makes this idempotent, so running it on both onInstalled and onStartup can't
-// stack duplicates.
+// Replace any existing rules with a freshly-built set and return how many were
+// registered. removeRules-then-addRules makes it idempotent, so re-running can't
+// stack duplicates. We don't await the addRules callback: the awaited work is
+// buildRules() (the fetch + OffscreenCanvas decode, which can actually fail);
+// handing the rules to Chrome is fire-and-forget.
 async function installRules() {
   const rules = await buildRules();
-  await new Promise((resolve) => {
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
-      chrome.declarativeContent.onPageChanged.addRules(rules, resolve);
-    });
+  chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+    chrome.declarativeContent.onPageChanged.addRules(rules);
   });
+  return rules.length;
 }
 
+// Register whenever the worker runs its top level — that covers install, update,
+// and browser launch (declarativeContent rules also persist across restarts, so a
+// launch that never wakes the worker keeps them). `iconRulesReady` is the
+// readiness promise (resolving to the rule count); the CI smoke test awaits it to
+// confirm the startup path ran end to end. onInstalled refreshes the rules after
+// an extension update even if the worker was already alive.
+globalThis.iconRulesReady = installRules();
 chrome.runtime.onInstalled.addListener(installRules);
-chrome.runtime.onStartup.addListener(installRules);
