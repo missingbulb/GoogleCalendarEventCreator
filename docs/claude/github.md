@@ -1,7 +1,7 @@
 # GitHub procedures
 
-How we drive GitHub: the issue → branch → PR → merge lifecycle, the merge
-signal, the branch/commit-history rules for PR work, the CI-interaction
+How we drive GitHub: the issue → branch → PR → merge lifecycle, the
+merge-to-main command, the branch/commit-history rules for PR work, the CI-interaction
 practices that keep a merge cheap in wall time and tokens, and how we keep
 merge-conflict churn cheap across parallel branches. The two owner-triggered
 defined instructions that also land through this PR flow — "bump version" and
@@ -18,24 +18,27 @@ For every new task in this repo:
 3. Update the issue's status (comments / close) as work progresses and when it's
    done.
 
-## The merge signal — "LGTM"
+## Merge to main command
 
-When the repo owner says "LGTM" on a change, treat it as approval to merge that
-branch's pull request into `main`. Merge via **squash**, appending the PR number
-to the title as `(#N)` — matching `main`'s linear, one-commit-per-PR history. CI
-must be green first; the test-flakiness gate in
+When the repo owner asks to merge a change to `main`, merge that branch's pull
+request via **squash**, appending the PR number to the title as `(#N)` — matching
+`main`'s linear, one-commit-per-PR history. CI must be green first; the
+test-flakiness gate in
 [../engineeringPractices.md](../engineeringPractices.md) (twice-green) applies
 only when the change adds or touches an e2e/heavy-browser test. After merging,
-also run **"learned lessons"** (see [workflow.md](workflow.md)) on the
-conversation before closing out.
+also run the **lessons** pass (see [workflow.md](workflow.md)) on the
+conversation before closing out. The owner's phrase for this command is
+**"LGTM"** — when the owner says "LGTM" on a change, treat it as that
+merge-to-main request (this trigger is an owner preference; see
+[../ownerPreferences.md](../ownerPreferences.md)).
 
-"LGTM" (like any approval) applies **only backward**, to the work already in
-front of the owner when it's given — never to anything requested or done *after*
-it. A later follow-up, even a fix to the just-merged change, needs its own
-explicit "LGTM" before it may be merged; don't carry one approval forward, and
-don't treat a chosen answer to an `AskUserQuestion` as merge authorization
-because an option's wording happened to mention merging. When in doubt, open the
-PR, get CI green, and wait for a fresh "LGTM".
+A merge approval (like any approval) applies **only backward**, to the work
+already in front of the owner when it's given — never to anything requested or
+done *after* it. A later follow-up, even a fix to the just-merged change, needs
+its own explicit approval before it may be merged; don't carry one approval
+forward, and don't treat a chosen answer to an `AskUserQuestion` as merge
+authorization because an option's wording happened to mention merging. When in
+doubt, open the PR, get CI green, and wait for a fresh approval.
 
 ## Branch and commit history
 
@@ -149,7 +152,7 @@ Conflict size scales with how long a branch lives and how far it drifts from
 `git merge origin/main` (or rebase) and `npm run regen` first, so the branch
 carries the latest sources and freshly-generated artifacts instead of
 discovering the gap at merge time. The one-commit-per-PR squash history (the
-merge signal above) keeps each branch a single reviewable unit, so
+merge-to-main command above) keeps each branch a single reviewable unit, so
 shorter-lived branches are the norm.
 
 ### Merging across a file relocation

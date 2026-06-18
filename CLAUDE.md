@@ -35,8 +35,8 @@ software engineering) live in `docs/agenticBestPractices.md` (imported below).
 @docs/agenticBestPractices.md
 
 The repo owner's personal interaction preferences (tone, end-of-turn
-conventions — not project conventions) live in `docs/ownerPreferences.md`
-(imported below). This is a temporary home until they move to the owner's own
-persistent environment.
+conventions, and the trigger phrases for owner-triggered commands — not project
+conventions) live in `docs/ownerPreferences.md` (imported below). This is a
+temporary home until they move to the owner's own persistent environment.
 
 @docs/ownerPreferences.md

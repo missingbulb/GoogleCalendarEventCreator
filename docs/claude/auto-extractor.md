@@ -255,7 +255,7 @@ The agent never merges the PR. A human must review:
 - The extracted values in `test/extractors/custom/<case-name>.json`
 - That `matches(host)` is correct for the target domain
 
-"LGTM" from the repo owner is the merge signal (see `docs/claude/github.md`).
+"LGTM" from the repo owner triggers the merge-to-main command (see `docs/claude/github.md`).
 CI must go green before merging; the extractor branch adds a deterministic
 offline integration case (not an e2e/heavy-browser test), so one green run
 suffices — the twice-green flakiness gate applies only to e2e/heavy-browser
