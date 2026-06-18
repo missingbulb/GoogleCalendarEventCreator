@@ -23,6 +23,4 @@ worked here. Each is one tight rule; the worked example lives in its own doc.
   carries the real spec. Inlined instructions drift silently — they can't be
   reviewed in a PR, go stale against renamed paths the repo's own tests would
   have caught, and miss conventions the repo later adds — whereas a doc the
-  repo's checks and lessons pass touches stays current for free. (The
-  fallback-coverage routine's UI prompt had three stale `test/integration/…`
-  paths the in-repo `docs/claude/auto-fallback-coverage.md` already had right.)
+  repo's checks and lessons pass touches stays current for free.
