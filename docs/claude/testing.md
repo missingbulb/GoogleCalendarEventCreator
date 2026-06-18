@@ -31,6 +31,16 @@ doc, when the mechanics change.
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically. (This is the
   same comparison the fallback-coverage gate automates — see below.)
+- **A UI snapshot verifies pixels, not logic — so before pruning a snapshot case,
+  audit the distinct *visual* it uniquely shows.** The popup's behavior is already
+  covered by unit tests (`popup-content` / `events-view` / `popup-truncation`), so
+  each `test/ui/cases/` image earns its keep by a visual treatment no other case
+  shows — a time-range inside a chip, a wrapping chip row, one event splitting into
+  month + same-day + single cards, the count cue counting instances not cards.
+  Slimming the set by deduping *logic* silently drops those visuals while every
+  unit test stays green. Reorganize by feature (all of a feature's variations in
+  one image, named scenario→expectation), but treat each removal as a coverage
+  question, not a dedupe.
 
 ## Adding a cached integration case
 
