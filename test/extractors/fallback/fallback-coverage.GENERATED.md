@@ -8,13 +8,13 @@ What the generic **fallback** extractor (`pipeline/extract-unsupported.js`) reco
 
 ## Score
 
-Headline coverage over all 20 cases in the corpus:
+Headline coverage over all 21 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **58.3%** | 35 / 60 |
-| **All fields** | **36.5%** | 46 / 126 |
-| Event coverage *(informational)* | 64% | 16 / 25 |
+| **Critical fields** (title + start + location) | **57.1%** | 36 / 63 |
+| **All fields** | **35.6%** | 47 / 132 |
+| Event coverage *(informational)* | 65.4% | 17 / 26 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) 
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 58.3% | 58.3% | ✓ |
-| All fields | 36.5% | 36.5% | ✓ |
+| Critical fields | 57.1% | 57.1% | ✓ |
+| All fields | 35.6% | 35.6% | ✓ |
 
-Gated over **20** shared case(s).
+Gated over **21** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 20 | 15 | 1 | 4 | 75% |
-| `start` **(critical)** | 20 | 10 | 6 | 4 | 50% |
-| `end` | 15 | 9 | 0 | 6 | 60% |
-| `location` **(critical)** | 20 | 10 | 1 | 9 | 50% |
-| `ctz` | 20 | 0 | 0 | 20 | 0% |
+| `title` **(critical)** | 21 | 16 | 1 | 4 | 76.2% |
+| `start` **(critical)** | 21 | 10 | 7 | 4 | 47.6% |
+| `end` | 16 | 9 | 0 | 7 | 56.3% |
+| `location` **(critical)** | 21 | 10 | 2 | 9 | 47.6% |
+| `ctz` | 21 | 0 | 0 | 21 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 20 | 2 | 9 | 9 | 10% |
+| `description` | 21 | 2 | 10 | 9 | 9.5% |
 
 ## By host
 
@@ -55,6 +55,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
 | `ticketmaster.co.il` | 1 | 1/1 | 100% | 60% |
+| `visit.tel-aviv.gov.il` | 1 | 1/1 | 33.3% | 16.7% |
 
 ## By exemplar
 
@@ -82,3 +83,4 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `telavivcinematheque-taiwan-week` | 0/6 | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `thinkdrink-quantum-lecture` | 1/1 | ✓ | ~ | — | ✓ | ✗ | — | ~ |
 | `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ~ |
+| `visit-tel-aviv` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | — | ~ |
