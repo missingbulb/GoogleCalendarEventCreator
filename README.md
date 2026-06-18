@@ -1,5 +1,7 @@
 # Google Calendar Event Creator
 
+**[Install from the Chrome Web Store →](https://chromewebstore.google.com/detail/google-calendar-event-cre/illegojjeehdmfpgnhnehjjhlghapacc)**
+
 A Chrome extension that adds a toolbar button which, when clicked, reads event
 details from the current web page and shows a small popup listing what was
 found — one button per event when the page describes several. Clicking a
