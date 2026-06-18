@@ -34,13 +34,16 @@ worse than nothing — and "LGTM" from the repo owner is the merge signal (see
 `docs/claude/github.md`). The PR references this routine's tracking issue (see
 below), so its activity is collected there.
 
-## Tracking under the routine's own log issue
+## Tracking: log each run under the routine's own issue
 
-Each daily automated routine has **its own** long-lived tracking issue — a
-running self-improvement log of what that routine did over time (the lessons
-digest's is **#365**). A run that produces a change references its routine's
-issue (`Refs #365` here) — and may be attached as a sub-issue for an at-a-glance
-checklist; the issue stays open as a standing log, never closed. **This applies
+When a run produces a PR, **find this routine's standing tracking issue** — the
+open *Daily routine log: "lessons" digest* issue (currently **#365**) — and
+**create a sub-issue on it** for the run, so the issue accumulates an
+at-a-glance checklist of every run over time; also reference it from the PR
+(`Refs #365`). If that tracking issue doesn't exist, open it first (long-lived,
+stays open, never closed). Each daily automated routine keeps its **own** such
+issue — a running self-improvement log of what it did over time. **This applies
 to future daily routines too:** when a new one is added, open its own tracking
-issue and have its output reference that issue the same way (e.g. the fallback
-extractor coverage routine logs to #366).
+issue and have its output logged the same way (e.g. the fallback extractor
+coverage routine logs to #366 — see
+[auto-fallback-coverage.md](auto-fallback-coverage.md)).
