@@ -92,11 +92,9 @@ test(
       cdp = connectCDP(await endpoint);
       await cdp.ready;
 
-      // Find the extension's MV3 background as a service_worker target. It only
-      // appears once the worker has registered. Opening a page (createTarget
-      // below) wakes the lazy worker; its install handler then registers the
-      // declarativeContent icon rules. Collect every target for a useful failure
-      // message.
+      // Find the extension's MV3 background as a service_worker target. The target
+      // exists once the worker is registered (even while stopped); attaching to it
+      // below starts it. Collect every target for a useful failure message.
       const seen = [];
       let onWorker;
       const swTargetId = new Promise((resolve, reject) => {
@@ -116,7 +114,7 @@ test(
       });
       cdp.on(onWorker);
       await cdp.send("Target.setDiscoverTargets", { discover: true });
-      await cdp.send("Target.createTarget", { url: "about:blank" }); // wake the worker
+      await cdp.send("Target.createTarget", { url: "about:blank" }); // a page, so the target set is non-empty
       const targetId = await swTargetId;
 
       // Attach and read the worker's `iconRulesReady` promise — the readiness
@@ -156,10 +154,25 @@ test(
         }
       })()`;
 
+      // Poll: a dormant MV3 worker has no globals until it (re)runs its top level.
+      // Attaching/evaluating starts it, but the first read can race that startup —
+      // so keep reading until `iconRulesReady` exists (anything other than
+      // "no-iconRulesReady"), then let the assertion judge the resolved value.
+      const probeUntil = async (deadlineMs = 20000) => {
+        const deadline = Date.now() + deadlineMs;
+        let result;
+        do {
+          result = await evaluate(probe);
+          if (result !== "no-iconRulesReady") break;
+          await new Promise((r) => setTimeout(r, 300));
+        } while (Date.now() < deadline);
+        return result;
+      };
+
       // The worker ran its startup path end to end iff it registered at least one
       // icon rule (gray for the denylist, green for supported hosts). "rules:0" / a
-      // timeout / an error all fail with the observed value.
-      const result = await evaluate(probe);
+      // timeout / an error / "no-iconRulesReady" all fail with the observed value.
+      const result = await probeUntil();
       assert.match(
         result,
         /^rules:[1-9]/,
