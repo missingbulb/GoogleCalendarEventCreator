@@ -63,6 +63,20 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
   URL→icon match runs inside Chrome, so it's verified only by the CI-only
   real-Chrome test (`test/fullBrowserHeavyTests/extension-load.chrome.test.js`).
+- **Introspecting an MV3 service worker over CDP (the real-Chrome test) has three
+  traps that each cost a CI round-trip.** When `Runtime.evaluate`-ing inside the
+  worker to verify its startup: (a) **`chrome.*` callback APIs don't reliably
+  settle when awaited under `awaitPromise: true`** — `declarativeContent…getRules`
+  hung forever (no internal timeout) until the whole job timed out; build the
+  awaited signal from plain promises (`fetch`/`OffscreenCanvas`), not chrome.*
+  callbacks. (b) **A bare top-level `function`/`const` name isn't reachable** from
+  an injected evaluate — expose what the test reads as an explicit
+  `globalThis.x = …` (the worker publishes an `iconRulesReady` promise this way).
+  (c) **A dormant worker has no globals** until it re-runs its top level; with no
+  tab/event listeners a test can trigger, attaching to the target is what starts
+  it, and the first read still races startup — so **poll** until the global
+  appears. (Bound every probe and add a test-level timeout regardless, per the
+  hang-proofing rule in [engineeringPractices.md](engineeringPractices.md).)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
   with the rest of the GitHub procedures in
