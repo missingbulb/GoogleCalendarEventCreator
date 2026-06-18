@@ -1,11 +1,9 @@
 # Workflow
 
-The GitHub issue → branch → PR → merge lifecycle, the **merge-to-main command**
-(triggered by **"LGTM"**), and the CI-interaction practices live in
-[github.md](github.md). This file holds the working discipline that isn't itself
-a GitHub operation, plus the two owner-triggered defined instructions ("bump
-version", "learned lessons"). The owner's trigger phrases themselves are
-preferences — see [../ownerPreferences.md](../ownerPreferences.md).
+The GitHub issue → branch → PR → merge lifecycle, the **merge-to-main command**,
+and the CI-interaction practices live in [github.md](github.md). This file holds
+the working discipline that isn't itself a GitHub operation, plus the two
+owner-triggered defined instructions ("bump version", "learned lessons").
 
 Confirm a behavior isn't already provided before building a mechanism for it —
 verify the gap against a real run first; the cheapest fix is often that it
@@ -36,9 +34,8 @@ them: show the changed PNGs inline in the chat and link the branch's
 `https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md`) for
 one-page review.
 
-When the repo owner says **"bump version"** (the trigger phrase is an owner
-preference — see [../ownerPreferences.md](../ownerPreferences.md)), treat it as a
-defined instruction: raise the extension's version by editing the `version` field in
+When the repo owner says **"bump version"**, treat it as a defined instruction:
+raise the extension's version by editing the `version` field in
 **both** `manifest.json` and `package.json` (they must stay in sync), update the `value` in `test/uber/shared_constants/version-sync.json` to match, on a
 branch, to be merged into `main` through the normal PR flow. Default to a
 **minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an explicit target ("bump version
@@ -49,17 +46,20 @@ whatever version is committed in `manifest.json` (and no-ops if that version is
 already the latest release). The release workflow never changes the version
 itself.
 
-When the repo owner says **"learned lessons"**, treat it as a defined instruction
-(like "LGTM"): review the current conversation — on Opus, since the reflection
+When the repo owner says **"learned lessons"**, treat it as a defined
+instruction: review the current conversation — on Opus, since the reflection
 needs the stronger model — and extract only the *important*, durable guidelines
 worth keeping, then add them to the doc that owns each one. Be selective: the bar
 is a genuinely new, reusable insight (a gotcha, practice, architecture rule, or
 project mechanic), not a routine detail or a restatement of something already
 documented — dedupe against the existing docs. **"No new lessons" is a valid,
 common outcome**: if nothing clears the bar, say so and make no edits rather than
-padding the docs to look productive. This pass runs only when the repo owner asks
-for it — never extract from a conversation unprompted; the owner decides when to
-do it. Route by scope: project mechanics to the matching file under
+padding the docs to look productive. Run this same pass after a merge to main,
+too — the merge-to-main command in [github.md](github.md) hands off to it:
+reflect on the just-merged conversation before closing out. Otherwise it runs
+only when the repo owner asks for it — never extract from a conversation
+unprompted; the owner decides when to do it. Route by scope: project mechanics to
+the matching file under
 `docs/claude/` (workflow, github, testing, adding-a-source, auto-extractor); top-level
 architecture rules to `docs/architectureGuidelines.md`; non-obvious codebase
 footguns to `docs/technicalGotchas.md`; AI-agent-specific best practices to

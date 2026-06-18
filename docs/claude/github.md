@@ -25,12 +25,7 @@ request via **squash**, appending the PR number to the title as `(#N)` — match
 `main`'s linear, one-commit-per-PR history. CI must be green first; the
 test-flakiness gate in
 [../engineeringPractices.md](../engineeringPractices.md) (twice-green) applies
-only when the change adds or touches an e2e/heavy-browser test. After merging,
-also run the **lessons** pass (see [workflow.md](workflow.md)) on the
-conversation before closing out. The owner's phrase for this command is
-**"LGTM"** — when the owner says "LGTM" on a change, treat it as that
-merge-to-main request (this trigger is an owner preference; see
-[../ownerPreferences.md](../ownerPreferences.md)).
+only when the change adds or touches an e2e/heavy-browser test.
 
 A merge approval (like any approval) applies **only backward**, to the work
 already in front of the owner when it's given — never to anything requested or
@@ -77,8 +72,9 @@ short token) to the readable prefix.
 
 ## Driving a merge cheaply (wall time + tokens)
 
-Getting from "LGTM" to a merged PR wastes both if CI is treated as a fixed
-poll-and-sleep ritual. These came out of a post-mortem on exactly that gap:
+Getting from a merge-to-main request to a merged PR wastes both if CI is treated
+as a fixed poll-and-sleep ritual. These came out of a post-mortem on exactly that
+gap:
 
 - **Merge on an already-green check; don't trigger or wait for a duplicate
   run.** A branch `git push` already runs `test.yml` on the head commit. Opening

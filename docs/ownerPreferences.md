@@ -13,6 +13,10 @@ trigger phrase.
 - **When there's nothing left to do, say so boldly at the end of the
   conversation.** Don't bury a "this is complete / I'm blocked / nothing further
   to do" behind hedging — make the terminal state unmistakable.
+- **"LGTM"** is the owner's phrase for the merge-to-main command: it asks for
+  the change in front of the owner to be merged into `main`. It's an
+  owner-triggered command; the mechanics — squash, CI-green, when the
+  twice-green gate applies — live in [claude/github.md](claude/github.md).
 - **"bump version"** is the owner's phrase for raising the extension's version
   (a minor bump by default). It's an owner-triggered command; the mechanics —
   which files to edit and how a release follows — live in
