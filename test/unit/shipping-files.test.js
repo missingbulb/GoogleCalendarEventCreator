@@ -59,19 +59,20 @@ test("popup's module script and stylesheet ship", () => {
   }
 });
 
-test("the service worker's importScripts targets ship", () => {
-  const block = read("ui/toolbar-icon.js").match(/importScripts\(([^)]*)\)/s);
-  assert.ok(block, "toolbar-icon.js must call importScripts");
-  const imports = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(imports.length > 0, "no importScripts targets found in toolbar-icon.js");
-  // An MV3 worker resolves an importScripts path relative to the worker's own
-  // location (ui/), a leading slash meaning the extension root. Resolve each the
-  // same way before confirming the target ships (see #146).
-  const fromWorker = (p) =>
-    p.startsWith("/") ? p.slice(1) : path.relative(ROOT, path.resolve(ROOT, "ui", p));
-  for (const i of imports) {
-    const target = fromWorker(i);
-    assert.ok(isShipped(target), `toolbar-icon.js imports ${i} (→ ${target}), but it is not in the shipping set`);
+test("the service worker's runtime resources ship", () => {
+  // The toolbar worker colors the icon via chrome.declarativeContent: at install
+  // it fetches the host lists and decodes the per-state icon PNGs into ImageData
+  // (it no longer importScripts the pipeline). Every resource it fetches must
+  // ship — and exist, so a renamed icon variant fails here, not at runtime.
+  const resources = ["pipeline/fallback-lists.json"];
+  for (const size of [16, 32]) {
+    for (const suffix of ["", "-supported", "-denied"]) {
+      resources.push(`icons/icon${size}${suffix}.png`);
+    }
+  }
+  for (const r of resources) {
+    assert.ok(fs.existsSync(path.join(ROOT, r)), `worker loads ${r}, which does not exist`);
+    assert.ok(isShipped(r), `worker loads ${r}, but it is not in the shipping set`);
   }
 });
 

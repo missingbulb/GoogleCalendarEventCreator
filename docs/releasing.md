@@ -120,9 +120,9 @@ If minting fails, the symptoms map to fixes like this:
 2. **Add new item** and upload the release zip.
 3. Complete the store listing: the store icon (`store-assets/icon-128.png`),
    description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
-   tab — justify each requested permission (`activeTab`, `scripting`, `tabs`;
-   see [Permissions](../README.md#permissions)) and declare data usage (this extension sends
-   nothing anywhere).
+   tab — justify each requested permission (`activeTab`, `scripting`,
+   `declarativeContent`; see [Permissions](../README.md#permissions)) and declare
+   data usage (this extension sends nothing anywhere).
 4. Submit for review. Approval typically takes a few hours to a few days.
 
 ## Minor update
