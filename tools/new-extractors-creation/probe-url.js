@@ -17,8 +17,13 @@
 //      returns a full-but-empty page still falls through to the agent's
 //      judgment step (it bails and the workflow opens no PR).
 //
-// Exit codes: 0 = usable (proceed), 1 = not usable (the reason is on stdout for
-// the workflow to quote in its issue comment), 2 = misuse (no URL).
+// Exit codes (the reason is on stdout for the workflow to quote in its issue
+// comment): 0 = usable (proceed); 1 = fetched but not usable (a 2xx
+// bot-challenge / interstitial); 2 = misuse (no URL); 3 = the page couldn't be
+// downloaded at all (the fetch threw — non-2xx like 403, DNS failure, timeout,
+// login wall). The workflow treats 3 specially: an outright download failure is
+// not something a re-run or the agent can fix, so it hands the issue to a human
+// (drops the trigger label, adds "human involvement required").
 //
 // Usage: node tools/new-extractors-creation/probe-url.js "<url>"
 "use strict";
@@ -83,8 +88,11 @@ function main() {
       process.exit(0);
     })
     .catch((err) => {
-      console.log(`it couldn't be fetched (${err.message})`);
-      process.exit(1);
+      // The page couldn't be downloaded at all (non-2xx like 403, DNS failure,
+      // timeout, login/bot wall). Exit 3 so the workflow can route this to a
+      // human instead of silently ending green like a soft-200 challenge.
+      console.log(`the HTML couldn't be downloaded from the server (${err.message})`);
+      process.exit(3);
     });
 }
 

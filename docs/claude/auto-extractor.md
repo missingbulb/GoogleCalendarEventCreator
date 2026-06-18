@@ -89,7 +89,14 @@ The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
    **stops** — but stopping is an **expected outcome, not a failure**: the probe
    step records its decision in the `proceed` step-output, the downstream steps
    gate on `proceed == 'true'`, and the run ends **green** with a "page not usable"
-   comment naming the reason. (A JS-rendered SPA shell that returns a full-but-empty
+   comment naming the reason. One not-usable case is singled out: when the fetch
+   **fails outright** (`probe-url.js` exit 3 — a 403 / unreachable host / login or
+   bot wall, where the HTML never downloaded at all), the probe also sets a
+   `downloadFailed` output. A re-run can't coax HTML out of a server that's
+   refusing the request, so that path hands the issue to a human — it **drops the
+   `extractor-request` label and adds `human involvement required`**, with a
+   comment that names the download failure explicitly (the other not-usable cases
+   keep the plain "page not usable" comment). (A JS-rendered SPA shell that returns a full-but-empty
    page still slips past — it's a real 2xx with no markers — and is caught later by
    the agent's judgment step.) Runs before `npm ci`. Reusing the recorder's exact
    headers is the whole point: a bare `curl` is rejected by sites that serve a real
@@ -203,15 +210,24 @@ agent.
 
 ## Outcomes and comments
 
-Every run that touches an issue leaves exactly one comment. Three of the shapes
+Every run that touches an issue leaves exactly one comment. Four of the shapes
 are **expected stops that finish green** — not failures — and one is a genuine
 failure (red):
 
-- **Page not usable** (green) — the URL probe stopped the run: the event URL was
-  missing, returned a non-2xx, sits behind a login/bot wall, or came back as a
+- **HTML couldn't be downloaded → handed to a human** (green) — the URL probe's
+  fetch failed outright (`probe-url.js` exit 3: a 403 / unreachable host / login
+  or bot wall — the HTML never came back). **No agent run was started**, and
+  because a re-run can't fix a server that refuses the request, the workflow
+  hands the issue off: it **removes the `extractor-request` label** (so the
+  automation won't re-fire) and **adds a `human involvement required` label**.
+  The comment states the blocker explicitly — the HTML couldn't be downloaded —
+  and points to the manual path (`docs/claude/adding-a-source.md`).
+- **Page not usable** (green) — the URL probe stopped the run for a *fetched* but
+  unusable page: the event URL was missing, or the page came back as a 2xx
   bot-challenge / interstitial (`detectChallenge`). **No agent run was started.**
   The comment names the reason and links the run log. Add the site by hand
-  (`docs/claude/adding-a-source.md`).
+  (`docs/claude/adding-a-source.md`). (An outright download failure is the
+  separate hand-off above.)
 - **Worked it, no PR** (green) — the agent ran but the case didn't clear the
   Phase-2 quality floor: either it bailed and left the case empty (e.g. a JS-rendered
   SPA shell the probe couldn't see), or it produced a `degenerate` event with no
