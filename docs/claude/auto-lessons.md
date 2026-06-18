@@ -24,6 +24,11 @@ unattended, so most days it correctly adds **nothing**.
 5. **Most days: nothing** — no branch, no PR, no edits. That's what keeps the
    digest worth reading.
 
+Its write surface is **Markdown docs only** — never code, tests, or workflows. If
+an edit lands in a doc a test reads (e.g. one tracked under
+`test/uber/shared_constants/`), run `npm install` if needed then
+`npm run test:offline` and keep it green before pushing.
+
 ## Output: a PR, never a merge
 
 If it found at least one genuinely new lesson, it opens a **PR for review** on a
