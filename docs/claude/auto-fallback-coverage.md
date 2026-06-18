@@ -69,7 +69,7 @@ On a clean, generic, Chrome-real, test-covered win: branch
 `claude/fallback-coverage/<date>`, commit, push, open a **PR for review**. The PR
 body states the hypothesis, **why** it's generic (which unseen sites it helps),
 **how** the jsdom trap was ruled out, the before→after numbers, and the covering
-test. It never merges — "LGTM" from the repo owner is the merge signal (see
+test. It never merges — from there it merges through the usual flow (see
 [github.md](github.md)) and CI must go green **twice** (it touches `test:live`).
 No win → no branch, no PR; print "No generic fallback-coverage improvement found."
 

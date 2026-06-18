@@ -30,7 +30,7 @@ If it found at least one genuinely new lesson, it opens a **PR for review** on a
 `claude/lessons/<date>-<rand>` branch (the random suffix keeps two same-day runs
 from colliding on one branch name). It never merges: a human reviews the PR — the
 docs are guidance everyone reads, so a hallucinated or duplicative "lesson" is
-worse than nothing — and "LGTM" from the repo owner is the merge signal (see
+worse than nothing — and from there it merges through the usual flow (see
 `docs/claude/github.md`). The PR references this routine's tracking issue (see
 below), so its activity is collected there.
 
