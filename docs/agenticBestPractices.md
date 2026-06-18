@@ -8,3 +8,12 @@ worked here. Each is one tight rule; the worked example lives in its own doc.
   before they're forgotten. Key discipline: dedupe ruthlessly against the
   existing docs, route each lesson to the doc that owns it, keep additions terse
   — and most days add nothing. (Worked example: `docs/claude/auto-lessons.md`.)
+
+- **Give each unattended recurring routine its own standing tracking issue as a
+  self-improvement log.** Log every run that produces a change there (e.g. as a
+  sub-issue) so the routine's output accumulates in one reviewable feed — making
+  it easy to audit what it did over time and to tell when the routine itself
+  needs tuning. One issue per routine, not a shared parent; have the routine
+  find its issue by a stable attribute (title/label) rather than a bare number
+  that can dangle. (Worked example: `docs/claude/auto-lessons.md` #365,
+  `docs/claude/auto-fallback-coverage.md` #366.)
