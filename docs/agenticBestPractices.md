@@ -17,3 +17,12 @@ worked here. Each is one tight rule; the worked example lives in its own doc.
   find its issue by a stable attribute (title/label) rather than a bare number
   that can dangle. (Worked example: `docs/claude/auto-lessons.md` #365,
   `docs/claude/auto-fallback-coverage.md` #366.)
+- **Keep an unattended routine's instructions in a repo doc, not inlined in the
+  launcher's config.** The launcher prompt (a CC web routine, a cron job's
+  embedded text) should be a thin pointer to a versioned in-repo doc; the doc
+  carries the real spec. Inlined instructions drift silently — they can't be
+  reviewed in a PR, go stale against renamed paths the repo's own tests would
+  have caught, and miss conventions the repo later adds — whereas a doc the
+  repo's checks and lessons pass touches stays current for free. (The
+  fallback-coverage routine's UI prompt had three stale `test/integration/…`
+  paths the in-repo `docs/claude/auto-fallback-coverage.md` already had right.)
