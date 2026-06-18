@@ -53,6 +53,21 @@ PR, get CI green, and wait for a fresh "LGTM".
   cherry-pick, or a hard reset): it's your own un-merged branch, so this is the
   amend-your-own-commits case above, not rewriting shared history.
 
+## Open the PR early when a change touches e2e / heavy / UI tests
+
+The usual default is to hold a PR until asked. **Reverse that when a change adds
+or modifies an e2e/heavy-browser (`test/fullBrowserHeavyTests/`) or UI-snapshot
+(`test/ui/`) test**: those can't be exercised locally (the sandbox has no Chrome;
+see [../technicalGotchas.md](../technicalGotchas.md)), and their reviewable
+artifacts only exist on a PR — CI runs the heavy/e2e suites against the branch,
+and a UI change's reviewable output (the pixel diff GitHub renders, and the
+rendered gallery linked via the branch's `test/ui/README.md`) needs a branch
+pushed to GitHub to view at all. So opening the PR *is* how you see the change
+working and surface failures; doing it up front (rather than after a round of
+local-only iteration that proves nothing for these classes) is the faster path to
+a working, reviewable result. Each CI iteration costs a full round-trip, so get
+the first one running as early as possible.
+
 ## A push or PR made with the Actions `GITHUB_TOKEN` does not start another workflow
 
 GitHub suppresses workflow runs triggered by the built-in `GITHUB_TOKEN` to
