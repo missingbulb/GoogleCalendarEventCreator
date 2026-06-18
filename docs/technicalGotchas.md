@@ -46,13 +46,9 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   `OffscreenCanvas`/`ImageData` workaround — here it *throws* "Failed to fetch",
   and the fix is the extension-root URL, not decoding the PNG to ImageData.
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
-  workflow.** GitHub suppresses workflow runs triggered by the built-in
-  `GITHUB_TOKEN` to prevent recursion, so a workflow's own `git push` or
-  `gh pr create` won't fire `test.yml` or `refresh-cache.yml`. The one exception is
-  `workflow_dispatch` / `repository_dispatch` — which is why the auto-extractor
-  pipeline dispatches `refresh-cache.yml` and `test.yml` explicitly (see
-  `docs/claude/auto-extractor.md`). A run dispatched against a branch executes on
-  its head commit, so its checks still attach to the PR.
+  workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
+  with the rest of the GitHub procedures in
+  [claude/github.md](claude/github.md).
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `test/harness.js`.
