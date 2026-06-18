@@ -72,6 +72,15 @@ remote branch is rejected non-fast-forward (so the run can't even open its PR).
 Give every run its own branch: append a per-run-unique suffix (`$RANDOM` / a
 short token) to the readable prefix.
 
+## A workflow that adds a brand-new label must create it first
+
+`gh issue edit --add-label "<name>"` fails when the label doesn't exist yet —
+unlike applying an already-defined label, GitHub won't create it on demand, so a
+workflow that introduces a new label breaks the first time it runs. Create it
+idempotently before the edit (`gh label create "<name>" --color … 2>/dev/null ||
+true`), then `--add-label`. (The download-failure hand-off in
+`auto-implement-extractor.yml` adds `human involvement required` this way.)
+
 ## Driving a merge cheaply (wall time + tokens)
 
 Getting from "LGTM" to a merged PR wastes both if CI is treated as a fixed
