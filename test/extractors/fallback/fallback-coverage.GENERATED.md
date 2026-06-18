@@ -12,9 +12,9 @@ Headline coverage over all 20 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **53.3%** | 32 / 60 |
-| **All fields** | **34.1%** | 43 / 126 |
-| Event coverage *(informational)* | 60% | 15 / 25 |
+| **Critical fields** (title + start + location) | **58.3%** | 35 / 60 |
+| **All fields** | **36.5%** | 46 / 126 |
+| Event coverage *(informational)* | 64% | 16 / 25 |
 
 ### Gate
 
@@ -22,8 +22,8 @@ The gate (`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) 
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 53.3% | 53.3% | ✓ |
-| All fields | 34.1% | 34.1% | ✓ |
+| Critical fields | 58.3% | 58.3% | ✓ |
+| All fields | 36.5% | 36.5% | ✓ |
 
 Gated over **20** shared case(s).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 20 | 14 | 1 | 5 | 70% |
-| `start` **(critical)** | 20 | 9 | 6 | 5 | 45% |
+| `title` **(critical)** | 20 | 15 | 1 | 4 | 75% |
+| `start` **(critical)** | 20 | 10 | 6 | 4 | 50% |
 | `end` | 15 | 9 | 0 | 6 | 60% |
-| `location` **(critical)** | 20 | 9 | 1 | 10 | 45% |
+| `location` **(critical)** | 20 | 10 | 1 | 9 | 50% |
 | `ctz` | 20 | 0 | 0 | 20 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 20 | 2 | 8 | 10 | 10% |
+| `description` | 20 | 2 | 9 | 9 | 10% |
 
 ## By host
 
@@ -54,7 +54,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
-| `ticketmaster.co.il` | 1 | 0/1 | 0% | 0% |
+| `ticketmaster.co.il` | 1 | 1/1 | 100% | 60% |
 
 ## By exemplar
 
@@ -81,4 +81,4 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `telavivcinematheque-sentimental-value` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-taiwan-week` | 0/6 | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `thinkdrink-quantum-lecture` | 1/1 | ✓ | ~ | — | ✓ | ✗ | — | ~ |
-| `ticketmaster-ravid-plotnik` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
+| `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ~ |
