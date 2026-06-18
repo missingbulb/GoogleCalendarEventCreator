@@ -17,34 +17,41 @@ const vm = require("node:vm");
 const ROOT = path.join(__dirname, "..", "..");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
 
-// Resolve an importScripts() argument the way a real MV3 service worker does:
-// relative to the worker's OWN location, with a leading slash meaning the
-// extension root. (Resolving relative to the repo root instead is exactly what
-// hid #146.)
-function resolveImport(workerPath, spec) {
-  return spec.startsWith("/")
-    ? path.join(ROOT, spec.slice(1))
-    : path.resolve(ROOT, path.dirname(workerPath), spec);
-}
-
 // Boot the background service worker in a sandbox with just enough of the
-// extension APIs stubbed, recording which event listeners it registers. A
-// thrown importScripts (file not found) aborts here just as it aborts the real
-// worker — before any listener registers and before chrome.action.setIcon runs.
+// extension APIs stubbed, recording which event listeners it registers and
+// capturing the install handler so a caller can drive it. A syntax error in the
+// worker aborts here just as it aborts the real worker — before any listener
+// registers. (The worker no longer importScripts the pipeline: it colors the
+// icon via chrome.declarativeContent, so it never loads the sources or builds
+// GCal — see ui/toolbar-icon.js.)
 function bootServiceWorker() {
   const workerPath = manifest.background.service_worker; // e.g. "ui/toolbar-icon.js"
   const registered = [];
-  const listener = (name) => ({ addListener: () => registered.push(name) });
+  const handlers = {};
+  const listener = (name) => ({ addListener: (fn) => { registered.push(name); handlers[name] = fn; } });
+  const addedRules = [];
   const sandbox = {
     URL,
-    fetch: async () => ({ json: async () => ({ allowlist: [], denylist: [] }) }),
+    // The worker fetches the host lists (.json) and the packaged icons (.blob).
+    fetch: async (url) => ({
+      json: async () => ({ allowlist: [], denylist: ["cnn.com"], supportedDomains: ["meetup.com"] }),
+      blob: async () => ({ __path: String(url) }),
+    }),
+    createImageBitmap: async (blob) => blob,
+    OffscreenCanvas: class {
+      getContext() {
+        return { drawImage(bitmap) { this.__bitmap = bitmap; }, getImageData() { return { __path: this.__bitmap?.__path }; } };
+      }
+    },
     chrome: {
-      action: { onClicked: listener("action.onClicked"), setIcon() {} },
-      tabs: {
-        onActivated: listener("tabs.onActivated"),
-        onUpdated: listener("tabs.onUpdated"),
-        query: async () => [],
-        get: async () => null,
+      action: { onClicked: listener("action.onClicked") },
+      declarativeContent: {
+        PageStateMatcher: class { constructor(arg) { Object.assign(this, arg); } },
+        SetIcon: class { constructor(arg) { Object.assign(this, arg); } },
+        onPageChanged: {
+          removeRules: (_ids, cb) => cb && cb(),
+          addRules: (rules, cb) => { addedRules.push(...rules); cb && cb(); },
+        },
       },
       runtime: {
         onInstalled: listener("runtime.onInstalled"),
@@ -52,35 +59,31 @@ function bootServiceWorker() {
         getURL: (p) => p,
       },
     },
-    importScripts(...specs) {
-      for (const spec of specs) {
-        vm.runInContext(fs.readFileSync(resolveImport(workerPath, spec), "utf8"), sandbox);
-      }
-    },
+    importScripts() { throw new Error("the worker must not importScripts the pipeline anymore"); },
   };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT, workerPath), "utf8"), sandbox);
-  return { sandbox, registered };
+  return { sandbox, registered, handlers, addedRules };
 }
 
-test("the background service worker loads (every importScripts resolves) and builds GCal", () => {
-  const { sandbox } = bootServiceWorker(); // throws if any import path is wrong
-  assert.ok(sandbox.GCal, "the worker's imports must build the GCal namespace");
-  assert.equal(
-    typeof sandbox.GCal.isSupportedHost,
-    "function",
-    "the worker's imports must build GCal.isSupportedHost"
-  );
+test("the background service worker loads without error", () => {
+  assert.doesNotThrow(bootServiceWorker, "the worker's top-level script must parse and run");
 });
 
-test("the service worker registers its tab/runtime listeners after importScripts", () => {
+test("the service worker registers its install/startup listeners", () => {
   const { registered } = bootServiceWorker();
-  // These run at the bottom of the worker, after importScripts. If an import had
-  // thrown, none would register and the toolbar icon would be stuck on the
-  // neutral default (the user-visible symptom of #146).
-  for (const name of ["tabs.onActivated", "tabs.onUpdated", "runtime.onInstalled", "runtime.onStartup"]) {
+  // The declarativeContent rules are (re)installed on install and on startup;
+  // if neither registered, the toolbar icon would never reflect page support.
+  for (const name of ["runtime.onInstalled", "runtime.onStartup"]) {
     assert.ok(registered.includes(name), `worker must register ${name}`);
   }
+  assert.ok(!registered.includes("tabs.onActivated"), "worker must not read tabs (no 'tabs' permission)");
+});
+
+test("installing registers declarativeContent icon rules (no tab URL read)", async () => {
+  const { handlers, addedRules } = bootServiceWorker();
+  await handlers["runtime.onInstalled"]();
+  assert.ok(addedRules.length, "the install handler must add declarativeContent rules");
 });
 
 test("every injected pipeline file parses as a script", () => {

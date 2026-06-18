@@ -6,7 +6,7 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "tabs"
+    "declarativeContent"
   ],
   "background": {
     "service_worker": "ui/toolbar-icon.js"

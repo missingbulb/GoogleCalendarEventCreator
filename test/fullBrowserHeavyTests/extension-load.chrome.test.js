@@ -91,10 +91,10 @@ test(
       await cdp.ready;
 
       // Find the extension's MV3 background as a service_worker target. It only
-      // appears once the worker has registered — i.e. once its first
-      // importScripts succeeded (#146). Opening a page wakes the lazy worker by
-      // firing the extension's chrome.tabs listeners. Collect every target for a
-      // useful failure message.
+      // appears once the worker has registered. Opening a page (createTarget
+      // below) wakes the lazy worker; its install handler then registers the
+      // declarativeContent icon rules. Collect every target for a useful failure
+      // message.
       const seen = [];
       let onWorker;
       const swTargetId = new Promise((resolve, reject) => {
@@ -117,8 +117,10 @@ test(
       await cdp.send("Target.createTarget", { url: "about:blank" }); // wake the worker
       const targetId = await swTargetId;
 
-      // Attach and run code *inside the worker*: importScripts succeeded iff GCal
-      // got built, and the supported-host decision must work end to end.
+      // Attach and run code *inside the worker*: it ran end to end iff its
+      // install handler registered the declarativeContent icon rules (which means
+      // it fetched the host lists and decoded the packaged icons via
+      // OffscreenCanvas — the whole startup path).
       const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
       const evaluate = async (expression) => {
         const { result, exceptionDetails } = await cdp.send(
@@ -131,10 +133,9 @@ test(
         }
         return result.value;
       };
-      // The service_worker target can appear before its top-level script has
-      // finished importScripts()-ing the pipeline, so poll until GCal is built
-      // rather than racing a single read (then let the assertion report the
-      // last value seen).
+      // The service_worker target can appear before its async install handler has
+      // finished registering the rules, so poll rather than racing a single read
+      // (then let the assertion report the last value seen).
       const evaluateUntil = async (expression, want, timeoutMs = 10000) => {
         const deadline = Date.now() + timeoutMs;
         let value;
@@ -146,15 +147,15 @@ test(
         return value;
       };
 
+      // The install handler ran end to end iff declarativeContent now holds at
+      // least one icon rule (gray for the denylist, green for supported hosts).
       assert.equal(
-        await evaluateUntil("typeof globalThis.GCal?.isSupportedHost", "function"),
-        "function",
-        "importScripts must have run inside the worker and built GCal.isSupportedHost"
-      );
-      assert.equal(
-        await evaluate('GCal.isSupportedHost("https://www.meetup.com/group/events/1/")'),
+        await evaluateUntil(
+          "new Promise((r) => chrome.declarativeContent.onPageChanged.getRules((rules) => r(rules.length > 0)))",
+          true
+        ),
         true,
-        "a known supported host must read as supported inside the live worker"
+        "the worker's install handler must register declarativeContent icon rules inside the live worker"
       );
     } finally {
       if (cdp) cdp.close();

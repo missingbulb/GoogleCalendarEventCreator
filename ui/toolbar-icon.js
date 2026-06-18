@@ -1,105 +1,91 @@
-// Background service worker: swaps the toolbar icon to a green tile on pages that
-// have a site-specific extractor, and a blue tile everywhere else. No badge is
-// used — the tile color itself is the state signal.
+// Background service worker: colors the toolbar icon to signal page support —
+// green tile on a host with a site-specific extractor, gray on a fallback-
+// denylisted host, blue (the manifest default_icon) everywhere else.
 //
-// The single supported-host decision is GCal.isSupportedHost (pipeline/
-// registry.js), which derives "supported" from the registered sources' own
-// `matches` functions. The worker loads the registry and every source so the
-// registry is populated, then swaps the icon when a source matches this page.
-// DOM-free files only — the sources register their matchers at load and the
-// worker never calls extract().
+// It does this with chrome.declarativeContent, NOT by reading tab URLs. The
+// browser matches the rules' URL patterns itself and swaps the icon; the
+// extension never sees any tab's URL, so the extension needs no "tabs"
+// permission and the install prompt no longer says "Read your browsing
+// history". (The old design listened to chrome.tabs.onActivated/onUpdated and
+// read tab.url for every tab, which is exactly what required "tabs".)
 //
-// The registry + source list this worker loads is GENERATED into
-// pipeline/worker-imports.generated.js by `npm run index` (an MV3 worker can
-// only importScripts synchronously at startup, so it can't read
-// load-order.generated.json first). Importing the generated file keeps the
-// worker's list a single source of truth with the sources on disk — adding a
-// source touches no file here, and there's no hand-list to conflict on. A drift
-// guard (test/unit/load-order-generated.test.js) fails if it goes stale.
-//
-// Leading-slash (extension-root) path: an MV3 service worker resolves an
-// importScripts path relative to the worker's OWN location, which is ui/ — but
-// the pipeline files live at the extension root, so the path needs the leading
-// slash to point there. Without it the import resolves to ui/pipeline/… , fails
-// to load, and that first failure aborts the whole worker before the listeners
-// below register — leaving the toolbar with no availability signal at all.
-// See #146. (The generated file's own imports are leading-slash absolute too.)
-importScripts("/pipeline/worker-imports.generated.js");
+// The host lists come from pipeline/fallback-lists.json — the same single
+// source of truth the popup's classifier (config.js / fallback-policy.js) reads.
+// `supportedDomains` is the static mirror of the sources' own matches() (kept
+// honest by test/unit/supported-domains.test.js); the icon decides at host
+// granularity, exactly as the old GCal.isSupportedHost/isDeniedHost did, so the
+// declarative host patterns reproduce the previous behavior.
 
-// Fetch the fallback allow/denylists from the JSON (single source of truth shared
-// with config.js). The fetch is async; every event handler awaits `ready` so
-// isDeniedHost() always sees the populated list, even on a cold worker start.
-// On fetch failure the lists stay empty and the gray icon simply won't appear.
-const ready = fetch(chrome.runtime.getURL("pipeline/fallback-lists.json"))
-  .then((r) => r.json())
-  .then((data) => {
-    GCal.sourceFallbackDenylist  = data.denylist  || [];
-    GCal.sourceFallbackAllowlist = data.allowlist || [];
-  })
-  .catch(() => {});
-
-// Availability is shown by swapping the toolbar icon between three tile variants:
-//   green — site has a first-class extractor (GCal.isSupportedHost)
-//   gray  — site is on the fallback denylist (GCal.isDeniedHost)
-//   blue  — default, page not classified
-// Using the icon color rather than a badge avoids the badge pill overlapping the
-// glyph, and makes the signal visible even when the icon is small.
-//
-// The icon paths MUST be extension-root absolute (chrome.runtime.getURL), not the
-// bare "icons/..." relative form. This worker lives at ui/toolbar-icon.js, so
-// chrome.action.setIcon resolves a relative path against ui/ and then fails to
-// fetch ui/icons/... — setIcon rejects with "Failed to set icon: Failed to
-// fetch" and the icon never changes (the #204 symptom). It's the same
-// extension-root-vs-worker-dir trap as the importScripts leading slashes above
-// (#146); getURL makes the extension-root resolution explicit.
-const iconVariant = (suffix) => ({
-  16:  chrome.runtime.getURL(`icons/icon16${suffix}.png`),
-  32:  chrome.runtime.getURL(`icons/icon32${suffix}.png`),
-  48:  chrome.runtime.getURL(`icons/icon48${suffix}.png`),
-  128: chrome.runtime.getURL(`icons/icon128${suffix}.png`),
-});
-const BLUE_ICON  = iconVariant("");
-const GREEN_ICON = iconVariant("-supported");
-const GRAY_ICON  = iconVariant("-denied");
-
-// The { size -> packaged icon URL } map for a given page URL.
-function availabilityIcon(url) {
-  if (GCal.isSupportedHost(url)) return GREEN_ICON;
-  if (GCal.isDeniedHost(url))    return GRAY_ICON;
-  return BLUE_ICON;
+// declarativeContent.SetIcon documents a `path` option, but in practice the
+// `path` form is unreliable (it silently leaves the icon unset / "Could not load
+// icon"); imageData is the robust route. And an MV3 service worker has no DOM —
+// no <img>/<canvas> — so we decode the packaged PNGs into ImageData via
+// fetch -> createImageBitmap -> OffscreenCanvas. (Same DOM-less-worker trap as
+// the old chrome.action.setIcon path, #204; see docs/technicalGotchas.md.)
+async function loadImageData(iconPath, size) {
+  const blob = await fetch(chrome.runtime.getURL(iconPath)).then((r) => r.blob());
+  const bitmap = await createImageBitmap(blob);
+  const canvas = new OffscreenCanvas(size, size);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, size, size);
+  return ctx.getImageData(0, 0, size, size);
 }
 
-async function updateIcon(tabId, url) {
-  try {
-    await chrome.action.setIcon({ tabId, path: availabilityIcon(url) });
-  } catch (e) {
-    // Tab may have closed before this ran.
-  }
+// The { size -> ImageData } map for one icon variant ("" blue, "-supported"
+// green, "-denied" gray). 16 and 32 are the toolbar-action sizes.
+async function iconImageData(suffix) {
+  const [px16, px32] = await Promise.all([
+    loadImageData(`icons/icon16${suffix}.png`, 16),
+    loadImageData(`icons/icon32${suffix}.png`, 32),
+  ]);
+  return { 16: px16, 32: px32 };
 }
 
-// Each listener is async and awaits its Chrome API calls so Chrome keeps the
-// service worker alive until the icon swap completes (MV3 service workers are
-// only kept alive for the duration of a returned Promise, not a callback).
-// `await ready` ensures the denylist is loaded before isDeniedHost() is consulted.
-chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  await ready;
-  const tab = await chrome.tabs.get(tabId).catch(() => null);
-  if (tab?.url) await updateIcon(tabId, tab.url);
-});
-
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.url || changeInfo.status === "complete") {
-    await ready;
-    await updateIcon(tabId, tab.url);
-  }
-});
-
-async function updateAllTabIcons() {
-  await ready;
-  for (const tab of await chrome.tabs.query({})) {
-    await updateIcon(tab.id, tab.url);
-  }
+// Two PageStateMatchers per host so "example.com" means the apex OR any
+// subdomain — but NOT "evilexample.com". A bare hostSuffix:"example.com" would
+// match "evilexample.com", so the apex is matched with hostEquals and subdomains
+// with a leading-dot hostSuffix. Mirrors the runtime's
+// `host === entry || host.endsWith("." + entry)` semantics.
+function hostMatchers(host) {
+  const schemes = ["http", "https"];
+  return [
+    new chrome.declarativeContent.PageStateMatcher({ pageUrl: { hostEquals: host, schemes } }),
+    new chrome.declarativeContent.PageStateMatcher({ pageUrl: { hostSuffix: "." + host, schemes } }),
+  ];
 }
 
-chrome.runtime.onInstalled.addListener(updateAllTabIcons);
-chrome.runtime.onStartup.addListener(updateAllTabIcons);
+// Build the declarativeContent rules from the host lists. No rule is needed for
+// the blue default — when no rule matches, Chrome shows the manifest default_icon.
+// Denied is listed before supported so that if a host ever appeared on both, the
+// later (supported/green) action would win; today the lists don't overlap.
+async function buildRules() {
+  const lists = await fetch(chrome.runtime.getURL("pipeline/fallback-lists.json")).then((r) => r.json());
+  const green = await iconImageData("-supported");
+  const gray = await iconImageData("-denied");
+
+  const rules = [];
+  const denied = (lists.denylist || []).flatMap(hostMatchers);
+  if (denied.length) {
+    rules.push({ conditions: denied, actions: [new chrome.declarativeContent.SetIcon({ imageData: gray })] });
+  }
+  const supported = (lists.supportedDomains || []).flatMap(hostMatchers);
+  if (supported.length) {
+    rules.push({ conditions: supported, actions: [new chrome.declarativeContent.SetIcon({ imageData: green })] });
+  }
+  return rules;
+}
+
+// Replace any existing rules with a freshly-built set. removeRules-then-addRules
+// makes this idempotent, so running it on both onInstalled and onStartup can't
+// stack duplicates.
+async function installRules() {
+  const rules = await buildRules();
+  await new Promise((resolve) => {
+    chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
+      chrome.declarativeContent.onPageChanged.addRules(rules, resolve);
+    });
+  });
+}
+
+chrome.runtime.onInstalled.addListener(installRules);
+chrome.runtime.onStartup.addListener(installRules);

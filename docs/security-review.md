@@ -12,10 +12,14 @@ extraction files) and, briefly, the repository's dev/CI tooling.
 The extension's overall security posture is good, but it is broader than a
 quick glance at `../README.md`'s "Permissions" section suggests:
 
-- **Manifest V3**, with `activeTab`, `scripting`, and **`tabs`** permissions.
-  `tabs` is new relative to the original `activeTab`+`scripting`-only design
-  and is discussed in [3.1](#31-tabs-permission--persistent-background-service-worker-icon-statejs-low--documented).
-  `../README.md` already documents this permission and what it's used for.
+- **Manifest V3**, with `activeTab`, `scripting`, and **`declarativeContent`**
+  permissions. The earlier `tabs` permission (which read every tab's URL to
+  color the toolbar icon, and triggered Chrome's "Read your browsing history"
+  install warning) has been **removed**: the icon is now colored by
+  `declarativeContent` rules the browser matches itself, so the extension never
+  reads any tab's URL — see
+  [3.1](#31-declarativecontent-icon-coloring-no-tab-url-access-low). This is a
+  net reduction in attack surface versus the prior `tabs`-based design.
 - The **page-content extraction** path (the part that runs untrusted,
   attacker-influenced DOM/JSON from the current page) now runs whenever the
   **popup is opened**, not only when the user clicks "Add to Google
@@ -37,12 +41,14 @@ quick glance at `../README.md`'s "Permissions" section suggests:
 There are now two independent flows:
 
 ```
-A) Toolbar icon coloring (always running, no user gesture required)
+A) Toolbar icon coloring (declarative; the browser matches, the extension never
+   reads any tab URL)
    ui/toolbar-icon.js (the manifest's background.service_worker)
-     -> chrome.tabs.onActivated / onUpdated / onInstalled / onStartup
-     -> reads tab.url for every tab (requires the "tabs" permission)
-     -> pipeline/registry.js + pipeline/sources/*: hostname regex match only
-     -> chrome.action.setBadgeBackgroundColor / setBadgeText(...)   (green badge, no page content read)
+     -> on runtime.onInstalled / onStartup, registers chrome.declarativeContent
+        rules from pipeline/fallback-lists.json (supported/denied host patterns)
+     -> the BROWSER matches a tab's URL against those patterns and swaps the
+        action icon (green/gray/blue) — no tab.url is ever read by extension code
+        (no "tabs" permission)
 
 B) Event extraction (only while the popup is open, a user-initiated action)
    User opens the popup
@@ -55,50 +61,48 @@ B) Event extraction (only while the popup is open, a user-initiated action)
           chrome.tabs.create({ url: "https://calendar.google.com/calendar/render?..." })
 ```
 
-Flow (A) is the main change since the last review: it runs continuously in
-the background and inspects the **URL** (not content) of every open tab.
-Flow (B) is the original extraction pipeline, now triggered by opening the
-popup rather than by a single toolbar click, and extended with two new
-site-specific extractors (`telavivcinematheque.js`, `edinburghfringe.js`) and a `ctz`
-(calendar timezone) field.
+Flow (A) no longer reads any tab's URL: the extension hands the browser a set
+of host-pattern rules once, and the browser does all matching internally. This
+is a reduction from the prior `tabs`-based design, which read `tab.url` for
+every open tab. Flow (B) is the original extraction pipeline, triggered by
+opening the popup rather than by a single toolbar click, and extended with two
+new site-specific extractors (`telavivcinematheque.js`, `edinburghfringe.js`)
+and a `ctz` (calendar timezone) field.
 
-The only "privileged" sinks are `chrome.action.setBadgeBackgroundColor` /
-`setBadgeText` (flow A, a fixed green color and a constant badge string — no
-attacker-controlled input reaches them) and `chrome.tabs.create` (flow B, target constrained to a hardcoded
-origin/path with all dynamic values passed through `URLSearchParams`, which
-percent-encodes them).
+The only "privileged" sinks are `chrome.declarativeContent.SetIcon` (flow A, a
+fixed set of packaged icons — no attacker-controlled input reaches it) and
+`chrome.tabs.create` (flow B, target constrained to a hardcoded origin/path with
+all dynamic values passed through `URLSearchParams`, which percent-encodes them).
 
 ## 3. Findings
 
-### 3.1 `tabs` permission + persistent background service worker (`icon-state.js`) (Low — documented)
+### 3.1 `declarativeContent` icon coloring (no tab-URL access) (Low)
 
-`manifest.json` now requests `"permissions": ["activeTab", "scripting",
-"tabs"]`, and `icon-state.js` is registered as the persistent
-`background.service_worker`. It listens to `chrome.tabs.onActivated`,
-`chrome.tabs.onUpdated`, `chrome.runtime.onInstalled`, and
-`chrome.runtime.onStartup`, and on every event calls `chrome.tabs.get`/iterates
-`chrome.tabs.query({})` to read `tab.url` for **every open tab**, then checks
-it against the hostname regexes the sources register (`pipeline/registry.js`'s
-`isSupportedHost` over `GCal.sources`) to show or hide a green toolbar badge.
+`manifest.json` requests `"permissions": ["activeTab", "scripting",
+"declarativeContent"]`. The background service worker (`ui/toolbar-icon.js`)
+registers `chrome.declarativeContent.onPageChanged` rules at
+`runtime.onInstalled`/`onStartup`, built from the supported/denied host patterns
+in `pipeline/fallback-lists.json`. The **browser** evaluates those rules against
+each page's URL and swaps the toolbar icon; the extension's own code never reads
+`tab.url`.
 
-This is a meaningful change from the original `activeTab`-only model:
+This is a security improvement over the previous `tabs`-based design:
 
-- Without `tabs`, the extension could only see a tab's URL after the user
-  invoked it on that specific tab (`activeTab`).
-- With `tabs`, `icon-state.js` runs unconditionally for the lifetime of the
-  browser session and can observe the **hostname/URL of every tab the user
-  has open**, including tabs the user never interacts with the extension on.
+- The old worker read `tab.url` for **every open tab** (the `tabs` permission),
+  which Chrome surfaces to users as the **"Read your browsing history"** install
+  warning.
+- `declarativeContent` keeps the same per-host icon behavior but moves the URL
+  matching into the browser, so the extension observes no tab URLs at all — and
+  the scary install prompt is gone.
 
-In the current code this is used for nothing more than a hostname regex
-match (`GCal.siteHosts`) to set a toolbar badge — **no page content is read,
-nothing leaves the device, and nothing is persisted**. So the practical risk
-today is low, and `../README.md`'s "Permissions" section already documents the
-`tabs` permission and this exact hostname-only usage.
+The rules contain only static, repo-controlled host patterns and packaged
+icons — **no page content is read, nothing leaves the device, and nothing is
+persisted**. `../README.md`'s and `../PRIVACY.md`'s "Permissions" sections
+document this usage.
 
-Any future change to `icon-state.js` that does more than a hostname check
-(e.g. fetching something based on `tab.url`, or recording visited hosts)
-would meaningfully change the privacy story and should get its own review and
-README update.
+Any future change that reverts to reading `tab.url` (e.g. re-adding `tabs` or
+broad host permissions) would re-introduce the browsing-history exposure and
+should get its own review and README/PRIVACY update.
 
 No action required.
 
@@ -252,8 +256,9 @@ the rest of the test suite and doesn't add new fetch targets.
 
 ### 3.9 Permissions & supply chain (Informational)
 
-- `manifest.json` requests `activeTab`, `scripting`, and `tabs` (see 3.1).
-  No `host_permissions`, no `content_scripts`, no `storage`, no remote code.
+- `manifest.json` requests `activeTab`, `scripting`, and `declarativeContent`
+  (see 3.1). No `tabs`, no `host_permissions`, no `content_scripts`, no
+  `storage`, no remote code.
 - The only dependency (`jsdom`) is a `devDependency` used solely by the test
   suite; it is not bundled into the extension that users install. Test/UI
   tooling also bundles Liberation Sans font files under
@@ -405,7 +410,7 @@ length limits, so this is a UX/robustness nit rather than a security hole.
 
 | # | Finding | Severity | Suggested action |
 |---|---------|----------|-------------------|
-| 3.1 | `tabs` permission + always-on `icon-state.js` reads every tab's URL | Low | No action — already documented in `../README.md`; re-review if `icon-state.js` ever does more than a hostname check |
+| 3.1 | `declarativeContent` colors the icon with no tab-URL access (replaces the old `tabs`-based reader) | Low | No action — net reduction vs. `tabs`; re-review if the worker ever reverts to reading `tab.url` |
 | 3.2 | Popup runs the extractor on every open | Informational | No action — same trust boundary, just triggered earlier |
 | 3.3 | `innerHTML` used to strip HTML from untrusted JSON-LD `description` | Medium | Replace with `DOMParser`-based stripping |
 | 3.4 | Regex/JSON parsing over untrusted page content | Low | Keep new patterns simple; avoid nested unbounded quantifiers; consider a ReDoS check in CI |
@@ -413,7 +418,7 @@ length limits, so this is a UX/robustness nit rather than a security hole.
 | 3.6 | Calendar URL construction incl. `sourceLink` | Informational | No action — `URLSearchParams` + fixed origin already mitigate this |
 | 3.7 | `meta()` template-literal selector | Informational | No action — only called with literals |
 | 3.8 | Cache refresher fetches case URLs in CI | Low | No action — scheduled/manual only, URLs are repo-reviewed |
-| 3.9 | Permissions & supply chain | Informational | No action — minimal permissions beyond `tabs`, no remote code, dev-only dependencies |
+| 3.9 | Permissions & supply chain | Informational | No action — minimal permissions (no `tabs`/host permissions), no remote code, dev-only dependencies |
 | 4.1 | Generic/JSON-LD parsing gives pages full control over prefilled event content, possibly hidden from view | Informational | By design; covered here for awareness |
 | 4.2 | `description`/`title`/`location` can carry phishing text/links that Google Calendar auto-linkifies once saved | Medium | Add a "review before saving" note in the popup UI |
 | 4.3 | "First event wins" heuristic is attacker-influenceable on multi-event pages | Low | No action — inherent to 4.1; "first of several" note already shown |

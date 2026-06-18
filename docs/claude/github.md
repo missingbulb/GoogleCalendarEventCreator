@@ -87,14 +87,13 @@ npm run regen   # load lists + UI snapshots + fallback-coverage baseline/report
 The committed `.gitattributes` maps each generated file to the `ours` merge
 driver, so git keeps one side automatically and `npm run regen` reproduces the
 correct merged result from the (normally-merged) source files. A stale artifact
-can't slip through — its own test fails: the load-order/worker-imports drift
-guard (`test/unit/load-order-generated.test.js`), the UI snapshot pixel diff, or
+can't slip through — its own test fails: the load-order drift guard
+(`test/unit/load-order-generated.test.js`), the UI snapshot pixel diff, or
 the fallback-coverage gate.
 
 Files under this rule (kept in sync with `.gitattributes`):
 
-- `pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js`
-  — both from `npm run index`.
+- `pipeline/load-order.generated.json` — from `npm run index`.
 - `test/ui/cases/*.png` and `test/ui/README.md` — from `npm run refresh:ui`.
 - `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
   `test/extractors/fallback/fallback-coverage.GENERATED.md` — from the
