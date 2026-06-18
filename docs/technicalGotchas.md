@@ -49,6 +49,12 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
   with the rest of the GitHub procedures in
   [claude/github.md](claude/github.md).
+- **`gh issue edit --add-label` fails when the label doesn't exist yet** — unlike
+  applying an already-defined label, GitHub won't create it on demand, so a
+  workflow that adds a brand-new label breaks the first time it runs. Create it
+  idempotently first (`gh label create "<name>" --color … 2>/dev/null || true`),
+  then `--add-label`. (The download-failure hand-off in
+  `auto-implement-extractor.yml` adds `human involvement required` this way.)
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `test/harness.js`.
