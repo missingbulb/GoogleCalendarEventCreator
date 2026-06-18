@@ -37,6 +37,24 @@ doubt, open the PR, get CI green, and wait for a fresh approval.
 
 ## Branch and commit history
 
+### Commit often, in layers
+
+While working a branch, commit frequently rather than landing one big commit at
+the end — small, ordered commits let the owner follow the work as it develops.
+Use commits to *layer* the work in the order you'd want it reviewed:
+
+- Write the failing test(s) first, commit them, **then** implement the feature —
+  so the history shows the contract before the code that satisfies it (and you've
+  seen the test fail before trusting it, per
+  [../engineeringPractices.md](../engineeringPractices.md)).
+- Keep any documentation update as its own commit *after* the feature, not folded
+  into it.
+
+There's no cost to a branch carrying many commits: the merge-to-main command
+**squashes** them into one commit on `main` (see above), so `main`'s
+one-commit-per-PR history is unaffected no matter how granularly the branch is
+committed.
+
 - Don't rewrite published/shared history to satisfy a tooling or authorship
   check (e.g. a hook flagging "unverified" commits): only amend your own
   un-pushed branch commits. Commits already on a shared branch — including ones
@@ -105,15 +123,27 @@ gap:
   a PR on that *same* commit fires a second, identical run — for a deterministic
   offline/docs change it tells you nothing new. Before waiting, check whether the
   PR head SHA already has a green required check (from the push) and merge on it.
-- **Wait on the condition, not a blind sleep.** Don't `sleep N` against a run of
-  unknown length and then re-poll — you over- or under-shoot. Use a single
-  background wait that exits the instant the check leaves `in_progress` (one
-  notification), then merge. The GitHub MCP tools aren't callable from Bash here
-  (no `gh` CLI), so the loop just signals completion and one MCP poll confirms.
-- **Never tight-poll.** Consecutive status calls that return the same
-  `in_progress` are pure token waste, as is re-reading a background job's output
-  file after its completion notification already fired. One poll → wait → one
-  poll.
+- **Poll on a short interval; don't guess one long sleep, and don't subscribe.**
+  The shell **can't observe GitHub state** here — the git remote is a git-only
+  proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s), there's
+  no API token in the env, and `gh` installs fine but reaches no `api.github.com`,
+  so a background bash loop can't detect when a check flips and the MCP tools
+  aren't callable from Bash. So you can't "wait on the condition" from a script —
+  only the MCP `get_check_runs`/`get_status` poll sees the state. A single padded
+  `sleep N` over- or under-shoots a run of unknown length (a blind 75s wait for a
+  ~45s run was the post-mortem trigger); instead loop **MCP poll → background sleep
+  → MCP poll**, until the check leaves `in_progress`, then merge. Back off the
+  sleep on a rolling schedule — **5s, 10s, 15s, 30s, then 30s** repeating — so a
+  fast-ending run wakes you within a few seconds while a slow one doesn't tight-poll;
+  always wait for the sleep's completion notification before the next poll (firing a
+  poll right after *launching* the sleep is the back-to-back waste below). And do
+  **not** reach for `subscribe_pr_activity` to wait for green: its webhooks never
+  deliver CI **success** (only failures/comments/reviews), so the green transition
+  you're waiting for never arrives — it's for babysitting a PR, not merge-on-green.
+- **Never tight-poll.** *Tight* means back-to-back status calls with no sleep
+  between — pure token waste (as is re-reading a background job's output file after
+  its completion notification already fired). The short-interval poll loop above is
+  not tight-polling: each poll is separated by a real sleep.
 - **Batch tool loading.** `ToolSearch` for every GitHub MCP tool the flow needs
   (`issue_write`, `create_pull_request`, `pull_request_read`,
   `merge_pull_request`) in one call, not one per turn.
