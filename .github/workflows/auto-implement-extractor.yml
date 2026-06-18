@@ -128,37 +128,31 @@ jobs:
             fi
           fi
 
-      # The probe decided the page can't back a static case (a bot-challenge or
-      # no URL — but NOT an outright download failure, which the dedicated
-      # hand-off step below owns). That's a handled, expected outcome — tell the
-      # requester and let the run finish GREEN. (Genuine failures below still go
-      # red via "Comment on failure".)
-      - name: Comment — page not usable (expected stop)
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed != 'true' && steps.probe.outputs.downloadFailed != 'true'
+      # The probe decided the page can't back a static test case — a soft-200
+      # bot-challenge / interstitial, an outright download failure (exit 3), or
+      # no event URL at all. NONE of these is fixable by a re-run or the agent
+      # (a Cloudflare/WAF wall from a CI IP won't clear on retry any more than a
+      # 403 will), so every not-usable page is handed to a human the same way:
+      # post a comment naming the blocker, drop the trigger label (so the
+      # automation won't re-fire), and add `extractor-blocked-needs-human`. This
+      # is still an EXPECTED stop, so the run finishes GREEN — only a genuine
+      # break goes red via "Comment on failure" below. The download-failure case
+      # (exit 3) keeps its own, more specific comment; everything else shares the
+      # generic "page not usable" one.
+      - name: Hand off to a human — page not usable
+        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed != 'true'
         env:
-          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          REASON:       ${{ steps.probe.outputs.reason }}
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER:    ${{ github.event.issue.number }}
+          RUN_URL:         ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REASON:          ${{ steps.probe.outputs.reason }}
+          DOWNLOAD_FAILED: ${{ steps.probe.outputs.downloadFailed }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started. The site can still be added by hand — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
-
-      # The probe couldn't download the HTML at all (a 403 / unreachable / bot
-      # wall — exit 3). Unlike a soft-200 challenge this can't be retried into a
-      # usable page, so hand the issue to a human: drop the trigger label (so
-      # the automation won't re-fire) and add a "extractor-blocked-needs-human"
-      # label. The comment makes the blocker explicit —
-      # the HTML couldn't be downloaded — so the reason is unmistakable. Still an
-      # EXPECTED stop, so the run finishes GREEN.
-      - name: Hand off to a human — HTML couldn't be downloaded
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.downloadFailed == 'true'
-        env:
-          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          REASON:       ${{ steps.probe.outputs.reason }}
-        run: |
-          gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+          if [ "$DOWNLOAD_FAILED" = "true" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+          else
+            gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started, and a re-run can't fix this. This needs a human: the site can be added by hand — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+          fi
           # Make sure the label exists before adding it (idempotent — ignore "already exists").
           gh label create "extractor-blocked-needs-human" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
           gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-request" --add-label "extractor-blocked-needs-human"

@@ -21,9 +21,10 @@
 // comment): 0 = usable (proceed); 1 = fetched but not usable (a 2xx
 // bot-challenge / interstitial); 2 = misuse (no URL); 3 = the page couldn't be
 // downloaded at all (the fetch threw — non-2xx like 403, DNS failure, timeout,
-// login wall). The workflow treats 3 specially: an outright download failure is
-// not something a re-run or the agent can fix, so it hands the issue to a human
-// (drops the trigger label, adds "extractor-blocked-needs-human").
+// login wall). None of the not-usable exits (1/2/3) is fixable by a re-run or
+// the agent, so the workflow hands the issue to a human in every case (drops the
+// trigger label, adds "extractor-blocked-needs-human"); exit 3 only differs in
+// getting a more specific "couldn't download the HTML" comment.
 //
 // Usage: node tools/new-extractors-creation/probe-url.js "<url>"
 "use strict";
