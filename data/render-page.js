@@ -145,7 +145,10 @@ async function renderPage(url, opts = {}) {
   } finally {
     if (cdp) cdp.close();
     proc.kill("SIGKILL");
-    fs.rmSync(userDataDir, { recursive: true, force: true });
+    // SIGKILL doesn't wait for Chrome to exit and release the profile dir, so an
+    // immediate removal can race the still-open files and throw ENOTEMPTY; rmSync's
+    // built-in EBUSY/ENOTEMPTY/EPERM backoff retries until the kill lands (#358).
+    fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   }
 }
 
