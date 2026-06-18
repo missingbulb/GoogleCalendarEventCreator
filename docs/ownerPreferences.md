@@ -9,10 +9,8 @@ owner likes to be worked with.
 sessions are ephemeral — the container (and `~/.claude`) is reclaimed after each
 session, so a user-level `~/.claude/CLAUDE.md` doesn't persist. The repo is the
 only durable store here. The intent is to move these preferences out to the
-owner's own environment (a persistent `~/.claude/CLAUDE.md` on the desktop/CLI,
-or the cloud environment's Setup script) once that exists; until then, this is
-the home. Keep it separate from the project-convention docs so the two never
-muddy each other.
+owner's own environment once that exists; until then, this is the home. Keep it
+separate from the project-convention docs so the two never muddy each other.
 
 ## Preferences
 
