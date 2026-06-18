@@ -80,8 +80,10 @@ function launchChrome(userDataDir, timeoutMs) {
 }
 
 test(
-  "the unpacked extension loads in Chrome: the service worker registers and GCal is built",
-  { skip },
+  "the unpacked extension loads in Chrome: the service worker registers its declarativeContent icon rules",
+  // A hard cap so a CI-only hang (e.g. an unsettled CDP await) fails fast with
+  // this test's own diagnostics instead of burning the whole job's timeout.
+  { skip, timeout: 120000 },
   async () => {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "gcal-e2e-"));
     const { proc, endpoint } = launchChrome(userDataDir, 30000);
@@ -117,10 +119,12 @@ test(
       await cdp.send("Target.createTarget", { url: "about:blank" }); // wake the worker
       const targetId = await swTargetId;
 
-      // Attach and run code *inside the worker*: it ran end to end iff its
-      // install handler registered the declarativeContent icon rules (which means
-      // it fetched the host lists and decoded the packaged icons via
-      // OffscreenCanvas — the whole startup path).
+      // Attach and run code *inside the worker*: drive its real startup path
+      // (installRules: fetch the host lists, decode the packaged icons via
+      // OffscreenCanvas, register the declarativeContent rules) and confirm the
+      // rules landed. Calling installRules() directly — rather than racing
+      // whichever moment onInstalled/onStartup happens to wake the worker — keeps
+      // this deterministic; onInstalled just calls the same function.
       const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
       const evaluate = async (expression) => {
         const { result, exceptionDetails } = await cdp.send(
@@ -133,29 +137,38 @@ test(
         }
         return result.value;
       };
-      // The service_worker target can appear before its async install handler has
-      // finished registering the rules, so poll rather than racing a single read
-      // (then let the assertion report the last value seen).
-      const evaluateUntil = async (expression, want, timeoutMs = 10000) => {
-        const deadline = Date.now() + timeoutMs;
-        let value;
-        do {
-          value = await evaluate(expression);
-          if (value === want) break;
-          await new Promise((r) => setTimeout(r, 100));
-        } while (Date.now() < deadline);
-        return value;
-      };
 
-      // The install handler ran end to end iff declarativeContent now holds at
-      // least one icon rule (gray for the denylist, green for supported hosts).
-      assert.equal(
-        await evaluateUntil(
-          "new Promise((r) => chrome.declarativeContent.onPageChanged.getRules((rules) => r(rules.length > 0)))",
-          true
-        ),
-        true,
-        "the worker's install handler must register declarativeContent icon rules inside the live worker"
+      // The probe always settles (every await is bounded by a timeout) and
+      // returns a diagnostic string, so a CI-only failure reports the observed
+      // state instead of hanging the job — see docs/engineeringPractices.md.
+      const probe = `(async () => {
+        const withTimeout = (p, ms, tag) =>
+          Promise.race([Promise.resolve(p), new Promise((r) => setTimeout(() => r(tag), ms))]);
+        try {
+          if (typeof installRules !== "function") return "no-installRules-fn";
+          await withTimeout(installRules(), 8000, "installRules-timeout");
+          return await withTimeout(
+            new Promise((resolve) =>
+              chrome.declarativeContent.onPageChanged.getRules((rules) =>
+                resolve("rules:" + (Array.isArray(rules) ? rules.length : "none"))
+              )
+            ),
+            4000,
+            "getRules-timeout"
+          );
+        } catch (e) {
+          return "error:" + (e && e.message ? e.message : e);
+        }
+      })()`;
+
+      // The worker ran its startup path end to end iff declarativeContent now
+      // holds at least one icon rule (gray for the denylist, green for supported
+      // hosts). "rules:0" / a timeout / an error all fail with the observed value.
+      const result = await evaluate(probe);
+      assert.match(
+        result,
+        /^rules:[1-9]/,
+        `the worker's installRules() must register declarativeContent icon rules inside the live worker (probe returned "${result}")`
       );
     } finally {
       if (cdp) cdp.close();
