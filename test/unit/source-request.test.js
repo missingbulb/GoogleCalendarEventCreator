@@ -88,14 +88,26 @@ test("omits empty fields so the user fills them in on the form", () => {
   assert.equal(new URL(buildSourceRequestUrl(PREFILL)).searchParams.has("end"), false);
 });
 
-test("the prefilled field ids match the template's field ids", () => {
+test("the prefilled field ids match the template's prefillable field ids", () => {
   const template = fs.readFileSync(
     path.join(__dirname, "..", "..", ".github", "ISSUE_TEMPLATE", "extractor-request.yml"),
     "utf8"
   );
-  const templateIds = [...template.matchAll(/^\s*id:\s*(\S+)/gm)].map((m) => m[1]);
+  // Only input/textarea fields carry a URL-prefilled value; a checkboxes field
+  // (e.g. "single-event") can't be prefilled via query params, so it's not a
+  // PARAM_KEY. Scope the comparison to the prefillable field types.
+  const prefillableIds = template
+    .split(/^\s*-\s*type:\s*/m)
+    .slice(1)
+    .map((block) => {
+      const type = block.split("\n")[0].trim();
+      const id = (block.match(/^\s*id:\s*(\S+)/m) || [])[1];
+      return { type, id };
+    })
+    .filter((f) => f.type === "input" || f.type === "textarea")
+    .map((f) => f.id);
   const PARAM_KEYS = ["url", "name", "start", "end", "timezone", "location", "description"];
-  assert.deepEqual(templateIds, PARAM_KEYS);
+  assert.deepEqual(prefillableIds, PARAM_KEYS);
 });
 
 // The prefill seeds the timezone from the fallback event's ctz, but falls back
