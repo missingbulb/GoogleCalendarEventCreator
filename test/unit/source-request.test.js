@@ -88,26 +88,58 @@ test("omits empty fields so the user fills them in on the form", () => {
   assert.equal(new URL(buildSourceRequestUrl(PREFILL)).searchParams.has("end"), false);
 });
 
-test("the prefilled field ids match the template's prefillable field ids", () => {
+// Parse the template's fields into { type, id } records (type precedes id in
+// each "- type:" block).
+function templateFields() {
   const template = fs.readFileSync(
     path.join(__dirname, "..", "..", ".github", "ISSUE_TEMPLATE", "extractor-request.yml"),
     "utf8"
   );
-  // Only input/textarea fields carry a URL-prefilled value; a checkboxes field
-  // (e.g. "single-event") can't be prefilled via query params, so it's not a
-  // PARAM_KEY. Scope the comparison to the prefillable field types.
-  const prefillableIds = template
+  return template
     .split(/^\s*-\s*type:\s*/m)
     .slice(1)
     .map((block) => {
       const type = block.split("\n")[0].trim();
       const id = (block.match(/^\s*id:\s*(\S+)/m) || [])[1];
-      return { type, id };
-    })
-    .filter((f) => f.type === "input" || f.type === "textarea")
-    .map((f) => f.id);
-  const PARAM_KEYS = ["url", "name", "start", "end", "timezone", "location", "description"];
+      return { type, id, block };
+    });
+}
+
+test("the prefilled field ids match the template's prefillable field ids", () => {
+  // input/textarea/dropdown fields accept a URL-prefilled value (a checkboxes
+  // field would not); each such id must be a prefill key and vice versa.
+  const prefillableIds = templateFields()
+    .filter((f) => ["input", "textarea", "dropdown"].includes(f.type))
+    .map((f) => f.id)
+    .sort();
+  const PARAM_KEYS = [
+    "url", "name", "start", "end", "timezone", "location", "description", "single-event",
+  ].sort();
   assert.deepEqual(prefillableIds, PARAM_KEYS);
+});
+
+test("the single-event field is a prefillable text input whose default is a known option", async () => {
+  const { SINGLE_EVENT_OPTIONS } = await import(
+    pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "source-request-view.js"))
+  );
+  const field = templateFields().find((f) => f.id === "single-event");
+  // GitHub only prefills text fields, so this must be an `input` (a dropdown's
+  // query-param prefill is silently ignored).
+  assert.equal(field.type, "input");
+  // Its default value must be one of the constants the popup writes, so the
+  // template wording and the popup can't drift apart.
+  const value = (field.block.match(/^\s*value:\s*"([^"]*)"/m) || [])[1];
+  assert.ok(
+    Object.values(SINGLE_EVENT_OPTIONS).includes(value),
+    `template default value "${value}" is not a known single-event option`
+  );
+});
+
+test("pre-selects the single-event option from the event count", () => {
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 1)["single-event"], "Single event");
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 3)["single-event"], "Multiple events");
+  // Defaults to single when no count is given.
+  assert.equal(sourceRequestPrefill(PREFILL, {})["single-event"], "Single event");
 });
 
 // The prefill seeds the timezone from the fallback event's ctz, but falls back

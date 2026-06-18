@@ -38,8 +38,18 @@ const POLICY_DOC_PATH = "docs/extraction-policy.md";
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query
-// param matching its id.
-const SOURCE_REQUEST_FIELDS = ["url", "name", "start", "end", "timezone", "location", "description"];
+// param matching its id. GitHub prefills only TEXT fields (`input`/`textarea`)
+// this way — NOT `dropdown` or `checkboxes` — so "single-event" is a plain text
+// input whose value we set to one of SINGLE_EVENT_OPTIONS below.
+const SOURCE_REQUEST_FIELDS = [
+  "url", "name", "start", "end", "timezone", "location", "description", "single-event",
+];
+
+// The two values the popup writes into the `single-event` text field — the same
+// strings the agent prompt and the template's guidance use, so they read
+// consistently everywhere. A unit test asserts the template's default value is
+// one of these, so the wording can't drift apart silently.
+export const SINGLE_EVENT_OPTIONS = { single: "Single event", multiple: "Multiple events" };
 
 // Generic registry labels that, sitting directly under a two-letter
 // country-code TLD, form a compound public suffix: `co.uk`, `com.au`, `gov.il`,
@@ -121,8 +131,12 @@ function headingLink(text, url, tab) {
 // State 5: a complete fallback event on an unlisted host. A "Suggest Correction"
 // link that opens the prefilled GitHub "Event source request" issue, seeded with
 // the scraped event — a logged-in user just submits the already-filled form.
-export function makeSourceRequestLink(tab, event) {
-  return headingLink("Suggest Correction", buildSourceRequestUrl(sourceRequestPrefill(tab, event)), tab);
+export function makeSourceRequestLink(tab, event, eventCount = 1) {
+  return headingLink(
+    "Suggest Correction",
+    buildSourceRequestUrl(sourceRequestPrefill(tab, event, eventCount)),
+    tab
+  );
 }
 
 // State 3: nothing to show on a non-denylisted host. A quiet "Disagree?" link to
@@ -136,9 +150,14 @@ export function makePolicyLink(tab) {
 // often just the URL and title (no event was parsed), so the user completes
 // the rest in the form itself.
 //
+// `eventCount` is how many complete events the popup found on the page (the
+// fallback's presentable events); >1 pre-selects the "Multiple events" dropdown
+// option so the agent extracts them all, telling it not to bail on a multi-date
+// page. The hint fields below still describe just the first event.
+//
 // Exported for the unit tests (the make* link builders that call it touch
 // chrome.tabs/document, so the tests exercise the prefill directly).
-export function sourceRequestPrefill(tab, event) {
+export function sourceRequestPrefill(tab, event, eventCount = 1) {
   event = event || {};
   // The event carries its timing in times[] (the multi-instance model); seed the
   // form from the first instance. A flat { start, end } event is tolerated too.
@@ -154,6 +173,7 @@ export function sourceRequestPrefill(tab, event) {
     timezone: event.ctz || currentTimezone(),
     location: event.location || "",
     description: event.description || "",
+    "single-event": eventCount > 1 ? SINGLE_EVENT_OPTIONS.multiple : SINGLE_EVENT_OPTIONS.single,
   };
 }
 

@@ -20,18 +20,19 @@ body:
       description: The event page to add support for.
     validations:
       required: true
-  - type: checkboxes
+  - type: input
     id: single-event
     attributes:
       label: Single event page
       description: >-
-        Leave this checked if the page is about one specific event. Uncheck it if
-        the page can show several events (e.g. a listing, calendar, or a tour with
-        multiple dates) — the agent will then extract every event it finds rather
-        than treating the page as unusable.
-      options:
-        - label: This page is about a single event.
-          required: false
+        Does this page describe one specific event, or several? Enter "Single
+        event", or "Multiple events" for a listing, calendar, or a tour with
+        multiple dates — the agent will then extract every event it finds rather
+        than treating the page as unusable. (The extension fills this in for you
+        when you open the form from its popup. It's a plain text field because
+        GitHub only prefills text fields from the popup's link, not dropdowns or
+        checkboxes.)
+      value: "Single event"
   - type: input
     id: name
     attributes:
