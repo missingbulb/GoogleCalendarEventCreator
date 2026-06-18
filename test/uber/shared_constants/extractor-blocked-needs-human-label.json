@@ -5,6 +5,6 @@
     ".github/workflows/auto-implement-extractor.yml": 3,
     "tools/new-extractors-creation/probe-url.js": 1,
     "tools/new-extractors-creation/phase2-finalize.sh": 3,
-    "tools/new-extractors-creation/agent-prompt-extractor.md": 2
+    "tools/new-extractors-creation/agent-prompt-extractor.md": 4
   }
 }

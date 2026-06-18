@@ -5,6 +5,6 @@
     ".github/workflows/auto-implement-extractor.yml": 3,
     "tools/new-extractors-creation/handoff-to-agent.sh": 4,
     "tools/new-extractors-creation/phase2-finalize.sh": 1,
-    "tools/new-extractors-creation/agent-prompt-extractor.md": 3
+    "tools/new-extractors-creation/agent-prompt-extractor.md": 4
   }
 }

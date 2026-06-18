@@ -172,8 +172,17 @@ If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page:
    not a single event page — there's no one date+venue a static extractor could
    turn into a calendar event."*
 3. On the issue, **remove the `extractor-agent-ready` label and add
-   `extractor-blocked-needs-human`.** Do not add `extractor-agent-done` (that's the
-   success signal). Then stop.
+   `extractor-blocked-needs-human`** — create that label first, since GitHub won't
+   make a new label on `--add-label`:
+   ```bash
+   gh label create "extractor-blocked-needs-human" --color B60205 \
+     --description "Automation could not proceed; a maintainer needs to take this over by hand" \
+     2>/dev/null || true
+   gh issue edit "$ISSUE_NUMBER" \
+     --remove-label "extractor-agent-ready" \
+     --add-label "extractor-blocked-needs-human"
+   ```
+   Do not add `extractor-agent-done` (that's the success signal). Then stop.
 
 ---
 
