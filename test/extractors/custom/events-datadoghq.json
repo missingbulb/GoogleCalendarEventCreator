@@ -1,6 +1,20 @@
 {
-  "description": "events.datadoghq.com: TODO(agent) — one line on what this case tests",
+  "description": "events.datadoghq.com: virtual Datadog Live Israel event with start time from about-section text and Asia/Jerusalem timezone",
   "expected": {
-    "events": []
+    "events": [
+      {
+        "title": "Virtual Datadog Live Israel with Viber",
+        "location": "Online",
+        "ctz": "Asia/Jerusalem",
+        "details": "https://events.datadoghq.com/events/datadog-live-israel-0626/\n\nWe invite you to a virtual event in Hebrew designed to bring together industry leaders, experts, and professionals, where we will explore real, day-to-day use cases and foster connection through shared experiences.\nDuring the event, Viber will share how it uses the platform to improve communication and resolve issues more efficiently. With Datadog, Viber has reduced log noise, improved visibility across its systems, and accelerated issue detection at scale.",
+        "times": [
+          {
+            "start": "2026-06-23T10:00:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
   }
 }
