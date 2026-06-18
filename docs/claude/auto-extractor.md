@@ -1,251 +1,279 @@
 # Automated extractor implementation
 
-A GitHub Actions workflow automatically implements new site extractors when an
-issue labelled `extractor-request` is opened. This covers the mechanics; the
-project conventions for what a correct extractor looks like live in
+New site extractors are implemented automatically when an issue labelled
+`extractor-request` is opened. The work runs in **three stages, each fired by a
+label** — two GitHub Actions workflows with a Claude Code on the web routine
+between them:
+
+```
+extractor-request      → prepare workflow (auto-implement-extractor.yml)
+                           triage + probe + scaffold, then swaps the label:
+                           −extractor-request  +extractor-agent-ready
+extractor-agent-ready  → Claude Code web routine (the agent)
+                           writes extract() + the case, pushes, then re-labels:
+                           success → −extractor-agent-ready +extractor-agent-done
+                           bail    → comment + −extractor-agent-ready +human involvement required
+extractor-agent-done   → finalize workflow (finalize-extractor.yml)
+                           blast-radius guard + quality floor + re-verify + PR,
+                           then clears extractor-agent-done
+```
+
+The agent moved **out** of Actions (it used to be a `claude` CLI step) and into a
+web routine wired to the `extractor-agent-ready` label, so the API-key/spend-cap
+concerns now live with that routine, not in this repo. Everything deterministic —
+before the agent (triage, probe, scaffold) and after it (blast-radius, re-verify,
+PR) — stays in the two workflows; the agent owns only the judgment step. This
+covers the mechanics; what a *correct* extractor looks like lives in
 `docs/claude/adding-a-source.md`.
 
 ## How to trigger it
 
 Open a new issue using the **Event source request** template
 (`.github/ISSUE_TEMPLATE/extractor-request.yml`). It pre-applies the
-`extractor-request` label, which starts the workflow immediately. The only
-required field is a public URL for a specific event page on the target site;
-the other fields (name, time, location, …) are optional context the agent can
-use to sanity-check its extraction.
+`extractor-request` label, which starts the prepare workflow immediately. The only
+required field is a public URL for a specific event page on the target site; the
+other fields (name, time, location, …) are optional context the agent can use to
+sanity-check its extraction.
 
 This is the **same form the extension's popup opens** from its "Request support
-for this site" button (`ui/views/source-request-view.js`), so an end-user
-request flows straight into the pipeline — submitting it is what fires the agent.
-Because every submission that gets past triage + the URL probe spends an agent
-run, keep an Anthropic spend cap set (see the secret note below).
+for this site" button (`ui/views/source-request-view.js`), so an end-user request
+flows straight into the pipeline.
 
 You can also trigger it on any existing issue by adding the `extractor-request`
-label by hand, as long as the issue body contains an event page URL the agent
-can parse.
+label by hand, as long as the issue body contains an event page URL.
 
 ## Where the pieces live
 
 Almost everything for this pipeline is one self-contained folder,
 `tools/new-extractors-creation/`:
 
-- `agent-prompt-extractor.md` — the agent's prompt template (Step 6 fills its
-  placeholders).
+- `agent-prompt-extractor.md` — the agent's prompt, **self-contained** (no
+  build-time interpolation): the web routine points the agent at it, and it tells
+  the agent to read the prepare workflow's hand-off comment for the branch + files.
 - `triage-extractor-request.js`, `probe-url.js`, `extractor-naming.js`,
-  `scaffold-source.js`, `scaffold-case.js`, `add-supported-domain.js` — the
-  deterministic Node steps the workflow runs around the agent.
-- `phase1-prepare.sh`, `build-prompt.py`, `phase2-finalize.sh` — the bash/python
-  the workflow used to inline. The YAML now just calls them, so it reads as a
-  **thin orchestrator**: triggers, permissions, per-step `env:` wiring, and one
-  script invocation per step.
+  `derive-names.js`, `scaffold-source.js`, `scaffold-case.js`,
+  `add-supported-domain.js`, `case-quality.js` — the deterministic Node steps the
+  workflows run around the agent.
+- `phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh` — the bash the
+  workflows call, so the YAML reads as a **thin orchestrator**: triggers,
+  permissions, per-step `env:` wiring, one script invocation per step.
 
-Two files **must** live under `.github/` because GitHub pins them there. They
+Three files **must** live under `.github/` because GitHub pins them there. They
 stay put and refer back to the folder:
 
-- `.github/workflows/auto-implement-extractor.yml` — the workflow. Workflows only
-  run from `.github/workflows/`; this one calls every script above, so the
-  substance lives in the folder and the YAML is just wiring.
-- `.github/ISSUE_TEMPLATE/extractor-request.yml` — the issue form. It's a
-  declarative template GitHub renders for the "New issue" UI (and the popup opens
-  it by filename via `?template=`), so it can't be relocated or factored out.
+- `.github/workflows/auto-implement-extractor.yml` — the **prepare** workflow.
+- `.github/workflows/finalize-extractor.yml` — the **finalize** workflow (Phase 2).
+- `.github/ISSUE_TEMPLATE/extractor-request.yml` — the issue form GitHub renders
+  for the "New issue" UI (the popup opens it by filename via `?template=`), so it
+  can't be relocated or factored out.
 
 Shared infrastructure the scripts lean on stays where it's shared, **not** in the
 folder: `data/fetch-page.js` (also used by `refresh-cache`), `config.js` /
 `fallback-policy.js` (the popup's host classifier), and `tools/index.js`
-(`npm run index`, run by every source addition). The pipeline *consumes* these;
-it doesn't own them.
+(`npm run index`, run by every source addition). The pipeline *consumes* these; it
+doesn't own them.
 
-## What the workflow does
+## Stage 1 — the prepare workflow
 
-The workflow is `.github/workflows/auto-implement-extractor.yml`. In order:
+`.github/workflows/auto-implement-extractor.yml`, on `extractor-request`. In order:
 
 1. Checks out the repo.
-2. **Triages the request** (`tools/new-extractors-creation/triage-extractor-request.js`): pulls the event
-   URL from the issue and decides whether the request is already settled. It
-   closes the issue as "not planned" and **skips every remaining step** (no probe,
-   no `npm ci`, no agent run) for any of four reasons:
+2. **Triages the request** (`triage-extractor-request.js`): pulls the event URL
+   from the issue and decides whether the request is already settled. It closes
+   the issue as "not planned" and **skips every remaining step** (no probe, no
+   `npm ci`, no hand-off) for any of four reasons:
    - **supported** — the host already has a dedicated source, per `config.js`'s
      `supportedDomains` (a static mirror of the sources' own `matches()`, kept
      honest by `test/unit/supported-domains.test.js`);
    - **deny** / **allow** — the host is on the fallback denylist/allowlist (the
      same `classifyHost` the popup uses, via `fallback-policy.js`);
    - **duplicate** — another **open** `extractor-request` issue already targets
-     this host (lowest issue number wins; a prior step gathers the open peers
-     with `gh` and passes them in, so the script stays offline).
+     this host (lowest issue number wins; a prior step gathers the open peers with
+     `gh` and passes them in, so the script stays offline).
 
    It also emits the event `url`, `host`, and the deterministic `slug`/`caseName`
-   (`tools/new-extractors-creation/extractor-naming.js`) the later steps consume. Runs before `npm ci`, so
-   a triaged request costs almost nothing, and fails **open** — any error proceeds.
-3. **Probes the event URL** (`tools/new-extractors-creation/probe-url.js`): fetches it the same way the
-   recorder will (shared `data/fetch-page.js` — browser headers + retries) and
-   decides whether the page is **usable** as a static case. Not usable when: the
-   URL is missing; the fetch returns anything but a 2xx (unreachable, login/bot
-   wall); **or** it returns a 2xx whose body is actually a bot-challenge /
-   interstitial rather than the event page — `probe-url.js`'s `detectChallenge`
-   sniffs the body for known vendor markers (AWS WAF, Cloudflare, DataDome,
-   PerimeterX, Imperva, reCAPTCHA/hCaptcha) and a suspiciously-small size, the one
-   soft-200 block we can catch cheaply before spending the agent (#279 StubHub).
-   In every not-usable case there is no real page to record against, so the run
-   **stops** — but stopping is an **expected outcome, not a failure**: the probe
-   step records its decision in the `proceed` step-output, the downstream steps
-   gate on `proceed == 'true'`, and the run ends **green** with a "page not usable"
-   comment naming the reason. One not-usable case is singled out: when the fetch
-   **fails outright** (`probe-url.js` exit 3 — a 403 / unreachable host / login or
-   bot wall, where the HTML never downloaded at all), the probe also sets a
-   `downloadFailed` output. A re-run can't coax HTML out of a server that's
-   refusing the request, so that path hands the issue to a human — it **drops the
-   `extractor-request` label and adds `human involvement required`**, with a
-   comment that names the download failure explicitly (the other not-usable cases
-   keep the plain "page not usable" comment). (A JS-rendered SPA shell that returns a full-but-empty
-   page still slips past — it's a real 2xx with no markers — and is caught later by
-   the agent's judgment step.) Runs before `npm ci`. Reusing the recorder's exact
-   headers is the whole point: a bare `curl` is rejected by sites that serve a real
-   browser, which would false-reject requests the recorder could actually fulfil.
-4. Installs dependencies + the `claude` CLI, configures git, and sets up a
-   Chrome for Testing binary (`CHROME_PATH` + `RENDER_NO_SANDBOX`, mirroring
-   `refresh-cache.yml`) so the inline `npm run refresh` below can render a
-   JS single-page-app shell instead of recording an empty one (#334; without it
-   every SPA — barby #325, visit.tel-aviv #277 — records a shell and the agent
-   bails).
-5. **Prepares the branch — Phase 1, all deterministic, in the workflow
-   (`tools/new-extractors-creation/phase1-prepare.sh`, not the agent):** branches `claude/extractor/<slug>`
-   off `main`; records the page inline (`data/<caseName>.url` + the empty `.html`
-   signal → `npm run refresh`, which renders an SPA shell via headless Chrome when
-   `data/spa-shell.js` flags one, asserted non-empty); **scaffolds**
-   `pipeline/sources/<slug>.js` with its `matches()` already filled
-   (`tools/new-extractors-creation/scaffold-source.js`) **and the placeholder case
+   (`extractor-naming.js`) the later steps consume. Runs before `npm ci`, so a
+   triaged request costs almost nothing, and fails **open** — any error proceeds.
+3. **Probes the event URL** (`probe-url.js`): fetches it the same way the recorder
+   will (shared `data/fetch-page.js` — browser headers + retries) and decides
+   whether the page is **usable** as a static case. Not usable when: the URL is
+   missing; the fetch returns anything but a 2xx (unreachable, login/bot wall);
+   **or** it returns a 2xx whose body is actually a bot-challenge / interstitial —
+   `detectChallenge` sniffs the body for known vendor markers (AWS WAF, Cloudflare,
+   DataDome, PerimeterX, Imperva, reCAPTCHA/hCaptcha) and a suspiciously-small
+   size, the one soft-200 block we can catch cheaply before handing off (#279
+   StubHub). In every not-usable case there's no real page to record against, so
+   the run **stops** — but stopping is an **expected outcome, not a failure**: the
+   probe records its decision in `proceed`, the downstream steps gate on
+   `proceed == 'true'`, and the run ends **green** with a "page not usable"
+   comment. One not-usable case is singled out: when the fetch **fails outright**
+   (`probe-url.js` exit 3 — a 403 / unreachable host / login or bot wall, where the
+   HTML never downloaded), the probe sets a `downloadFailed` output. A re-run can't
+   coax HTML out of a refusing server, so that path hands the issue to a human — it
+   **drops `extractor-request` and adds `human involvement required`**, with a
+   comment naming the download failure. (A JS-rendered SPA shell that returns a
+   full-but-empty page still slips past — a real 2xx with no markers — and is
+   caught later by the agent's judgment.) Runs before `npm ci`.
+4. Installs dependencies, configures git, and sets up a Chrome for Testing binary
+   (`CHROME_PATH` + `RENDER_NO_SANDBOX`, mirroring `refresh-cache.yml`) so Phase 1's
+   `npm run refresh` can render a JS single-page-app shell instead of recording an
+   empty one (#334; without it every SPA — barby #325, visit.tel-aviv #277 —
+   records a shell and the agent bails).
+5. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
+   branches `claude/extractor/<slug>` off `main`; records the page inline
+   (`data/<caseName>.url` + the empty `.html` signal → `npm run refresh`, rendering
+   an SPA shell via headless Chrome when `data/spa-shell.js` flags one, asserted
+   non-empty); **scaffolds** `pipeline/sources/<slug>.js` with `matches()` filled
+   (`scaffold-source.js`) **and the placeholder case
    `test/extractors/custom/<caseName>.json`** with empty `events`
-   (`tools/new-extractors-creation/scaffold-case.js`); registers the host in `supportedDomains`
-   (`tools/new-extractors-creation/add-supported-domain.js`); and runs `npm run index` to regenerate the
-   load lists. A baseline `npm run test:offline` must be green before the agent is
-   spent; then it commits and pushes. (A `GITHUB_TOKEN` push doesn't fire
-   `refresh-cache.yml`'s push trigger, so the page is recorded once.)
-6. Interpolates the issue + the branch/slug/caseName/host/url into the prompt
-   template (`tools/new-extractors-creation/build-prompt.py`) and runs the agent
-   (`claude … --model claude-sonnet-4-6 -p …`) on the prepared branch. (Sonnet,
-   not Haiku: the one judgment the agent owns — recognising a listing/index page
-   and bailing, vs. shipping a degenerate single-event case — needs the stronger
-   model; Haiku shipped a bare-title case off a multi-date tour page, #283.)
-7. **Finalizes — Phase 2, again in the workflow
-   (`tools/new-extractors-creation/phase2-finalize.sh`):** enforces the blast radius (below), re-runs
-   `test:live` + `test:offline`, commits the agent's two files, opens the PR
-   (`Closes #N`), dispatches `test.yml` against the branch, and comments the PR
-   link on the issue.
+   (`scaffold-case.js`); registers the host in `supportedDomains`
+   (`add-supported-domain.js`); runs `npm run index` to regenerate the load lists;
+   requires a green baseline `npm run test:offline`; then commits + pushes. The
+   commit message is `chore: scaffold <slug> extractor …` — Phase 2 finds the
+   **scaffold commit** by that message. (A `GITHUB_TOKEN` push doesn't fire
+   `refresh-cache.yml`, so the page is recorded once.)
+6. **Hands off to the agent (`handoff-to-agent.sh`):** posts a comment carrying a
+   machine-readable `extractor-handoff` block (branch, source path, case path,
+   host, url — what the agent reads to know where to work), then swaps the label:
+   removes `extractor-request`, adds `extractor-agent-ready`. **Adding that label
+   is the trigger for the web routine.** The comment is posted *before* the label
+   so the agent sees the hand-off on arrival.
 
-So the agent owns only the judgment step (see `tools/new-extractors-creation/agent-prompt-extractor.md`):
-read the real cached page, fill in `extract()` (and the source's header), fill the
-pre-created `test/extractors/custom/<caseName>.json` from the actual
-`npm run test:live` output, and confirm `test:live` + `test:offline` are green —
-then stop. It does **not** create the branch, edit `matches()` / `supportedDomains`
-/ the load lists, commit, open the PR, or dispatch CI.
+## Stage 2 — the agent (Claude Code on the web)
 
-**The agent's write surface is exactly two pre-created files** — the source and the
-case. This is a containment guarantee, not just an instruction: Phase 2's
-blast-radius guard reverts any *other* tracked change the agent made (e.g. a shared
-helper) back to the scaffold commit and deletes anything it created, so a
-misbehaving agent can't reach the PR. (If the extractor genuinely depended on a
-reverted edit, the re-verify goes red and no PR opens — exactly right.) The prompt
-tells the agent to inline any helper logic into its own source IIFE, as
-`meetup.js` does, rather than touch `pipeline/helpers/`.
+A web routine wired to the `extractor-agent-ready` label runs the agent against
+`agent-prompt-extractor.md`. The agent owns **only the judgment step**: read the
+hand-off comment, check out the branch, read the real cached page, fill in
+`extract()` (and the source header), fill the pre-created case from the actual
+`npm run test:live` output, confirm `test:live` + `test:offline` are green.
 
-Its one judgment escape hatch: if the cached `data/<caseName>.html` isn't **one
-specific event** — a bot/CAPTCHA/login/SPA-shell page, or a listing/index/artist/
-tour page showing many dates (a soft 2xx the probe's `detectChallenge` can't see),
-it **stops**, writes a one-sentence diagnosis to `BAIL_REASON_FILE` (`/tmp`, so the
-blast-radius `git clean` can't delete it), and **leaves the case's `events`
-empty** — it does **not** comment itself.
+**The agent's write surface is exactly two files** — the source and the case.
+It commits and pushes *only those two* (it runs in its own environment now, so it
+must push for the finalize workflow to see its work), then re-labels:
 
-A filled case is the agent's done-signal, but Phase 2 doesn't trust it blindly: it
-runs a deterministic **quality floor** (`tools/new-extractors-creation/case-quality.js`)
-before opening a PR. The verdict is `empty` (the agent bailed), `degenerate` (a
-filled case whose event has **no location** — the signature of a listing page that
-yielded only a bare title, #283 livenation), or `ok`. For `empty` and `degenerate`
-**Phase 2 posts the comment itself** — quoting the diagnosis file for a bail, a
-"looks like a listing page" note for a degenerate one — so an issue the agent
-worked always gets a reply, and exits **green** (both are expected, not failures);
-only `ok` opens a PR. Two earlier misses drove this: the agent didn't reliably
-comment on a bail (#277, so the comment is now the workflow's job), and Haiku
-shipped a degenerate bare-title case off a listing page (#283, so the floor
-rejects it and the agent now runs on **Sonnet**).
+- **success** → removes `extractor-agent-ready`, adds `extractor-agent-done` (the
+  finalize trigger). It does **not** open the PR.
+- **bail** → the cached page isn't **one specific event** (a bot/CAPTCHA/login/
+  SPA-shell page, or a listing/index/artist/tour page showing many dates — a soft
+  2xx the probe's `detectChallenge` can't see). It leaves the case's `events`
+  empty, **posts a one-sentence diagnosis comment itself**, removes
+  `extractor-agent-ready`, and adds `human involvement required`. It does **not**
+  add `extractor-agent-done`, so finalize never runs.
 
-### Why the workflow dispatches CI itself
+The two-file surface is a *containment guarantee*, not just an instruction, but the
+guarantee is enforced by Stage 3 (the finalize workflow), not the agent — see
+below. The prompt tells the agent to inline any helper logic into its own source
+IIFE, as `meetup.js` does, rather than touch `pipeline/helpers/`.
+
+## Stage 3 — the finalize workflow (Phase 2)
+
+`.github/workflows/finalize-extractor.yml`, on `extractor-agent-done`. This is the
+**external enforcement** of the agent's containment — it runs in a runner the agent
+doesn't control, so the blast-radius guard is a guarantee rather than a request
+(`docs/architectureGuidelines.md`). It:
+
+1. **Re-derives the names** (`derive-names.js`) from the issue's event URL — the
+   same `slug`/`caseName`/`host` Phase 1 used, from the same code — since the
+   `labeled` event payload carries only the issue, not the branch.
+2. Checks out the agent's branch (`phase2-finalize.sh` does the `git checkout`).
+3. **Blast-radius guard:** finds the **scaffold commit** (the Phase-1 commit,
+   matched by its message), then diffs the agent's commits against it. Because the
+   agent now commits in a separate environment, this is a **commit diff**, not a
+   working-tree diff: any file the agent changed *other than* the source + case is
+   reverted to the scaffold state (a created file is removed) in a fresh commit, so
+   a misbehaving agent can't reach the PR. (If the extractor truly depended on a
+   reverted edit, the re-verify below goes red and no PR opens — exactly right.)
+4. **Quality floor** (`case-quality.js`): a deterministic backstop to the agent's
+   bail judgment. Verdicts: `empty` (case has no events), `degenerate` (a filled
+   case whose event has **no location** — the signature of a listing page that
+   yielded only a bare title, #283 livenation), or `ok`. A clean bail goes through
+   the agent's own Stage-2 path (`human involvement required`) and never reaches
+   here, so `empty`/`degenerate` arriving on `extractor-agent-done` are anomalies:
+   Phase 2 **comments, hands the issue to a human** (clears `extractor-agent-done`,
+   adds `human involvement required`), and exits **green** — no PR. Only `ok`
+   proceeds.
+5. **Re-verifies** (`npm ci` + `test:live` + `test:offline` — don't trust the
+   agent), pushes any blast-radius revert, **opens the PR** (`Closes #N`),
+   dispatches `test.yml` so checks attach to the branch, comments the PR link, and
+   **clears `extractor-agent-done`** (the automation's terminal state).
+
+### Why the finalize workflow dispatches CI itself
 
 GitHub deliberately **does not start a workflow run for events triggered by the
-built-in `GITHUB_TOKEN`** (this prevents a workflow from recursively triggering
-itself). So the Phase-2 `git push` and `gh pr create` do **not** kick off
-`test.yml` the way a human push would — the PR would otherwise open with an empty
-checks section.
+built-in `GITHUB_TOKEN`** (preventing a workflow from recursively triggering
+itself). So Phase 2's `git push` and `gh pr create` do **not** kick off `test.yml`
+— the PR would open with an empty checks section. The one documented exception is
+`workflow_dispatch`, so after opening the PR, Phase 2 dispatches `test.yml`
+(which has a `workflow_dispatch:` trigger) against the branch; the run executes on
+the branch head, so its checks attach to that commit and appear on the PR.
 
-The one documented exception is `workflow_dispatch` (and `repository_dispatch`).
-So after opening the PR, Phase 2 dispatches `test.yml` (which has a
-`workflow_dispatch:` trigger) against the branch; the run executes against the
-branch's head commit, so its checks attach to that commit and appear on the PR for
-the reviewer. (The same `GITHUB_TOKEN` rule is what keeps Phase 1's inline
-`git push` from re-firing `refresh-cache.yml` — so the page is recorded once.)
+### Why the label relay works across the boundary
+
+The same `GITHUB_TOKEN` rule is exactly what makes the three-stage relay work:
+
+- The prepare workflow adds `extractor-agent-ready` with the Actions
+  `GITHUB_TOKEN`. That suppresses *Actions workflow* runs, but **not** GitHub App
+  webhook delivery — so the Claude GitHub App (the web routine) still receives the
+  label event and fires.
+- The agent adds `extractor-agent-done` with the **App's own token, not
+  `GITHUB_TOKEN`**, so it *does* start the finalize workflow.
+
+(And the same rule keeps Phase 1's `git push` from re-firing `refresh-cache.yml`,
+so the page is recorded once.)
 
 ## Required secrets
 
 | Secret | Purpose |
 |--------|---------|
-| `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` | Authenticate the `claude` CLI — **must be set** before this workflow can run |
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
 
-Add `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` under **Settings → Secrets and variables → Actions →
-Repository secrets**.
+No Anthropic API key is needed in this repo any more: the agent runs in the Claude
+Code on the web routine, which carries its own credentials/limits. (The old
+`ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` secret is no longer read by any
+workflow and can be removed.)
 
-## Permissions the workflow uses
+## Permissions the workflows use
 
-The workflow's `permissions:` block grants the `GITHUB_TOKEN`:
-- `contents: write` — push the feature branch (Phase 1 + the agent)
+**prepare** (`auto-implement-extractor.yml`) grants the `GITHUB_TOKEN`:
+- `contents: write` — create / push the feature branch
+- `issues: write` — post the progress / failure comment, swap labels
+
+**finalize** (`finalize-extractor.yml`) grants:
+- `contents: write` — push the blast-radius revert commit
 - `pull-requests: write` — open the PR
-- `issues: write` — post the progress / failure comment
-- `actions: write` — Phase 2 dispatches `test.yml` on the branch
+- `issues: write` — comment + clear the label
+- `actions: write` — dispatch `test.yml` on the branch
 
-## Timeout
+## Timeouts
 
-The workflow job times out at 90 minutes. The agent step itself is capped at
-75 minutes. Recording the page inline is quick now (it used to be the bulk of the
-wait, via the separate refresh workflow), so most of the elapsed time is the
-agent.
+The prepare job times out at 90 minutes (recording the page inline is quick, so it
+rarely comes close); the finalize job at 30 minutes. The agent's own time budget
+lives in the web routine, not here.
 
 ## Outcomes and comments
 
-Every run that touches an issue leaves exactly one comment. Four of the shapes
-are **expected stops that finish green** — not failures — and one is a genuine
-failure (red):
+Every run that touches an issue leaves a comment. The expected stops **finish
+green** — only a genuine break is red:
 
-- **HTML couldn't be downloaded → handed to a human** (green) — the URL probe's
-  fetch failed outright (`probe-url.js` exit 3: a 403 / unreachable host / login
-  or bot wall — the HTML never came back). **No agent run was started**, and
-  because a re-run can't fix a server that refuses the request, the workflow
-  hands the issue off: it **removes the `extractor-request` label** (so the
-  automation won't re-fire) and **adds a `human involvement required` label**.
-  The comment states the blocker explicitly — the HTML couldn't be downloaded —
-  and points to the manual path (`docs/claude/adding-a-source.md`).
-- **Page not usable** (green) — the URL probe stopped the run for a *fetched* but
-  unusable page: the event URL was missing, or the page came back as a 2xx
-  bot-challenge / interstitial (`detectChallenge`). **No agent run was started.**
-  The comment names the reason and links the run log. Add the site by hand
-  (`docs/claude/adding-a-source.md`). (An outright download failure is the
-  separate hand-off above.)
-- **Worked it, no PR** (green) — the agent ran but the case didn't clear the
-  Phase-2 quality floor: either it bailed and left the case empty (e.g. a JS-rendered
-  SPA shell the probe couldn't see), or it produced a `degenerate` event with no
-  location (a listing/tour page, #283). Phase 2 posts the diagnosis (a bail) or a
-  "looks like a listing page" note (degenerate) and opens no PR. The scaffolding
-  stays on the branch for follow-up.
-- **PR opened** (green) — the normal success path: Phase 2 commits, opens the PR,
-  and comments the link.
-- **Unexpected failure** (red) — only a genuine break reaches the `failure()`
-  comment now (the expected stops above no longer fail the job). A generic comment
-  links the run. Common causes:
-  - `ANTHROPIC_API_KEY_AUTO_IMPLEMENT_EXTRACTOR` missing/expired, or its Anthropic
-    **spend cap reached** (the `claude` CLI returns a usage-limit error and the
-    step fails — this is what stalled the first batch of requests);
-  - the agent exhausted its turn budget;
-  - the scaffold baseline or the Phase-2 re-verify went red.
+- **HTML couldn't be downloaded → handed to a human** (green, prepare) — the
+  probe's fetch failed outright (exit 3). No agent involved; the workflow removes
+  `extractor-request`, adds `human involvement required`, and names the blocker.
+- **Page not usable** (green, prepare) — the probe stopped for a *fetched* but
+  unusable page (missing URL, or a 2xx bot-challenge). No agent involved; the
+  comment names the reason and links the run.
+- **Bailed — not a single event** (green, Stage 2) — the agent judged the cached
+  page a bot wall / SPA shell / listing page, commented its diagnosis, and set
+  `human involvement required`. No PR; scaffolding stays on the branch.
+- **Anomaly handed to a human** (green, finalize) — `extractor-agent-done` arrived
+  but the case is `empty` or `degenerate` (quality floor). Phase 2 comments and
+  sets `human involvement required`. No PR.
+- **PR opened** (green, finalize) — the success path: re-verify passes, the PR
+  opens, the link is commented, `extractor-agent-done` is cleared.
+- **Unexpected failure** (red) — only a genuine break reaches a `failure()`
+  comment (in either workflow). Common causes: the scaffold baseline or the
+  re-verify went red; `npm ci` / page recording / git or PR work failed.
 
-In any of these cases, fall back to the manual process in
+In any of these, fall back to the manual process in
 `docs/claude/adding-a-source.md`.
 
 ## Review gate
@@ -255,17 +283,15 @@ The agent never merges the PR. A human must review:
 - The extracted values in `test/extractors/custom/<case-name>.json`
 - That `matches(host)` is correct for the target domain
 
-"LGTM" from the repo owner is the merge signal (see `docs/claude/github.md`).
-CI must go green before merging; the extractor branch adds a deterministic
-offline integration case (not an e2e/heavy-browser test), so one green run
-suffices — the twice-green flakiness gate applies only to e2e/heavy-browser
-changes (`docs/engineeringPractices.md`).
+"LGTM" from the repo owner is the merge signal (see `docs/claude/github.md`). CI
+must go green before merging; the extractor branch adds a deterministic offline
+integration case (not an e2e/heavy-browser test), so one green run suffices.
 
 ## Updating the agent prompt
 
-The prompt template is `tools/new-extractors-creation/agent-prompt-extractor.md`. The placeholders
-`{{ISSUE_NUMBER}}`, `{{ISSUE_TITLE}}`, `{{ISSUE_BODY}}`, `{{REPO}}`, `{{BRANCH}}`,
-`{{SLUG}}`, `{{CASE_NAME}}`, `{{HOST}}`, and `{{EVENT_URL}}` are substituted at
-runtime by the "Build agent prompt" step (`tools/new-extractors-creation/build-prompt.py`; the last
-five come from the triage step's outputs). Edit that file to change what the agent
-does or add site-specific guidance.
+The prompt is `tools/new-extractors-creation/agent-prompt-extractor.md`. It is
+**self-contained** — no placeholders, no build step: the web routine points the
+agent at it, and the agent reads the per-issue specifics (branch, source path, case
+path, host, url) from the prepare workflow's `extractor-handoff` comment. Edit that
+file to change what the agent does or add site-specific guidance; if you change the
+fields in the hand-off block, update `handoff-to-agent.sh` to match.

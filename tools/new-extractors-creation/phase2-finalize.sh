@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
-# Phase 2 of the auto-implement-extractor pipeline — deterministic wrap-up run by
-# the workflow (.github/workflows/auto-implement-extractor.yml) after the agent
-# stops, not the agent. See docs/claude/auto-extractor.md.
+# Phase 2 of the auto-implement-extractor pipeline — deterministic wrap-up, run by
+# the finalize workflow (.github/workflows/finalize-extractor.yml) when the agent
+# adds the `extractor-agent-done` label, NOT by the agent. See
+# docs/claude/auto-extractor.md.
 #
-# Enforce the two-file blast radius (revert anything the agent touched outside the
-# source + case), treat a still-empty case as a bail (the agent judged the page
-# unextractable and commented — no PR), else re-verify, commit the source + case,
-# open the PR, and dispatch test.yml so its checks attach to the branch.
+# Since the agent now runs in a separate environment (Claude Code on the web,
+# triggered by the `extractor-agent-ready` label) it commits and pushes its two
+# files itself; this workflow checks the branch out fresh. So the blast-radius
+# guard diffs the agent's commits against the SCAFFOLD COMMIT (Phase 1's commit)
+# rather than the working tree — it reverts anything the agent changed outside the
+# source + case, in a new commit. Then it runs the quality floor, re-verifies
+# (never trusting the agent), opens the PR, dispatches test.yml, and clears the
+# `extractor-agent-done` label.
 #
 # Reads GH_TOKEN / BRANCH / SLUG / CASE_NAME / HOST / ISSUE_NUMBER / REPO from the
 # env (set by the workflow step). cd's to the repo root, so it runs from anywhere.
@@ -17,64 +22,85 @@ cd "$HERE/../.."
 SRC="pipeline/sources/$SLUG.js"
 CASE_FILE="test/extractors/custom/$CASE_NAME.json"
 
+# This workflow is triggered by an `issues` event, so the checkout lands on the
+# default branch — fetch + switch to the agent's branch. Map both refs explicitly
+# (the checkout action's refspec may be narrow) so origin/main is available for the
+# scaffold-commit search and origin/$BRANCH for the checkout.
+git fetch origin "+refs/heads/main:refs/remotes/origin/main" \
+                 "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+git checkout -B "$BRANCH" "origin/$BRANCH"
+
+# Hand the issue to a human: drop the trigger label and flag for a maintainer,
+# with an explanatory comment. Used for both non-PR verdicts below. ($1 = comment)
+hand_off_to_human() {
+  gh label create "human involvement required" --color B60205 \
+    --description "Automation could not proceed; a maintainer needs to take this over by hand" \
+    2>/dev/null || true
+  gh issue comment "$ISSUE_NUMBER" --body "$1"
+  gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-agent-done" \
+    --add-label "human involvement required"
+}
+
+# The scaffold commit = Phase 1's commit on this branch (off main). Match it by
+# its message so extra agent commits or ordering can't fool us; fall back to the
+# oldest branch-only commit. The blast-radius guard rewinds everything except the
+# agent's two files to this point.
+SCAFFOLD=$(git log --format='%H' --grep="chore: scaffold $SLUG extractor" "origin/main..HEAD" | tail -1)
+if [ -z "$SCAFFOLD" ]; then
+  SCAFFOLD=$(git rev-list "origin/main..HEAD" | tail -1)
+fi
+echo "Scaffold commit: $SCAFFOLD"
+
 # Blast-radius guard: the agent's whole write surface is two pre-created files
-# (the source + the case). Revert any OTHER tracked edit (e.g. a shared helper)
-# back to the scaffold commit, and delete anything it created, so a misbehaving
-# agent can't reach the PR. (If the extractor truly depended on a reverted helper
-# edit, the re-verify below goes red and no PR opens — exactly what we want.)
-mapfile -t CHANGED < <(git diff --name-only HEAD)
-for f in "${CHANGED[@]}"; do
+# (the source + the case). Revert any OTHER change it committed (a shared helper,
+# the load lists, a new file) back to the scaffold state, in a fresh commit, so a
+# misbehaving agent can't reach the PR. (If the extractor truly depended on a
+# reverted edit, the re-verify below goes red and no PR opens — exactly right.)
+REVERTED=0
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
   if [ "$f" != "$SRC" ] && [ "$f" != "$CASE_FILE" ]; then
     echo "blast-radius guard: reverting unexpected change to $f"
-    git checkout HEAD -- "$f"
+    # Restore from scaffold; if the file didn't exist then (agent created it), remove it.
+    git checkout "$SCAFFOLD" -- "$f" 2>/dev/null || git rm -f --quiet "$f" 2>/dev/null || true
+    REVERTED=1
   fi
-done
-git clean -fd >/dev/null 2>&1 || true
+done < <(git diff --name-only "$SCAFFOLD" HEAD)
+if [ "$REVERTED" = "1" ]; then
+  git add -A
+  git commit -m "chore: revert out-of-bounds agent edits to the two-file write surface (Refs #$ISSUE_NUMBER)" || true
+fi
 
 # Quality floor before a PR (tools/new-extractors-creation/case-quality.js). The
-# agent ran — work started on this issue — so we ALWAYS leave a comment here
-# rather than trusting the agent to have posted one (it doesn't reliably). Two
-# non-PR verdicts, both expected outcomes (comment + exit 0 green, not a failure):
-#   empty      — the agent judged the page unextractable and left the case empty.
-#                It writes its diagnosis to BAIL_REASON_FILE (in /tmp, outside the
-#                repo, so the blast-radius `git clean` above can't delete it); we
-#                quote it when present, generic note otherwise.
+# agent signals success by filling the case AND adding `extractor-agent-done`; a
+# bail goes the other way (it comments + labels `human involvement required`
+# itself and never reaches here). So two non-PR verdicts are anomalies we still
+# guard against, both handed to a human (comment + relabel, exit 0 green):
+#   empty      — the agent marked the work done but left the case empty.
 #   degenerate — a filled case whose event has no location: the signature of a
-#                listing/index/tour page that yielded only a bare title, not a
-#                single event (#283). Don't ship it as a PR.
-BAIL_REASON_FILE="${BAIL_REASON_FILE:-/tmp/agent-bail-reason.md}"
+#                listing/index/tour page that yielded only a bare title (#283).
 VERDICT=$(CASE_FILE="$CASE_FILE" node tools/new-extractors-creation/case-quality.js)
 
 if [ "$VERDICT" = "empty" ]; then
-  echo "Integration case still empty — the agent judged the page unextractable. No PR; commenting."
-  if [ -s "$BAIL_REASON_FILE" ]; then
-    DIAGNOSIS="$(cat "$BAIL_REASON_FILE")"
-  else
-    DIAGNOSIS="The cached page didn't contain the event data a static extractor needs (e.g. a bot/CAPTCHA wall, a login wall, or a JavaScript-rendered single-page-app shell)."
-  fi
-  gh issue comment "$ISSUE_NUMBER" --body "🛑 Looked into this, but didn't open a PR: $DIAGNOSIS
-
-No dedicated extractor was added. The site can still be added by hand — see docs/claude/adding-a-source.md. (Scaffolding is left on branch \`$BRANCH\` for follow-up.)"
+  echo "Case is empty but the agent marked it done — handing to a human. No PR."
+  hand_off_to_human "🛑 The implementation agent marked this done, but the integration case came back empty — there's no extraction to ship. The page likely wasn't a single usable event (a bot/login wall or a JavaScript single-page-app shell). No dedicated extractor was added; the site can be added by hand — see docs/claude/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
   exit 0
 fi
 
 if [ "$VERDICT" = "degenerate" ]; then
-  echo "Extraction is degenerate (an event has no location) — likely a listing/index page, not a single event. No PR; commenting."
-  gh issue comment "$ISSUE_NUMBER" --body "🛑 Looked into this, but didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue.
-
-No dedicated extractor was added. Point the request at one specific event page on this site, or add it by hand — see docs/claude/adding-a-source.md. (Scaffolding is left on branch \`$BRANCH\` for follow-up.)"
+  echo "Extraction is degenerate (an event has no location) — likely a listing page. No PR."
+  hand_off_to_human "🛑 Didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue. Point the request at one specific event page on this site, or add it by hand — see docs/claude/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
   exit 0
 fi
 
 # Don't trust the agent — re-verify before opening a PR.
+npm ci
 npm run test:live
 npm run test:offline
 
-git add "$SRC" "$CASE_FILE"
-if ! git diff --cached --quiet; then
-  git commit -m "feat: add $SLUG extractor (Refs #$ISSUE_NUMBER)"
-  git push origin "$BRANCH"
-fi
+# The agent already committed + pushed the two files; only the blast-radius
+# revert above (if any) is new here. Push whatever this job added.
+git push origin "$BRANCH"
 
 cat > /tmp/pr-body.md <<EOF
 Implements the extractor for \`$HOST\`.
@@ -102,3 +128,5 @@ curl -s -X POST \
 
 PR_URL=$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo "")
 gh issue comment "$ISSUE_NUMBER" --body "✅ Extractor implemented — PR ready for review: $PR_URL  (asserts against the real cached page; review the \`extract()\` logic and field values before merging)."
+# Terminal state for the automation: clear the trigger label now the PR is open.
+gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-agent-done" || true
