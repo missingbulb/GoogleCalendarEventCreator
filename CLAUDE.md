@@ -10,6 +10,7 @@ own file under `docs/claude/` and is imported here:
 @docs/claude/testing.md
 @docs/claude/auto-extractor.md
 @docs/claude/auto-lessons.md
+@docs/claude/auto-fallback-coverage.md
 
 The project's top-level architectural rules of the road live in
 `docs/architectureGuidelines.md` (imported below). Whenever we agree on a new or

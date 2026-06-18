@@ -69,9 +69,11 @@ See [PRIVACY.md](PRIVACY.md) for the full policy.
 click the button on it, and sends nothing anywhere — it just opens a Google
 Calendar URL in a new tab.
 
-`tabs`: lets `ui/toolbar-icon.js` see each tab's URL (hostname only) so it can
-show a green toolbar icon on pages with a site-specific extractor (e.g.
-meetup.com), and the default blue icon elsewhere.
+`declarativeContent`: lets `ui/toolbar-icon.js` ask the **browser** to show a
+green toolbar icon on pages with a site-specific extractor (e.g. meetup.com), a
+gray icon on unsupported "news"-type sites, and the default blue icon elsewhere
+— matched by host pattern inside Chrome. The extension never reads your tabs'
+URLs, so it requests **no** "tabs"/browsing-history access.
 
 ## Documentation
 

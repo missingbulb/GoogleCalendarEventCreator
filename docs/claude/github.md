@@ -51,6 +51,21 @@ doubt, open the PR, get CI green, and wait for a fresh approval.
   cherry-pick, or a hard reset): it's your own un-merged branch, so this is the
   amend-your-own-commits case above, not rewriting shared history.
 
+## Open the PR early when a change touches e2e / heavy / UI tests
+
+The usual default is to hold a PR until asked. **Reverse that when a change adds
+or modifies an e2e/heavy-browser (`test/fullBrowserHeavyTests/`) or UI-snapshot
+(`test/ui/`) test**: those can't be exercised locally (the sandbox has no Chrome;
+see [../technicalGotchas.md](../technicalGotchas.md)), and their reviewable
+artifacts only exist on a PR — CI runs the heavy/e2e suites against the branch,
+and a UI change's reviewable output (the pixel diff GitHub renders, and the
+rendered gallery linked via the branch's `test/ui/README.md`) needs a branch
+pushed to GitHub to view at all. So opening the PR *is* how you see the change
+working and surface failures; doing it up front (rather than after a round of
+local-only iteration that proves nothing for these classes) is the faster path to
+a working, reviewable result. Each CI iteration costs a full round-trip, so get
+the first one running as early as possible.
+
 ## A push or PR made with the Actions `GITHUB_TOKEN` does not start another workflow
 
 GitHub suppresses workflow runs triggered by the built-in `GITHUB_TOKEN` to
@@ -69,6 +84,15 @@ checkout -b` fails when the branch already exists, and a push to the diverged
 remote branch is rejected non-fast-forward (so the run can't even open its PR).
 Give every run its own branch: append a per-run-unique suffix (`$RANDOM` / a
 short token) to the readable prefix.
+
+## A workflow that adds a brand-new label must create it first
+
+`gh issue edit --add-label "<name>"` fails when the label doesn't exist yet —
+unlike applying an already-defined label, GitHub won't create it on demand, so a
+workflow that introduces a new label breaks the first time it runs. Create it
+idempotently before the edit (`gh label create "<name>" --color … 2>/dev/null ||
+true`), then `--add-label`. (The download-failure hand-off in
+`auto-implement-extractor.yml` adds `human involvement required` this way.)
 
 ## Driving a merge cheaply (wall time + tokens)
 
@@ -112,14 +136,13 @@ npm run regen   # load lists + UI snapshots + fallback-coverage baseline/report
 The committed `.gitattributes` maps each generated file to the `ours` merge
 driver, so git keeps one side automatically and `npm run regen` reproduces the
 correct merged result from the (normally-merged) source files. A stale artifact
-can't slip through — its own test fails: the load-order/worker-imports drift
-guard (`test/unit/load-order-generated.test.js`), the UI snapshot pixel diff, or
+can't slip through — its own test fails: the load-order drift guard
+(`test/unit/load-order-generated.test.js`), the UI snapshot pixel diff, or
 the fallback-coverage gate.
 
 Files under this rule (kept in sync with `.gitattributes`):
 
-- `pipeline/load-order.generated.json` and `pipeline/worker-imports.generated.js`
-  — both from `npm run index`.
+- `pipeline/load-order.generated.json` — from `npm run index`.
 - `test/ui/cases/*.png` and `test/ui/README.md` — from `npm run refresh:ui`.
 - `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
   `test/extractors/fallback/fallback-coverage.GENERATED.md` — from the
