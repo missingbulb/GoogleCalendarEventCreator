@@ -10,8 +10,9 @@ reference: [`docs/claude/auto-extractor.md`](../../docs/claude/auto-extractor.md
 ## What's in this folder
 
 - **`agent-prompt-extractor.md`** — the agent's prompt, **self-contained** (no
-  build step): the web routine points the agent at it, and it reads the per-issue
-  branch/files from the prepare workflow's `extractor-handoff` comment.
+  build step): the web routine points the agent at it, and it derives the per-issue
+  branch/files from the issue's event URL itself (same `extractor-naming.js` the
+  workflow used).
 - Deterministic Node steps the workflows run around the agent:
   - `triage-extractor-request.js` — close a request already settled (supported /
     listed / duplicate) before the hand-off.
@@ -29,7 +30,7 @@ reference: [`docs/claude/auto-extractor.md`](../../docs/claude/auto-extractor.md
     `degenerate` / `ok`) over the agent's case.
 - The bash the workflows call, so the YAML stays a thin orchestrator:
   - `phase1-prepare.sh` — branch, record the page, scaffold, baseline-test, push.
-  - `handoff-to-agent.sh` — post the hand-off comment + swap `extractor-request` →
+  - `handoff-to-agent.sh` — post a status comment + swap `extractor-request` →
     `extractor-agent-ready` (triggers the agent).
   - `phase2-finalize.sh` — check out the branch, blast-radius guard against the
     scaffold commit, quality floor, re-verify, open the PR, dispatch CI.

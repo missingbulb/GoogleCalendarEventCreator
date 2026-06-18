@@ -9,33 +9,37 @@ cached page, fill in `extract()` so it pulls the event's fields correctly, fill 
 the test case from the real output, push the two files, and re-label the issue.**
 
 You are running as a Claude Code on the web routine, triggered by the
-`extractor-agent-ready` label on a GitHub issue. Everything you need is on that
-issue and its prepared branch.
+`extractor-agent-ready` label on a GitHub issue. Everything you need you derive
+from that issue and its prepared branch — there is no hand-off file to read.
 
-## Step 0 — Read the hand-off and check out the branch
+## Step 0 — Derive your context and check out the branch
 
-The prepare workflow left a comment on the issue containing a machine-readable
-`extractor-handoff` block, e.g.:
+The prepare workflow already created the branch and named everything
+deterministically from the issue's event URL, so you reproduce those names with
+the same code:
 
-```
-<!-- extractor-handoff
-branch: claude/extractor/<slug>
-source: pipeline/sources/<slug>.js
-case: test/extractors/custom/<caseName>.json
-host: <host>
-url: <url>
--->
-```
+1. Take the **event URL**: the first `http(s)` URL in the issue body (the request
+   form lists it first).
+2. From the repo's default branch, derive the **slug** with the same helper the
+   workflow used:
+   ```bash
+   SLUG=$(node -e "process.stdout.write(require('./tools/new-extractors-creation/extractor-naming').namesFor(process.argv[1]).slug)" "<event-url>")
+   ```
+3. The names all follow from the slug (for this auto-recorded case `caseName == slug`):
+   - **branch**: `claude/extractor/$SLUG`
+   - **source**: `pipeline/sources/$SLUG.js`
+   - **case**: `test/extractors/custom/$SLUG.json`
+   - **cached page**: `data/$SLUG.html` (URL — with the host — in `data/$SLUG.url`)
+4. Check the branch out and install deps:
+   ```bash
+   git fetch origin "claude/extractor/$SLUG" && git checkout "claude/extractor/$SLUG"
+   npm install        # dev deps aren't installed on a fresh checkout
+   ```
+5. Sanity-check you're in the right place: `git diff --name-only origin/main...HEAD`
+   should list exactly the scaffolded **source** and **case** (plus the cached
+   `data/` files) — those two are your write surface.
 
-Read it to get the **branch**, the **source** file, the **case** file, the
-**host**, and the event **url**. Then check the branch out and work on it:
-
-```bash
-git fetch origin <branch> && git checkout <branch>
-npm install        # dev deps aren't installed on a fresh checkout
-```
-
-Below, `<source>` / `<case>` / `<host>` / `<url>` refer to those handoff values.
+Below, `<source>` / `<case>` / `<host>` / `<url>` refer to those derived values.
 
 ## Your write surface is exactly TWO files
 
@@ -54,8 +58,8 @@ those two files before the PR, so straying just wastes your effort.)
 
 ## What is already set up for you
 
-- **The real event page is cached** at `data/<caseName>.html` (URL in
-  `data/<caseName>.url`). Read it — this is the markup your selectors must handle.
+- **The real event page is cached** at `data/<slug>.html` (URL in
+  `data/<slug>.url`). Read it — this is the markup your selectors must handle.
 - `<source>` exists, scaffolded with `matches(host)` already correct and a
   placeholder `extract()`.
 - `<case>` exists with `"events": []` — a placeholder for you to fill.
@@ -91,7 +95,7 @@ the rest. Read `pipeline/sources/meetup.js` as the canonical example, and skim
 ## Step 1 — Is the cached page one specific event?
 
 ```bash
-wc -c data/<caseName>.html
+wc -c data/<slug>.html
 ```
 
 Open it and confirm it's a page for **one specific event** — a single title with a
@@ -115,7 +119,7 @@ finalize workflow rejects a location-less event anyway).
 ## Step 2 — Fill in `extract()`
 
 Edit `<source>`: replace the placeholder field reads with selectors that match
-`data/<caseName>.html`, add `location` / `description` / `ctz` as the page
+`data/<slug>.html`, add `location` / `description` / `ctz` as the page
 warrants, and complete the header comment (expected HTML + where each field comes
 from), mirroring `meetup.js`. Supply only the fields the page needs; let
 `merge(...)` fold in JSON-LD for the rest. Leave `matches()` alone.
@@ -127,7 +131,7 @@ values**:
 ```bash
 npm run test:live 2>&1
 ```
-There is **no `url` field** in the case JSON — the URL lives in `data/<caseName>.url`.
+There is **no `url` field** in the case JSON — the URL lives in `data/<slug>.url`.
 
 ## Step 4 — Fill the case and verify
 
@@ -181,6 +185,6 @@ If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page:
 - **Never fabricate input or output.** Don't hand-write HTML, and don't invent
   `expected` values — copy them from the real `npm run test:live` run. If the page
   isn't usable (Step 1), bail via Step 5b instead.
-- **No `url` field** inside the case JSON — it lives in `data/<caseName>.url`.
+- **No `url` field** inside the case JSON — it lives in `data/<slug>.url`.
 - **Re-label, don't open the PR.** Success → `extractor-agent-done`; bail →
   `human involvement required`. The finalize workflow opens the PR.

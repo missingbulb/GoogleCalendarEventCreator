@@ -230,22 +230,17 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: bash tools/new-extractors-creation/phase1-prepare.sh
 
-      # Hand off to the agent: the branch is scaffolded + pushed, so post the
-      # machine-readable handoff comment and swap the label — remove
-      # `extractor-request`, add `extractor-agent-ready`. Adding that label is
-      # what triggers the Claude Code on the web routine that writes extract() +
-      # the case. (The agent then adds `extractor-agent-done`, firing
-      # finalize-extractor.yml.) See tools/new-extractors-creation/handoff-to-agent.sh.
+      # Hand off to the agent: the branch is scaffolded + pushed, so swap the
+      # label — remove `extractor-request`, add `extractor-agent-ready`. Adding
+      # that label is what triggers the Claude Code on the web routine that writes
+      # extract() + the case (it derives the branch/file names from the issue URL
+      # itself). The agent then adds `extractor-agent-done`, firing
+      # finalize-extractor.yml. See tools/new-extractors-creation/handoff-to-agent.sh.
       - name: Hand off to the implementation agent
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
-          SLUG:         ${{ steps.triage.outputs.slug }}
-          CASE_NAME:    ${{ steps.triage.outputs.caseName }}
-          HOST:         ${{ steps.triage.outputs.host }}
-          EVENT_URL:    ${{ steps.triage.outputs.url }}
         run: bash tools/new-extractors-creation/handoff-to-agent.sh
 
       # One comment for a GENUINE failure only. An expected stop (unfetchable /

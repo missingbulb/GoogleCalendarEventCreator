@@ -49,7 +49,8 @@ Almost everything for this pipeline is one self-contained folder,
 
 - `agent-prompt-extractor.md` — the agent's prompt, **self-contained** (no
   build-time interpolation): the web routine points the agent at it, and it tells
-  the agent to read the prepare workflow's hand-off comment for the branch + files.
+  the agent to derive the branch + file names from the issue's event URL itself
+  (the same `extractor-naming.js` the workflow used).
 - `triage-extractor-request.js`, `probe-url.js`, `extractor-naming.js`,
   `derive-names.js`, `scaffold-source.js`, `scaffold-case.js`,
   `add-supported-domain.js`, `case-quality.js` — the deterministic Node steps the
@@ -132,18 +133,18 @@ doesn't own them.
    commit message is `chore: scaffold <slug> extractor …` — Phase 2 finds the
    **scaffold commit** by that message. (A `GITHUB_TOKEN` push doesn't fire
    `refresh-cache.yml`, so the page is recorded once.)
-6. **Hands off to the agent (`handoff-to-agent.sh`):** posts a comment carrying a
-   machine-readable `extractor-handoff` block (branch, source path, case path,
-   host, url — what the agent reads to know where to work), then swaps the label:
-   removes `extractor-request`, adds `extractor-agent-ready`. **Adding that label
-   is the trigger for the web routine.** The comment is posted *before* the label
-   so the agent sees the hand-off on arrival.
+6. **Hands off to the agent (`handoff-to-agent.sh`):** posts a human-readable
+   status comment, then swaps the label: removes `extractor-request`, adds
+   `extractor-agent-ready`. **Adding that label is the trigger for the web
+   routine.** No machine-readable hand-off is needed — the agent derives the
+   branch + file names from the issue's event URL itself (same `extractor-naming.js`
+   the workflow used; for the auto-recorded case `caseName == slug`).
 
 ## Stage 2 — the agent (Claude Code on the web)
 
 A web routine wired to the `extractor-agent-ready` label runs the agent against
-`agent-prompt-extractor.md`. The agent owns **only the judgment step**: read the
-hand-off comment, check out the branch, read the real cached page, fill in
+`agent-prompt-extractor.md`. The agent owns **only the judgment step**: derive the
+branch from the issue's event URL, check it out, read the real cached page, fill in
 `extract()` (and the source header), fill the pre-created case from the actual
 `npm run test:live` output, confirm `test:live` + `test:offline` are green.
 
@@ -291,7 +292,8 @@ integration case (not an e2e/heavy-browser test), so one green run suffices.
 
 The prompt is `tools/new-extractors-creation/agent-prompt-extractor.md`. It is
 **self-contained** — no placeholders, no build step: the web routine points the
-agent at it, and the agent reads the per-issue specifics (branch, source path, case
-path, host, url) from the prepare workflow's `extractor-handoff` comment. Edit that
-file to change what the agent does or add site-specific guidance; if you change the
-fields in the hand-off block, update `handoff-to-agent.sh` to match.
+agent at it, and the agent derives the per-issue specifics (branch, source path,
+case path, host) from the issue's event URL via `extractor-naming.js`, exactly as
+the prepare workflow did. Edit that file to change what the agent does or add
+site-specific guidance; if the naming convention in `extractor-naming.js` ever
+changes, the prompt's Step 0 must follow it.
