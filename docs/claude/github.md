@@ -1,11 +1,12 @@
 # GitHub procedures
 
 How we drive GitHub: the issue → branch → PR → merge lifecycle, the merge
-signal, the CI-interaction practices that keep a merge cheap in wall time and
-tokens, and how we keep merge-conflict churn cheap across parallel branches. The
-two owner-triggered defined instructions that also land through this PR flow —
-"bump version" and "learned lessons" — keep their definitions in
-[workflow.md](workflow.md) (they reference the flow here).
+signal, the branch/commit-history rules for PR work, the CI-interaction
+practices that keep a merge cheap in wall time and tokens, and how we keep
+merge-conflict churn cheap across parallel branches. The two owner-triggered
+defined instructions that also land through this PR flow — "bump version" and
+"learned lessons" — keep their definitions in [workflow.md](workflow.md) (they
+reference the flow here).
 
 ## The task lifecycle
 
@@ -36,6 +37,22 @@ don't treat a chosen answer to an `AskUserQuestion` as merge authorization
 because an option's wording happened to mention merging. When in doubt, open the
 PR, get CI green, and wait for a fresh "LGTM".
 
+## Branch and commit history
+
+- Don't rewrite published/shared history to satisfy a tooling or authorship
+  check (e.g. a hook flagging "unverified" commits): only amend your own
+  un-pushed branch commits. Commits already on a shared branch — including ones
+  merged in from `main` — belong to that history; reset-authoring or rebasing
+  them forks your branch away from it.
+- After your commit is **squash-merged** to `main`, a *reused* feature branch
+  still carries that original commit (the squash created a *new* commit on
+  `main`, so the branch's own is unreachable from it) — and the next PR off the
+  branch re-includes it in the diff, because the three-dot merge-base predates
+  the squash. Sync the branch to `origin/main` before opening the next PR
+  (`git rebase origin/main`, which drops the commit as an already-applied
+  cherry-pick, or a hard reset): it's your own un-merged branch, so this is the
+  amend-your-own-commits case above, not rewriting shared history.
+
 ## A push or PR made with the Actions `GITHUB_TOKEN` does not start another workflow
 
 GitHub suppresses workflow runs triggered by the built-in `GITHUB_TOKEN` to
@@ -45,6 +62,15 @@ prevent recursion, so a workflow's own `git push` or `gh pr create` won't fire
 `refresh-cache.yml` and `test.yml` explicitly (see
 [auto-extractor.md](auto-extractor.md)). A run dispatched against a branch
 executes on its head commit, so its checks still attach to the PR.
+
+## An automated job needs a unique branch per run
+
+An automated or scheduled job that derives its branch name from a non-unique key
+(e.g. the date) collides with itself on a repeat run for that key — `git
+checkout -b` fails when the branch already exists, and a push to the diverged
+remote branch is rejected non-fast-forward (so the run can't even open its PR).
+Give every run its own branch: append a per-run-unique suffix (`$RANDOM` / a
+short token) to the readable prefix.
 
 ## Driving a merge cheaply (wall time + tokens)
 
@@ -125,3 +151,11 @@ carries the latest sources and freshly-generated artifacts instead of
 discovering the gap at merge time. The one-commit-per-PR squash history (the
 merge signal above) keeps each branch a single reviewable unit, so
 shorter-lived branches are the norm.
+
+### Merging across a file relocation
+
+git's rename detection re-applies your content edits onto the moved files, but it
+does *not* fix *references* to the moved paths — an npm script, a `.gitattributes`
+glob, or a doc link naming the old location keeps pointing there and breaks with
+no conflict (a green local test on the old layout won't catch it either). After
+such a merge, grep the files your branch touched for the old paths.
