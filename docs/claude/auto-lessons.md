@@ -41,14 +41,17 @@ below), so its activity is collected there.
 
 ## Tracking: log each run under the routine's own issue
 
-When a run produces a PR, **find this routine's standing tracking issue** — the
-open *Daily routine log: "lessons" digest* issue (currently **#365**) — and
-**create a sub-issue on it** for the run, so the issue accumulates an
-at-a-glance checklist of every run over time; also reference it from the PR
-(`Refs #365`). If that tracking issue doesn't exist, open it first (long-lived,
-stays open, never closed). Each daily automated routine keeps its **own** such
-issue — a running self-improvement log of what it did over time. **This applies
-to future daily routines too:** when a new one is added, open its own tracking
-issue and have its output logged the same way (e.g. the fallback extractor
-coverage routine logs to #366 — see
+When a run produces a PR, log it on this routine's standing tracking issue — the
+*Daily routine log: "lessons" digest* issue (find it **by title**, currently
+**#365**, not a hard-coded number; if it doesn't exist, open it). Log the run as a
+**dated comment** on that issue — **not** a sub-issue — so it accumulates a
+scrollable history of every run over time; also reference the issue from the PR
+(`Refs #365`). The issue is long-lived: if it was **closed**, **reopen it** when a
+run needs logging (a closure while the routine is still producing PRs is stale),
+matching the open-branch report's behavior
+([auto-branch-report.md](auto-branch-report.md)). Each daily automated routine
+keeps its **own** such issue — a running self-improvement log of what it did over
+time. **This applies to future daily routines too:** when a new one is added, open
+its own tracking issue and log its output the same way — as comments (e.g. the
+fallback extractor coverage routine logs to #366 — see
 [auto-fallback-coverage.md](auto-fallback-coverage.md)).

@@ -75,10 +75,13 @@ No win → no branch, no PR; print "No generic fallback-coverage improvement fou
 
 ## Tracking: log each run under the routine's own issue
 
-When a run produces a PR, **find this routine's standing tracking issue** — the
-open *Daily routine log: generic fallback extractor coverage improvements* issue
-(currently **#366**) — and **create a sub-issue on it** for the run, so the issue
-accumulates an at-a-glance checklist of every run over time; also reference it
-from the PR (`Refs #366`). If that tracking issue doesn't exist, open it first
-(long-lived, stays open, never closed). Each daily routine keeps its own such
-issue — the lessons digest's is #365 (see [auto-lessons.md](auto-lessons.md)).
+When a run produces a PR, log it on this routine's standing tracking issue — the
+*Daily routine log: generic fallback extractor coverage improvements* issue (find
+it **by title**, currently **#366**, not a hard-coded number; if it doesn't exist,
+open it). Log the run as a **dated comment** on that issue — **not** a sub-issue —
+so it accumulates a scrollable history of every run over time; also reference the
+issue from the PR (`Refs #366`). The issue is long-lived: if it was **closed**,
+**reopen it** when a run needs logging (a closure while the routine is still
+producing PRs is stale), matching the open-branch report's behavior
+([auto-branch-report.md](auto-branch-report.md)). Each daily routine keeps its own
+such issue — the lessons digest's is #365 (see [auto-lessons.md](auto-lessons.md)).
