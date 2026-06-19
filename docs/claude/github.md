@@ -222,3 +222,12 @@ the marked conflicts isn't enough. Re-run the check that *defines* the invariant
 (the grep) over the whole tree after the merge, not just the conflicted files.
 (Merging `main` reintroduced a trigger-phrase term this branch had confined to a
 single doc, via a newly-added doc that merged with no conflict.)
+
+### Porting old work forward across a changed invariant
+
+The converse direction: when you re-implement or cherry-pick an *older* change
+onto current `main`, check each part against the invariants `main` has added
+since — not just whether it still applies. A part that violates a now-enforced
+guarantee becomes a **silent no-op** if taken verbatim (e.g. a guard that reverts
+any write outside an allowed set leaves the patch landed but doing nothing), so
+drop or redesign it rather than copy it.
