@@ -204,10 +204,10 @@ test("showPerDayTimes: any all-day/dateless session -> false (plain day chips)",
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
-// with one single-time day is a "single" card; one day with several times is a
-// "sameDay" card; every other single-time day (consecutive or scattered) folds
-// into one "month" card. Instances are NEVER merged — each date keeps its own
-// button (a card built from X instances exposes X buttons).
+// with one showing is a "single" card; a month with two or more showings is one
+// "month" card holding every showing as its own button (a day with several
+// showings keeps a button per showing — never a separate card). Instances are
+// NEVER merged — a card built from X instances exposes X buttons.
 
 const card = (events) => toCards(events);
 const ev = (title, times) => ({ title, location: "Hall", ctz: "", times });
@@ -283,8 +283,8 @@ test("toCards: the same month in different years stays separate", () => {
   assert.deepEqual(cards.map((c) => c.kind), ["single", "single"]);
 });
 
-test("toCards: a one-day month with two times is still a same-day card", () => {
-  // Jun 10 8PM / Jun 10 9PM / Jul 9PM -> same-day (Jun 10) + single (Jul).
+test("toCards: a one-day month with two times is one 'month' card with both times", () => {
+  // Jun 10 8PM / Jun 10 9PM / Jul 9PM -> a June month card (both times) + Jul single.
   const cards = card([
     ev("Fest", [
       { start: "2026-06-10T20:00:00" },
@@ -292,12 +292,13 @@ test("toCards: a one-day month with two times is still a same-day card", () => {
       { start: "2026-07-11T21:00:00" },
     ]),
   ]);
-  assert.deepEqual(cards.map((c) => c.kind), ["sameDay", "single"]);
+  assert.deepEqual(cards.map((c) => c.kind), ["month", "single"]);
   assert.equal(cards[0].instances.length, 2);
 });
 
-test("toCards: a same-day day inside a multi-day month is its own card, scattered days fold", () => {
-  // Jun 10 / Jun 11 x2 / Jun 12 -> month card (10,12) + same-day card (11).
+test("toCards: a month's showings — including a day with two — are one 'month' card", () => {
+  // Jun 10 / Jun 11 x2 / Jun 12 -> ONE June month card holding all four showings,
+  // never peeling the two-showing day (Jun 11) out into its own card.
   const cards = card([
     ev("Series", [
       { start: "2026-06-10T20:00:00" },
@@ -306,9 +307,11 @@ test("toCards: a same-day day inside a multi-day month is its own card, scattere
       { start: "2026-06-12T23:00:00" },
     ]),
   ]);
-  assert.deepEqual(cards.map((c) => c.kind), ["month", "sameDay"]);
-  assert.deepEqual(cards[0].instances.map((it) => it.t.start.slice(0, 10)), ["2026-06-10", "2026-06-12"]);
-  assert.equal(cards[1].instances.length, 2);
+  assert.deepEqual(cards.map((c) => c.kind), ["month"]);
+  assert.deepEqual(
+    cards[0].instances.map((it) => it.t.start.slice(0, 10)),
+    ["2026-06-10", "2026-06-11", "2026-06-11", "2026-06-12"]
+  );
 });
 
 test("toCards: instances keep their original times[] index (for the right URL)", () => {
@@ -319,10 +322,10 @@ test("toCards: instances keep their original times[] index (for the right URL)",
       { start: "2026-06-10T21:00:00" }, // index 2
     ]),
   ]);
-  const sameDay = cards.find((c) => c.kind === "sameDay");
+  assert.deepEqual(cards.map((c) => c.kind), ["month"]);
   assert.deepEqual(
-    sameDay.instances.map((it) => it.i).sort(),
-    [1, 2],
-    "the Jun 10 card carries the original indices 1 and 2"
+    cards[0].instances.map((it) => it.i).sort(),
+    [0, 1, 2],
+    "the month card carries every original index, regardless of sort order"
   );
 });

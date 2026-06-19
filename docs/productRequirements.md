@@ -67,8 +67,10 @@ link text, placement, and styling — is specified in
   event with several **instances** (each its own start/end). What folds into one
   event is showings matching on title, location, description, and timezone
   (differing only in time); distinct events that merely share a title stay
-  separate. Such an event's instances are grouped into one or more cards (a single
-  card, a same-day card, or a month card).
+  separate. Such an event's instances are grouped **by month** into one or more
+  cards — a single card for a month with one showing, or a grouped card with a
+  button per showing (a day with several showings stays in its month's card as
+  several buttons, never split off).
 
 The exact card grouping and ordering, card appearance (the calendar chip, card
 weight, the year pill, headers, truncation), how an event is opened, the

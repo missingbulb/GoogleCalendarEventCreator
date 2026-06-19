@@ -15,14 +15,6 @@ A case names its scenario and expectation and bundles several requirements into
 one image. Every leaf requirement is covered by at least one case, enforced by
 `test/uber/ui-requirements-coverage.test.js`.
 
-## card-month-and-same-day-keep-a-button-per-instance
-
-One event's June showings: single-show days 10 & 12 fold into a month card (a time-chip button per day), the two-show day 11 stays its own same-day card whose buttons show each screening's start–end range — and the month card sorts first despite holding day 12
-
-Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `4.10`, `5.3.1`, `5.3.2`, `5.5`, `5.7.2`, `9.2`
-
-![card-month-and-same-day-keep-a-button-per-instance](cases/card-month-and-same-day-keep-a-button-per-instance.png)
-
 ## card-month-header-shows-shared-time-or-location-only
 
 Three month cards: scattered dates that share one start time show it in the header over day chips; differing-time dates drop to a location-only header with time chips; all-day dates show a location-only header with day chips
@@ -30,6 +22,14 @@ Three month cards: scattered dates that share one start time show it in the head
 Requirements: `4.2`, `4.3`, `4.6`, `5.2`, `5.3.1`, `5.7.1`, `5.7.2`, `5.7.3`
 
 ![card-month-header-shows-shared-time-or-location-only](cases/card-month-header-shows-shared-time-or-location-only.png)
+
+## card-month-keeps-same-day-showings-as-buttons
+
+One event's June showings in a single card: the day with two showings (Jun 11) keeps a button per showing next to the single-showing days (Jun 10, Jun 12) — never peeled into a separate card — with differing times making each button a date+time chip
+
+Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `5.3.1`, `5.3.2`, `5.5`, `5.7.2`, `9.2`
+
+![card-month-keeps-same-day-showings-as-buttons](cases/card-month-keeps-same-day-showings-as-buttons.png)
 
 ## card-single-shows-pills-times-all-day-and-no-date
 
