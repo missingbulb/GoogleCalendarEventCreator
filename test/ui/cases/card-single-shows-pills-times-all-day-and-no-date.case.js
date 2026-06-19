@@ -5,10 +5,12 @@
 //
 //   E1 (2025, past)  — gray year pill (5.6.1); a long title that clamps to two
 //                      lines + ellipsized location (5.8); a round-hour start whose
-//                      :00 is dropped (6.1) shown as a start–end en-dash range
-//                      (6.2); a UTC offset stripped to literal wall-clock (6.6).
-//   E2 (2026, this year) — NO pill (5.6.3); a non-round time keeps its minutes (6.1).
+//                      :00 is dropped (6.1.1) shown as a start–end en-dash range
+//                      (6.2.1); a UTC offset stripped to literal wall-clock (6.6).
+//   E2 (2026, this year) — NO pill (5.6.3); a non-round time keeps its minutes (6.1.2).
 //   E3 (2027, future) — green "upcoming" pill (5.6.2).
+//   E6 (2026, this year) — an end not after its start is dropped, so just the
+//                      single time shows (6.2.2).
 //   E4 (all-day, multi-day) — a single instance spanning Sep 15–18 stays ONE
 //                      single card, not split into buttons (4.8), and reads
 //                      "All day" (6.3).
@@ -26,7 +28,7 @@ module.exports = {
   requirements: [
     "1.2", "4.1", "4.4", "4.8", "4.9",
     "5.1", "5.2", "5.4", "5.6.1", "5.6.2", "5.6.3", "5.8",
-    "6.1", "6.2", "6.3", "6.4", "6.5", "6.6",
+    "6.1.1", "6.1.2", "6.2.1", "6.2.2", "6.3", "6.4", "6.5", "6.6",
     "8.3", "9.1", "9.3",
   ],
   data: {
@@ -55,6 +57,13 @@ module.exports = {
         title: "Designers & Founders Summit",
         start: "2027-03-12T09:00:00",
         location: "Pioneer Works, Brooklyn",
+      },
+      {
+        // End equals the start (not after it), so it's dropped: just "10 AM".
+        title: "Neighborhood Office Hours",
+        start: "2026-08-04T10:00:00",
+        end: "2026-08-04T10:00:00",
+        location: "Central Library, Grand Army Plaza",
       },
       {
         title: "Community Workshop (date to be announced)",
