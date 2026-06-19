@@ -136,13 +136,24 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return "";
   }
 
+  // Reference "now" for time-relative inference — choosing the year of a date a
+  // page shows WITHOUT one (nearestYearFor below; tabitisrael's "21/6"). Defaults
+  // to the real clock, so production is unchanged: the injected popup world never
+  // sets the override. Tests inject a fixed instant via globalThis.__REFERENCE_NOW__
+  // (threaded by test/harness.js from a case's "referenceNow"), so a no-year case
+  // asserts a stable date instead of silently rotting as wall-clock time passes
+  // (docs/engineeringPractices.md).
+  function now() {
+    return globalThis.__REFERENCE_NOW__ ? new Date(globalThis.__REFERENCE_NOW__) : new Date();
+  }
+
   function nearestYearFor(monthDayText) {
-    const now = new Date();
-    const thisYear = new Date(`${monthDayText} ${now.getFullYear()}`);
-    if (!isNaN(thisYear) && thisYear.getTime() < now.getTime() - 24 * 3600 * 1000) {
-      return now.getFullYear() + 1;
+    const ref = now();
+    const thisYear = new Date(`${monthDayText} ${ref.getFullYear()}`);
+    if (!isNaN(thisYear) && thisYear.getTime() < ref.getTime() - 24 * 3600 * 1000) {
+      return ref.getFullYear() + 1;
     }
-    return now.getFullYear();
+    return ref.getFullYear();
   }
 
   function normalizeIso(s) {
@@ -195,5 +206,5 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return "";
   }
 
-  return { dateToString, normalizeDateValue, parseDateFromText, endFromTimeRange };
+  return { dateToString, normalizeDateValue, parseDateFromText, endFromTimeRange, now };
 })());

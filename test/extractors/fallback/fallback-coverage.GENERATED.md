@@ -8,13 +8,13 @@ What the generic **fallback** extractor (`pipeline/extract-unsupported.js`) reco
 
 ## Score
 
-Headline coverage over all 24 cases in the corpus:
+Headline coverage over all 25 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **55.6%** | 40 / 72 |
-| **All fields** | **35.8%** | 53 / 148 |
-| Event coverage *(informational)* | 69% | 20 / 29 |
+| **Critical fields** (title + start + location) | **53.3%** | 40 / 75 |
+| **All fields** | **34.6%** | 53 / 153 |
+| Event coverage *(informational)* | 66.7% | 20 / 30 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) 
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 55.6% | 55.6% | ✓ |
-| All fields | 35.8% | 35.8% | ✓ |
+| Critical fields | 53.3% | 53.3% | ✓ |
+| All fields | 34.6% | 34.6% | ✓ |
 
-Gated over **24** shared case(s).
+Gated over **25** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 24 | 18 | 2 | 4 | 75% |
-| `start` **(critical)** | 24 | 11 | 9 | 4 | 45.8% |
+| `title` **(critical)** | 25 | 18 | 2 | 5 | 72% |
+| `start` **(critical)** | 25 | 11 | 9 | 5 | 44% |
 | `end` | 17 | 10 | 0 | 7 | 58.8% |
-| `location` **(critical)** | 24 | 11 | 2 | 11 | 45.8% |
-| `ctz` | 24 | 0 | 0 | 24 | 0% |
+| `location` **(critical)** | 25 | 11 | 2 | 12 | 44% |
+| `ctz` | 25 | 0 | 0 | 25 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 24 | 3 | 12 | 9 | 12.5% |
+| `description` | 25 | 3 | 12 | 10 | 12% |
 
 ## By host
 
@@ -56,6 +56,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
+| `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
 | `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
 | `ticketmaster.co.il` | 1 | 1/1 | 100% | 60% |
 | `visit.tel-aviv.gov.il` | 1 | 1/1 | 33.3% | 16.7% |
@@ -83,6 +84,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `meetup-nyc-tech-mixer` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-startup-designers` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
+| `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `telavivcinematheque-left-handed-girl` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-poetry-bookstores` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-sentimental-value` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
