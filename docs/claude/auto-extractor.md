@@ -106,15 +106,18 @@ doesn't own them.
    StubHub). In every not-usable case there's no real page to record against, so
    the run **stops** — but stopping is an **expected outcome, not a failure**: the
    probe records its decision in `proceed`, the downstream steps gate on
-   `proceed == 'true'`, and the run ends **green** with a "page not usable"
-   comment. One not-usable case is singled out: when the fetch **fails outright**
-   (`probe-url.js` exit 3 — a 403 / unreachable host / login or bot wall, where the
-   HTML never downloaded), the probe sets a `downloadFailed` output. A re-run can't
-   coax HTML out of a refusing server, so that path hands the issue to a human — it
-   **drops `extractor-request` and adds `extractor-blocked-needs-human`**, with a
-   comment naming the download failure. (A JS-rendered SPA shell that returns a
-   full-but-empty page still slips past — a real 2xx with no markers — and is
-   caught later by the agent's judgment.) Runs before `npm ci`.
+   `proceed == 'true'`, and the run ends **green**. Because **none** of the
+   not-usable outcomes is fixable by a re-run or the agent (a Cloudflare/WAF wall
+   from a CI IP won't clear on retry any more than a 403 will), every one of them
+   **hands the issue to a human** the same way: a single step **drops
+   `extractor-request` and adds `extractor-blocked-needs-human`**, with a comment
+   naming the blocker. The fetch that **fails outright** (`probe-url.js` exit 3 — a
+   403 / unreachable host / login or bot wall, where the HTML never downloaded)
+   sets a `downloadFailed` output so it gets a more specific "couldn't download the
+   HTML" comment, but the label hand-off is identical to a soft-200 challenge or a
+   missing URL. (A JS-rendered SPA shell that returns a full-but-empty page still
+   slips past — a real 2xx with no markers — and is caught later by the agent's
+   judgment.) Runs before `npm ci`.
 4. Installs dependencies, configures git, and sets up a Chrome for Testing binary
    (`CHROME_PATH` + `RENDER_NO_SANDBOX`, mirroring `refresh-cache.yml`) so Phase 1's
    `npm run refresh` can render a JS single-page-app shell instead of recording an
@@ -256,12 +259,13 @@ lives in the web routine, not here.
 Every run that touches an issue leaves a comment. The expected stops **finish
 green** — only a genuine break is red:
 
-- **HTML couldn't be downloaded → handed to a human** (green, prepare) — the
-  probe's fetch failed outright (exit 3). No agent involved; the workflow removes
-  `extractor-request`, adds `extractor-blocked-needs-human`, and names the blocker.
-- **Page not usable** (green, prepare) — the probe stopped for a *fetched* but
-  unusable page (missing URL, or a 2xx bot-challenge). No agent involved; the
-  comment names the reason and links the run.
+- **Page not usable → handed to a human** (green, prepare) — the probe judged the
+  page unusable: a 2xx bot-challenge / interstitial, a missing URL, or an outright
+  download failure (exit 3 — a 403 / unreachable host / login or bot wall). No
+  agent involved. Because none of these is fixable by a re-run, a single step
+  removes `extractor-request`, adds `extractor-blocked-needs-human`, and names the
+  blocker; the download-failure case gets a more specific "couldn't download the
+  HTML" comment.
 - **Bailed — not a single event** (green, Stage 2) — the agent judged the cached
   page a bot wall / SPA shell / listing page, commented its diagnosis, and set
   `extractor-blocked-needs-human`. No PR; scaffolding stays on the branch.

@@ -27,6 +27,13 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   prefer extracting JSON-LD/`og:` (which SPAs often still inject) over brittle DOM
   positions. CI-only: the cloud sandbox can't even download Chrome (below), so the
   render no-ops locally and is verified only in CI (#310).
+- **`SIGKILL` followed by an immediate `rmSync` of the killed process's working
+  directory races with still-open file handles, causing intermittent `ENOTEMPTY`.**
+  `SIGKILL` is non-catchable and forces the process to exit, but the kernel may not
+  have fully released the process's file handles before the caller's next statement
+  runs. The fix is Node's built-in backoff: `rmSync(dir, { recursive: true,
+  force: true, maxRetries: 3, retryDelay: 100 })` retries until the files are
+  released. (`data/render-page.js` Chrome teardown, #358.)
 - **Day-boundary date math must use UTC component math, not local-midnight +
   `toISOString()`.** Compute an adjacent day with `Date.UTC(y, m-1, d+1)` then
   `getUTC*` (as `nextDay` in `build-calendar-url.js` does).
