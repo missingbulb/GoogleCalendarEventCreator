@@ -64,8 +64,9 @@ which branches are safe to delete.
 
 ## Where it posts
 
-The report lands on the standing issue titled **`Daily routine log: open-branch
-status report`** (find it **by title** — currently **#399**, not a hard-coded
+The report lands on the standing issue titled
+**`Open Branches Cleanup Tracker`** (find it **by title** — currently
+**#399**, not a hard-coded
 number; if it doesn't exist, open it). Then decide whether to post by **what
 changed**, so the issue stays a signal rather than a daily wall of identical
 tables — read the most recent comment on the issue to compare against:
