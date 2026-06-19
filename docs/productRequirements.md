@@ -69,13 +69,9 @@ link text, placement, and styling — is specified in
   (differing only in time); distinct events that merely share a title stay
   separate. Such an event's instances are grouped into one or more cards (a single
   card, a same-day card, or a month card).
-- The event list is scrollable and height-capped, showing a count label once not
-  everything fits. Clicking a card — or, for a multi-instance event, one of its
-  instance buttons — opens that event/showing's pre-filled Google Calendar
-  template in a new tab.
 
 The exact card grouping and ordering, card appearance (the calendar chip, card
-weight, the year pill, headers, truncation), date/time display, the
+weight, the year pill, headers, truncation), how an event is opened, the
 scroll/overflow cues, and the count-label wording are specified in
 [uiRequirements.md](uiRequirements.md).
 
