@@ -15,9 +15,16 @@
 module.exports = {
   description:
     "Three month cards: scattered dates that share one start time show it in the header over day chips; differing-time dates drop to a location-only header with time chips; all-day dates show a location-only header with day chips",
-  requirements: [
-    "4.2", "4.3", "4.6", "5.2", "5.3.1", "5.7.1", "5.7.2", "5.7.3",
-  ],
+  requirements: {
+    "4.2": "each event's scattered days fold into one month card",
+    "4.3": "the consecutive run Jun 5–7 stays one button per day, not merged",
+    "4.6": "each is an unclickable month card: a header over per-showing buttons",
+    "5.2": "the bare buttons are day chips (month banner over day-of-month)",
+    "5.3.1": "a single-time June showing shows just its time",
+    "5.7.1": "June's shared 7 PM leads the header and buttons stay bare day chips",
+    "5.7.2": "July's differing times drop to a location-only header with time chips",
+    "5.7.3": "August's all-day days give a location-only header with day chips",
+  },
   data: {
     supported: true,
     events: [

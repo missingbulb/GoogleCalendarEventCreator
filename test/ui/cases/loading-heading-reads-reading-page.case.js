@@ -7,6 +7,8 @@
 
 module.exports = {
   description: "Initial load, before extraction returns: the heading reads 'Reading page…' over an empty body",
-  requirements: ["1.1"],
+  requirements: {
+    "1.1": "the initial shell, before extraction returns, reads \"Reading page…\"",
+  },
   skipRender: true,
 };

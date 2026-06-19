@@ -21,7 +21,10 @@ const events = Array.from({ length: 16 }, (_, i) => {
 
 module.exports = {
   description: "A long list scrolled to its middle: the height cap clips both ends, so both edge fades show over a peek of the cut cards",
-  requirements: ["7.1", "7.3"],
+  requirements: {
+    "7.1": "the height cap clips both ends, showing a peek of the cut cards",
+    "7.3": "with list above and below, both edge fades show",
+  },
   data: { supported: true, events },
   listing: "none",
   action: scrollToMiddle,

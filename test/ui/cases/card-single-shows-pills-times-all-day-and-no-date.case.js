@@ -25,12 +25,31 @@
 module.exports = {
   description:
     "Single cards on a supported host: past→gray pill, this-year→no pill, future→green pill; round vs minute times, a start–end range, an all-day multi-day card, and a dateless card — all sorted chronologically with no count label",
-  requirements: [
-    "1.2", "4.1", "4.4", "4.8", "4.9",
-    "5.1", "5.2", "5.4", "5.6.1", "5.6.2", "5.6.3", "5.8",
-    "6.1.1", "6.1.2", "6.2.1", "6.2.2", "6.3", "6.4", "6.5", "6.6",
-    "8.3", "9.1", "9.3",
-  ],
+  requirements: {
+    "1.2": "events present, so the heading reads \"Add to Google Calendar\"",
+    "4.1": "one card per event on the page",
+    "4.4": "the single-showing and dateless cards are each a whole-card click target",
+    "4.8": "E4 spans Sep 15–18 yet stays one single card, not split per day",
+    "4.9": "the shuffled events render sorted chronologically",
+    "5.1": "each card carries the calendar-chip \"addable event\" motif",
+    "5.2": "the left indicator is a day chip (month banner over day-of-month)",
+    "5.4": "a single card is elevated/tinted with a trailing \"›\" chevron",
+    "5.6.1": "E1 (2025) is past → gray year pill",
+    "5.6.2": "E3 (2027) is future → green year pill",
+    "5.6.3": "E2 (this year) shows no pill",
+    "5.8": "E1's long title clamps to two lines and its location ellipsizes",
+    "6.1.1": "E3's round 9:00 hour drops its minutes (\"9 AM\")",
+    "6.1.2": "E1's non-round 6:30 keeps its minutes",
+    "6.2.1": "E1's start+end renders as an en-dash time range",
+    "6.2.2": "E6's end equals its start, so it's dropped to a single time",
+    "6.3": "E4 is date-only, so it reads \"All day\"",
+    "6.4": "E5 has no parseable start, so it reads \"No date found\"",
+    "6.5": "E5 shows no calendar chip (no usable date)",
+    "6.6": "E1's -05:00 offset is shown as literal wall-clock, not re-zoned",
+    "8.3": "the list fits unscrolled, so there is no count label",
+    "9.1": "clicking a single card opens that event's calendar template",
+    "9.3": "the template opens in an adjacent tab and the popup closes",
+  },
   data: {
     supported: true,
     // Deliberately out of chronological order — the render must sort them.

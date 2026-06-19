@@ -13,9 +13,17 @@
 module.exports = {
   description:
     "One event's June showings in a single card: the day with two showings (Jun 11) keeps a button per showing next to the single-showing days (Jun 10, Jun 12) — never peeled into a separate card — with differing times making each button a date+time chip",
-  requirements: [
-    "4.2", "4.5", "4.6", "4.7", "5.3.1", "5.3.2", "5.5", "5.7.2", "9.2",
-  ],
+  requirements: {
+    "4.2": "the four June showings group by month into one card",
+    "4.5": "Jun 11's two showings stay as two buttons, not peeled into a separate card",
+    "4.6": "the month card is a header over one button per showing",
+    "4.7": "the grouped card has no single left calendar icon",
+    "5.3.1": "Jun 10 and Jun 12 are single-time buttons showing just the time",
+    "5.3.2": "Jun 11's two showings carry start+end, so their buttons show a time range",
+    "5.5": "the grouped card is flat, not itself clickable, with no chevron",
+    "5.7.2": "the showings' differing times make each button a date+time chip",
+    "9.2": "pressing a button opens that specific showing's template",
+  },
   data: {
     supported: true,
     events: [

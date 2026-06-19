@@ -24,7 +24,14 @@ const events = Array.from({ length: 40 }, (_, i) => {
 module.exports = {
   description:
     "Forty cards exceed the first-render cap; scrolled to the bottom the end reads 'N out of M events showing' with a 'show all' link, over a faded top edge",
-  requirements: ["7.2", "7.3", "8.1", "8.5", "8.6", "8.7"],
+  requirements: {
+    "7.2": "only a prefix of the 40 cards renders at first (the card cap)",
+    "7.3": "scrolled to the bottom, the top edge fades",
+    "8.1": "the count label is the list's last item, in view at the bottom",
+    "8.5": "the prefix reads \"N out of M events showing\" with a \"show all\" link",
+    "8.6": "past the expanded cap it would read \"shown\" with no link (behavior)",
+    "8.7": "the \"show all\" link keys off the card cap, not the event count",
+  },
   data: { supported: true, events },
   listing: "none",
   action: scrollToBottom,

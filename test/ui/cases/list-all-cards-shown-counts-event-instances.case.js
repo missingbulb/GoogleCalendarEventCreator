@@ -26,7 +26,12 @@ const screenings = (title, day, times) => ({
 module.exports = {
   description:
     "Eight cards (two of them same-day films of four screenings each) overflow the cap; scrolled to the bottom the end reads '14 events showing' — counting instances, not cards — with only the top edge faded",
-  requirements: ["7.3", "8.1", "8.2", "8.4"],
+  requirements: {
+    "7.3": "scrolled to the bottom, only the top edge fades",
+    "8.1": "the count label is the list's last item, in view at the bottom",
+    "8.2": "it counts instances, not cards: 8 cards but \"14 events showing\"",
+    "8.4": "every card is shown but the list overflows, so it reads \"N events showing\" with no link",
+  },
   data: {
     supported: true,
     events: [
