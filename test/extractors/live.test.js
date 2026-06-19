@@ -110,7 +110,11 @@ for (const file of caseFiles) {
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");
-    const extracted = extractFromHtml(html, url);
+    // A case may pin a fixed reference instant ("referenceNow") for an extractor
+    // that infers a date's missing year from "now" (tabitisrael shows "21/6", no
+    // year), so the asserted date stays stable instead of rotting over time.
+    // Other cases omit it and use the real clock, exactly as production does.
+    const extracted = extractFromHtml(html, url, { referenceNow: testCase.referenceNow });
 
     // Build each event exactly as the popup would when opening the Calendar
     // template, so cases assert on the final details/URL. `details` is the same

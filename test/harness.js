@@ -33,11 +33,17 @@ const SOURCES = extractorSources();
  *   fragments that need browser-faithful <noscript> parsing (with scripting on,
  *   jsdom keeps <noscript> content as raw text, like a real browser); never for
  *   real cached pages, whose third-party scripts would then execute.
+ * @param {string} [opts.referenceNow]  Fixed reference instant (any Date-parseable
+ *   string) exposed to the extractor as globalThis.__REFERENCE_NOW__, so an
+ *   extractor that infers a date's missing year off "now" (GCal.now in
+ *   helpers/dates.js) resolves it deterministically. Omitted -> real clock, as
+ *   in production. Keeps a no-year case (tabitisrael) from rotting over time.
  * @returns {object}     The extractor's result: { events: [{ title, start, end, location, description, ctz }], supported }
  */
 function extractFromHtml(html, url, opts = {}) {
   const dom = new JSDOM(html, { url, runScripts: opts.runScripts || "outside-only" });
   try {
+    if (opts.referenceNow) dom.window.__REFERENCE_NOW__ = opts.referenceNow;
     // Load every file in injection order so they register onto GCal (the
     // helpers, the extract layers, and the sources), then run the SAME named
     // top-level extractor the popup runs — GCal.extract() picks the matching
