@@ -19,8 +19,12 @@
 
 const path = require("node:path");
 const { loadCases } = require("./cases");
+const { requirementSectionAnchors } = require("./ui-requirements");
 
 const README_PATH = path.join(__dirname, "README.md");
+
+// The gallery sits at test/ui/README.md, so the spec doc is two levels up.
+const REQ_DOC = "../../docs/uiRequirements.md";
 
 const HEADER = `# UI snapshots
 
@@ -28,7 +32,7 @@ const HEADER = `# UI snapshots
 > regenerate; \`test/ui/readme.test.js\` fails if it drifts.
 
 Each popup state is a self-contained case in [\`cases/\`](cases/): a
-\`<name>.case.js\` module supplying only *fake data* and the list of
+\`<name>.case.js\` module supplying only *fake data* and the
 [\`uiRequirements.md\`](../../docs/uiRequirements.md) IDs it checks, paired with
 its reference \`<name>.png\`. The renderer feeds that data to \`ui/popup.js\`'s
 real \`render()\` — the same \`chooseContent\` + views the extension runs — and
@@ -36,8 +40,10 @@ rasterizes the result, so these images track the shipped popup directly. See
 [\`docs/claude/testing.md\`](../../docs/claude/testing.md) for the mechanics.
 
 A case names its scenario and expectation and bundles several requirements into
-one image. Every leaf requirement is covered by at least one case, enforced by
-\`test/uber/ui-requirements-coverage.test.js\`.
+one image. Under each case, **Checks** lists the requirements it pins — each ID
+links into [\`uiRequirements.md\`](../../docs/uiRequirements.md) and carries a
+brief note on what that case checks for it. Every leaf requirement is covered by
+at least one case, enforced by \`test/uber/ui-requirements-coverage.test.js\`.
 `;
 
 // "1.10" sorts after "1.9" numerically, not lexically — order each case's
@@ -52,14 +58,25 @@ function byNumericId(a, b) {
   return 0;
 }
 
-function gallerySection({ name, description, requirements }) {
-  const reqs = (requirements || []).slice().sort(byNumericId).map((id) => `\`${id}\``).join(", ");
-  const reqLine = reqs ? `Requirements: ${reqs}\n\n` : "";
-  return `## ${name}\n\n${description}\n\n${reqLine}![${name}](cases/${name}.png)\n`;
+// Each requirement renders as a checklist line: the ID linked to its section in
+// the spec doc (so a reviewer can jump straight to it), followed by the case's
+// brief note on what it checks for that requirement.
+function gallerySection({ name, description, requirements }, anchors) {
+  const ids = Object.keys(requirements || {}).sort(byNumericId);
+  const lines = ids
+    .map((id) => {
+      const href = anchors[id] ? `${REQ_DOC}#${anchors[id]}` : REQ_DOC;
+      const note = requirements[id] ? ` — ${requirements[id]}` : "";
+      return `- [\`${id}\`](${href})${note}`;
+    })
+    .join("\n");
+  const reqBlock = lines ? `Checks:\n\n${lines}\n\n` : "";
+  return `## ${name}\n\n${description}\n\n${reqBlock}![${name}](cases/${name}.png)\n`;
 }
 
 function buildReadme() {
-  const sections = loadCases().map(gallerySection);
+  const anchors = requirementSectionAnchors();
+  const sections = loadCases().map((c) => gallerySection(c, anchors));
   return `${HEADER}\n${sections.join("\n")}`;
 }
 

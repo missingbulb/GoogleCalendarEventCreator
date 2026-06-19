@@ -8,7 +8,11 @@
 module.exports = {
   description:
     "Denylisted host (or a supported host that found nothing): the 'No events found' heading over the calendar glyph alone — no policy link",
-  requirements: ["1.3", "2.1", "2.3"],
+  requirements: {
+    "1.3": "nothing shown, so the heading reads \"No events found on this page\"",
+    "2.1": "the event area shows the single muted calendar glyph",
+    "2.3": "the glyph stands alone — no link beneath it",
+  },
   data: { supported: false, events: [] },
   listing: "deny",
 };

@@ -11,7 +11,12 @@
 module.exports = {
   description:
     "Unlisted host with a complete fallback event: the event card plus a right-aligned, understated 'Suggest Correction' link on the heading line",
-  requirements: ["1.2", "3.1", "3.3", "3.4"],
+  requirements: {
+    "1.2": "an event is shown, so the heading reads \"Add to Google Calendar\"",
+    "3.1": "\"Suggest Correction\" sits on the heading line, right-aligned",
+    "3.3": "the link uses the small, understated accent-blue treatment",
+    "3.4": "the link opens the prefilled issue in a new tab and closes the popup",
+  },
   data: {
     supported: false,
     events: [

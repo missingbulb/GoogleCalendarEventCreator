@@ -21,4 +21,11 @@ function loadCases() {
     .map((f) => ({ name: f.replace(/\.case\.js$/, ""), ...require(path.join(CASES_DIR, f)) }));
 }
 
-module.exports = { loadCases, CASES_DIR };
+// A case's `requirements` is a map { "<id>": "<brief note on what the case checks
+// for that requirement>" }, so a reviewer sees the intent next to each ID. These
+// helpers read it without each caller re-deriving the shape.
+function caseRequirementIds(c) {
+  return c && c.requirements && typeof c.requirements === "object" ? Object.keys(c.requirements) : [];
+}
+
+module.exports = { loadCases, CASES_DIR, caseRequirementIds };
