@@ -1,7 +1,7 @@
 {
   "_comment": "High-watermark gate for the generic fallback extractor's coverage, asserted by fallback-coverage.test.js and explained in test/extractors/fallback/fallback-coverage.GENERATED.md. criticalFieldsPct/allFieldsPct are the best field-match percentages reached against the dedicated sources, and cases is the list they were computed over. The gate compares the current run to these over the SHARED cases, so adding a new case never fails it; the watermark ratchets up on an unchanged case set and re-anchors to the current aggregate when the set changes. Re-baseline by hand (lower a number) only for a deliberate, reviewed drop.",
-  "criticalFieldsPct": 58,
-  "allFieldsPct": 37.1,
+  "criticalFieldsPct": 55.6,
+  "allFieldsPct": 35.8,
   "cases": [
     "bandsintown-berry-sakharof",
     "barby",
@@ -14,6 +14,7 @@
     "eventbrite-1989775742810",
     "eventbrite-games-for-change",
     "eventim-co-il-the90sshow",
+    "events-datadoghq",
     "luma-event",
     "meetup-fusion-la-israel",
     "meetup-nyc-tech-mixer",
