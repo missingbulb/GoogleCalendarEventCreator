@@ -107,13 +107,16 @@ test("the shipped config marks a host that has a source as supported (eventbrite
 
 const dupLists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [], supportedDomains: [] };
 
-test("a newer request for a host with an earlier OPEN request is closed as a duplicate", async () => {
+test("a newer request for a host with an earlier OPEN request is deferred as a sample", async () => {
   const openRequests = [{ number: 10, body: bodyWith("https://dup.example/e/1") }];
   const res = await runTriage({ body: bodyWith("https://dup.example/e/2"), number: 11 }, dupLists, openRequests);
   assert.equal(res.triaged, true);
-  assert.equal(res.reason, "duplicate");
+  assert.equal(res.reason, "sample");
   assert.equal(res.duplicateOf, 10);
-  assert.match(res.message, /duplicate of #10/i);
+  // The new event page is folded into the leader, not discarded.
+  assert.match(res.message, /#10/);
+  assert.match(res.message, /additional sample/i);
+  assert.equal(res.url, "https://dup.example/e/2"); // the URL the workflow attaches
 });
 
 test("the earliest (lowest-numbered) request proceeds — it's the elder", async () => {
@@ -159,7 +162,7 @@ test("without the current issue number the duplicate check fails open (proceeds)
   assert.equal(res.triaged, false);
 });
 
-test("a settled listing wins over a duplicate (denylist beats the dup check)", async () => {
+test("a settled listing wins over a sample (denylist beats the dup check)", async () => {
   const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: ["dup.example"], supportedDomains: [] };
   const openRequests = [{ number: 1, body: bodyWith("https://dup.example/e/1") }];
   const res = await runTriage({ body: bodyWith("https://dup.example/e/2"), number: 9 }, lists, openRequests);
