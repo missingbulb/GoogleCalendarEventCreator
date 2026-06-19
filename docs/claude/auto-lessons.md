@@ -42,8 +42,9 @@ below), so its activity is collected there.
 ## Tracking: log each run under the routine's own issue
 
 When a run produces a PR, log it on this routine's standing tracking issue — the
-*Daily routine log: "lessons" digest* issue (find it **by title**, currently
-**#365**, not a hard-coded number; if it doesn't exist, open it). Log the run as a
+*Auto-Improvements Tracker - Lessons Learned* issue (find it **by title**,
+currently **#365**, not a hard-coded number; if it doesn't exist, open it). Log
+the run as a
 **dated comment** on that issue — **not** a sub-issue — so it accumulates a
 scrollable history of every run over time; also reference the issue from the PR
 (`Refs #365`). The issue is long-lived: if it was **closed**, **reopen it** when a

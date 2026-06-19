@@ -76,7 +76,7 @@ No win → no branch, no PR; print "No generic fallback-coverage improvement fou
 ## Tracking: log each run under the routine's own issue
 
 When a run produces a PR, log it on this routine's standing tracking issue — the
-*Daily routine log: generic fallback extractor coverage improvements* issue (find
+*Auto-Improvements Tracker - Fallback Extractor Coverage* issue (find
 it **by title**, currently **#366**, not a hard-coded number; if it doesn't exist,
 open it). Log the run as a **dated comment** on that issue — **not** a sub-issue —
 so it accumulates a scrollable history of every run over time; also reference the
