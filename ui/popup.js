@@ -54,11 +54,11 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     const { toCards, renderCard } = await import("./views/events-view.js");
 
     // Turn the events into cards: a single occurrence is one clickable card, and
-    // a multi-instance event is grouped by month into one or more cards (a
-    // same-day card with a button per time, a month card with a button per day,
-    // or plain single cards — see events-view.js's toCards). Instances are never
-    // merged, so one event can yield several cards and a card can stand for
-    // several instances, each its own button.
+    // a multi-instance event is grouped by month into one or more cards (a grouped
+    // card with a button per showing, or plain single cards — see
+    // events-view.js's toCards). Instances are never merged, so one event can
+    // yield several cards and a card can stand for several instances, each its own
+    // button.
     const cards = toCards(allEvents);
     const totalEvents = cards.reduce((n, c) => n + c.instances.length, 0);
 

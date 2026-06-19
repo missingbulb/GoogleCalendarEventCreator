@@ -8,18 +8,12 @@
 // calendar month and year). Instances are NEVER merged — a card built from X
 // instances always exposes X addable buttons (a genuinely multi-day event is a
 // SINGLE instance whose start/end span days, shown as a range; it is not N
-// separate dates collapsed into one). What a month becomes depends on its days:
-//   - One day, one time -> a plain single-occurrence card (the whole card is
-//     clickable, like an ordinary event).
-//   - One day, two or more times -> a "same-day" card (NOT clickable) whose left
-//     icon shows that date and whose buttons each open one of that day's times.
-//   - Two or more single-time days (consecutive or scattered) -> one "month"
-//     card (NOT clickable): a title/location header (plus a shared time when the
-//     days all share one) over a button per day. A lone leftover day is just a
-//     single card.
-// Cards still order by their earliest instance, so a month with a same-day card
-// interleaved among scattered days can read out of strict day order — the
-// month grouping is the deliberate trade.
+// separate dates collapsed into one). A month with a single showing is a plain
+// single-occurrence card (the whole card is clickable, like an ordinary event);
+// a month with two or more showings is one "month" card (NOT clickable): a
+// title/location header (plus a shared time when every showing shares one) over a
+// button per showing. A day with two or more showings keeps a button per showing
+// in that same card — showings are never peeled off into their own card.
 //
 // `toCards` and `renderCard` are the controller's entry points; the pure display
 // helpers (formatWhen, summarize, dateChip, sameDayLabel) are also exported for
@@ -46,8 +40,8 @@ function cmpStart(a, b) {
 // Split every event's instances into card descriptors, ordered by date. A
 // descriptor is { event, kind, instances } where instances is an array of
 // { t, i } (the instance and its original index in event.times, so
-// buildCalendarUrl can schedule exactly that showing). kind is "single",
-// "sameDay", or "month".
+// buildCalendarUrl can schedule exactly that showing). kind is "single" or
+// "month" (a grouped card).
 export function toCards(events) {
   const cards = events.flatMap(eventCards);
   for (const c of cards) c.instances.sort((a, b) => cmpStart(a.t.start, b.t.start));
@@ -83,30 +77,13 @@ function eventCards(event) {
   return cards;
 }
 
-// The card(s) for one month's worth of an event's instances. Each day with two
-// or more times is its own same-day card; every single-time day (consecutive or
-// scattered) folds into one month card of per-day buttons — a lone single-time
-// day is just a single card. Instances are never merged: every date keeps its
-// own button.
+// The single card for one month's worth of an event's instances: a "single" card
+// when there's just one showing, otherwise one "month" card holding EVERY showing
+// that month as its own button (a day with two showings contributes two buttons —
+// showings are never peeled off into a separate card). Instances are never merged.
 function monthCards(event, instances) {
-  const byDay = new Map();
-  for (const it of instances) pushInto(byDay, dateKey(it.t.start), it);
-  const days = [...byDay.keys()].sort();
-
-  const cards = [];
-  const leftover = [];
-  for (const day of days) {
-    const group = byDay.get(day);
-    // A day with several times stays its own same-day card; a single-time day
-    // joins the leftover set folded into one month (or single) card below.
-    if (group.length >= 2) cards.push({ event, kind: "sameDay", instances: group });
-    else leftover.push(group[0]);
-  }
-
-  if (leftover.length >= 2) cards.push({ event, kind: "month", instances: leftover });
-  else if (leftover.length === 1) cards.push({ event, kind: "single", instances: leftover });
-
-  return cards;
+  if (instances.length === 1) return [{ event, kind: "single", instances }];
+  return [{ event, kind: "month", instances }];
 }
 
 function pushInto(map, key, value) {
@@ -123,26 +100,23 @@ function pushInto(map, key, value) {
 // a year pill (any year but this one); it defaults to the real current year and
 // is threaded down from render() so the UI snapshots can pin it.
 export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
-  switch (card.kind) {
-    case "single":
-      return makeSingleCard(card.event, card.instances[0], tab, currentYear);
-    case "month":
-      // Scattered days. When they all share one time, that time leads the header
-      // (commonTime) and each chip is a bare DAY chip (month banner + day). When
-      // the days have DIFFERENT times, there's no header time to show, so each
-      // chip becomes a TIME chip (date banner + that day's time) so no time is
-      // lost. Days with any all-day/dateless session fall back to plain day chips.
-      return makeGroupCard(
-        card,
-        tab,
-        showPerDayTimes(card.instances)
-          ? (it) => timeChip(it.t, currentYear)
-          : (it) => dayChip(it.t.start, currentYear)
-      );
-    default: // "sameDay"
-      // Several showings on one date: one TIME chip (date banner + time) each.
-      return makeGroupCard(card, tab, (it) => timeChip(it.t, currentYear));
+  if (card.kind === "single") {
+    return makeSingleCard(card.event, card.instances[0], tab, currentYear);
   }
+  // A grouped "month" card: every showing that month as its own chip button.
+  // When the showings all share one time, that time leads the header (commonTime)
+  // and each chip is a bare DAY chip (month banner + day). When they have
+  // DIFFERENT times — including two showings on the same day — there's no header
+  // time to show, so each chip becomes a TIME chip (date banner + that showing's
+  // time) so the showings are told apart. Any all-day/dateless session falls back
+  // to plain day chips.
+  return makeGroupCard(
+    card,
+    tab,
+    showPerDayTimes(card.instances)
+      ? (it) => timeChip(it.t, currentYear)
+      : (it) => dayChip(it.t.start, currentYear)
+  );
 }
 
 // A single clickable event button. A calendar-style date chip on the left, then

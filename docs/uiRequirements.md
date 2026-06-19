@@ -67,25 +67,23 @@ unlisted) and *when* each occurs are defined in
 - `4.3` Instances are **never merged**: a card built from N instances always
   exposes N addable buttons. Consecutive days are grouped exactly like scattered
   ones — a run is never collapsed into a single spanning event.
-- `4.4` A **single card** — a day with a single time that is the only such day in
-  its month, or any instance with no usable date: the **whole card is clickable**.
-- `4.5` A **same-day card** — a day with two or more times: an **unclickable**
-  container, a title/location header over **one button per time**.
-- `4.6` A **month card** — two or more single-time days in one month (consecutive
-  or scattered): an **unclickable** container, a title/location header over **one
-  button per day**. A lone leftover single-time day is a single card (→ `4.4`).
-- `4.7` Neither grouped card (same-day, month) has a single left calendar icon —
-  its per-instance chip buttons (→ `5`) are its calendar visuals.
+- `4.4` A **single card** — a month with a single showing, or any instance with
+  no usable date: the **whole card is clickable**.
+- `4.5` A day with **two or more showings** contributes **one button per showing**
+  to its month's grouped card — it is **not** peeled off into a separate card; the
+  showings are told apart by their time (→ `5.3`).
+- `4.6` A **month card** (grouped card) — an event with two or more showings in
+  one month: an **unclickable** container, a title/location header over **one
+  button per showing**. A month with a single showing is a single card (→ `4.4`).
+- `4.7` A grouped card has no single left calendar icon — its per-showing chip
+  buttons (→ `5`) are its calendar visuals.
 - `4.8` An event whose **single instance's own start–end crosses several days**
   stays one **single card** — it is *not* split into a button per day (only
   separate instances ever become multiple buttons). Its chip shows the start day
   and its line shows the instance's time (or "All day"), not a per-day breakdown.
-- `4.9` Cards are ordered by their **earliest instance's start**, and an event's
-  instances are ordered within its card — so everything reads chronologically
+- `4.9` Cards are ordered by their **earliest showing's start**, and an event's
+  showings are ordered within its card — so everything reads chronologically
   regardless of the order the page listed it in.
-- `4.10` Because a card sorts by its earliest instance, a month card that spans a
-  range can read slightly out of strict day order (a same-day card for a day
-  inside that range follows it). This is the accepted month-grouping trade.
 
 ## 5. Event cards — appearance
 
