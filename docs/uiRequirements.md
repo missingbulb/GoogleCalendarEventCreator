@@ -95,9 +95,12 @@ unlisted) and *when* each occurs are defined in
   of a grouped card's instance buttons.
 - `5.2` **Day chip** — a month banner over the day-of-month (e.g. JUN / 19). Used
   as a single card's left indicator and as a month card's per-day buttons.
-- `5.3` **Time chip** — a full-date banner over a time or time range (e.g.
-  JUN 19 / 4:30 PM – 6:18 PM). Used as a same-day card's buttons, and as a month
-  card's buttons when its days carry different times (→ `5.7.2`).
+- `5.3` **Time chip** — a full-date banner over the showing's time. Used as a
+  same-day card's buttons, and as a month card's buttons when its days carry
+  different times (→ `5.7.2`).
+  - `5.3.1` A single-time showing shows just the time (e.g. JUN 19 / 1 PM).
+  - `5.3.2` A showing with a start **and** end shows the en-dash time range inside
+    the button (e.g. JUN 19 / 4:30 PM – 6:18 PM).
 - `5.4` **Single-card weight.** A single card is the heavier element — visibly
   elevated and tinted, its whole surface one click target — with a trailing **"›"
   chevron** as the resting cue that the card itself is the button.

@@ -16,7 +16,7 @@ module.exports = {
   description:
     "Three month cards: scattered dates that share one start time show it in the header over day chips; differing-time dates drop to a location-only header with time chips; all-day dates show a location-only header with day chips",
   requirements: [
-    "4.2", "4.3", "4.6", "5.2", "5.3", "5.7.1", "5.7.2", "5.7.3",
+    "4.2", "4.3", "4.6", "5.2", "5.3.1", "5.7.1", "5.7.2", "5.7.3",
   ],
   data: {
     supported: true,

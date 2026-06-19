@@ -13,72 +13,13 @@ rasterizes the result, so these images track the shipped popup directly. See
 
 A case names its scenario and expectation and bundles several requirements into
 one image. Every leaf requirement is covered by at least one case, enforced by
-`test/uber/ui-requirements-coverage.test.js`; the coverage map below is the
-generated proof.
-
-## Requirement coverage
-
-Every leaf requirement in [`docs/uiRequirements.md`](../../docs/uiRequirements.md), and the case(s) that check it.
-
-| Requirement | Covered by |
-| --- | --- |
-| `1.1` | loading-heading-reads-reading-page |
-| `1.2` | card-single-shows-pills-times-all-day-and-no-date<br>link-unlisted-event-shows-suggest-correction |
-| `1.3` | empty-denylisted-shows-glyph-without-link<br>empty-nothing-found-shows-glyph-with-disagree-link |
-| `2.1` | empty-denylisted-shows-glyph-without-link<br>empty-nothing-found-shows-glyph-with-disagree-link |
-| `2.2` | empty-nothing-found-shows-glyph-with-disagree-link |
-| `2.3` | empty-denylisted-shows-glyph-without-link |
-| `3.1` | link-unlisted-event-shows-suggest-correction |
-| `3.2` | empty-nothing-found-shows-glyph-with-disagree-link |
-| `3.3` | empty-nothing-found-shows-glyph-with-disagree-link<br>link-unlisted-event-shows-suggest-correction |
-| `3.4` | empty-nothing-found-shows-glyph-with-disagree-link<br>link-unlisted-event-shows-suggest-correction |
-| `4.1` | card-single-shows-pills-times-all-day-and-no-date |
-| `4.2` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
-| `4.3` | card-month-header-shows-shared-time-or-location-only |
-| `4.4` | card-single-shows-pills-times-all-day-and-no-date |
-| `4.5` | card-month-and-same-day-keep-a-button-per-instance |
-| `4.6` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
-| `4.7` | card-month-and-same-day-keep-a-button-per-instance |
-| `4.8` | card-single-shows-pills-times-all-day-and-no-date |
-| `4.9` | card-single-shows-pills-times-all-day-and-no-date |
-| `4.10` | card-month-and-same-day-keep-a-button-per-instance |
-| `5.1` | card-single-shows-pills-times-all-day-and-no-date |
-| `5.2` | card-month-header-shows-shared-time-or-location-only<br>card-single-shows-pills-times-all-day-and-no-date |
-| `5.3` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
-| `5.4` | card-single-shows-pills-times-all-day-and-no-date |
-| `5.5` | card-month-and-same-day-keep-a-button-per-instance |
-| `5.6.1` | card-single-shows-pills-times-all-day-and-no-date |
-| `5.6.2` | card-single-shows-pills-times-all-day-and-no-date |
-| `5.6.3` | card-single-shows-pills-times-all-day-and-no-date |
-| `5.7.1` | card-month-header-shows-shared-time-or-location-only |
-| `5.7.2` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
-| `5.7.3` | card-month-header-shows-shared-time-or-location-only |
-| `5.8` | card-single-shows-pills-times-all-day-and-no-date |
-| `6.1` | card-single-shows-pills-times-all-day-and-no-date |
-| `6.2` | card-single-shows-pills-times-all-day-and-no-date |
-| `6.3` | card-single-shows-pills-times-all-day-and-no-date |
-| `6.4` | card-single-shows-pills-times-all-day-and-no-date |
-| `6.5` | card-single-shows-pills-times-all-day-and-no-date |
-| `6.6` | card-single-shows-pills-times-all-day-and-no-date |
-| `7.1` | list-scrolled-to-middle-fades-both-edges |
-| `7.2` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
-| `7.3` | list-all-cards-shown-counts-event-instances<br>list-capped-at-bottom-shows-n-out-of-m-with-show-all<br>list-scrolled-to-middle-fades-both-edges |
-| `8.1` | list-all-cards-shown-counts-event-instances<br>list-capped-at-bottom-shows-n-out-of-m-with-show-all |
-| `8.2` | list-all-cards-shown-counts-event-instances |
-| `8.3` | card-single-shows-pills-times-all-day-and-no-date |
-| `8.4` | list-all-cards-shown-counts-event-instances |
-| `8.5` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
-| `8.6` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
-| `8.7` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
-| `9.1` | card-single-shows-pills-times-all-day-and-no-date |
-| `9.2` | card-month-and-same-day-keep-a-button-per-instance |
-| `9.3` | card-single-shows-pills-times-all-day-and-no-date |
+`test/uber/ui-requirements-coverage.test.js`.
 
 ## card-month-and-same-day-keep-a-button-per-instance
 
-One event's June showings: single-show days 10 & 12 fold into a month card (a button per day), the two-show day 11 stays its own same-day card — the month card sorts first despite holding day 12, and every instance keeps its own time-chip button
+One event's June showings: single-show days 10 & 12 fold into a month card (a time-chip button per day), the two-show day 11 stays its own same-day card whose buttons show each screening's start–end range — and the month card sorts first despite holding day 12
 
-Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `4.10`, `5.3`, `5.5`, `5.7.2`, `9.2`
+Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `4.10`, `5.3.1`, `5.3.2`, `5.5`, `5.7.2`, `9.2`
 
 ![card-month-and-same-day-keep-a-button-per-instance](cases/card-month-and-same-day-keep-a-button-per-instance.png)
 
@@ -86,7 +27,7 @@ Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `4.10`, `5.3`, `5.5`, `5.7.2`, `9.2`
 
 Three month cards: scattered dates that share one start time show it in the header over day chips; differing-time dates drop to a location-only header with time chips; all-day dates show a location-only header with day chips
 
-Requirements: `4.2`, `4.3`, `4.6`, `5.2`, `5.3`, `5.7.1`, `5.7.2`, `5.7.3`
+Requirements: `4.2`, `4.3`, `4.6`, `5.2`, `5.3.1`, `5.7.1`, `5.7.2`, `5.7.3`
 
 ![card-month-header-shows-shared-time-or-location-only](cases/card-month-header-shows-shared-time-or-location-only.png)
 
