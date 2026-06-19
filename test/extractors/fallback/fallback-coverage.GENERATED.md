@@ -12,9 +12,9 @@ Headline coverage over all 23 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **56.5%** | 39 / 69 |
-| **All fields** | **36.4%** | 52 / 143 |
-| Event coverage *(informational)* | 64.3% | 18 / 28 |
+| **Critical fields** (title + start + location) | **58%** | 40 / 69 |
+| **All fields** | **37.1%** | 53 / 143 |
+| Event coverage *(informational)* | 67.9% | 19 / 28 |
 
 ### Gate
 
@@ -22,8 +22,8 @@ The gate (`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) 
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 56.5% | 56.5% | ✓ |
-| All fields | 36.4% | 36.4% | ✓ |
+| Critical fields | 58% | 58% | ✓ |
+| All fields | 37.1% | 37.1% | ✓ |
 
 Gated over **23** shared case(s).
 
@@ -33,20 +33,20 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 23 | 17 | 1 | 5 | 73.9% |
-| `start` **(critical)** | 23 | 11 | 7 | 5 | 47.8% |
+| `title` **(critical)** | 23 | 18 | 1 | 4 | 78.3% |
+| `start` **(critical)** | 23 | 11 | 8 | 4 | 47.8% |
 | `end` | 17 | 10 | 0 | 7 | 58.8% |
 | `location` **(critical)** | 23 | 11 | 2 | 10 | 47.8% |
 | `ctz` | 23 | 0 | 0 | 23 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 23 | 3 | 10 | 10 | 13% |
+| `description` | 23 | 3 | 11 | 9 | 13% |
 
 ## By host
 
 | Host | Cases | Events found (fb/custom) | Critical % | All % |
 | --- | --: | --: | --: | --: |
 | `bandsintown.com` | 1 | 1/1 | 66.7% | 66.7% |
-| `barby.co.il` | 1 | 0/1 | 0% | 0% |
+| `barby.co.il` | 1 | 1/1 | 33.3% | 20% |
 | `cinema.co.il` | 4 | 0/9 | 0% | 0% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 83.3% |
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
@@ -66,7 +66,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | Case | Events fb/custom | title | start | end | loc | ctz | len | desc |
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | `bandsintown-berry-sakharof` | 1/1 | ~ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
-| `barby` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
+| `barby` | 1/1 | ✓ | ~ | — | ✗ | ✗ | — | ~ |
 | `dash-datadoghq` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-kristen-schaal` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
