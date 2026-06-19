@@ -32,7 +32,15 @@ Whenever a change regenerates the UI snapshots (`test/ui/cases/*.png`, via
 them: show the changed PNGs inline in the chat and link the branch's
 `test/ui/README.md` (the rendered gallery of every case —
 `https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md`) for
-one-page review.
+one-page review. Whenever `test/ui/README.md` itself changes, post that
+branch link in the chat so it's one click to review.
+
+When a change to a `test/ui/cases/*` case — its spec or its rendering — makes
+the snapshot tests **fail** (the pixels moved), don't silently regenerate the
+baseline: show the **expected** (committed) and **actual** (newly-rendered) PNGs
+inline in the chat side by side and **ask the owner to approve the difference**
+before refreshing and committing the new snapshot. The owner's approval of the
+visual diff is the gate; an unreviewed pixel change is never auto-accepted.
 
 When the repo owner says **"bump version"**, treat it as a defined instruction:
 raise the extension's version by editing the `version` field in
