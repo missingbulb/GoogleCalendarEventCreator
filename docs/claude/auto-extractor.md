@@ -51,10 +51,10 @@ Almost everything for this pipeline is one self-contained folder,
   build-time interpolation): the web routine points the agent at it, and it tells
   the agent to derive the branch + file names from the issue's event URL itself
   (the same `extractor-naming.js` the workflow used).
-- `triage-extractor-request.js`, `probe-url.js`, `extractor-naming.js`,
-  `derive-names.js`, `scaffold-source.js`, `scaffold-case.js`,
-  `add-supported-domain.js`, `case-quality.js` — the deterministic Node steps the
-  workflows run around the agent.
+- `triage-extractor-request.js`, `attach-sample-url.js`, `probe-url.js`,
+  `extractor-naming.js`, `derive-names.js`, `scaffold-source.js`,
+  `scaffold-case.js`, `add-supported-domain.js`, `case-quality.js` — the
+  deterministic Node steps the workflows run around the agent.
 - `phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh` — the bash the
   workflows call, so the YAML reads as a **thin orchestrator**: triggers,
   permissions, per-step `env:` wiring, one script invocation per step.
@@ -88,9 +88,19 @@ doesn't own them.
      honest by `test/unit/supported-domains.test.js`);
    - **deny** / **allow** — the host is on the fallback denylist/allowlist (the
      same `classifyHost` the popup uses, via `fallback-policy.js`);
-   - **duplicate** — another **open** `extractor-request` issue already targets
+   - **sample** — another **open** `extractor-request` issue already targets
      this host (lowest issue number wins; a prior step gathers the open peers with
-     `gh` and passes them in, so the script stays offline).
+     `gh` and passes them in, so the script stays offline). The newer request's
+     event page isn't discarded: a follow-up step folds it into the **leader**
+     issue as an *additional sample page* (the offline, unit-tested
+     `attach-sample-url.js` rewrites the leader body's `additional-samples`
+     checklist idempotently; the `gh` read/write lives in the workflow). The
+     post-reorg agent has a hard two-file write surface, so it can't add the
+     extra case itself — the sample accrues on the leader for the maintainer
+     reviewing its PR (or a future Phase-1 enhancement) to turn into an
+     integration case, which still beats discarding the URL. **In-flight only**:
+     once the leader merges the host is `supported`, so later same-host requests
+     triage as `supported`.
 
    It also emits the event `url`, `host`, and the deterministic `slug`/`caseName`
    (`extractor-naming.js`) the later steps consume. Runs before `npm ci`, so a

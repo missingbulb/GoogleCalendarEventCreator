@@ -74,6 +74,12 @@ venue for a `.de` URL, `[object Object]`, a date that doesn't match the page). A
 date, or venue — is a **red flag to re-examine whether this is really one usable
 event page**, not a cue to reconcile by copying the hints in.
 
+If the body contains an **"Additional sample pages"** checklist block (extra event
+URLs folded in from duplicate requests for this same site), **ignore it** — turning
+those into cases means creating new `data/` + case files, which is outside your
+two-file surface (the finalize guard reverts anything else). They're a to-do for
+the maintainer reviewing your PR, not work for you.
+
 The form also has a **"Number of events on the page" field** (a count the
 extension fills in from what the popup detected, defaulting to 1). When it's **1**,
 the page is expected to describe one specific event, and a multi-date listing is a
