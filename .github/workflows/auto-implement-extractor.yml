@@ -40,11 +40,13 @@ jobs:
           node-version: 22
           cache: npm
 
-      # Gather the OTHER open requests with this label so the triage can close a
-      # duplicate request for a host that's already in flight: an in-review PR
+      # Gather the OTHER open requests with this label so the triage can defer a
+      # same-host request for a host that's already in flight: an in-review PR
       # keeps its issue OPEN (the PR only `Closes #N` on merge), so an open
-      # issue for the same host means the work is already happening. The network
-      # call lives here, in the workflow, so the triage script stays offline and
+      # issue for the same host means the work is already happening. The newer
+      # request's URL isn't discarded — it's folded into the leader as a sample
+      # (the "Attach the event page to the leader" step below). The network call
+      # lives here, in the workflow, so the triage script stays offline and
       # unit-testable. gh is preinstalled on the runner; no npm deps needed yet.
       - name: Gather in-flight requests
         env:
@@ -61,8 +63,9 @@ jobs:
 
       # Pre-flight triage: close + skip the (expensive) agent run when the
       # request is already settled — the host already has a dedicated source,
-      # it's on config.js's fallback allow/denylist, or it duplicates an
-      # in-flight request. Also emits the event URL plus the deterministic
+      # it's on config.js's fallback allow/denylist, or another in-flight request
+      # already covers its host (its URL is folded into that leader as a sample).
+      # Also emits the event URL plus the deterministic
       # slug/caseName the probe and Phase-1 steps below use. Needs only Node +
       # the repo (no deps), so it runs before `npm ci`. The issue fields come
       # from the event payload via env, so free-form text isn't shell-interpolated.
@@ -74,7 +77,24 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: node tools/new-extractors-creation/triage-extractor-request.js
 
-      - name: Close a triaged request (supported / listed / duplicate)
+      # A same-host request in flight isn't discarded: its event page is folded
+      # into the LEADER issue as an extra sample, so that extractor can pick up a
+      # second real integration case. The network read/write lives here (gh); the
+      # body edit itself is the offline, unit-tested attach-sample-url.js. Runs
+      # before the close below so the URL is recorded before this issue closes.
+      - name: Attach the event page to the leader (sample)
+        if: steps.triage.outputs.reason == 'sample'
+        env:
+          GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
+          LEADER:     ${{ steps.triage.outputs.leader }}
+          SAMPLE_URL: ${{ steps.triage.outputs.url }}
+        run: |
+          ISSUE_BODY="$(gh issue view "$LEADER" --repo "${{ github.repository }}" --json body -q .body)" \
+            node tools/new-extractors-creation/attach-sample-url.js > /tmp/leader-body.md
+          gh issue edit "$LEADER" --repo "${{ github.repository }}" --body-file /tmp/leader-body.md
+          echo "Attached $SAMPLE_URL to leader #$LEADER as an additional sample."
+
+      - name: Close a triaged request (supported / listed / sample)
         if: steps.triage.outputs.skipAgent == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}

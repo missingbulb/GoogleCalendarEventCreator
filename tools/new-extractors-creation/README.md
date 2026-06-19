@@ -15,7 +15,10 @@ reference: [`docs/claude/auto-extractor.md`](../../docs/claude/auto-extractor.md
   workflow used).
 - Deterministic Node steps the workflows run around the agent:
   - `triage-extractor-request.js` — close a request already settled (supported /
-    listed / duplicate) before the hand-off.
+    listed / sample) before the hand-off.
+  - `attach-sample-url.js` — fold a deferred same-host request's event URL into
+    the leader issue body as an extra sample (idempotent; the `gh` read/write is
+    in the prepare workflow).
   - `probe-url.js` — fetch the event URL the way the recorder will; stop on
     anything but a usable 2xx.
   - `extractor-naming.js` — derive the deterministic `slug` / `caseName` from the
