@@ -3,9 +3,10 @@
 A nightly Claude **Opus** Claude Code routine that reports every open branch's
 status against `main` and which are safe to delete — the scheduled version of the
 manual branch analysis. It is **read-only on the repo**: it never pushes, deletes,
-or merges anything; its only write is one comment per run on its standing tracking
-issue (#399). Unlike the lessons/fallback digests, a quiet repo still gets a
-(terse) report — this is a status heartbeat, not a change digest.
+or merges anything; its only writes are a comment on its standing tracking issue
+(#399) when the branch picture has changed, and reopening that issue if it was
+closed while branches still need tracking. Like the lessons/fallback digests it
+stays **silent when nothing moved** — an unchanged night posts no comment.
 
 ## What it reports
 
@@ -63,13 +64,22 @@ which branches are safe to delete.
 
 ## Where it posts
 
-Find the open standing issue titled **`Daily routine log: open-branch status
-report`** (by title — currently **#399**) and add the report as a new dated
-comment, so the issue accumulates a scrollable history. If that issue doesn't
-exist, open it first (long-lived, never closed). To stay quiet when nothing moved:
-if this run's table is substantively identical to the previous comment, post a
-one-line `No change since <date>` instead of repeating it; if there are no
-branches besides `main`, post a one-line all-clear.
+The report lands on the standing issue titled **`Daily routine log: open-branch
+status report`** (find it **by title** — currently **#399**, not a hard-coded
+number; if it doesn't exist, open it). Then decide whether to post by **what
+changed**, so the issue stays a signal rather than a daily wall of identical
+tables — read the most recent comment on the issue to compare against:
+
+- **No branches other than `main`** → **do nothing**: no comment, no reopen.
+  There's nothing to track.
+- **Open branches exist but the issue is closed** → **reopen it** (it's
+  long-lived; a closure while branches still need tracking is stale). Reopening is
+  itself the signal, so it happens regardless of the comment decision below.
+- **This run's report is substantially identical to the last one posted** (same
+  set of branches, and same status + safe-to-delete for each) → **don't comment**.
+- **The report changed** (a branch appeared or was pruned, or any branch's status
+  or safe-to-delete flipped) → **post it** as a new dated comment, so the issue
+  accumulates a scrollable history.
 
 ## The launcher (Claude Code Routine)
 
@@ -80,9 +90,11 @@ into the nightly routine:
 
 > Run the nightly open-branch status report for this repository exactly as
 > specified in `docs/claude/auto-branch-report.md`: analyze every open branch's
-> status against `main` (squash-aware, per that doc), and post the report as a
-> comment on the routine's standing tracking issue (#399). You are read-only on
-> the repo — never push, delete, or merge anything.
+> status against `main` (squash-aware, per that doc), then post to the routine's
+> standing tracking issue (#399) only per that doc's rules — comment when the
+> branch picture changed, stay silent when it didn't, reopen the issue if it was
+> closed while branches still need tracking, and do nothing when no branches but
+> `main` exist. You are read-only on the repo — never push, delete, or merge.
 
 Schedule it nightly in the Claude Code Routines UI; the repo can't schedule
 itself, so the doc is the spec and the routine is the trigger.
