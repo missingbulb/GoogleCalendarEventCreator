@@ -16,6 +16,24 @@
 # Full rationale: issue #186 and
 # https://code.claude.com/docs/en/claude-code-on-the-web (Setup scripts /
 # Environment caching).
+#
+# Because this script is pasted into the environment settings by hand, an
+# environment can silently drift to a stale (or absent) copy. ENV_VERSION below
+# is the drift signal: bump it whenever this script's body changes in a way that
+# matters, and the script stamps it into a persistent flag file. A lightweight
+# SessionStart validator (.claude/hooks/session-start.sh) compares the committed
+# ENV_VERSION against that flag every session and tells the user to re-paste this
+# file when it's missing or older. The flag literal is read back by the hook via
+# grep, so this `ENV_VERSION=` line is the single source of truth -- keep it on
+# one line. (issue #403)
+ENV_VERSION=1
+
+# Where the stamped version lives. Outside the checkout (cloned fresh per
+# container) but inside the environment's cached filesystem, so it persists
+# across sessions exactly like the node_modules this script installs. The hook
+# reads this same path.
+ENV_VERSION_FLAG=/home/user/.gcal-environment-version
+
 set -euo pipefail
 
 # The setup script runs as root before Claude launches, starting in the repo's
@@ -40,3 +58,8 @@ npm ci || true
 # environment's cached filesystem alongside node_modules above.
 git config rerere.enabled true
 git config merge.ours.driver true
+
+# Stamp the environment version last, once setup has succeeded, so the flag is
+# only written when the environment is genuinely configured. The SessionStart
+# hook compares this against the committed ENV_VERSION.
+echo "$ENV_VERSION" > "$ENV_VERSION_FLAG"
