@@ -68,6 +68,14 @@ committed.
   (`git rebase origin/main`, which drops the commit as an already-applied
   cherry-pick, or a hard reset): it's your own un-merged branch, so this is the
   amend-your-own-commits case above, not rewriting shared history.
+  - **`git rebase origin/main` only drops the old commit cleanly when the branch
+    carried a *single* squash-merged commit.** When it carried *several* commits
+    that `main` squashed into *one* (then kept developing), git can't match them
+    to the squash as already-applied, so it replays them and conflicts mid-rebase.
+    Replant only the genuinely-new commits instead: `git rebase --onto
+    origin/main <last-squash-merged-commit>` (then `git push --force-with-lease`).
+    If the new work is small, a `git reset --hard origin/main` + redo beats
+    fighting the replay.
 
 ## Open the PR early when a change touches e2e / heavy / UI tests
 
