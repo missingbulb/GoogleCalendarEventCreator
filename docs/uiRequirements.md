@@ -76,9 +76,10 @@ unlisted) and *when* each occurs are defined in
   button per day**. A lone leftover single-time day is a single card (→ `4.4`).
 - `4.7` Neither grouped card (same-day, month) has a single left calendar icon —
   its per-instance chip buttons (→ `5`) are its calendar visuals.
-- `4.8` The one genuinely spanning card: an event whose **single instance's own
-  start–end crosses several days** stays a single card, and its line reads the
-  date range.
+- `4.8` An event whose **single instance's own start–end crosses several days**
+  stays one **single card** — it is *not* split into a button per day (only
+  separate instances ever become multiple buttons). Its chip shows the start day
+  and its line shows the instance's time (or "All day"), not a per-day breakdown.
 - `4.9` Cards are ordered by their **earliest instance's start**, and an event's
   instances are ordered within its card — so everything reads chronologically
   regardless of the order the page listed it in.
@@ -94,9 +95,12 @@ unlisted) and *when* each occurs are defined in
   of a grouped card's instance buttons.
 - `5.2` **Day chip** — a month banner over the day-of-month (e.g. JUN / 19). Used
   as a single card's left indicator and as a month card's per-day buttons.
-- `5.3` **Time chip** — a full-date banner over a time or time range (e.g.
-  JUN 19 / 4:30 PM – 6:18 PM). Used as a same-day card's buttons, and as a month
-  card's buttons when its days carry different times (→ `5.7.2`).
+- `5.3` **Time chip** — a full-date banner over the showing's time. Used as a
+  same-day card's buttons, and as a month card's buttons when its days carry
+  different times (→ `5.7.2`).
+  - `5.3.1` A single-time showing shows just the time (e.g. JUN 19 / 1 PM).
+  - `5.3.2` A showing with a start **and** end shows the en-dash time range inside
+    the button (e.g. JUN 19 / 4:30 PM – 6:18 PM).
 - `5.4` **Single-card weight.** A single card is the heavier element — visibly
   elevated and tinted, its whole surface one click target — with a trailing **"›"
   chevron** as the resting cue that the card itself is the button.

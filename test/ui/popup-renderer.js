@@ -214,8 +214,13 @@ async function renderCasePng(testCase) {
   global.document = doc;
   global.window = dom.window;
   try {
-    await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR });
-    if (testCase.action) testCase.action(doc);
+    // A `skipRender` case snapshots the inert initial popup.html shell (the
+    // "Reading page…" state render() never produces); everything else runs the
+    // real render() and any DOM action on top of it.
+    if (!testCase.skipRender) {
+      await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR });
+      if (testCase.action) testCase.action(doc);
+    }
 
     inlinePopupCss(doc.body);
     clampOverflowingList(doc); // after styling, so :last-child etc. reflect the true list

@@ -31,18 +31,19 @@ doc, when the mechanics change.
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically. (This is the
   same comparison the fallback-coverage gate automates — see below.)
-- **A UI snapshot checks pixels *against a UI requirement*: does the popup render
-  the right appearance for this scenario? — not whether some appearance can be
-  produced.** The popup's logic is already pinned by unit tests (`popup-content` /
-  `events-view` / `popup-truncation`); a `test/ui/cases/` image earns its keep by
-  fixing what one scenario *should* look like (named scenario→expectation), and its
-  reference PNG only means something once a human has confirmed it matches the
-  actual requirement — not whatever the code happened to draw. So when adding or
-  pruning a case, the question is "which requirement's correct rendering does this
-  verify?", not "can these pixels be generated?"; deduping cases against the unit
-  tests silently drops a requirement's pixel check while every unit test stays
-  green. Reorganize by feature (a feature's variations together in one image), but
-  treat each removal as a coverage question, not a dedupe.
+- **A UI snapshot checks pixels *against a numbered UI requirement*.** The popup's
+  testable requirements are enumerated in `docs/uiRequirements.md` (`1.1`,
+  `5.6.1`, …). Each `test/ui/cases/` case names its scenario→expectation and
+  declares the requirement IDs it checks in a `requirements: [...]` field;
+  `test/uber/ui-requirements-coverage.test.js` fails unless **every leaf
+  requirement is covered by ≥1 case** (and rejects a case that cites a
+  nonexistent ID). So a case earns its keep by pinning specific requirements'
+  correct rendering — confirmed by a human against the PNG, not "can these pixels
+  be generated?" — and should **bundle several requirements into one image** (a
+  feature's variations together), keeping the case count down. Pruning a case is a
+  coverage question, but the ubertest now catches a dropped requirement instead of
+  it slipping silently. The popup's pure logic stays pinned by unit tests
+  (`popup-content` / `events-view` / `popup-truncation`).
 
 ## Adding a cached integration case
 
@@ -78,20 +79,24 @@ Read the file when you touch it; the one-liners here are just a map.
   rewrites `fallback-coverage.GENERATED.md` locally and is read-only in CI.
   Adding an extractor never fails it.
 - **UI snapshots** — the renderer's satori/resvg limits, CSS inlining (no
-  selector specificity), and the tall-list clamp are in
-  `test/ui/popup-renderer.js`; the pixel-exact diff (`MAX_DIFF_RATIO = 0`) and
-  the en-US-locale guard are in `test/ui/popup-snapshots.test.js`; the
-  scroll/fade gestures are in `test/ui/actions.js`. After an intentional
-  popup/view/CSS change run `npm run refresh:ui` and commit the PNGs (the change
-  author regenerates on their branch — it's deterministic, no CI workflow). A
-  case is a self-contained `<name>.case.js` (fake data only) + `<name>.png`; the
-  renderer feeds it the popup's REAL `render()`, so a view change moves the
-  snapshots automatically.
-- **UI snapshot gallery** — `test/ui/README.md` is GENERATED from the cases
-  (`test/ui/build-readme.js`, gated by `readme.test.js`); never hand-edit it.
-  It's named plain `README.md` (not `*.GENERATED.md`) so GitHub renders it as the
-  folder landing page — the do-not-edit banner + CI gate stand in for the missing
-  cue.
+  selector specificity), the tall-list clamp, and the `skipRender` initial-shell
+  case are in `test/ui/popup-renderer.js`; the pixel-exact diff
+  (`MAX_DIFF_RATIO = 0`) and the en-US-locale guard are in
+  `test/ui/popup-snapshots.test.js`; the scroll/fade gestures are in
+  `test/ui/actions.js`. A case is a self-contained `<name>.case.js` (fake data +
+  the `requirements: [...]` IDs it checks) + `<name>.png`; the renderer feeds it
+  the popup's REAL `render()`, so a view change moves the snapshots automatically.
+  After an intentional popup/view/CSS change run `npm run refresh:ui` and commit
+  the PNGs + README (deterministic, no CI workflow). The requirement list is
+  parsed from `docs/uiRequirements.md` by `test/ui/ui-requirements.js`, shared
+  with the coverage ubertest (`test/uber/ui-requirements-coverage.test.js`).
+- **UI snapshot gallery** — `test/ui/README.md` is GENERATED from the cases plus
+  `docs/uiRequirements.md` (`test/ui/build-readme.js`, gated by `readme.test.js`):
+  the image gallery (each case's PNG, description, and the requirements it checks)
+  plus a **requirement-coverage map** (every leaf requirement → the case(s) that
+  check it). Never hand-edit it. Named plain `README.md` (not `*.GENERATED.md`) so
+  GitHub renders it as the folder landing page — the do-not-edit banner + CI gate
+  stand in for the missing cue.
 - **"Does the extension load?"** is guarded in two layers:
   `test/extension/extension-loads.test.js` (always-on, no browser — boots the
   service worker through a Chrome-faithful `importScripts` and checks every
