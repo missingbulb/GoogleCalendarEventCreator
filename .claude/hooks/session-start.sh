@@ -7,7 +7,11 @@
 # and runs ~once per environment; a SessionStart hook is uncached and would
 # re-run every session (the #186 rationale). So this hook's only job is to detect
 # when the environment was set up with a STALE or MISSING copy of that script and
-# tell the user to re-paste it.
+# instruct the assistant to HALT and ask the user (via AskUserQuestion) whether to
+# continue before doing any work -- a soft, instruction-driven gate. A SessionStart
+# hook cannot itself block the session or prompt interactively (it can only inject
+# context), so the confirmation is carried out by the assistant on this directive,
+# not enforced by the hook.
 #
 # How it works: scripts/cloud-setup.sh bakes an `ENV_VERSION=N` and, on success,
 # stamps N into a persistent flag file. Here we read the committed (expected)
@@ -36,28 +40,35 @@ fi
 
 emit_warning() {
   # SessionStart hooks inject stdout into the session as additional context; the
-  # assistant relays it to the user. JSON form keeps it unambiguous. The messages
-  # below are plain text with no double quotes or backslashes, so they're safe to
-  # embed in the JSON string directly (no escaping dependency).
+  # assistant acts on it (here: halt and ask the user before any work -- see
+  # halt_directive below). JSON form keeps it unambiguous. The messages below are
+  # plain text with no double quotes or backslashes, so they're safe to embed in
+  # the JSON string directly (no escaping dependency).
   local msg="$1"
   printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$msg"
 }
 
 repaste_instructions="Copy the full body of scripts/cloud-setup.sh from this repo into the Setup script field of this environment in Claude Code Web settings (cloud session settings then the environment then Setup script), then start a fresh session so it re-runs."
 
+# The shared directive every warning ends with. A SessionStart hook can't block or
+# prompt on its own, so this tells the assistant to run the confirmation itself:
+# stop before any other action and put the choice to the user with AskUserQuestion.
+# (Plain text only -- no double quotes or backslashes -- per the emit_warning note.)
+halt_directive="STOP: before running any other tool, answering, or starting the requested task, use the AskUserQuestion tool to ask the user whether to continue anyway despite the misconfigured environment or to pause and fix it first; do not proceed until they answer. To fix it: ${repaste_instructions}"
+
 if [ ! -f "$ENV_VERSION_FLAG" ]; then
-  emit_warning "ENVIRONMENT NOT CONFIGURED: no environment-version flag was found, which means this environment's Setup script did not run the committed scripts/cloud-setup.sh (expected version ${expected}). Test devDependencies may be missing. Please alert the user: ${repaste_instructions}"
+  emit_warning "ENVIRONMENT NOT CONFIGURED: no environment-version flag was found, which means this environment's Setup script did not run the committed scripts/cloud-setup.sh (expected version ${expected}). Test devDependencies may be missing. ${halt_directive}"
   exit 0
 fi
 
 actual="$(head -n1 "$ENV_VERSION_FLAG" | tr -dc '0-9' || true)"
 if [ -z "$actual" ]; then
-  emit_warning "ENVIRONMENT FLAG UNREADABLE: ${ENV_VERSION_FLAG} exists but holds no version number. Please alert the user: ${repaste_instructions}"
+  emit_warning "ENVIRONMENT FLAG UNREADABLE: ${ENV_VERSION_FLAG} exists but holds no version number. ${halt_directive}"
   exit 0
 fi
 
 if [ "$actual" -lt "$expected" ]; then
-  emit_warning "ENVIRONMENT OUTDATED: this environment was set up with cloud-setup.sh version ${actual}, but the repo is now at version ${expected}. Please alert the user that the Setup script is stale: ${repaste_instructions}"
+  emit_warning "ENVIRONMENT OUTDATED: this environment was set up with cloud-setup.sh version ${actual}, but the repo is now at version ${expected}. The Setup script is stale. ${halt_directive}"
   exit 0
 fi
 
