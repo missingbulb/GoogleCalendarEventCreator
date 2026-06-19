@@ -76,9 +76,10 @@ unlisted) and *when* each occurs are defined in
   button per day**. A lone leftover single-time day is a single card (→ `4.4`).
 - `4.7` Neither grouped card (same-day, month) has a single left calendar icon —
   its per-instance chip buttons (→ `5`) are its calendar visuals.
-- `4.8` The one genuinely spanning card: an event whose **single instance's own
-  start–end crosses several days** stays a single card, and its line reads the
-  date range.
+- `4.8` An event whose **single instance's own start–end crosses several days**
+  stays one **single card** — it is *not* split into a button per day (only
+  separate instances ever become multiple buttons). Its chip shows the start day
+  and its line shows the instance's time (or "All day"), not a per-day breakdown.
 - `4.9` Cards are ordered by their **earliest instance's start**, and an event's
   instances are ordered within its card — so everything reads chronologically
   regardless of the order the page listed it in.

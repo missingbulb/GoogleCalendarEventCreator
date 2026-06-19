@@ -4,119 +4,152 @@
 > regenerate; `test/ui/readme.test.js` fails if it drifts.
 
 Each popup state is a self-contained case in [`cases/`](cases/): a
-`<name>.case.js` module supplying only *fake data*, paired with its reference
-`<name>.png`. The renderer feeds that data to `ui/popup.js`'s real
-`render()` — the same `chooseContent` + views the extension runs — and
+`<name>.case.js` module supplying only *fake data* and the list of
+[`uiRequirements.md`](../../docs/uiRequirements.md) IDs it checks, paired with
+its reference `<name>.png`. The renderer feeds that data to `ui/popup.js`'s
+real `render()` — the same `chooseContent` + views the extension runs — and
 rasterizes the result, so these images track the shipped popup directly. See
 [`docs/claude/testing.md`](../../docs/claude/testing.md) for the mechanics.
 
-The gallery below shows every case's reference image with its description, so the
-current (or changed) state is reviewable straight from GitHub.
+A case names its scenario and expectation and bundles several requirements into
+one image. Every leaf requirement is covered by at least one case, enforced by
+`test/uber/ui-requirements-coverage.test.js`; the coverage map below is the
+generated proof.
 
-## 01-supported-listing
+## Requirement coverage
 
-Supported host: events across past, current, and future years (off-year cards get a year pill); the current-year event's times carry a UTC offset shown as wall-clock
+Every leaf requirement in [`docs/uiRequirements.md`](../../docs/uiRequirements.md), and the case(s) that check it.
 
-![01-supported-listing](cases/01-supported-listing.png)
+| Requirement | Covered by |
+| --- | --- |
+| `1.1` | loading-heading-reads-reading-page |
+| `1.2` | card-single-shows-pills-times-all-day-and-no-date<br>link-unlisted-event-shows-suggest-correction |
+| `1.3` | empty-denylisted-shows-glyph-without-link<br>empty-nothing-found-shows-glyph-with-disagree-link |
+| `2.1` | empty-denylisted-shows-glyph-without-link<br>empty-nothing-found-shows-glyph-with-disagree-link |
+| `2.2` | empty-nothing-found-shows-glyph-with-disagree-link |
+| `2.3` | empty-denylisted-shows-glyph-without-link |
+| `3.1` | link-unlisted-event-shows-suggest-correction |
+| `3.2` | empty-nothing-found-shows-glyph-with-disagree-link |
+| `3.3` | empty-nothing-found-shows-glyph-with-disagree-link<br>link-unlisted-event-shows-suggest-correction |
+| `3.4` | empty-nothing-found-shows-glyph-with-disagree-link<br>link-unlisted-event-shows-suggest-correction |
+| `4.1` | card-single-shows-pills-times-all-day-and-no-date |
+| `4.2` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
+| `4.3` | card-month-header-shows-shared-time-or-location-only |
+| `4.4` | card-single-shows-pills-times-all-day-and-no-date |
+| `4.5` | card-month-and-same-day-keep-a-button-per-instance |
+| `4.6` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
+| `4.7` | card-month-and-same-day-keep-a-button-per-instance |
+| `4.8` | card-single-shows-pills-times-all-day-and-no-date |
+| `4.9` | card-single-shows-pills-times-all-day-and-no-date |
+| `4.10` | card-month-and-same-day-keep-a-button-per-instance |
+| `5.1` | card-single-shows-pills-times-all-day-and-no-date |
+| `5.2` | card-month-header-shows-shared-time-or-location-only<br>card-single-shows-pills-times-all-day-and-no-date |
+| `5.3` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
+| `5.4` | card-single-shows-pills-times-all-day-and-no-date |
+| `5.5` | card-month-and-same-day-keep-a-button-per-instance |
+| `5.6.1` | card-single-shows-pills-times-all-day-and-no-date |
+| `5.6.2` | card-single-shows-pills-times-all-day-and-no-date |
+| `5.6.3` | card-single-shows-pills-times-all-day-and-no-date |
+| `5.7.1` | card-month-header-shows-shared-time-or-location-only |
+| `5.7.2` | card-month-and-same-day-keep-a-button-per-instance<br>card-month-header-shows-shared-time-or-location-only |
+| `5.7.3` | card-month-header-shows-shared-time-or-location-only |
+| `5.8` | card-single-shows-pills-times-all-day-and-no-date |
+| `6.1` | card-single-shows-pills-times-all-day-and-no-date |
+| `6.2` | card-single-shows-pills-times-all-day-and-no-date |
+| `6.3` | card-single-shows-pills-times-all-day-and-no-date |
+| `6.4` | card-single-shows-pills-times-all-day-and-no-date |
+| `6.5` | card-single-shows-pills-times-all-day-and-no-date |
+| `6.6` | card-single-shows-pills-times-all-day-and-no-date |
+| `7.1` | list-scrolled-to-middle-fades-both-edges |
+| `7.2` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
+| `7.3` | list-all-cards-shown-counts-event-instances<br>list-capped-at-bottom-shows-n-out-of-m-with-show-all<br>list-scrolled-to-middle-fades-both-edges |
+| `8.1` | list-all-cards-shown-counts-event-instances<br>list-capped-at-bottom-shows-n-out-of-m-with-show-all |
+| `8.2` | list-all-cards-shown-counts-event-instances |
+| `8.3` | card-single-shows-pills-times-all-day-and-no-date |
+| `8.4` | list-all-cards-shown-counts-event-instances |
+| `8.5` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
+| `8.6` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
+| `8.7` | list-capped-at-bottom-shows-n-out-of-m-with-show-all |
+| `9.1` | card-single-shows-pills-times-all-day-and-no-date |
+| `9.2` | card-month-and-same-day-keep-a-button-per-instance |
+| `9.3` | card-single-shows-pills-times-all-day-and-no-date |
 
-## 02-denylisted
+## card-month-and-same-day-keep-a-button-per-instance
 
-Denylisted host: 'No events found' (no link, no prompt) — even a complete event is suppressed
+One event's June showings: single-show days 10 & 12 fold into a month card (a button per day), the two-show day 11 stays its own same-day card — the month card sorts first despite holding day 12, and every instance keeps its own time-chip button
 
-![02-denylisted](cases/02-denylisted.png)
+Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `4.10`, `5.3`, `5.5`, `5.7.2`, `9.2`
 
-## 03-nothing-found
+![card-month-and-same-day-keep-a-button-per-instance](cases/card-month-and-same-day-keep-a-button-per-instance.png)
 
-Nothing found: 'No events found' + a right-aligned 'Disagree?' link
+## card-month-header-shows-shared-time-or-location-only
 
-![03-nothing-found](cases/03-nothing-found.png)
+Three month cards: scattered dates that share one start time show it in the header over day chips; differing-time dates drop to a location-only header with time chips; all-day dates show a location-only header with day chips
 
-## 04-allowlisted
+Requirements: `4.2`, `4.3`, `4.6`, `5.2`, `5.3`, `5.7.1`, `5.7.2`, `5.7.3`
 
-Allowlisted: show the event (no support request)
+![card-month-header-shows-shared-time-or-location-only](cases/card-month-header-shows-shared-time-or-location-only.png)
 
-![04-allowlisted](cases/04-allowlisted.png)
+## card-single-shows-pills-times-all-day-and-no-date
 
-## 05-unlisted
+Single cards on a supported host: past→gray pill, this-year→no pill, future→green pill; round vs minute times, a start–end range, an all-day multi-day card, and a dateless card — all sorted chronologically with no count label
 
-Unlisted: show the event + a right-aligned 'Suggest Correction' link
+Requirements: `1.2`, `4.1`, `4.4`, `4.8`, `4.9`, `5.1`, `5.2`, `5.4`, `5.6.1`, `5.6.2`, `5.6.3`, `5.8`, `6.1`, `6.2`, `6.3`, `6.4`, `6.5`, `6.6`, `8.3`, `9.1`, `9.3`
 
-![05-unlisted](cases/05-unlisted.png)
+![card-single-shows-pills-times-all-day-and-no-date](cases/card-single-shows-pills-times-all-day-and-no-date.png)
 
-## 06-overflow-bottom-fade
+## empty-denylisted-shows-glyph-without-link
 
-Overflowing list, top of scroll: bottom edge fades out (more below)
+Denylisted host (or a supported host that found nothing): the 'No events found' heading over the calendar glyph alone — no policy link
 
-![06-overflow-bottom-fade](cases/06-overflow-bottom-fade.png)
+Requirements: `1.3`, `2.1`, `2.3`
 
-## 07-scrolled-middle-both-fades
+![empty-denylisted-shows-glyph-without-link](cases/empty-denylisted-shows-glyph-without-link.png)
 
-Scrolled to the middle of a long list: both edges fade out
+## empty-nothing-found-shows-glyph-with-disagree-link
 
-![07-scrolled-middle-both-fades](cases/07-scrolled-middle-both-fades.png)
+Nothing found (non-denylisted): the 'No events found' heading over the calendar glyph, with a quiet 'Disagree?' policy link beneath it
 
-## 08-scrolled-bottom-count
+Requirements: `1.3`, `2.1`, `2.2`, `3.2`, `3.3`, `3.4`
 
-Long capped list scrolled to the bottom: 'N out of M' + top fade only
+![empty-nothing-found-shows-glyph-with-disagree-link](cases/empty-nothing-found-shows-glyph-with-disagree-link.png)
 
-![08-scrolled-bottom-count](cases/08-scrolled-bottom-count.png)
+## link-unlisted-event-shows-suggest-correction
 
-## 09-month-scattered-with-sameday
+Unlisted host with a complete fallback event: the event card plus a right-aligned, understated 'Suggest Correction' link on the heading line
 
-Month grouping: two scattered single-show days fold into one month card; a two-show day stays a same-day card
+Requirements: `1.2`, `3.1`, `3.3`, `3.4`
 
-![09-month-scattered-with-sameday](cases/09-month-scattered-with-sameday.png)
+![link-unlisted-event-shows-suggest-correction](cases/link-unlisted-event-shows-suggest-correction.png)
 
-## 10-same-day-three-screenings
+## list-all-cards-shown-counts-event-instances
 
-Same day, three screenings: one same-day card with a button per time
+Eight cards (two of them same-day films of four screenings each) overflow the cap; scrolled to the bottom the end reads '14 events showing' — counting instances, not cards — with only the top edge faded
 
-![10-same-day-three-screenings](cases/10-same-day-three-screenings.png)
+Requirements: `7.3`, `8.1`, `8.2`, `8.4`
 
-## 11-month-allday-and-sameday
+![list-all-cards-shown-counts-event-instances](cases/list-all-cards-shown-counts-event-instances.png)
 
-Month grouping with an all-day day and a timed day folding into one month card, plus a same-day card
+## list-capped-at-bottom-shows-n-out-of-m-with-show-all
 
-![11-month-allday-and-sameday](cases/11-month-allday-and-sameday.png)
+Forty cards exceed the first-render cap; scrolled to the bottom the end reads 'N out of M events showing' with a 'show all' link, over a faded top edge
 
-## 12-events-outnumber-cards-count
+Requirements: `7.2`, `7.3`, `8.1`, `8.5`, `8.6`, `8.7`
 
-Count cue counts events, not cards: 8 cards (two same-day cards) -> 13 events showing
+![list-capped-at-bottom-shows-n-out-of-m-with-show-all](cases/list-capped-at-bottom-shows-n-out-of-m-with-show-all.png)
 
-![12-events-outnumber-cards-count](cases/12-events-outnumber-cards-count.png)
+## list-scrolled-to-middle-fades-both-edges
 
-## 13-month-grouped-across-months
+A long list scrolled to its middle: the height cap clips both ends, so both edge fades show over a peek of the cut cards
 
-Month grouping across months: three scattered June dates become one JUN card (5/14/25), the July date a single card
+Requirements: `7.1`, `7.3`
 
-![13-month-grouped-across-months](cases/13-month-grouped-across-months.png)
+![list-scrolled-to-middle-fades-both-edges](cases/list-scrolled-to-middle-fades-both-edges.png)
 
-## 14-consecutive-run-instances
+## loading-heading-reads-reading-page
 
-Consecutive days aren't merged: Jun 5–7 + scattered Jun 14/25 are one month card with a button per day; July is a single card
+Initial load, before extraction returns: the heading reads 'Reading page…' over an empty body
 
-![14-consecutive-run-instances](cases/14-consecutive-run-instances.png)
+Requirements: `1.1`
 
-## 15-month-common-time-header
-
-Month card common-time header: scattered dates that share one start time show it above the icons; differing-time and all-day month cards show only the location
-
-![15-month-common-time-header](cases/15-month-common-time-header.png)
-
-## 16-mixed-grouping-overflow-top
-
-Many instances of mixed grouping styles (single, same-day, month, all-day) overflowing at the top of scroll: bottom fade only
-
-![16-mixed-grouping-overflow-top](cases/16-mixed-grouping-overflow-top.png)
-
-## 17-mixed-grouping-scrolled-bottom
-
-Many mixed-grouping instances scrolled to the bottom: count cue sums instances across single, same-day, and month cards; top fade only
-
-![17-mixed-grouping-scrolled-bottom](cases/17-mixed-grouping-scrolled-bottom.png)
-
-## 18-many-instances-one-card
-
-Many instances in ONE card, each at a different hour: one month card whose chips all become date+time chips (no common-time header)
-
-![18-many-instances-one-card](cases/18-many-instances-one-card.png)
+![loading-heading-reads-reading-page](cases/loading-heading-reads-reading-page.png)
