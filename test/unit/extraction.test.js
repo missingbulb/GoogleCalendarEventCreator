@@ -169,6 +169,17 @@ test("Generic site: a day-first hyphenated date (DD-MM-YYYY) is parsed day-first
   assert.equal(e.times[0].start, "2026-06-18");
 });
 
+test("Generic site: an unambiguous day-first slash date (DD/MM/YYYY, DD>12) is parsed day-first", () => {
+  // DD/MM/YYYY with "/" is the everyday format in Europe and Israel. When the day
+  // component is > 12 the reading is unambiguous — V8's Date() would reject it
+  // (month=16 is invalid) — so we build the date from parts, day-first.
+  // Ambiguous cases (DD ≤ 12) fall through to V8's US month-first parsing.
+  const html = `<h1>Show Night</h1><p>16/06/2026</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.times[0].start, "2026-06-16");
+});
+
 test("Generic site: a Hebrew month date with bullet-separated time is parsed", () => {
   // Israeli sites write dates as "4 ביולי 2026•21:00" — day, Hebrew month name,
   // year, bullet separator, 24-hour time. V8 can't parse Hebrew months with new

@@ -55,22 +55,27 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     const isoMatch = s.match(/\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?/);
     if (isoMatch) return normalizeIso(isoMatch[0]);
 
-    // Day-first numeric dates with "." or "-" separators ("15.6.2026",
-    // "18-06-2026", "15.6.2026 19:00") — the everyday format outside the US,
-    // which the English-only patterns below (built on V8's Date parsing) miss.
-    // ("/" stays month-first American, handled in the patterns below.) Built
-    // straight from the parts, read day-first, with an optional adjacent time. A
-    // backreference pins both separators to the same character, and (?<!\d)…(?!\d)
-    // (not \b) so an abutting letter is fine — block elements concatenate without
-    // spaces in body text ("Night15.6.2026") — while a neighbouring digit (part
-    // of a longer number) rules it out. matchAll lets an out-of-range leading
-    // candidate ("50-12-2026") be skipped to reach a real date later in the text.
+    // Day-first numeric dates with ".", "-", or "/" separators ("15.6.2026",
+    // "18-06-2026", "16/06/2026") — the everyday format outside the US, which
+    // the English-only patterns below (built on V8's Date parsing) miss. For "/"
+    // we only accept it when the day component is > 12, making the reading
+    // unambiguous (V8 would reject month=16); ambiguous slash dates (DD ≤ 12) fall
+    // through to the US month-first patterns below. Built straight from the parts,
+    // read day-first, with an optional adjacent time. A backreference pins both
+    // separators to the same character, and (?<!\d)…(?!\d) (not \b) so an abutting
+    // letter is fine — block elements concatenate without spaces in body text
+    // ("Night15.6.2026") — while a neighbouring digit (part of a longer number)
+    // rules it out. matchAll lets an out-of-range leading candidate ("50-12-2026")
+    // be skipped to reach a real date later in the text.
     for (const m of s.matchAll(
-      new RegExp(`(?<!\\d)(\\d{1,2})([.\\-])(\\d{1,2})\\2(\\d{4})(?!\\d)(?:\\s*${SEP}?\\s*(\\d{1,2}):(\\d{2}))?`, "g")
+      new RegExp(`(?<!\\d)(\\d{1,2})([./\\-])(\\d{1,2})\\2(\\d{4})(?!\\d)(?:\\s*${SEP}?\\s*(\\d{1,2}):(\\d{2}))?`, "g")
     )) {
       const dd = +m[1];
       const mm = +m[3];
+      const sep = m[2];
       if (dd < 1 || dd > 31 || mm < 1 || mm > 12) continue;
+      // Ambiguous slash date (e.g. 06/07/2026): leave to US-style V8 parsing below.
+      if (sep === "/" && dd <= 12) continue;
       const day = `${m[4]}-${pad(mm)}-${pad(dd)}`;
       return m[5] != null ? `${day}T${pad(+m[5])}:${m[6]}:00` : day;
     }
