@@ -6,11 +6,15 @@
 //   "deny"      — the host is on the fallback denylist.
 //   "allow"     — the host is on the fallback allowlist (generic extractor
 //                 already handles it).
-//   "duplicate" — another OPEN extractor-request issue already targets this
+//   "sample"    — another OPEN extractor-request issue already targets this
 //                 host (a request whose PR is still in review keeps its issue
 //                 open, since the PR only `Closes #N` on merge). The lowest
 //                 issue number wins, so two near-simultaneous requests resolve
-//                 to exactly one agent run.
+//                 to exactly one agent run. Rather than discard the newer
+//                 request's URL, the workflow folds it into the leader issue as
+//                 an extra sample page (a second real event page is useful raw
+//                 material for a more robust extractor); this script names the
+//                 leader + emits the URL for the workflow to attach.
 // Any of these closes the issue and skips the agent.
 //
 // Reuses fallback-policy.js (the same classifier the popup uses) so the workflow
@@ -23,7 +27,9 @@
 //               `gh issue list --json number,title,body` array of OTHER open
 //               extractor-request issues (the workflow gathers it; this script
 //               never touches the network, so the unit tests stay offline)
-//   out (GITHUB_OUTPUT): skipAgent=true|false, reason=<reason>|""
+//   out (GITHUB_OUTPUT): skipAgent, reason, url, host, slug, caseName; plus
+//                        leader=<#> when reason="sample" (the URL to fold into
+//                        that leader issue is the emitted `url`)
 //   out (file, when skipping): /tmp/triage-message.md — the closing comment
 // As a module (the tests): exports firstUrl() and runTriage().
 "use strict";
@@ -98,10 +104,12 @@ function skipMessage(reason, { host, duplicateOf }) {
         `See the host classifier in \`config.js\` and the policy in \`docs/extraction-policy.md\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
       );
-    case "duplicate":
+    case "sample":
       return (
-        `This request was auto-triaged and closed as a duplicate of #${duplicateOf}, which already ` +
+        `This request was auto-triaged and closed in favour of #${duplicateOf}, which already ` +
         `covers \`${host}\` and is in progress (its pull request may still be in review).\n\n` +
+        `Your event page wasn't wasted: it's been attached to #${duplicateOf} as an **additional ` +
+        `sample page**, so the extractor there can pick up a second real integration case from it.\n\n` +
         `Follow #${duplicateOf} for the extractor. If that request stalls, reopen this one.`
       );
     default:
@@ -130,7 +138,7 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
   if (isSupportedDomain(url, lists)) reason = "supported";
   else if (listing === "deny") reason = "deny";
   else if (listing === "allow") reason = "allow";
-  else if ((duplicateOf = earlierDuplicate(host, currentNumber, openRequests))) reason = "duplicate";
+  else if ((duplicateOf = earlierDuplicate(host, currentNumber, openRequests))) reason = "sample";
 
   const triaged = reason !== "";
   // Deterministic branch/cache names the workflow uses when it proceeds (does
@@ -169,8 +177,8 @@ if (require.main === module) {
     if (res.triaged) {
       fs.writeFileSync(MESSAGE_PATH, res.message);
       const detail =
-        res.reason === "duplicate"
-          ? `duplicate of #${res.duplicateOf}`
+        res.reason === "sample"
+          ? `extra sample for #${res.duplicateOf}`
           : res.reason === "supported"
             ? "already supported"
             : `on the ${res.reason}list`;
@@ -184,7 +192,9 @@ if (require.main === module) {
     }
     // url/host/slug/caseName feed the workflow's probe + Phase-1 steps when it
     // proceeds (skipAgent=false). Empty when the body had no parseable URL — the
-    // probe step then stops the run with a "no event URL" message.
+    // probe step then stops the run with a "no event URL" message. `leader` is
+    // the issue this defers to in the "sample" case (else ""), so the workflow
+    // can fold the emitted `url` into that leader before closing this one.
     writeOutputs({
       skipAgent: res.triaged,
       reason: res.reason,
@@ -192,6 +202,7 @@ if (require.main === module) {
       host: res.host,
       slug: res.slug,
       caseName: res.caseName,
+      leader: res.duplicateOf ?? "",
     });
   })().catch((e) => {
     console.error("Triage check errored — proceeding to the agent (fail open):", e);
