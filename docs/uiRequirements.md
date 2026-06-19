@@ -19,6 +19,12 @@ UI snapshot case (`test/ui/`) names the requirement(s) it verifies by number, so
 case and the requirement it pins can be cross-checked. Add new requirements with
 new numbers; don't renumber or reuse existing ones.
 
+**One spec per leaf.** Each leaf requirement states exactly one display
+specification. When a rendering is conditional — "in case X render Y, in case Z
+render W" — split it into one numbered child per case rather than bundling the
+cases in a single bullet (the parent becomes a heading, the cases its leaves), as
+`5.6`, `5.7`, `6.1`, and `6.2` do.
+
 The five popup **states** (supported / denylisted / nothing-found / allowlisted /
 unlisted) and *when* each occurs are defined in
 [productRequirements.md](productRequirements.md); this doc specifies how each is
@@ -124,11 +130,14 @@ unlisted) and *when* each occurs are defined in
 
 ## 6. Date & time display
 
-- `6.1` A round hour drops its minutes ("10 AM", not "10:00 AM"); a non-round time
-  keeps them ("6:30 PM").
-- `6.2` A start with an end shows as a time range joined by an **en dash**
-  ("6:30 PM – 8:30 PM"); an end that isn't after the start is dropped (the single
-  time is shown).
+- `6.1` **Round vs. non-round time.**
+  - `6.1.1` A round hour drops its minutes ("10 AM", not "10:00 AM").
+  - `6.1.2` A non-round time keeps its minutes ("6:30 PM").
+- `6.2` **Start with an end.**
+  - `6.2.1` A start with an end shows as a time range joined by an **en dash**
+    ("6:30 PM – 8:30 PM").
+  - `6.2.2` An end that isn't after the start is dropped — the single time is
+    shown.
 - `6.3` A date with no time reads **"All day"**.
 - `6.4` A start that can't be parsed to a date reads **"No date found"**.
 - `6.5` A card whose instance has no usable date shows **no** calendar chip — just

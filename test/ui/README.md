@@ -35,7 +35,7 @@ Requirements: `4.2`, `4.5`, `4.6`, `4.7`, `5.3.1`, `5.3.2`, `5.5`, `5.7.2`, `9.2
 
 Single cards on a supported host: past→gray pill, this-year→no pill, future→green pill; round vs minute times, a start–end range, an all-day multi-day card, and a dateless card — all sorted chronologically with no count label
 
-Requirements: `1.2`, `4.1`, `4.4`, `4.8`, `4.9`, `5.1`, `5.2`, `5.4`, `5.6.1`, `5.6.2`, `5.6.3`, `5.8`, `6.1`, `6.2`, `6.3`, `6.4`, `6.5`, `6.6`, `8.3`, `9.1`, `9.3`
+Requirements: `1.2`, `4.1`, `4.4`, `4.8`, `4.9`, `5.1`, `5.2`, `5.4`, `5.6.1`, `5.6.2`, `5.6.3`, `5.8`, `6.1.1`, `6.1.2`, `6.2.1`, `6.2.2`, `6.3`, `6.4`, `6.5`, `6.6`, `8.3`, `9.1`, `9.3`
 
 ![card-single-shows-pills-times-all-day-and-no-date](cases/card-single-shows-pills-times-all-day-and-no-date.png)
 
