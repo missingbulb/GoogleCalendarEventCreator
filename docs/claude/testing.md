@@ -67,6 +67,16 @@ and read its exact `expected` off the committed file instead of guessing:
    runs against the local cached HTML, so its output gives you the exact
    `expected` to paste in. Commit and push.
 
+When the host is bot-blocked even from the refresh workflow (so step 2 can't
+record it) and the page is a **JS-rendered SPA**, capture the HTML by hand from
+the **rendered DOM** — DevTools → Elements → right-click `<html>` → Copy →
+*Copy outerHTML* — never View Source or a plain fetch, which return the empty
+app shell (`<body><app-root></app-root></body>`) with no event data. Commit that
+rendered capture as `data/<name>.html` and read the source's fields from it.
+(tabitisrael #345: the View-Source shell carried only a `Restaurant` JSON-LD and
+og tags; the reservation date/time lived only in the rendered markup.)
+
+
 ## Where each test harness documents itself
 
 These harnesses are self-documenting: the *why* of every non-obvious decision
