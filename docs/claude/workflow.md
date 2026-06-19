@@ -27,12 +27,18 @@ fix is a larger refactor), open a dedicated issue for it (unless one is already
 open) so it's tracked and not lost — then move on. Resolving it (real fix, or a
 consciously-chosen suppression) happens in that issue's own change.
 
-Whenever a change regenerates the UI snapshots (`test/ui/cases/*.png`, via
-`npm run refresh:ui`), surface them to the reviewer in the same turn you commit
-them: show the changed PNGs inline in the chat and link the branch's
-`test/ui/README.md` (the rendered gallery of every case —
-`https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md`) for
+Whenever a change regenerates `test/ui/README.md` (the rendered gallery of every
+case, via `npm run refresh:ui`), link the branch's copy in the chat in the same
+turn you commit it —
+`https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md` — for
 one-page review.
+
+When a change to a `test/ui/cases/*` case — its spec or its rendering — makes
+the snapshot tests **fail** (the pixels moved), don't silently regenerate the
+baseline: show the **expected** (committed) and **actual** (newly-rendered) PNGs
+inline in the chat side by side and **ask the owner to approve the difference**
+before refreshing and committing the new snapshot. The owner's approval of the
+visual diff is the gate; an unreviewed pixel change is never auto-accepted.
 
 When the repo owner says **"bump version"**, treat it as a defined instruction:
 raise the extension's version by editing the `version` field in
