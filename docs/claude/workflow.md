@@ -23,7 +23,10 @@ change is never auto-accepted. The process:
    committed **expected** PNG, run the snapshot test so it fails (the harness
    writes the rendered `actual` and a highlighted `diff` to `test/ui/.artifacts/`),
    and send three images to the chat: **expected** (committed), **actual**
-   (newly-rendered), and the **diff**.
+   (newly-rendered), and the **diff**. When the change alters the PNG's
+   **dimensions** (e.g. a fixture shrink), pixelmatch can't diff unequal sizes so
+   the harness writes only `actual` (no `diff`) — stitch **expected** and
+   **actual** side-by-side into one image for the review instead.
 2. **Ask via `AskUserQuestion`, not prose** — a popup notifies the owner on
    mobile. Offer **Approve** and **Reject — let's discuss**.
 3. **Hold without overwriting the expected image.** If the working tree must be
