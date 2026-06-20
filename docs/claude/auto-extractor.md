@@ -55,9 +55,12 @@ Almost everything for this pipeline is one self-contained folder,
   `extractor-naming.js`, `derive-names.js`, `scaffold-source.js`,
   `scaffold-case.js`, `add-supported-domain.js`, `case-quality.js` — the
   deterministic Node steps the workflows run around the agent.
-- `phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh` — the bash the
-  workflows call, so the YAML reads as a **thin orchestrator**: triggers,
-  permissions, per-step `env:` wiring, one script invocation per step.
+- `phase1-prepare.sh`, `handoff-to-agent.sh`, `record-supported-sample.sh`,
+  `phase2-finalize.sh` — the bash the workflows call, so the YAML reads as a
+  **thin orchestrator**: triggers, permissions, per-step `env:` wiring, one
+  script invocation per step. (`record-supported-sample.sh` is the
+  already-supported host's sample-capture step — see the triage `supported`
+  disposition above.)
 
 Three files **must** live under `.github/` because GitHub pins them there. They
 stay put and refer back to the folder:
@@ -85,7 +88,13 @@ doesn't own them.
    `npm ci`, no hand-off) for any of four reasons:
    - **supported** — the host already has a dedicated source, per `config.js`'s
      `supportedDomains` (a static mirror of the sources' own `matches()`, kept
-     honest by `test/unit/supported-domains.test.js`);
+     honest by `test/unit/supported-domains.test.js`). The event page isn't
+     discarded either: a follow-up step (`record-supported-sample.sh`) folds its
+     URL into that host's standing **Additional sample pages** enhancement issue
+     (one per host, label `extractor-samples`, found-or-created-or-reopened by
+     title) via the same idempotent `attach-sample-url.js` block as the sample
+     case — raw material for a maintainer to add an extra integration case that
+     hardens the existing extractor;
    - **deny** / **allow** — the host is on the fallback denylist/allowlist (the
      same `classifyHost` the popup uses, via `fallback-policy.js`);
    - **sample** — another **open** `extractor-request` issue already targets
@@ -269,6 +278,10 @@ lives in the web routine, not here.
 Every run that touches an issue leaves a comment. The expected stops **finish
 green** — only a genuine break is red:
 
+- **Already supported → closed, sample recorded** (green, prepare) — the host
+  has a dedicated source, so no agent runs; the event URL is folded into that
+  host's standing **Additional sample pages** enhancement issue
+  (`record-supported-sample.sh`) before the request is closed "not planned".
 - **Page not usable → handed to a human** (green, prepare) — the probe judged the
   page unusable: a 2xx bot-challenge / interstitial, a missing URL, or an outright
   download failure (exit 3 — a 403 / unreachable host / login or bot wall). No
