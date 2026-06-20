@@ -19,6 +19,14 @@ worked here. Each is one tight rule; the worked example lives in its own doc.
   still need logging. (Worked examples: `docs/claude/auto-lessons.md` #365,
   `docs/claude/auto-fallback-coverage.md` #366,
   `docs/claude/auto-branch-report.md` #399.)
+- **A SessionStart hook gates session progress through directive text, not blocking.**
+  A SessionStart hook can't block execution or prompt interactively — its stdout is
+  injected into the session as context the assistant reads. Use this for environment
+  or setup validation: when a check fails, output a STOP directive that tells the
+  assistant to ask the user (via AskUserQuestion) before doing any work. The
+  assistant's instruction-following is the enforcement mechanism; the hook provides
+  the check. Stay silent on success — only emit when something requires the user's
+  decision. (`.claude/hooks/session-start.sh` is a worked example.)
 - **Keep an unattended routine's instructions in a repo doc, not inlined in the
   launcher's config.** The launcher prompt (a CC web routine, a cron job's
   embedded text) should be a thin pointer to a versioned in-repo doc; the doc
