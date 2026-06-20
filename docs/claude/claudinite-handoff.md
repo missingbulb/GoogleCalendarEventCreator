@@ -7,9 +7,15 @@ A session in this repo can't push to Claudinite, so a *portable* lesson — one 
 generalizes beyond this project — can't be written into the shared docs directly.
 This is the **up-path**: how such a lesson travels from here into Claudinite.
 
+Lessons are **captured locally** (the "learned lessons" command, the auto-lessons
+digest — capture never reaches Claudinite). The daily **optimize-procedures**
+routine ([auto-optimize-procedures.md](auto-optimize-procedures.md)) is the only
+thing that starts the up-path: it spots a generalizable local item and **files the
+`claudinite-lesson` issue** that this doc's Action then carries upward.
+
 ```
-"learned lessons" (portable lesson)
-        │  files a claudinite-lesson-labelled issue here
+optimize-procedures routine (daily)
+        │  files a claudinite-lesson-labelled issue here (ensuring the label exists first)
         ▼
 claudinite-lesson-handoff.yml  (this repo, deterministic Action)
         │  copies the issue to Claudinite (PAT), links back, closes it here
@@ -20,7 +26,7 @@ claudinite-lesson issue in Claudinite
 docs PR in Claudinite  → review → merge
         │  Dependabot bumps the submodule pin here
         ▼
-the lesson arrives back as a read-only rule
+the canon absorbs it → optimize-procedures prunes the local copy
 ```
 
 The generic-enough call is made **twice** — the consumer proposes, the Claudinite
@@ -35,10 +41,13 @@ not redundancy.
   and **closes the source issue** (the canonical home is now the Claudinite issue).
   It's deterministic — no agent — and bounded to issue plumbing.
 - **`.github/ISSUE_TEMPLATE/claudinite-lesson.yml`** — the structured proposal
-  form (pre-applies the label). The "learned lessons" pass can also just open a
-  labelled issue directly; the template is for consistency and humans.
-- The **`claudinite-lesson` label** — the trigger. It is drift-guarded across the
-  workflow and template by `test/uber/shared_constants/claudinite-lesson-label.json`.
+  form (pre-applies the label), for a human filing one by hand. The
+  optimize-procedures routine opens the labelled issue programmatically.
+- The **`claudinite-lesson` label** — the trigger. The optimize-procedures routine
+  **ensures it exists idempotently** before applying it (create-if-missing,
+  no-op-if-present), so it needs no manual pre-creation and never errors on a
+  re-run. It is drift-guarded across the workflow and template by
+  `test/uber/shared_constants/claudinite-lesson-label.json`.
 
 ## The token
 
@@ -63,12 +72,12 @@ own-tracking-issue convention — see [auto-lessons.md](auto-lessons.md)).
 
 1. **`CLAUDINITE_ISSUE_TOKEN`** secret — the fine-grained PAT above, under
    *Settings → Secrets and variables → Actions* in this repo.
-2. **Create the `claudinite-lesson` label in this repo** — GitHub silently drops an
-   unknown label on issue creation, so the trigger won't fire until it exists
-   (`gh label create claudinite-lesson --color BFD4F2 --description "Portable lesson to hand off to Claudinite"`,
-   or via the Labels UI). The Action also creates it on the Claudinite side, but
-   that needs the PAT to carry label perms — create it there by hand if not.
-3. **Stand up the Claudinite curation routine** and its tracking issue (above).
+2. **Stand up the Claudinite curation routine** and its tracking issue (above),
+   and schedule the **optimize-procedures** routine
+   ([auto-optimize-procedures.md](auto-optimize-procedures.md)) that feeds this
+   up-path.
 
-Until 1–2 are done the hand-off can't run; until 3 is done a handed-off issue just
-waits in Claudinite for a human.
+The `claudinite-lesson` label needs no manual creation — optimize-procedures
+ensures it on both sides before use (the Action also self-creates it on the
+Claudinite side). Until 1 is done the hand-off can't run; until 2 is done a
+handed-off issue just waits in Claudinite for a human.
