@@ -176,10 +176,10 @@ does the chrome/fetch I/O to gather the data, render builds the DOM from it.)
 Each case is a self-contained tuple in **`test/ui/cases/`**, one per leaf
 requirement: a `req-<id>.case.js` whose filename names the single
 [`uiRequirements.md`](uiRequirements.md) leaf it pins, minimal data isolating that
-one requirement. For the current set with every reference image inline beneath its
-requirement, see the generated inline gallery in
-**[`uiRequirements.md`](uiRequirements.md)** — it's derived from the cases (so it
-can't drift) and is the one-page review surface.
+one requirement. For the current set with every reference image shown in a
+two-column table beside its requirement (image left, spec right), see the
+generated gallery in **[`uiRequirements.md`](uiRequirements.md)** — it's derived
+from the cases (so it can't drift) and is the one-page review surface.
 
 `req-<id>.case.js` exports `{ description, data, listing?, tab?, action? }`. `data`
 is the fake extraction result (`{ supported, events: [...] }`); `listing` is the

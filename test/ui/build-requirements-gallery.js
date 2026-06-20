@@ -1,21 +1,24 @@
-// Embeds the UI snapshot gallery INLINE into docs/uiRequirements.md: under each
-// leaf requirement, a generated "managed line" — for a RENDER leaf with a
-// per-leaf case, its `req-<id>.png` image; for a BEHAVIOR leaf, a one-line note
-// pointing at the behavior test. The requirement prose is the spine; the image
-// sits right beside the words it verifies (no separate case-first gallery to
-// drift). This is the requirement-first inversion of the old test/ui/README.md.
+// Maintains the two-column gallery embedded in docs/uiRequirements.md: each leaf
+// requirement is laid out as a small HTML <table> row — LEFT cell the generated
+// snapshot image (for a render leaf) or a behavior-test note (for a behavior
+// leaf), RIGHT cell the hand-authored requirement text. GitHub renders the
+// markdown inside a <td> as long as it's surrounded by blank lines, which is how
+// the image and the prose both render in the two columns.
 //
-// Part-generated / part-authored file: this generator ONLY ever rewrites managed
-// lines (recognized by their `![req-…]`/`<!-- req: … -->` shape), never the
-// hand-written spec prose around them. It strips the existing managed lines and
-// re-inserts the current ones, so it's idempotent and deterministic (no
-// timestamps → an unchanged run yields no diff). refresh-popup-snapshots.js runs
-// it after rendering the PNGs; requirements-gallery.test.js gates drift (a
-// read-only check in CI).
+// SPLIT OF OWNERSHIP — the crux of why this stays drift-free:
+//   - The <table> scaffolding and the RIGHT-cell requirement prose are
+//     hand-authored (the spec). This generator never rewrites them.
+//   - The LEFT-cell content is a single MANAGED line, tagged with an
+//     ID-bearing marker `<!-- req-gallery:<id> -->`. This generator rewrites ONLY
+//     those marker lines (to the right image path, or the behavior note), keyed
+//     off the leaf's kind. The marker is the LAST token on the line so the line
+//     starts as real markdown (an image / italic note) that GitHub renders.
 //
-// NOTE: docs/uiRequirements.md is NOT on the `ours` merge driver (unlike the
-// fully-generated artifacts) because its prose is hand-authored — a prose
-// conflict is resolved by hand, and only these image lines are regenerated.
+// So a re-run only ever changes a left-cell image line; the gate
+// (requirements-gallery.test.js) checks (a) the committed file equals this
+// generator's output and (b) every leaf has exactly one marker. Deterministic, no
+// timestamps. docs/uiRequirements.md is therefore part-generated / part-authored
+// and is NOT on the `ours` merge driver — a prose conflict is resolved by hand.
 "use strict";
 
 const fs = require("node:fs");
@@ -27,72 +30,50 @@ const CASES_DIR = path.join(__dirname, "cases");
 const IMG_REL = "../test/ui/cases";
 const BEHAVIOR_TEST = "test/unit/events-view-actions.test.js";
 
-// A managed line carries this marker (a trailing HTML comment — invisible when
-// rendered) so it is unambiguously generator-owned and can be stripped on every
-// run regardless of its content. It's placed at the END so the line starts as
-// real inline content (an image / a continuation), never as an HTML block.
-const MARKER = "<!-- req-gallery -->";
+// The ID-bearing marker that tags a managed left-cell line.
+const MARKER_RE = /<!--\s*req-gallery:(\d+(?:\.\d+)+)\s*-->/;
 
-// Recognize a previously-generated managed line (so a re-run replaces, not
-// duplicates). Matches at any indentation.
-function isManagedLine(line) {
-  return line.includes(MARKER);
+function marker(id) {
+  return `<!-- req-gallery:${id} -->`;
 }
 
-// The managed line for one leaf, at the given indentation, or null when a render
-// leaf has no per-leaf image yet (migration in progress — emit nothing). The
-// indentation keeps the line inside its (possibly nested) list item so the image
-// renders as part of the requirement rather than breaking the list. The trailing
-// marker is the last token.
-function managedLine(id, kind, indent) {
+// The canonical managed left-cell content for one leaf (the image for a render
+// leaf, a note for a behavior leaf), with the marker as the trailing token.
+function managedLine(id, kind) {
   if (kind === "behavior") {
-    return `${indent}\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${MARKER}`;
+    return `\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${marker(id)}`;
   }
-  const png = `req-${id}.png`;
-  if (!fs.existsSync(path.join(CASES_DIR, png))) return null;
-  return `${indent}![req-${id}](${IMG_REL}/${png}) ${MARKER}`;
+  return `![req-${id}](${IMG_REL}/req-${id}.png) ${marker(id)}`;
 }
 
-// A leaf requirement bullet: `- \`<id>\`` at some indentation. Capture the indent
-// so the managed line aligns with the bullet's text.
-const LEAF_BULLET = /^(\s*)-\s+`(\d+(?:\.\d+)+)`/;
+// All leaf IDs that carry a marker line in the doc, with their line indices.
+function markerLines(lines) {
+  const out = [];
+  lines.forEach((line, i) => {
+    const m = MARKER_RE.exec(line);
+    if (m) out.push({ id: m[1], i });
+  });
+  return out;
+}
 
-// Build the new doc text: walk lines, drop any existing managed lines, and after
-// the LAST line of each leaf bullet insert that leaf's managed line. A leaf bullet
-// owns its first line plus any following MORE-indented continuation (wrapped)
-// lines; leaves never have child bullets, so the bullet ends at the next line
-// that isn't deeper than its marker.
+// Rewrite every managed marker line to its canonical content (preserving the
+// line's leading indentation); leave every other line — scaffolding and prose —
+// untouched.
 function buildGallery(docPath = DOC_PATH) {
   const kinds = leafRequirementKinds(docPath);
-  const src = fs.readFileSync(docPath, "utf8").split("\n").filter((l) => !isManagedLine(l));
-
-  const out = [];
-  for (let i = 0; i < src.length; i++) {
-    const line = src[i];
-    out.push(line);
-    const m = LEAF_BULLET.exec(line);
-    if (!m || !(m[2] in kinds)) continue;
-
-    const markerIndent = m[1].length;
-    // Skip past this bullet's wrapped continuation lines (deeper than the marker,
-    // non-blank), so the managed line lands after the whole bullet.
-    while (
-      i + 1 < src.length &&
-      src[i + 1].trim() !== "" &&
-      /^(\s*)/.exec(src[i + 1])[1].length > markerIndent &&
-      !LEAF_BULLET.test(src[i + 1])
-    ) {
-      out.push(src[++i]);
-    }
-    const ml = managedLine(m[2], kinds[m[2]], " ".repeat(markerIndent + 2));
-    if (ml) out.push(ml);
-  }
+  const lines = fs.readFileSync(docPath, "utf8").split("\n");
+  const out = lines.map((line) => {
+    const m = MARKER_RE.exec(line);
+    if (!m) return line;
+    const lead = line.match(/^\s*/)[0];
+    return `${lead}${managedLine(m[1], kinds[m[1]] || "render")}`;
+  });
   return out.join("\n");
 }
 
-module.exports = { buildGallery, DOC_PATH };
+module.exports = { buildGallery, markerLines, MARKER_RE, DOC_PATH };
 
 if (require.main === module) {
   fs.writeFileSync(DOC_PATH, buildGallery());
-  console.log(`Wrote inline gallery into ${DOC_PATH}`);
+  console.log(`Refreshed the two-column gallery in ${DOC_PATH}`);
 }

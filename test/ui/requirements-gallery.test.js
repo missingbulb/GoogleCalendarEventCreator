@@ -1,25 +1,26 @@
-// Keeps the INLINE gallery (the generated `![req-…]` image lines and behavior
-// notes embedded under each requirement in docs/uiRequirements.md) in sync with
-// the cases, the same REFRESH-then-GATE way as readme.test.js: a refresh test
-// rewrites the managed lines into the working tree (skipped in CI), and a gate
-// test asserts the committed file already matches (the read-only truth in CI). So
-// adding a per-leaf case (or its PNG) embeds its image inline on the next local
+// Keeps the two-column gallery (the generated left-cell image/note lines, tagged
+// `<!-- req-gallery:<id> -->`, in docs/uiRequirements.md) in sync with the cases,
+// the same REFRESH-then-GATE way as the snapshots: a refresh test rewrites the
+// managed lines into the working tree (skipped in CI), and a gate test asserts
+// the committed file already matches (the read-only truth in CI). So flipping a
+// leaf's kind, or renaming a PNG, updates the left cells on the next local
 // `npm test`/`npm run refresh:ui`, and a stale doc fails CI.
 //
-// The generator only rewrites managed lines — the hand-authored requirement prose
-// is untouched — so this gate does NOT fight a spec edit; it only catches a
-// missing/stale generated image line. Single source of truth: the requirement
-// kinds + the per-leaf PNGs on disk (see build-requirements-gallery.js).
+// A second gate checks STRUCTURE the generator can't fix on its own (it only
+// rewrites existing marker lines, never inserts): every leaf — and only a leaf —
+// carries exactly one marker, so a leaf whose two-column row was dropped, or a
+// marker for a non-leaf, fails here.
 "use strict";
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const { buildGallery, DOC_PATH } = require("./build-requirements-gallery");
+const { buildGallery, markerLines, DOC_PATH } = require("./build-requirements-gallery");
+const { leafRequirementKinds } = require("./ui-requirements");
 
 const isCI = Boolean(process.env.CI);
 
-test("inline requirements gallery is refreshed (skipped in CI)", (t) => {
+test("two-column gallery is refreshed (skipped in CI)", (t) => {
   if (isCI) {
     t.skip("CI: read-only gate — the committed docs/uiRequirements.md is the reviewed truth");
     return;
@@ -27,12 +28,27 @@ test("inline requirements gallery is refreshed (skipped in CI)", (t) => {
   fs.writeFileSync(DOC_PATH, buildGallery());
 });
 
-test("docs/uiRequirements.md inline gallery matches the generator (run npm run refresh:ui)", () => {
+test("docs/uiRequirements.md gallery matches the generator (run npm run refresh:ui)", () => {
   const committed = fs.existsSync(DOC_PATH) ? fs.readFileSync(DOC_PATH, "utf8") : "";
   assert.equal(
     committed,
     buildGallery(),
-    "docs/uiRequirements.md's inline `![req-…]` gallery is stale: it's generated from the cases. " +
+    "docs/uiRequirements.md's generated left-cell lines are stale. " +
       "Run `npm run refresh:ui` (or `npm test` locally) and commit the result."
   );
+});
+
+test("every leaf — and only a leaf — has exactly one gallery marker", () => {
+  const kinds = leafRequirementKinds();
+  const leaves = Object.keys(kinds);
+  const marks = markerLines(fs.readFileSync(DOC_PATH, "utf8").split("\n"));
+
+  const counts = marks.reduce((acc, { id }) => ((acc[id] = (acc[id] || 0) + 1), acc), {});
+  const missing = leaves.filter((id) => !counts[id]);
+  const dupes = Object.keys(counts).filter((id) => counts[id] > 1);
+  const stray = Object.keys(counts).filter((id) => !(id in kinds));
+
+  assert.deepEqual(missing, [], "leaves with no `<!-- req-gallery:id -->` row in docs/uiRequirements.md:");
+  assert.deepEqual(dupes, [], "leaves with more than one gallery row:");
+  assert.deepEqual(stray, [], "gallery markers for IDs that aren't leaf requirements:");
 });

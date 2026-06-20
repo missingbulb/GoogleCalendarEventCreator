@@ -36,8 +36,9 @@ doc, when the mechanics change.
   `docs/uiRequirements.md` (`1.1`, `5.6.1`, …) and split into two kinds:
   - A **render** leaf is pinned by exactly one **per-leaf** UI snapshot case,
     named `req-<id>.case.js` → `req-<id>.png` (the *filename* is the link), whose
-    image is embedded **inline under the requirement** in `docs/uiRequirements.md`
-    by `test/ui/build-requirements-gallery.js`. The gate enforces a strict
+    image is shown in a **two-column table** beside the requirement (image left,
+    spec right) in `docs/uiRequirements.md` by
+    `test/ui/build-requirements-gallery.js`. The gate enforces a strict
     one-case-per-leaf bijection: a render leaf with no case (or two) fails.
   - A **behavior** leaf (tagged `_(behavior)_` in the spec — a click/navigation a
     static image can't observe, e.g. `9.1`–`9.3`, `3.4`) is routed to a behavior
@@ -113,15 +114,19 @@ Read the file when you touch it; the one-liners here are just a map.
   by the manifest `test/ui/behavior-coverage.js`. It **stubs** the
   `chrome.tabs.create`/`window.close` boundary, so it's explicitly INCOMPLETE (a
   loud banner in the file; a faithful non-stub verification is owed in #435).
-- **Inline requirements gallery** — `test/ui/build-requirements-gallery.js`
-  embeds each render leaf's `req-<id>.png` (and a note under each behavior leaf)
-  **inline beneath the requirement** in `docs/uiRequirements.md`, gated by
-  `test/ui/requirements-gallery.test.js` (refresh-then-gate: rewrites the working
-  tree locally, read-only in CI). It rewrites only the managed `![req-…]` lines,
-  never the hand-authored prose — so `docs/uiRequirements.md` is part-generated
-  and is **not** on the `ours` merge driver (a prose conflict is resolved by hand;
-  the image lines regenerate via `npm run regen`). This requirement-first gallery
-  **replaced** the old case-first `test/ui/README.md` (since removed).
+- **Two-column requirements gallery** — `test/ui/build-requirements-gallery.js`
+  lays each leaf out as an HTML `<table>` row in `docs/uiRequirements.md`: the
+  generated `req-<id>.png` (or a behavior-test note) in the **left** cell, the
+  hand-authored requirement in the **right** cell. GitHub renders the markdown in
+  each `<td>` because the cell content is blank-line-separated. The generator
+  rewrites **only** the managed left-cell line — tagged `<!-- req-gallery:<id> -->`
+  — never the scaffolding or prose, so `docs/uiRequirements.md` is
+  part-generated/part-authored and is **not** on the `ours` merge driver (a prose
+  conflict is resolved by hand; the left cells regenerate via `npm run regen`).
+  Gated by `test/ui/requirements-gallery.test.js` (refresh-then-gate locally,
+  read-only in CI; plus a check that every leaf has exactly one marker). This
+  requirement-first gallery **replaced** the old case-first `test/ui/README.md`
+  (since removed).
 - **"Does the extension load?"** is guarded in two layers:
   `test/extension/extension-loads.test.js` (always-on, no browser — boots the
   service worker through a Chrome-faithful `importScripts` and checks every
