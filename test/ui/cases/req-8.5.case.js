@@ -1,6 +1,9 @@
 // Per-leaf snapshot for requirement 8.5: a shown prefix reads "N out of M events showing" with a "show all" link.
 // The filename (req-8.5) is the link; build-requirements-gallery.js embeds this
 // image inline beneath 8.5 in docs/uiRequirements.md.
+//
+// Shrunken per issue #439: a tiny maxCardsShown cap + short viewport reaches the
+// "N out of M showing" + "show all" state with a handful of events instead of 40.
 "use strict";
 
 const { scrollToBottom } = require("../actions");
@@ -12,7 +15,9 @@ const filler = (count) => Array.from({ length: count }, (_, i) => {
 
 module.exports = {
   description: "a shown prefix reads \"N out of M events showing\" with a \"show all\" link",
-  data: { supported: true, events: filler(40) },
+  data: { supported: true, events: filler(6) },
   listing: "none",
+  configurationOverrides: { maxCardsShown: 3 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };

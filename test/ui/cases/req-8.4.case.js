@@ -1,6 +1,9 @@
 // Per-leaf snapshot for requirement 8.4: every card shown but taller than fits reads "N events showing" with no link.
 // The filename (req-8.4) is the link; build-requirements-gallery.js embeds this
 // image inline beneath 8.4 in docs/uiRequirements.md.
+//
+// Shrunken per issue #439: a tiny cardsVisibleBeforeScroll + short viewport gives
+// the "all shown but taller than fits" cue with a few events instead of 10.
 "use strict";
 
 const { scrollToBottom } = require("../actions");
@@ -12,7 +15,9 @@ const filler = (count) => Array.from({ length: count }, (_, i) => {
 
 module.exports = {
   description: "every card shown but taller than fits reads \"N events showing\" with no link",
-  data: { supported: true, events: filler(10) },
+  data: { supported: true, events: filler(5) },
   listing: "none",
+  configurationOverrides: { cardsVisibleBeforeScroll: 2 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };
