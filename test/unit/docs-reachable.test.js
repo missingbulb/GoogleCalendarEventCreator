@@ -2,7 +2,7 @@
 // reachable from a root doc (CLAUDE.md or README.md) by following the same
 // navigation an agent or reader uses — CLAUDE.md's `@imports` and Markdown
 // `[text](path.md)` links. A new doc that nobody imports or links to is
-// invisible (it bit docs/agenticBestPractices.md, which sat orphaned between
+// invisible (it bit agenticBestPractices.md, which sat orphaned between
 // being created and being wired into CLAUDE.md). This catches that drift
 // structurally, with no hand-maintained list to keep in sync.
 

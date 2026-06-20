@@ -25,20 +25,27 @@ time — live in `docs/technicalGotchas.md` (imported below).
 
 @docs/technicalGotchas.md
 
-General software-engineering practices that aren't specific to this project
-(verifying platform behavior, earning dependencies, test discipline) live in
-`docs/engineeringPractices.md` (imported below).
+## Shared portable rules (the Claudinite submodule)
 
-@docs/engineeringPractices.md
+The project-agnostic rules — general software-engineering practices, agentic best
+practices, portable git/GitHub procedures, general working discipline,
+unattended-agent architecture principles, and the repo owner's personal
+interaction preferences — are **not** maintained in this repo. They live in the
+shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo, mounted
+here as a git submodule at `docs/claude/shared/` (see its
+[README](docs/claude/shared/README.md)) and imported below.
 
-Best practices specific to building and running AI agents (as opposed to general
-software engineering) live in `docs/agenticBestPractices.md` (imported below).
+They are consumed **read-only**: a rule change happens in Claudinite and arrives
+here as a Dependabot submodule-bump PR, so a portable lesson learned in this repo
+is *handed off* to Claudinite rather than edited in place (see
+[issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)).
+A fresh clone needs `git submodule update --init` (`scripts/cloud-setup.sh` runs
+it) or `docs/claude/shared/` is an empty folder and these imports resolve to
+nothing.
 
-@docs/agenticBestPractices.md
-
-The repo owner's personal interaction preferences (tone, end-of-turn
-conventions, and the trigger phrases for owner-triggered commands — not project
-conventions) live in `docs/ownerPreferences.md` (imported below). This is a
-temporary home until they move to the owner's own persistent environment.
-
-@docs/ownerPreferences.md
+@docs/claude/shared/engineeringPractices.md
+@docs/claude/shared/agenticBestPractices.md
+@docs/claude/shared/git-and-github.md
+@docs/claude/shared/working-discipline.md
+@docs/claude/shared/agent-architecture.md
+@docs/claude/shared/ownerPreferences.md

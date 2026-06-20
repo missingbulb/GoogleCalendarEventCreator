@@ -3,7 +3,7 @@
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
 live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
-engineering practices in [engineeringPractices.md](engineeringPractices.md).
+engineering practices in [engineeringPractices.md](claude/shared/engineeringPractices.md).
 
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
@@ -83,11 +83,11 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   tab/event listeners a test can trigger, attaching to the target is what starts
   it, and the first read still races startup — so **poll** until the global
   appears. (Bound every probe and add a test-level timeout regardless, per the
-  hang-proofing rule in [engineeringPractices.md](engineeringPractices.md).)
+  hang-proofing rule in [engineeringPractices.md](claude/shared/engineeringPractices.md).)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
-  with the rest of the GitHub procedures in
-  [claude/github.md](claude/github.md).
+  with the rest of the portable GitHub procedures in
+  [claude/shared/git-and-github.md](claude/shared/git-and-github.md).
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `test/harness.js`.

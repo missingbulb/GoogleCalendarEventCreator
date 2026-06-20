@@ -24,6 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        # Check out the Claudinite shared-rules submodule (docs/claude/shared) so
+        # docs-reachable validates the real shared content — this is what makes a
+        # Dependabot submodule-bump PR's CI a genuine gate rather than a no-op.
+        # Claudinite is public, so the workflow token clones it without extra creds.
+        with:
+          submodules: recursive
 
       - uses: actions/setup-node@v5
         with:
