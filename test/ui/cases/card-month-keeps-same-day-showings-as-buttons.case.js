@@ -6,8 +6,9 @@
 // into their own same-day card (4.5). Because the showings carry different times,
 // each button is a TIME chip (date + time) so they're told apart (5.7.2): Jun 10
 // and Jun 12 are single-time chips (5.3.1), and the two Jun 11 screenings carry a
-// start AND end, so their buttons show the time RANGE (5.3.2). Pressing a button
-// opens that showing (9.2); the showings are grouped by month (4.2).
+// start AND end, so their buttons show the time RANGE (5.3.2). The showings are
+// grouped by month (4.2). (Pressing a button to open that showing — 9.2 — is a
+// behavior verified in test/unit/events-view-actions.test.js, not by this image.)
 "use strict";
 
 module.exports = {
@@ -22,7 +23,6 @@ module.exports = {
     "5.3.2": "Jun 11's two showings carry start+end, so their buttons show a time range",
     "5.5": "the grouped card is flat, not itself clickable, with no chevron",
     "5.7.2": "the showings' differing times make each button a date+time chip",
-    "9.2": "pressing a button opens that specific showing's template",
   },
   data: {
     supported: true,

@@ -18,8 +18,10 @@
 //                      "No date found" (6.4, 6.5).
 //
 // Because nothing overflows the height cap, there is no count label (8.3). Each
-// card is one whole-surface click target with a trailing chevron (5.4) — the
-// click itself (9.1, 9.3) is the behavior this card type carries.
+// card is one whole-surface click target with a trailing chevron (5.4). (The
+// click itself — opening the template in an adjacent tab and closing the popup,
+// 9.1/9.3 — is a behavior verified in test/unit/events-view-actions.test.js, not
+// by this static image.)
 "use strict";
 
 module.exports = {
@@ -47,8 +49,6 @@ module.exports = {
     "6.5": "E5 shows no calendar chip (no usable date)",
     "6.6": "E1's -05:00 offset is shown as literal wall-clock, not re-zoned",
     "8.3": "the list fits unscrolled, so there is no count label",
-    "9.1": "clicking a single card opens that event's calendar template",
-    "9.3": "the template opens in an adjacent tab and the popup closes",
   },
   data: {
     supported: true,

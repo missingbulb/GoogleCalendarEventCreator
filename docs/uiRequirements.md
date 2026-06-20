@@ -14,10 +14,38 @@ popup's *rendering* — the toolbar/extension icon, the GitHub source-request is
 form, and the calendar-URL / timezone *semantics* — stays in
 productRequirements; this doc covers the **popup only**.
 
+> # ⚠️ INCOMPLETE TESTING — DO NOT READ A GREEN BUILD AS "FULLY VERIFIED" ⚠️
+>
+> The coverage gate proves every leaf below is *claimed* by some test, **not**
+> that every leaf is *faithfully* verified. Two known gaps, tracked for
+> follow-up (see the tracking issue linked from
+> [`docs/claude/testing.md`](claude/testing.md)):
+>
+> 1. **Snapshot migration is in progress.** The target is one minimal snapshot
+>    case per *render* leaf, its image embedded inline under the requirement
+>    here. Only a subset has been split out so far; the rest are still covered by
+>    the older bundled multi-requirement cases. Until the migration completes,
+>    not every requirement has its own focused image below.
+> 2. **Behavioral leaves are only stub-verified.** A leaf tagged `_(behavior)_`
+>    (a click → new-tab → close-popup action) has no pixels, so it is routed to a
+>    *behavior* test (`test/unit/events-view-actions.test.js`) instead of a
+>    snapshot. That test **stubs `chrome.tabs.create`/`window.close`**, so it
+>    confirms our code *asks* for the right thing — **not** that a real Chrome
+>    actually does it. A faithful real-Chrome e2e does not exist yet.
+>
+> Treat the gallery as a review aid in transition, not a completeness guarantee.
+
 **Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). A
 UI snapshot case (`test/ui/`) names the requirement(s) it verifies by number, so a
 case and the requirement it pins can be cross-checked. Add new requirements with
 new numbers; don't renumber or reuse existing ones.
+
+**Verification kind.** Most leaves are *render* requirements, pinned by a UI
+snapshot whose image is embedded inline directly beneath the requirement. A leaf
+tagged **`_(behavior)_`** right after its number is instead verified by a
+behavior test (a click/navigation a static image can't observe) — the coverage
+gate is **segmented** by this kind (`test/ui/behavior-coverage.js`). The inline
+images below are generated; don't hand-edit a `![req-…]` line.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
 specification. When a rendering is conditional — "in case X render Y, in case Z
@@ -61,8 +89,8 @@ unlisted) and *when* each occurs are defined in
   doc.
 - `3.3` Both links share one small, understated treatment (≈11px, accent blue, no
   underline at rest, underline on hover) so neither reads as a primary action.
-- `3.4` Each link opens its target in a **new tab** (adjacent to the current one)
-  and closes the popup.
+- `3.4` _(behavior)_ Each link opens its target in a **new tab** (adjacent to the
+  current one) and closes the popup.
 
 ## 4. Event cards — grouping & ordering
 
@@ -177,9 +205,9 @@ unlisted) and *when* each occurs are defined in
 
 ## 9. Opening an event
 
-- `9.1` Clicking a single card opens that event's prefilled Google Calendar
-  template in a new browser tab.
-- `9.2` Clicking a grouped card's instance button opens that **specific
-  showing's** template in a new tab.
-- `9.3` A template opens in a tab **adjacent** to the current one, and the popup
-  then closes.
+- `9.1` _(behavior)_ Clicking a single card opens that event's prefilled Google
+  Calendar template in a new browser tab.
+- `9.2` _(behavior)_ Clicking a grouped card's instance button opens that
+  **specific showing's** template in a new tab.
+- `9.3` _(behavior)_ A template opens in a tab **adjacent** to the current one,
+  and the popup then closes.

@@ -37,6 +37,33 @@ function leafRequirementIds(docPath = DOC_PATH) {
   return ids.filter((id) => !ids.some((other) => other !== id && other.startsWith(`${id}.`)));
 }
 
+// A requirement bullet tagged `_(behavior)_` right after its ID is verified by a
+// BEHAVIOR test (a click/navigation a snapshot can't observe), not a UI snapshot
+// — the segmentation behind the coverage gate (test/ui/behavior-coverage.js,
+// docs/engineeringPractices.md #429). Everything else is a "render" leaf, pinned
+// by a snapshot. Returns { "<leafId>": "behavior" | "render" }.
+function leafRequirementKinds(docPath = DOC_PATH) {
+  const text = fs.readFileSync(docPath, "utf8");
+  const behavior = new Set();
+  for (const line of text.split("\n")) {
+    const m = /^\s*-\s+`(\d+(?:\.\d+)+)`\s+_\(behavior\)_/.exec(line);
+    if (m) behavior.add(m[1]);
+  }
+  const kinds = {};
+  for (const id of leafRequirementIds(docPath)) kinds[id] = behavior.has(id) ? "behavior" : "render";
+  return kinds;
+}
+
+// The leaf IDs of each kind, derived from leafRequirementKinds.
+function behaviorLeafIds(docPath = DOC_PATH) {
+  const kinds = leafRequirementKinds(docPath);
+  return Object.keys(kinds).filter((id) => kinds[id] === "behavior");
+}
+function renderLeafIds(docPath = DOC_PATH) {
+  const kinds = leafRequirementKinds(docPath);
+  return Object.keys(kinds).filter((id) => kinds[id] === "render");
+}
+
 // GitHub builds a heading's in-page anchor by lowercasing the text, stripping
 // punctuation, and turning each remaining space into a hyphen (the
 // github-slugger algorithm). Spaces aren't collapsed first, so a stripped
@@ -69,6 +96,9 @@ function requirementSectionAnchors(docPath = DOC_PATH) {
 module.exports = {
   allRequirementIds,
   leafRequirementIds,
+  leafRequirementKinds,
+  behaviorLeafIds,
+  renderLeafIds,
   githubSlug,
   requirementSectionAnchors,
   DOC_PATH,
