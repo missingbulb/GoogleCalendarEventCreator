@@ -27,9 +27,12 @@ fix is a larger refactor), open a dedicated issue for it (unless one is already
 open) so it's tracked and not lost — then move on. Resolving it (real fix, or a
 consciously-chosen suppression) happens in that issue's own change.
 
-Whenever a change regenerates `test/ui/README.md` (the rendered gallery of every
-case, via `npm run refresh:ui`), link the branch's copy in the chat in the same
-turn you commit it —
+Whenever a change regenerates the UI galleries (via `npm run refresh:ui`), link
+the branch's copies in the chat in the same turn you commit them — the
+requirement-first inline gallery
+`https://github.com/<owner>/<repo>/blob/<branch>/docs/uiRequirements.md` (each
+requirement with its snapshot beside it) and, until it's retired (#435), the
+legacy case-first
 `https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md` — for
 one-page review.
 
