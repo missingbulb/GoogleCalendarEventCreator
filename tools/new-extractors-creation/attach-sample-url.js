@@ -1,16 +1,10 @@
-// Fold an extractor request's event URL into a target issue's body as an extra
-// "sample page" (see triage-extractor-request.js and docs/claude/auto-extractor.md).
-// Two dispositions reuse this:
-//   - "sample"    — a newer same-host request defers to an in-flight LEADER
-//                   issue; its URL is a second real event page, useful raw
-//                   material for a more robust extractor.
-//   - "supported" — the host already has a dedicated source, so there's no agent
-//                   run; the URL is recorded on that host's standing
-//                   "Additional sample pages" enhancement issue, so a maintainer
-//                   can add an extra integration case that hardens the existing
-//                   extractor.
-// Either way, instead of discarding the URL the workflow records it on the
-// target issue as a checklist item a maintainer can turn into an extra case.
+// Fold a deferred extractor request's event URL into the LEADER issue's body as
+// an extra "sample page" (see triage-extractor-request.js's "sample" disposition
+// and docs/claude/auto-extractor.md). Two same-host requests can't run the agent
+// concurrently, but the newer one's URL is a second real event page — useful raw
+// material for a more robust extractor. So instead of discarding it, the prepare
+// workflow records it on the leader issue as a checklist item a maintainer (the
+// one reviewing the leader's PR) can turn into an extra integration case.
 //
 // The list lives as a marked block in the leader's issue body so the edit is
 // idempotent: re-running with the same URL is a no-op, and a ticked box
@@ -32,9 +26,9 @@ const END = "<!-- additional-samples:end -->";
 
 const HEADING =
   "### Additional sample pages\n\n" +
-  "Real event pages submitted for this site, folded in so the extractor gets a " +
-  "second real integration case from each. Add one `test/extractors/custom/` " +
-  "case per URL, then tick it off:";
+  "Event pages from duplicate requests for this same site, folded in so the " +
+  "extractor gets a second real integration case from each. Add one " +
+  "`test/extractors/custom/` case per URL, then tick it off:";
 
 // A URL already listed in the block, on either a `- [ ]` or `- [x]` line, so a
 // re-submission (or a re-run) doesn't double it.
