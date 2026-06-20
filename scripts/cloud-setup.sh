@@ -26,7 +26,7 @@
 # file when it's missing or older. The flag literal is read back by the hook via
 # grep, so this `ENV_VERSION=` line is the single source of truth -- keep it on
 # one line. (issue #403)
-ENV_VERSION=1
+ENV_VERSION=2
 
 # Where the stamped version lives. Outside the checkout (cloned fresh per
 # container) but inside the environment's cached filesystem, so it persists
@@ -40,6 +40,12 @@ set -euo pipefail
 # PARENT directory (/home/user) rather than the checkout. cd in first -- without
 # this, `npm ci` finds no package.json and silently installs nothing.
 cd /home/user/GoogleCalendarEventCreator
+
+# Pull in the Claudinite shared-rules submodule (docs/claude/shared). The clone
+# doesn't fetch submodules automatically, so without this the folder is empty and
+# CLAUDE.md's `@docs/claude/shared/*` imports resolve to nothing. Idempotent; the
+# pinned commit comes from the freshly-cloned gitlink. (issue #364)
+git submodule update --init --recursive || true
 
 # `|| true` so a transient registry hiccup doesn't block the whole session from
 # starting (per the platform's setup-script guidance). A session that never runs
