@@ -91,6 +91,7 @@ unlisted) and *when* each occurs are defined in
   underline at rest, underline on hover) so neither reads as a primary action.
 - `3.4` _(behavior)_ Each link opens its target in a **new tab** (adjacent to the
   current one) and closes the popup.
+  🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery -->
 
 ## 4. Event cards — grouping & ordering
 
@@ -142,6 +143,7 @@ unlisted) and *when* each occurs are defined in
 - `5.6` **Year pill.** A chip whose date falls outside the current year carries a
   small year pill on the corner of its calendar icon.
   - `5.6.1` A **past** year shows a **gray** pill.
+    ![req-5.6.1](../test/ui/cases/req-5.6.1.png) <!-- req-gallery -->
   - `5.6.2` A **future** year shows a **green** ("upcoming") pill — never red
     (a next-year event isn't an error).
   - `5.6.3` The **current** year shows **no** pill.
@@ -207,7 +209,10 @@ unlisted) and *when* each occurs are defined in
 
 - `9.1` _(behavior)_ Clicking a single card opens that event's prefilled Google
   Calendar template in a new browser tab.
+  🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery -->
 - `9.2` _(behavior)_ Clicking a grouped card's instance button opens that
   **specific showing's** template in a new tab.
+  🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery -->
 - `9.3` _(behavior)_ A template opens in a tab **adjacent** to the current one,
   and the popup then closes.
+  🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery -->

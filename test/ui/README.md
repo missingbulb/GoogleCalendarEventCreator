@@ -48,7 +48,6 @@ Checks:
 - [`5.3.2`](../../docs/uiRequirements.md#5-event-cards--appearance) — Jun 11's two showings carry start+end, so their buttons show a time range
 - [`5.5`](../../docs/uiRequirements.md#5-event-cards--appearance) — the grouped card is flat, not itself clickable, with no chevron
 - [`5.7.2`](../../docs/uiRequirements.md#5-event-cards--appearance) — the showings' differing times make each button a date+time chip
-- [`9.2`](../../docs/uiRequirements.md#9-opening-an-event) — pressing a button opens that specific showing's template
 
 ![card-month-keeps-same-day-showings-as-buttons](cases/card-month-keeps-same-day-showings-as-buttons.png)
 
@@ -79,8 +78,6 @@ Checks:
 - [`6.5`](../../docs/uiRequirements.md#6-date--time-display) — E5 shows no calendar chip (no usable date)
 - [`6.6`](../../docs/uiRequirements.md#6-date--time-display) — E1's -05:00 offset is shown as literal wall-clock, not re-zoned
 - [`8.3`](../../docs/uiRequirements.md#8-count-label) — the list fits unscrolled, so there is no count label
-- [`9.1`](../../docs/uiRequirements.md#9-opening-an-event) — clicking a single card opens that event's calendar template
-- [`9.3`](../../docs/uiRequirements.md#9-opening-an-event) — the template opens in an adjacent tab and the popup closes
 
 ![card-single-shows-pills-times-all-day-and-no-date](cases/card-single-shows-pills-times-all-day-and-no-date.png)
 
@@ -107,7 +104,6 @@ Checks:
 - [`2.2`](../../docs/uiRequirements.md#2-empty-state-nothing-to-add) — the "Disagree?" link sits beneath the glyph
 - [`3.2`](../../docs/uiRequirements.md#3-affordance-links) — the "Disagree?" link is shown (state 3 opens the policy doc)
 - [`3.3`](../../docs/uiRequirements.md#3-affordance-links) — the link uses the small, understated accent-blue treatment
-- [`3.4`](../../docs/uiRequirements.md#3-affordance-links) — the link opens its target in a new tab and closes the popup
 
 ![empty-nothing-found-shows-glyph-with-disagree-link](cases/empty-nothing-found-shows-glyph-with-disagree-link.png)
 
@@ -120,7 +116,6 @@ Checks:
 - [`1.2`](../../docs/uiRequirements.md#1-heading) — an event is shown, so the heading reads "Add to Google Calendar"
 - [`3.1`](../../docs/uiRequirements.md#3-affordance-links) — "Suggest Correction" sits on the heading line, right-aligned
 - [`3.3`](../../docs/uiRequirements.md#3-affordance-links) — the link uses the small, understated accent-blue treatment
-- [`3.4`](../../docs/uiRequirements.md#3-affordance-links) — the link opens the prefilled issue in a new tab and closes the popup
 
 ![link-unlisted-event-shows-suggest-correction](cases/link-unlisted-event-shows-suggest-correction.png)
 
@@ -172,3 +167,9 @@ Checks:
 - [`1.1`](../../docs/uiRequirements.md#1-heading) — the initial shell, before extraction returns, reads "Reading page…"
 
 ![loading-heading-reads-reading-page](cases/loading-heading-reads-reading-page.png)
+
+## req-5.6.1
+
+5.6.1 — a single card dated in a past year shows a gray year pill on its calendar chip
+
+![req-5.6.1](cases/req-5.6.1.png)
