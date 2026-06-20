@@ -1,31 +1,12 @@
 # Workflow
 
 The GitHub issue → branch → PR → merge lifecycle, the **merge-to-main command**,
-and the CI-interaction practices live in [github.md](github.md). This file holds
-the working discipline that isn't itself a GitHub operation, plus the two
-owner-triggered defined instructions ("bump version", "learned lessons").
-
-Confirm a behavior isn't already provided before building a mechanism for it —
-verify the gap against a real run first; the cheapest fix is often that it
-already works.
-
-Fix build/test/CI warnings, don't tolerate them: a clean run with no warnings
-makes a genuinely new warning or error stand out, so noise here costs detection
-later. Prefer a small, targeted fix that addresses the *cause* in the same
-change.
-
-Suppressing a warning — muting it with a flag (e.g. `--disable-warning`),
-`eslint-disable`, swallowing it, etc. — is **not** a small fix: it hides the
-signal instead of resolving it. Never reach for suppression as the quick path.
-It's only ever an option inside the dedicated-issue path below, as a deliberate,
-reviewed decision once the real fix has been weighed and rejected — never an
-unattended default.
-
-When a warning can't be fixed with a small cause-addressing change now without
-hindering current work (e.g. it's waiting on an upstream release, or the real
-fix is a larger refactor), open a dedicated issue for it (unless one is already
-open) so it's tracked and not lost — then move on. Resolving it (real fix, or a
-consciously-chosen suppression) happens in that issue's own change.
+and the CI-interaction practices live in [github.md](github.md). The general,
+project-agnostic working discipline (confirm-before-building, the warnings
+policy) now lives in the shared rules:
+[shared/working-discipline.md](shared/working-discipline.md). This file holds the
+project-specific working rules, plus the two owner-triggered defined instructions
+("bump version", "learned lessons").
 
 Whenever a change regenerates `test/ui/README.md` (the rendered gallery of every
 case, via `npm run refresh:ui`), link the branch's copy in the chat in the same
@@ -64,15 +45,26 @@ padding the docs to look productive. Run this same pass after a merge to main,
 too — the merge-to-main command in [github.md](github.md) hands off to it:
 reflect on the just-merged conversation before closing out. Otherwise it runs
 only when the repo owner asks for it — never extract from a conversation
-unprompted; the owner decides when to do it. Route by scope: project mechanics to
-the matching file under
-`docs/claude/` (workflow, github, testing, adding-a-source, auto-extractor); top-level
-architecture rules to `docs/architectureGuidelines.md`; non-obvious codebase
-footguns to `docs/technicalGotchas.md`; AI-agent-specific best practices to
-`docs/agenticBestPractices.md`; other project-agnostic practices to
-`docs/engineeringPractices.md`. Keep every addition terse. Project-specific
-guidance is good; broader engineering practices that generalize beyond this repo
-are better — prefer the most general file a lesson legitimately fits.
+unprompted; the owner decides when to do it. Route by scope:
+
+- **Project-specific** lessons land here, in this repo: project mechanics to the
+  matching file under `docs/claude/` (workflow, github, testing, adding-a-source,
+  auto-extractor); top-level project architecture rules to
+  `docs/architectureGuidelines.md`; non-obvious codebase footguns to
+  `docs/technicalGotchas.md`.
+- **Portable** lessons (general engineering practices, agentic best practices,
+  portable git/GitHub procedures, working discipline, agent-architecture
+  principles) belong in the **shared rules** — `docs/claude/shared/`, which is the
+  **Claudinite** submodule, consumed **read-only** here. They **cannot** be edited
+  in this repo (a session can't push across repos), so a portable lesson is
+  **handed off to Claudinite**, not written here — see the hand-off mechanism in
+  [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364).
+  Until that automated hand-off exists, record the portable lesson in the
+  Claudinite repo directly (its own session/PR).
+
+Keep every addition terse. Project-specific guidance is good; broader engineering
+practices that generalize beyond this repo are better — and a generalizable lesson
+belongs in the shared rules (Claudinite), not duplicated here.
 
 A scheduled workflow runs this same pass automatically once a day over the last
 24h of commits and issue/PR activity, opening a PR for review

@@ -1,0 +1,4 @@
+[submodule "docs/claude/shared"]
+	path = docs/claude/shared
+	url = https://github.com/missingbulb/Claudinite.git
+	branch = main
