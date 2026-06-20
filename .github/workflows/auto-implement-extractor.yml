@@ -94,6 +94,22 @@ jobs:
           gh issue edit "$LEADER" --repo "${{ github.repository }}" --body-file /tmp/leader-body.md
           echo "Attached $SAMPLE_URL to leader #$LEADER as an additional sample."
 
+      # An already-supported host has no agent run and no leader issue, but the
+      # user's event page is still a real page the existing extractor could be
+      # hardened against. Rather than discard it, record it on that host's standing
+      # "Additional sample pages" enhancement issue (find-or-create-reopen by
+      # title) for a maintainer to turn into an extra integration case. The gh
+      # read/write lives here; the body edit is the offline, unit-tested
+      # attach-sample-url.js (same idempotent block as the leader-sample flow).
+      # Runs before the close below so the URL is recorded before this issue closes.
+      - name: Record the event page for the existing extractor (supported)
+        if: steps.triage.outputs.reason == 'supported'
+        env:
+          GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
+          HOST:       ${{ steps.triage.outputs.host }}
+          SAMPLE_URL: ${{ steps.triage.outputs.url }}
+        run: bash tools/new-extractors-creation/record-supported-sample.sh
+
       - name: Close a triaged request (supported / listed / sample)
         if: steps.triage.outputs.skipAgent == 'true'
         env:

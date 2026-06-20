@@ -2,7 +2,11 @@
 // (.github/workflows/auto-implement-extractor.yml). Before spending an agent
 // run, decide whether the request should be closed without one. Four reasons:
 //   "supported" — the host already has a dedicated source (config.js's
-//                 supportedDomains), so a custom extractor isn't needed.
+//                 supportedDomains), so a custom extractor isn't needed. The
+//                 event URL still isn't discarded: the workflow folds it into
+//                 that host's standing "Additional sample pages" enhancement
+//                 issue (find-or-create-reopen by title), so a maintainer can
+//                 add an extra integration case that hardens the existing source.
 //   "deny"      — the host is on the fallback denylist.
 //   "allow"     — the host is on the fallback allowlist (generic extractor
 //                 already handles it).
@@ -85,7 +89,10 @@ function skipMessage(reason, { host, duplicateOf }) {
     case "supported":
       return (
         `This request was auto-triaged and closed without an agent run: \`${host}\` already has a ` +
-        `dedicated extractor (\`pipeline/sources/\`), so a custom source isn't needed.\n\n` +
+        `dedicated extractor (\`pipeline/sources/\`), so a new source isn't needed.\n\n` +
+        `Your event page wasn't wasted, though: it's been recorded on this site's **Additional ` +
+        `sample pages** tracking issue, so a maintainer can turn it into a new integration case ` +
+        `that hardens the existing extractor.\n\n` +
         `If extraction on this site is actually broken, please open a bug report instead.`
       );
     case "deny":
