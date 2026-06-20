@@ -14,26 +14,18 @@ popup's *rendering* — the toolbar/extension icon, the GitHub source-request is
 form, and the calendar-URL / timezone *semantics* — stays in
 productRequirements; this doc covers the **popup only**.
 
-> # ⚠️ INCOMPLETE TESTING — DO NOT READ A GREEN BUILD AS "FULLY VERIFIED" ⚠️
+> # ⚠️ INCOMPLETE TESTING — A GREEN BUILD MEANS "CLAIMED", NOT "FULLY VERIFIED" ⚠️
 >
-> The coverage gate proves every leaf below is *claimed* by some test, **not**
-> that every leaf is *faithfully* verified. Two known gaps, tracked for
-> follow-up (see the tracking issue linked from
-> [`docs/claude/testing.md`](claude/testing.md)):
->
-> 1. **Snapshot migration is in progress.** The target is one minimal snapshot
->    case per *render* leaf, its image embedded inline under the requirement
->    here. Only a subset has been split out so far; the rest are still covered by
->    the older bundled multi-requirement cases. Until the migration completes,
->    not every requirement has its own focused image below.
-> 2. **Behavioral leaves are only stub-verified.** A leaf tagged `_(behavior)_`
->    (a click → new-tab → close-popup action) has no pixels, so it is routed to a
->    *behavior* test (`test/unit/events-view-actions.test.js`) instead of a
->    snapshot. That test **stubs `chrome.tabs.create`/`window.close`**, so it
->    confirms our code *asks* for the right thing — **not** that a real Chrome
->    actually does it. A faithful real-Chrome e2e does not exist yet.
->
-> Treat the gallery as a review aid in transition, not a completeness guarantee.
+> Every *render* leaf below has its own inline snapshot, and every *behavior* leaf
+> a behavior test, so the coverage gate proves each leaf is *claimed* by the right
+> kind of test. What it does **not** prove is how *faithfully* the behavioral
+> leaves are checked: a leaf tagged `_(behavior)_` (a click → new-tab →
+> close-popup action) has no pixels, so it's verified by
+> `test/unit/events-view-actions.test.js`, which **stubs
+> `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the right
+> action, **not** that a real Chrome performs it. A faithful (non-stub)
+> verification is still owed; tracked in the issue linked from
+> [`docs/claude/testing.md`](claude/testing.md).
 
 **Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). A
 UI snapshot case (`test/ui/`) names the requirement(s) it verifies by number, so a
@@ -62,20 +54,26 @@ unlisted) and *when* each occurs are defined in
 ## 1. Heading
 
 - `1.1` While the page is being read, the heading reads **"Reading page…"**.
+  ![req-1.1](../test/ui/cases/req-1.1.png) <!-- req-gallery -->
 - `1.2` When one or more events are shown, the heading reads **"Add to Google
   Calendar"**.
+  ![req-1.2](../test/ui/cases/req-1.2.png) <!-- req-gallery -->
 - `1.3` When no events are shown, the heading reads **"No events found on this
   page"**.
+  ![req-1.3](../test/ui/cases/req-1.3.png) <!-- req-gallery -->
 
 ## 2. Empty state (nothing to add)
 
 - `2.1` When there are no events to show, the event area shows a single muted,
   calendar-shaped glyph (a bordered box with a header strip), centered with
   generous vertical spacing — so the popup has a "face" rather than a bare line.
+  ![req-2.1](../test/ui/cases/req-2.1.png) <!-- req-gallery -->
 - `2.2` In the nothing-found state (state 3), the "Disagree?" link (→ `3.2`) sits
   **beneath** the glyph.
+  ![req-2.2](../test/ui/cases/req-2.2.png) <!-- req-gallery -->
 - `2.3` In the denylisted state (state 2), and on a supported host that simply
   found no events, the glyph stands **alone** — no link beneath it.
+  ![req-2.3](../test/ui/cases/req-2.3.png) <!-- req-gallery -->
 
 ## 3. Affordance links
 
@@ -84,11 +82,14 @@ unlisted) and *when* each occurs are defined in
   row: title on the left, link on the right, vertically centered). Clicking it
   opens the prefilled source-request issue (the issue form itself is out of
   scope — see productRequirements).
+  ![req-3.1](../test/ui/cases/req-3.1.png) <!-- req-gallery -->
 - `3.2` **Disagree?** — shown only in the nothing-found state (state 3), beneath
   the empty-state glyph (→ `2.2`). Clicking it opens the public extraction-policy
   doc.
+  ![req-3.2](../test/ui/cases/req-3.2.png) <!-- req-gallery -->
 - `3.3` Both links share one small, understated treatment (≈11px, accent blue, no
   underline at rest, underline on hover) so neither reads as a primary action.
+  ![req-3.3](../test/ui/cases/req-3.3.png) <!-- req-gallery -->
 - `3.4` _(behavior)_ Each link opens its target in a **new tab** (adjacent to the
   current one) and closes the popup.
   🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery -->
@@ -97,28 +98,37 @@ unlisted) and *when* each occurs are defined in
 
 - `4.1` One **card** per distinct event on the page; a listing/series page yields
   one card per event.
+  ![req-4.1](../test/ui/cases/req-4.1.png) <!-- req-gallery -->
 - `4.2` A multi-instance event (an event carrying several instances) groups its
   instances **by month** (same calendar month and year) into one or more cards.
+  ![req-4.2](../test/ui/cases/req-4.2.png) <!-- req-gallery -->
 - `4.3` Instances are **never merged**: a card built from N instances always
   exposes N addable buttons. Consecutive days are grouped exactly like scattered
   ones — a run is never collapsed into a single spanning event.
+  ![req-4.3](../test/ui/cases/req-4.3.png) <!-- req-gallery -->
 - `4.4` A **single card** — a month with a single showing, or any instance with
   no usable date: the **whole card is clickable**.
+  ![req-4.4](../test/ui/cases/req-4.4.png) <!-- req-gallery -->
 - `4.5` A day with **two or more showings** contributes **one button per showing**
   to its month's grouped card — it is **not** peeled off into a separate card; the
   showings are told apart by their time (→ `5.3`).
+  ![req-4.5](../test/ui/cases/req-4.5.png) <!-- req-gallery -->
 - `4.6` A **month card** (grouped card) — an event with two or more showings in
   one month: an **unclickable** container, a title/location header over **one
   button per showing**. A month with a single showing is a single card (→ `4.4`).
+  ![req-4.6](../test/ui/cases/req-4.6.png) <!-- req-gallery -->
 - `4.7` A grouped card has no single left calendar icon — its per-showing chip
   buttons (→ `5`) are its calendar visuals.
+  ![req-4.7](../test/ui/cases/req-4.7.png) <!-- req-gallery -->
 - `4.8` An event whose **single instance's own start–end crosses several days**
   stays one **single card** — it is *not* split into a button per day (only
   separate instances ever become multiple buttons). Its chip shows the start day
   and its line shows the instance's time (or "All day"), not a per-day breakdown.
+  ![req-4.8](../test/ui/cases/req-4.8.png) <!-- req-gallery -->
 - `4.9` Cards are ordered by their **earliest showing's start**, and an event's
   showings are ordered within its card — so everything reads chronologically
   regardless of the order the page listed it in.
+  ![req-4.9](../test/ui/cases/req-4.9.png) <!-- req-gallery -->
 
 ## 5. Event cards — appearance
 
@@ -126,84 +136,114 @@ unlisted) and *when* each occurs are defined in
   colored banner (the shared context) over a prominent body (the pick). The same
   chip marks an addable event whether it's a single card's left indicator or one
   of a grouped card's instance buttons.
+  ![req-5.1](../test/ui/cases/req-5.1.png) <!-- req-gallery -->
 - `5.2` **Day chip** — a month banner over the day-of-month (e.g. JUN / 19). Used
   as a single card's left indicator and as a month card's per-day buttons.
+  ![req-5.2](../test/ui/cases/req-5.2.png) <!-- req-gallery -->
 - `5.3` **Time chip** — a full-date banner over the showing's time. Used as a
   same-day card's buttons, and as a month card's buttons when its days carry
   different times (→ `5.7.2`).
   - `5.3.1` A single-time showing shows just the time (e.g. JUN 19 / 1 PM).
+    ![req-5.3.1](../test/ui/cases/req-5.3.1.png) <!-- req-gallery -->
   - `5.3.2` A showing with a start **and** end shows the en-dash time range inside
     the button (e.g. JUN 19 / 4:30 PM – 6:18 PM).
+    ![req-5.3.2](../test/ui/cases/req-5.3.2.png) <!-- req-gallery -->
 - `5.4` **Single-card weight.** A single card is the heavier element — visibly
   elevated and tinted, its whole surface one click target — with a trailing **"›"
   chevron** as the resting cue that the card itself is the button.
+  ![req-5.4](../test/ui/cases/req-5.4.png) <!-- req-gallery -->
 - `5.5` **Grouped-card weight.** A grouped card (same-day, month) is lighter and
   flat, is **not** itself clickable, and has **no** chevron — you press one of its
   inner chip buttons instead.
+  ![req-5.5](../test/ui/cases/req-5.5.png) <!-- req-gallery -->
 - `5.6` **Year pill.** A chip whose date falls outside the current year carries a
   small year pill on the corner of its calendar icon.
   - `5.6.1` A **past** year shows a **gray** pill.
     ![req-5.6.1](../test/ui/cases/req-5.6.1.png) <!-- req-gallery -->
   - `5.6.2` A **future** year shows a **green** ("upcoming") pill — never red
     (a next-year event isn't an error).
+    ![req-5.6.2](../test/ui/cases/req-5.6.2.png) <!-- req-gallery -->
   - `5.6.3` The **current** year shows **no** pill.
+    ![req-5.6.3](../test/ui/cases/req-5.6.3.png) <!-- req-gallery -->
 - `5.7` **Grouped-card header time.**
   - `5.7.1` When a month card's days all share one start time, that time leads the
     header line ("7 PM · &lt;location&gt;") and the buttons stay bare day chips.
+    ![req-5.7.1](../test/ui/cases/req-5.7.1.png) <!-- req-gallery -->
   - `5.7.2` When the days carry **different** times, no shared time is shown, so
     each button becomes a **time chip** (its own day's time) so no time is lost,
     and the header is location-only.
+    ![req-5.7.2](../test/ui/cases/req-5.7.2.png) <!-- req-gallery -->
   - `5.7.3` When any day is all-day (no time), the buttons stay plain day chips and
     the header is location-only.
+    ![req-5.7.3](../test/ui/cases/req-5.7.3.png) <!-- req-gallery -->
 - `5.8` **Truncation never grows the popup.** A title clamps to two lines; the
   time/location line is a single line that ellipsizes; the popup's width is fixed.
+  ![req-5.8](../test/ui/cases/req-5.8.png) <!-- req-gallery -->
 
 ## 6. Date & time display
 
 - `6.1` **Round vs. non-round time.**
   - `6.1.1` A round hour drops its minutes ("10 AM", not "10:00 AM").
+    ![req-6.1.1](../test/ui/cases/req-6.1.1.png) <!-- req-gallery -->
   - `6.1.2` A non-round time keeps its minutes ("6:30 PM").
+    ![req-6.1.2](../test/ui/cases/req-6.1.2.png) <!-- req-gallery -->
 - `6.2` **Start with an end.**
   - `6.2.1` A start with an end shows as a time range joined by an **en dash**
     ("6:30 PM – 8:30 PM").
+    ![req-6.2.1](../test/ui/cases/req-6.2.1.png) <!-- req-gallery -->
   - `6.2.2` An end that isn't after the start is dropped — the single time is
     shown.
+    ![req-6.2.2](../test/ui/cases/req-6.2.2.png) <!-- req-gallery -->
 - `6.3` A date with no time reads **"All day"**.
+  ![req-6.3](../test/ui/cases/req-6.3.png) <!-- req-gallery -->
 - `6.4` A start that can't be parsed to a date reads **"No date found"**.
+  ![req-6.4](../test/ui/cases/req-6.4.png) <!-- req-gallery -->
 - `6.5` A card whose instance has no usable date shows **no** calendar chip — just
   the title and the time line.
+  ![req-6.5](../test/ui/cases/req-6.5.png) <!-- req-gallery -->
 - `6.6` A card always shows the page's **literal wall-clock** time and day: an
   explicit UTC offset or trailing `Z` is stripped for display and **never re-zoned
   to the viewer's timezone**. (The underlying instant still drives the Calendar
   event — see productRequirements.)
+  ![req-6.6](../test/ui/cases/req-6.6.png) <!-- req-gallery -->
 
 ## 7. List, scrolling & overflow
 
 - `7.1` The event list is height-capped to roughly the first
   `cardsVisibleBeforeScroll` rows plus a **peek** of the next card, and scrolls
   past that.
+  ![req-7.1](../test/ui/cases/req-7.1.png) <!-- req-gallery -->
 - `7.2` At most `maxCardsShown` cards render at first (the cap is on **cards** —
   it's a height limit); "show all" (→ `8.5`) expands to `maxCardsExpanded`.
+  ![req-7.2](../test/ui/cases/req-7.2.png) <!-- req-gallery -->
 - `7.3` A soft **white fade** appears at the **top** edge once scrolled away from
   the top, and at the **bottom** edge while there's more list below — a cue that
   there's more in that direction. An edge with nothing beyond it shows no fade.
+  ![req-7.3](../test/ui/cases/req-7.3.png) <!-- req-gallery -->
 
 ## 8. Count label
 
 - `8.1` The count label is the **last item inside the scrollable list** (it
   scrolls with the cards, so it's seen only once scrolled to the end).
+  ![req-8.1](../test/ui/cases/req-8.1.png) <!-- req-gallery -->
 - `8.2` It counts **event instances**, not cards (a card can stand for several),
   so its numbers can exceed the card count.
+  ![req-8.2](../test/ui/cases/req-8.2.png) <!-- req-gallery -->
 - `8.3` When the whole list fits unscrolled, there is **no label**.
+  ![req-8.3](../test/ui/cases/req-8.3.png) <!-- req-gallery -->
 - `8.4` When every card is shown but the list is taller than fits: "**N events
   showing**" — a scroll cue, with no "out of" and no link.
+  ![req-8.4](../test/ui/cases/req-8.4.png) <!-- req-gallery -->
 - `8.5` When only a prefix of the cards is shown and the list can still grow:
   "**N out of M events showing**" with a right-aligned "**show all**" link that
   expands the list to the `maxCardsExpanded` cap.
+  ![req-8.5](../test/ui/cases/req-8.5.png) <!-- req-gallery -->
 - `8.6` Once the `maxCardsExpanded` cap is reached with more still remaining:
   "**N out of M events shown**" with **no** link.
+  ![req-8.6](../test/ui/cases/req-8.6.png) <!-- req-gallery -->
 - `8.7` The "show all" link's presence keys off the **card** cap, not the event
   count.
+  ![req-8.7](../test/ui/cases/req-8.7.png) <!-- req-gallery -->
 
 ## 9. Opening an event
 

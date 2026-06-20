@@ -64,42 +64,11 @@ function renderLeafIds(docPath = DOC_PATH) {
   return Object.keys(kinds).filter((id) => kinds[id] === "render");
 }
 
-// GitHub builds a heading's in-page anchor by lowercasing the text, stripping
-// punctuation, and turning each remaining space into a hyphen (the
-// github-slugger algorithm). Spaces aren't collapsed first, so a stripped
-// punctuation mark surrounded by spaces yields a double hyphen — matching what
-// GitHub actually renders. We replicate it (rather than depend on the package)
-// so the gallery README's requirement links resolve to the right section.
-const SLUG_STRIP = new RegExp("[\\u2000-\\u206F\\u2E00-\\u2E7F\\\\'!\"#$%&()*+,./:;<=>?@[\\]^`{|}~]", "g");
-function githubSlug(heading) {
-  return heading.toLowerCase().replace(SLUG_STRIP, "").replace(/ /g, "-");
-}
-
-// Maps each requirement ID to the anchor of the `## ` section it lives under, so
-// a cited ID can deep-link into docs/uiRequirements.md at that section.
-function requirementSectionAnchors(docPath = DOC_PATH) {
-  const text = fs.readFileSync(docPath, "utf8");
-  const anchors = {};
-  let currentAnchor = null;
-  for (const line of text.split("\n")) {
-    const h = /^##\s+(.+?)\s*$/.exec(line);
-    if (h) {
-      currentAnchor = githubSlug(h[1]);
-      continue;
-    }
-    const m = /^\s*-\s+`(\d+(?:\.\d+)+)`/.exec(line);
-    if (m && currentAnchor) anchors[m[1]] = currentAnchor;
-  }
-  return anchors;
-}
-
 module.exports = {
   allRequirementIds,
   leafRequirementIds,
   leafRequirementKinds,
   behaviorLeafIds,
   renderLeafIds,
-  githubSlug,
-  requirementSectionAnchors,
   DOC_PATH,
 };

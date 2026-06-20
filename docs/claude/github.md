@@ -92,7 +92,7 @@ or modifies an e2e/heavy-browser (`test/fullBrowserHeavyTests/`) or UI-snapshot
 see [../technicalGotchas.md](../technicalGotchas.md)), and their reviewable
 artifacts only exist on a PR — CI runs the heavy/e2e suites against the branch,
 and a UI change's reviewable output (the pixel diff GitHub renders, and the
-rendered gallery linked via the branch's `test/ui/README.md`) needs a branch
+inline gallery in the branch's `docs/uiRequirements.md`) needs a branch
 pushed to GitHub to view at all. So opening the PR *is* how you see the change
 working and surface failures; doing it up front (rather than after a round of
 local-only iteration that proves nothing for these classes) is the faster path to
@@ -188,7 +188,10 @@ the fallback-coverage gate.
 Files under this rule (kept in sync with `.gitattributes`):
 
 - `pipeline/load-order.generated.json` — from `npm run index`.
-- `test/ui/cases/*.png` and `test/ui/README.md` — from `npm run refresh:ui`.
+- `test/ui/cases/*.png` — from `npm run refresh:ui`. (The inline gallery in
+  `docs/uiRequirements.md`, also refreshed by that script, is part-authored prose,
+  so it is **not** on the `ours` driver — its image lines are reconciled by `npm
+  run regen` + the gallery drift gate, not by taking one side.)
 - `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
   `test/extractors/fallback/fallback-coverage.GENERATED.md` — from the
   fallback-coverage test, which `npm run regen` runs (it rewrites them locally;

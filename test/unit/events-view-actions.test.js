@@ -13,11 +13,10 @@
 // called with the right arguments. Per docs/engineeringPractices.md ("a test
 // that stubs the exact boundary where the bug lives can't catch that bug"), this
 // CANNOT confirm that a REAL Chrome actually opens the tab, places it adjacent,
-// or tears the popup down — only that our code asked it to. The faithful check
-// is a real-Chrome e2e (test/fullBrowserHeavyTests/), which does not yet exist
-// for these requirements. Tracked for follow-up — see the UI-testing tracking
-// issue referenced in docs/claude/testing.md. Until then, 3.4/9.1/9.2/9.3 are
-// only PARTIALLY verified.
+// or tears the popup down — only that our code asked it to. A faithful (non-stub)
+// verification of these leaves is still owed; the approach is TBD by the repo
+// owner — see the UI-testing tracking issue referenced in docs/claude/testing.md.
+// Until then, 3.4/9.1/9.2/9.3 are only PARTIALLY verified.
 // =====================================================================
 "use strict";
 

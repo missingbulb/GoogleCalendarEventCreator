@@ -16,4 +16,3 @@ pipeline/load-order.generated.json                                  merge=ours
 test/extractors/fallback/fallback-coverage.baseline.GENERATED.json  merge=ours
 test/extractors/fallback/fallback-coverage.GENERATED.md             merge=ours
 test/ui/cases/*.png                                                 merge=ours
-test/ui/README.md                                                   merge=ours
