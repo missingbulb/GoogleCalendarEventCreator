@@ -44,17 +44,21 @@ function leafRequirementIds(docPath = DOC_PATH) {
 // A requirement tagged `_(behavior)_` right after its ID is verified by a
 // BEHAVIOR test (a click/navigation a snapshot can't observe), not a UI snapshot
 // — the segmentation behind the coverage gate (test/ui/behavior-coverage.js,
-// docs/engineeringPractices.md #429). Everything else is a "render" leaf, pinned
-// by a snapshot. Returns { "<leafId>": "behavior" | "render" }.
+// docs/engineeringPractices.md #429). A requirement tagged `_(TBD)_` is a
+// PLACEHOLDER: an edge case whose correct behavior is not yet decided — it's
+// shown with a "TO BE DECIDED" banner and is exempt from the snapshot bijection
+// (it MAY carry a provisional snapshot of current behavior, but isn't required
+// to). Everything else is a "render" leaf, pinned by a snapshot. Returns
+// { "<leafId>": "behavior" | "tbd" | "render" }.
 function leafRequirementKinds(docPath = DOC_PATH) {
   const text = fs.readFileSync(docPath, "utf8");
-  const behavior = new Set();
+  const tag = {};
   for (const line of text.split("\n")) {
-    const m = /^\s*(?:-\s+)?`(\d+(?:\.\d+)+)`\s+_\(behavior\)_/.exec(line);
-    if (m) behavior.add(m[1]);
+    const m = /^\s*(?:-\s+)?`(\d+(?:\.\d+)+)`\s+_\((behavior|TBD)\)_/.exec(line);
+    if (m) tag[m[1]] = m[2] === "TBD" ? "tbd" : "behavior";
   }
   const kinds = {};
-  for (const id of leafRequirementIds(docPath)) kinds[id] = behavior.has(id) ? "behavior" : "render";
+  for (const id of leafRequirementIds(docPath)) kinds[id] = tag[id] || "render";
   return kinds;
 }
 
@@ -67,6 +71,10 @@ function renderLeafIds(docPath = DOC_PATH) {
   const kinds = leafRequirementKinds(docPath);
   return Object.keys(kinds).filter((id) => kinds[id] === "render");
 }
+function tbdLeafIds(docPath = DOC_PATH) {
+  const kinds = leafRequirementKinds(docPath);
+  return Object.keys(kinds).filter((id) => kinds[id] === "tbd");
+}
 
 module.exports = {
   allRequirementIds,
@@ -74,5 +82,6 @@ module.exports = {
   leafRequirementKinds,
   behaviorLeafIds,
   renderLeafIds,
+  tbdLeafIds,
   DOC_PATH,
 };

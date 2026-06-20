@@ -36,10 +36,13 @@ new numbers; don't renumber or reuse existing ones.
 snapshot shown in a **two-column table** below — the generated image on the left,
 the requirement on the right. A leaf tagged **`_(behavior)_`** right after its
 number is instead verified by a behavior test (a click/navigation a static image
-can't observe), and its left cell carries a note rather than an image — the
-coverage gate is **segmented** by this kind (`test/ui/behavior-coverage.js`). The
-left cells are generated; don't hand-edit a line carrying a
-`<!-- req-gallery:… -->` marker.
+can't observe), and its left cell carries a note rather than an image. A leaf
+tagged **`_(TBD)_`** is a **placeholder** — an edge case whose correct behavior
+isn't decided yet; its left cell shows a loud "TO BE DECIDED" banner (with a
+provisional render of *current* behavior when one exists), and it's exempt from
+the one-snapshot-per-leaf rule until the decision is made. The coverage gate is
+**segmented** by these kinds (`test/ui/behavior-coverage.js`). The left cells are
+generated; don't hand-edit a line carrying a `<!-- req-gallery:… -->` marker.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
 specification. When a rendering is conditional — "in case X render Y, in case Z
@@ -244,17 +247,53 @@ one card per event.
 </tr>
 </table>
 
+- `4.2` A multi-instance event (an event carrying several instances) groups its
+  instances **by month** (same calendar month and year) into one or more cards:
+
 <table>
 <tr>
 <td valign="top" width="320">
 
-![req-4.2](../test/ui/cases/req-4.2.png) <!-- req-gallery:4.2 -->
+![req-4.2.1](../test/ui/cases/req-4.2.1.png) <!-- req-gallery:4.2.1 -->
 
 </td>
 <td valign="top">
 
-`4.2` A multi-instance event (an event carrying several instances) groups its
-instances **by month** (same calendar month and year) into one or more cards.
+`4.2.1` Two showings in the **same** month group into **one** grouped card.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![req-4.2.2](../test/ui/cases/req-4.2.2.png) <!-- req-gallery:4.2.2 -->
+
+</td>
+<td valign="top">
+
+`4.2.2` Two showings in **different** months **split** into one card per month.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![req-4.2.3](../test/ui/cases/req-4.2.3.png) <!-- req-gallery:4.2.3 -->
+
+</td>
+<td valign="top">
+
+`4.2.3` _(TBD)_ Edge case — **one event** with three instances: one in June, one a
+**multi-day instance spanning June → July**, and one in July. Today the spanning
+instance groups by its **start** (June), so it shows under June only and never
+under July (provisional render at left). Whether a cross-month instance should
+also surface in the later month is **to be decided**.
 
 </td>
 </tr>
@@ -287,7 +326,10 @@ ones — a run is never collapsed into a single spanning event.
 <td valign="top">
 
 `4.4` A **single card** — a month with a single showing, or any instance with
-no usable date: the **whole card is clickable**.
+no usable date: the **whole card is clickable**. (The image pins its *appearance*
+as one whole-surface button; the click itself is verified by `9.1`, and the
+resting visual cue is the chevron — see `5.4`. A mouse-cursor / `:hover` state
+isn't capturable by the static renderer — see note below the gallery.)
 
 </td>
 </tr>
@@ -354,8 +396,10 @@ buttons (→ `5`) are its calendar visuals.
 
 `4.8` An event whose **single instance's own start–end crosses several days**
 stays one **single card** — it is *not* split into a button per day (only
-separate instances ever become multiple buttons). Its chip shows the start day
-and its line shows the instance's time (or "All day"), not a per-day breakdown.
+separate instances ever become multiple buttons). Its chip shows **just the start
+day** (today there is **no** date range on the calendar chip) and its line shows
+the instance's time (or "All day"), not a per-day breakdown. (Whether a long /
+multi-month span *should* show a range is the open question in `4.10`.)
 
 </td>
 </tr>
@@ -372,7 +416,27 @@ and its line shows the instance's time (or "All day"), not a per-day breakdown.
 
 `4.9` Cards are ordered by their **earliest showing's start**, and an event's
 showings are ordered within its card — so everything reads chronologically
-regardless of the order the page listed it in.
+regardless of the order the page listed it in. (The image shows **both**: cards
+sorted across the list, and a grouped card whose shuffled showings render in
+order.)
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![req-4.10](../test/ui/cases/req-4.10.png) <!-- req-gallery:4.10 -->
+
+</td>
+<td valign="top">
+
+`4.10` _(TBD)_ A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
+today its chip shows just the **start day** (provisional render at left). Whether a
+long or multi-month span should instead show a **date range** on the calendar chip
+— and how the span should read on the line — is **to be decided**.
 
 </td>
 </tr>
@@ -572,13 +636,16 @@ and the header is location-only.
 <tr>
 <td valign="top" width="320">
 
-![req-5.7.3](../test/ui/cases/req-5.7.3.png) <!-- req-gallery:5.7.3 -->
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![req-5.7.3](../test/ui/cases/req-5.7.3.png) <!-- req-gallery:5.7.3 -->
 
 </td>
 <td valign="top">
 
-`5.7.3` When any day is all-day (no time), the buttons stay plain day chips and
-the header is location-only.
+`5.7.3` _(TBD)_ When any day is all-day (no time), the buttons stay plain day
+chips. The header **should** read **"All day · &lt;location&gt;"** (the "All day"
+label beside the location, mirroring a single all-day card's line) — but **today
+it renders location-only**, with no "All day" (provisional render at left).
+Aligning the code to show "All day · location" here is **to be decided**.
 
 </td>
 </tr>
@@ -952,3 +1019,17 @@ and the popup then closes.
 </tr>
 </table>
 
+
+---
+
+### A note on "clickable" and cursor / hover states
+
+The snapshot renderer (satori → resvg) rasterizes the popup's **DOM**, not a live
+browser, so it cannot show an OS **mouse cursor** or a `:hover`/`cursor: pointer`
+state — those aren't DOM elements, and satori ignores interaction CSS. So
+"clickable" (`4.4`) is not pinned by a cursor in the image. It's covered three
+ways instead: the **behavior** (a click opens the event) by `9.1`; the resting
+**visual cue** (the elevated surface + "›" chevron) by `5.4`; and, if we want an
+explicit assertion that the surface *is* a button, a cheap **DOM check** (the
+element is a `<button>` whose computed `cursor` is `pointer`) belongs in a unit
+test — not a snapshot. (Tracked alongside the periodic edge-case review.)

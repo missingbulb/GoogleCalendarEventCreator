@@ -45,6 +45,11 @@ doc, when the mechanics change.
     test (`test/unit/events-view-actions.test.js`) via the manifest
     `test/ui/behavior-coverage.js`. A `req-<id>` snapshot may **not** exist for one
     — that was the #429 anti-pattern (a PNG "covering" a click it can't see).
+  - A **TBD** leaf (tagged `_(TBD)_` — an edge case whose behavior isn't decided
+    yet, e.g. `4.2.3`, `4.10`, `5.7.3`) is a placeholder: rendered with a "TO BE
+    DECIDED" banner and **exempt** from the bijection (it may carry a *provisional*
+    `req-<id>` snapshot of current behavior, but isn't required to). The
+    edge-case-review routine (#438) is what fills these in over time.
 
   `test/uber/ui-requirements-coverage.test.js` fails unless **every leaf is
   covered by the right kind** (and rejects a nonexistent/typo'd/duplicate case, or

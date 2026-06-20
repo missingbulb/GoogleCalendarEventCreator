@@ -37,13 +37,24 @@ function marker(id) {
   return `<!-- req-gallery:${id} -->`;
 }
 
-// The canonical managed left-cell content for one leaf (the image for a render
-// leaf, a note for a behavior leaf), with the marker as the trailing token.
+// The canonical managed left-cell content for one leaf, with the marker as the
+// trailing token: the image for a render leaf, a note for a behavior leaf, and a
+// loud "TO BE DECIDED" banner for a tbd leaf (followed by a provisional snapshot
+// of CURRENT behavior when a req-<id>.png exists, so a reviewer can see what the
+// undecided edge case renders as today).
 function managedLine(id, kind) {
   if (kind === "behavior") {
     return `\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${marker(id)}`;
   }
-  return `![req-${id}](${IMG_REL}/req-${id}.png) ${marker(id)}`;
+  const img = `![req-${id}](${IMG_REL}/req-${id}.png)`;
+  if (kind === "tbd") {
+    const hasProvisional = fs.existsSync(path.join(CASES_DIR, `req-${id}.png`));
+    const banner = "⚠️ **TO BE DECIDED** — behavior not yet decided";
+    return hasProvisional
+      ? `${banner}; provisional render of CURRENT behavior: ${img} ${marker(id)}`
+      : `${banner}. ${marker(id)}`;
+  }
+  return `${img} ${marker(id)}`;
 }
 
 // All leaf IDs that carry a marker line in the doc, with their line indices.

@@ -9,6 +9,10 @@
 //       image can't observe) is covered by the behavior test, declared in
 //       test/ui/behavior-coverage.js. A snapshot case may NOT exist for one: a
 //       PNG can't verify an action, so a `req-<behavior-id>` case is the #429 bug.
+//   - a TBD leaf (`_(TBD)_` in the spec — an edge case whose behavior isn't
+//       decided yet) is a placeholder, exempt from the bijection: it MAY carry a
+//       provisional `req-<id>` case (a snapshot of current behavior) but isn't
+//       required to.
 //
 // A new requirement with no covering test of its kind fails here; a stray case
 // (a typo'd id, or one with no requirement) fails too.
@@ -51,13 +55,16 @@ test("no `req-<id>` case exists for a BEHAVIOR leaf (those go to the behavior te
   assert.deepEqual(bad, [], "a PNG can't verify a click — these belong in events-view-actions.test.js:");
 });
 
-test("every RENDER leaf has exactly one per-leaf snapshot case (bijection)", () => {
+test("every RENDER leaf has exactly one per-leaf snapshot case; TBD leaves at most one", () => {
+  const tbd = new Set(Object.keys(kinds).filter((id) => kinds[id] === "tbd"));
   const have = caseIds.map((n) => PER_LEAF.exec(n)).filter(Boolean).map((m) => m[1]);
   const counts = have.reduce((acc, id) => ((acc[id] = (acc[id] || 0) + 1), acc), {});
   const missing = renderLeaves.filter((id) => !counts[id]);
   const dupes = Object.keys(counts).filter((id) => counts[id] > 1);
   assert.deepEqual(missing, [], "render leaves with no req-<id>.case.js:");
-  assert.deepEqual(dupes, [], "render leaves with more than one case (strictly one per leaf):");
+  assert.deepEqual(dupes, [], "leaves with more than one case (strictly one per render leaf, ≤1 per TBD):");
+  // (TBD leaves are exempt from the missing-case check; a provisional case is optional.)
+  void tbd;
 });
 
 test("every BEHAVIOR leaf is covered by the behavior test (behavior-coverage.js)", () => {
