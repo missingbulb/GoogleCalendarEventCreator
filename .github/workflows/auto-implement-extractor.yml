@@ -94,23 +94,7 @@ jobs:
           gh issue edit "$LEADER" --repo "${{ github.repository }}" --body-file /tmp/leader-body.md
           echo "Attached $SAMPLE_URL to leader #$LEADER as an additional sample."
 
-      # An already-supported host has no agent run and no leader issue, but the
-      # user's event page is still a real page the existing extractor could be
-      # hardened against. Rather than discard it, record it on that host's standing
-      # "Additional sample pages" enhancement issue (find-or-create-reopen by
-      # title) for a maintainer to turn into an extra integration case. The gh
-      # read/write lives here; the body edit is the offline, unit-tested
-      # attach-sample-url.js (same idempotent block as the leader-sample flow).
-      # Runs before the close below so the URL is recorded before this issue closes.
-      - name: Record the event page for the existing extractor (supported)
-        if: steps.triage.outputs.reason == 'supported'
-        env:
-          GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
-          HOST:       ${{ steps.triage.outputs.host }}
-          SAMPLE_URL: ${{ steps.triage.outputs.url }}
-        run: bash tools/new-extractors-creation/record-supported-sample.sh
-
-      - name: Close a triaged request (supported / listed / sample)
+      - name: Close a triaged request (listed / sample)
         if: steps.triage.outputs.skipAgent == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
@@ -193,6 +177,20 @@ jobs:
           gh label create "extractor-blocked-needs-human" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
           gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-request" --add-label "extractor-blocked-needs-human"
 
+      # Supported mode: the host already has a dedicated source. We're NOT closing
+      # the request — the pipeline adds a fresh integration case to that existing
+      # source. Leave a note on the issue so it's clear this isn't a new-source run
+      # and which source it relates to. (Green; informational.)
+      - name: Note the already-supported relationship (supported mode)
+        if: success() && steps.triage.outputs.mode == 'supported' && steps.probe.outputs.proceed == 'true'
+        env:
+          GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          HOST:         ${{ steps.triage.outputs.host }}
+          SOURCE_PATH:  ${{ steps.triage.outputs.sourcePath }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$HOST\` is already supported by \`$SOURCE_PATH\`. Rather than close this, the pipeline will add a fresh integration case from your event page to harden that existing extractor — the agent runs next and a PR will follow."
+
       - name: Install npm dependencies
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         run: npm ci
@@ -252,7 +250,8 @@ jobs:
         id: prepare
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
-          BRANCH:       claude/extractor/${{ steps.triage.outputs.slug }}
+          MODE:         ${{ steps.triage.outputs.mode }}
+          BRANCH:       ${{ steps.triage.outputs.branch }}
           SLUG:         ${{ steps.triage.outputs.slug }}
           CASE_NAME:    ${{ steps.triage.outputs.caseName }}
           HOST:         ${{ steps.triage.outputs.host }}

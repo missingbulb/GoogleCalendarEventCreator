@@ -13,13 +13,19 @@
 # (never trusting the agent), opens the PR, dispatches test.yml, and clears the
 # `extractor-agent-done` label.
 #
-# Reads GH_TOKEN / BRANCH / SLUG / CASE_NAME / HOST / ISSUE_NUMBER / REPO from the
-# env (set by the workflow step). cd's to the repo root, so it runs from anywhere.
+# Reads GH_TOKEN / MODE / BRANCH / SLUG / SOURCE_BASE / SOURCE_PATH / CASE_NAME /
+# HOST / ISSUE_NUMBER / REPO from the env (set by the workflow step). cd's to the
+# repo root, so it runs from anywhere.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$HERE/../.."
 
-SRC="pipeline/sources/$SLUG.js"
+MODE="${MODE:-new}"
+# The agent's two-file write surface. In supported mode SRC is an EXISTING,
+# shipped source (the agent may make a minimal edit to it to pass the new case);
+# in new mode it's the freshly-scaffolded one. The blast-radius guard allows edits
+# to exactly these two and reverts everything else.
+SRC="${SOURCE_PATH:-pipeline/sources/$SLUG.js}"
 CASE_FILE="test/extractors/custom/$CASE_NAME.json"
 
 # This workflow is triggered by an `issues` event, so the checkout lands on the
@@ -45,7 +51,7 @@ hand_off_to_human() {
 # its message so extra agent commits or ordering can't fool us; fall back to the
 # oldest branch-only commit. The blast-radius guard rewinds everything except the
 # agent's two files to this point.
-SCAFFOLD=$(git log --format='%H' --grep="chore: scaffold $SLUG extractor" "origin/main..HEAD" | tail -1)
+SCAFFOLD=$(git log --format='%H' --grep="chore: scaffold" "origin/main..HEAD" | tail -1)
 if [ -z "$SCAFFOLD" ]; then
   SCAFFOLD=$(git rev-list "origin/main..HEAD" | tail -1)
 fi
@@ -102,17 +108,29 @@ npm run test:offline
 # revert above (if any) is new here. Push whatever this job added.
 git push origin "$BRANCH"
 
-cat > /tmp/pr-body.md <<EOF
+if [ "$MODE" = "supported" ]; then
+  PR_TITLE="test: add integration case for $HOST (hardens $SOURCE_BASE)"
+  cat > /tmp/pr-body.md <<EOF
+Adds a fresh integration case for \`$HOST\`, which is already handled by \`$SRC\`.
+
+This request came in for an already-supported host, so instead of a new source the pipeline recorded the submitted page (\`data/$CASE_NAME.html\`) and the agent added \`$CASE_FILE\` asserting the real extraction — a second real page hardening the existing extractor. Any change to \`$SRC\` itself (if the new page needed one to pass) is in the diff for review; all pre-existing cases still pass (re-verified).
+
+Closes #$ISSUE_NUMBER
+EOF
+else
+  PR_TITLE="feat: add $SLUG extractor"
+  cat > /tmp/pr-body.md <<EOF
 Implements the extractor for \`$HOST\`.
 
 The workflow scaffolded the branch — the \`matches()\` gate, the \`supportedDomains\` entry, the regenerated load lists, and the real cached event page (\`data/$CASE_NAME.html\`). The agent wrote \`extract()\` and the integration case asserting the real extraction.
 
 Closes #$ISSUE_NUMBER
 EOF
+fi
 
 if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
   gh pr create --base main --head "$BRANCH" \
-    --title "feat: add $SLUG extractor" --body-file /tmp/pr-body.md
+    --title "$PR_TITLE" --body-file /tmp/pr-body.md
 fi
 
 # A GITHUB_TOKEN push/PR doesn't start test.yml; dispatch it so checks attach to
@@ -127,6 +145,10 @@ curl -s -X POST \
   -d "{\"ref\":\"$BRANCH\"}" || echo "warning: test.yml dispatch failed — dispatch it manually"
 
 PR_URL=$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo "")
-gh issue comment "$ISSUE_NUMBER" --body "✅ Extractor implemented — PR ready for review: $PR_URL  (asserts against the real cached page; review the \`extract()\` logic and field values before merging)."
+if [ "$MODE" = "supported" ]; then
+  gh issue comment "$ISSUE_NUMBER" --body "✅ Already-supported host — added a fresh integration case hardening \`$SOURCE_BASE\`. PR ready for review: $PR_URL  (asserts against the real cached page; review the case values and any \`$SRC\` change before merging)."
+else
+  gh issue comment "$ISSUE_NUMBER" --body "✅ Extractor implemented — PR ready for review: $PR_URL  (asserts against the real cached page; review the \`extract()\` logic and field values before merging)."
+fi
 # Terminal state for the automation: clear the trigger label now the PR is open.
 gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-agent-done" || true
