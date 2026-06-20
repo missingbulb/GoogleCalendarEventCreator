@@ -87,6 +87,11 @@ test("a host with a dedicated source is triaged (agent skipped), reason 'support
   assert.equal(res.triaged, true);
   assert.equal(res.reason, "supported");
   assert.match(res.message, /dedicated extractor/i);
+  // The event page isn't discarded: the message points the user at the host's
+  // standing "Additional sample pages" enhancement issue (the workflow records
+  // the URL there via record-supported-sample.sh).
+  assert.match(res.message, /additional sample pages/i);
+  assert.equal(res.url, "https://covered.example/e/1"); // the URL the workflow records
 });
 
 test("the supported check is subdomain-aware (www and sub stripped/covered)", async () => {
