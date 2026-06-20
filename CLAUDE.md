@@ -12,6 +12,7 @@ own file under `docs/claude/` and is imported here:
 @docs/claude/auto-lessons.md
 @docs/claude/auto-fallback-coverage.md
 @docs/claude/auto-branch-report.md
+@docs/claude/claudinite-handoff.md
 
 The project's top-level architectural rules of the road live in
 `docs/architectureGuidelines.md` (imported below). Whenever we agree on a new or

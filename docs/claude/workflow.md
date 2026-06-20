@@ -70,10 +70,11 @@ unprompted; the owner decides when to do it. Route by scope:
   principles) belong in the **shared rules** — `docs/claude/shared/`, which is the
   **Claudinite** submodule, consumed **read-only** here. They **cannot** be edited
   in this repo (a session can't push across repos), so a portable lesson is
-  **handed off to Claudinite**, not written here — see the hand-off mechanism in
-  [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364).
-  Until that automated hand-off exists, record the portable lesson in the
-  Claudinite repo directly (its own session/PR).
+  **handed off to Claudinite**: open a `claudinite-lesson`-labelled issue (a
+  complete, self-contained proposal — Claudinite won't have this conversation's
+  context), and the hand-off Action copies it there for curation. See
+  [claudinite-handoff.md](claudinite-handoff.md) (and
+  [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)).
 
 Keep every addition terse. Project-specific guidance is good; broader engineering
 practices that generalize beyond this repo are better — and a generalizable lesson
