@@ -17,7 +17,7 @@ module.exports = {
   description: "the \"show all\" link's presence keys off the card cap, not the event count",
   data: { supported: true, events: filler(6) },
   listing: "none",
-  caps: { maxCardsShown: 3 },
-  viewportPx: 170,
+  configurationOverrides: { maxCardsShown: 3 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };

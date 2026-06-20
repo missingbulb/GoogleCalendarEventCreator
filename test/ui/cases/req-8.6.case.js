@@ -18,8 +18,8 @@ module.exports = {
   description: "past the expanded cap it reads \"N out of M events shown\" with no link",
   data: { supported: true, events: filler(6) },
   listing: "none",
-  caps: { maxCardsShown: 3, maxCardsExpanded: 4 },
-  viewportPx: 170,
+  configurationOverrides: { maxCardsShown: 3, maxCardsExpanded: 4 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   // Expand the list (click \"show all\" \u2192 renderList(maxCardsExpanded), synchronous)
   // to reach the capped \"shown\" state, then pin to the bottom to see the label.
   action(doc) {

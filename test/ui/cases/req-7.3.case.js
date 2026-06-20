@@ -17,6 +17,6 @@ module.exports = {
   description: "with list above and below, both edge fades show",
   data: { supported: true, events: filler(6) },
   listing: "none",
-  viewportPx: 170,
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToMiddle,
 };

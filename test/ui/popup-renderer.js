@@ -148,11 +148,14 @@ const EVENTS_VIEWPORT_PX = 500; // mirrors #events max-height in ui/popup.css
 const MIN_ROW_PX = 60;
 const visibleRowsFor = (viewportPx) => Math.ceil(viewportPx / MIN_ROW_PX) + 3; // + safety/peek
 
-// A case may shrink the #events viewport (its own `viewportPx`) so a tiny event
-// list still overflows — paired with shrunken `caps` it pins an overflow
-// requirement (7.x/8.x) with a fraction of the cards/pixels (issue #439). Both
-// the inlined max-height and the rasterization clamp follow the per-case value.
-const viewportFor = (testCase) => testCase.viewportPx || EVENTS_VIEWPORT_PX;
+// A case may shrink the #events viewport so a tiny event list still overflows —
+// paired with shrunken config (`configurationOverrides`) it pins an overflow
+// requirement (7.x/8.x) with a fraction of the cards/pixels (issue #439). The
+// viewport is NOT a config.js value (it mirrors a renderer constant), so it
+// lives under `nonConfigurableUiSettingsOverrides`, apart from the GCalConfig
+// overrides. Both the inlined max-height and the rasterization clamp follow it.
+const viewportFor = (testCase) =>
+  (testCase.nonConfigurableUiSettingsOverrides && testCase.nonConfigurableUiSettingsOverrides.viewportPx) || EVENTS_VIEWPORT_PX;
 
 // Override the inlined #events max-height with the case's shrunken viewport, so
 // satori clips a short list to it (the append wins — same property, last-declared).
@@ -232,7 +235,7 @@ async function renderCasePng(testCase) {
     // "Reading page…" state render() never produces); everything else runs the
     // real render() and any DOM action on top of it.
     if (!testCase.skipRender) {
-      await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR, caps: testCase.caps });
+      await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR, configurationOverrides: testCase.configurationOverrides });
       if (testCase.action) testCase.action(doc);
     }
 

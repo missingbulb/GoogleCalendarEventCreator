@@ -42,12 +42,13 @@ async function init() {
 // `currentYear` (the year against which a card decides whether to show a year
 // pill — see events-view's chip helpers) defaults to the real current year; the
 // UI snapshot tests pass a fixed one so their PNGs stay deterministic.
-// `caps` overrides the list-size limits (maxCardsShown / maxCardsExpanded /
-// cardsVisibleBeforeScroll) read from config.js; production never passes it, but
-// a UI snapshot case can shrink the caps so a tiny event list still exercises an
-// overflow requirement (issue #439) — same behavior, a fraction of the pixels.
-export async function render({ data, tab, listing, currentYear = new Date().getFullYear(), caps }) {
-  const limits = { ...GCalConfig, ...caps };
+// `configurationOverrides` overrides the GCalConfig product values render reads
+// (the list-size limits maxCardsShown / maxCardsExpanded / cardsVisibleBeforeScroll);
+// production never passes it, but a UI snapshot case can shrink them so a tiny
+// event list still exercises an overflow requirement (issue #439) — same
+// behavior, a fraction of the pixels.
+export async function render({ data, tab, listing, currentYear = new Date().getFullYear(), configurationOverrides }) {
+  const config = { ...GCalConfig, ...configurationOverrides };
   const headingEl = document.getElementById("heading");
   const eventsEl = document.getElementById("events");
 
@@ -83,8 +84,8 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
         cards.length,
         shownEvents,
         totalEvents,
-        () => renderList(limits.maxCardsExpanded),
-        limits
+        () => renderList(config.maxCardsExpanded),
+        config
       );
       if (label) items.push(label);
       eventsEl.replaceChildren(...items);
@@ -93,7 +94,7 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
       updateScrollFades();
     };
 
-    renderList(limits.maxCardsShown);
+    renderList(config.maxCardsShown);
 
     // Edge fades: a scroll cue that there's more list above/below. Keep them in
     // sync as the user scrolls. In a real browser the scroll metrics are live;
@@ -172,12 +173,12 @@ function updateScrollFades() {
 //     link while the list can still grow (we're below the maxCardsExpanded cap),
 //     or "N out of M events shown" with no link once it's capped — the link
 //     can't reveal anything more.
-// `onShowAll` re-renders the list at the expanded card cap. `caps` (the
-// cardsVisibleBeforeScroll / maxCardsExpanded thresholds) defaults to the
-// shipped config.js; a UI snapshot case can pass shrunken caps (issue #439).
-export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEvents, onShowAll, caps = GCalConfig) {
+// `onShowAll` re-renders the list at the expanded card cap. `config` (the source
+// of the cardsVisibleBeforeScroll / maxCardsExpanded thresholds) defaults to the
+// shipped GCalConfig; a UI snapshot case can pass shrunken values (issue #439).
+export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEvents, onShowAll, config = GCalConfig) {
   const allShown = shownCards >= totalCards;
-  if (allShown && totalCards <= caps.cardsVisibleBeforeScroll) return null;
+  if (allShown && totalCards <= config.cardsVisibleBeforeScroll) return null;
 
   const el = document.createElement("p");
   el.id = "truncated";
@@ -191,7 +192,7 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
     return el;
   }
 
-  const canExpand = shownCards < caps.maxCardsExpanded;
+  const canExpand = shownCards < config.maxCardsExpanded;
   label.textContent = `${shownEvents} out of ${totalEvents} events ${canExpand ? "showing" : "shown"}`;
   el.appendChild(label);
 

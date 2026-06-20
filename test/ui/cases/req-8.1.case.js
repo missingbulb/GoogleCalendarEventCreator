@@ -17,7 +17,7 @@ module.exports = {
   description: "the count label is the list's last item, in view at the bottom",
   data: { supported: true, events: filler(4) },
   listing: "none",
-  caps: { cardsVisibleBeforeScroll: 2 },
-  viewportPx: 170,
+  configurationOverrides: { cardsVisibleBeforeScroll: 2 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };

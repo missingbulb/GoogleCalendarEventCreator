@@ -17,7 +17,7 @@ module.exports = {
   description: "every card shown but taller than fits reads \"N events showing\" with no link",
   data: { supported: true, events: filler(5) },
   listing: "none",
-  caps: { cardsVisibleBeforeScroll: 2 },
-  viewportPx: 170,
+  configurationOverrides: { cardsVisibleBeforeScroll: 2 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };

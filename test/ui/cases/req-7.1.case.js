@@ -17,6 +17,6 @@ module.exports = {
   description: "the height cap clips both ends, showing a peek of the cut cards",
   data: { supported: true, events: filler(6) },
   listing: "none",
-  viewportPx: 170,
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToMiddle,
 };

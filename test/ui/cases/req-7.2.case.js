@@ -18,7 +18,7 @@ module.exports = {
   description: "only a prefix of many cards renders at first (the card cap)",
   data: { supported: true, events: filler(6) },
   listing: "none",
-  caps: { maxCardsShown: 3 },
-  viewportPx: 170,
+  configurationOverrides: { maxCardsShown: 3 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: restAtTop,
 };

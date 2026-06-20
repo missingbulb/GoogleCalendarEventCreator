@@ -18,7 +18,7 @@ module.exports = {
     single(2, "11"),
   ] },
   listing: "none",
-  caps: { cardsVisibleBeforeScroll: 2 },
-  viewportPx: 170,
+  configurationOverrides: { cardsVisibleBeforeScroll: 2 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };

@@ -17,7 +17,7 @@ module.exports = {
   description: "a shown prefix reads \"N out of M events showing\" with a \"show all\" link",
   data: { supported: true, events: filler(6) },
   listing: "none",
-  caps: { maxCardsShown: 3 },
-  viewportPx: 170,
+  configurationOverrides: { maxCardsShown: 3 },
+  nonConfigurableUiSettingsOverrides: { viewportPx: 170 },
   action: scrollToBottom,
 };
