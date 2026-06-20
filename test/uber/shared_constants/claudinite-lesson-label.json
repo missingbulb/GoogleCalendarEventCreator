@@ -1,0 +1,8 @@
+{
+  "what": "claudinite-lesson label — the trigger for the portable-lesson hand-off. The issue template applies it; the hand-off workflow guards on it, ensures it on the Claudinite side, and applies it to the copied issue. The label must also exist in this repo (created by hand) for GitHub to keep it on a new issue. Counts include comments. See docs/claude/claudinite-handoff.md.",
+  "value": "claudinite-lesson",
+  "counts": {
+    ".github/workflows/claudinite-lesson-handoff.yml": 4,
+    ".github/ISSUE_TEMPLATE/claudinite-lesson.yml": 1
+  }
+}
