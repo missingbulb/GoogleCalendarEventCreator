@@ -159,3 +159,16 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   the full-page `data/*.html` test fixtures dwarf the source by bytes.
   `.gitattributes` marks `data/*.html linguist-vendored` so Linguist ignores them;
   do the same for any future large generated/fixture files. (#78)
+- **GitHub renders Markdown inside a raw `<td>` only when the cell content is
+  blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
+  two-column "image left, text right" layout that survives GitHub's renderer
+  (`docs/uiRequirements.md`'s gallery), wrap each row in a literal
+  `<table>`/`<tr>`/`<td>` and put a **blank line before and after** the cell's
+  content; cmark-gfm then re-enters Markdown mode inside the cell, so `![img]()`,
+  `**bold**`, and links render. Without the surrounding blank lines the content is
+  swallowed into the HTML block and shown verbatim. A leading inline `<!-- … -->`
+  also starts an HTML block — keep any marker as the **last** token on the line so
+  the line still *starts* as Markdown (how the generator tags its managed
+  left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
+  two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
+  pipe-table cell can't hold the multi-line prose. (`test/ui/build-requirements-gallery.js`.)
