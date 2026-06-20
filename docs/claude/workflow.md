@@ -35,10 +35,23 @@ requirement with its snapshot beside it — for one-page review.
 
 When a change to a `test/ui/cases/*` case — its spec or its rendering — makes
 the snapshot tests **fail** (the pixels moved), don't silently regenerate the
-baseline: show the **expected** (committed) and **actual** (newly-rendered) PNGs
-inline in the chat side by side and **ask the owner to approve the difference**
-before refreshing and committing the new snapshot. The owner's approval of the
-visual diff is the gate; an unreviewed pixel change is never auto-accepted.
+baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel
+change is never auto-accepted. The process:
+
+1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
+   committed **expected** PNG, run the snapshot test so it fails (the harness
+   writes the rendered `actual` and a highlighted `diff` to `test/ui/.artifacts/`),
+   and send three images to the chat: **expected** (committed), **actual**
+   (newly-rendered), and the **diff**.
+2. **Ask via `AskUserQuestion`, not prose** — a popup notifies the owner on
+   mobile. Offer **Approve** and **Reject — let's discuss**.
+3. **Hold without overwriting the expected image.** If the working tree must be
+   committed while waiting (e.g. a stop-hook), commit the *reverted* (expected)
+   baseline so the branch/PR honestly shows the snapshot test **red, pending
+   approval** — never commit the new baseline first.
+4. On **Approve**: regenerate the baseline (`npm run refresh:ui`), confirm the
+   suite is green, and push. On **Reject**: **do not** roll back automatically —
+   leave the change in place and discuss how to proceed.
 
 When the repo owner says **"bump version"**, treat it as a defined instruction:
 raise the extension's version by editing the `version` field in
