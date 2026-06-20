@@ -15,7 +15,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
-let commonTime, showPerDayTimes;
+let commonTime, showPerDayTimes, groupHeaderTime;
 before(async () => {
   ({
     formatWhen,
@@ -25,6 +25,7 @@ before(async () => {
     toCards,
     commonTime,
     showPerDayTimes,
+    groupHeaderTime,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
 });
 
@@ -172,6 +173,28 @@ test("commonTime: a shared start AND end returns the full range", () => {
     { t: { start: "2026-06-25T19:00:00", end: "2026-06-25T21:00:00" } },
   ];
   assert.ok(commonTime(times).includes("–"), `expected a range in "${commonTime(times)}"`);
+});
+
+// --- groupHeaderTime: the time-label that leads a grouped card's header — the
+// shared time (commonTime), else "All day" when EVERY showing is all-day, else ""
+// (mixed, or differing times). #441: all-day grouped cards show "All day · loc".
+
+test("groupHeaderTime: a shared start time leads the header (not 'All day')", () => {
+  const label = groupHeaderTime([inst("2026-08-05T19:00:00"), inst("2026-08-25T19:00:00")]);
+  assert.equal(label, sameDayLabel({ start: "2026-08-05T19:00:00" }));
+  assert.notEqual(label, "All day");
+});
+
+test("groupHeaderTime: every showing all-day yields 'All day'", () => {
+  assert.equal(groupHeaderTime([inst("2026-08-05"), inst("2026-08-14"), inst("2026-08-25")]), "All day");
+});
+
+test("groupHeaderTime: a mix of timed and all-day showings yields '' (no single label)", () => {
+  assert.equal(groupHeaderTime([inst("2026-08-05T19:00:00"), inst("2026-08-14")]), "");
+});
+
+test("groupHeaderTime: all timed but differing times yields '' (each chip carries its own)", () => {
+  assert.equal(groupHeaderTime([inst("2026-08-05T18:00:00"), inst("2026-08-14T20:00:00")]), "");
 });
 
 test("commonTime: a same start but differing end is not common ('')", () => {
