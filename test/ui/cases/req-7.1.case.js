@@ -1,6 +1,9 @@
 // Per-leaf snapshot for requirement 7.1: the height cap clips both ends, showing a peek of the cut cards.
 // The filename (req-7.1) is the link; build-requirements-gallery.js embeds this
 // image inline beneath 7.1 in docs/uiRequirements.md.
+//
+// Shrunken per issue #439: a short viewport makes a handful of cards overflow
+// (clipped both ends) instead of 16 — same requirement, fewer pixels.
 "use strict";
 
 const { scrollToMiddle } = require("../actions");
@@ -12,7 +15,8 @@ const filler = (count) => Array.from({ length: count }, (_, i) => {
 
 module.exports = {
   description: "the height cap clips both ends, showing a peek of the cut cards",
-  data: { supported: true, events: filler(16) },
+  data: { supported: true, events: filler(6) },
   listing: "none",
+  viewportPx: 170,
   action: scrollToMiddle,
 };

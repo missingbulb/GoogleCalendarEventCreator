@@ -1,6 +1,10 @@
 // Per-leaf snapshot for requirement 8.6: past the expanded cap it reads "N out of M events shown" with no link.
 // The filename (req-8.6) is the link; build-requirements-gallery.js embeds this
 // image inline beneath 8.6 in docs/uiRequirements.md.
+//
+// Shrunken per issue #439: tiny maxCardsShown/maxCardsExpanded caps + a short
+// viewport reach the capped "shown" (no-link) state with a handful of events
+// instead of 100 — the slowest render in the suite at the old size.
 "use strict";
 
 const { scrollToBottom } = require("../actions");
@@ -12,8 +16,10 @@ const filler = (count) => Array.from({ length: count }, (_, i) => {
 
 module.exports = {
   description: "past the expanded cap it reads \"N out of M events shown\" with no link",
-  data: { supported: true, events: filler(100) },
+  data: { supported: true, events: filler(6) },
   listing: "none",
+  caps: { maxCardsShown: 3, maxCardsExpanded: 4 },
+  viewportPx: 170,
   // Expand the list (click \"show all\" \u2192 renderList(maxCardsExpanded), synchronous)
   // to reach the capped \"shown\" state, then pin to the bottom to see the label.
   action(doc) {

@@ -1,6 +1,9 @@
 // Per-leaf snapshot for requirement 8.7: the "show all" link's presence keys off the card cap, not the event count.
 // The filename (req-8.7) is the link; build-requirements-gallery.js embeds this
 // image inline beneath 8.7 in docs/uiRequirements.md.
+//
+// Shrunken per issue #439: a tiny maxCardsShown cap + short viewport shows the
+// "show all" link off the card cap with a handful of events instead of 40.
 "use strict";
 
 const { scrollToBottom } = require("../actions");
@@ -12,7 +15,9 @@ const filler = (count) => Array.from({ length: count }, (_, i) => {
 
 module.exports = {
   description: "the \"show all\" link's presence keys off the card cap, not the event count",
-  data: { supported: true, events: filler(40) },
+  data: { supported: true, events: filler(6) },
   listing: "none",
+  caps: { maxCardsShown: 3 },
+  viewportPx: 170,
   action: scrollToBottom,
 };

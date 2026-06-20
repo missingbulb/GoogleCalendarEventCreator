@@ -1,6 +1,10 @@
 // Per-leaf snapshot for requirement 7.2: only a prefix of many cards renders at first (the card cap).
 // The filename (req-7.2) is the link; build-requirements-gallery.js embeds this
 // image inline beneath 7.2 in docs/uiRequirements.md.
+//
+// Shrunken per issue #439: a tiny maxCardsShown cap + short viewport exercises
+// the card cap with a handful of events instead of 40 — same requirement, far
+// fewer pixels and render time.
 "use strict";
 
 const { restAtTop } = require("../actions");
@@ -12,7 +16,9 @@ const filler = (count) => Array.from({ length: count }, (_, i) => {
 
 module.exports = {
   description: "only a prefix of many cards renders at first (the card cap)",
-  data: { supported: true, events: filler(40) },
+  data: { supported: true, events: filler(6) },
   listing: "none",
+  caps: { maxCardsShown: 3 },
+  viewportPx: 170,
   action: restAtTop,
 };
