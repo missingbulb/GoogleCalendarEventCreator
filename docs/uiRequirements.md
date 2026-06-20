@@ -636,16 +636,15 @@ and the header is location-only.
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![req-5.7.3](../test/ui/cases/req-5.7.3.png) <!-- req-gallery:5.7.3 -->
+![req-5.7.3](../test/ui/cases/req-5.7.3.png) <!-- req-gallery:5.7.3 -->
 
 </td>
 <td valign="top">
 
-`5.7.3` _(TBD)_ When any day is all-day (no time), the buttons stay plain day
-chips. The header **should** read **"All day · &lt;location&gt;"** (the "All day"
-label beside the location, mirroring a single all-day card's line) — but **today
-it renders location-only**, with no "All day" (provisional render at left).
-Aligning the code to show "All day · location" here is **to be decided**.
+`5.7.3` When a month card's days are **all all-day** (no time), the buttons stay
+plain day chips and the header reads **"All day · &lt;location&gt;"** — the "All
+day" label beside the location, mirroring a single all-day card's line. (If only
+*some* days are all-day, no single time fits, so the header stays location-only.)
 
 </td>
 </tr>
