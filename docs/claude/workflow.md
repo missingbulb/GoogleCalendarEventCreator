@@ -58,27 +58,32 @@ padding the docs to look productive. Run this same pass after a merge to main,
 too — the merge-to-main command in [github.md](github.md) hands off to it:
 reflect on the just-merged conversation before closing out. Otherwise it runs
 only when the repo owner asks for it — never extract from a conversation
-unprompted; the owner decides when to do it. Route by scope:
+unprompted; the owner decides when to do it.
 
-- **Project-specific** lessons land here, in this repo: project mechanics to the
-  matching file under `docs/claude/` (workflow, github, testing, adding-a-source,
-  auto-extractor); top-level project architecture rules to
-  `docs/architectureGuidelines.md`; non-obvious codebase footguns to
-  `docs/technicalGotchas.md`.
-- **Portable** lessons (general engineering practices, agentic best practices,
-  portable git/GitHub procedures, working discipline, agent-architecture
-  principles) belong in the **shared rules** — `docs/claude/shared/`, which is the
-  **Claudinite** submodule, consumed **read-only** here. They **cannot** be edited
-  in this repo (a session can't push across repos), so a portable lesson is
-  **handed off to Claudinite**: open a `claudinite-lesson`-labelled issue (a
-  complete, self-contained proposal — Claudinite won't have this conversation's
-  context), and the hand-off Action copies it there for curation. See
-  [claudinite-handoff.md](claudinite-handoff.md) (and
-  [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)).
+**Always write to the local repository docs** — capture never reaches across to
+Claudinite. Route by scope:
+
+- **Project-specific** lessons: project mechanics to the matching file under
+  `docs/claude/` (workflow, github, testing, adding-a-source, auto-extractor);
+  top-level project architecture rules to `docs/architectureGuidelines.md`;
+  non-obvious codebase footguns to `docs/technicalGotchas.md`.
+- **Portable** lessons (general engineering practices, agentic best practices):
+  to the local working-set docs `docs/engineeringPractices.md` and
+  `docs/agenticBestPractices.md`. These are local capture surfaces; the curated,
+  project-agnostic canon lives read-only in the Claudinite submodule
+  (`docs/claude/shared/`). Don't try to edit the shared docs or file a Claudinite
+  issue here — just write the best local doc.
+
+You never hand a lesson to Claudinite at capture time. The daily
+**optimize-procedures** routine ([auto-optimize-procedures.md](auto-optimize-procedures.md))
+is the *only* thing that bridges to Claudinite: it later promotes generalizable
+local items up (via a `claudinite-lesson` issue) and prunes the local copy once
+the canon absorbs it. So a portable insight captured locally isn't "stuck" here —
+it travels up on its own.
 
 Keep every addition terse. Project-specific guidance is good; broader engineering
-practices that generalize beyond this repo are better — and a generalizable lesson
-belongs in the shared rules (Claudinite), not duplicated here.
+practices that generalize beyond this repo are better — write those to the local
+practice docs so optimize-procedures can carry them upstream.
 
 A scheduled workflow runs this same pass automatically once a day over the last
 24h of commits and issue/PR activity, opening a PR for review
