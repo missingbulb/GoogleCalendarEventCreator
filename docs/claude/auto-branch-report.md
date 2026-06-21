@@ -85,7 +85,7 @@ tables — read the most recent comment on the issue to compare against:
 ## The launcher (Claude Code Routine)
 
 Keep the routine's config a **thin pointer** to this doc, not an inlined spec (per
-[../agenticBestPractices.md](../agenticBestPractices.md) — inlined instructions
+[shared/agenticBestPractices.md](shared/agenticBestPractices.md) — inlined instructions
 drift against renamed paths and miss conventions the repo later adds). Paste this
 into the nightly routine:
 

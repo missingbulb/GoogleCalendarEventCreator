@@ -1,7 +1,11 @@
 // The UI snapshot cases, decoupled from the (heavy) rendering stack so callers
-// that only need the case list — the README generator, its drift gate — don't
-// pull in satori/resvg/jsdom. popup-renderer.js re-exports these for the
-// renderer's own callers.
+// that only need the case list — the coverage ubertest, the inline-gallery
+// generator — don't pull in satori/resvg/jsdom. popup-renderer.js re-exports
+// these for the renderer's own callers.
+//
+// Each case is a per-leaf module `req-<id>.case.js`: its FILENAME names the single
+// uiRequirements leaf it pins (the coverage gate reads it), and it supplies only
+// fake data (+ an optional DOM action) fed to the popup's real render().
 "use strict";
 
 const fs = require("node:fs");
@@ -21,11 +25,4 @@ function loadCases() {
     .map((f) => ({ name: f.replace(/\.case\.js$/, ""), ...require(path.join(CASES_DIR, f)) }));
 }
 
-// A case's `requirements` is a map { "<id>": "<brief note on what the case checks
-// for that requirement>" }, so a reviewer sees the intent next to each ID. These
-// helpers read it without each caller re-deriving the shape.
-function caseRequirementIds(c) {
-  return c && c.requirements && typeof c.requirements === "object" ? Object.keys(c.requirements) : [];
-}
-
-module.exports = { loadCases, CASES_DIR, caseRequirementIds };
+module.exports = { loadCases, CASES_DIR };

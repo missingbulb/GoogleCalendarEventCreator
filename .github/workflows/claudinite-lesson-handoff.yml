@@ -1,0 +1,61 @@
+# Hand a portable lesson off to the shared Claudinite repo. Portable lessons
+# can't be edited in this repo — the shared rules live in a read-only submodule
+# (docs/claude/shared) — so the "learned lessons" pass files a labelled issue
+# here and this workflow copies it to Claudinite, where a curation routine
+# dedupes/routes it into a docs PR. See docs/claude/claudinite-handoff.md and #364.
+#
+# Needs the CLAUDINITE_ISSUE_TOKEN secret: a fine-grained PAT with Issues: write
+# on missingbulb/Claudinite (the automatic GITHUB_TOKEN can't write cross-repo).
+# The claudinite-lesson label must exist in THIS repo for the trigger to fire
+# (GitHub silently drops an unknown label on issue creation — create it once,
+# see the doc).
+name: Claudinite lesson hand-off
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write # comment on + close the source issue in this repo
+
+jobs:
+  hand-off:
+    if: github.event.label.name == 'claudinite-lesson'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy the lesson to Claudinite, link back, close here
+        env:
+          PAT: ${{ secrets.CLAUDINITE_ISSUE_TOKEN }}
+          SRC_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Untrusted issue content is passed as env (never inlined into the run
+          # script) so a malicious title/body can't inject shell.
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+          SRC_URL: ${{ github.event.issue.html_url }}
+          SRC_NUM: ${{ github.event.issue.number }}
+          SRC_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          target="missingbulb/Claudinite"
+
+          # Belt-and-suspenders: ensure the label exists on the target. Needs
+          # Issues:write; harmless if it already exists or the token lacks label
+          # perms (then create it once by hand — see the doc).
+          GH_TOKEN="$PAT" gh label create claudinite-lesson --repo "$target" \
+            --color BFD4F2 --description "Portable lesson proposed from a consumer repo" \
+            2>/dev/null || true
+
+          # Target body: the original proposal plus a provenance backlink.
+          printf '%s\n\n---\n_Handed off from %s#%s — %s_\n' \
+            "$BODY" "$SRC_REPO" "$SRC_NUM" "$SRC_URL" > "$RUNNER_TEMP/body.md"
+
+          new_url="$(GH_TOKEN="$PAT" gh issue create --repo "$target" \
+            --title "$TITLE" --body-file "$RUNNER_TEMP/body.md" \
+            --label claudinite-lesson)"
+          echo "Created $new_url"
+
+          # Link back and close the source issue (tracking continues in
+          # Claudinite), using THIS repo's token — the PAT is Claudinite-only.
+          GH_TOKEN="$SRC_TOKEN" gh issue close "$SRC_NUM" --repo "$SRC_REPO" \
+            --reason "not planned" \
+            --comment "Handed off to Claudinite for curation: $new_url — tracking continues there."

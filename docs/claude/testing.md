@@ -31,19 +31,41 @@ doc, when the mechanics change.
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically. (This is the
   same comparison the fallback-coverage gate automates — see below.)
-- **A UI snapshot checks pixels *against a numbered UI requirement*.** The popup's
-  testable requirements are enumerated in `docs/uiRequirements.md` (`1.1`,
-  `5.6.1`, …). Each `test/ui/cases/` case names its scenario→expectation and
-  declares the requirement IDs it checks in a `requirements: [...]` field;
-  `test/uber/ui-requirements-coverage.test.js` fails unless **every leaf
-  requirement is covered by ≥1 case** (and rejects a case that cites a
-  nonexistent ID). So a case earns its keep by pinning specific requirements'
-  correct rendering — confirmed by a human against the PNG, not "can these pixels
-  be generated?" — and should **bundle several requirements into one image** (a
-  feature's variations together), keeping the case count down. Pruning a case is a
-  coverage question, but the ubertest now catches a dropped requirement instead of
-  it slipping silently. The popup's pure logic stays pinned by unit tests
+- **The UI coverage gate is SEGMENTED by what each requirement needs (issue
+  #429).** The popup's testable requirements are enumerated in
+  `docs/uiRequirements.md` (`1.1`, `5.6.1`, …) and split into two kinds:
+  - A **render** leaf is pinned by exactly one **per-leaf** UI snapshot case,
+    named `req-<id>.case.js` → `req-<id>.png` (the *filename* is the link), whose
+    image is shown in a **two-column table** beside the requirement (image left,
+    spec right) in `docs/uiRequirements.md` by
+    `test/ui/build-requirements-gallery.js`. The gate enforces a strict
+    one-case-per-leaf bijection: a render leaf with no case (or two) fails.
+  - A **behavior** leaf (tagged `_(behavior)_` in the spec — a click/navigation a
+    static image can't observe, e.g. `9.1`–`9.3`, `3.4`) is routed to a behavior
+    test (`test/unit/events-view-actions.test.js`) via the manifest
+    `test/ui/behavior-coverage.js`. A `req-<id>` snapshot may **not** exist for one
+    — that was the #429 anti-pattern (a PNG "covering" a click it can't see).
+  - A **TBD** leaf (tagged `_(TBD)_` — an edge case whose behavior isn't decided
+    yet, e.g. `4.2.3`, `4.10`, `5.7.3`) is a placeholder: rendered with a "TO BE
+    DECIDED" banner and **exempt** from the bijection (it may carry a *provisional*
+    `req-<id>` snapshot of current behavior, but isn't required to). The
+    edge-case-review routine (#438) is what fills these in over time.
+
+  `test/uber/ui-requirements-coverage.test.js` fails unless **every leaf is
+  covered by the right kind** (and rejects a nonexistent/typo'd/duplicate case, or
+  a snapshot for a behavior leaf). A render case earns its keep by pinning a
+  requirement's correct rendering — confirmed by a human against the PNG, not "can
+  these pixels be generated?". The popup's pure logic stays pinned by unit tests
   (`popup-content` / `events-view` / `popup-truncation`).
+
+  **⚠️ This verification is deliberately INCOMPLETE — tracked in #435.** Every leaf
+  is *claimed* by the right kind of test, but the behavior test **stubs**
+  `chrome.tabs.create`/`window.close` — so it confirms our code *asks* for the
+  right action, not that a real Chrome performs it. A faithful (non-stub)
+  verification of the `_(behavior)_` leaves is still owed (the owner will address
+  it separately). A loud banner in `docs/uiRequirements.md` says the same: a green
+  build means every leaf is *claimed*, not that every leaf is *faithfully*
+  verified.
 
 ## Adding a cached integration case
 
@@ -83,20 +105,33 @@ Read the file when you touch it; the one-liners here are just a map.
   case are in `test/ui/popup-renderer.js`; the pixel-exact diff
   (`MAX_DIFF_RATIO = 0`) and the en-US-locale guard are in
   `test/ui/popup-snapshots.test.js`; the scroll/fade gestures are in
-  `test/ui/actions.js`. A case is a self-contained `<name>.case.js` (fake data +
-  the `requirements: [...]` IDs it checks) + `<name>.png`; the renderer feeds it
-  the popup's REAL `render()`, so a view change moves the snapshots automatically.
+  `test/ui/actions.js`. A case is a self-contained per-leaf `req-<id>.case.js`
+  (fake data + an optional DOM action) + `req-<id>.png`; the renderer feeds it the
+  popup's REAL `render()`, so a view change moves the snapshots automatically.
   After an intentional popup/view/CSS change run `npm run refresh:ui` and commit
-  the PNGs + README (deterministic, no CI workflow). The requirement list is
-  parsed from `docs/uiRequirements.md` by `test/ui/ui-requirements.js`, shared
-  with the coverage ubertest (`test/uber/ui-requirements-coverage.test.js`).
-- **UI snapshot gallery** — `test/ui/README.md` is GENERATED from the cases plus
-  `docs/uiRequirements.md` (`test/ui/build-readme.js`, gated by `readme.test.js`):
-  the image gallery (each case's PNG, description, and the requirements it checks)
-  plus a **requirement-coverage map** (every leaf requirement → the case(s) that
-  check it). Never hand-edit it. Named plain `README.md` (not `*.GENERATED.md`) so
-  GitHub renders it as the folder landing page — the do-not-edit banner + CI gate
-  stand in for the missing cue.
+  the PNGs + inline gallery (deterministic, no CI workflow). The requirement list
+  — and each leaf's **kind** (render vs `_(behavior)_`) — is parsed from
+  `docs/uiRequirements.md` by `test/ui/ui-requirements.js`, shared with the
+  coverage ubertest (`test/uber/ui-requirements-coverage.test.js`).
+- **Behavior verification** — `test/unit/events-view-actions.test.js` drives the
+  clicks the snapshots can't (the `_(behavior)_` leaves: a card / instance button
+  / affordance link opens an adjacent new tab and closes the popup), routed to it
+  by the manifest `test/ui/behavior-coverage.js`. It **stubs** the
+  `chrome.tabs.create`/`window.close` boundary, so it's explicitly INCOMPLETE (a
+  loud banner in the file; a faithful non-stub verification is owed in #435).
+- **Two-column requirements gallery** — `test/ui/build-requirements-gallery.js`
+  lays each leaf out as an HTML `<table>` row in `docs/uiRequirements.md`: the
+  generated `req-<id>.png` (or a behavior-test note) in the **left** cell, the
+  hand-authored requirement in the **right** cell. GitHub renders the markdown in
+  each `<td>` because the cell content is blank-line-separated. The generator
+  rewrites **only** the managed left-cell line — tagged `<!-- req-gallery:<id> -->`
+  — never the scaffolding or prose, so `docs/uiRequirements.md` is
+  part-generated/part-authored and is **not** on the `ours` merge driver (a prose
+  conflict is resolved by hand; the left cells regenerate via `npm run regen`).
+  Gated by `test/ui/requirements-gallery.test.js` (refresh-then-gate locally,
+  read-only in CI; plus a check that every leaf has exactly one marker). This
+  requirement-first gallery **replaced** the old case-first `test/ui/README.md`
+  (since removed).
 - **"Does the extension load?"** is guarded in two layers:
   `test/extension/extension-loads.test.js` (always-on, no browser — boots the
   service worker through a Chrome-faithful `importScripts` and checks every

@@ -3,7 +3,7 @@
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
 live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
-engineering practices in [engineeringPractices.md](engineeringPractices.md).
+engineering practices in [engineeringPractices.md](claude/shared/engineeringPractices.md).
 
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
@@ -83,11 +83,11 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   tab/event listeners a test can trigger, attaching to the target is what starts
   it, and the first read still races startup — so **poll** until the global
   appears. (Bound every probe and add a test-level timeout regardless, per the
-  hang-proofing rule in [engineeringPractices.md](engineeringPractices.md).)
+  hang-proofing rule in [engineeringPractices.md](claude/shared/engineeringPractices.md).)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
-  with the rest of the GitHub procedures in
-  [claude/github.md](claude/github.md).
+  with the rest of the portable GitHub procedures in
+  [claude/shared/git-and-github.md](claude/shared/git-and-github.md).
 - **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `test/harness.js`.
@@ -159,3 +159,16 @@ engineering practices in [engineeringPractices.md](engineeringPractices.md).
   the full-page `data/*.html` test fixtures dwarf the source by bytes.
   `.gitattributes` marks `data/*.html linguist-vendored` so Linguist ignores them;
   do the same for any future large generated/fixture files. (#78)
+- **GitHub renders Markdown inside a raw `<td>` only when the cell content is
+  blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
+  two-column "image left, text right" layout that survives GitHub's renderer
+  (`docs/uiRequirements.md`'s gallery), wrap each row in a literal
+  `<table>`/`<tr>`/`<td>` and put a **blank line before and after** the cell's
+  content; cmark-gfm then re-enters Markdown mode inside the cell, so `![img]()`,
+  `**bold**`, and links render. Without the surrounding blank lines the content is
+  swallowed into the HTML block and shown verbatim. A leading inline `<!-- … -->`
+  also starts an HTML block — keep any marker as the **last** token on the line so
+  the line still *starts* as Markdown (how the generator tags its managed
+  left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
+  two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
+  pipe-table cell can't hold the multi-line prose. (`test/ui/build-requirements-gallery.js`.)

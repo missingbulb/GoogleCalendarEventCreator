@@ -173,14 +173,15 @@ extension runs. There is no hand-copied markup to drift, so a change to a view i
 caught automatically. (`render()` is split out of `init()` for exactly this: init
 does the chrome/fetch I/O to gather the data, render builds the DOM from it.)
 
-Each case is a self-contained tuple in **`test/ui/cases/`**. The cases are
-feature-focused — one popup state or rendering feature per image, with that
-feature's variations shown together in the one picture, named for the scenario
-and its expected outcome. For the current set with every reference image inline,
-see the generated gallery **[`test/ui/README.md`](../test/ui/README.md)** — it's
-derived from the cases (so it can't drift) and is the one-page review surface.
+Each case is a self-contained tuple in **`test/ui/cases/`**, one per leaf
+requirement: a `req-<id>.case.js` whose filename names the single
+[`uiRequirements.md`](uiRequirements.md) leaf it pins, minimal data isolating that
+one requirement. For the current set with every reference image shown in a
+two-column table beside its requirement (image left, spec right), see the
+generated gallery in **[`uiRequirements.md`](uiRequirements.md)** — it's derived
+from the cases (so it can't drift) and is the one-page review surface.
 
-`<name>.case.js` exports `{ description, data, listing?, tab?, action? }`. `data`
+`req-<id>.case.js` exports `{ description, data, listing?, tab?, action? }`. `data`
 is the fake extraction result (`{ supported, events: [...] }`); `listing` is the
 host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
