@@ -93,7 +93,26 @@ Claudinite. Route by scope:
 - **Project-specific** lessons: project mechanics to the matching file under
   `docs/claude/` (workflow, github, testing, adding-a-source, auto-extractor);
   top-level project architecture rules to `docs/architectureGuidelines.md`;
-  non-obvious codebase footguns to `docs/technicalGotchas.md`.
+  non-obvious **project-wide** codebase footguns to `docs/technicalGotchas.md`
+  (file-local footguns go in the file instead — see the next bullet).
+- **File-local** footguns go in the file, not `docs/technicalGotchas.md`. A trap
+  you'd only trip over *while editing one specific file or function* — a mistake
+  of **commission** you make with that file open in front of you — belongs in
+  that file's **top-of-file header comment** (the self-documenting convention
+  [testing.md](testing.md) already mandates for test harnesses, generalized to
+  any footgun). It loads into context **on-demand** when Claude reads the file,
+  can't drift from the code, and stays off the always-loaded `CLAUDE.md` budget —
+  every `@import` is expanded at launch *every* session, so a file-specific note
+  in `technicalGotchas.md` taxes every unrelated session. **Keep it central
+  instead** when Claude could hit the trap *without* reading the locus file: a
+  mistake of **omission** (you must know it to decide whether to open or avoid
+  the file) or a cross-cutting invariant spanning files. One file can split both
+  ways — `data/render-page.js`'s "never give the SPA render the e2e test's
+  `--no-sandbox`" stays central (you might add it without ever reading the file),
+  while its `SIGKILL`-then-`rmSync` teardown race lives inline at the call site
+  (you only meet it editing the teardown). Co-locate only **non-portable** traps:
+  a portable lesson buried in a code comment escapes the optimize-procedures
+  promotion path, so those still go to the practice docs below.
 - **Portable** lessons (general engineering practices, agentic best practices):
   to the local working-set docs `docs/engineeringPractices.md` and
   `docs/agenticBestPractices.md`. These are local capture surfaces; the curated,
