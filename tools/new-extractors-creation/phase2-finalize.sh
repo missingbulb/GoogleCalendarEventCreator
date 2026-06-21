@@ -25,7 +25,7 @@ MODE="${MODE:-new}"
 # shipped source (the agent may make a minimal edit to it to pass the new case);
 # in new mode it's the freshly-scaffolded one. The blast-radius guard allows edits
 # to exactly these two and reverts everything else.
-SRC="${SOURCE_PATH:-pipeline/sources/$SLUG.js}"
+SRC="${SOURCE_PATH:-extension/pipeline/sources/$SLUG.js}"
 CASE_FILE="test/extractors/custom/$CASE_NAME.json"
 
 # This workflow is triggered by an `issues` event, so the checkout lands on the

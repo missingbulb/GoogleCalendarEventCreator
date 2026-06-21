@@ -12,13 +12,16 @@ const path = require("node:path");
 const { computeLoadOrder, render, OUTPUT } = require("../../tools/index");
 
 const ROOT = path.join(__dirname, "..", "..");
+// OUTPUT is relative to the extension root (extension/), where the generated
+// load list is committed alongside the pipeline it lists.
+const EXT = path.join(ROOT, "extension");
 
 test("the committed load order matches `npm run index`", () => {
-  const committed = fs.readFileSync(path.join(ROOT, OUTPUT), "utf8");
+  const committed = fs.readFileSync(path.join(EXT, OUTPUT), "utf8");
   assert.equal(
     committed,
     render(computeLoadOrder()),
-    "pipeline/load-order.generated.json is stale — run `npm run index` and commit it"
+    "extension/pipeline/load-order.generated.json is stale — run `npm run index` and commit it"
   );
 });
 

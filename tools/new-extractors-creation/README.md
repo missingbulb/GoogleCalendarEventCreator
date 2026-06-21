@@ -2,7 +2,7 @@
 
 Everything for the three-stage flow that turns an `extractor-request` issue into a
 PR — gathered here so the pipeline reads as one unit. It runs in **two modes**: a
-new host gets a brand-new `pipeline/sources/<site>.js` (**new-source mode**); an
+new host gets a brand-new `extension/pipeline/sources/<site>.js` (**new-source mode**); an
 already-supported host instead gets a fresh integration case added to its existing
 source (**add-a-case mode**), hardening it against a second real page. The flow is a
 label relay: the **prepare** workflow hands off to a Claude Code on the web routine
@@ -35,10 +35,10 @@ workflow via `extractor-agent-done`. **Full reference:
     regex from the URL (used by `plan-names.js`).
   - `derive-names.js` — the finalize workflow's re-derivation of those mode-aware
     names from the issue (its event payload has no branch), via `plan-names.js`.
-  - `scaffold-source.js` — write the `pipeline/sources/<slug>.js` stub (with
+  - `scaffold-source.js` — write the `extension/pipeline/sources/<slug>.js` stub (with
     `matches()` filled). New-source mode only.
   - `scaffold-case.js` — write the empty placeholder `test/extractors/custom/<caseName>.json`.
-  - `add-supported-domain.js` — register the host in `pipeline/fallback-lists.json`.
+  - `add-supported-domain.js` — register the host in `extension/pipeline/fallback-lists.json`.
     New-source mode only.
   - `case-quality.js` — the finalize workflow's quality floor (`empty` /
     `degenerate` / `ok`) over the agent's case.
@@ -62,8 +62,8 @@ folder:
   factored out.
 
 Shared infrastructure stays where it's shared — this pipeline consumes it, it
-doesn't own it: `data/fetch-page.js` (also used by `refresh-cache`), `config.js` /
-`fallback-policy.js` (the popup's host classifier), and `tools/index.js`
+doesn't own it: `data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
+`extension/fallback-policy.js` (the popup's host classifier), and `tools/index.js`
 (`npm run index`).
 
 The pure functions here are unit-tested from `test/unit/` (`extractor-naming`,

@@ -12,7 +12,7 @@ const { pathToFileURL } = require("node:url");
 let buildCalendarUrl, formatDatesParam;
 before(async () => {
   ({ buildCalendarUrl, formatDatesParam } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "pipeline", "build-calendar-url.js"))
   ));
 });
 const TAB = { title: "Tab Title", url: "https://example.com/events/picnic", index: 0 };

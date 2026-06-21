@@ -1,15 +1,15 @@
 name: Create Release Package
 
 # Builds and publishes a GitHub Release of the extension at the version that is
-# currently committed in manifest.json. It does NOT change the version — bumping
+# currently committed in extension/manifest.json. It does NOT change the version — bumping
 # is a deliberate, human step (ask Claude to "bump version"; it edits
-# manifest.json/package.json on a branch and lands on main via a normal PR — see
+# extension/manifest.json/package.json on a branch and lands on main via a normal PR — see
 # docs/claude/workflow.md).
 #
 # It runs automatically when a version bump merges to main (a push to main that
-# touches manifest.json), so cutting a release is just "merge the bump PR". If
+# touches extension/manifest.json), so cutting a release is just "merge the bump PR". If
 # that version already matches the latest published release, the run is a clean
-# no-op — so manifest.json edits that aren't version bumps don't cut a release.
+# no-op — so extension/manifest.json edits that aren't version bumps don't cut a release.
 # It's also runnable from the Actions tab.
 #
 # Pushing to the Chrome Web Store is the one remaining manual step (the "Publish
@@ -20,7 +20,7 @@ on:
     branches:
       - main
     paths:
-      - manifest.json
+      - extension/manifest.json
 
 permissions:
   contents: write
@@ -39,26 +39,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # The version to release is whatever's committed in manifest.json (the
+      # The version to release is whatever's committed in extension/manifest.json (the
       # store's source of truth, kept in sync with package.json). When it already
       # matches the latest published release (or a matching tag exists), there's
       # nothing to release: skip cleanly (release=false) rather than fail, so a
-      # non-bump manifest.json change doesn't turn the run red. A drift between
-      # manifest.json and package.json, or a malformed version, is a real mistake
+      # non-bump extension/manifest.json change doesn't turn the run red. A drift between
+      # extension/manifest.json and package.json, or a malformed version, is a real mistake
       # and fails the run.
       - name: Resolve and guard version
         id: version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          version="$(node -p "require('./manifest.json').version")"
+          version="$(node -p "require('./extension/manifest.json').version")"
           if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "manifest.json version '$version' is not X.Y.Z." >&2
+            echo "extension/manifest.json version '$version' is not X.Y.Z." >&2
             exit 1
           fi
           pkg_version="$(node -p "require('./package.json').version")"
           if [ "$pkg_version" != "$version" ]; then
-            echo "package.json ($pkg_version) and manifest.json ($version) disagree — bump both together." >&2
+            echo "package.json ($pkg_version) and extension/manifest.json ($version) disagree — bump both together." >&2
             exit 1
           fi
           latest="$(gh release view --json tagName -q .tagName 2>/dev/null | sed 's/^v//' || true)"

@@ -63,11 +63,11 @@ if (require.main === module) {
     console.error(`scaffold-source: no usable slug from URL ${JSON.stringify(url)}`);
     process.exit(1);
   }
-  const dest = path.join(__dirname, "..", "..", "pipeline", "sources", `${slug}.js`);
+  const dest = path.join(__dirname, "..", "..", "extension", "pipeline", "sources", `${slug}.js`);
   if (fs.existsSync(dest)) {
     console.error(`scaffold-source: ${dest} already exists — refusing to overwrite`);
     process.exit(1);
   }
   fs.writeFileSync(dest, sourceStub(url));
-  console.log(`scaffold-source: wrote pipeline/sources/${slug}.js`);
+  console.log(`scaffold-source: wrote extension/pipeline/sources/${slug}.js`);
 }

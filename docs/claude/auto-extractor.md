@@ -5,7 +5,7 @@ New site extractors are implemented automatically when an issue labelled
 triage from whether the host already has a source:
 
 - **new-source mode** — no source matches the host yet: scaffold a brand-new
-  `pipeline/sources/<slug>.js` and fill its `extract()` + case.
+  `extension/pipeline/sources/<slug>.js` and fill its `extract()` + case.
 - **add-a-case mode** (the host is already **supported**) — instead of closing the
   request, add a fresh integration case for the submitted page to the **existing**
   source, hardening it against a second real page; the agent edits that source only
@@ -48,7 +48,7 @@ other fields (name, time, location, …) are optional context the agent can use 
 sanity-check its extraction.
 
 This is the **same form the extension's popup opens** from its "Request support
-for this site" button (`ui/views/source-request-view.js`), so an end-user request
+for this site" button (`extension/ui/views/source-request-view.js`), so an end-user request
 flows straight into the pipeline.
 
 You can also trigger it on any existing issue by adding the `extractor-request`
@@ -86,8 +86,8 @@ stay put and refer back to the folder:
   can't be relocated or factored out.
 
 Shared infrastructure the scripts lean on stays where it's shared, **not** in the
-folder: `data/fetch-page.js` (also used by `refresh-cache`), `config.js` /
-`fallback-policy.js` (the popup's host classifier), and `tools/index.js`
+folder: `data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
+`extension/fallback-policy.js` (the popup's host classifier), and `tools/index.js`
 (`npm run index`, run by every source addition). The pipeline *consumes* these; it
 doesn't own them.
 
@@ -110,7 +110,7 @@ doesn't own them.
      the **file** to harden — which the slug can't (`cinema.co.il` →
      `telavivcinematheque.js`). Supported beats the allow/deny/sample checks below;
    - **deny** / **allow** *(close)* — the host is on the fallback denylist/allowlist
-     (the same `classifyHost` the popup uses, via `fallback-policy.js`);
+     (the same `classifyHost` the popup uses, via `extension/fallback-policy.js`);
    - **sample** — another **open** `extractor-request` issue already targets
      this host (lowest issue number wins; a prior step gathers the open peers with
      `gh` and passes them in, so the script stays offline). The newer request's
@@ -161,7 +161,7 @@ doesn't own them.
    branches `<branch>` off `main`; records the page inline (`data/<caseName>.url` +
    the empty `.html` signal → `npm run refresh`, rendering an SPA shell via headless
    Chrome when `data/spa-shell.js` flags one, asserted non-empty); then, **in
-   new-source mode**, scaffolds `pipeline/sources/<slug>.js` with `matches()` filled
+   new-source mode**, scaffolds `extension/pipeline/sources/<slug>.js` with `matches()` filled
    (`scaffold-source.js`) + the placeholder case (`scaffold-case.js`), registers the
    host in `supportedDomains` (`add-supported-domain.js`), and runs `npm run index`;
    **in add-a-case mode** it scaffolds *only* the placeholder case for the existing
@@ -207,7 +207,7 @@ then re-labels:
 The two-file surface is a *containment guarantee*, not just an instruction, but the
 guarantee is enforced by Stage 3 (the finalize workflow), not the agent — see
 below. The prompt tells the agent to inline any helper logic into its own source
-IIFE, as `meetup.js` does, rather than touch `pipeline/helpers/`.
+IIFE, as `meetup.js` does, rather than touch `extension/pipeline/helpers/`.
 
 ## Stage 3 — the finalize workflow (Phase 2)
 
@@ -336,7 +336,7 @@ In any of these, fall back to the manual process in
 ## Review gate
 
 The agent never merges the PR. A human must review:
-- **new-source mode:** the extractor logic in `pipeline/sources/<slug>.js`, the
+- **new-source mode:** the extractor logic in `extension/pipeline/sources/<slug>.js`, the
   extracted values in `test/extractors/custom/<case-name>.json`, and that
   `matches(host)` is correct for the target domain.
 - **add-a-case mode:** the extracted values in the new

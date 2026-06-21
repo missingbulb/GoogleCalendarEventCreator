@@ -89,7 +89,7 @@ function skipMessage(reason, { host, duplicateOf }) {
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
         `fallback **denylist** — we deliberately don't extract events there, so a custom source ` +
         `won't be added.\n\n` +
-        `See the host classifier in \`config.js\` and the policy in \`docs/extraction-policy.md\`. ` +
+        `See the host classifier in \`extension/config.js\` and the policy in \`docs/extraction-policy.md\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
       );
     case "allow":
@@ -97,7 +97,7 @@ function skipMessage(reason, { host, duplicateOf }) {
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
         `fallback **allowlist** — the generic extractor already handles it, so a custom source ` +
         `isn't needed.\n\n` +
-        `See the host classifier in \`config.js\` and the policy in \`docs/extraction-policy.md\`. ` +
+        `See the host classifier in \`extension/config.js\` and the policy in \`docs/extraction-policy.md\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
       );
     case "sample":
@@ -114,12 +114,12 @@ function skipMessage(reason, { host, duplicateOf }) {
 }
 
 // Decide how a request should be handled, and why. `lists` defaults (via
-// fallback-policy.js) to the shipped config; tests pass their own. `openRequests`
-// is the array of OTHER open extractor-request issues (for the duplicate check);
-// omit it to skip that check.
+// extension/fallback-policy.js) to the shipped config; tests pass their own.
+// `openRequests` is the array of OTHER open extractor-request issues (for the
+// duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
   const { classifyHost } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "fallback-policy.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "fallback-policy.js"))
   );
 
   const url = firstUrl(body) || firstUrl(title);

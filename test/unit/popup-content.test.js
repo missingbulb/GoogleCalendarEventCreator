@@ -35,10 +35,10 @@ const { pathToFileURL } = require("node:url");
 let chooseContent, classifyHost, isPresentableFallbackEvent;
 before(async () => {
   ({ chooseContent } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "ui", "popup.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "ui", "popup.js"))
   ));
   ({ classifyHost, isPresentableFallbackEvent } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "fallback-policy.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "fallback-policy.js"))
   ));
 });
 

@@ -79,7 +79,7 @@ const DATA_DIR = path.join(__dirname, "..", "..", "data");
 let buildCalendarUrl;
 before(async () => {
   ({ buildCalendarUrl } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "pipeline", "build-calendar-url.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "pipeline", "build-calendar-url.js"))
   ));
 });
 

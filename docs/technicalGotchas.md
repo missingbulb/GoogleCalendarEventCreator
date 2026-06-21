@@ -43,7 +43,8 @@ engineering practices in [engineeringPractices.md](claude/shared/engineeringPrac
   sandbox/CI default parses floating times as UTC, so a unit test there won't
   surface the shift — it only shows in a positive-offset locale.
 - **Service-worker paths must be extension-root absolute.** The background service
-  worker runs from `ui/toolbar-icon.js`, so any path it hands a Chrome API
+  worker runs from `ui/toolbar-icon.js` (relative to the extension root,
+  `extension/`), so any path it hands a Chrome API
   (`importScripts`, `action.setIcon`) or `fetch` must be extension-root absolute —
   a leading slash or `chrome.runtime.getURL(...)`. A bare relative path
   (`icons/...`, `pipeline/...`) resolves against `ui/` and silently fails: the
@@ -101,7 +102,7 @@ engineering practices in [engineeringPractices.md](claude/shared/engineeringPrac
 - **Google Calendar renders the event `details` field as HTML, not Markdown.**
   Text placed in the `details` URL parameter is HTML: a bare `**bold**` shows
   literal asterisks and a bare URL is auto-linked (so it needs no `<a>`).
-  `pipeline/build-calendar-url.js` translates the Markdown that survives
+  `extension/pipeline/build-calendar-url.js` translates the Markdown that survives
   extraction (Meetup / JSON-LD descriptions) into HTML for exactly this reason.
   (#91, #102)
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
@@ -150,7 +151,7 @@ engineering practices in [engineeringPractices.md](claude/shared/engineeringPrac
   GitHub's docs are explicit that query params "fill custom text fields" in issue
   forms; a `?field-id=value` for a dropdown or checkbox is silently ignored (no
   error, the control just keeps its default). So the popup's "Suggest Correction"
-  link (`ui/views/source-request-view.js`, prefilling
+  link (`extension/ui/views/source-request-view.js`, prefilling
   `.github/ISSUE_TEMPLATE/extractor-request.yml`) can only seed text inputs — a
   single-vs-multiple signal had to be a plain text count field, not the nicer
   checkbox/dropdown control, to be prefillable from the popup's detection.

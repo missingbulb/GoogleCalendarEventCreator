@@ -105,7 +105,7 @@ way).
 ### Fallback-coverage gate — how the generic extractor stacks up
 
 **`test/extractors/fallback/fallback-coverage.test.js`** (part of `test:live`) measures
-what the generic **fallback** extractor (`pipeline/extract-unsupported.js`)
+what the generic **fallback** extractor (`extension/pipeline/extract-unsupported.js`)
 recovers on each cached case page, relative to that page's **dedicated source**
 — the reviewed-correct ground truth. The comparison logic lives in
 **`test/extractors/fallback/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
@@ -167,7 +167,7 @@ from facebook.com, so it can't be cached as a live case.
 **`test/ui/popup-snapshots.test.js`** renders each UI *case* and compares it
 pixel-by-pixel (via `pixelmatch`) against a committed image. Crucially, the
 rendered DOM is the popup's **real output**: a case supplies only fake data, and
-the renderer feeds it to `ui/popup.js`'s exported `render({ data, tab, listing })`
+the renderer feeds it to `extension/ui/popup.js`'s exported `render({ data, tab, listing })`
 — the same `chooseContent` + `events-view.js`/`source-request-view.js` code the
 extension runs. There is no hand-copied markup to drift, so a change to a view is
 caught automatically. (`render()` is split out of `init()` for exactly this: init
@@ -190,7 +190,7 @@ to its end so the bottom-anchored count label is painted).
 
 `test/ui/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
 browser). satori has no CSS engine, so the renderer folds the **real
-`ui/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
+`extension/ui/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
 with jsdom, inline every declaration) — one source of truth for the styling, no
 duplicated values. Nothing is cherry-picked: satori ignores what it doesn't use;
 the only adjustments are its one structural rule (a box with element children
@@ -210,8 +210,8 @@ Rendering is deterministic, so this is fast and dependency-light enough to run
 as part of `npm test`/`test:ui` everywhere, with no separate CI job or browser
 install step.
 
-After an intentional change to the popup — its views (`ui/popup.js`,
-`ui/views/*.js`) or its styling (`ui/popup.css`) — run `npm run refresh:ui` to
+After an intentional change to the popup — its views (`extension/ui/popup.js`,
+`extension/ui/views/*.js`) or its styling (`extension/ui/popup.css`) — run `npm run refresh:ui` to
 regenerate the `test/ui/cases/*.png` images and commit them so reviewers see the
 before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
 `<name>.diff.png` to `test/ui/.artifacts/` (gitignored; see

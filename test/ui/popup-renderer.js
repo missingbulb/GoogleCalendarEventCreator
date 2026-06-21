@@ -50,8 +50,8 @@ const WIDTH = 304;
 // cases all use 2026 dates, so 2026 keeps them pill-free.
 const REFERENCE_YEAR = 2026;
 
-const POPUP_CSS = fs.readFileSync(path.join(ROOT, "ui", "popup.css"), "utf8");
-const POPUP_HTML = fs.readFileSync(path.join(ROOT, "ui", "popup.html"), "utf8");
+const POPUP_CSS = fs.readFileSync(path.join(ROOT, "extension", "ui", "popup.css"), "utf8");
+const POPUP_HTML = fs.readFileSync(path.join(ROOT, "extension", "ui", "popup.html"), "utf8");
 const { loadCases, CASES_DIR } = require("./cases");
 
 // Stub tab the cases render against. Only the calendar-URL/link hrefs read it
@@ -65,7 +65,7 @@ const DEFAULT_TAB = { url: "https://example.com/events", title: "Example event p
 let renderPromise;
 function loadRender() {
   if (!renderPromise) {
-    renderPromise = import(pathToFileURL(path.join(ROOT, "ui", "popup.js")).href).then((m) => m.render);
+    renderPromise = import(pathToFileURL(path.join(ROOT, "extension", "ui", "popup.js")).href).then((m) => m.render);
   }
   return renderPromise;
 }

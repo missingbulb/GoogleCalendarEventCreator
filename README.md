@@ -29,11 +29,13 @@ Grab the packaged extension — just the files that ship, not the whole repo:
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
    [Create Release Package workflow](docs/releasing.md#creating-a-release-package)) and extract
-   it. It unpacks into a folder containing `manifest.json`. As a secondary
+   it. It unpacks into a folder containing `manifest.json` — that folder is the
+   one to load. As a secondary
    option, download
    [the repo as a zip](https://github.com/missingbulb/GoogleCalendarEventCreator/archive/refs/heads/main.zip)
-   and extract it — the `manifest.json` for **Load unpacked** lives at the top
-   of the extracted folder.
+   and extract it — here the deployable extension lives in the **`extension/`**
+   subfolder (that's the one with `manifest.json` at its top), so load that
+   subfolder, not the repo root.
 2. Open `chrome://extensions` in Chrome.
 3. Enable **Developer mode** (top right).
 4. Click **Load unpacked** and select the extracted folder (the one
@@ -46,8 +48,10 @@ folder, and click the refresh icon on the extension's card in
 
 If you're **working on the extension**, clone the repo instead
 (`git clone https://github.com/missingbulb/GoogleCalendarEventCreator.git`) and
-**Load unpacked** the working tree directly — or run `npm run build` to produce
-the very same `dist/google-calendar-event-creator.zip` the release serves.
+**Load unpacked** the **`extension/`** subfolder of the working tree (that's the
+extension root — everything else in the repo is tests, fixtures, and tooling) —
+or run `npm run build` to produce the very same
+`dist/google-calendar-event-creator.zip` the release serves.
 
 ## Use
 
@@ -69,7 +73,7 @@ See [PRIVACY.md](PRIVACY.md) for the full policy.
 click the button on it, and sends nothing anywhere — it just opens a Google
 Calendar URL in a new tab.
 
-`declarativeContent`: lets `ui/toolbar-icon.js` ask the **browser** to show a
+`declarativeContent`: lets `extension/ui/toolbar-icon.js` ask the **browser** to show a
 green toolbar icon on pages with a site-specific extractor (e.g. meetup.com), a
 gray icon on unsupported "news"-type sites, and the default blue icon elsewhere
 — matched by host pattern inside Chrome. The extension never reads your tabs'

@@ -4,8 +4,8 @@ Refs #35
 
 This is a review of the extension's attack surface, trust boundaries, and
 known risks as of the current `main`. It covers the runtime extension code
-(`manifest.json`, the `ui/` popup + service worker, and the `pipeline/`
-extraction files) and, briefly, the repository's dev/CI tooling.
+(`extension/manifest.json`, the `extension/ui/` popup + service worker, and the
+`extension/pipeline/` extraction files) and, briefly, the repository's dev/CI tooling.
 
 ## 1. Summary
 
@@ -43,7 +43,8 @@ There are now two independent flows:
 ```
 A) Toolbar icon coloring (declarative; the browser matches, the extension never
    reads any tab URL)
-   ui/toolbar-icon.js (the manifest's background.service_worker)
+   ui/toolbar-icon.js (the manifest's background.service_worker; paths here are
+   relative to the extension root, extension/)
      -> on runtime.onInstalled / onStartup, registers chrome.declarativeContent
         rules from pipeline/fallback-lists.json (supported/denied host patterns)
      -> the BROWSER matches a tab's URL against those patterns and swaps the
@@ -78,11 +79,11 @@ all dynamic values passed through `URLSearchParams`, which percent-encodes them)
 
 ### 3.1 `declarativeContent` icon coloring (no tab-URL access) (Low)
 
-`manifest.json` requests `"permissions": ["activeTab", "scripting",
-"declarativeContent"]`. The background service worker (`ui/toolbar-icon.js`)
+`extension/manifest.json` requests `"permissions": ["activeTab", "scripting",
+"declarativeContent"]`. The background service worker (`extension/ui/toolbar-icon.js`)
 registers `chrome.declarativeContent.onPageChanged` rules at
 `runtime.onInstalled`/`onStartup`, built from the supported/denied host patterns
-in `pipeline/fallback-lists.json`. The **browser** evaluates those rules against
+in `extension/pipeline/fallback-lists.json`. The **browser** evaluates those rules against
 each page's URL and swaps the toolbar icon; the extension's own code never reads
 `tab.url`.
 
@@ -256,7 +257,7 @@ the rest of the test suite and doesn't add new fetch targets.
 
 ### 3.9 Permissions & supply chain (Informational)
 
-- `manifest.json` requests `activeTab`, `scripting`, and `declarativeContent`
+- `extension/manifest.json` requests `activeTab`, `scripting`, and `declarativeContent`
   (see 3.1). No `tabs`, no `host_permissions`, no `content_scripts`, no
   `storage`, no remote code.
 - The only dependency (`jsdom`) is a `devDependency` used solely by the test

@@ -4,7 +4,7 @@ What the extension does, described as user-facing behavior — independent of ho
 it's built (that's [highLevelDesign.md](highLevelDesign.md) and the per-file map
 in [fileDescriptions.md](fileDescriptions.md)). The tunable values called out
 below (default duration, the events cap, fallback copy, the host allow/denylist)
-live in `config.js`.
+live in `extension/config.js`.
 
 This file is a **rough, feature-level description**. The **specific, numbered UI
 requirements** for the popup — exact text, layout, colors, card structure, the
