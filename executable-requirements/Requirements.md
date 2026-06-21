@@ -30,16 +30,19 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > that.
 
 **Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). Each
-leaf has exactly one case named `req-<id>.case.js`, so a case and the requirement it
-pins are cross-checked by number. Add new requirements with new numbers; don't
-renumber or reuse existing ones.
+leaf has exactly one case named `<slug>.<id>.case.js`, where `<slug>` is the
+section's component/feature name (e.g. `event-cards-appearance`) and `<id>` is the
+leaf number (`event-cards-appearance.5.6.1.case.js`), so a case and the requirement
+it pins are cross-checked by number. Keying on the section's name (not a bare
+`req-<id>`) means renumbering or retitling a section doesn't force a mass rename.
+Add new requirements with new numbers; don't renumber or reuse existing ones.
 
 **How each leaf is verified is declared by its CASE, not tagged here.** The spec is
-just numbered prose; each leaf's `req-<id>.case.js` declares how it's verified via
+just numbered prose; each leaf's `<slug>.<id>.case.js` declares how it's verified via
 its own `kind` (default `"popup"`) — and `executable-requirements/infrastructure/render-snapshot.js` dispatches on
 it:
 
-- `"popup"` / `"icon"` — an **image** leaf, pinned by a `req-<id>.png` snapshot in
+- `"popup"` / `"icon"` — an **image** leaf, pinned by a `<slug>.<id>.png` snapshot in
   the **two-column table** below (image left, requirement right). `"popup"` is the
   popup's real `render()`; `"icon"` is the real `extension/ui/toolbar-icon.js` in a fake
   browser (the toolbar icon, §10).
@@ -71,7 +74,7 @@ unlisted) and *when* each occurs are defined in
 <tr>
 <td valign="top" width="320">
 
-![req-1.1](ui/cases/req-1.1.png) <!-- req-gallery:1.1 -->
+![heading.1.1](ui/cases/heading.1.1.png) <!-- req-gallery:1.1 -->
 
 </td>
 <td valign="top">
@@ -86,7 +89,7 @@ unlisted) and *when* each occurs are defined in
 <tr>
 <td valign="top" width="320">
 
-![req-1.2](ui/cases/req-1.2.png) <!-- req-gallery:1.2 -->
+![heading.1.2](ui/cases/heading.1.2.png) <!-- req-gallery:1.2 -->
 
 </td>
 <td valign="top">
@@ -102,7 +105,7 @@ Calendar"**.
 <tr>
 <td valign="top" width="320">
 
-![req-1.3](ui/cases/req-1.3.png) <!-- req-gallery:1.3 -->
+![heading.1.3](ui/cases/heading.1.3.png) <!-- req-gallery:1.3 -->
 
 </td>
 <td valign="top">
@@ -121,7 +124,7 @@ page"**.
 <tr>
 <td valign="top" width="320">
 
-![req-2.1](ui/cases/req-2.1.png) <!-- req-gallery:2.1 -->
+![empty-state.2.1](ui/cases/empty-state.2.1.png) <!-- req-gallery:2.1 -->
 
 </td>
 <td valign="top">
@@ -138,7 +141,7 @@ generous vertical spacing — so the popup has a "face" rather than a bare line.
 <tr>
 <td valign="top" width="320">
 
-![req-2.2](ui/cases/req-2.2.png) <!-- req-gallery:2.2 -->
+![empty-state.2.2](ui/cases/empty-state.2.2.png) <!-- req-gallery:2.2 -->
 
 </td>
 <td valign="top">
@@ -154,7 +157,7 @@ generous vertical spacing — so the popup has a "face" rather than a bare line.
 <tr>
 <td valign="top" width="320">
 
-![req-2.3](ui/cases/req-2.3.png) <!-- req-gallery:2.3 -->
+![empty-state.2.3](ui/cases/empty-state.2.3.png) <!-- req-gallery:2.3 -->
 
 </td>
 <td valign="top">
@@ -173,7 +176,7 @@ found no events, the glyph stands **alone** — no link beneath it.
 <tr>
 <td valign="top" width="320">
 
-![req-3.1](ui/cases/req-3.1.png) <!-- req-gallery:3.1 -->
+![affordance-links.3.1](ui/cases/affordance-links.3.1.png) <!-- req-gallery:3.1 -->
 
 </td>
 <td valign="top">
@@ -193,7 +196,7 @@ issue form itself is out of scope — see productRequirements).
 <tr>
 <td valign="top" width="320">
 
-![req-3.2](ui/cases/req-3.2.png) <!-- req-gallery:3.2 -->
+![affordance-links.3.2](ui/cases/affordance-links.3.2.png) <!-- req-gallery:3.2 -->
 
 </td>
 <td valign="top">
@@ -210,7 +213,7 @@ doc.
 <tr>
 <td valign="top" width="320">
 
-![req-3.3](ui/cases/req-3.3.png) <!-- req-gallery:3.3 -->
+![affordance-links.3.3](ui/cases/affordance-links.3.3.png) <!-- req-gallery:3.3 -->
 
 </td>
 <td valign="top">
@@ -245,7 +248,7 @@ current one) and closes the popup.
 <tr>
 <td valign="top" width="320">
 
-![req-4.1](ui/cases/req-4.1.png) <!-- req-gallery:4.1 -->
+![event-cards-grouping.4.1](ui/cases/event-cards-grouping.4.1.png) <!-- req-gallery:4.1 -->
 
 </td>
 <td valign="top">
@@ -264,7 +267,7 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-![req-4.2.1](ui/cases/req-4.2.1.png) <!-- req-gallery:4.2.1 -->
+![event-cards-grouping.4.2.1](ui/cases/event-cards-grouping.4.2.1.png) <!-- req-gallery:4.2.1 -->
 
 </td>
 <td valign="top">
@@ -279,7 +282,7 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-![req-4.2.2](ui/cases/req-4.2.2.png) <!-- req-gallery:4.2.2 -->
+![event-cards-grouping.4.2.2](ui/cases/event-cards-grouping.4.2.2.png) <!-- req-gallery:4.2.2 -->
 
 </td>
 <td valign="top">
@@ -294,7 +297,7 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![req-4.2.3](ui/cases/req-4.2.3.png) <!-- req-gallery:4.2.3 -->
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.2.3](ui/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
 
 </td>
 <td valign="top">
@@ -313,7 +316,7 @@ also surface in the later month is **to be decided**.
 <tr>
 <td valign="top" width="320">
 
-![req-4.3](ui/cases/req-4.3.png) <!-- req-gallery:4.3 -->
+![event-cards-grouping.4.3](ui/cases/event-cards-grouping.4.3.png) <!-- req-gallery:4.3 -->
 
 </td>
 <td valign="top">
@@ -330,7 +333,7 @@ ones — a run is never collapsed into a single spanning event.
 <tr>
 <td valign="top" width="320">
 
-![req-4.4](ui/cases/req-4.4.png) <!-- req-gallery:4.4 -->
+![event-cards-grouping.4.4](ui/cases/event-cards-grouping.4.4.png) <!-- req-gallery:4.4 -->
 
 </td>
 <td valign="top">
@@ -349,7 +352,7 @@ isn't capturable by the static renderer — see note below the gallery.)
 <tr>
 <td valign="top" width="320">
 
-![req-4.5](ui/cases/req-4.5.png) <!-- req-gallery:4.5 -->
+![event-cards-grouping.4.5](ui/cases/event-cards-grouping.4.5.png) <!-- req-gallery:4.5 -->
 
 </td>
 <td valign="top">
@@ -366,7 +369,7 @@ showings are told apart by their time (→ `5.3`).
 <tr>
 <td valign="top" width="320">
 
-![req-4.6](ui/cases/req-4.6.png) <!-- req-gallery:4.6 -->
+![event-cards-grouping.4.6](ui/cases/event-cards-grouping.4.6.png) <!-- req-gallery:4.6 -->
 
 </td>
 <td valign="top">
@@ -383,7 +386,7 @@ button per showing**. A month with a single showing is a single card (→ `4.4`)
 <tr>
 <td valign="top" width="320">
 
-![req-4.7](ui/cases/req-4.7.png) <!-- req-gallery:4.7 -->
+![event-cards-grouping.4.7](ui/cases/event-cards-grouping.4.7.png) <!-- req-gallery:4.7 -->
 
 </td>
 <td valign="top">
@@ -399,7 +402,7 @@ buttons (→ `5`) are its calendar visuals.
 <tr>
 <td valign="top" width="320">
 
-![req-4.8](ui/cases/req-4.8.png) <!-- req-gallery:4.8 -->
+![event-cards-grouping.4.8](ui/cases/event-cards-grouping.4.8.png) <!-- req-gallery:4.8 -->
 
 </td>
 <td valign="top">
@@ -419,7 +422,7 @@ multi-month span *should* show a range is the open question in `4.10`.)
 <tr>
 <td valign="top" width="320">
 
-![req-4.9](ui/cases/req-4.9.png) <!-- req-gallery:4.9 -->
+![event-cards-grouping.4.9](ui/cases/event-cards-grouping.4.9.png) <!-- req-gallery:4.9 -->
 
 </td>
 <td valign="top">
@@ -438,7 +441,7 @@ order.)
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![req-4.10](ui/cases/req-4.10.png) <!-- req-gallery:4.10 -->
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.10](ui/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
 
 </td>
 <td valign="top">
@@ -459,7 +462,7 @@ long or multi-month span should instead show a **date range** on the calendar ch
 <tr>
 <td valign="top" width="320">
 
-![req-5.1](ui/cases/req-5.1.png) <!-- req-gallery:5.1 -->
+![event-cards-appearance.5.1](ui/cases/event-cards-appearance.5.1.png) <!-- req-gallery:5.1 -->
 
 </td>
 <td valign="top">
@@ -477,7 +480,7 @@ of a grouped card's instance buttons.
 <tr>
 <td valign="top" width="320">
 
-![req-5.2](ui/cases/req-5.2.png) <!-- req-gallery:5.2 -->
+![event-cards-appearance.5.2](ui/cases/event-cards-appearance.5.2.png) <!-- req-gallery:5.2 -->
 
 </td>
 <td valign="top">
@@ -497,7 +500,7 @@ as a single card's left indicator and as a month card's per-day buttons.
 <tr>
 <td valign="top" width="320">
 
-![req-5.3.1](ui/cases/req-5.3.1.png) <!-- req-gallery:5.3.1 -->
+![event-cards-appearance.5.3.1](ui/cases/event-cards-appearance.5.3.1.png) <!-- req-gallery:5.3.1 -->
 
 </td>
 <td valign="top">
@@ -512,7 +515,7 @@ as a single card's left indicator and as a month card's per-day buttons.
 <tr>
 <td valign="top" width="320">
 
-![req-5.3.2](ui/cases/req-5.3.2.png) <!-- req-gallery:5.3.2 -->
+![event-cards-appearance.5.3.2](ui/cases/event-cards-appearance.5.3.2.png) <!-- req-gallery:5.3.2 -->
 
 </td>
 <td valign="top">
@@ -528,7 +531,7 @@ the button (e.g. JUN 19 / 4:30 PM – 6:18 PM).
 <tr>
 <td valign="top" width="320">
 
-![req-5.4](ui/cases/req-5.4.png) <!-- req-gallery:5.4 -->
+![event-cards-appearance.5.4](ui/cases/event-cards-appearance.5.4.png) <!-- req-gallery:5.4 -->
 
 </td>
 <td valign="top">
@@ -545,7 +548,7 @@ chevron** as the resting cue that the card itself is the button.
 <tr>
 <td valign="top" width="320">
 
-![req-5.5](ui/cases/req-5.5.png) <!-- req-gallery:5.5 -->
+![event-cards-appearance.5.5](ui/cases/event-cards-appearance.5.5.png) <!-- req-gallery:5.5 -->
 
 </td>
 <td valign="top">
@@ -565,7 +568,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![req-5.6.1](ui/cases/req-5.6.1.png) <!-- req-gallery:5.6.1 -->
+![event-cards-appearance.5.6.1](ui/cases/event-cards-appearance.5.6.1.png) <!-- req-gallery:5.6.1 -->
 
 </td>
 <td valign="top">
@@ -580,7 +583,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![req-5.6.2](ui/cases/req-5.6.2.png) <!-- req-gallery:5.6.2 -->
+![event-cards-appearance.5.6.2](ui/cases/event-cards-appearance.5.6.2.png) <!-- req-gallery:5.6.2 -->
 
 </td>
 <td valign="top">
@@ -596,7 +599,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![req-5.6.3](ui/cases/req-5.6.3.png) <!-- req-gallery:5.6.3 -->
+![event-cards-appearance.5.6.3](ui/cases/event-cards-appearance.5.6.3.png) <!-- req-gallery:5.6.3 -->
 
 </td>
 <td valign="top">
@@ -613,7 +616,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![req-5.7.1](ui/cases/req-5.7.1.png) <!-- req-gallery:5.7.1 -->
+![event-cards-appearance.5.7.1](ui/cases/event-cards-appearance.5.7.1.png) <!-- req-gallery:5.7.1 -->
 
 </td>
 <td valign="top">
@@ -629,7 +632,7 @@ header line ("7 PM · &lt;location&gt;") and the buttons stay bare day chips.
 <tr>
 <td valign="top" width="320">
 
-![req-5.7.2](ui/cases/req-5.7.2.png) <!-- req-gallery:5.7.2 -->
+![event-cards-appearance.5.7.2](ui/cases/event-cards-appearance.5.7.2.png) <!-- req-gallery:5.7.2 -->
 
 </td>
 <td valign="top">
@@ -646,7 +649,7 @@ and the header is location-only.
 <tr>
 <td valign="top" width="320">
 
-![req-5.7.3](ui/cases/req-5.7.3.png) <!-- req-gallery:5.7.3 -->
+![event-cards-appearance.5.7.3](ui/cases/event-cards-appearance.5.7.3.png) <!-- req-gallery:5.7.3 -->
 
 </td>
 <td valign="top">
@@ -664,7 +667,7 @@ day" label beside the location, mirroring a single all-day card's line. (If only
 <tr>
 <td valign="top" width="320">
 
-![req-5.8](ui/cases/req-5.8.png) <!-- req-gallery:5.8 -->
+![event-cards-appearance.5.8](ui/cases/event-cards-appearance.5.8.png) <!-- req-gallery:5.8 -->
 
 </td>
 <td valign="top">
@@ -685,7 +688,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![req-6.1.1](ui/cases/req-6.1.1.png) <!-- req-gallery:6.1.1 -->
+![date-time-display.6.1.1](ui/cases/date-time-display.6.1.1.png) <!-- req-gallery:6.1.1 -->
 
 </td>
 <td valign="top">
@@ -700,7 +703,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![req-6.1.2](ui/cases/req-6.1.2.png) <!-- req-gallery:6.1.2 -->
+![date-time-display.6.1.2](ui/cases/date-time-display.6.1.2.png) <!-- req-gallery:6.1.2 -->
 
 </td>
 <td valign="top">
@@ -717,7 +720,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![req-6.2.1](ui/cases/req-6.2.1.png) <!-- req-gallery:6.2.1 -->
+![date-time-display.6.2.1](ui/cases/date-time-display.6.2.1.png) <!-- req-gallery:6.2.1 -->
 
 </td>
 <td valign="top">
@@ -733,7 +736,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![req-6.2.2](ui/cases/req-6.2.2.png) <!-- req-gallery:6.2.2 -->
+![date-time-display.6.2.2](ui/cases/date-time-display.6.2.2.png) <!-- req-gallery:6.2.2 -->
 
 </td>
 <td valign="top">
@@ -749,7 +752,7 @@ shown.
 <tr>
 <td valign="top" width="320">
 
-![req-6.3](ui/cases/req-6.3.png) <!-- req-gallery:6.3 -->
+![date-time-display.6.3](ui/cases/date-time-display.6.3.png) <!-- req-gallery:6.3 -->
 
 </td>
 <td valign="top">
@@ -764,7 +767,7 @@ shown.
 <tr>
 <td valign="top" width="320">
 
-![req-6.4](ui/cases/req-6.4.png) <!-- req-gallery:6.4 -->
+![date-time-display.6.4](ui/cases/date-time-display.6.4.png) <!-- req-gallery:6.4 -->
 
 </td>
 <td valign="top">
@@ -779,7 +782,7 @@ shown.
 <tr>
 <td valign="top" width="320">
 
-![req-6.5](ui/cases/req-6.5.png) <!-- req-gallery:6.5 -->
+![date-time-display.6.5](ui/cases/date-time-display.6.5.png) <!-- req-gallery:6.5 -->
 
 </td>
 <td valign="top">
@@ -795,7 +798,7 @@ the title and the time line.
 <tr>
 <td valign="top" width="320">
 
-![req-6.6](ui/cases/req-6.6.png) <!-- req-gallery:6.6 -->
+![date-time-display.6.6](ui/cases/date-time-display.6.6.png) <!-- req-gallery:6.6 -->
 
 </td>
 <td valign="top">
@@ -816,7 +819,7 @@ event — see productRequirements.)
 <tr>
 <td valign="top" width="320">
 
-![req-7.1](ui/cases/req-7.1.png) <!-- req-gallery:7.1 -->
+![list-overflow.7.1](ui/cases/list-overflow.7.1.png) <!-- req-gallery:7.1 -->
 
 </td>
 <td valign="top">
@@ -833,7 +836,7 @@ past that.
 <tr>
 <td valign="top" width="320">
 
-![req-7.2](ui/cases/req-7.2.png) <!-- req-gallery:7.2 -->
+![list-overflow.7.2](ui/cases/list-overflow.7.2.png) <!-- req-gallery:7.2 -->
 
 </td>
 <td valign="top">
@@ -849,7 +852,7 @@ it's a height limit); "show all" (→ `8.5`) expands to `maxCardsExpanded`.
 <tr>
 <td valign="top" width="320">
 
-![req-7.3](ui/cases/req-7.3.png) <!-- req-gallery:7.3 -->
+![list-overflow.7.3](ui/cases/list-overflow.7.3.png) <!-- req-gallery:7.3 -->
 
 </td>
 <td valign="top">
@@ -869,7 +872,7 @@ there's more in that direction. An edge with nothing beyond it shows no fade.
 <tr>
 <td valign="top" width="320">
 
-![req-8.1](ui/cases/req-8.1.png) <!-- req-gallery:8.1 -->
+![count-label.8.1](ui/cases/count-label.8.1.png) <!-- req-gallery:8.1 -->
 
 </td>
 <td valign="top">
@@ -885,7 +888,7 @@ scrolls with the cards, so it's seen only once scrolled to the end).
 <tr>
 <td valign="top" width="320">
 
-![req-8.2](ui/cases/req-8.2.png) <!-- req-gallery:8.2 -->
+![count-label.8.2](ui/cases/count-label.8.2.png) <!-- req-gallery:8.2 -->
 
 </td>
 <td valign="top">
@@ -901,7 +904,7 @@ so its numbers can exceed the card count.
 <tr>
 <td valign="top" width="320">
 
-![req-8.3](ui/cases/req-8.3.png) <!-- req-gallery:8.3 -->
+![count-label.8.3](ui/cases/count-label.8.3.png) <!-- req-gallery:8.3 -->
 
 </td>
 <td valign="top">
@@ -916,7 +919,7 @@ so its numbers can exceed the card count.
 <tr>
 <td valign="top" width="320">
 
-![req-8.4](ui/cases/req-8.4.png) <!-- req-gallery:8.4 -->
+![count-label.8.4](ui/cases/count-label.8.4.png) <!-- req-gallery:8.4 -->
 
 </td>
 <td valign="top">
@@ -932,7 +935,7 @@ showing**" — a scroll cue, with no "out of" and no link.
 <tr>
 <td valign="top" width="320">
 
-![req-8.5](ui/cases/req-8.5.png) <!-- req-gallery:8.5 -->
+![count-label.8.5](ui/cases/count-label.8.5.png) <!-- req-gallery:8.5 -->
 
 </td>
 <td valign="top">
@@ -949,7 +952,7 @@ expands the list to the `maxCardsExpanded` cap.
 <tr>
 <td valign="top" width="320">
 
-![req-8.6](ui/cases/req-8.6.png) <!-- req-gallery:8.6 -->
+![count-label.8.6](ui/cases/count-label.8.6.png) <!-- req-gallery:8.6 -->
 
 </td>
 <td valign="top">
@@ -965,7 +968,7 @@ expands the list to the `maxCardsExpanded` cap.
 <tr>
 <td valign="top" width="320">
 
-![req-8.7](ui/cases/req-8.7.png) <!-- req-gallery:8.7 -->
+![count-label.8.7](ui/cases/count-label.8.7.png) <!-- req-gallery:8.7 -->
 
 </td>
 <td valign="top">
@@ -1044,7 +1047,7 @@ real `extension/ui/toolbar-icon.js` in a fake browser rather than the popup (see
 <tr>
 <td valign="top" width="320">
 
-![req-10.1](ui/cases/req-10.1.png) <!-- req-gallery:10.1 -->
+![toolbar-icon.10.1](ui/cases/toolbar-icon.10.1.png) <!-- req-gallery:10.1 -->
 
 </td>
 <td valign="top">
@@ -1060,7 +1063,7 @@ list**), the icon is **green**.
 <tr>
 <td valign="top" width="320">
 
-![req-10.2](ui/cases/req-10.2.png) <!-- req-gallery:10.2 -->
+![toolbar-icon.10.2](ui/cases/toolbar-icon.10.2.png) <!-- req-gallery:10.2 -->
 
 </td>
 <td valign="top">
@@ -1076,7 +1079,7 @@ decided not to extract), the icon is **gray**.
 <tr>
 <td valign="top" width="320">
 
-![req-10.3](ui/cases/req-10.3.png) <!-- req-gallery:10.3 -->
+![toolbar-icon.10.3](ui/cases/toolbar-icon.10.3.png) <!-- req-gallery:10.3 -->
 
 </td>
 <td valign="top">

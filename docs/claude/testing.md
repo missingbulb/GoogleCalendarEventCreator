@@ -33,13 +33,13 @@ doc, when the mechanics change.
   same comparison the fallback-coverage gate automates — see below.)
 - **Every leaf is verified by exactly one CASE, which declares HOW (issue #429,
   #435).** The spec (`executable-requirements/Requirements.md`) is just numbered prose; it does NOT
-  tag how a leaf is verified. Each leaf has exactly one `req-<id>.case.js` (the
+  tag how a leaf is verified. Each leaf has exactly one `<slug>.<id>.case.js` (the
   *filename* is the link), and the **case** declares its `kind` (default `"popup"`)
   plus an optional `tbd` flag. `executable-requirements/infrastructure/render-snapshot.js` is the one dispatcher
   that turns a case into a PNG by its `kind` — so there is ONE visual-comparison
   system:
   - `kind: "popup"` (default) — an image leaf, the popup's real `render()` via
-    `executable-requirements/infrastructure/popup-renderer.js`, pinned by a `req-<id>.png` snapshot shown in a
+    `executable-requirements/infrastructure/popup-renderer.js`, pinned by a `<slug>.<id>.png` snapshot shown in a
     **two-column table** beside the requirement (image left, spec right) in
     `executable-requirements/Requirements.md` by `executable-requirements/infrastructure/build-requirements-gallery.js`.
   - `kind: "icon"` — an image leaf too, but rendered by the real
@@ -49,7 +49,7 @@ doc, when the mechanics change.
   - `kind: "behavior"` — a click/navigation a static image can't observe (e.g.
     `9.1`–`9.3`, `3.4`); the case carries NO image and is verified by
     `executable-requirements/ui/events-view-actions.test.js` (which self-asserts it covers exactly
-    the `kind: "behavior"` cases). A `req-<id>.png` for one is the #429 anti-pattern
+    the `kind: "behavior"` cases). A `<slug>.<id>.png` for one is the #429 anti-pattern
     and the gate rejects it.
   - `tbd: true` — an edge case whose behavior isn't decided yet (e.g. `4.2.3`,
     `4.10`); it still renders a provisional snapshot, shown under a "TO BE DECIDED"
@@ -72,7 +72,7 @@ doc, when the mechanics change.
   verified.
 - **An executable requirements test case declares HOW it's verified, with a default
   — never a parallel classifier.** When each numbered requirement is pinned by its
-  own executable case (`req-<id>.case.js`), the case carries its verification kind as
+  own executable case (`<slug>.<id>.case.js`), the case carries its verification kind as
   its own field (`kind`, defaulting to the common one, plus a flag like `tbd`) rather
   than the spec prose tagging it or a side manifest keyed by id. One source of truth
   means a case can't desync from its classifier, and it collapses parallel routing
@@ -122,8 +122,8 @@ commission-while-editing trap goes in the file's header comment rather than
   case are in `executable-requirements/infrastructure/popup-renderer.js`; the pixel-exact diff
   (`MAX_DIFF_RATIO = 0`) and the en-US-locale guard are in
   `executable-requirements/ui/popup-snapshots.test.js`; the scroll/fade gestures are in
-  `executable-requirements/infrastructure/actions.js`. A case is a self-contained per-leaf `req-<id>.case.js`
-  (fake data + an optional DOM action) + `req-<id>.png`; `executable-requirements/infrastructure/render-snapshot.js`
+  `executable-requirements/infrastructure/actions.js`. A case is a self-contained per-leaf `<slug>.<id>.case.js`
+  (fake data + an optional DOM action) + `<slug>.<id>.png`; `executable-requirements/infrastructure/render-snapshot.js`
   picks the renderer by the case's own `kind` (default `"popup"` → the popup's REAL
   `render()`; `"icon"` → the real `extension/ui/toolbar-icon.js` in a fake browser,
   `icon-renderer.js` + `fake-chrome.js`), so a view or icon change moves the
@@ -143,7 +143,7 @@ commission-while-editing trap goes in the file's header comment rather than
   loud banner in the file; a faithful non-stub verification is owed in #435).
 - **Two-column requirements gallery** — `executable-requirements/infrastructure/build-requirements-gallery.js`
   lays each leaf out as an HTML `<table>` row in `executable-requirements/Requirements.md`: the
-  generated `req-<id>.png` (or a behavior-test note) in the **left** cell, the
+  generated `<slug>.<id>.png` (or a behavior-test note) in the **left** cell, the
   hand-authored requirement in the **right** cell. GitHub renders the markdown in
   each `<td>` because the cell content is blank-line-separated. The generator
   rewrites **only** the managed left-cell line — tagged `<!-- req-gallery:<id> -->`

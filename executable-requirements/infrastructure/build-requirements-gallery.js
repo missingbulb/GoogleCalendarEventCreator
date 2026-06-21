@@ -24,7 +24,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { DOC_PATH } = require("./ui-requirements");
-const { loadCases } = require("./cases");
+const { loadCases, leafIdOf } = require("./cases");
 
 const CASES_DIR = path.join(__dirname, "..", "ui", "cases");
 // executable-requirements/Requirements.md → executable-requirements/ui/cases/ is two levels up then back down.
@@ -41,17 +41,20 @@ function marker(id) {
 // The canonical managed left-cell content for one leaf, derived from its CASE (its
 // `kind` / `tbd` fields), with the marker as the trailing token: a note for a
 // `kind: "behavior"` case (no image — a click a snapshot can't show); otherwise the
-// req-<id>.png image (popup or icon — same embed either way), prefixed with a loud
-// "TO BE DECIDED" banner when the case is `tbd` (so a reviewer sees the provisional
-// render of CURRENT behavior under the banner).
+// <slug>.<id>.png image (popup or icon — same embed either way), prefixed with a
+// loud "TO BE DECIDED" banner when the case is `tbd` (so a reviewer sees the
+// provisional render of CURRENT behavior under the banner). The image filename is
+// the case's OWN stem (`testCase.name`), so a leaf is embedded by its real
+// component-named PNG, not a reconstructed `req-<id>`.
 function managedLine(id, testCase) {
   const kind = (testCase && testCase.kind) || "popup";
   if (kind === "behavior") {
     return `\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${marker(id)}`;
   }
-  const img = `![req-${id}](${IMG_REL}/req-${id}.png)`;
+  const stem = (testCase && testCase.name) || id;
+  const img = `![${stem}](${IMG_REL}/${stem}.png)`;
   if (testCase && testCase.tbd) {
-    const hasProvisional = fs.existsSync(path.join(CASES_DIR, `req-${id}.png`));
+    const hasProvisional = fs.existsSync(path.join(CASES_DIR, `${stem}.png`));
     const banner = "⚠️ **TO BE DECIDED** — behavior not yet decided";
     return hasProvisional
       ? `${banner}; provisional render of CURRENT behavior: ${img} ${marker(id)}`
@@ -74,7 +77,7 @@ function markerLines(lines) {
 // line's leading indentation); leave every other line — scaffolding and prose —
 // untouched.
 function buildGallery(docPath = DOC_PATH) {
-  const caseById = new Map(loadCases().map((c) => [c.name.replace(/^req-/, ""), c]));
+  const caseById = new Map(loadCases().map((c) => [leafIdOf(c.name), c]));
   const lines = fs.readFileSync(docPath, "utf8").split("\n");
   const out = lines.map((line) => {
     const m = MARKER_RE.exec(line);

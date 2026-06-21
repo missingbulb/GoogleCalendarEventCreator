@@ -9,7 +9,7 @@
 //   kind: "icon"            -> the real extension/ui/toolbar-icon.js loaded into a fake browser
 //                              (icon-renderer.js), fed the case's faked tabUrl + lists
 //
-// The comparison, storage (executable-requirements/ui/cases/req-<id>.png), naming, and refresh are all
+// The comparison, storage (executable-requirements/ui/cases/<slug>.<id>.png), naming, and refresh are all
 // shared across kinds — only the pixel source differs, because a popup and a toolbar
 // icon are genuinely produced by different code paths.
 "use strict";

@@ -25,7 +25,7 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { JSDOM } = require("jsdom");
-const { loadCases } = require("../infrastructure/cases");
+const { loadCases, leafIdOf } = require("../infrastructure/cases");
 
 const ROOT = path.join(__dirname, "..", "..");
 const TAB = { url: "https://example.com/events", title: "Example event page", index: 3 };
@@ -136,7 +136,7 @@ for (const [label, build] of [
 test("covers exactly the leaves whose case declares kind:\"behavior\"", () => {
   const behaviorLeaves = loadCases()
     .filter((c) => c.kind === "behavior")
-    .map((c) => c.name.replace(/^req-/, ""))
+    .map((c) => leafIdOf(c.name))
     .sort();
   assert.deepEqual(
     behaviorLeaves,

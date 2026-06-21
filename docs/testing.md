@@ -178,14 +178,14 @@ is split out of `init()` for exactly this: init does the chrome/fetch I/O to gat
 the data, render builds the DOM from it.)
 
 Each case is a self-contained tuple in **`executable-requirements/ui/cases/`**, one per leaf
-requirement: a `req-<id>.case.js` whose filename names the single
+requirement: a `<slug>.<id>.case.js` whose filename names the single
 [`uiRequirements.md`](uiRequirements.md) leaf it pins, minimal data isolating that
 one requirement. For the current set with every reference image shown in a
 two-column table beside its requirement (image left, spec right), see the
 generated gallery in **[`uiRequirements.md`](uiRequirements.md)** — it's derived
 from the cases (so it can't drift) and is the one-page review surface.
 
-A popup `req-<id>.case.js` exports `{ description, data, listing?, tab?, action? }`.
+A popup `<slug>.<id>.case.js` exports `{ description, data, listing?, tab?, action? }`.
 `data` is the fake extraction result (`{ supported, events: [...] }`); `listing` is
 the host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`

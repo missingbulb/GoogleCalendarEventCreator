@@ -3,10 +3,10 @@
 // each for itself, how its leaf is verified (its `kind` / `tbd`). This gate is the
 // strict bijection between them, plus the routing rules each kind implies:
 //
-//   - EVERY leaf has exactly one `req-<id>.case.js` (the FILENAME is the link), and
+//   - EVERY leaf has exactly one `<slug>.<id>.case.js` (the FILENAME is the link), and
 //     every case names a real leaf. No leaf is unclaimed; no case is a stray.
 //   - A case's `kind` (default "popup") decides verification:
-//       * "popup" / "icon" — an image leaf, pinned by a `req-<id>.png` snapshot
+//       * "popup" / "icon" — an image leaf, pinned by a `<slug>.<id>.png` snapshot
 //         (rendered by render-snapshot.js, compared by popup-snapshots.test.js).
 //       * "behavior"       — a click/navigation a static image can't observe, so it
 //         carries NO image and is verified by executable-requirements/ui/events-view-actions.test.js
@@ -24,15 +24,17 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { loadCases, CASES_DIR } = require("./infrastructure/cases");
+const { loadCases, leafIdOf, CASES_DIR } = require("./infrastructure/cases");
 const { allRequirementIds, leafRequirementIds } = require("./infrastructure/ui-requirements");
 
 const allIds = new Set(allRequirementIds());
 const leaves = leafRequirementIds();
 const cases = loadCases();
 
-const PER_LEAF = /^req-(\d+(?:\.\d+)+)$/;
-const idOf = (c) => c.name.replace(/^req-/, "");
+// A case file is `<slug>.<leaf-id>.case.js`: a kebab-case component/feature slug,
+// then the dotted requirement number it pins. The leaf id is the trailing run.
+const PER_LEAF = /^[a-z][a-z0-9-]*\.(\d+(?:\.\d+)+)$/;
+const idOf = (c) => leafIdOf(c.name);
 const kindOf = (c) => c.kind || "popup";
 const KNOWN_KINDS = new Set(["popup", "icon", "behavior"]);
 
@@ -41,12 +43,12 @@ test("executable-requirements/Requirements.md yields leaf requirements", () => {
   assert.ok(leaves.length > 0, "no leaf requirements computed");
 });
 
-test("every UI case is a `req-<id>` case naming a real leaf", () => {
+test("every UI case is a `<slug>.<id>` case naming a real leaf", () => {
   const bad = [];
   for (const c of cases) {
     const m = PER_LEAF.exec(c.name);
-    if (!m) bad.push(`${c.name} (not named req-<id>.case.js)`);
-    else if (!allIds.has(m[1])) bad.push(`${c.name} (req-${m[1]} is not a requirement in the spec)`);
+    if (!m) bad.push(`${c.name} (not named <slug>.<id>.case.js)`);
+    else if (!allIds.has(m[1])) bad.push(`${c.name} (${m[1]} is not a requirement in the spec)`);
   }
   assert.deepEqual(bad, [], "stray/misnamed UI cases:");
 });
@@ -55,7 +57,7 @@ test("every leaf has exactly one case (strict bijection)", () => {
   const counts = cases.reduce((acc, c) => ((acc[idOf(c)] = (acc[idOf(c)] || 0) + 1), acc), {});
   const missing = leaves.filter((id) => !counts[id]);
   const dupes = Object.keys(counts).filter((id) => counts[id] > 1);
-  assert.deepEqual(missing, [], "leaves with no req-<id>.case.js:");
+  assert.deepEqual(missing, [], "leaves with no <slug>.<id>.case.js:");
   assert.deepEqual(dupes, [], "leaves with more than one case:");
 });
 
