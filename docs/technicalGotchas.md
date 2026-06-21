@@ -65,7 +65,7 @@ trap spanning files. See the full locality rule in
   `evilexample.com` — pair `hostEquals: "example.com"` with
   `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
   URL→icon match runs inside Chrome, so it's verified only by the CI-only
-  real-Chrome test (`test/fullBrowserHeavyTests/extension-load.chrome.test.js`).
+  real-Chrome test (`executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js`).
 - **Introspecting an MV3 service worker over CDP (the real-Chrome test) has three
   traps that each cost a CI round-trip.** When `Runtime.evaluate`-ing inside the
   worker to verify its startup: (a) **`chrome.*` callback APIs don't reliably
@@ -152,7 +152,7 @@ trap spanning files. See the full locality rule in
 - **GitHub renders Markdown inside a raw `<td>` only when the cell content is
   blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
   two-column "image left, text right" layout that survives GitHub's renderer
-  (`docs/uiRequirements.md`'s gallery), wrap each row in a literal
+  (`executable-requirements/Requirements.md`'s gallery), wrap each row in a literal
   `<table>`/`<tr>`/`<td>` and put a **blank line before and after** the cell's
   content; cmark-gfm then re-enters Markdown mode inside the cell, so `![img]()`,
   `**bold**`, and links render. Without the surrounding blank lines the content is
@@ -161,4 +161,4 @@ trap spanning files. See the full locality rule in
   the line still *starts* as Markdown (how the generator tags its managed
   left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
   two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
-  pipe-table cell can't hold the multi-line prose. (`test/ui/build-requirements-gallery.js`.)
+  pipe-table cell can't hold the multi-line prose. (`executable-requirements/infrastructure/build-requirements-gallery.js`.)

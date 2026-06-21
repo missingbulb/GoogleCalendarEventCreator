@@ -1,7 +1,7 @@
 // Minimal DevTools Protocol client over one WebSocket — the single definition
 // shared by everything in this repo that drives a real Chrome with no npm
 // dependency (Node has shipped a global WebSocket since v22). Two callers use it:
-//   - test/fullBrowserHeavyTests/extension-load.chrome.test.js — loads the
+//   - executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js — loads the
 //     unpacked extension and inspects its MV3 service worker.
 //   - data/render-page.js — renders a JS single-page-app shell to extractable
 //     HTML (issue #310).

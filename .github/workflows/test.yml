@@ -52,8 +52,8 @@ jobs:
       - name: Run live tests
         run: npm run test:live
 
-      # Renders each test/ui/cases/*.case.js through the popup's real render() and
-      # compares it to the committed test/ui/cases/*.png (browsable on GitHub).
+      # Renders each executable-requirements/ui/cases/*.case.js through the popup's real render() and
+      # compares it to the committed executable-requirements/ui/cases/*.png (browsable on GitHub).
       # Deterministic and dependency-light (satori + resvg, no browser), so it
       # runs alongside the other tests.
       - name: Run UI snapshot test

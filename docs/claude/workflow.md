@@ -11,7 +11,7 @@ project-specific working rules, plus the two owner-triggered defined instruction
 Whenever a change regenerates the UI gallery (via `npm run refresh:ui`), link the
 branch's copy in the chat in the same turn you commit it — the requirement-first
 inline gallery
-`https://github.com/<owner>/<repo>/blob/<branch>/docs/uiRequirements.md`, each
+`https://github.com/<owner>/<repo>/blob/<branch>/executable-requirements/Requirements.md`, each
 requirement with its snapshot beside it — for one-page review.
 
 When the owner asks to **show** or **see** a visual artifact (a snapshot, a diff,
@@ -20,14 +20,14 @@ link — surface the file itself so it renders inline; a link makes the owner go
 fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact
 nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
 
-When a change to a `test/ui/cases/*` case — its spec or its rendering — makes
+When a change to a `executable-requirements/ui/cases/*` case — its spec or its rendering — makes
 the snapshot tests **fail** (the pixels moved), don't silently regenerate the
 baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel
 change is never auto-accepted. The process:
 
 1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
    committed **expected** PNG, run the snapshot test so it fails (the harness
-   writes the rendered `actual` and a highlighted `diff` to `test/ui/.artifacts/`),
+   writes the rendered `actual` and a highlighted `diff` to `executable-requirements/infrastructure/.artifacts/`),
    and send three images to the chat: **expected** (committed), **actual**
    (newly-rendered), and the **diff**. When the change alters the PNG's
    **dimensions** (e.g. a fixture shrink), pixelmatch can't diff unequal sizes so

@@ -82,8 +82,8 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 ## Documentation
 
 - [Architecture guidelines](docs/architectureGuidelines.md) — top-level rules of the road.
-- [Product requirements](docs/productRequirements.md) — what the extension does (user-facing behavior).
-- [Popup UI requirements](docs/uiRequirements.md) — the specific, numbered popup UI requirements (referenced by the UI tests).
+- [Product requirements](executable-requirements/productRequirements.md) — what the extension does (user-facing behavior).
+- [Popup UI requirements](executable-requirements/Requirements.md) — the specific, numbered popup UI requirements (referenced by the UI tests).
 - [High-level design](docs/highLevelDesign.md) — how extraction works.
 - [File descriptions](docs/fileDescriptions.md) — the per-file map.
 - [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.

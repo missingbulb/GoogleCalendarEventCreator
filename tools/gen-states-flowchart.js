@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Regenerates docs/popup-states-flowchart.png — a flowchart of the states the
 // popup can render (issue #192; State 1b added in #456). It mirrors the decision
-// ui/popup.js's chooseContent makes (see docs/productRequirements.md): a
+// ui/popup.js's chooseContent makes (see executable-requirements/productRequirements.md): a
 // supported host shows its dedicated extractor's events (State 1), or — when that
 // extractor finds nothing — falls back to the generic one and shows its events
 // with a "Suggest Correction" link (State 1b); an unsupported host runs the
@@ -11,7 +11,7 @@
 //
 // Authors an SVG by hand and rasterizes it with @resvg/resvg-js (already a dev
 // dependency) — no browser, no graphviz, deterministic. Fonts come from the
-// bundled Liberation Sans in test/ui/fonts so text renders without system fonts.
+// bundled Liberation Sans in executable-requirements/ui/fonts so text renders without system fonts.
 "use strict";
 
 const fs = require("node:fs");

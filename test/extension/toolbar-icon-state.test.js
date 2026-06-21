@@ -5,7 +5,7 @@
 // The worker no longer reads tab URLs — it registers chrome.declarativeContent
 // rules and the BROWSER matches them (so no "tabs" permission / no "Read your
 // browsing history" prompt). The real URL→icon match therefore happens inside
-// Chrome and is exercised by the real-Chrome test (test/fullBrowserHeavyTests/
+// Chrome and is exercised by the real-Chrome test (executable-requirements/fullBrowserHeavyTests/
 // extension-load.chrome.test.js). Here we test the layer we own: that buildRules()
 // maps each supported host to the green icon and each denied host to the gray
 // icon, with apex + subdomain matchers (and unknown hosts to neither).

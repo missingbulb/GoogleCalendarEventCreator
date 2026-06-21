@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`test/extractors/`, `test/extension/`, `test/unit/`, and `test/ui/`:
+`test/extractors/`, `test/extension/`, `test/unit/`, and `executable-requirements/ui/`:
 
 ```sh
 npm install
@@ -164,9 +164,9 @@ from facebook.com, so it can't be cached as a live case.
 
 ### UI snapshot test
 
-**`test/ui/popup-snapshots.test.js`** is the single visual-comparison engine: it
+**`executable-requirements/ui/popup-snapshots.test.js`** is the single visual-comparison engine: it
 renders each UI *case* and compares it pixel-by-pixel (via `pixelmatch`) against a
-committed image. `test/ui/render-snapshot.js` picks the renderer by the **case's own
+committed image. `executable-requirements/infrastructure/render-snapshot.js` picks the renderer by the **case's own
 `kind`**: a `"popup"` case (the default) is fed to `extension/ui/popup.js`'s exported
 `render({ data, tab, listing })` — the same `chooseContent` +
 `events-view.js`/`source-request-view.js` code the extension runs — and a
@@ -177,7 +177,7 @@ automatically; the comparison, naming, storage, and refresh are shared. (`render
 is split out of `init()` for exactly this: init does the chrome/fetch I/O to gather
 the data, render builds the DOM from it.)
 
-Each case is a self-contained tuple in **`test/ui/cases/`**, one per leaf
+Each case is a self-contained tuple in **`executable-requirements/ui/cases/`**, one per leaf
 requirement: a `req-<id>.case.js` whose filename names the single
 [`uiRequirements.md`](uiRequirements.md) leaf it pins, minimal data isolating that
 one requirement. For the current set with every reference image shown in a
@@ -189,12 +189,12 @@ A popup `req-<id>.case.js` exports `{ description, data, listing?, tab?, action?
 `data` is the fake extraction result (`{ supported, events: [...] }`); `listing` is
 the host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
-from `test/ui/actions.js`, since satori can't actually scroll (it pins `#events`
+from `executable-requirements/infrastructure/actions.js`, since satori can't actually scroll (it pins `#events`
 to its end so the bottom-anchored count label is painted). An icon case
 (`kind: "icon"`) instead exports `{ kind, description, tabUrl, lists }` — the faked
 active-tab URL and host lists the toolbar-icon renderer classifies.
 
-`test/ui/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
+`executable-requirements/infrastructure/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
 browser). satori has no CSS engine, so the renderer folds the **real
 `extension/ui/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
 with jsdom, inline every declaration) — one source of truth for the styling, no
@@ -218,7 +218,7 @@ install step.
 
 After an intentional change to the popup — its views (`extension/ui/popup.js`,
 `extension/ui/views/*.js`) or its styling (`extension/ui/popup.css`) — run `npm run refresh:ui` to
-regenerate the `test/ui/cases/*.png` images and commit them so reviewers see the
+regenerate the `executable-requirements/ui/cases/*.png` images and commit them so reviewers see the
 before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
-`<name>.diff.png` to `test/ui/.artifacts/` (gitignored; see
-`test/ui/snapshot-artifacts-dir.js`) and prints their full paths.
+`<name>.diff.png` to `executable-requirements/infrastructure/.artifacts/` (gitignored; see
+`executable-requirements/infrastructure/snapshot-artifacts-dir.js`) and prints their full paths.

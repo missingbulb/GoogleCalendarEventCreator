@@ -1,7 +1,7 @@
 # File descriptions
 
 A per-file map of the repo. See [highLevelDesign.md](highLevelDesign.md) for how
-extraction works, [productRequirements.md](productRequirements.md) for what the
+extraction works, [productRequirements.md](../executable-requirements/productRequirements.md) for what the
 extension does, and [architectureGuidelines.md](architectureGuidelines.md) for
 the rules of the road.
 
@@ -13,7 +13,7 @@ the rules of the road.
 | `extension/ui/popup.html`, `extension/ui/popup.css`, `extension/ui/popup.js` | Toolbar popup: controller that runs the extractor, picks a view (`chooseContent`), and renders it (markup + extracted styles) |
 | `extension/ui/views/events-view.js` | Renders one card per event — a clickable button for a single occurrence, or a grouped card with a button per showing for a multi-instance event (loaded on demand via `import()`) |
 | `extension/ui/views/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
-| `docs/extraction-policy.md` | Short public "how this extension finds events" doc the "Disagree?" link opens |
+| [`docs/extraction-policy.md`](extraction-policy.md) | Short public "how this extension finds events" doc the "Disagree?" link opens |
 | `extension/ui/toolbar-icon.js` | Background service worker: registers `chrome.declarativeContent` rules (from `fallback-lists.json`) so the browser colors the toolbar icon by host pattern — green on supported hosts, gray on denylisted ones, blue elsewhere — without the extension reading any tab URL |
 | `extension/pipeline/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
 | `extension/pipeline/helpers/` | Shared utilities any extractor may use, split by concern: DOM, text (rich-text/`htmlToText`/`parts`), dates, timezones, timezone-names, merge, and `embedded-events` (the `GCal.embeddedEvents` schema.org JSON-LD reader) |
@@ -32,17 +32,17 @@ the rules of the road.
 | `test/extractors/fallback/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `test/extractors/fallback/fallback-coverage.GENERATED.md` and ratchets the baseline locally |
 | `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` | Stored high-watermark percentages the coverage gate asserts against (test-rewritten; `GENERATED` in the name flags it — don't hand-merge) |
 | `test/extractors/fallback/fallback-coverage.GENERATED.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
-| `test/ui/cases/<name>.case.js` | One UI snapshot case: fake data (`{ description, data, listing?, tab?, action? }`) fed to the popup's real `render()`. Its scenario lives only here — no shared gallery |
-| `test/ui/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
-| `test/ui/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |
-| `test/ui/popup-renderer.js` | Builds each popup case's DOM via the popup's real `render()` and rasterizes to PNG (satori + resvg, no browser), inlining the real `extension/ui/popup.css` first; prunes off-screen list rows so resvg doesn't choke on a tall SVG |
-| `test/ui/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `extension/ui/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind a `kind: "icon"` snapshot case |
-| `test/ui/fake-chrome.js` | The fake browser (`chrome.*` + `fetch`/`OffscreenCanvas`) that `icon-renderer.js` loads `extension/ui/toolbar-icon.js` into, then queries "what icon at this URL?" |
-| `test/ui/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's own `kind` field (default `"popup"`) |
-| `test/ui/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
-| `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
-| `test/ui/popup-snapshots.test.js` | The single visual-comparison engine: renders each `test/ui/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
-| `test/ui/refresh-popup-snapshots.js` | Regenerates the `test/ui/cases/*.png` snapshots (popup and icon) + the inline gallery |
+| `executable-requirements/ui/cases/<name>.case.js` | One UI snapshot case: fake data (`{ description, data, listing?, tab?, action? }`) fed to the popup's real `render()`. Its scenario lives only here — no shared gallery |
+| `executable-requirements/ui/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
+| `executable-requirements/infrastructure/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |
+| `executable-requirements/infrastructure/popup-renderer.js` | Builds each popup case's DOM via the popup's real `render()` and rasterizes to PNG (satori + resvg, no browser), inlining the real `extension/ui/popup.css` first; prunes off-screen list rows so resvg doesn't choke on a tall SVG |
+| `executable-requirements/infrastructure/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `extension/ui/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind a `kind: "icon"` snapshot case |
+| `executable-requirements/infrastructure/fake-chrome.js` | The fake browser (`chrome.*` + `fetch`/`OffscreenCanvas`) that `icon-renderer.js` loads `extension/ui/toolbar-icon.js` into, then queries "what icon at this URL?" |
+| `executable-requirements/infrastructure/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's own `kind` field (default `"popup"`) |
+| `executable-requirements/infrastructure/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
+| `executable-requirements/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
+| `executable-requirements/ui/popup-snapshots.test.js` | The single visual-comparison engine: renders each `executable-requirements/ui/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
+| `executable-requirements/infrastructure/refresh-popup-snapshots.js` | Regenerates the `executable-requirements/ui/cases/*.png` snapshots (popup and icon) + the inline gallery |
 | `tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
 | `tools/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
 | `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |

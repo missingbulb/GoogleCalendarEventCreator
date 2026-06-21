@@ -15,4 +15,4 @@ data/*.html linguist-vendored
 extension/pipeline/load-order.generated.json                        merge=ours
 test/extractors/fallback/fallback-coverage.baseline.GENERATED.json  merge=ours
 test/extractors/fallback/fallback-coverage.GENERATED.md             merge=ours
-test/ui/cases/*.png                                                 merge=ours
+executable-requirements/ui/cases/*.png                                                 merge=ours

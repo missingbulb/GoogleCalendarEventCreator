@@ -1,6 +1,6 @@
 // CI-only render fallback for the SPA-shell class (issue #310). Loads a URL in a
 // real *headless* Chrome over the DevTools Protocol (zero npm deps — the same
-// machinery as test/fullBrowserHeavyTests/extension-load.chrome.test.js, sharing
+// machinery as executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js, sharing
 // data/cdp-client.js) and returns the post-JS rendered HTML, so a JS
 // single-page-app shell becomes extractable like a normal page. Only
 // data/refresh-cache.js calls it, and only when data/spa-shell.js says the plain
