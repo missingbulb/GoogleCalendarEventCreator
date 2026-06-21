@@ -44,7 +44,12 @@ not redundancy.
   **label alone**, not on any issue template (there is no dedicated form): the
   optimize-procedures routine files its issue programmatically with the fields in
   the body, and a human filing one by hand opens a plain issue carrying the
-  lesson(s) and applies the label. Either way the body holds the proposal.
+  lesson(s) and applies the label. Either way the body holds the proposal. And it
+  fires the instant the label lands (including at issue creation), copying + closing
+  within seconds, so it's **effectively irreversible from this side**: to withhold a
+  borderline item, decide *before* filing and don't apply the label — removing the
+  label afterward loses the race, and the already-created Claudinite copy then has
+  to be closed in Claudinite, which a session scoped only to this repo can't reach.
 - The **`claudinite-lesson` label** — the trigger. The optimize-procedures routine
   **ensures it exists idempotently** before applying it (create-if-missing,
   no-op-if-present), so it needs no manual pre-creation and never errors on a
