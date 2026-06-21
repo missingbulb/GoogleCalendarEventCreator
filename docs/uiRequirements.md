@@ -54,7 +54,7 @@ The five popup **states** (supported / denylisted / nothing-found / allowlisted 
 unlisted) and *when* each occurs are defined in
 [productRequirements.md](productRequirements.md); this doc specifies how each is
 *rendered*. Tunable values referenced below (`maxCardsShown`,
-`maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `config.js`.
+`maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `extension/config.js`.
 
 ## 1. Heading
 
