@@ -184,7 +184,7 @@ test(
     } finally {
       if (cdp) cdp.close();
       proc.kill("SIGKILL");
-      fs.rmSync(userDataDir, { recursive: true, force: true });
+      fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     }
   }
 );
