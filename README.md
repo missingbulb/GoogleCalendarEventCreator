@@ -19,7 +19,7 @@ or OAuth needed. You review the pre-filled event and hit Save.
 
 An event is created with whatever subset of these is available; missing fields
 are simply left for you to fill in on the Google Calendar screen. For how the
-details are scraped from a page, see [docs/highLevelDesign.md](docs/highLevelDesign.md).
+details are scraped from a page, see [dev/procedures/highLevelDesign.md](dev/procedures/highLevelDesign.md).
 
 ## Install (developer mode)
 
@@ -28,7 +28,7 @@ Grab the packaged extension — just the files that ship, not the whole repo:
 1. Download
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
-   [Create Release Package workflow](docs/releasing.md#creating-a-release-package)) and extract
+   [Create Release Package workflow](dev/procedures/releasing.md#creating-a-release-package)) and extract
    it. It unpacks into a folder containing `manifest.json` — that folder is the
    one to load. As a secondary
    option, download
@@ -81,12 +81,12 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 
 ## Documentation
 
-- [Architecture guidelines](docs/architectureGuidelines.md) — top-level rules of the road.
-- [Executable requirements](executable-requirements/README.md) — how requirements are modeled (a numbered breakdown where every leaf has a validating case) and how to add one.
-- [Requirements](executable-requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
-- [High-level design](docs/highLevelDesign.md) — how extraction works.
-- [File descriptions](docs/fileDescriptions.md) — the per-file map.
-- [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
-- [Releasing](docs/releasing.md) — building the zip and publishing to the Chrome Web Store.
-- [Resources](docs/resources.md) — external references relevant to the project.
-- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `docs/claude/`).
+- [Architecture guidelines](dev/procedures/architectureGuidelines.md) — top-level rules of the road.
+- [Executable requirements](dev/requirements/README.md) — how requirements are modeled (a numbered breakdown where every leaf has a validating case) and how to add one.
+- [Requirements](dev/requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
+- [High-level design](dev/procedures/highLevelDesign.md) — how extraction works.
+- [File descriptions](dev/procedures/fileDescriptions.md) — the per-file map.
+- [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
+- [Releasing](dev/procedures/releasing.md) — building the zip and publishing to the Chrome Web Store.
+- [Resources](dev/procedures/resources.md) — external references relevant to the project.
+- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/claude/`).

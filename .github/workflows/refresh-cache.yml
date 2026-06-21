@@ -1,15 +1,15 @@
 name: Refresh cached HTML files
 
-# Records any missing or empty (zero-byte) executable-requirements/data/<name>.html by fetching its URL
-# (from the matching executable-requirements/data/<name>.url), runs the live tests, and commits the
+# Records any missing or empty (zero-byte) dev/requirements/data/<name>.html by fetching its URL
+# (from the matching dev/requirements/data/<name>.url), runs the live tests, and commits the
 # result back to the branch it ran on.
 #
 # It runs automatically when you push a branch (other than main) that adds or
-# removes an executable-requirements/data/ file — a new executable-requirements/data/<name>.url, or a deleted executable-requirements/data/<name>.html you
+# removes an dev/requirements/data/ file — a new dev/requirements/data/<name>.url, or a deleted dev/requirements/data/<name>.html you
 # want re-recorded. So the flow is just "push the branch"; there's no manual step
 # and no separate "force" mode. It's also runnable from the Actions tab. (The
 # auto-implement-extractor workflow doesn't use it — it records the page inline in
-# Phase 1; see tools/new-extractors-creation/phase1-prepare.sh.)
+# Phase 1; see dev/tools/new-extractors-creation/phase1-prepare.sh.)
 #
 # It never runs on main: a commit to main goes through a PR under branch
 # protection, and by merge time the cached HTML is already filled on the branch.
@@ -19,7 +19,7 @@ on:
     branches-ignore:
       - main
     paths:
-      - "executable-requirements/data/**"
+      - "dev/requirements/data/**"
 
 permissions:
   contents: write
@@ -40,7 +40,7 @@ jobs:
 
       # Provide a Chrome for Testing binary so the recorder can render a
       # data-less JS single-page-app shell into extractable HTML (issue #310;
-      # executable-requirements/infra/data/render-page.js). Same on-demand fetch + monthly cache as the e2e
+      # dev/requirements/infra/data/render-page.js). Same on-demand fetch + monthly cache as the e2e
       # smoke test in test.yml — no project dependency added. Without this the
       # recorder simply keeps the static HTML (the render step no-ops).
       - name: Chrome for Testing cache key
@@ -75,10 +75,10 @@ jobs:
 
       - name: Commit refreshed cached HTML files
         run: |
-          if [ -n "$(git status --porcelain executable-requirements/data)" ]; then
+          if [ -n "$(git status --porcelain dev/requirements/data)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add executable-requirements/data
+            git add dev/requirements/data
             git commit -m "chore: refresh cached HTML files [skip ci]"
             git push
           else

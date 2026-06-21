@@ -1,11 +1,11 @@
 node_modules/
 
-# Python bytecode cache (e.g. from compiling tools/**/*.py)
+# Python bytecode cache (e.g. from compiling dev/tools/**/*.py)
 __pycache__/
 
 # Built extension package (produced by `npm run build` / the Release workflow)
 dist/
 
 # UI snapshot test failure artifacts (.actual.png / .diff.png), written here
-# by the tests on a mismatch (see executable-requirements/infra/snapshot-artifacts-dir.js).
-executable-requirements/infra/.artifacts/
+# by the tests on a mismatch (see dev/requirements/infra/snapshot-artifacts-dir.js).
+dev/requirements/infra/.artifacts/

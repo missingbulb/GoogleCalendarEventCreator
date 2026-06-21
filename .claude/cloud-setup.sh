@@ -41,9 +41,9 @@ set -euo pipefail
 # this, `npm ci` finds no package.json and silently installs nothing.
 cd /home/user/GoogleCalendarEventCreator
 
-# Pull in the Claudinite shared-rules submodule (docs/claude/shared). The clone
+# Pull in the Claudinite shared-rules submodule (dev/procedures/claude/shared). The clone
 # doesn't fetch submodules automatically, so without this the folder is empty and
-# CLAUDE.md's `@docs/claude/shared/*` imports resolve to nothing. Idempotent; the
+# CLAUDE.md's `@dev/procedures/claude/shared/*` imports resolve to nothing. Idempotent; the
 # pinned commit comes from the freshly-cloned gitlink. (issue #364)
 git submodule update --init --recursive || true
 
@@ -55,7 +55,7 @@ npm ci || true
 # Conflict-resolution hygiene for the generated/derived artifacts that every
 # parallel branch regenerates (the load lists, UI snapshots, coverage baseline).
 # Two per-clone git settings the committed .gitattributes relies on (see
-# docs/claude/github.md). Both are idempotent, so re-running is safe.
+# dev/procedures/claude/github.md). Both are idempotent, so re-running is safe.
 #   - rerere: record how a conflict was resolved and replay it automatically when
 #     the same conflict recurs — and these recur in the same shape across branches.
 #   - the `ours` merge driver .gitattributes maps the generated files to, so a

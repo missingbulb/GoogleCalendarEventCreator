@@ -140,9 +140,9 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   // page shows WITHOUT one (nearestYearFor below; tabitisrael's "21/6"). Defaults
   // to the real clock, so production is unchanged: the injected popup world never
   // sets the override. Tests inject a fixed instant via globalThis.__REFERENCE_NOW__
-  // (threaded by test/harness.js from a case's "referenceNow"), so a no-year case
+  // (threaded by extension-test/harness.js from a case's "referenceNow"), so a no-year case
   // asserts a stable date instead of silently rotting as wall-clock time passes
-  // (docs/claude/shared/engineeringPractices.md).
+  // (dev/procedures/claude/shared/engineeringPractices.md).
   function now() {
     return globalThis.__REFERENCE_NOW__ ? new Date(globalThis.__REFERENCE_NOW__) : new Date();
   }

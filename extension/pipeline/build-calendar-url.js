@@ -5,8 +5,8 @@
 // can be a module — it is never injected into the page). `buildCalendarUrl` and
 // `formatDatesParam` are exported; the rest are module-private helpers.
 //
-// GOTCHAS — read before editing (file-local footguns; see docs/claude/workflow.md
-// for why these live here and not in docs/technicalGotchas.md):
+// GOTCHAS — read before editing (file-local footguns; see dev/procedures/claude/workflow.md
+// for why these live here and not in dev/procedures/technicalGotchas.md):
 //   * Google Calendar renders the `details` param as HTML, not Markdown. A bare
 //     `**bold**` shows literal asterisks; a bare URL is auto-linked (so it needs
 //     no `<a>`). `markdownToHtml` below translates the Markdown that survives
