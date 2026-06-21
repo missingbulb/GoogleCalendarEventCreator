@@ -22,21 +22,24 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { loadCases } = require("../ui/cases");
 const { BEHAVIOR_COVERAGE } = require("../ui/behavior-coverage");
+const { ICON_COVERAGE } = require("../ui/icon-coverage");
 const { allRequirementIds, leafRequirementKinds } = require("../ui/ui-requirements");
 
 const allIds = new Set(allRequirementIds());
 const kinds = leafRequirementKinds();
 const renderLeaves = Object.keys(kinds).filter((id) => kinds[id] === "render");
 const behaviorLeaves = Object.keys(kinds).filter((id) => kinds[id] === "behavior");
+const iconLeaves = Object.keys(kinds).filter((id) => kinds[id] === "icon");
 
 // Each render case is `req-<id>.case.js`; the id is parsed from the filename.
 const PER_LEAF = /^req-(\d+(?:\.\d+)+)$/;
 const caseIds = loadCases().map((c) => c.name);
 
-test("docs/uiRequirements.md yields requirements of both kinds", () => {
+test("docs/uiRequirements.md yields requirements of each kind", () => {
   assert.ok(allIds.size > 0, "no `N.M` requirement IDs parsed from docs/uiRequirements.md");
   assert.ok(renderLeaves.length > 0, "no render leaves computed");
   assert.ok(behaviorLeaves.length > 0, "no behavior leaves computed (the `_(behavior)_` tag?)");
+  assert.ok(iconLeaves.length > 0, "no icon leaves computed (the `_(icon)_` tag?)");
 });
 
 test("every UI case is a `req-<id>` per-leaf case naming a real leaf", () => {
@@ -53,6 +56,12 @@ test("no `req-<id>` case exists for a BEHAVIOR leaf (those go to the behavior te
   const behavior = new Set(behaviorLeaves);
   const bad = caseIds.map((n) => PER_LEAF.exec(n)).filter((m) => m && behavior.has(m[1])).map((m) => `req-${m[1]}`);
   assert.deepEqual(bad, [], "a PNG can't verify a click — these belong in events-view-actions.test.js:");
+});
+
+test("no `req-<id>` popup case exists for an ICON leaf (those go to the icon snapshot test)", () => {
+  const icon = new Set(iconLeaves);
+  const bad = caseIds.map((n) => PER_LEAF.exec(n)).filter((m) => m && icon.has(m[1])).map((m) => `req-${m[1]}`);
+  assert.deepEqual(bad, [], "an icon leaf is pinned by the icon snapshot test, not a popup snapshot:");
 });
 
 test("every RENDER leaf has exactly one per-leaf snapshot case; TBD leaves at most one", () => {
@@ -77,4 +86,16 @@ test("behavior-coverage.js lists only real behavior leaves (no stale/typo'd IDs)
   const behavior = new Set(behaviorLeaves);
   const bad = Object.keys(BEHAVIOR_COVERAGE).filter((id) => !behavior.has(id));
   assert.deepEqual(bad, [], "behavior-coverage.js claims IDs that aren't `_(behavior)_` leaves in the spec:");
+});
+
+test("every ICON leaf is covered by the icon snapshot test (icon-coverage.js)", () => {
+  const covered = new Set(Object.keys(ICON_COVERAGE));
+  const uncovered = iconLeaves.filter((id) => !covered.has(id));
+  assert.deepEqual(uncovered, [], "these icon requirements aren't routed to the icon snapshot test:");
+});
+
+test("icon-coverage.js lists only real icon leaves (no stale/typo'd IDs)", () => {
+  const icon = new Set(iconLeaves);
+  const bad = Object.keys(ICON_COVERAGE).filter((id) => !icon.has(id));
+  assert.deepEqual(bad, [], "icon-coverage.js claims IDs that aren't `_(icon)_` leaves in the spec:");
 });

@@ -17,6 +17,7 @@ const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
 const { iconPngForUrl } = require("./extension-icon-for-url");
 const { loadIconCases } = require("./icon-cases");
+const { ICON_COVERAGE } = require("../ui/icon-coverage");
 
 const DOCS = path.join(__dirname, "..", "..", "docs");
 const ARTIFACTS_DIR = path.join(__dirname, ".artifacts");
@@ -66,6 +67,18 @@ const CASES = loadIconCases();
 
 test("there is at least one icon case", () => {
   assert.ok(CASES.length > 0, "no test/extension/icon-cases/*.case.js found");
+});
+
+// Keep the icon cases and the uiRequirements.md routing manifest (icon-coverage.js)
+// in lockstep: every requirement maps to a real case, and every case is claimed by
+// a requirement — a bijection, so neither can silently drift from the other.
+test("icon-coverage.js and the icon cases are in one-to-one correspondence", () => {
+  const caseNames = new Set(CASES.map((c) => c.name));
+  const mapped = Object.values(ICON_COVERAGE);
+  const unmapped = [...caseNames].filter((n) => !mapped.includes(n));
+  const dangling = mapped.filter((n) => !caseNames.has(n));
+  assert.deepEqual(dangling, [], "icon-coverage.js maps a requirement to a non-existent case:");
+  assert.deepEqual(unmapped, [], "icon cases not claimed by any requirement in icon-coverage.js:");
 });
 
 for (const testCase of CASES) {

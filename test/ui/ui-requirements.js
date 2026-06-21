@@ -44,18 +44,23 @@ function leafRequirementIds(docPath = DOC_PATH) {
 // A requirement tagged `_(behavior)_` right after its ID is verified by a
 // BEHAVIOR test (a click/navigation a snapshot can't observe), not a UI snapshot
 // — the segmentation behind the coverage gate (test/ui/behavior-coverage.js,
-// docs/engineeringPractices.md #429). A requirement tagged `_(TBD)_` is a
-// PLACEHOLDER: an edge case whose correct behavior is not yet decided — it's
-// shown with a "TO BE DECIDED" banner and is exempt from the snapshot bijection
-// (it MAY carry a provisional snapshot of current behavior, but isn't required
-// to). Everything else is a "render" leaf, pinned by a snapshot. Returns
-// { "<leafId>": "behavior" | "tbd" | "render" }.
+// docs/engineeringPractices.md #429). A requirement tagged `_(icon)_` is the
+// toolbar/extension icon, verified by the ICON snapshot test
+// (test/ui/icon-coverage.js → test/extension/extension-icon-snapshots.test.js): a
+// pixel snapshot too, but produced by a different harness (the real
+// ui/toolbar-icon.js in a fake browser), not the popup's render(), so it carries no
+// req-<id> popup case. A requirement tagged `_(TBD)_` is a PLACEHOLDER: an edge
+// case whose correct behavior is not yet decided — it's shown with a "TO BE
+// DECIDED" banner and is exempt from the snapshot bijection (it MAY carry a
+// provisional snapshot of current behavior, but isn't required to). Everything else
+// is a "render" leaf, pinned by a popup snapshot. Returns
+// { "<leafId>": "behavior" | "icon" | "tbd" | "render" }.
 function leafRequirementKinds(docPath = DOC_PATH) {
   const text = fs.readFileSync(docPath, "utf8");
   const tag = {};
   for (const line of text.split("\n")) {
-    const m = /^\s*(?:-\s+)?`(\d+(?:\.\d+)+)`\s+_\((behavior|TBD)\)_/.exec(line);
-    if (m) tag[m[1]] = m[2] === "TBD" ? "tbd" : "behavior";
+    const m = /^\s*(?:-\s+)?`(\d+(?:\.\d+)+)`\s+_\((behavior|TBD|icon)\)_/.exec(line);
+    if (m) tag[m[1]] = m[2] === "TBD" ? "tbd" : m[2];
   }
   const kinds = {};
   for (const id of leafRequirementIds(docPath)) kinds[id] = tag[id] || "render";
@@ -71,6 +76,10 @@ function renderLeafIds(docPath = DOC_PATH) {
   const kinds = leafRequirementKinds(docPath);
   return Object.keys(kinds).filter((id) => kinds[id] === "render");
 }
+function iconLeafIds(docPath = DOC_PATH) {
+  const kinds = leafRequirementKinds(docPath);
+  return Object.keys(kinds).filter((id) => kinds[id] === "icon");
+}
 function tbdLeafIds(docPath = DOC_PATH) {
   const kinds = leafRequirementKinds(docPath);
   return Object.keys(kinds).filter((id) => kinds[id] === "tbd");
@@ -82,6 +91,7 @@ module.exports = {
   leafRequirementKinds,
   behaviorLeafIds,
   renderLeafIds,
+  iconLeafIds,
   tbdLeafIds,
   DOC_PATH,
 };

@@ -9,10 +9,11 @@ This is deliberately separate from
 feature-level description** of what the extension does and why. The split: "the
 popup turns the page's event into a one-click calendar link" is a feature
 description and lives there; "an off-current-year chip shows a gray pill for a
-past year" is a specific UI requirement and lives here. Anything that isn't the
-popup's *rendering* — the toolbar/extension icon, the GitHub source-request issue
-form, and the calendar-URL / timezone *semantics* — stays in
-productRequirements; this doc covers the **popup only**.
+past year" is a specific UI requirement and lives here. Anything that isn't a
+pixel-assertable *rendering* — the GitHub source-request issue form, and the
+calendar-URL / timezone *semantics* — stays in productRequirements. This doc
+covers the popup's rendering **and** the toolbar/extension icon (§10): both are
+pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves.
 
 > # ⚠️ INCOMPLETE TESTING — A GREEN BUILD MEANS "CLAIMED", NOT "FULLY VERIFIED" ⚠️
 >
@@ -25,7 +26,10 @@ productRequirements; this doc covers the **popup only**.
 > `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the right
 > action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [`docs/claude/testing.md`](claude/testing.md).
+> [`docs/claude/testing.md`](claude/testing.md). Likewise, an `_(icon)_` leaf
+> (§10) is verified offline through a **fake Chrome**, so it pins the icon the
+> extension *generates*, not that real Chrome *paints* it — only the e2e test does
+> that.
 
 **Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). A
 UI snapshot case (`test/ui/`) names the requirement(s) it verifies by number, so a
@@ -40,8 +44,13 @@ can't observe), and its left cell carries a note rather than an image. A leaf
 tagged **`_(TBD)_`** is a **placeholder** — an edge case whose correct behavior
 isn't decided yet; its left cell shows a loud "TO BE DECIDED" banner (with a
 provisional render of *current* behavior when one exists), and it's exempt from
-the one-snapshot-per-leaf rule until the decision is made. The coverage gate is
-**segmented** by these kinds (`test/ui/behavior-coverage.js`). The left cells are
+the one-snapshot-per-leaf rule until the decision is made. A leaf tagged
+**`_(icon)_`** is the toolbar/extension icon: pixel-asserted like a render leaf,
+but produced by a different harness (the real `ui/toolbar-icon.js` loaded into a
+fake browser — `test/extension/extension-icon-snapshots.test.js`), so it carries
+no popup `req-<id>` case; its image is generated there and embedded the same way.
+The coverage gate is **segmented** by these kinds
+(`test/ui/behavior-coverage.js`, `test/ui/icon-coverage.js`). The left cells are
 generated; don't hand-edit a line carrying a `<!-- req-gallery:… -->` marker.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
@@ -1013,6 +1022,65 @@ Calendar template in a new browser tab.
 
 `9.3` _(behavior)_ A template opens in a tab **adjacent** to the current one,
 and the popup then closes.
+
+</td>
+</tr>
+</table>
+
+## 10. Toolbar icon
+
+The toolbar/extension icon signals how the current page's host is classified —
+before the popup is even opened — so the user knows at a glance whether a one-click
+extraction is first-class. It reflects the *host's classification*, not whether an
+event was found (the icon can't read the page, so a page where the generic fallback
+later finds an event still shows the blue icon). When the host is denylisted **or**
+supported it would otherwise show two icons; supported wins. Unlike the rest of
+this doc, these leaves are pinned by the **icon** snapshot test, not a popup
+snapshot (see "Verification kind" above).
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![extension-icon-supported](extension-icon-supported.png) <!-- req-gallery:10.1 -->
+
+</td>
+<td valign="top">
+
+`10.1` _(icon)_ On a host with a dedicated, first-class extractor (the **supported
+list**), the icon is **green**.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![extension-icon-denylisted](extension-icon-denylisted.png) <!-- req-gallery:10.2 -->
+
+</td>
+<td valign="top">
+
+`10.2` _(icon)_ On a host on the fallback **denylist** (where we've deliberately
+decided not to extract), the icon is **gray**.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![extension-icon-default](extension-icon-default.png) <!-- req-gallery:10.3 -->
+
+</td>
+<td valign="top">
+
+`10.3` _(icon)_ On any **other** page — neither supported nor denylisted, including
+an allowlisted host — the icon stays the manifest default, **blue**.
 
 </td>
 </tr>

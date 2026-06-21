@@ -10,9 +10,11 @@ This file is a **rough, feature-level description**. The **specific, numbered UI
 requirements** for the popup — exact text, layout, colors, card structure, the
 count label, scroll cues — live in [uiRequirements.md](uiRequirements.md) (the
 popup's testable contract, referenced by the UI snapshot tests). The rule of
-thumb: the *what and why* of a feature is here; the *exact rendering* of the popup
-is there. The toolbar icon and the source-request issue form are features in their
-own right and stay here.
+thumb: the *what and why* of a feature is here; the *exact rendering* is there.
+The **toolbar icon** is pixel-assertable like the popup, so its requirements live
+with the other visual requirements in [uiRequirements.md](uiRequirements.md)
+(§10 — "Toolbar icon"); the source-request issue form is a feature in its own
+right and stays here.
 
 ## Purpose
 
@@ -22,38 +24,11 @@ opened in a new tab, in one click.
 ## Toolbar icon
 
 The icon signals how the current page's host is classified, before the user
-clicks. It reflects the host's classification, not whether an event was found —
-the icon can't read the page, so a page where the generic fallback later finds an
-event still shows the blue (default) icon.
-
-Each state below is its own sub-requirement: a description and the exact icon the
-extension paints. Every image is generated and pixel-asserted from the shipped
-icons by `test/extension/extension-icon-states.test.js`, with the variant chosen
-by the real `ui/toolbar-icon.js` classification — so it always shows what Chrome
-actually paints.
-
-### Supported host — green
-
-![The green toolbar icon shown on a supported host](extension-icon-supported.png)
-
-The host has a dedicated, first-class extractor (e.g. `bandsintown.com`). The
-green icon tells the user a one-click extraction will use that first-class source.
-
-### Denylisted host — gray
-
-![The gray toolbar icon shown on a denylisted host](extension-icon-denylisted.png)
-
-The host is on the fallback denylist (e.g. `cnn.com`), where we've deliberately
-decided not to extract — see the "denylisted host" popup state below. The gray
-icon signals the extension will stay out of the way there.
-
-### Any other page — blue (default)
-
-![The blue default toolbar icon shown on any other page](extension-icon-default.png)
-
-The host is neither supported nor denylisted. The icon stays the manifest default
-(blue), since the icon can't read the page; the generic fallback may still find an
-event when the popup opens.
+clicks (green = supported, gray = denylisted, blue = anything else). It reflects
+the host's classification, not whether an event was found — the icon can't read
+the page, so a page where the generic fallback later finds an event still shows
+the blue (default) icon. The exact icon for each state — with its pixel-asserted
+image — is specified in [uiRequirements.md](uiRequirements.md) §10.
 
 ## What the popup shows
 
