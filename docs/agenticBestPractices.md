@@ -24,3 +24,11 @@ usually just whatever is captured-but-not-yet-upstreamed.
   assistant's instruction-following is the enforcement mechanism; the hook provides
   the check. Stay silent on success — only emit when something requires the user's
   decision. (`.claude/hooks/session-start.sh` is a worked example.)
+- **When an unattended routine fans out many change-proposals into the same few
+  target files, bundle them into one review unit, not one per item.** N separate
+  issues/PRs that each edit the same doc conflict pairwise — only the first merges
+  clean, the rest need rebasing — so the fan-out fights itself at merge time. Emit
+  one issue/PR carrying every proposal and let the downstream reviewer/curator pick
+  the subset (propose broadly, land them together). (Worked example: the Claudinite
+  portable-lesson hand-off bundles a run's lessons into one issue → one docs PR —
+  `docs/claude/auto-optimize-procedures.md`.)
