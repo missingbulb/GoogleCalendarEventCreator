@@ -22,7 +22,7 @@ function extractorSources() {
   const files = JSON.parse(
     readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8")
   );
-  assert.ok(files.length > 0, "pipeline/load-order.generated.json is empty");
+  assert.ok(files.length > 0, "extension/pipeline/load-order.generated.json is empty");
   return files.map((file) => ({ file, src: readFileSync(path.join(EXT, file), "utf8") }));
 }
 

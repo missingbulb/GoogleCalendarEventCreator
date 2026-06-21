@@ -21,7 +21,7 @@ test("the committed load order matches `npm run index`", () => {
   assert.equal(
     committed,
     render(computeLoadOrder()),
-    "pipeline/load-order.generated.json is stale — run `npm run index` and commit it"
+    "extension/pipeline/load-order.generated.json is stale — run `npm run index` and commit it"
   );
 });
 
