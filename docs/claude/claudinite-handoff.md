@@ -39,7 +39,12 @@ not redundancy.
   `claudinite-lesson`, copies it to `missingbulb/Claudinite` as a new
   `claudinite-lesson` issue (with a provenance backlink), then comments the link
   and **closes the source issue** (the canonical home is now the Claudinite issue).
-  It's deterministic — no agent — and bounded to issue plumbing.
+  It's deterministic — no agent — and bounded to issue plumbing. It fires the
+  instant the label lands (including at issue creation) and copies + closes within
+  seconds, so it's **effectively irreversible from this side**: to withhold a
+  borderline item, decide *before* filing and don't apply the label — removing the
+  label afterward loses the race, and the already-created Claudinite copy then has
+  to be closed in Claudinite, which a session scoped only to this repo can't reach.
 - **`.github/ISSUE_TEMPLATE/claudinite-lesson.yml`** — the structured proposal
   form (pre-applies the label), for a human filing one by hand. The
   optimize-procedures routine opens the labelled issue programmatically.
