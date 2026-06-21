@@ -1,9 +1,21 @@
 # Automated extractor implementation
 
 New site extractors are implemented automatically when an issue labelled
-`extractor-request` is opened. The work runs in **three stages, each fired by a
-label** — two GitHub Actions workflows with a Claude Code on the web routine
-between them:
+`extractor-request` is opened. The same pipeline runs in **two modes**, chosen by
+triage from whether the host already has a source:
+
+- **new-source mode** — no source matches the host yet: scaffold a brand-new
+  `pipeline/sources/<slug>.js` and fill its `extract()` + case.
+- **add-a-case mode** (the host is already **supported**) — instead of closing the
+  request, add a fresh integration case for the submitted page to the **existing**
+  source, hardening it against a second real page; the agent edits that source only
+  if the new page needs a change to extract. The case/branch are keyed by the
+  existing source's file name + the issue number (`plan-names.js` → `resolve-source.js`,
+  since the file name need not be the slug — `cinema.co.il` is served by
+  `telavivcinematheque.js`).
+
+The work runs in **three stages, each fired by a label** — two GitHub Actions
+workflows with a Claude Code on the web routine between them:
 
 ```
 extractor-request      → prepare workflow (auto-implement-extractor.yml)
@@ -49,12 +61,17 @@ Almost everything for this pipeline is one self-contained folder,
 
 - `agent-prompt-extractor.md` — the agent's prompt, **self-contained** (no
   build-time interpolation): the web routine points the agent at it, and it tells
-  the agent to derive the branch + file names from the issue's event URL itself
-  (the same `extractor-naming.js` the workflow used).
+  the agent to pick its mode (new-source vs add-a-case) and derive the branch +
+  file names from the issue's event URL itself (the same `resolve-source.js` /
+  `extractor-naming.js` the workflow used).
 - `triage-extractor-request.js`, `attach-sample-url.js`, `probe-url.js`,
-  `extractor-naming.js`, `derive-names.js`, `scaffold-source.js`,
-  `scaffold-case.js`, `add-supported-domain.js`, `case-quality.js` — the
-  deterministic Node steps the workflows run around the agent.
+  `extractor-naming.js`, `resolve-source.js`, `plan-names.js`, `derive-names.js`,
+  `scaffold-source.js`, `scaffold-case.js`, `add-supported-domain.js`,
+  `case-quality.js` — the deterministic Node steps the workflows run around the
+  agent. `resolve-source.js` (host → existing-source file, via the sources' own
+  `matches()`) and `plan-names.js` (the one place that turns a URL + issue number
+  into every mode-aware name) are the shared spine that lets triage, the agent, and
+  finalize all agree on the mode and file names without passing state around.
 - `phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh` — the bash the
   workflows call, so the YAML reads as a **thin orchestrator**: triggers,
   permissions, per-step `env:` wiring, one script invocation per step.
@@ -80,14 +97,20 @@ doesn't own them.
 
 1. Checks out the repo.
 2. **Triages the request** (`triage-extractor-request.js`): pulls the event URL
-   from the issue and decides whether the request is already settled. It closes
-   the issue as "not planned" and **skips every remaining step** (no probe, no
-   `npm ci`, no hand-off) for any of four reasons:
-   - **supported** — the host already has a dedicated source, per `config.js`'s
-     `supportedDomains` (a static mirror of the sources' own `matches()`, kept
-     honest by `test/unit/supported-domains.test.js`);
-   - **deny** / **allow** — the host is on the fallback denylist/allowlist (the
-     same `classifyHost` the popup uses, via `fallback-policy.js`);
+   from the issue, computes every mode-aware name (`plan-names.js`), and decides
+   how to handle it. Two of the dispositions **proceed** (probe + scaffold + agent);
+   the other three **close** the issue as "not planned" and skip every remaining
+   step. The dispositions:
+   - **supported** *(proceeds, add-a-case mode)* — an existing source already
+     matches the host (`resolve-source.js`, the sources' own `matches()`). Rather
+     than close the request, the pipeline runs in add-a-case mode: it records the
+     submitted page and the agent adds a fresh integration case to that existing
+     source (and edits it minimally only if the page needs it). `resolve-source`
+     supersedes the old static `supportedDomains` check here because it also yields
+     the **file** to harden — which the slug can't (`cinema.co.il` →
+     `telavivcinematheque.js`). Supported beats the allow/deny/sample checks below;
+   - **deny** / **allow** *(close)* — the host is on the fallback denylist/allowlist
+     (the same `classifyHost` the popup uses, via `fallback-policy.js`);
    - **sample** — another **open** `extractor-request` issue already targets
      this host (lowest issue number wins; a prior step gathers the open peers with
      `gh` and passes them in, so the script stays offline). The newer request's
@@ -102,9 +125,10 @@ doesn't own them.
      once the leader merges the host is `supported`, so later same-host requests
      triage as `supported`.
 
-   It also emits the event `url`, `host`, and the deterministic `slug`/`caseName`
-   (`extractor-naming.js`) the later steps consume. Runs before `npm ci`, so a
-   triaged request costs almost nothing, and fails **open** — any error proceeds.
+   It also emits the event `url`, `host`, `mode`, and the deterministic
+   `slug`/`sourceBase`/`caseName`/`branch`/`sourcePath` (`plan-names.js`) the later
+   steps consume. Runs before `npm ci`, so a triaged request costs almost nothing,
+   and fails **open** — any error proceeds.
 3. **Probes the event URL** (`probe-url.js`): fetches it the same way the recorder
    will (shared `data/fetch-page.js` — browser headers + retries) and decides
    whether the page is **usable** as a static case. Not usable when: the URL is
@@ -134,36 +158,42 @@ doesn't own them.
    empty one (#334; without it every SPA — barby #325, visit.tel-aviv #277 —
    records a shell and the agent bails).
 5. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
-   branches `claude/extractor/<slug>` off `main`; records the page inline
-   (`data/<caseName>.url` + the empty `.html` signal → `npm run refresh`, rendering
-   an SPA shell via headless Chrome when `data/spa-shell.js` flags one, asserted
-   non-empty); **scaffolds** `pipeline/sources/<slug>.js` with `matches()` filled
-   (`scaffold-source.js`) **and the placeholder case
-   `test/extractors/custom/<caseName>.json`** with empty `events`
-   (`scaffold-case.js`); registers the host in `supportedDomains`
-   (`add-supported-domain.js`); runs `npm run index` to regenerate the load lists;
-   requires a green baseline `npm run test:offline`; then commits + pushes. The
-   commit message is `chore: scaffold <slug> extractor …` — Phase 2 finds the
-   **scaffold commit** by that message. (A `GITHUB_TOKEN` push doesn't fire
-   `refresh-cache.yml`, so the page is recorded once.)
+   branches `<branch>` off `main`; records the page inline (`data/<caseName>.url` +
+   the empty `.html` signal → `npm run refresh`, rendering an SPA shell via headless
+   Chrome when `data/spa-shell.js` flags one, asserted non-empty); then, **in
+   new-source mode**, scaffolds `pipeline/sources/<slug>.js` with `matches()` filled
+   (`scaffold-source.js`) + the placeholder case (`scaffold-case.js`), registers the
+   host in `supportedDomains` (`add-supported-domain.js`), and runs `npm run index`;
+   **in add-a-case mode** it scaffolds *only* the placeholder case for the existing
+   source (no new source, no `supportedDomains` entry, no load-list change). Either
+   way it requires a green baseline `npm run test:offline`, then commits + pushes.
+   The commit message starts `chore: scaffold …` — Phase 2 finds the **scaffold
+   commit** by that prefix. (A `GITHUB_TOKEN` push doesn't fire `refresh-cache.yml`,
+   so the page is recorded once.)
 6. **Hands off to the agent (`handoff-to-agent.sh`):** posts a human-readable
    status comment, then swaps the label: removes `extractor-request`, adds
    `extractor-agent-ready`. **Adding that label is the trigger for the web
-   routine.** No machine-readable hand-off is needed — the agent derives the
-   branch + file names from the issue's event URL itself (same `extractor-naming.js`
-   the workflow used; for the auto-recorded case `caseName == slug`).
+   routine.** No machine-readable hand-off is needed — the agent recomputes its mode
+   + branch + file names from the issue's event URL itself (same `resolve-source.js`
+   / `plan-names.js` the workflow used). (In supported mode a separate step also
+   comments noting which existing source the new case will harden.)
 
 ## Stage 2 — the agent (Claude Code on the web)
 
 A web routine wired to the `extractor-agent-ready` label runs the agent against
-`agent-prompt-extractor.md`. The agent owns **only the judgment step**: derive the
-branch from the issue's event URL, check it out, read the real cached page, fill in
-`extract()` (and the source header), fill the pre-created case from the actual
-`npm run test:live` output, confirm `test:live` + `test:offline` are green.
+`agent-prompt-extractor.md`. The agent owns **only the judgment step**: pick its
+mode (new-source vs add-a-case, via `resolve-source.js`), check out the branch, read
+the real cached page, then either fill in `extract()` (new-source mode) or just add
+the case and confirm the existing extractor handles the page (add-a-case mode —
+editing the source only minimally, and only if the page needs it), fill the
+pre-created case from the actual `npm run test:live` output, and confirm `test:live`
++ `test:offline` are green.
 
-**The agent's write surface is exactly two files** — the source and the case.
-It commits and pushes *only those two* (it runs in its own environment now, so it
-must push for the finalize workflow to see its work), then re-labels:
+**The agent's write surface is exactly two files** — the source and the case (in
+add-a-case mode the source is a *pre-existing* file it may touch only minimally; it
+often touches just the case). It commits and pushes *only those two* (it runs in its
+own environment now, so it must push for the finalize workflow to see its work),
+then re-labels:
 
 - **success** → removes `extractor-agent-ready`, adds `extractor-agent-done` (the
   finalize trigger). It does **not** open the PR.
@@ -186,17 +216,23 @@ IIFE, as `meetup.js` does, rather than touch `pipeline/helpers/`.
 doesn't control, so the blast-radius guard is a guarantee rather than a request
 (`docs/architectureGuidelines.md`). It:
 
-1. **Re-derives the names** (`derive-names.js`) from the issue's event URL — the
-   same `slug`/`caseName`/`host` Phase 1 used, from the same code — since the
-   `labeled` event payload carries only the issue, not the branch.
+1. **Re-derives the names** (`derive-names.js` → `plan-names.js`) from the issue's
+   event URL — the same `mode`/`sourceBase`/`caseName`/`branch`/`host` Phase 1 used,
+   from the same code — since the `labeled` event payload carries only the issue,
+   not the branch. It runs on the default-branch checkout, so `resolve-source` sees
+   `main` and resolves the mode the same way triage did (a new-mode source isn't on
+   `main` yet; a supported host's source is).
 2. Checks out the agent's branch (`phase2-finalize.sh` does the `git checkout`).
 3. **Blast-radius guard:** finds the **scaffold commit** (the Phase-1 commit,
    matched by its message), then diffs the agent's commits against it. Because the
    agent now commits in a separate environment, this is a **commit diff**, not a
    working-tree diff: any file the agent changed *other than* the source + case is
    reverted to the scaffold state (a created file is removed) in a fresh commit, so
-   a misbehaving agent can't reach the PR. (If the extractor truly depended on a
-   reverted edit, the re-verify below goes red and no PR opens — exactly right.)
+   a misbehaving agent can't reach the PR. The allowed source path is mode-aware
+   (`sourcePath` from `derive-names`) — in add-a-case mode it's the **existing**
+   shipped source, so the agent's permitted minimal edit to it survives while
+   everything else is reverted. (If the extractor truly depended on a reverted edit,
+   the re-verify below goes red and no PR opens — exactly right.)
 4. **Quality floor** (`case-quality.js`): a deterministic backstop to the agent's
    bail judgment. Verdicts: `empty` (case has no events), `degenerate` (a filled
    case whose event has **no location** — the signature of a listing page that
@@ -269,6 +305,12 @@ lives in the web routine, not here.
 Every run that touches an issue leaves a comment. The expected stops **finish
 green** — only a genuine break is red:
 
+- **Already supported → adds a case** (green, prepare → PR) — the host has a
+  dedicated source, so instead of closing, the pipeline runs in **add-a-case mode**:
+  it comments which source the request relates to, records the submitted page, and
+  the agent adds a fresh integration case (hardening that source), which finalize
+  turns into a PR like any other. (A page that turns out not to be one usable event
+  still bails via Stage 2 / the quality floor, same as new-source mode.)
 - **Page not usable → handed to a human** (green, prepare) — the probe judged the
   page unusable: a 2xx bot-challenge / interstitial, a missing URL, or an outright
   download failure (exit 3 — a 403 / unreachable host / login or bot wall). No
@@ -294,9 +336,13 @@ In any of these, fall back to the manual process in
 ## Review gate
 
 The agent never merges the PR. A human must review:
-- The extractor logic in `pipeline/sources/<slug>.js`
-- The extracted values in `test/extractors/custom/<case-name>.json`
-- That `matches(host)` is correct for the target domain
+- **new-source mode:** the extractor logic in `pipeline/sources/<slug>.js`, the
+  extracted values in `test/extractors/custom/<case-name>.json`, and that
+  `matches(host)` is correct for the target domain.
+- **add-a-case mode:** the extracted values in the new
+  `test/extractors/custom/<base>-<issue>.json`, and — if the agent edited the
+  existing source — that the diff is a minimal, correct change (no refactor, no
+  regression to the other cases the source already covers).
 
 "LGTM" from the repo owner is the merge signal (see `docs/claude/github.md`). CI
 must go green before merging; the extractor branch adds a deterministic offline
@@ -306,8 +352,9 @@ integration case (not an e2e/heavy-browser test), so one green run suffices.
 
 The prompt is `tools/new-extractors-creation/agent-prompt-extractor.md`. It is
 **self-contained** — no placeholders, no build step: the web routine points the
-agent at it, and the agent derives the per-issue specifics (branch, source path,
-case path, host) from the issue's event URL via `extractor-naming.js`, exactly as
-the prepare workflow did. Edit that file to change what the agent does or add
-site-specific guidance; if the naming convention in `extractor-naming.js` ever
-changes, the prompt's Step 0 must follow it.
+agent at it, and the agent derives the per-issue specifics (mode, branch, source
+path, case path, host) from the issue's event URL via `resolve-source.js` +
+`extractor-naming.js`, exactly as the prepare workflow did (through `plan-names.js`).
+Edit that file to change what the agent does or add site-specific guidance; if the
+naming/mode convention in `plan-names.js` / `resolve-source.js` ever changes, the
+prompt's Step 0 must follow it.

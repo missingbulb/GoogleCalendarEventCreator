@@ -1,123 +1,137 @@
-# Task: write the `extract()` for a new site extractor
+# Task: implement a site extractor — or harden an existing one with a new case
 
 You are an expert at writing small, robust HTML scraping/parsing code. That is the
 one part of this job that needs judgment, so it's the only part left to you — a
-workflow has already done everything deterministic (branch, cached page, the
-scaffolded source with `matches()` filled, a placeholder test case, the
-`supportedDomains` entry, the regenerated load lists). **Your job: read the real
-cached page, fill in `extract()` so it pulls the event's fields correctly, fill in
-the test case from the real output, push the two files, and re-label the issue.**
+workflow has already done everything deterministic (branch, cached page, scaffolded
+files, load lists). There are **two modes**, and Step 0 tells you which one you're
+in:
+
+- **new-source mode** — the host has no extractor yet. You write `extract()` for a
+  freshly-scaffolded source and fill its test case.
+- **add-a-case mode** — the host **already** has a working extractor. You add a
+  fresh integration case for the submitted page and make it pass, hardening the
+  existing source against a second real page. You touch the existing source **only
+  if** the new page needs a change to extract correctly — and then only minimally.
 
 You are running as a Claude Code on the web routine, triggered by the
 `extractor-agent-ready` label on a GitHub issue. Everything you need you derive
 from that issue and its prepared branch — there is no hand-off file to read.
 
-## Step 0 — Derive your context and check out the branch
+## Step 0 — Derive your context, pick your mode, check out the branch
 
 The prepare workflow already created the branch and named everything
-deterministically from the issue's event URL, so you reproduce those names with
-the same code:
+deterministically. Reproduce those names with the same code, **from the repo's
+default branch (before you check anything out):**
 
 1. Take the **event URL**: the first `http(s)` URL in the issue body (the request
-   form lists it first).
-2. From the repo's default branch, derive the **slug** with the same helper the
-   workflow used:
+   form lists it first). Call the issue's number `<issue>`.
+2. **Decide the mode** by asking whether an existing source already handles the
+   host — using the sources' own `matches()`, run against the default branch:
    ```bash
-   SLUG=$(node -e "process.stdout.write(require('./tools/new-extractors-creation/extractor-naming').namesFor(process.argv[1]).slug)" "<event-url>")
+   BASE=$(node tools/new-extractors-creation/resolve-source.js "<event-url>" 2>/dev/null || true)
    ```
-3. The names all follow from the slug (for this auto-recorded case `caseName == slug`):
-   - **branch**: `claude/extractor/$SLUG`
-   - **source**: `pipeline/sources/$SLUG.js`
-   - **case**: `test/extractors/custom/$SLUG.json`
-   - **cached page**: `data/$SLUG.html` (URL — with the host — in `data/$SLUG.url`)
-4. Check the branch out and install deps:
+   - **`BASE` is empty → new-source mode.** Derive the slug:
+     ```bash
+     SLUG=$(node -e "process.stdout.write(require('./tools/new-extractors-creation/extractor-naming').namesFor(process.argv[1]).slug)" "<event-url>")
+     ```
+     - **branch**: `claude/extractor/$SLUG`
+     - **source**: `pipeline/sources/$SLUG.js` (scaffolded, `matches()` filled)
+     - **case**: `test/extractors/custom/$SLUG.json` (placeholder, `events: []`)
+     - **cached page**: `data/$SLUG.html` (URL in `data/$SLUG.url`)
+   - **`BASE` is non-empty → add-a-case mode.** `$BASE` is the existing source's
+     file name (e.g. `telavivcinematheque`). The names carry the issue number so
+     each request for a supported host gets its own case + branch:
+     - **branch**: `claude/extractor/$BASE-<issue>`
+     - **source**: `pipeline/sources/$BASE.js` — **already shipped and working**
+     - **case**: `test/extractors/custom/$BASE-<issue>.json` (placeholder, `events: []`)
+     - **cached page**: `data/$BASE-<issue>.html` (URL in `data/$BASE-<issue>.url`)
+3. Check the branch out and install deps:
    ```bash
-   git fetch origin "claude/extractor/$SLUG" && git checkout "claude/extractor/$SLUG"
+   git fetch origin "<branch>" && git checkout "<branch>"
    npm install        # dev deps aren't installed on a fresh checkout
    ```
-5. Sanity-check you're in the right place: `git diff --name-only origin/main...HEAD`
-   should list exactly the scaffolded **source** and **case** (plus the cached
-   `data/` files) — those two are your write surface.
+4. Sanity-check with `git diff --name-only origin/main...HEAD`:
+   - new-source mode lists the scaffolded **source** + **case** (plus `data/` files
+     and the regenerated load lists);
+   - add-a-case mode lists **only** a new **case** (plus its `data/` files) — the
+     existing source is untouched so far.
 
-Below, `<source>` / `<case>` / `<host>` / `<url>` refer to those derived values.
+Below, `<source>` / `<case>` / `<host>` / `<url>` refer to the derived values.
 
 ## Your write surface is exactly TWO files
 
-Edit only these — both already exist on the branch:
-1. `<source>` — the extractor. Fill in `extract()` and its header comment.
-   **Leave `matches()` alone.**
+Edit only these:
+1. `<source>` — the extractor.
+   - **new-source mode**: fill in `extract()` and its header comment. **Leave
+     `matches()` alone.**
+   - **add-a-case mode**: this is **shipped code other cases depend on**. Prefer to
+     **not touch it at all** — add the case and see if it already passes. Change it
+     **only if** the new page genuinely doesn't extract correctly, and then make the
+     **smallest** change that makes the new case pass **without regressing any
+     existing case** (the re-verify runs the whole suite). **Never refactor, rename,
+     restyle, or "improve" it**, and never touch `matches()`.
 2. `<case>` — the integration case. Fill in `expected` from the real test output.
 
 **Do not create any new file. Do not edit anything else** — not the load lists,
 not `supportedDomains`, not the cached page, and **not the shared helpers in
-`pipeline/helpers/` (even to "improve" or refactor them).** If your extractor
-needs a helper the shared ones don't provide, write it as a local function inside
-your source file's IIFE, exactly as `pipeline/sources/meetup.js` does with its
-`fullDescription`. (A guard in the finalize workflow reverts any change outside
-those two files before the PR, so straying just wastes your effort.)
+`pipeline/helpers/`** (even to "improve" them). If your extractor needs a helper the
+shared ones don't provide, write it as a local function inside `<source>`'s IIFE,
+exactly as `pipeline/sources/meetup.js` does with its `fullDescription`. (A guard in
+the finalize workflow reverts any change outside those two files before the PR, so
+straying just wastes your effort.)
 
 ## What is already set up for you
 
-- **The real event page is cached** at `data/<slug>.html` (URL in
-  `data/<slug>.url`). Read it — this is the markup your selectors must handle.
-- `<source>` exists, scaffolded with `matches(host)` already correct and a
-  placeholder `extract()`.
+- **The real event page is cached** at the `data/` path from Step 0 — read it; this
+  is the markup your selectors must handle.
 - `<case>` exists with `"events": []` — a placeholder for you to fill.
-- `<host>` is already in `supportedDomains`; the load lists are regenerated.
+- **new-source mode**: `<source>` is scaffolded with `matches(host)` correct and a
+  placeholder `extract()`; `<host>` is in `supportedDomains`; load lists regenerated.
+- **add-a-case mode**: `<source>` already exists and works; `<host>` is already
+  registered; nothing else was scaffolded.
 
 The issue body (from the **Event source request** form) may carry user-supplied
 name/time/location/description. Only the URL is authoritative — treat the rest as
 **hints to sanity-check your extraction against**, never values to copy in. Those
-hints are a **generic auto-scrape and are often wrong or garbage** (e.g. a US
-venue for a `.de` URL, `[object Object]`, a date that doesn't match the page). A
-**large divergence** between your extraction and the hints — different country,
-date, or venue — is a **red flag to re-examine whether this is really one usable
-event page**, not a cue to reconcile by copying the hints in.
+hints are a **generic auto-scrape and are often wrong or garbage** (e.g. a US venue
+for a `.de` URL, `[object Object]`, a date that doesn't match the page). A **large
+divergence** between your extraction and the hints — different country, date, or
+venue — is a **red flag to re-examine whether this is really one usable event
+page**, not a cue to reconcile by copying the hints in.
 
-If the body contains an **"Additional sample pages"** checklist block (extra event
-URLs folded in from duplicate requests for this same site), **ignore it** — turning
-those into cases means creating new `data/` + case files, which is outside your
-two-file surface (the finalize guard reverts anything else). They're a to-do for
-the maintainer reviewing your PR, not work for you.
+The form also has a **"Number of events on the page" field** (a count the extension
+fills from what the popup detected, defaulting to 1). When it's **1**, the page is
+expected to describe one specific event, and a multi-date listing is a sign
+something's off (re-examine, then bail per Step 1). When it's **greater than 1**, the
+page legitimately shows several events (a listing, calendar, or tour) — **extract
+them all** into a `result.events` array (Step 2); the single-event hints then
+describe just one of them, so divergence is expected and a multi-event result is
+still valid. Treat the count as a **hint, not a quota**: extract every genuine event
+the page actually carries even if that's more than the number given. If the field is
+absent, default the same way.
 
-The form also has a **"Number of events on the page" field** (a count the
-extension fills in from what the popup detected, defaulting to 1). When it's **1**,
-the page is expected to describe one specific event, and a multi-date listing is a
-sign something's off (re-examine, then bail per Step 1). When it's **greater than
-1**, the submitter (or the popup) is telling you the page legitimately shows
-several events (a listing, calendar, or tour with multiple dates) — so **extract
-them all** into a `result.events` array (see Step 2). In that case the
-single-event hints describe just one of the events on the page, so your extraction
-*should* contain more than one event and *will* diverge from those hints — that
-divergence is expected and the multi-event result is still a valid contribution,
-not a reason to bail. Treat the count as a **hint, not a quota**: it's a generic
-detection that can undercount, so extract every genuine event the page actually
-carries even if that's more than the number given. If the field is absent (an
-older issue or a hand-applied label), default the same way: extract every genuine
-event you find.
+## How extraction works (so you write/read the right thing)
 
-## How extraction works (so you write the right thing)
-
-When `matches(host)` is true, **your source is the *only* extractor that runs for
-the page** — it must produce every field itself. The generic fallback heuristics
-run *only* for unsupported hosts; they will **not** fill any gaps for you. What you
-*can* lean on is the page's own schema.org JSON-LD: the scaffold already ends with
+When `matches(host)` is true, **that source is the *only* extractor that runs for
+the page** — it must produce every field itself; the generic fallback runs *only*
+for unsupported hosts and won't fill gaps. What a source *can* lean on is the page's
+own schema.org JSON-LD: sources typically end with
 
 ```js
 return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
 ```
 
-so your DOM fields in `dom` win where present, and the page's embedded event fills
-the rest. Read `pipeline/sources/meetup.js` as the canonical example, and skim
-`pipeline/helpers/{dom,text,dates}.js` for the shared helpers on `GCal`
-(`text`, `firstText`, `blockText`, `normalizeDateValue`, `findTimezone`, …).
+so DOM fields win where present and the page's embedded event fills the rest. Read
+`pipeline/sources/meetup.js` as the canonical single-event example and
+`pipeline/sources/telavivcinematheque.js` as the multi-event/series one; skim
+`pipeline/helpers/{dom,text,dates}.js` for the shared `GCal` helpers.
 
 ---
 
-## Step 1 — Is the cached page one specific event?
+## Step 1 — Is the cached page one usable event (or a clean multi-event listing)?
 
 ```bash
-wc -c data/<slug>.html
+wc -c <cached-page>
 ```
 
 Open it and confirm it carries **at least one genuine, fully-formed event** — a
@@ -126,64 +140,49 @@ when there's nothing a static extractor can turn into a calendar event:
 
 - a bot/CAPTCHA challenge, a login wall, or a cookie interstitial;
 - an empty single-page-app shell with no event data in the HTML;
-- **a page from which you can't assemble even one complete event** — the only
-  title you can get is a bare **artist or venue name** with no single date+venue
-  attached to it (#283: a livenation.de artist page with five tour dates produced
-  just title `"Muse"`, no location). A location-less event is rejected by the
-  finalize workflow's quality floor, so if you can't get a venue, bail.
+- **a page from which you can't assemble even one complete event** — the only title
+  you can get is a bare **artist or venue name** with no single date+venue attached
+  (#283). A location-less event is rejected by the finalize quality floor, so if you
+  can't get a venue, bail.
 
-A page that shows **multiple events** is **not** itself a reason to bail — the
-pipeline supports a source returning many events (Step 2). Decide by what each
-entry yields, and let the "Number of events on the page" count guide you:
+A page that shows **multiple events** is **not** itself a reason to bail — a source
+may return many events (Step 2). Let the count guide you: one specific event →
+extract it; a listing/tour where each entry is a complete event → extract them all;
+a listing whose entries are **not** complete events → bail.
 
-- The page is **one specific event** (single title, date, venue) — extract that
-  one event. If the count was greater than 1 yet you find only one, that's fine;
-  extract the one.
-- The page is a **listing / calendar / tour** where each entry is a complete event
-  (its own title — or a shared title — plus its own date *and* a venue) — extract
-  **all of them** into `result.events`. This is the case a count greater than 1
-  signals.
-- The page is a listing whose entries are **not** complete events (bare
-  artist/venue names, dates with no venue) — bail per the third bullet above; there
-  's no event to build.
+Note where the title, date/time, location, and description live.
 
-Note where the title, date/time, location, and description live for the event(s)
-you'll extract.
+## Step 2 — Make the extraction work
 
-## Step 2 — Fill in `extract()`
+- **new-source mode:** edit `<source>` — replace the placeholder field reads with
+  selectors that match the cached page, add `location` / `description` / `ctz` as
+  warranted, complete the header comment, mirroring `meetup.js`. Supply only the
+  fields the page needs; let `merge(...)` fold in JSON-LD. Leave `matches()` alone.
+  For a multi-event page, return an object with an `events` array (one entry per
+  occurrence; the orchestrator groups same-titled showings).
 
-Edit `<source>`: replace the placeholder field reads with selectors that match
-`data/<slug>.html`, add `location` / `description` / `ctz` as the page
-warrants, and complete the header comment (expected HTML + where each field comes
-from), mirroring `meetup.js`. Supply only the fields the page needs; let
-`merge(...)` fold in JSON-LD for the rest. Leave `matches()` alone.
-
-**For a single event**, return one partial event object (the scaffold's
-`merge(dom, …)` shape). **For a multi-event page** (Step 1 — the count-greater-
-than-1 case), return an object with an `events` array instead — one entry per
-event, each with its own `title`/`start`/`location`/… — plus optional page-level
-`description`/`ctz` that fill any field an individual event didn't carry. The
-orchestrator folds same-titled showings into one multi-instance event on its own,
-so emit one entry per distinct occurrence and let it group them
-(`pipeline/sources/telavivcinematheque.js` is the canonical multi-event/series
-example).
+- **add-a-case mode:** **do not edit the source yet.** Go straight to Step 3 and run
+  the existing extractor against the new page. Only if the output is wrong/empty do
+  you come back and make the **minimal** source change described under "write
+  surface" — re-running the full suite each time to confirm no existing case broke.
 
 ## Step 3 — See the real extraction
 
-Run the live tests — the placeholder case fails but prints the **actual extracted
-values**:
+The placeholder case fails but prints the **actual extracted values**:
 ```bash
 npm run test:live 2>&1
 ```
-There is **no `url` field** in the case JSON — the URL lives in `data/<slug>.url`.
+There is **no `url` field** in the case JSON — the URL lives in the `data/…​.url`
+file.
 
 ## Step 4 — Fill the case and verify
 
-In `<case>`, replace `"events": []` with the **actual** output from Step 3 (copy
-it — never guess) and write a one-line `description`, having checked those values
-are genuinely right for the page (cross-check the issue hints). If a field is wrong
-or empty, fix the selectors in `<source>` and re-run. Then both of these must
-pass:
+In `<case>`, replace `"events": []` with the **actual** output from Step 3 (copy it
+— never guess) and write a one-line `description`, having checked the values are
+genuinely right for the page (cross-check the issue hints). If a field is wrong or
+empty: in new-source mode fix your selectors; in add-a-case mode make the minimal
+source change (or, if the page isn't really one usable event, bail per Step 5b).
+Then both must pass:
 ```bash
 npm run test:live
 npm run test:offline
@@ -193,31 +192,29 @@ npm run test:offline
 
 When both suites are green:
 
-1. Commit **only your two files** and push to the branch:
+1. Commit **only your two files** (in add-a-case mode where you didn't need a source
+   change, that's just the case) and push:
    ```bash
-   git add <source> <case>
-   git commit -m "feat: add <slug> extractor (Refs #<issue>)"
+   git add <source> <case>   # <source> only if you actually changed it
+   git commit -m "<feat: add <slug> extractor | test: add <host> case> (Refs #<issue>)"
    git push origin <branch>
    ```
-2. On the issue, **remove the `extractor-agent-ready` label and add
-   `extractor-agent-done`.** Adding that label is what triggers the finalize
-   workflow (it re-verifies your work, enforces the two-file blast radius, and
-   opens the PR). Do **not** open the PR yourself.
+2. On the issue, **remove `extractor-agent-ready` and add `extractor-agent-done`** —
+   that label triggers the finalize workflow (it re-verifies, enforces the two-file
+   blast radius, and opens the PR). Do **not** open the PR yourself.
 
 That's it — stop after re-labeling.
 
 ## Step 5b — Bail (the page was NOT one usable event)
 
-If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page:
+If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page with no
+complete event:
 
-1. **Leave the case's `events` empty** and do not push any extractor changes.
-2. **Comment on the issue** with a one-sentence diagnosis of what the page
-   actually is, e.g. *"This is a livenation.de artist page listing five tour dates,
-   not a single event page — there's no one date+venue a static extractor could
-   turn into a calendar event."*
-3. On the issue, **remove the `extractor-agent-ready` label and add
-   `extractor-blocked-needs-human`** — create that label first, since GitHub won't
-   make a new label on `--add-label`:
+1. **Leave the case's `events` empty** and make no source change.
+2. **Comment on the issue** with a one-sentence diagnosis of what the page actually
+   is.
+3. **Remove `extractor-agent-ready` and add `extractor-blocked-needs-human`** —
+   create that label first (GitHub won't make a new label on `--add-label`):
    ```bash
    gh label create "extractor-blocked-needs-human" --color B60205 \
      --description "Automation could not proceed; a maintainer needs to take this over by hand" \
@@ -226,18 +223,21 @@ If Step 1 found a bot/login wall, an empty SPA shell, or a listing/tour page:
      --remove-label "extractor-agent-ready" \
      --add-label "extractor-blocked-needs-human"
    ```
-   Do not add `extractor-agent-done` (that's the success signal). Then stop.
+   Do not add `extractor-agent-done`. Then stop.
 
 ---
 
 ## Hard constraints
 
-- **Edit exactly two files**: `<source>` (just `extract()` + its header) and
-  `<case>`. Create nothing; touch nothing else — not `matches()`, the load lists,
-  `supportedDomains`, the cached page, or the shared helpers.
+- **Edit at most two files**: `<source>` and `<case>`. Create nothing; touch nothing
+  else — not `matches()`, the load lists, `supportedDomains`, the cached page, or the
+  shared helpers.
+- **In add-a-case mode, the existing source is shipped code.** Don't touch it unless
+  the new page needs it to pass; if it does, make the smallest change that keeps
+  every existing case green. Never refactor it.
 - **Never fabricate input or output.** Don't hand-write HTML, and don't invent
-  `expected` values — copy them from the real `npm run test:live` run. If the page
-  isn't usable (Step 1), bail via Step 5b instead.
-- **No `url` field** inside the case JSON — it lives in `data/<slug>.url`.
+  `expected` values — copy them from the real `npm run test:live`. If the page isn't
+  usable, bail via Step 5b.
+- **No `url` field** inside the case JSON — it lives in the `data/…​.url` file.
 - **Re-label, don't open the PR.** Success → `extractor-agent-done`; bail →
   `extractor-blocked-needs-human`. The finalize workflow opens the PR.

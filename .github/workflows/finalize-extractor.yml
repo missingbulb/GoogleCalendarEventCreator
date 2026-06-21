@@ -43,14 +43,18 @@ jobs:
           node-version: 22
           cache: npm
 
-      # Re-derive the deterministic slug / caseName / host from the issue's event
-      # URL — the same names Phase 1 used — so this workflow knows which branch and
-      # files to finalize without the agent passing them back.
+      # Re-derive the deterministic mode-aware names from the issue's event URL —
+      # the same names Phase 1 used — so this workflow knows which branch and files
+      # to finalize without the agent passing them back. Runs on the default-branch
+      # checkout (an `issues` event), so resolve-source sees `main`: a new-mode
+      # source isn't there yet, a supported host's source is — which is exactly how
+      # planNames tells the two modes apart.
       - name: Derive names from the issue
         id: names
         env:
-          ISSUE_BODY:  ${{ github.event.issue.body }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY:   ${{ github.event.issue.body }}
+          ISSUE_TITLE:  ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: node tools/new-extractors-creation/derive-names.js
 
       - name: Configure git
@@ -66,8 +70,11 @@ jobs:
       - name: Finalize — verify, commit, open PR
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
-          BRANCH:       claude/extractor/${{ steps.names.outputs.slug }}
+          MODE:         ${{ steps.names.outputs.mode }}
+          BRANCH:       ${{ steps.names.outputs.branch }}
           SLUG:         ${{ steps.names.outputs.slug }}
+          SOURCE_BASE:  ${{ steps.names.outputs.sourceBase }}
+          SOURCE_PATH:  ${{ steps.names.outputs.sourcePath }}
           CASE_NAME:    ${{ steps.names.outputs.caseName }}
           HOST:         ${{ steps.names.outputs.host }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}

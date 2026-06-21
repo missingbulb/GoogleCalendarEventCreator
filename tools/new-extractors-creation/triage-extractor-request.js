@@ -1,25 +1,26 @@
 // Pre-flight triage for the Auto-implement-extractor workflow
 // (.github/workflows/auto-implement-extractor.yml). Before spending an agent
-// run, decide whether the request should be closed without one. Four reasons:
-//   "supported" — the host already has a dedicated source (config.js's
-//                 supportedDomains), so a custom extractor isn't needed.
-//   "deny"      — the host is on the fallback denylist.
-//   "allow"     — the host is on the fallback allowlist (generic extractor
-//                 already handles it).
-//   "sample"    — another OPEN extractor-request issue already targets this
-//                 host (a request whose PR is still in review keeps its issue
-//                 open, since the PR only `Closes #N` on merge). The lowest
-//                 issue number wins, so two near-simultaneous requests resolve
-//                 to exactly one agent run. Rather than discard the newer
-//                 request's URL, the workflow folds it into the leader issue as
-//                 an extra sample page (a second real event page is useful raw
-//                 material for a more robust extractor); this script names the
-//                 leader + emits the URL for the workflow to attach.
-// Any of these closes the issue and skips the agent.
+// run, decide how to handle the request. The host's situation sorts it into one
+// of these:
+//   "supported" — the host already has a dedicated source. We DON'T close it any
+//                 more: the pipeline runs in **supported mode** and adds a fresh
+//                 integration case to that existing source (hardening it against a
+//                 second real page) instead of scaffolding a new one. plan-names.js
+//                 resolves which existing source via the sources' own matches().
+//   "deny"      — the host is on the fallback denylist.            } these three
+//   "allow"     — the host is on the fallback allowlist (generic   } still CLOSE
+//                 extractor already handles it).                    } the request
+//   "sample"    — another OPEN extractor-request issue already targets this host
+//                 (a request whose PR is still in review keeps its issue open).
+//                 The lowest issue number wins; the newer request's URL is folded
+//                 into the leader issue as an extra sample page.
+// deny / allow / sample close the issue and skip the agent (skipAgent=true);
+// supported and "no match" both PROCEED (skipAgent=false) — supported in supported
+// mode, no-match in new-source mode.
 //
-// Reuses fallback-policy.js (the same classifier the popup uses) so the workflow
-// and the popup can never disagree about a host — config.js's lists stay the
-// single source of truth.
+// Reuses fallback-policy.js (the popup's host classifier) for deny/allow and
+// resolve-source.js (the sources' matches()) for supported, so the workflow and
+// the popup can never disagree about a host.
 //
 // As a script (run by the workflow):
 //   in  (env):  ISSUE_BODY, ISSUE_TITLE, ISSUE_NUMBER — the issue's raw fields
@@ -27,9 +28,10 @@
 //               `gh issue list --json number,title,body` array of OTHER open
 //               extractor-request issues (the workflow gathers it; this script
 //               never touches the network, so the unit tests stay offline)
-//   out (GITHUB_OUTPUT): skipAgent, reason, url, host, slug, caseName; plus
-//                        leader=<#> when reason="sample" (the URL to fold into
-//                        that leader issue is the emitted `url`)
+//   out (GITHUB_OUTPUT): skipAgent, reason, mode, url, host, slug, sourceBase,
+//                        caseName, branch, sourcePath, casePath; plus leader=<#>
+//                        when reason="sample" (the URL to fold into that leader
+//                        issue is the emitted `url`)
 //   out (file, when skipping): /tmp/triage-message.md — the closing comment
 // As a module (the tests): exports firstUrl() and runTriage().
 "use strict";
@@ -37,7 +39,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
-const { namesFor } = require("./extractor-naming");
+const { planNames } = require("./plan-names");
 
 const MESSAGE_PATH = "/tmp/triage-message.md";
 const OPEN_REQUESTS_PATH = process.env.OPEN_REQUESTS_FILE || "/tmp/open-requests.json";
@@ -82,12 +84,6 @@ function earlierDuplicate(host, currentNumber, openRequests) {
 
 function skipMessage(reason, { host, duplicateOf }) {
   switch (reason) {
-    case "supported":
-      return (
-        `This request was auto-triaged and closed without an agent run: \`${host}\` already has a ` +
-        `dedicated extractor (\`pipeline/sources/\`), so a custom source isn't needed.\n\n` +
-        `If extraction on this site is actually broken, please open a bug report instead.`
-      );
     case "deny":
       return (
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
@@ -117,12 +113,12 @@ function skipMessage(reason, { host, duplicateOf }) {
   }
 }
 
-// Decide whether a request should be closed without an agent run, and why.
-// `lists` defaults (via fallback-policy.js) to the shipped config; tests pass
-// their own. `openRequests` is the array of OTHER open extractor-request issues
-// (for the duplicate check); omit it to skip that check.
+// Decide how a request should be handled, and why. `lists` defaults (via
+// fallback-policy.js) to the shipped config; tests pass their own. `openRequests`
+// is the array of OTHER open extractor-request issues (for the duplicate check);
+// omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
-  const { classifyHost, isSupportedDomain } = await import(
+  const { classifyHost } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "fallback-policy.js"))
   );
 
@@ -130,30 +126,38 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
   const host = hostOf({ body, title });
   const currentNumber = Number.isInteger(Number(number)) ? Number(number) : undefined;
 
-  // Precedence: an already-supported or listed host is a settled decision;
-  // the duplicate check only matters for a host that would otherwise proceed.
+  // All the mode-aware names in one place. `mode === "supported"` means an
+  // existing source already handles the host (resolve-source) — that's the top
+  // precedence: we add a case to it rather than weigh allow/deny/dup at all.
+  const names = planNames(url, currentNumber);
+
   const listing = classifyHost(url, lists); // "allow" | "deny" | "none"
   let reason = "";
   let duplicateOf = null;
-  if (isSupportedDomain(url, lists)) reason = "supported";
+  if (names.mode === "supported") reason = "supported";
   else if (listing === "deny") reason = "deny";
   else if (listing === "allow") reason = "allow";
   else if ((duplicateOf = earlierDuplicate(host, currentNumber, openRequests))) reason = "sample";
 
-  const triaged = reason !== "";
-  // Deterministic branch/cache names the workflow uses when it proceeds (does
-  // Phase 1 itself). Derived here so the URL is parsed once, in one place.
-  const { slug, caseName } = namesFor(url);
+  // deny / allow / sample CLOSE the request; supported and no-match PROCEED to the
+  // probe + Phase 1 (supported mode adds a case, no-match scaffolds a new source).
+  const skipAgent = reason === "deny" || reason === "allow" || reason === "sample";
+
   return {
     url,
     host,
-    slug,
-    caseName,
+    slug: names.slug,
+    mode: names.mode,
+    sourceBase: names.sourceBase,
+    caseName: names.caseName,
+    branch: names.branch,
+    sourcePath: names.sourcePath,
+    casePath: names.casePath,
     listing,
     reason,
     duplicateOf,
-    triaged,
-    message: triaged ? skipMessage(reason, { host, duplicateOf }) : "",
+    skipAgent,
+    message: skipAgent ? skipMessage(reason, { host, duplicateOf }) : "",
   };
 }
 
@@ -174,34 +178,35 @@ if (require.main === module) {
       undefined,
       openRequests
     );
-    if (res.triaged) {
+    if (res.skipAgent) {
       fs.writeFileSync(MESSAGE_PATH, res.message);
       const detail =
-        res.reason === "sample"
-          ? `extra sample for #${res.duplicateOf}`
-          : res.reason === "supported"
-            ? "already supported"
-            : `on the ${res.reason}list`;
-      console.log(`Auto-triaged: ${res.host || res.url} (${detail}) — skipping the agent run.`);
+        res.reason === "sample" ? `extra sample for #${res.duplicateOf}` : `on the ${res.reason}list`;
+      console.log(`Auto-triaged: ${res.host || res.url} (${detail}) — closing, no agent run.`);
     } else {
       console.log(
         res.url
-          ? `No triage match for ${res.host || res.url} — proceeding to the agent.`
+          ? `Proceeding for ${res.host || res.url} in ${res.mode} mode (case ${res.caseName}).`
           : "No URL found in the issue — proceeding to the agent."
       );
     }
-    // url/host/slug/caseName feed the workflow's probe + Phase-1 steps when it
-    // proceeds (skipAgent=false). Empty when the body had no parseable URL — the
-    // probe step then stops the run with a "no event URL" message. `leader` is
-    // the issue this defers to in the "sample" case (else ""), so the workflow
-    // can fold the emitted `url` into that leader before closing this one.
+    // When it proceeds (skipAgent=false), the mode-aware names feed the probe +
+    // Phase-1 steps: `mode` (new|supported) decides whether Phase 1 scaffolds a
+    // new source or just a case; `sourcePath`/`casePath`/`branch`/`caseName` name
+    // the files. Empty when the body had no parseable URL — the probe step then
+    // stops the run. `leader` is the issue a "sample" defers to (else "").
     writeOutputs({
-      skipAgent: res.triaged,
+      skipAgent: res.skipAgent,
       reason: res.reason,
+      mode: res.mode,
       url: res.url,
       host: res.host,
       slug: res.slug,
+      sourceBase: res.sourceBase,
       caseName: res.caseName,
+      branch: res.branch,
+      sourcePath: res.sourcePath,
+      casePath: res.casePath,
       leader: res.duplicateOf ?? "",
     });
   })().catch((e) => {
