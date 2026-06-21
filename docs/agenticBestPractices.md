@@ -16,4 +16,11 @@ up (via a `claudinite-lesson` issue) and, once the canon absorbs them and the
 submodule pin updates, prunes them from this file. So this doc stays small —
 usually just whatever is captured-but-not-yet-upstreamed.
 
-_No locally-captured agentic best practices pending promotion right now._
+- **A SessionStart hook gates session progress through directive text, not blocking.**
+  A SessionStart hook can't block execution or prompt interactively — its stdout is
+  injected into the session as context the assistant reads. Use this for environment
+  or setup validation: when a check fails, output a STOP directive that tells the
+  assistant to ask the user (via AskUserQuestion) before doing any work. The
+  assistant's instruction-following is the enforcement mechanism; the hook provides
+  the check. Stay silent on success — only emit when something requires the user's
+  decision. (`.claude/hooks/session-start.sh` is a worked example.)
