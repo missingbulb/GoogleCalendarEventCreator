@@ -21,15 +21,6 @@ right and stays here.
 Turn the event on the current web page into a pre-filled Google Calendar event,
 opened in a new tab, in one click.
 
-## Toolbar icon
-
-The icon signals how the current page's host is classified, before the user
-clicks (green = supported, gray = denylisted, blue = anything else). It reflects
-the host's classification, not whether an event was found — the icon can't read
-the page, so a page where the generic fallback later finds an event still shows
-the blue (default) icon. The exact icon for each state — with its pixel-asserted
-image — is specified in [uiRequirements.md](uiRequirements.md) §10.
-
 ## What the popup shows
 
 When opened, the popup lands in one of five states:

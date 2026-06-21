@@ -1,11 +1,14 @@
-// UI snapshot tests. Each case (test/ui/cases/<name>.case.js) supplies fake data
-// (and an optional DOM action); the renderer feeds it to the popup's REAL
-// render() — the same chooseContent + view code the extension runs — and
-// rasterizes the result, which is compared pixel-by-pixel (via pixelmatch)
-// against the committed reference PNG (test/ui/cases/<name>.png). So the
-// snapshots track the shipped views and styles directly; there is no
-// hand-maintained copy of the popup markup. Run `npm run refresh:ui` to
-// regenerate after an intentional change to the popup, the views, or ui/popup.css.
+// UI snapshot tests — the single visual-comparison engine for every pixel-asserted
+// requirement. Each case (test/ui/cases/<name>.case.js) supplies fake data;
+// render-snapshot.js turns it into a PNG with the RIGHT renderer (the popup's REAL
+// render() for a popup leaf, the real ui/toolbar-icon.js in a fake browser for an
+// `_(icon)_` leaf — §10), and the result is compared pixel-by-pixel (via
+// pixelmatch) against the committed reference PNG (test/ui/cases/<name>.png). So the
+// snapshots track the shipped code directly; there is no hand-maintained copy of
+// the popup markup or the icon art. The comparison, naming, and refresh below are
+// shared across both — only the pixel source differs. Run `npm run refresh:ui` to
+// regenerate after an intentional change to the popup, the views, ui/popup.css, or
+// the toolbar icon.
 //
 // A case is a self-contained scenario: its data lives only in the case file
 // (never in production code, never in a shared gallery). See docs/claude/testing.md.
@@ -17,7 +20,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
-const { renderCasePng, loadCases, CASES_DIR } = require("./popup-renderer");
+const { loadCases, CASES_DIR } = require("./popup-renderer");
+const { renderSnapshot } = require("./render-snapshot");
 const { artifactPath } = require("./snapshot-artifacts-dir");
 
 // Rendering is deterministic (satori + resvg + bundled fonts, no browser), so a
@@ -89,6 +93,6 @@ test("the environment resolves to the en-US locale the snapshots assume", () => 
 
 for (const testCase of CASES) {
   test(`UI case "${testCase.name}" (${testCase.description}) matches its snapshot`, async () => {
-    await compareToSnapshot(testCase.name, await renderCasePng(testCase));
+    await compareToSnapshot(testCase.name, await renderSnapshot(testCase));
   });
 }

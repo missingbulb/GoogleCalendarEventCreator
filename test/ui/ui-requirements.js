@@ -45,11 +45,11 @@ function leafRequirementIds(docPath = DOC_PATH) {
 // BEHAVIOR test (a click/navigation a snapshot can't observe), not a UI snapshot
 // — the segmentation behind the coverage gate (test/ui/behavior-coverage.js,
 // docs/engineeringPractices.md #429). A requirement tagged `_(icon)_` is the
-// toolbar/extension icon, verified by the ICON snapshot test
-// (test/ui/icon-coverage.js → test/extension/extension-icon-snapshots.test.js): a
-// pixel snapshot too, but produced by a different harness (the real
-// ui/toolbar-icon.js in a fake browser), not the popup's render(), so it carries no
-// req-<id> popup case. A requirement tagged `_(TBD)_` is a PLACEHOLDER: an edge
+// toolbar/extension icon — a snapshot leaf with its own req-<id> case like a render
+// leaf, but whose PNG is produced by a different renderer (the real
+// ui/toolbar-icon.js in a fake browser; test/ui/icon-renderer.js via
+// test/ui/render-snapshot.js), not the popup's render(). A requirement tagged
+// `_(TBD)_` is a PLACEHOLDER: an edge
 // case whose correct behavior is not yet decided — it's shown with a "TO BE
 // DECIDED" banner and is exempt from the snapshot bijection (it MAY carry a
 // provisional snapshot of current behavior, but isn't required to). Everything else

@@ -45,13 +45,15 @@ tagged **`_(TBD)_`** is a **placeholder** — an edge case whose correct behavio
 isn't decided yet; its left cell shows a loud "TO BE DECIDED" banner (with a
 provisional render of *current* behavior when one exists), and it's exempt from
 the one-snapshot-per-leaf rule until the decision is made. A leaf tagged
-**`_(icon)_`** is the toolbar/extension icon: pixel-asserted like a render leaf,
-but produced by a different harness (the real `ui/toolbar-icon.js` loaded into a
-fake browser — `test/extension/extension-icon-snapshots.test.js`), so it carries
-no popup `req-<id>` case; its image is generated there and embedded the same way.
-The coverage gate is **segmented** by these kinds
-(`test/ui/behavior-coverage.js`, `test/ui/icon-coverage.js`). The left cells are
-generated; don't hand-edit a line carrying a `<!-- req-gallery:… -->` marker.
+**`_(icon)_`** is the toolbar/extension icon: pinned by a `req-<id>` snapshot
+exactly like a render leaf — same naming, same gallery, same comparison — only its
+PNG is produced by a different renderer (the real `ui/toolbar-icon.js` loaded into
+a fake browser, `test/ui/icon-renderer.js`) instead of the popup's `render()`
+(`render-snapshot.js` dispatches by kind). So the coverage gate is **segmented**
+only into snapshot vs behavior (`test/ui/behavior-coverage.js`): render and icon
+leaves each carry one `req-<id>` snapshot, a behavior leaf carries a note instead.
+The left cells are generated; don't hand-edit a line carrying a
+`<!-- req-gallery:… -->` marker.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
 specification. When a rendering is conditional — "in case X render Y, in case Z
@@ -1042,7 +1044,7 @@ snapshot (see "Verification kind" above).
 <tr>
 <td valign="top" width="320">
 
-![extension-icon-supported](extension-icon-supported.png) <!-- req-gallery:10.1 -->
+![req-10.1](../test/ui/cases/req-10.1.png) <!-- req-gallery:10.1 -->
 
 </td>
 <td valign="top">
@@ -1058,7 +1060,7 @@ list**), the icon is **green**.
 <tr>
 <td valign="top" width="320">
 
-![extension-icon-denylisted](extension-icon-denylisted.png) <!-- req-gallery:10.2 -->
+![req-10.2](../test/ui/cases/req-10.2.png) <!-- req-gallery:10.2 -->
 
 </td>
 <td valign="top">
@@ -1074,7 +1076,7 @@ decided not to extract), the icon is **gray**.
 <tr>
 <td valign="top" width="320">
 
-![extension-icon-default](extension-icon-default.png) <!-- req-gallery:10.3 -->
+![req-10.3](../test/ui/cases/req-10.3.png) <!-- req-gallery:10.3 -->
 
 </td>
 <td valign="top">
