@@ -62,7 +62,7 @@ folder:
   factored out.
 
 Shared infrastructure stays where it's shared — this pipeline consumes it, it
-doesn't own it: `executable-requirements/data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
+doesn't own it: `executable-requirements/infra/data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
 `extension/fallback-policy.js` (the popup's host classifier), and `tools/index.js`
 (`npm run index`).
 

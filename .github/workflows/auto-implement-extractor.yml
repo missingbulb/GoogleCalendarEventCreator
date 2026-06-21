@@ -104,7 +104,7 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
       # Pre-flight URL probe. Fetch the event page the same way the recorder will
-      # (tools/new-extractors-creation/probe-url.js → executable-requirements/data/fetch-page.js: browser headers + retries) and
+      # (tools/new-extractors-creation/probe-url.js → executable-requirements/infra/data/fetch-page.js: browser headers + retries) and
       # judge whether it's usable as a static case — a 2xx that's actually a
       # bot-challenge / interstitial counts as NOT usable (probe-url.js sniffs the
       # body). If it isn't usable — URL missing, non-2xx, unreachable, behind a
@@ -203,7 +203,7 @@ jobs:
 
       # Provide a Chrome for Testing binary so Phase 1's `npm run refresh` can
       # render a data-less JS single-page-app shell into extractable HTML
-      # (executable-requirements/data/render-page.js / executable-requirements/data/spa-shell.js, issues #310/#334). Without this
+      # (executable-requirements/infra/data/render-page.js / executable-requirements/infra/data/spa-shell.js, issues #310/#334). Without this
       # the recorder records the empty shell and the agent bails on every SPA
       # (barby #325, visit.tel-aviv #277). Same on-demand fetch + monthly cache as
       # refresh-cache.yml and the e2e smoke test — no project dependency added.

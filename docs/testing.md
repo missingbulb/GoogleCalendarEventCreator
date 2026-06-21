@@ -59,7 +59,7 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- **`executable-requirements/data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
+- **`executable-requirements/infra/data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
   that is missing or empty (zero bytes). A failed fetch keeps the previous
   cached HTML file and only warns, so a site outage or bot-blocking never breaks
   the suite.

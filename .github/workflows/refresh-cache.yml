@@ -40,7 +40,7 @@ jobs:
 
       # Provide a Chrome for Testing binary so the recorder can render a
       # data-less JS single-page-app shell into extractable HTML (issue #310;
-      # executable-requirements/data/render-page.js). Same on-demand fetch + monthly cache as the e2e
+      # executable-requirements/infra/data/render-page.js). Same on-demand fetch + monthly cache as the e2e
       # smoke test in test.yml — no project dependency added. Without this the
       # recorder simply keeps the static HTML (the render step no-ops).
       - name: Chrome for Testing cache key

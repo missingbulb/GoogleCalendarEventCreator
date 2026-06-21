@@ -24,7 +24,7 @@ the rules of the road.
 | `extension/pipeline/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `executable-requirements/extractors/custom/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `executable-requirements/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
-| `executable-requirements/data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
+| `executable-requirements/infra/data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
 | `executable-requirements/extractors/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `test/unit/extraction.test.js`, `test/unit/calendar-url.test.js` | Internal offline unit tests |
 | `test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |

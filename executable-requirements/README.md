@@ -81,22 +81,23 @@ executable-requirements/
     fallback/                  the generic-fallback coverage gate (+ GENERATED artifacts)
     live.test.js               runs custom/* against the cached pages
     extractor-support.test.js  the §11 extractor leaves (one per supported host)
-  data/                        cached event-page fixtures (<name>.html + <name>.url),
-                               plus the recorder/render helpers (refresh-cache.js,
-                               fetch-page.js, render-page.js, spa-shell.js, cdp-client.js)
+  data/                        cached event-page fixtures only (<name>.html + <name>.url)
   fullBrowserHeavyTests/       CI-only real-Chrome e2e (extension load, SPA render)
-  infra/                       the renderers, fake-chrome, gallery builder, parsers,
-                               snapshot/coverage harnesses (test-only helper code)
+  infra/                       test-only helper code: the renderers, fake-chrome,
+                               gallery builder, parsers, snapshot/coverage harnesses
+    data/                      the recorder/render helpers (refresh-cache.js,
+                               fetch-page.js, render-page.js, spa-shell.js, cdp-client.js)
   requirements-coverage.test.js  the leaf↔case bijection + kind routing gate
   product-requirements.test.js      runs the wired logic leaves, surfaces the tbd ones
 ```
 
-Some of the `data/` helpers are shared with non-requirements callers — the
-recorder (`data/refresh-cache.js`, `data/fetch-page.js`) and the auto-extractor
-pipeline's probe (`tools/new-extractors-creation/probe-url.js`), the e2e tests and
-the SPA-render fallback (`data/render-page.js`, `data/spa-shell.js`,
-`data/cdp-client.js`). The pipeline's jsdom harness `test/harness.js` stays under
-`test/` since the unit tests share it too.
+`data/` holds only the sample fixtures; the recorder/render **code** lives in
+`infra/data/`. Some of those helpers are shared with non-requirements callers —
+the recorder (`infra/data/refresh-cache.js`, `infra/data/fetch-page.js`) and the
+auto-extractor pipeline's probe (`tools/new-extractors-creation/probe-url.js`), the
+e2e tests and the SPA-render fallback (`infra/data/render-page.js`,
+`infra/data/spa-shell.js`, `infra/data/cdp-client.js`). The pipeline's jsdom
+harness `test/harness.js` stays under `test/` since the unit tests share it too.
 
 ## Regenerating
 

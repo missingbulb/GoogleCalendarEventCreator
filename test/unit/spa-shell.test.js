@@ -1,4 +1,4 @@
-// Unit tests for the SPA-shell detector (executable-requirements/data/spa-shell.js) — the explicit
+// Unit tests for the SPA-shell detector (executable-requirements/infra/data/spa-shell.js) — the explicit
 // trigger for the headless-render fallback (issues #310, #328). Two predicates:
 //   shouldRender (TRIGGER) fires ONLY on a framework shell with no machine
 //     start date (a <time datetime> or JSON-LD startDate) — NOT on og:title or
@@ -15,7 +15,7 @@ const {
   isSpaShell,
   hasEventData,
   hasExtractableData,
-} = require("../../executable-requirements/data/spa-shell");
+} = require("../../executable-requirements/infra/data/spa-shell");
 
 // Pad past the visible-text bar with real words (whitespace is collapsed/trimmed).
 const lots = (s) => s + " lorem ipsum dolor sit amet".repeat(40);

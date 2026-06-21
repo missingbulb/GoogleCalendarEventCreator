@@ -86,7 +86,7 @@ stay put and refer back to the folder:
   can't be relocated or factored out.
 
 Shared infrastructure the scripts lean on stays where it's shared, **not** in the
-folder: `executable-requirements/data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
+folder: `executable-requirements/infra/data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
 `extension/fallback-policy.js` (the popup's host classifier), and `tools/index.js`
 (`npm run index`, run by every source addition). The pipeline *consumes* these; it
 doesn't own them.
@@ -130,7 +130,7 @@ doesn't own them.
    steps consume. Runs before `npm ci`, so a triaged request costs almost nothing,
    and fails **open** — any error proceeds.
 3. **Probes the event URL** (`probe-url.js`): fetches it the same way the recorder
-   will (shared `executable-requirements/data/fetch-page.js` — browser headers + retries) and decides
+   will (shared `executable-requirements/infra/data/fetch-page.js` — browser headers + retries) and decides
    whether the page is **usable** as a static case. Not usable when: the URL is
    missing; the fetch returns anything but a 2xx (unreachable, login/bot wall);
    **or** it returns a 2xx whose body is actually a bot-challenge / interstitial —
@@ -160,7 +160,7 @@ doesn't own them.
 5. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
    branches `<branch>` off `main`; records the page inline (`executable-requirements/data/<caseName>.url` +
    the empty `.html` signal → `npm run refresh`, rendering an SPA shell via headless
-   Chrome when `executable-requirements/data/spa-shell.js` flags one, asserted non-empty); then, **in
+   Chrome when `executable-requirements/infra/data/spa-shell.js` flags one, asserted non-empty); then, **in
    new-source mode**, scaffolds `extension/pipeline/sources/<slug>.js` with `matches()` filled
    (`scaffold-source.js`) + the placeholder case (`scaffold-case.js`), registers the
    host in `supportedDomains` (`add-supported-domain.js`), and runs `npm run index`;

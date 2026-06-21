@@ -181,14 +181,14 @@ commission-while-editing trap goes in the file's header comment rather than
   `executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js` (`npm run test:e2e` —
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
-- **SPA-shell render fallback** (#310, #328) — the detector (`executable-requirements/data/spa-shell.js`,
+- **SPA-shell render fallback** (#310, #328) — the detector (`executable-requirements/infra/data/spa-shell.js`,
   `shouldRender = isSpaShell && !hasEventData`, keying on a machine start date)
   is pure and unit-tested
   offline in `test/unit/spa-shell.test.js`; the headless render itself
-  (`executable-requirements/data/render-page.js`, sharing the DevTools client `executable-requirements/data/cdp-client.js` with
+  (`executable-requirements/infra/data/render-page.js`, sharing the DevTools client `executable-requirements/infra/data/cdp-client.js` with
   the extension-load test) is exercised by
   `executable-requirements/fullBrowserHeavyTests/render-page.chrome.test.js` against a self-authored
   `data:` URL — CI-only, skips without `CHROME_PATH`. The recorder
-  (`executable-requirements/data/refresh-cache.js`) calls the render only when the plain fetch returns a
+  (`executable-requirements/infra/data/refresh-cache.js`) calls the render only when the plain fetch returns a
   data-less SPA shell, and keeps it only if it gained extractable data;
   `refresh-cache.yml` wires `CHROME_PATH` so this happens when recording.

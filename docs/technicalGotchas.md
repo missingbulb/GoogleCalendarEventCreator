@@ -17,7 +17,7 @@ trap spanning files. See the full locality rule in
 
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
-  in real headless Chrome (`executable-requirements/data/render-page.js`) only when `executable-requirements/data/spa-shell.js`'s
+  in real headless Chrome (`executable-requirements/infra/data/render-page.js`) only when `executable-requirements/infra/data/spa-shell.js`'s
   `shouldRender` is true — a positive conjunction (`isSpaShell &&
   !hasEventData`), not "the body is small", so it never fires on a generic
   error body or a page that already carries an event date, and bot-challenge pages

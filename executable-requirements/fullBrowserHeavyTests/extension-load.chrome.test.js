@@ -18,9 +18,9 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
-// The DevTools Protocol client is shared with executable-requirements/data/render-page.js (issue #310);
+// The DevTools Protocol client is shared with executable-requirements/infra/data/render-page.js (issue #310);
 // Node has shipped a global WebSocket since v22 (global fetch since v18).
-const { connectCDP } = require("../data/cdp-client");
+const { connectCDP } = require("../infra/data/cdp-client");
 
 const ROOT = path.join(__dirname, "..", "..");
 // The unpacked extension to load is the extension/ subfolder (its manifest.json
