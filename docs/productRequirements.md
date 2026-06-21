@@ -24,7 +24,7 @@ opened in a new tab, in one click.
 The icon signals how the current page's host is classified:
 
 - **green** — the host has a dedicated extractor;
-- **gray** — the host is on the fallback denylist, where we've deliberately
+- **red** — the host is on the fallback denylist, where we've deliberately
   decided not to extract (the "denylisted host" popup state below);
 - **blue** — every other page.
 
