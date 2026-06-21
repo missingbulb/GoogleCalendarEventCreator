@@ -45,9 +45,9 @@ the rules of the road.
 | `executable-requirements/infra/refresh-popup-snapshots.js` | Regenerates the `executable-requirements/ui/cases/*.png` snapshots (popup and icon) + the inline gallery |
 | `tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
 | `store-assets/gen_store_icon.py` | Regenerates the Chrome Web Store icon `store-assets/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
-| `tools/shipping-files.js` | Single source of truth for the files that ship in the release zip |
-| `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
+| `.github/workflows/shipping-files.js` | Single source of truth for the files that ship in the release zip |
+| `.github/workflows/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
 | `tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `docs/claude/auto-extractor.md` |
 | `tools/new-extractors-creation/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
 | `executable-requirements/infra/gen-states-flowchart.js` | Regenerates `executable-requirements/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
-| `test/unit/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
+| `.github/workflows/tests/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |

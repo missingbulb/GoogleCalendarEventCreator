@@ -3,8 +3,8 @@
 // extension. Everything else in the repo (tests, cached HTML, dev tooling,
 // docs) is intentionally excluded.
 //
-// `tools/build-zip.js` reads this to build dist/google-calendar-event-creator.zip,
-// and test/unit/shipping-files.test.js asserts it stays in sync with what the
+// `.github/workflows/build-zip.js` reads this to build dist/google-calendar-event-creator.zip,
+// and .github/workflows/tests/shipping-files.test.js asserts it stays in sync with what the
 // manifest and the popup actually load — so the zip can never silently drop a
 // runtime file.
 

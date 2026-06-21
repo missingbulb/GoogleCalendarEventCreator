@@ -2,14 +2,14 @@
 // Builds the shippable extension zip — the artifact uploaded to the Chrome Web
 // Store and attached to GitHub Releases for "Load unpacked" testing.
 //
-//   node tools/build-zip.js        ->  dist/google-calendar-event-creator.zip
+//   node .github/workflows/build-zip.js        ->  dist/google-calendar-event-creator.zip
 //
 // The zip name is stable (not version-stamped) so a GitHub Release can serve it
 // at a permanent URL:
 //   https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip
 // The version it contains is manifest.json's `version`, printed below.
 //
-// Contents come from tools/shipping-files.js (the single source of truth), so
+// Contents come from .github/workflows/shipping-files.js (the single source of truth), so
 // the zip and the manifest can't drift. Uses the system `zip` (preinstalled on
 // the GitHub Ubuntu runners and on macOS/Linux) to avoid adding a runtime dep.
 
@@ -18,7 +18,7 @@ const fs = require("fs");
 const path = require("path");
 const { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("./shipping-files");
 
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "..", "..");
 // The extension root — the folder Chrome loads. Shipping paths are relative to
 // it, and the zip is built from inside it, so the archive has manifest.json at
 // its top (no leading repo or extension/ dir).
