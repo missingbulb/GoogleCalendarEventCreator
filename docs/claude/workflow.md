@@ -63,6 +63,24 @@ reflect on the just-merged conversation before closing out. Otherwise it runs
 only when the repo owner asks for it — never extract from a conversation
 unprompted; the owner decides when to do it.
 
+As part of the same pass, also run an **efficiency analysis** of the
+conversation's tool/process usage — separate from the durable-lessons extraction
+above, with its own equally high bar. Look at what ran after each user command:
+which tools/processes fired, how many of each, and how long each took. Then ask
+whether the work could have been done with **fewer operations** (redundant or
+repeated calls, work that could have been batched into one call, polling that
+could have been a single wait) and whether it could have finished in **less wall
+time without harming quality** (serial calls that had no dependency and could
+have run in parallel, padded `sleep`s, an unnecessarily long path to the result).
+Flag specifically any process that **returns its result but then wastes time on
+shutdown** — one that could be safely killed once its output is in hand rather
+than waited out. Close with a **terse verdict**: either one concrete speed-up
+recommendation (route it like any other lesson — a project mechanic to the
+matching `docs/claude/*`, a portable practice to `docs/agenticBestPractices.md`),
+or an explicit **"no changes recommended"**. The bar is high — most
+conversations won't yield a new process note, so "no changes recommended" is the
+common, expected outcome; don't manufacture one.
+
 **Always write to the local repository docs** — capture never reaches across to
 Claudinite. Route by scope:
 
