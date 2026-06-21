@@ -1,5 +1,5 @@
 // Guards pipeline/load-order.generated.json against drift: it must match what
-// `npm run index` (tools/index.js) would produce from the current extractor
+// `npm run index` (tools/gen-load-order.js) would produce from the current extractor
 // files. If this fails, an extractor was added/removed/renamed without
 // regenerating the list — run `npm run index` and commit the result.
 
@@ -9,7 +9,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { computeLoadOrder, render, OUTPUT } = require("../../tools/index");
+const { computeLoadOrder, render, OUTPUT } = require("../../tools/gen-load-order");
 
 const ROOT = path.join(__dirname, "..", "..");
 // OUTPUT is relative to the extension root (extension/), where the generated

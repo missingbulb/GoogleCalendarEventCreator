@@ -133,7 +133,7 @@ def write_png(path, px):
 
 
 def main():
-    out_dir = os.path.join(os.path.dirname(__file__), "..", "store-assets")
+    out_dir = os.path.dirname(__file__)
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "icon-128.png")
     write_png(path, render())

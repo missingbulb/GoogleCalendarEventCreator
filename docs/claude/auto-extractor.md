@@ -87,7 +87,7 @@ stay put and refer back to the folder:
 
 Shared infrastructure the scripts lean on stays where it's shared, **not** in the
 folder: `executable-requirements/infra/data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
-`extension/fallback-policy.js` (the popup's host classifier), and `tools/index.js`
+`extension/fallback-policy.js` (the popup's host classifier), and `tools/gen-load-order.js`
 (`npm run index`, run by every source addition). The pipeline *consumes* these; it
 doesn't own them.
 

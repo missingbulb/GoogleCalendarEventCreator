@@ -10,10 +10,10 @@
     "test:ui": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test executable-requirements/ui/popup-snapshots.test.js",
     "test:e2e": "node --test \"executable-requirements/fullBrowserHeavyTests/**/*.test.js\"",
     "build": "node tools/build-zip.js",
-    "index": "node tools/index.js",
+    "index": "node tools/gen-load-order.js",
     "refresh": "node executable-requirements/infra/data/refresh-cache.js",
     "refresh:ui": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON executable-requirements/infra/refresh-popup-snapshots.js",
-    "regen": "node tools/index.js && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON executable-requirements/infra/refresh-popup-snapshots.js && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test executable-requirements/extractors/fallback/fallback-coverage.test.js"
+    "regen": "node tools/gen-load-order.js && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON executable-requirements/infra/refresh-popup-snapshots.js && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test executable-requirements/extractors/fallback/fallback-coverage.test.js"
   },
   "license": "MIT",
   "_scriptNotes": {
