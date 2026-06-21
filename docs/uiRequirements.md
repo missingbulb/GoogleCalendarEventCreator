@@ -169,11 +169,12 @@ found no events, the glyph stands **alone** — no link beneath it.
 </td>
 <td valign="top">
 
-`3.1` **Suggest Correction** — shown only in the unlisted-with-event state
-(state 5). It sits on the **heading line, right-aligned** (the heading becomes a
-row: title on the left, link on the right, vertically centered). Clicking it
-opens the prefilled source-request issue (the issue form itself is out of
-scope — see productRequirements).
+`3.1` **Suggest Correction** — shown in the unlisted-with-event state (state 5),
+and on a supported host where the dedicated source found nothing but the generic
+fallback did (state 1b — see productRequirements). It sits on the **heading line,
+right-aligned** (the heading becomes a row: title on the left, link on the right,
+vertically centered). Clicking it opens the prefilled source-request issue (the
+issue form itself is out of scope — see productRequirements).
 
 </td>
 </tr>
