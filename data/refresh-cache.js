@@ -2,17 +2,17 @@
 // Refresh the committed cached HTML files that the live tests assert against.
 //
 // Each cached page is described by two per-case files in data/:
-//   - data/<name>.url   — plain text, the source URL (single source of truth;
+//   - executable-requirements/data/<name>.url   — plain text, the source URL (single source of truth;
 //                         live.test.js reads it too, to fetch and to set the
 //                         DOM's origin).
-//   - data/<name>.html  — the recorded HTML the live tests assert against.
+//   - executable-requirements/data/<name>.html  — the recorded HTML the live tests assert against.
 //
 // A cached HTML file is fetched when:
 //   - --force was given, OR
-//   - data/<name>.html is missing or empty (zero bytes).
-// A committed empty (zero-byte) data/<name>.html is the "fetch me" signal: pair
-// it with a data/<name>.url and the next refresh fills it in. That's also the
-// pre-case flow — record the HTML first, then add test/extractors/custom/<name>.json
+//   - executable-requirements/data/<name>.html is missing or empty (zero bytes).
+// A committed empty (zero-byte) executable-requirements/data/<name>.html is the "fetch me" signal: pair
+// it with a executable-requirements/data/<name>.url and the next refresh fills it in. That's also the
+// pre-case flow — record the HTML first, then add executable-requirements/extractors/custom/<name>.json
 // once you can read the expected values off the committed file.
 //
 // A failed fetch KEEPS the previous cached HTML file and only warns — a site
@@ -37,7 +37,7 @@ const { fetchPage } = require("./fetch-page");
 const { shouldRender, hasExtractableData } = require("./spa-shell");
 const { renderPage } = require("./render-page");
 
-const DATA_DIR = __dirname;
+const DATA_DIR = path.join(__dirname, "..", "executable-requirements", "data");
 
 function isEmptyOrMissing(filePath) {
   try {

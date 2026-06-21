@@ -146,8 +146,8 @@ trap spanning files. See the full locality rule in
   checkbox/dropdown control, to be prefillable from the popup's detection.
 - **Large cached HTML fixtures skew GitHub's language stats — mark them
   `linguist-vendored`.** GitHub reported this JS extension as "mostly HTML" because
-  the full-page `data/*.html` test fixtures dwarf the source by bytes.
-  `.gitattributes` marks `data/*.html linguist-vendored` so Linguist ignores them;
+  the full-page `executable-requirements/data/*.html` test fixtures dwarf the source by bytes.
+  `.gitattributes` marks `executable-requirements/data/*.html linguist-vendored` so Linguist ignores them;
   do the same for any future large generated/fixture files. (#78)
 - **GitHub renders Markdown inside a raw `<td>` only when the cell content is
   blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a

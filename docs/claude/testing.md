@@ -12,7 +12,7 @@ doc, when the mechanics change.
 ## Project testing decisions
 
 - **Integration cases are the reviewed contract.** A person reads
-  `test/extractors/custom/` to confirm the behavior is right; nobody reviews the
+  `executable-requirements/extractors/custom/` to confirm the behavior is right; nobody reviews the
   unit tests. So every required change or bugfix must be covered by an
   integration case — add or update one whenever you add/change support for a
   site or fix an extraction bug (one real, focused event page per distinct
@@ -87,17 +87,17 @@ New cached HTML can't be fetched here (the sandbox is bot-blocked — see
 and read its exact `expected` off the committed file instead of guessing:
 
 1. Commit two new files — but **not** the case file yet:
-   - `data/<name>.html` — an empty (zero-byte) file; the empty file is the
+   - `executable-requirements/data/<name>.html` — an empty (zero-byte) file; the empty file is the
      "fetch me" signal for the refresh script.
-   - `data/<name>.url` — a plain-text file containing just the event page URL
+   - `executable-requirements/data/<name>.url` — a plain-text file containing just the event page URL
      (e.g. `https://www.meetup.com/.../`). This file stays for good: it's the
      single source of truth for the page's URL (used by the refresh script and
      by `live.test.js`), so the URL is **not** repeated in the case file.
 2. Push the branch. The **Refresh cached HTML files** workflow runs
    automatically (the push adds a `data/` file), fills in the empty
-   `data/<name>.html`, and commits it back to the branch; `test:live` stays
+   `executable-requirements/data/<name>.html`, and commits it back to the branch; `test:live` stays
    green because no case asserts it yet.
-3. Pull, then add `test/extractors/custom/<name>.json` (same `<name>`, just
+3. Pull, then add `executable-requirements/extractors/custom/<name>.json` (same `<name>`, just
    `description` + `expected`, no `url`) and run `npm run test:live` — it now
    runs against the local cached HTML, so its output gives you the exact
    `expected` to paste in. Commit and push.
@@ -112,7 +112,7 @@ commission-while-editing trap goes in the file's header comment rather than
 `docs/technicalGotchas.md`; see the locality rule in
 [workflow.md](workflow.md).)
 
-- **Fallback-coverage gate** — `test/extractors/fallback/fallback-coverage.js`
+- **Fallback-coverage gate** — `executable-requirements/extractors/fallback/fallback-coverage.js`
   (the field-by-field comparison) and `fallback-coverage.test.js` (the
   high-watermark gate over a changing case set, #240). Runs in `test:live`;
   rewrites `fallback-coverage.GENERATED.md` locally and is read-only in CI.

@@ -7,7 +7,7 @@
 // real page makes the suite deterministic and runnable anywhere (no network),
 // while still reflecting each site's current markup.
 //
-// Each JSON file in test/extractors/custom/ describes one scenario. The
+// Each JSON file in executable-requirements/extractors/custom/ describes one scenario. The
 // extractor always returns a list of events; each event carries its timing in
 // `times[]` (the multi-instance model — one entry per showing), so `expected`
 // looks like:
@@ -34,7 +34,7 @@
 //   }
 //
 // The scenario's source URL lives alongside the cached HTML, in
-// data/<name>.url (the single source of truth — refresh-cache.js fetches it,
+// executable-requirements/data/<name>.url (the single source of truth — refresh-cache.js fetches it,
 // and the suite loads the HTML into a DOM at that URL so hostname-based site
 // detection behaves as in Chrome). It is NOT repeated in the case file.
 //
@@ -57,8 +57,8 @@
 // pinned the event to
 // (e.g. "GB" for edfringe.com), or null.
 //
-// To cover a new website or platform: add a data/<name>.url with the event
-// page URL and a case file (test/extractors/custom/<name>.json) with its
+// To cover a new website or platform: add a executable-requirements/data/<name>.url with the event
+// page URL and a case file (executable-requirements/extractors/custom/<name>.json) with its
 // `expected`, then record the cached HTML with `node data/refresh-cache.js`
 // (on a machine with internet) or let CI record it on the next run. Run the
 // suite once to see the actual extracted values in the failure output, then
@@ -70,10 +70,10 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
-const { extractFromHtml } = require("../harness");
+const { extractFromHtml } = require("../../test/harness");
 
-const CASES_DIR = path.join(__dirname, "..", "extractors", "custom");
-const DATA_DIR = path.join(__dirname, "..", "..", "data");
+const CASES_DIR = path.join(__dirname, "custom");
+const DATA_DIR = path.join(__dirname, "..", "data");
 
 // build-calendar-url.js is an ES module; import it before the tests run.
 let buildCalendarUrl;

@@ -28,7 +28,7 @@ const HEADING =
   "### Additional sample pages\n\n" +
   "Event pages from duplicate requests for this same site, folded in so the " +
   "extractor gets a second real integration case from each. Add one " +
-  "`test/extractors/custom/` case per URL, then tick it off:";
+  "`executable-requirements/extractors/custom/` case per URL, then tick it off:";
 
 // A URL already listed in the block, on either a `- [ ]` or `- [x]` line, so a
 // re-submission (or a re-run) doesn't double it.

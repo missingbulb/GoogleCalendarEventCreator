@@ -2,10 +2,10 @@
 // extractor (pipeline/extract-unsupported.js) recovers on each integration-test
 // page, relative to that page's dedicated per-site source (the ground truth).
 //
-// For every test/extractors/custom/*.json page we run GCal.extract() twice
-// against the same cached HTML (data/<name>.html):
+// For every executable-requirements/extractors/custom/*.json page we run GCal.extract() twice
+// against the same cached HTML (executable-requirements/data/<name>.html):
 //   - custom:   the normal pipeline, with the matching site source registered.
-//               This is the reviewed-correct extraction (test/extractors/
+//               This is the reviewed-correct extraction (executable-requirements/extractors/
 //               live.test.js pins it to the case's `expected`).
 //   - fallback: the SAME pipeline with GCal.sources emptied, which forces the
 //               unsupported-host path (assemble-events.js -> fallbackEvents),
@@ -16,8 +16,8 @@
 // (events[0] after the pipeline's own chronological sort) comes to the custom
 // primary event, and separately track how many events each found (the fallback
 // can't enumerate a listing page the way a dedicated source can). The result
-// feeds two consumers: test/extractors/fallback/fallback-coverage.test.js (the
-// high-watermark gate) and the human-readable test/extractors/fallback/fallback-coverage.GENERATED.md report.
+// feeds two consumers: executable-requirements/extractors/fallback/fallback-coverage.test.js (the
+// high-watermark gate) and the human-readable executable-requirements/extractors/fallback/fallback-coverage.GENERATED.md report.
 //
 // This file owns the comparison logic only; it reads the same generated
 // load-order the popup injects and the harness uses, so it exercises the real,
@@ -30,8 +30,8 @@ const { JSDOM } = require("jsdom");
 
 const ROOT = path.join(__dirname, "../../..");
 const EXT = path.join(ROOT, "extension"); // the extension root; load-order entries are relative to it
-const CASES_DIR = path.join(ROOT, "test/extractors/custom");
-const DATA_DIR = path.join(ROOT, "data");
+const CASES_DIR = path.join(ROOT, "executable-requirements/extractors/custom");
+const DATA_DIR = path.join(ROOT, "executable-requirements/data");
 
 // The seven normalized event fields GCal.extract() returns (see
 // pipeline/assemble-events.js's norm()). CRITICAL is the subset the popup
@@ -350,8 +350,8 @@ function renderMarkdown(cov, watermark) {
   L.push("# Fallback extractor coverage");
   L.push("");
   L.push(
-    "> **Auto-generated** by `test/extractors/fallback/fallback-coverage.test.js` " +
-      "(logic in `test/extractors/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten " +
+    "> **Auto-generated** by `executable-requirements/extractors/fallback/fallback-coverage.test.js` " +
+      "(logic in `executable-requirements/extractors/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten " +
       "whenever the tests run locally. See `docs/claude/testing.md`."
   );
   L.push("");
@@ -359,7 +359,7 @@ function renderMarkdown(cov, watermark) {
     "What the generic **fallback** extractor (`extension/pipeline/extract-unsupported.js`) " +
       "recovers on each integration-test page, compared to that page's **dedicated " +
       "per-site source** — the reviewed-correct extraction the live test pins down. " +
-      "For every `test/extractors/custom/*.json` page, `GCal.extract()` is run twice " +
+      "For every `executable-requirements/extractors/custom/*.json` page, `GCal.extract()` is run twice " +
       "on the same cached HTML: once normally (custom) and once with the site " +
       "registry emptied (fallback). We grade the fallback's **primary event** " +
       "(`events[0]` after the chronological sort) field-by-field against the custom " +
@@ -399,7 +399,7 @@ function renderMarkdown(cov, watermark) {
   L.push("### Gate");
   L.push("");
   L.push(
-    "The gate (`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) compares the current run to the stored " +
+    "The gate (`executable-requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json`) compares the current run to the stored " +
       "watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's " +
       "excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark " +
       "ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes."

@@ -158,7 +158,7 @@ doesn't own them.
    empty one (#334; without it every SPA — barby #325, visit.tel-aviv #277 —
    records a shell and the agent bails).
 5. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
-   branches `<branch>` off `main`; records the page inline (`data/<caseName>.url` +
+   branches `<branch>` off `main`; records the page inline (`executable-requirements/data/<caseName>.url` +
    the empty `.html` signal → `npm run refresh`, rendering an SPA shell via headless
    Chrome when `data/spa-shell.js` flags one, asserted non-empty); then, **in
    new-source mode**, scaffolds `extension/pipeline/sources/<slug>.js` with `matches()` filled
@@ -337,10 +337,10 @@ In any of these, fall back to the manual process in
 
 The agent never merges the PR. A human must review:
 - **new-source mode:** the extractor logic in `extension/pipeline/sources/<slug>.js`, the
-  extracted values in `test/extractors/custom/<case-name>.json`, and that
+  extracted values in `executable-requirements/extractors/custom/<case-name>.json`, and that
   `matches(host)` is correct for the target domain.
 - **add-a-case mode:** the extracted values in the new
-  `test/extractors/custom/<base>-<issue>.json`, and — if the agent edited the
+  `executable-requirements/extractors/custom/<base>-<issue>.json`, and — if the agent edited the
   existing source — that the diff is a minimal, correct change (no refactor, no
   regression to the other cases the source already covers).
 

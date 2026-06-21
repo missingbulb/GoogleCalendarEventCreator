@@ -119,8 +119,8 @@ Files under this rule (kept in sync with `.gitattributes`):
   `executable-requirements/Requirements.md`, also refreshed by that script, is part-authored prose,
   so it is **not** on the `ours` driver — its image lines are reconciled by `npm
   run regen` + the gallery drift gate, not by taking one side.)
-- `test/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
-  `test/extractors/fallback/fallback-coverage.GENERATED.md` — from the
+- `executable-requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
+  `executable-requirements/extractors/fallback/fallback-coverage.GENERATED.md` — from the
   fallback-coverage test, which `npm run regen` runs (it rewrites them locally;
   in CI the gate is read-only). If `regen` reports a coverage regression here,
   that's the real gate firing — review it, don't paper over it.

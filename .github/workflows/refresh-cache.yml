@@ -1,11 +1,11 @@
 name: Refresh cached HTML files
 
-# Records any missing or empty (zero-byte) data/<name>.html by fetching its URL
-# (from the matching data/<name>.url), runs the live tests, and commits the
+# Records any missing or empty (zero-byte) executable-requirements/data/<name>.html by fetching its URL
+# (from the matching executable-requirements/data/<name>.url), runs the live tests, and commits the
 # result back to the branch it ran on.
 #
 # It runs automatically when you push a branch (other than main) that adds or
-# removes a data/ file — a new data/<name>.url, or a deleted data/<name>.html you
+# removes an executable-requirements/data/ file — a new executable-requirements/data/<name>.url, or a deleted executable-requirements/data/<name>.html you
 # want re-recorded. So the flow is just "push the branch"; there's no manual step
 # and no separate "force" mode. It's also runnable from the Actions tab. (The
 # auto-implement-extractor workflow doesn't use it — it records the page inline in
@@ -19,7 +19,7 @@ on:
     branches-ignore:
       - main
     paths:
-      - "data/**"
+      - "executable-requirements/data/**"
 
 permissions:
   contents: write
@@ -75,10 +75,10 @@ jobs:
 
       - name: Commit refreshed cached HTML files
         run: |
-          if [ -n "$(git status --porcelain data)" ]; then
+          if [ -n "$(git status --porcelain executable-requirements/data)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add data
+            git add executable-requirements/data
             git commit -m "chore: refresh cached HTML files [skip ci]"
             git push
           else

@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`test/extractors/`, `test/extension/`, `test/unit/`, and `executable-requirements/ui/`:
+`executable-requirements/extractors/`, `test/extension/`, `test/unit/`, and `executable-requirements/ui/`:
 
 ```sh
 npm install
@@ -15,8 +15,8 @@ npm test               # everything above (offline + live + UI)
 
 ### Integration tests — the ones you review
 
-**`test/extractors/live.test.js`** is driven by declarative JSON files in
-`test/extractors/custom/` — the values the extractor must produce for a page.
+**`executable-requirements/extractors/live.test.js`** is driven by declarative JSON files in
+`executable-requirements/extractors/custom/` — the values the extractor must produce for a page.
 These are the assertions a human reviews to confirm each site is handled
 correctly.
 
@@ -46,7 +46,7 @@ an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The case's **source URL is not in the case file** — it lives next to the cached
-HTML, in `data/<name>.url` (a plain-text file holding just the URL). That one
+HTML, in `executable-requirements/data/<name>.url` (a plain-text file holding just the URL). That one
 file is the single source of truth for the page's URL: `refresh-cache.js`
 fetches it, and the live test loads the cached HTML into a DOM at that URL.
 Keeping it out of the reviewed case file means a test (`description` +
@@ -76,7 +76,7 @@ site's markup at the time it was recorded:
   push doesn't fire the push trigger.) It's the *only* thing that fetches live
   pages and commits cached HTML, which keeps the Tests workflow simple. To
   re-record a cached file that already exists — e.g. when a site changes its
-  markup — delete `data/<name>.html` on your branch and push; the now-missing
+  markup — delete `executable-requirements/data/<name>.html` on your branch and push; the now-missing
   file is refetched like any other.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
@@ -88,27 +88,27 @@ against that commit ever re-triggering CI.
 shared index to edit, so parallel branches never collide. The expected
 sequence is:
 
-1. Add the extractor (if needed), a `data/<name>.url` with the event page URL,
-   and the new case file (`test/extractors/custom/<name>.json`) with its
+1. Add the extractor (if needed), a `executable-requirements/data/<name>.url` with the event page URL,
+   and the new case file (`executable-requirements/extractors/custom/<name>.json`) with its
    `expected`. Commit that change.
 2. Run `npm run refresh` locally on the same branch (needs internet) — this
    is the same `refresh-cache.js` step the **Refresh cached HTML files**
-   workflow runs, and it fetches the new page's HTML from `data/<name>.url`.
-3. Commit the resulting `data/<name>.html` as a follow-up commit on the branch.
+   workflow runs, and it fetches the new page's HTML from `executable-requirements/data/<name>.url`.
+3. Commit the resulting `executable-requirements/data/<name>.html` as a follow-up commit on the branch.
 
 Until a cached HTML file exists for the new case, `test:live` (and so the Tests
 workflow) will fail with `Missing cached HTML for "<name>"`. Note that cases
 also need occasional gardening: when an event page is eventually taken down,
-point `data/<name>.url` at a newer event (and refresh its cached HTML the same
+point `executable-requirements/data/<name>.url` at a newer event (and refresh its cached HTML the same
 way).
 
 ### Fallback-coverage gate — how the generic extractor stacks up
 
-**`test/extractors/fallback/fallback-coverage.test.js`** (part of `test:live`) measures
+**`executable-requirements/extractors/fallback/fallback-coverage.test.js`** (part of `test:live`) measures
 what the generic **fallback** extractor (`extension/pipeline/extract-unsupported.js`)
 recovers on each cached case page, relative to that page's **dedicated source**
 — the reviewed-correct ground truth. The comparison logic lives in
-**`test/extractors/fallback/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
+**`executable-requirements/extractors/fallback/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
 — once normally, once with `GCal.sources` emptied (the documented way to force
 the unsupported-host path) — and grades the fallback's **primary event**
 (`events[0]` after the chronological sort) field-by-field against the custom
@@ -123,7 +123,7 @@ miss against the fallback's offset-bearing instant (a floating time read an hour
 off, or one that dropped its time, still is).
 
 The two percentages are a **high-watermark gate** stored in
-`test/extractors/fallback/fallback-coverage.baseline.GENERATED.json`, which holds the percentages
+`executable-requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json`, which holds the percentages
 **plus the list of `cases` they were computed over**. The gate compares the
 current run to the watermark over the cases they **share**, so a newly added case
 (absent from `cases`) is excluded and **adding an extractor never fails the
@@ -136,7 +136,7 @@ error to fix. *Caveat:* with a single aggregate watermark, a regression bundled
 into the same change as a case-set change can be re-anchored over rather than
 caught — don't commit a re-anchored baseline while the gate is red.
 
-Running locally also rewrites the human-readable **`test/extractors/fallback/fallback-coverage.GENERATED.md`**
+Running locally also rewrites the human-readable **`executable-requirements/extractors/fallback/fallback-coverage.GENERATED.md`**
 report (headline score, the shared-subset gate, and per-host / per-field-type /
 per-case tables — the per-case matrix stays committed so a gate failure shows
 which case/field regressed without re-running the old code) — commit it like the
