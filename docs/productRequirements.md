@@ -28,6 +28,12 @@ The icon signals how the current page's host is classified:
   decided not to extract (the "denylisted host" popup state below);
 - **blue** — every other page.
 
+![The toolbar icon in each of its three states](extension-icon-states.png)
+
+(The image above is generated and pixel-asserted from the shipped icons by
+`test/extension/extension-icon-states.test.js`, so it always shows what Chrome
+actually paints.)
+
 It reflects the host's classification, not whether an event was found — the icon
 can't read the page, so a page where the generic fallback later finds an event
 still shows the blue icon.
