@@ -89,5 +89,4 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](docs/releasing.md) — building the zip and publishing to the Chrome Web Store.
 - [Resources](docs/resources.md) — external references relevant to the project.
-- [Security review](docs/security-review.md) — attack surface, trust boundaries, and known risks.
 - Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `docs/claude/`).
