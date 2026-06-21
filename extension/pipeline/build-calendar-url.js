@@ -106,8 +106,12 @@ function sourceLink(tab) {
 // Markdown survives extraction (e.g. Meetup's description, whose inline JSON
 // state and JSON-LD both carry markdown). Google Calendar renders the details
 // field as HTML, not markdown, so translate the markdown we see into HTML:
-//   - links [text](url) -> <a href="url">text</a> (the URL is kept as-is; a
-//     bare `[text]` with no following `(url)` doesn't match and stays literal)
+//   - links [text](url) -> <a href="url">text</a>, but only when `url` is a
+//     safe scheme (http/https/mailto). The description is page-controlled, so a
+//     `[x](javascript:...)` would otherwise emit `<a href="javascript:...">`
+//     into Google Calendar's HTML-rendered details — don't build a dangerous
+//     scheme from untrusted input; leave any other `[text](url)` literal. A bare
+//     `[text]` with no following `(url)` doesn't match and stays literal too.
 //   - bold **text** -> <b>text</b>, but only when each `**` is an isolated
 //     pair (not part of a longer run of asterisks) wrapping star-free,
 //     single-line text. That keeps star ratings (e.g. edfringe reviews'
@@ -115,8 +119,22 @@ function sourceLink(tab) {
 //     literal rather than mangling them.
 function markdownToHtml(text) {
   return text
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, label, url) =>
+      isSafeLinkUrl(url) ? `<a href="${url}">${label}</a>` : match
+    )
     .replace(/(?<!\*)\*\*(?!\*)([^\n*]+?)\*\*(?!\*)/g, "<b>$1</b>");
+}
+
+// Whether a markdown link's URL is safe to emit as an <a href>. Allows only
+// http/https/mailto and scheme-relative (//host) / relative URLs; rejects
+// javascript:, data:, vbscript:, and any other scheme. A bare host like
+// "example.com/x" has no scheme and is treated as relative (kept) — matching how
+// Google Calendar would render it; the guard exists to block dangerous schemes,
+// not to validate link reachability.
+function isSafeLinkUrl(url) {
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(url);
+  if (!scheme) return true; // no scheme -> relative/scheme-relative, safe
+  return ["http", "https", "mailto"].includes(scheme[1].toLowerCase());
 }
 
 // Build the `dates` parameter for the TEMPLATE URL:
