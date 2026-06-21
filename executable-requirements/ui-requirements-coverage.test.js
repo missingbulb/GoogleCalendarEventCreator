@@ -36,7 +36,9 @@ const cases = loadCases();
 const PER_LEAF = /^[a-z][a-z0-9-]*\.(\d+(?:\.\d+)+)$/;
 const idOf = (c) => leafIdOf(c.name);
 const kindOf = (c) => c.kind || "popup";
-const KNOWN_KINDS = new Set(["popup", "icon", "behavior"]);
+const KNOWN_KINDS = new Set(["popup", "icon", "behavior", "extractor"]);
+// The kinds with no rendered image — verified by a dedicated test, not a snapshot.
+const NON_IMAGE_KINDS = new Set(["behavior", "extractor"]);
 
 test("executable-requirements/Requirements.md yields leaf requirements", () => {
   assert.ok(allIds.size > 0, "no `N.M` requirement IDs parsed from executable-requirements/Requirements.md");
@@ -66,9 +68,9 @@ test("every case declares a known kind", () => {
   assert.deepEqual(bad, [], `cases with an unknown kind (known: ${[...KNOWN_KINDS].join(", ")}):`);
 });
 
-test("a behavior case carries no snapshot image (a PNG can't verify a click — #429)", () => {
+test("a non-image case carries no snapshot image (a PNG can't verify a click or an extraction — #429)", () => {
   const bad = cases
-    .filter((c) => kindOf(c) === "behavior" && fs.existsSync(path.join(CASES_DIR, `${c.name}.png`)))
+    .filter((c) => NON_IMAGE_KINDS.has(kindOf(c)) && fs.existsSync(path.join(CASES_DIR, `${c.name}.png`)))
     .map((c) => `${c.name}.png`);
-  assert.deepEqual(bad, [], "behavior leaves must not carry a snapshot image:");
+  assert.deepEqual(bad, [], "behavior/extractor leaves must not carry a snapshot image:");
 });

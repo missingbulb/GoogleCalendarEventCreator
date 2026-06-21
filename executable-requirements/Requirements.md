@@ -1092,6 +1092,262 @@ an allowlisted host — the icon stays the manifest default, **blue**.
 </table>
 
 
+## 11. Required explicit support for Extractors
+
+Each host below has **explicit, dedicated extractor support** — a self-contained
+source under `extension/pipeline/sources/` whose `matches(host)` claims the page,
+so the toolbar icon goes green and the popup extracts the event from that site's
+own markup (not the generic fallback). This section is the **executable
+catalogue** of that support: each leaf is one supported host, validated by a
+`kind: "extractor"` case (`executable-requirements/ui/cases/extractor-support.<id>.case.js`)
+that runs the real extractor against a **real cached page**
+(`executable-requirements/data/<page>.html`) and asserts the host is recognized as
+supported and yields a complete event (title + location + start) —
+`executable-requirements/extractors/extractor-support.test.js`. Adding a new source
+(see `docs/claude/adding-a-source.md`) adds a row here. A bot-blocked host with no
+cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
+is covered by unit tests only.
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `meetup-nyc-tech-mixer` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.1 -->
+
+</td>
+<td valign="top">
+
+`11.1` `meetup.com` — extracted by the dedicated source `extension/pipeline/sources/meetup.js`, validated against the cached `meetup-nyc-tech-mixer` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `eventbrite-games-for-change` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.2 -->
+
+</td>
+<td valign="top">
+
+`11.2` `eventbrite.com` — extracted by the dedicated source `extension/pipeline/sources/eventbrite.js`, validated against the cached `eventbrite-games-for-change` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `edinburghfringe-daniel-sloss` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.3 -->
+
+</td>
+<td valign="top">
+
+`11.3` `edfringe.com` — extracted by the dedicated source `extension/pipeline/sources/edinburghfringe.js`, validated against the cached `edinburghfringe-daniel-sloss` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `telavivcinematheque-sentimental-value` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.4 -->
+
+</td>
+<td valign="top">
+
+`11.4` `cinema.co.il` — extracted by the dedicated source `extension/pipeline/sources/telavivcinematheque.js`, validated against the cached `telavivcinematheque-sentimental-value` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `ticketmaster-ravid-plotnik` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.5 -->
+
+</td>
+<td valign="top">
+
+`11.5` `ticketmaster.co.il` — extracted by the dedicated source `extension/pipeline/sources/ticketmaster.js`, validated against the cached `ticketmaster-ravid-plotnik` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `bandsintown-berry-sakharof` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.6 -->
+
+</td>
+<td valign="top">
+
+`11.6` `bandsintown.com` — extracted by the dedicated source `extension/pipeline/sources/bandsintown.js`, validated against the cached `bandsintown-berry-sakharof` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `barby` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.7 -->
+
+</td>
+<td valign="top">
+
+`11.7` `barby.co.il` — extracted by the dedicated source `extension/pipeline/sources/barby.js`, validated against the cached `barby` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `dash-datadoghq` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.8 -->
+
+</td>
+<td valign="top">
+
+`11.8` `dash.datadoghq.com` — extracted by the dedicated source `extension/pipeline/sources/dash-datadoghq.js`, validated against the cached `dash-datadoghq` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `eventim-co-il-the90sshow` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.9 -->
+
+</td>
+<td valign="top">
+
+`11.9` `eventim.co.il` — extracted by the dedicated source `extension/pipeline/sources/eventim-co-il.js`, validated against the cached `eventim-co-il-the90sshow` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `events-datadoghq` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.10 -->
+
+</td>
+<td valign="top">
+
+`11.10` `events.datadoghq.com` — extracted by the dedicated source `extension/pipeline/sources/events-datadoghq.js`, validated against the cached `events-datadoghq` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `luma-event` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.11 -->
+
+</td>
+<td valign="top">
+
+`11.11` `lu.ma` — extracted by the dedicated source `extension/pipeline/sources/luma.js`, validated against the cached `luma-event` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `secrettelaviv-world-cup-eve` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.12 -->
+
+</td>
+<td valign="top">
+
+`11.12` `secrettelaviv.com` — extracted by the dedicated source `extension/pipeline/sources/secrettelaviv.js`, validated against the cached `secrettelaviv-world-cup-eve` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `tabitisrael` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.13 -->
+
+</td>
+<td valign="top">
+
+`11.13` `tabitisrael.co.il` — extracted by the dedicated source `extension/pipeline/sources/tabitisrael.js`, validated against the cached `tabitisrael` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `thinkdrink-quantum-lecture` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.14 -->
+
+</td>
+<td valign="top">
+
+`11.14` `thinkdrink.co.il` — extracted by the dedicated source `extension/pipeline/sources/thinkdrink.js`, validated against the cached `thinkdrink-quantum-lecture` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — validated against cached page `visit-tel-aviv` by `executable-requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.15 -->
+
+</td>
+<td valign="top">
+
+`11.15` `visit.tel-aviv.gov.il` — extracted by the dedicated source `extension/pipeline/sources/visit-tel-aviv.js`, validated against the cached `visit-tel-aviv` page.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Extractor leaf — no cached page (bot-blocked) — covered by unit tests only._ <!-- req-gallery:11.16 -->
+
+</td>
+<td valign="top">
+
+`11.16` `facebook.com` — extracted by the dedicated source `extension/pipeline/sources/facebook.js`. No cached live case (bot-blocked); covered by unit tests only.
+
+</td>
+</tr>
+</table>
+
 ---
 
 ### A note on "clickable" and cursor / hover states

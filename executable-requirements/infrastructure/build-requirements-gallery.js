@@ -30,6 +30,7 @@ const CASES_DIR = path.join(__dirname, "..", "ui", "cases");
 // executable-requirements/Requirements.md → executable-requirements/ui/cases/ is two levels up then back down.
 const IMG_REL = "ui/cases";
 const BEHAVIOR_TEST = "executable-requirements/ui/events-view-actions.test.js";
+const EXTRACTOR_TEST = "executable-requirements/extractors/extractor-support.test.js";
 
 // The ID-bearing marker that tags a managed left-cell line.
 const MARKER_RE = /<!--\s*req-gallery:(\d+(?:\.\d+)+)\s*-->/;
@@ -39,17 +40,25 @@ function marker(id) {
 }
 
 // The canonical managed left-cell content for one leaf, derived from its CASE (its
-// `kind` / `tbd` fields), with the marker as the trailing token: a note for a
-// `kind: "behavior"` case (no image — a click a snapshot can't show); otherwise the
-// <slug>.<id>.png image (popup or icon — same embed either way), prefixed with a
-// loud "TO BE DECIDED" banner when the case is `tbd` (so a reviewer sees the
-// provisional render of CURRENT behavior under the banner). The image filename is
-// the case's OWN stem (`testCase.name`), so a leaf is embedded by its real
-// component-named PNG, not a reconstructed `req-<id>`.
+// `kind` / `tbd` fields), with the marker as the trailing token. The non-image
+// kinds carry a note instead of a picture: a `kind: "behavior"` case (a click a
+// snapshot can't show) and a `kind: "extractor"` case (a host's extractor
+// validated against a cached page, not a rendered surface). An image kind
+// (popup / icon) embeds the <slug>.<id>.png snapshot — same embed either way —
+// prefixed with a loud "TO BE DECIDED" banner when the case is `tbd` (so a
+// reviewer sees the provisional render of CURRENT behavior under the banner). The
+// image filename is the case's OWN stem (`testCase.name`), so a leaf is embedded
+// by its real component-named PNG, not a reconstructed `req-<id>`.
 function managedLine(id, testCase) {
   const kind = (testCase && testCase.kind) || "popup";
   if (kind === "behavior") {
     return `\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${marker(id)}`;
+  }
+  if (kind === "extractor") {
+    const note = testCase && testCase.tbd
+      ? `no cached page (bot-blocked) — covered by unit tests only`
+      : `validated against cached page \`${(testCase && testCase.page) || "?"}\` by \`${EXTRACTOR_TEST}\``;
+    return `\u{1F9E9} _Extractor leaf — ${note}._ ${marker(id)}`;
   }
   const stem = (testCase && testCase.name) || id;
   const img = `![${stem}](${IMG_REL}/${stem}.png)`;
