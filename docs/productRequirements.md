@@ -42,9 +42,9 @@ When opened, the popup lands in one of five states:
    dedicated extractor finds **none**, fall back to the generic extractor: when
    that turns up a *complete* event, show it **and** offer "Suggest Correction"
    (as in state 5) so the page the dedicated source missed can be reported — a
-   user only opens the popup when they see an event, so a best-effort result
-   beats an empty popup. When the fallback also finds nothing, the empty state
-   shows (state 2's bare glyph — no policy link). The host stays classified
+   user most likely opens the popup when they see an event, so a best-effort
+   result beats an empty popup. When the fallback also finds nothing, the empty
+   state shows (state 2's bare glyph — no policy link). The host stays classified
    *supported* throughout (the icon stays green).
 2. **Denylisted host** — show nothing and prompt for nothing: no event, no
    support request, no policy link. We've deliberately decided not to extract
