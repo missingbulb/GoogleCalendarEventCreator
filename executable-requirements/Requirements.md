@@ -1348,6 +1348,312 @@ is covered by unit tests only.
 </tr>
 </table>
 
+## 12. Popup states (what the popup shows)
+
+When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `test/unit/popup-content.test.js`); the one machine-checkable rule, completeness, is wired.
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/popup-content.test.js`._ <!-- req-gallery:12.1 -->
+
+</td>
+<td valign="top">
+
+`12.1` Supported host shows the dedicated extractor's events; when it finds none, the generic fallback is shown if it yields a complete event (with "Suggest Correction") and the empty state otherwise — the host stays classified supported throughout (icon green).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/popup-content.test.js`._ <!-- req-gallery:12.2 -->
+
+</td>
+<td valign="top">
+
+`12.2` Denylisted host shows nothing and prompts for nothing: no event, no support request, no policy link.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/popup-content.test.js`._ <!-- req-gallery:12.3 -->
+
+</td>
+<td valign="top">
+
+`12.3` Unsupported host with no complete fallback event shows the empty state with a link to the public policy doc.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/popup-content.test.js`._ <!-- req-gallery:12.4 -->
+
+</td>
+<td valign="top">
+
+`12.4` Allowlisted host with an event shows the event and does NOT ask for support (the generic result is already trusted there).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/popup-content.test.js`._ <!-- req-gallery:12.5 -->
+
+</td>
+<td valign="top">
+
+`12.5` Unlisted host with an event shows the event AND offers to request first-class support (a prefilled GitHub issue).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — verified by `executable-requirements/product-requirements.test.js`._ <!-- req-gallery:12.6 -->
+
+</td>
+<td valign="top">
+
+`12.6` A fallback (non-dedicated) event counts as COMPLETE only when it has all three of a title, a location, and a start; anything less is "nothing found".
+
+</td>
+</tr>
+</table>
+
+## 13. Events model
+
+How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `test/unit/events-view.test.js` and the §4 snapshots).
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/events-view.test.js`._ <!-- req-gallery:13.1 -->
+
+</td>
+<td valign="top">
+
+`13.1` One card per distinct event on the page: an ordinary event page yields one; a listing or series page (a film week, a festival) yields one card per event.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/events-view.test.js`._ <!-- req-gallery:13.2 -->
+
+</td>
+<td valign="top">
+
+`13.2` A multi-instance event folds showings that match on title, location, description, and timezone (differing only in time) into ONE event with several instances; distinct events that merely share a title stay separate.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `executable-requirements/ui/cases/event-cards-grouping.4.2.1.case.js`._ <!-- req-gallery:13.3 -->
+
+</td>
+<td valign="top">
+
+`13.3` An event's instances are grouped BY MONTH into one or more cards — a single card for a month with one showing, or a grouped card with a button per showing.
+
+</td>
+</tr>
+</table>
+
+## 14. Event fields
+
+Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `docs/technicalGotchas.md`).
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/extraction.test.js`._ <!-- req-gallery:14.1 -->
+
+</td>
+<td valign="top">
+
+`14.1` Description preserves its line and paragraph breaks into the Calendar details; single-line fields (title, location) are whitespace-collapsed.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — verified by `executable-requirements/product-requirements.test.js`._ <!-- req-gallery:14.2 -->
+
+</td>
+<td valign="top">
+
+`14.2` Title falls back to the page/tab title, and then to a configured default (`fallbackEventTitle`) when the page gives none.
+
+</td>
+</tr>
+</table>
+
+## 15. Dates, times & timezones
+
+The rules that govern the *instant* the Calendar event lands on (how a time is *displayed* on a card is §6). Most timezone rules are tracked but not yet wired (covered today by `test/unit/extraction.test.js`); the all-day and default-duration rules are wired.
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/extraction.test.js`._ <!-- req-gallery:15.1 -->
+
+</td>
+<td valign="top">
+
+`15.1` A timed date with NO timezone is a floating local time: the event shows the same wall-clock time the page displayed, wherever the viewer is.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/extraction.test.js`._ <!-- req-gallery:15.2 -->
+
+</td>
+<td valign="top">
+
+`15.2` A date with an explicit offset (or trailing `Z`) is an exact instant: the same moment regardless of the viewer's timezone.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/extraction.test.js`._ <!-- req-gallery:15.3 -->
+
+</td>
+<td valign="top">
+
+`15.3` A site known to run in a fixed place pins the event to that city's timezone, so the time reads as that city shows it for every viewer.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — verified by `executable-requirements/product-requirements.test.js`._ <!-- req-gallery:15.4 -->
+
+</td>
+<td valign="top">
+
+`15.4` A date with NO time becomes an all-day event.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — verified by `executable-requirements/product-requirements.test.js`._ <!-- req-gallery:15.5 -->
+
+</td>
+<td valign="top">
+
+`15.5` When the page gives a start but no end, the event is `defaultEventDurationMs` long (2 hours by default); all-day events stay all-day.
+
+</td>
+</tr>
+</table>
+
+## 16. Requesting support
+
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `test/unit/source-request.test.js`; the automation pipeline by the auto-extractor unit tests and `docs/claude/auto-extractor.md`.
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/source-request.test.js`._ <!-- req-gallery:16.1 -->
+
+</td>
+<td valign="top">
+
+`16.1` "Suggest Correction" opens a prefilled GitHub "Event source request" issue.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/triage-extractor-request.test.js`._ <!-- req-gallery:16.2 -->
+
+</td>
+<td valign="top">
+
+`16.2` Submitting the request kicks off the automated extractor, which implements support for the site and opens a pull request for review.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🔧 _Logic leaf — **untested here** — currently covered by `test/unit/triage-extractor-request.test.js`._ <!-- req-gallery:16.3 -->
+
+</td>
+<td valign="top">
+
+`16.3` A request whose host is already on the allow- or denylist is closed automatically, without a run.
+
+</td>
+</tr>
+</table>
+
+
 ---
 
 ### A note on "clickable" and cursor / hover states

@@ -31,6 +31,7 @@ const CASES_DIR = path.join(__dirname, "..", "ui", "cases");
 const IMG_REL = "ui/cases";
 const BEHAVIOR_TEST = "executable-requirements/ui/events-view-actions.test.js";
 const EXTRACTOR_TEST = "executable-requirements/extractors/extractor-support.test.js";
+const LOGIC_TEST = "executable-requirements/product-requirements.test.js";
 
 // The ID-bearing marker that tags a managed left-cell line.
 const MARKER_RE = /<!--\s*req-gallery:(\d+(?:\.\d+)+)\s*-->/;
@@ -59,6 +60,12 @@ function managedLine(id, testCase) {
       ? `no cached page (bot-blocked) — covered by unit tests only`
       : `validated against cached page \`${(testCase && testCase.page) || "?"}\` by \`${EXTRACTOR_TEST}\``;
     return `\u{1F9E9} _Extractor leaf — ${note}._ ${marker(id)}`;
+  }
+  if (kind === "logic") {
+    const note = testCase && testCase.tbd
+      ? `**untested here** — currently covered by \`${(testCase && testCase.coveredBy) || "?"}\``
+      : `verified by \`${LOGIC_TEST}\``;
+    return `\u{1F527} _Logic leaf — ${note}._ ${marker(id)}`;
   }
   const stem = (testCase && testCase.name) || id;
   const img = `![${stem}](${IMG_REL}/${stem}.png)`;

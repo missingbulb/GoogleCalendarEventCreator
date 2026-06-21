@@ -36,9 +36,9 @@ const cases = loadCases();
 const PER_LEAF = /^[a-z][a-z0-9-]*\.(\d+(?:\.\d+)+)$/;
 const idOf = (c) => leafIdOf(c.name);
 const kindOf = (c) => c.kind || "popup";
-const KNOWN_KINDS = new Set(["popup", "icon", "behavior", "extractor"]);
+const KNOWN_KINDS = new Set(["popup", "icon", "behavior", "extractor", "logic"]);
 // The kinds with no rendered image — verified by a dedicated test, not a snapshot.
-const NON_IMAGE_KINDS = new Set(["behavior", "extractor"]);
+const NON_IMAGE_KINDS = new Set(["behavior", "extractor", "logic"]);
 
 test("executable-requirements/Requirements.md yields leaf requirements", () => {
   assert.ok(allIds.size > 0, "no `N.M` requirement IDs parsed from executable-requirements/Requirements.md");
