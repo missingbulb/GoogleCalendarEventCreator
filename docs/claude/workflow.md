@@ -1,44 +1,41 @@
 # Workflow
 
 The GitHub issue → branch → PR → merge lifecycle, the **merge-to-main command**,
-and the CI-interaction practices live in [github.md](github.md). This file holds
-the working discipline that isn't itself a GitHub operation, plus the two
-owner-triggered defined instructions ("bump version", "learned lessons").
+and the CI-interaction practices live in [github.md](github.md). The general,
+project-agnostic working discipline (confirm-before-building, the warnings
+policy) now lives in the shared rules:
+[shared/working-discipline.md](shared/working-discipline.md). This file holds the
+project-specific working rules, plus the two owner-triggered defined instructions
+("bump version", "learned lessons").
 
-Confirm a behavior isn't already provided before building a mechanism for it —
-verify the gap against a real run first; the cheapest fix is often that it
-already works.
-
-Fix build/test/CI warnings, don't tolerate them: a clean run with no warnings
-makes a genuinely new warning or error stand out, so noise here costs detection
-later. Prefer a small, targeted fix that addresses the *cause* in the same
-change.
-
-Suppressing a warning — muting it with a flag (e.g. `--disable-warning`),
-`eslint-disable`, swallowing it, etc. — is **not** a small fix: it hides the
-signal instead of resolving it. Never reach for suppression as the quick path.
-It's only ever an option inside the dedicated-issue path below, as a deliberate,
-reviewed decision once the real fix has been weighed and rejected — never an
-unattended default.
-
-When a warning can't be fixed with a small cause-addressing change now without
-hindering current work (e.g. it's waiting on an upstream release, or the real
-fix is a larger refactor), open a dedicated issue for it (unless one is already
-open) so it's tracked and not lost — then move on. Resolving it (real fix, or a
-consciously-chosen suppression) happens in that issue's own change.
-
-Whenever a change regenerates `test/ui/README.md` (the rendered gallery of every
-case, via `npm run refresh:ui`), link the branch's copy in the chat in the same
-turn you commit it —
-`https://github.com/<owner>/<repo>/blob/<branch>/test/ui/README.md` — for
-one-page review.
+Whenever a change regenerates the UI gallery (via `npm run refresh:ui`), link the
+branch's copy in the chat in the same turn you commit it — the requirement-first
+inline gallery
+`https://github.com/<owner>/<repo>/blob/<branch>/docs/uiRequirements.md`, each
+requirement with its snapshot beside it — for one-page review.
 
 When a change to a `test/ui/cases/*` case — its spec or its rendering — makes
 the snapshot tests **fail** (the pixels moved), don't silently regenerate the
-baseline: show the **expected** (committed) and **actual** (newly-rendered) PNGs
-inline in the chat side by side and **ask the owner to approve the difference**
-before refreshing and committing the new snapshot. The owner's approval of the
-visual diff is the gate; an unreviewed pixel change is never auto-accepted.
+baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel
+change is never auto-accepted. The process:
+
+1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
+   committed **expected** PNG, run the snapshot test so it fails (the harness
+   writes the rendered `actual` and a highlighted `diff` to `test/ui/.artifacts/`),
+   and send three images to the chat: **expected** (committed), **actual**
+   (newly-rendered), and the **diff**. When the change alters the PNG's
+   **dimensions** (e.g. a fixture shrink), pixelmatch can't diff unequal sizes so
+   the harness writes only `actual` (no `diff`) — stitch **expected** and
+   **actual** side-by-side into one image for the review instead.
+2. **Ask via `AskUserQuestion`, not prose** — a popup notifies the owner on
+   mobile. Offer **Approve** and **Reject — let's discuss**.
+3. **Hold without overwriting the expected image.** If the working tree must be
+   committed while waiting (e.g. a stop-hook), commit the *reverted* (expected)
+   baseline so the branch/PR honestly shows the snapshot test **red, pending
+   approval** — never commit the new baseline first.
+4. On **Approve**: regenerate the baseline (`npm run refresh:ui`), confirm the
+   suite is green, and push. On **Reject**: **do not** roll back automatically —
+   leave the change in place and discuss how to proceed.
 
 When the repo owner says **"bump version"**, treat it as a defined instruction:
 raise the extension's version by editing the `version` field in
@@ -64,15 +61,32 @@ padding the docs to look productive. Run this same pass after a merge to main,
 too — the merge-to-main command in [github.md](github.md) hands off to it:
 reflect on the just-merged conversation before closing out. Otherwise it runs
 only when the repo owner asks for it — never extract from a conversation
-unprompted; the owner decides when to do it. Route by scope: project mechanics to
-the matching file under
-`docs/claude/` (workflow, github, testing, adding-a-source, auto-extractor); top-level
-architecture rules to `docs/architectureGuidelines.md`; non-obvious codebase
-footguns to `docs/technicalGotchas.md`; AI-agent-specific best practices to
-`docs/agenticBestPractices.md`; other project-agnostic practices to
-`docs/engineeringPractices.md`. Keep every addition terse. Project-specific
-guidance is good; broader engineering practices that generalize beyond this repo
-are better — prefer the most general file a lesson legitimately fits.
+unprompted; the owner decides when to do it.
+
+**Always write to the local repository docs** — capture never reaches across to
+Claudinite. Route by scope:
+
+- **Project-specific** lessons: project mechanics to the matching file under
+  `docs/claude/` (workflow, github, testing, adding-a-source, auto-extractor);
+  top-level project architecture rules to `docs/architectureGuidelines.md`;
+  non-obvious codebase footguns to `docs/technicalGotchas.md`.
+- **Portable** lessons (general engineering practices, agentic best practices):
+  to the local working-set docs `docs/engineeringPractices.md` and
+  `docs/agenticBestPractices.md`. These are local capture surfaces; the curated,
+  project-agnostic canon lives read-only in the Claudinite submodule
+  (`docs/claude/shared/`). Don't try to edit the shared docs or file a Claudinite
+  issue here — just write the best local doc.
+
+You never hand a lesson to Claudinite at capture time. The daily
+**optimize-procedures** routine ([auto-optimize-procedures.md](auto-optimize-procedures.md))
+is the *only* thing that bridges to Claudinite: it later promotes generalizable
+local items up (via a `claudinite-lesson` issue) and prunes the local copy once
+the canon absorbs it. So a portable insight captured locally isn't "stuck" here —
+it travels up on its own.
+
+Keep every addition terse. Project-specific guidance is good; broader engineering
+practices that generalize beyond this repo are better — write those to the local
+practice docs so optimize-procedures can carry them upstream.
 
 A scheduled workflow runs this same pass automatically once a day over the last
 24h of commits and issue/PR activity, opening a PR for review

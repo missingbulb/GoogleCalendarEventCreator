@@ -162,13 +162,14 @@ function makeGroupCard(card, tab, chipFor) {
   const cardEl = document.createElement("div");
   cardEl.className = "event-group";
 
-  // Header: the title over the "when · where" line, full width. When every
-  // session shares one time (a month card whose scattered dates all start — and
-  // end — alike), that common time leads the line; otherwise just the location.
+  // Header: the title over the "when · where" line, full width. A leading time
+  // label (groupHeaderTime) precedes the location when one fits — the shared time
+  // when every session starts (and ends) alike, or "All day" when every session
+  // is all-day; otherwise just the location.
   const head = document.createElement("span");
   head.className = "e-group-head";
   head.appendChild(titleEl(event, tab));
-  const detail = [commonTime(instances), event.location].filter(Boolean).join(" · ");
+  const detail = [groupHeaderTime(instances), event.location].filter(Boolean).join(" · ");
   if (detail) {
     const loc = document.createElement("span");
     loc.className = "e-when";
@@ -413,6 +414,17 @@ export function commonTime(instances) {
   const times = instances.map((it) => timeRange(it.t));
   if (times.some((t) => !t)) return "";
   return times.every((t) => t === times[0]) ? times[0] : "";
+}
+
+// The label that leads a grouped card's header line, before the location: the
+// shared time when every showing has one (commonTime), else "All day" when EVERY
+// showing is all-day (so an all-day month card reads "All day · <location>", like
+// a single all-day card's line — #441), else "" when the showings differ or mix
+// timed with all-day (no single label fits; each chip then carries its own time).
+export function groupHeaderTime(instances) {
+  const shared = commonTime(instances);
+  if (shared) return shared;
+  return instances.every((it) => it.t.start && isAllDay(it.t.start)) ? "All day" : "";
 }
 
 // True when a month card's days carry DIFFERENT times that all deserve showing:

@@ -146,19 +146,36 @@ function styleObject(styleAttr) {
 // = 60px, so this many rows always more than fills (and overflows) the cap.
 const EVENTS_VIEWPORT_PX = 500; // mirrors #events max-height in ui/popup.css
 const MIN_ROW_PX = 60;
-const VISIBLE_ROWS = Math.ceil(EVENTS_VIEWPORT_PX / MIN_ROW_PX) + 3; // + safety/peek
+const visibleRowsFor = (viewportPx) => Math.ceil(viewportPx / MIN_ROW_PX) + 3; // + safety/peek
+
+// A case may shrink the #events viewport so a tiny event list still overflows —
+// paired with shrunken config (`configurationOverrides`) it pins an overflow
+// requirement (7.x/8.x) with a fraction of the cards/pixels (issue #439). The
+// viewport is NOT a config.js value (it mirrors a renderer constant), so it
+// lives under `nonConfigurableUiSettingsOverrides`, apart from the GCalConfig
+// overrides. Both the inlined max-height and the rasterization clamp follow it.
+const viewportFor = (testCase) =>
+  (testCase.nonConfigurableUiSettingsOverrides && testCase.nonConfigurableUiSettingsOverrides.viewportPx) || EVENTS_VIEWPORT_PX;
+
+// Override the inlined #events max-height with the case's shrunken viewport, so
+// satori clips a short list to it (the append wins — same property, last-declared).
+function applyViewportOverride(doc, viewportPx) {
+  if (viewportPx === EVENTS_VIEWPORT_PX) return;
+  const events = doc.getElementById("events");
+  if (events) events.setAttribute("style", `${events.getAttribute("style") || ""};max-height:${viewportPx}px`);
+}
 
 // Keep only the rows in the visible window of an overflowing #events list,
 // anchored to wherever the list is scrolled: the tail when an action pinned it to
 // the bottom (justify-content: flex-end), otherwise the head. No-op for a list
 // that already fits.
-function clampOverflowingList(doc) {
+function clampOverflowingList(doc, visibleRows) {
   const events = doc.getElementById("events");
   if (!events) return;
   const rows = [...events.children];
-  if (rows.length <= VISIBLE_ROWS) return;
+  if (rows.length <= visibleRows) return;
   const pinnedToBottom = /flex-end/.test(events.getAttribute("style") || "");
-  const keep = new Set(pinnedToBottom ? rows.slice(-VISIBLE_ROWS) : rows.slice(0, VISIBLE_ROWS));
+  const keep = new Set(pinnedToBottom ? rows.slice(-visibleRows) : rows.slice(0, visibleRows));
   for (const row of rows) if (!keep.has(row)) events.removeChild(row);
 }
 
@@ -218,12 +235,14 @@ async function renderCasePng(testCase) {
     // "Reading page…" state render() never produces); everything else runs the
     // real render() and any DOM action on top of it.
     if (!testCase.skipRender) {
-      await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR });
+      await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR, configurationOverrides: testCase.configurationOverrides });
       if (testCase.action) testCase.action(doc);
     }
 
     inlinePopupCss(doc.body);
-    clampOverflowingList(doc); // after styling, so :last-child etc. reflect the true list
+    const viewportPx = viewportFor(testCase);
+    applyViewportOverride(doc, viewportPx);
+    clampOverflowingList(doc, visibleRowsFor(viewportPx)); // after styling, so :last-child etc. reflect the true list
     const vdom = toVDom(doc.body);
     // Root scaffolding: fixed popup width, and the bundled font (the CSS
     // font-family stack was dropped so satori uses the one we loaded).

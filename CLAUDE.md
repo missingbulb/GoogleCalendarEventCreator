@@ -12,6 +12,8 @@ own file under `docs/claude/` and is imported here:
 @docs/claude/auto-lessons.md
 @docs/claude/auto-fallback-coverage.md
 @docs/claude/auto-branch-report.md
+@docs/claude/claudinite-handoff.md
+@docs/claude/auto-optimize-procedures.md
 
 The project's top-level architectural rules of the road live in
 `docs/architectureGuidelines.md` (imported below). Whenever we agree on a new or
@@ -25,20 +27,36 @@ time — live in `docs/technicalGotchas.md` (imported below).
 
 @docs/technicalGotchas.md
 
-General software-engineering practices that aren't specific to this project
-(verifying platform behavior, earning dependencies, test discipline) live in
-`docs/engineeringPractices.md` (imported below).
+General engineering and agentic practices learned **in this repo** are captured
+locally in the working-set docs below (capture is always local — see
+`docs/claude/workflow.md`). They start near-empty; the curated canon lives in the
+shared submodule (next section), and the `optimize-procedures` routine moves
+generalizable items up and prunes them here once the canon absorbs them.
 
 @docs/engineeringPractices.md
-
-Best practices specific to building and running AI agents (as opposed to general
-software engineering) live in `docs/agenticBestPractices.md` (imported below).
-
 @docs/agenticBestPractices.md
 
-The repo owner's personal interaction preferences (tone, end-of-turn
-conventions, and the trigger phrases for owner-triggered commands — not project
-conventions) live in `docs/ownerPreferences.md` (imported below). This is a
-temporary home until they move to the owner's own persistent environment.
+## Shared portable rules (the Claudinite submodule)
 
-@docs/ownerPreferences.md
+The project-agnostic **canon** — general software-engineering practices, agentic
+best practices, portable git/GitHub procedures, general working discipline,
+unattended-agent architecture principles, and the repo owner's personal
+interaction preferences — is **not** maintained in this repo. It lives in the
+shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo, mounted
+here as a git submodule at `docs/claude/shared/` (see its
+[README](docs/claude/shared/README.md)) and imported below.
+
+It is consumed **read-only**: a rule change happens in Claudinite and arrives here
+as a Dependabot submodule-bump PR. Lessons are *captured locally* (above) and only
+the daily `optimize-procedures` routine bridges them up to Claudinite (see
+[issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
+and `docs/claude/auto-optimize-procedures.md`). A fresh clone needs
+`git submodule update --init` (`scripts/cloud-setup.sh` runs it) or
+`docs/claude/shared/` is an empty folder and these imports resolve to nothing.
+
+@docs/claude/shared/engineeringPractices.md
+@docs/claude/shared/agenticBestPractices.md
+@docs/claude/shared/git-and-github.md
+@docs/claude/shared/working-discipline.md
+@docs/claude/shared/agent-architecture.md
+@docs/claude/shared/ownerPreferences.md

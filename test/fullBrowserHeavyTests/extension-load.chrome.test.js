@@ -141,7 +141,7 @@ test(
 
       // The probe always settles (the await is bounded by a timeout) and returns a
       // diagnostic string, so a CI-only failure reports the observed state instead
-      // of hanging the job — see docs/engineeringPractices.md.
+      // of hanging the job — see docs/claude/shared/engineeringPractices.md.
       const probe = `(async () => {
         const withTimeout = (p, ms, tag) =>
           Promise.race([Promise.resolve(p), new Promise((r) => setTimeout(() => r(tag), ms))]);

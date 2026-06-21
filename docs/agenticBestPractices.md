@@ -1,28 +1,26 @@
-# Agentic best practices
+# Agentic best practices (local working set)
 
-Durable, project-agnostic practices for running AI agents — distilled from what
-worked here. Each is one tight rule; the worked example lives in its own doc.
+Practices specific to building and running AI agents, captured **in this repo**
+that haven't (yet) been promoted into the shared canon. The curated,
+project-agnostic canon lives read-only in the Claudinite submodule —
+[claude/shared/agenticBestPractices.md](claude/shared/agenticBestPractices.md) —
+which is what the rest of the docs link to.
 
-- **A daily "lessons learned" pass keeps hard-won insights from evaporating.**
-  Run it over recent activity to fold durable, reusable lessons into shared docs
-  before they're forgotten. Key discipline: dedupe ruthlessly against the
-  existing docs, route each lesson to the doc that owns it, keep additions terse
-  — and most days add nothing. (Worked example: `docs/claude/auto-lessons.md`.)
-- **Match the agent model to the judgment it must make.** A weaker/cheaper model is adequate for mechanical extraction but fails silently on judgment calls — it ships a plausible-but-wrong output where a capable model would correctly bail. Downgrade only for tasks the weaker model reliably handles. (Downgrading the auto-extractor agent to Haiku led it to ship a bare-title case off a listing page instead of stopping; Sonnet bailed correctly — `docs/claude/auto-extractor.md`.)
-- **Give each unattended recurring routine its own standing tracking issue as a
-  self-improvement log.** Log every run that produces a change there — as a
-  **dated comment**, not a sub-issue — so the routine's output accumulates in one
-  reviewable feed, making it easy to audit what it did over time and to tell when
-  the routine itself needs tuning. One issue per routine, not a shared parent;
-  have the routine find its issue by a stable attribute (title/label) rather than
-  a bare number that can dangle, and **reopen it if it was closed** while runs
-  still need logging. (Worked examples: `docs/claude/auto-lessons.md` #365,
-  `docs/claude/auto-fallback-coverage.md` #366,
-  `docs/claude/auto-branch-report.md` #399.)
-- **Keep an unattended routine's instructions in a repo doc, not inlined in the
-  launcher's config.** The launcher prompt (a CC web routine, a cron job's
-  embedded text) should be a thin pointer to a versioned in-repo doc; the doc
-  carries the real spec. Inlined instructions drift silently — they can't be
-  reviewed in a PR, go stale against renamed paths the repo's own tests would
-  have caught, and miss conventions the repo later adds — whereas a doc the
-  repo's checks and lessons pass touches stays current for free.
+This file is a **local capture surface**: the "learned lessons" command and the
+daily auto-lessons digest write new agentic-practice insights here (capture is
+always local — see [claude/workflow.md](claude/workflow.md)). The daily
+**optimize-procedures** routine
+([claude/auto-optimize-procedures.md](claude/auto-optimize-procedures.md)) is the
+only thing that bridges to Claudinite: it promotes generalizable items from here
+up (via a `claudinite-lesson` issue) and, once the canon absorbs them and the
+submodule pin updates, prunes them from this file. So this doc stays small —
+usually just whatever is captured-but-not-yet-upstreamed.
+
+- **A SessionStart hook gates session progress through directive text, not blocking.**
+  A SessionStart hook can't block execution or prompt interactively — its stdout is
+  injected into the session as context the assistant reads. Use this for environment
+  or setup validation: when a check fails, output a STOP directive that tells the
+  assistant to ask the user (via AskUserQuestion) before doing any work. The
+  assistant's instruction-following is the enforcement mechanism; the hook provides
+  the check. Stay silent on success — only emit when something requires the user's
+  decision. (`.claude/hooks/session-start.sh` is a worked example.)
