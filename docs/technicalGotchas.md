@@ -5,6 +5,16 @@ debugging time, recorded so they bite only once. Overarching architecture rules
 live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
 engineering practices in [engineeringPractices.md](claude/shared/engineeringPractices.md).
 
+**Scope — project-wide footguns only.** A trap you'd only trip over *while
+editing one specific file or function* (a mistake of **commission**, made with
+that file open) belongs in that file's **top-of-file header comment**, not here:
+it loads on-demand when Claude opens the file, can't drift from the code, and
+stays off the always-loaded `CLAUDE.md` budget. Keep an entry here only when
+Claude could hit it *without* reading the locus file — a mistake of **omission**
+(you must know it to decide whether to open/avoid the file) or a cross-cutting
+trap spanning files. See the full locality rule in
+[claude/workflow.md](claude/workflow.md).
+
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
   in real headless Chrome (`data/render-page.js`) only when `data/spa-shell.js`'s
@@ -27,21 +37,6 @@ engineering practices in [engineeringPractices.md](claude/shared/engineeringPrac
   prefer extracting JSON-LD/`og:` (which SPAs often still inject) over brittle DOM
   positions. CI-only: the cloud sandbox can't even download Chrome (below), so the
   render no-ops locally and is verified only in CI (#310).
-- **`SIGKILL` followed by an immediate `rmSync` of the killed process's working
-  directory races with still-open file handles, causing intermittent `ENOTEMPTY`.**
-  `SIGKILL` is non-catchable and forces the process to exit, but the kernel may not
-  have fully released the process's file handles before the caller's next statement
-  runs. The fix is Node's built-in backoff: `rmSync(dir, { recursive: true,
-  force: true, maxRetries: 3, retryDelay: 100 })` retries until the files are
-  released. (`data/render-page.js` Chrome teardown, #358.)
-- **Day-boundary date math must use UTC component math, not local-midnight +
-  `toISOString()`.** Compute an adjacent day with `Date.UTC(y, m-1, d+1)` then
-  `getUTC*` (as `nextDay` in `build-calendar-url.js` does).
-  `new Date("YYYY-MM-DDT00:00:00")` is *local*
-  midnight, which under a positive UTC offset is the previous UTC day, so
-  `toISOString()` reports the wrong adjacent date. The UTC/`C.UTF-8`
-  sandbox/CI default parses floating times as UTC, so a unit test there won't
-  surface the shift — it only shows in a positive-offset locale.
 - **Service-worker paths must be extension-root absolute.** The background service
   worker runs from `ui/toolbar-icon.js` (relative to the extension root,
   `extension/`), so any path it hands a Chrome API
@@ -99,12 +94,6 @@ engineering practices in [engineeringPractices.md](claude/shared/engineeringPrac
   filled by the **Refresh cached HTML files** workflow, not locally), and GitHub
   Actions runners get HTTP 400 from `facebook.com` (so Facebook is covered by unit
   tests only — it can't be a cached live case).
-- **Google Calendar renders the event `details` field as HTML, not Markdown.**
-  Text placed in the `details` URL parameter is HTML: a bare `**bold**` shows
-  literal asterisks and a bare URL is auto-linked (so it needs no `<a>`).
-  `extension/pipeline/build-calendar-url.js` translates the Markdown that survives
-  extraction (Meetup / JSON-LD descriptions) into HTML for exactly this reason.
-  (#91, #102)
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
   textContent`) returns `textContent` in tests — including `<select>`/`<option>`
   and hidden text a real browser's `innerText` omits. A generic visible-text

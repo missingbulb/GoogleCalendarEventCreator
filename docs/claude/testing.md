@@ -106,7 +106,11 @@ and read its exact `expected` off the committed file instead of guessing:
 
 These harnesses are self-documenting: the *why* of every non-obvious decision
 lives in the file's own header/inline comments, so it can't drift from the code.
-Read the file when you touch it; the one-liners here are just a map.
+Read the file when you touch it; the one-liners here are just a map. (This same
+co-location applies to **any** file-local footgun, not just harness mechanics — a
+commission-while-editing trap goes in the file's header comment rather than
+`docs/technicalGotchas.md`; see the locality rule in
+[workflow.md](workflow.md).)
 
 - **Fallback-coverage gate** — `test/extractors/fallback/fallback-coverage.js`
   (the field-by-field comparison) and `fallback-coverage.test.js` (the
