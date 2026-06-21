@@ -3,7 +3,7 @@
 # SessionStart validator for the cloud environment version (issue #403).
 #
 # This hook does NOT install anything. Dependency install deliberately lives in
-# the pasted Setup script (scripts/cloud-setup.sh), which is filesystem-cached
+# the pasted Setup script (.claude/cloud-setup.sh), which is filesystem-cached
 # and runs ~once per environment; a SessionStart hook is uncached and would
 # re-run every session (the #186 rationale). So this hook's only job is to detect
 # when the environment was set up with a STALE or MISSING copy of that script and
@@ -13,7 +13,7 @@
 # context), so the confirmation is carried out by the assistant on this directive,
 # not enforced by the hook.
 #
-# How it works: scripts/cloud-setup.sh bakes an `ENV_VERSION=N` and, on success,
+# How it works: .claude/cloud-setup.sh bakes an `ENV_VERSION=N` and, on success,
 # stamps N into a persistent flag file. Here we read the committed (expected)
 # ENV_VERSION straight out of that script -- so the version literal has a single
 # source of truth and can't drift -- and compare it to the stamped flag.
@@ -28,7 +28,7 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
 fi
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-/home/user/GoogleCalendarEventCreator}"
-SETUP_SCRIPT="$PROJECT_DIR/scripts/cloud-setup.sh"
+SETUP_SCRIPT="$PROJECT_DIR/.claude/cloud-setup.sh"
 ENV_VERSION_FLAG=/home/user/.gcal-environment-version
 
 # Expected version, read from the committed setup script (the source of truth).
@@ -48,7 +48,7 @@ emit_warning() {
   printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$msg"
 }
 
-repaste_instructions="Copy the full body of scripts/cloud-setup.sh from this repo into the Setup script field of this environment in Claude Code Web settings (cloud session settings then the environment then Setup script), then start a fresh session so it re-runs."
+repaste_instructions="Copy the full body of .claude/cloud-setup.sh from this repo into the Setup script field of this environment in Claude Code Web settings (cloud session settings then the environment then Setup script), then start a fresh session so it re-runs."
 
 # The shared directive every warning ends with. A SessionStart hook can't block or
 # prompt on its own, so this tells the assistant to run the confirmation itself:
@@ -57,7 +57,7 @@ repaste_instructions="Copy the full body of scripts/cloud-setup.sh from this rep
 halt_directive="STOP: before running any other tool, answering, or starting the requested task, use the AskUserQuestion tool to ask the user whether to continue anyway despite the misconfigured environment or to pause and fix it first; do not proceed until they answer. To fix it: ${repaste_instructions}"
 
 if [ ! -f "$ENV_VERSION_FLAG" ]; then
-  emit_warning "ENVIRONMENT NOT CONFIGURED: no environment-version flag was found, which means this environment's Setup script did not run the committed scripts/cloud-setup.sh (expected version ${expected}). Test devDependencies may be missing. ${halt_directive}"
+  emit_warning "ENVIRONMENT NOT CONFIGURED: no environment-version flag was found, which means this environment's Setup script did not run the committed .claude/cloud-setup.sh (expected version ${expected}). Test devDependencies may be missing. ${halt_directive}"
   exit 0
 fi
 

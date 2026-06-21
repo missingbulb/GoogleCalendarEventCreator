@@ -82,8 +82,8 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 ## Documentation
 
 - [Architecture guidelines](docs/architectureGuidelines.md) — top-level rules of the road.
-- [Product requirements](docs/productRequirements.md) — what the extension does (user-facing behavior).
-- [Popup UI requirements](docs/uiRequirements.md) — the specific, numbered popup UI requirements (referenced by the UI tests).
+- [Executable requirements](executable-requirements/README.md) — how requirements are modeled (a numbered breakdown where every leaf has a validating case) and how to add one.
+- [Requirements](executable-requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
 - [High-level design](docs/highLevelDesign.md) — how extraction works.
 - [File descriptions](docs/fileDescriptions.md) — the per-file map.
 - [Testing](docs/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.

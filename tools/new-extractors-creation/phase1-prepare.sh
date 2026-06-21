@@ -25,10 +25,10 @@ MODE="${MODE:-new}"
 
 git checkout -b "$BRANCH"
 
-printf '%s' "$EVENT_URL" > "data/$CASE_NAME.url"
-: > "data/$CASE_NAME.html"            # empty file = the recorder's "fetch me" signal
+printf '%s' "$EVENT_URL" > "executable-requirements/data/$CASE_NAME.url"
+: > "executable-requirements/data/$CASE_NAME.html"            # empty file = the recorder's "fetch me" signal
 npm run refresh
-test -s "data/$CASE_NAME.html"        # the page must have actually been recorded
+test -s "executable-requirements/data/$CASE_NAME.html"        # the page must have actually been recorded
 
 if [ "$MODE" = "supported" ]; then
   # Add a case only — the source already exists and is registered.

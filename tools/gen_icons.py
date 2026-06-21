@@ -12,7 +12,7 @@ import os
 import struct
 import zlib
 
-# Brand palette — shared with tools/gen_store_icon.py for the blue variant.
+# Brand palette — shared with store-assets/gen_store_icon.py for the blue variant.
 BLUE       = (26, 115, 232)   # #1a73e8
 DARK_BLUE  = (23, 78, 166)    # #174ea6
 GREEN      = (52, 168, 83)    # #34a853

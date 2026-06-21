@@ -22,6 +22,12 @@ change.
 
 @docs/architectureGuidelines.md
 
+All requirements-related documents and the tests that validate them live in one
+top-level folder, `executable-requirements/`. How requirements are modeled (a
+numbered breakdown where every leaf has an external validation case) and how to
+add one (with the available case kinds and when to use `tbd`/untested) are
+documented in [executable-requirements/README.md](executable-requirements/README.md).
+
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `docs/technicalGotchas.md` (imported below).
 
@@ -51,7 +57,7 @@ as a Dependabot submodule-bump PR. Lessons are *captured locally* (above) and on
 the daily `optimize-procedures` routine bridges them up to Claudinite (see
 [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
 and `docs/claude/auto-optimize-procedures.md`). A fresh clone needs
-`git submodule update --init` (`scripts/cloud-setup.sh` runs it) or
+`git submodule update --init` (`.claude/cloud-setup.sh` runs it) or
 `docs/claude/shared/` is an empty folder and these imports resolve to nothing.
 
 @docs/claude/shared/engineeringPractices.md

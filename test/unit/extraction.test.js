@@ -1,6 +1,6 @@
 // Offline unit tests for the extraction layers, using small synthetic HTML
 // snippets inline (no network, no committed cached HTML files). These pin down
-// the extractor's behavior deterministically; test/extractors/live.test.js
+// the extractor's behavior deterministically; executable-requirements/extractors/live.test.js
 // is the suite that checks the real sites still serve parseable markup.
 //
 // extractFromHtml returns { events: [...] }, where each event carries its timing
