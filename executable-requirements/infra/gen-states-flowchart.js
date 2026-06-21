@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Regenerates docs/popup-states-flowchart.png — a flowchart of the states the
+// Regenerates executable-requirements/popup-states-flowchart.png — a flowchart of the states the
 // popup can render (issue #192; State 1b added in #456). It mirrors the decision
 // ui/popup.js's chooseContent makes (see executable-requirements/Requirements.md §12–§16): a
 // supported host shows its dedicated extractor's events (State 1), or — when that
@@ -7,7 +7,7 @@
 // with a "Suggest Correction" link (State 1b); an unsupported host runs the
 // denylist / fallback / allowlist chain (States 2–5).
 //
-//   node tools/gen-states-flowchart.js
+//   node executable-requirements/infra/gen-states-flowchart.js
 //
 // Authors an SVG by hand and rasterizes it with @resvg/resvg-js (already a dev
 // dependency) — no browser, no graphviz, deterministic. Fonts come from the
@@ -18,7 +18,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { Resvg } = require("@resvg/resvg-js");
 
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "..", "..");
 const W = 1320;
 const H = 700;
 
@@ -145,7 +145,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" 
   ${parts.join("\n  ")}
 </svg>`;
 
-const FONT_DIR = path.join(ROOT, "test", "ui", "fonts");
+const FONT_DIR = path.join(__dirname, "..", "ui", "fonts");
 const resvg = new Resvg(svg, {
   fitTo: { mode: "zoom", value: 2 }, // 2× for a crisp raster
   font: {
@@ -158,6 +158,6 @@ const resvg = new Resvg(svg, {
   },
 });
 
-const outPath = path.join(ROOT, "docs", "popup-states-flowchart.png");
+const outPath = path.join(__dirname, "..", "popup-states-flowchart.png");
 fs.writeFileSync(outPath, resvg.render().asPng());
 console.log(`Wrote ${path.relative(ROOT, outPath)}`);

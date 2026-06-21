@@ -1351,7 +1351,7 @@ is covered by unit tests only.
 
 When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `test/unit/popup-content.test.js`); the one machine-checkable rule, completeness, is wired.
 
-![Flowchart of the popup's five states](../docs/popup-states-flowchart.png)
+![Flowchart of the popup's five states](popup-states-flowchart.png)
 
 <table>
 <tr>

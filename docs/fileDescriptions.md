@@ -49,5 +49,5 @@ the rules of the road.
 | `tools/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
 | `tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `docs/claude/auto-extractor.md` |
 | `tools/new-extractors-creation/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
-| `tools/gen-states-flowchart.js` | Regenerates `docs/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
+| `executable-requirements/infra/gen-states-flowchart.js` | Regenerates `executable-requirements/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
 | `test/unit/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
