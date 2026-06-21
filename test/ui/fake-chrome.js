@@ -1,4 +1,4 @@
-// A minimal FAKE of the browser environment ui/toolbar-icon.js runs in: the
+// A minimal FAKE of the browser environment extension/ui/toolbar-icon.js runs in: the
 // chrome.* extension APIs it calls, plus the few web-platform globals it uses
 // (fetch, createImageBitmap, OffscreenCanvas). It lets a test load the REAL worker
 // unmodified, have it register its declarativeContent rules exactly as in

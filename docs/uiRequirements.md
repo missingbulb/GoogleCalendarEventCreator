@@ -41,7 +41,7 @@ it:
 
 - `"popup"` / `"icon"` — an **image** leaf, pinned by a `req-<id>.png` snapshot in
   the **two-column table** below (image left, requirement right). `"popup"` is the
-  popup's real `render()`; `"icon"` is the real `ui/toolbar-icon.js` in a fake
+  popup's real `render()`; `"icon"` is the real `extension/ui/toolbar-icon.js` in a fake
   browser (the toolbar icon, §10).
 - `"behavior"` — a click/navigation a static image can't observe; the case carries
   no image, its left cell shows a note, and it's verified by
@@ -63,7 +63,7 @@ The five popup **states** (supported / denylisted / nothing-found / allowlisted 
 unlisted) and *when* each occurs are defined in
 [productRequirements.md](productRequirements.md); this doc specifies how each is
 *rendered*. Tunable values referenced below (`maxCardsShown`,
-`maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `config.js`.
+`maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `extension/config.js`.
 
 ## 1. Heading
 
@@ -178,11 +178,12 @@ found no events, the glyph stands **alone** — no link beneath it.
 </td>
 <td valign="top">
 
-`3.1` **Suggest Correction** — shown only in the unlisted-with-event state
-(state 5). It sits on the **heading line, right-aligned** (the heading becomes a
-row: title on the left, link on the right, vertically centered). Clicking it
-opens the prefilled source-request issue (the issue form itself is out of
-scope — see productRequirements).
+`3.1` **Suggest Correction** — shown in the unlisted-with-event state (state 5),
+and on a supported host where the dedicated source found nothing but the generic
+fallback did (state 1b — see productRequirements). It sits on the **heading line,
+right-aligned** (the heading becomes a row: title on the left, link on the right,
+vertically centered). Clicking it opens the prefilled source-request issue (the
+issue form itself is out of scope — see productRequirements).
 
 </td>
 </tr>
@@ -1036,7 +1037,7 @@ event was found (the icon can't read the page, so a page where the generic fallb
 later finds an event still shows the blue icon). When the host is denylisted **or**
 supported it would otherwise show two icons; supported wins. These are ordinary
 snapshot leaves whose cases set `kind: "icon"`, so their images are rendered by the
-real `ui/toolbar-icon.js` in a fake browser rather than the popup (see
+real `extension/ui/toolbar-icon.js` in a fake browser rather than the popup (see
 "Verification kind" above).
 
 <table>

@@ -7,10 +7,13 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
-const { SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("../../tools/shipping-files");
+const { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("../../tools/shipping-files");
 
 const ROOT = path.join(__dirname, "..", "..");
-const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
+// Shipping paths and everything the runtime references are relative to the
+// extension root (the folder Chrome loads), so resolve them under EXT.
+const EXT = path.join(ROOT, EXTENSION_DIR);
+const read = (p) => fs.readFileSync(path.join(EXT, p), "utf8");
 
 // True when `file` ships: under a listed path, and not specifically excluded.
 function isShipped(file) {
@@ -20,7 +23,7 @@ function isShipped(file) {
 
 test("every shipping path exists", () => {
   for (const p of SHIPPING_PATHS) {
-    assert.ok(fs.existsSync(path.join(ROOT, p)), `shipping path missing: ${p}`);
+    assert.ok(fs.existsSync(path.join(EXT, p)), `shipping path missing: ${p}`);
   }
 });
 
@@ -42,7 +45,7 @@ test("every injected extractor file ships", () => {
   const files = JSON.parse(read("pipeline/load-order.generated.json"));
   assert.ok(files.length > 0, "load-order.generated.json lists no files");
   for (const f of files) {
-    assert.ok(fs.existsSync(path.join(ROOT, f)), `load order lists ${f}, which does not exist`);
+    assert.ok(fs.existsSync(path.join(EXT, f)), `load order lists ${f}, which does not exist`);
     assert.ok(isShipped(f), `load order lists ${f}, but it is not in the shipping set`);
   }
 });
@@ -71,7 +74,7 @@ test("the service worker's runtime resources ship", () => {
     }
   }
   for (const r of resources) {
-    assert.ok(fs.existsSync(path.join(ROOT, r)), `worker loads ${r}, which does not exist`);
+    assert.ok(fs.existsSync(path.join(EXT, r)), `worker loads ${r}, which does not exist`);
     assert.ok(isShipped(r), `worker loads ${r}, but it is not in the shipping set`);
   }
 });
@@ -84,7 +87,7 @@ test("dev/test-only paths do not ship", () => {
 
 test("excluded files exist and live under a shipped directory (else the exclude is stale)", () => {
   for (const p of SHIPPING_EXCLUDES) {
-    assert.ok(fs.existsSync(path.join(ROOT, p)), `excluded path missing: ${p}`);
+    assert.ok(fs.existsSync(path.join(EXT, p)), `excluded path missing: ${p}`);
     const underShipped = SHIPPING_PATHS.some((s) => p === s || p.startsWith(s + "/"));
     assert.ok(underShipped, `excluded path ${p} is not under any shipping path — the exclude is pointless`);
   }

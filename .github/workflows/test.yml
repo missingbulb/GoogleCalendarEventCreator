@@ -40,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Validate extension manifest.json
-        run: node -e "JSON.parse(require('fs').readFileSync('manifest.json'))"
+        run: node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json'))"
 
       # "For me" tests: deterministic, no network. These gate every change.
       - name: Run offline tests

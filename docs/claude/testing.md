@@ -43,7 +43,7 @@ doc, when the mechanics change.
     **two-column table** beside the requirement (image left, spec right) in
     `docs/uiRequirements.md` by `test/ui/build-requirements-gallery.js`.
   - `kind: "icon"` — an image leaf too, but rendered by the real
-    `ui/toolbar-icon.js` loaded into a fake browser (`test/ui/icon-renderer.js` +
+    `extension/ui/toolbar-icon.js` loaded into a fake browser (`test/ui/icon-renderer.js` +
     `test/ui/fake-chrome.js`), fed the case's faked tab URL + host lists (the
     toolbar icon, §10).
   - `kind: "behavior"` — a click/navigation a static image can't observe (e.g.
@@ -112,7 +112,7 @@ Read the file when you touch it; the one-liners here are just a map.
   `test/ui/actions.js`. A case is a self-contained per-leaf `req-<id>.case.js`
   (fake data + an optional DOM action) + `req-<id>.png`; `test/ui/render-snapshot.js`
   picks the renderer by the case's own `kind` (default `"popup"` → the popup's REAL
-  `render()`; `"icon"` → the real `ui/toolbar-icon.js` in a fake browser,
+  `render()`; `"icon"` → the real `extension/ui/toolbar-icon.js` in a fake browser,
   `icon-renderer.js` + `fake-chrome.js`), so a view or icon change moves the
   snapshots automatically. After an intentional popup/view/CSS or toolbar-icon
   change run `npm run refresh:ui` and commit the PNGs + inline gallery

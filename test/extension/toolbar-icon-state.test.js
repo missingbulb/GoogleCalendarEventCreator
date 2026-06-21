@@ -18,8 +18,9 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.join(__dirname, "..", "..");
-const WORKER = path.join(ROOT, "ui/toolbar-icon.js");
-const LISTS = JSON.parse(fs.readFileSync(path.join(ROOT, "pipeline/fallback-lists.json"), "utf8"));
+const EXT = path.join(ROOT, "extension"); // the extension root; worker + lists are relative to it
+const WORKER = path.join(EXT, "ui/toolbar-icon.js");
+const LISTS = JSON.parse(fs.readFileSync(path.join(EXT, "pipeline/fallback-lists.json"), "utf8"));
 
 // Boot the worker with the external boundaries stubbed: the host-list/icon
 // fetches, the OffscreenCanvas decode (no DOM in a worker), and the

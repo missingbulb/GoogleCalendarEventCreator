@@ -54,9 +54,11 @@
         const modules = (ctx.structuredContent && ctx.structuredContent.modules) || [];
         const bodyHtml = modules.filter((m) => m.type === "text").map((m) => m.text).join("");
         if (bodyHtml) {
-          const tmp = document.createElement("div");
-          tmp.innerHTML = bodyHtml;
-          const paras = [...tmp.querySelectorAll("p")]
+          // bodyHtml is page-controlled — parse it inertly with DOMParser (no
+          // browsing context: scripts don't run, resources aren't fetched)
+          // rather than assigning to a live element's .innerHTML.
+          const doc = new DOMParser().parseFromString(bodyHtml, "text/html");
+          const paras = [...doc.querySelectorAll("p")]
             .map((p) => clean(p.textContent))
             .filter(Boolean);
           const bodyText = paras.join("\n\n");

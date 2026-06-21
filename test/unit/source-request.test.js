@@ -13,7 +13,7 @@ const { pathToFileURL } = require("node:url");
 let buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill;
 before(async () => {
   ({ buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "source-request-view.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "ui", "views", "source-request-view.js"))
   ));
 });
 

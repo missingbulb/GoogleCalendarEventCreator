@@ -53,13 +53,15 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   }
 
   // Render an HTML *string* (e.g. a JSON-LD or inline-JSON description) to text,
-  // preserving its <br>/newline layout instead of flattening it. Parses the
-  // markup into a detached element and runs it through blockText — so no caller
-  // has to collapse a description down to a single line.
+  // preserving its <br>/newline layout instead of flattening it. The string is
+  // page-controlled (untrusted), so parse it with DOMParser, which yields an
+  // inert document — no browsing context, so scripts don't run, resources aren't
+  // fetched, and event-handler attributes aren't realized — rather than assigning
+  // to a live element's .innerHTML. The parsed <body> runs through blockText, so
+  // no caller has to collapse a description down to a single line.
   function htmlToText(html, opts) {
-    const div = document.createElement("div");
-    div.innerHTML = html || "";
-    return blockText(div, opts);
+    const body = new DOMParser().parseFromString(html || "", "text/html").body;
+    return blockText(body, opts);
   }
 
   // A small collector for building a comma-separated string (typically a

@@ -13,7 +13,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join(__dirname, "..", "..", "pipeline", "fallback-lists.json");
+const FILE = path.join(__dirname, "..", "..", "extension", "pipeline", "fallback-lists.json");
 
 // Pure: return `list` with `host` present, sorted and de-duplicated.
 function withDomain(list, host) {

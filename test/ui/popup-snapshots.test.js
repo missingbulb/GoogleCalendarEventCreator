@@ -2,7 +2,7 @@
 // requirement. Each case (test/ui/cases/<name>.case.js) supplies fake data;
 // render-snapshot.js turns it into a PNG with the RIGHT renderer, chosen by the
 // case's own `kind` (the popup's REAL render() by default; the real
-// ui/toolbar-icon.js in a fake browser for a `kind: "icon"` case — §10), and the
+// extension/ui/toolbar-icon.js in a fake browser for a `kind: "icon"` case — §10), and the
 // result is compared pixel-by-pixel (via pixelmatch) against the committed
 // reference PNG (test/ui/cases/<name>.png). So the
 // snapshots track the shipped code directly; there is no hand-maintained copy of

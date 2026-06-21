@@ -40,12 +40,31 @@ real status by what the branch's *content* does against `main`:
    adds is already present in `main` (its new files/lines don't show up as
    branch-side additions), it's merged-or-stale ⇒ *safe to delete*. Spot-check the
    branch's signature files with `git cat-file -e origin/main:<path>`.
-3. **No common ancestor ⇒ orphaned.** If `git merge-base origin/main origin/<b>`
+3. **Superseded-elsewhere — content absorbed into `main` in a different form.**
+   A branch can be obsolete even when step 1 finds no merged PR and step 2 still
+   shows its files as branch-side additions: its *work* may have landed in `main`
+   under a **different path or form** — a doc distilled into another doc, a feature
+   re-implemented elsewhere, a lesson folded into a canonical file — so a pure
+   file/line diff never matches and the branch reads as "unmerged." Before
+   concluding a branch is unmerged work (step 5), ask whether its **intent** already
+   exists in `main`: take the branch's signature change (the file it adds, the
+   capability it documents) and look for that same intent in `main` —
+   `git cat-file -e origin/main:<path>` for the exact file, then `git grep`/`git
+   show origin/main:<file>` for the *concept* if the path differs. If `main` already
+   carries the work in any form (and any hook/code it documents has shipped), the
+   branch is **superseded** ⇒ *safe to delete* — note in Details where the content
+   now lives. This is a content/judgment read, not a mechanical diff; all of it is
+   **nondestructive** — reads against `origin/main` only, never a pull/merge into
+   the working tree. (Worked example: a branch adding a standalone
+   `docs/devEnvironmentSetup.md` whose guidance had been distilled into
+   `docs/agenticBestPractices.md` on `main`, with its hook already shipped — invisible
+   to step 2, caught here.)
+4. **No common ancestor ⇒ orphaned.** If `git merge-base origin/main origin/<b>`
    fails, `main`'s history was rewritten out from under the branch (a force-push).
    Flag it **orphaned (pre-rewrite)**: its commits can't be mechanically proven in
    or out of `main`, so report it as *needs a human eye* — never an automatic
    safe-to-delete.
-4. Otherwise the branch has genuine commits/content not in `main` ⇒ **unmerged
+5. Otherwise the branch has genuine commits/content not in `main` ⇒ **unmerged
    work** — *do not delete*; describe what it carries.
 
 Start each run with `git fetch origin --prune` so the view is current (note any
@@ -57,10 +76,11 @@ A Markdown table, most-recent-activity first:
 
 | Branch | Last commit (date) | Ahead | PR | Status | Safe to delete? |
 
-`Status` ∈ `merged/stale` · `unmerged work` · `orphaned (pre-rewrite)`. Below the
-table, a **Details** subsection: one short paragraph per branch with commits ahead
-that isn't merged, describing its changes. End with a one-line recommendation of
-which branches are safe to delete.
+`Status` ∈ `merged/stale` · `superseded` · `unmerged work` · `orphaned
+(pre-rewrite)`. Below the table, a **Details** subsection: one short paragraph per
+branch with commits ahead that isn't merged, describing its changes — and for a
+`superseded` branch, where in `main` its content now lives. End with a one-line
+recommendation of which branches are safe to delete.
 
 ## Where it posts
 
