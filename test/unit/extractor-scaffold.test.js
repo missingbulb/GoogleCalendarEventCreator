@@ -30,7 +30,7 @@ test("the scaffolded stub is loadable and registers a working matcher", () => {
   const ROOT = path.join(__dirname, "..", "..");
   const sandbox = { URL, document: { querySelector: () => null } };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, "pipeline/registry.js"), "utf8"), sandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, "extension/pipeline/registry.js"), "utf8"), sandbox);
   vm.runInContext(sourceStub(URL), sandbox);
   const source = sandbox.GCal.sources.find((s) => s.name === "axs");
   assert.ok(source, "stub registered a source named axs");

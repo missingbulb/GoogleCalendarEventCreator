@@ -23,6 +23,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
+// The deployable extension lives under extension/ (its own extension root —
+// the folder Chrome loads). Files are read/written there, but the emitted load
+// list stays extension-root-relative ("pipeline/...") because that's how the
+// popup injects them (chrome.runtime.getURL / executeScript resolve against the
+// extension root, i.e. extension/).
+const EXT = path.join(ROOT, "extension");
 const DIR = "pipeline";
 const OUTPUT = "pipeline/load-order.generated.json";
 
@@ -36,25 +42,25 @@ const isJs = (f) => f.endsWith(".js");
 
 function computeLoadOrder() {
   const helpers = fs
-    .readdirSync(path.join(ROOT, DIR, "helpers"))
+    .readdirSync(path.join(EXT, DIR, "helpers"))
     .filter(isJs)
     .sort()
     .map((f) => `helpers/${f}`);
 
   const sources = fs
-    .readdirSync(path.join(ROOT, DIR, "sources"))
+    .readdirSync(path.join(EXT, DIR, "sources"))
     .filter(isJs)
     .map((f) => `sources/${f}`);
 
   const pinned = new Set([...PINNED_FIRST, ...PINNED_LAST, ...NOT_INJECTED]);
   const topLevelMiddle = fs
-    .readdirSync(path.join(ROOT, DIR))
+    .readdirSync(path.join(EXT, DIR))
     .filter((f) => isJs(f) && !pinned.has(f)); // the extract-* layers
 
   const middle = [...topLevelMiddle, ...sources].sort();
 
   for (const f of [...PINNED_FIRST, ...PINNED_LAST]) {
-    if (!fs.existsSync(path.join(ROOT, DIR, f))) {
+    if (!fs.existsSync(path.join(EXT, DIR, f))) {
       throw new Error(`expected ${DIR}/${f} to exist`);
     }
   }
@@ -69,7 +75,7 @@ function render(list) {
 
 if (require.main === module) {
   const list = computeLoadOrder();
-  fs.writeFileSync(path.join(ROOT, OUTPUT), render(list));
+  fs.writeFileSync(path.join(EXT, OUTPUT), render(list));
   console.log(`Wrote ${OUTPUT} (${list.length} files)`);
 }
 

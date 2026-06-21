@@ -9,40 +9,49 @@ This is deliberately separate from
 feature-level description** of what the extension does and why. The split: "the
 popup turns the page's event into a one-click calendar link" is a feature
 description and lives there; "an off-current-year chip shows a gray pill for a
-past year" is a specific UI requirement and lives here. Anything that isn't the
-popup's *rendering* — the toolbar/extension icon, the GitHub source-request issue
-form, and the calendar-URL / timezone *semantics* — stays in
-productRequirements; this doc covers the **popup only**.
+past year" is a specific UI requirement and lives here. Anything that isn't a
+pixel-assertable *rendering* — the GitHub source-request issue form, and the
+calendar-URL / timezone *semantics* — stays in productRequirements. This doc
+covers the popup's rendering **and** the toolbar/extension icon (§10): both are
+pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves.
 
 > # ⚠️ INCOMPLETE TESTING — A GREEN BUILD MEANS "CLAIMED", NOT "FULLY VERIFIED" ⚠️
 >
-> Every *render* leaf below has its own inline snapshot, and every *behavior* leaf
-> a behavior test, so the coverage gate proves each leaf is *claimed* by the right
-> kind of test. What it does **not** prove is how *faithfully* the behavioral
-> leaves are checked: a leaf tagged `_(behavior)_` (a click → new-tab →
-> close-popup action) has no pixels, so it's verified by
-> `test/unit/events-view-actions.test.js`, which **stubs
-> `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the right
-> action, **not** that a real Chrome performs it. A faithful (non-stub)
+> Every leaf below is *claimed* by exactly one case, so the coverage gate proves
+> each leaf is verified by the right kind of test. What it does **not** prove is how
+> *faithfully*: a `kind: "behavior"` case (a click → new-tab → close-popup action)
+> has no pixels, so it's verified by `test/ui/events-view-actions.test.js`, which
+> **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
+> right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [`docs/claude/testing.md`](claude/testing.md).
+> [`docs/claude/testing.md`](claude/testing.md). Likewise, the toolbar-icon leaves
+> (§10) are verified offline through a **fake Chrome**, so they pin the icon the
+> extension *generates*, not that real Chrome *paints* it — only the e2e test does
+> that.
 
-**Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). A
-UI snapshot case (`test/ui/`) names the requirement(s) it verifies by number, so a
-case and the requirement it pins can be cross-checked. Add new requirements with
-new numbers; don't renumber or reuse existing ones.
+**Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). Each
+leaf has exactly one case named `req-<id>.case.js`, so a case and the requirement it
+pins are cross-checked by number. Add new requirements with new numbers; don't
+renumber or reuse existing ones.
 
-**Verification kind.** Most leaves are *render* requirements, each pinned by a UI
-snapshot shown in a **two-column table** below — the generated image on the left,
-the requirement on the right. A leaf tagged **`_(behavior)_`** right after its
-number is instead verified by a behavior test (a click/navigation a static image
-can't observe), and its left cell carries a note rather than an image. A leaf
-tagged **`_(TBD)_`** is a **placeholder** — an edge case whose correct behavior
-isn't decided yet; its left cell shows a loud "TO BE DECIDED" banner (with a
-provisional render of *current* behavior when one exists), and it's exempt from
-the one-snapshot-per-leaf rule until the decision is made. The coverage gate is
-**segmented** by these kinds (`test/ui/behavior-coverage.js`). The left cells are
-generated; don't hand-edit a line carrying a `<!-- req-gallery:… -->` marker.
+**How each leaf is verified is declared by its CASE, not tagged here.** The spec is
+just numbered prose; each leaf's `req-<id>.case.js` declares how it's verified via
+its own `kind` (default `"popup"`) — and `test/ui/render-snapshot.js` dispatches on
+it:
+
+- `"popup"` / `"icon"` — an **image** leaf, pinned by a `req-<id>.png` snapshot in
+  the **two-column table** below (image left, requirement right). `"popup"` is the
+  popup's real `render()`; `"icon"` is the real `extension/ui/toolbar-icon.js` in a fake
+  browser (the toolbar icon, §10).
+- `"behavior"` — a click/navigation a static image can't observe; the case carries
+  no image, its left cell shows a note, and it's verified by
+  `test/ui/events-view-actions.test.js`.
+- a case may also set **`tbd: true`** — an edge case whose correct behavior isn't
+  decided yet; its left cell shows a loud "TO BE DECIDED" banner above its
+  provisional (current-behavior) snapshot.
+
+The left cells are generated from the cases; don't hand-edit a line carrying a
+`<!-- req-gallery:… -->` marker.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
 specification. When a rendering is conditional — "in case X render Y, in case Z
@@ -54,7 +63,7 @@ The five popup **states** (supported / denylisted / nothing-found / allowlisted 
 unlisted) and *when* each occurs are defined in
 [productRequirements.md](productRequirements.md); this doc specifies how each is
 *rendered*. Tunable values referenced below (`maxCardsShown`,
-`maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `config.js`.
+`maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `extension/config.js`.
 
 ## 1. Heading
 
@@ -169,11 +178,12 @@ found no events, the glyph stands **alone** — no link beneath it.
 </td>
 <td valign="top">
 
-`3.1` **Suggest Correction** — shown only in the unlisted-with-event state
-(state 5). It sits on the **heading line, right-aligned** (the heading becomes a
-row: title on the left, link on the right, vertically centered). Clicking it
-opens the prefilled source-request issue (the issue form itself is out of
-scope — see productRequirements).
+`3.1` **Suggest Correction** — shown in the unlisted-with-event state (state 5),
+and on a supported host where the dedicated source found nothing but the generic
+fallback did (state 1b — see productRequirements). It sits on the **heading line,
+right-aligned** (the heading becomes a row: title on the left, link on the right,
+vertically centered). Clicking it opens the prefilled source-request issue (the
+issue form itself is out of scope — see productRequirements).
 
 </td>
 </tr>
@@ -216,12 +226,12 @@ underline at rest, underline on hover) so neither reads as a primary action.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:3.4 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:3.4 -->
 
 </td>
 <td valign="top">
 
-`3.4` _(behavior)_ Each link opens its target in a **new tab** (adjacent to the
+`3.4` Each link opens its target in a **new tab** (adjacent to the
 current one) and closes the popup.
 
 </td>
@@ -289,7 +299,7 @@ one card per event.
 </td>
 <td valign="top">
 
-`4.2.3` _(TBD)_ Edge case — **one event** with three instances: one in June, one a
+`4.2.3` Edge case — **one event** with three instances: one in June, one a
 **multi-day instance spanning June → July**, and one in July. Today the spanning
 instance groups by its **start** (June), so it shows under June only and never
 under July (provisional render at left). Whether a cross-month instance should
@@ -433,7 +443,7 @@ order.)
 </td>
 <td valign="top">
 
-`4.10` _(TBD)_ A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
+`4.10` A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
 today its chip shows just the **start day** (provisional render at left). Whether a
 long or multi-month span should instead show a **date range** on the calendar chip
 — and how the span should read on the line — is **to be decided**.
@@ -974,12 +984,12 @@ count.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.1 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.1 -->
 
 </td>
 <td valign="top">
 
-`9.1` _(behavior)_ Clicking a single card opens that event's prefilled Google
+`9.1` Clicking a single card opens that event's prefilled Google
 Calendar template in a new browser tab.
 
 </td>
@@ -990,12 +1000,12 @@ Calendar template in a new browser tab.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.2 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.2 -->
 
 </td>
 <td valign="top">
 
-`9.2` _(behavior)_ Clicking a grouped card's instance button opens that
+`9.2` Clicking a grouped card's instance button opens that
 **specific showing's** template in a new tab.
 
 </td>
@@ -1006,13 +1016,73 @@ Calendar template in a new browser tab.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.3 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.3 -->
 
 </td>
 <td valign="top">
 
-`9.3` _(behavior)_ A template opens in a tab **adjacent** to the current one,
+`9.3` A template opens in a tab **adjacent** to the current one,
 and the popup then closes.
+
+</td>
+</tr>
+</table>
+
+## 10. Toolbar icon
+
+The toolbar/extension icon signals how the current page's host is classified —
+before the popup is even opened — so the user knows at a glance whether a one-click
+extraction is first-class. It reflects the *host's classification*, not whether an
+event was found (the icon can't read the page, so a page where the generic fallback
+later finds an event still shows the blue icon). When the host is denylisted **or**
+supported it would otherwise show two icons; supported wins. These are ordinary
+snapshot leaves whose cases set `kind: "icon"`, so their images are rendered by the
+real `extension/ui/toolbar-icon.js` in a fake browser rather than the popup (see
+"Verification kind" above).
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![req-10.1](../test/ui/cases/req-10.1.png) <!-- req-gallery:10.1 -->
+
+</td>
+<td valign="top">
+
+`10.1` On a host with a dedicated, first-class extractor (the **supported
+list**), the icon is **green**.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![req-10.2](../test/ui/cases/req-10.2.png) <!-- req-gallery:10.2 -->
+
+</td>
+<td valign="top">
+
+`10.2` On a host on the fallback **denylist** (where we've deliberately
+decided not to extract), the icon is **gray**.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![req-10.3](../test/ui/cases/req-10.3.png) <!-- req-gallery:10.3 -->
+
+</td>
+<td valign="top">
+
+`10.3` On any **other** page — neither supported nor denylisted, including
+an allowlisted host — the icon stays the manifest default, **blue**.
 
 </td>
 </tr>

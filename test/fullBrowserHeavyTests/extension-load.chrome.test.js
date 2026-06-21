@@ -23,6 +23,9 @@ const { spawn } = require("node:child_process");
 const { connectCDP } = require("../../data/cdp-client");
 
 const ROOT = path.join(__dirname, "..", "..");
+// The unpacked extension to load is the extension/ subfolder (its manifest.json
+// lives there), not the repo root.
+const EXT = path.join(ROOT, "extension");
 
 const chromePath = [process.env.CHROME_PATH, process.env.PUPPETEER_EXECUTABLE_PATH].find(
   (p) => p && fs.existsSync(p)
@@ -41,8 +44,8 @@ function launchChrome(userDataDir, timeoutMs) {
     [
       `--user-data-dir=${userDataDir}`,
       "--remote-debugging-port=0",
-      `--disable-extensions-except=${ROOT}`,
-      `--load-extension=${ROOT}`,
+      `--disable-extensions-except=${EXT}`,
+      `--load-extension=${EXT}`,
       // Branded Chrome 137+ gates --load-extension behind this feature; a no-op
       // on Chrome for Testing and older Chrome.
       "--disable-features=DisableLoadExtensionCommandLineSwitch",
@@ -181,7 +184,7 @@ test(
     } finally {
       if (cdp) cdp.close();
       proc.kill("SIGKILL");
-      fs.rmSync(userDataDir, { recursive: true, force: true });
+      fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     }
   }
 );

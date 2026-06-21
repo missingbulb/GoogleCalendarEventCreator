@@ -510,6 +510,33 @@ test("Supported host, no event on the page: returns no events", () => {
   assert.equal(ev.supported, true); // but the host is still recognized (green icon)
 });
 
+test("Supported host, dedicated extractor finds nothing but the page has a generic event: falls back and flags it (#456)", () => {
+  // meetup.js reads <time datetime> / JSON-LD only; with neither present it finds
+  // no event, so the orchestrator runs the generic fallback, which reads the
+  // og:title + event:start_time meta + <address> the dedicated source ignores.
+  const html = `
+    <meta property="og:title" content="Indie Rock Night">
+    <meta property="event:start_time" content="2026-09-12T20:00:00">
+    <address>The Echo, Los Angeles</address>`;
+
+  const ev = extractFromHtml(html, "https://www.meetup.com/some-group/events/123/");
+  assert.equal(ev.supported, true); // the host stays supported (green icon)
+  assert.equal(ev.fallback, true);  // the events came from the generic fallback
+  assert.equal(ev.events.length, 1);
+  assert.equal(ev.events[0].title, "Indie Rock Night");
+  assert.equal(ev.events[0].location, "The Echo, Los Angeles");
+  assert.equal(ev.events[0].times[0].start, "2026-09-12T20:00:00");
+});
+
+test("Supported host, neither dedicated nor fallback finds an event: nothing, fallback flag stays false (#456)", () => {
+  const html = `<h1>Brooklyn Rustaceans</h1><p>Welcome to our group.</p>`;
+
+  const ev = extractFromHtml(html, "https://www.meetup.com/brooklyn-rustaceans/");
+  assert.equal(ev.events.length, 0);
+  assert.equal(ev.supported, true);
+  assert.equal(ev.fallback, false);
+});
+
 test("Page with a parseable date but no site/JSON-LD: still yields the event", () => {
   // A date is a real event signal, so the generic fallback keeps the event.
   const html = `<h1>Block Party</h1><p>Join us on Saturday, July 11, 2026 at 2 PM.</p>`;

@@ -35,14 +35,14 @@ default branch (before you check anything out):**
      SLUG=$(node -e "process.stdout.write(require('./tools/new-extractors-creation/extractor-naming').namesFor(process.argv[1]).slug)" "<event-url>")
      ```
      - **branch**: `claude/extractor/$SLUG`
-     - **source**: `pipeline/sources/$SLUG.js` (scaffolded, `matches()` filled)
+     - **source**: `extension/pipeline/sources/$SLUG.js` (scaffolded, `matches()` filled)
      - **case**: `test/extractors/custom/$SLUG.json` (placeholder, `events: []`)
      - **cached page**: `data/$SLUG.html` (URL in `data/$SLUG.url`)
    - **`BASE` is non-empty → add-a-case mode.** `$BASE` is the existing source's
      file name (e.g. `telavivcinematheque`). The names carry the issue number so
      each request for a supported host gets its own case + branch:
      - **branch**: `claude/extractor/$BASE-<issue>`
-     - **source**: `pipeline/sources/$BASE.js` — **already shipped and working**
+     - **source**: `extension/pipeline/sources/$BASE.js` — **already shipped and working**
      - **case**: `test/extractors/custom/$BASE-<issue>.json` (placeholder, `events: []`)
      - **cached page**: `data/$BASE-<issue>.html` (URL in `data/$BASE-<issue>.url`)
 3. Check the branch out and install deps:
@@ -74,9 +74,9 @@ Edit only these:
 
 **Do not create any new file. Do not edit anything else** — not the load lists,
 not `supportedDomains`, not the cached page, and **not the shared helpers in
-`pipeline/helpers/`** (even to "improve" them). If your extractor needs a helper the
+`extension/pipeline/helpers/`** (even to "improve" them). If your extractor needs a helper the
 shared ones don't provide, write it as a local function inside `<source>`'s IIFE,
-exactly as `pipeline/sources/meetup.js` does with its `fullDescription`. (A guard in
+exactly as `extension/pipeline/sources/meetup.js` does with its `fullDescription`. (A guard in
 the finalize workflow reverts any change outside those two files before the PR, so
 straying just wastes your effort.)
 
@@ -122,9 +122,9 @@ return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
 ```
 
 so DOM fields win where present and the page's embedded event fills the rest. Read
-`pipeline/sources/meetup.js` as the canonical single-event example and
-`pipeline/sources/telavivcinematheque.js` as the multi-event/series one; skim
-`pipeline/helpers/{dom,text,dates}.js` for the shared `GCal` helpers.
+`extension/pipeline/sources/meetup.js` as the canonical single-event example and
+`extension/pipeline/sources/telavivcinematheque.js` as the multi-event/series one; skim
+`extension/pipeline/helpers/{dom,text,dates}.js` for the shared `GCal` helpers.
 
 ---
 

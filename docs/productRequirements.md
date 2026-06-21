@@ -4,33 +4,22 @@ What the extension does, described as user-facing behavior — independent of ho
 it's built (that's [highLevelDesign.md](highLevelDesign.md) and the per-file map
 in [fileDescriptions.md](fileDescriptions.md)). The tunable values called out
 below (default duration, the events cap, fallback copy, the host allow/denylist)
-live in `config.js`.
+live in `extension/config.js`.
 
 This file is a **rough, feature-level description**. The **specific, numbered UI
 requirements** for the popup — exact text, layout, colors, card structure, the
 count label, scroll cues — live in [uiRequirements.md](uiRequirements.md) (the
 popup's testable contract, referenced by the UI snapshot tests). The rule of
-thumb: the *what and why* of a feature is here; the *exact rendering* of the popup
-is there. The toolbar icon and the source-request issue form are features in their
-own right and stay here.
+thumb: the *what and why* of a feature is here; the *exact rendering* is there.
+The **toolbar icon** is pixel-assertable like the popup, so its requirements live
+with the other visual requirements in [uiRequirements.md](uiRequirements.md)
+(§10 — "Toolbar icon"); the source-request issue form is a feature in its own
+right and stays here.
 
 ## Purpose
 
 Turn the event on the current web page into a pre-filled Google Calendar event,
 opened in a new tab, in one click.
-
-## Toolbar icon
-
-The icon signals how the current page's host is classified:
-
-- **green** — the host has a dedicated extractor;
-- **gray** — the host is on the fallback denylist, where we've deliberately
-  decided not to extract (the "denylisted host" popup state below);
-- **blue** — every other page.
-
-It reflects the host's classification, not whether an event was found — the icon
-can't read the page, so a page where the generic fallback later finds an event
-still shows the blue icon.
 
 ## What the popup shows
 
@@ -38,7 +27,14 @@ When opened, the popup lands in one of five states:
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 
-1. **Supported host** — show the events the dedicated extractor found.
+1. **Supported host** — show the events the dedicated extractor found. If the
+   dedicated extractor finds **none**, fall back to the generic extractor: when
+   that turns up a *complete* event, show it **and** offer "Suggest Correction"
+   (as in state 5) so the page the dedicated source missed can be reported — a
+   user most likely opens the popup when they see an event, so a best-effort
+   result beats an empty popup. When the fallback also finds nothing, the empty
+   state shows (state 2's bare glyph — no policy link). The host stays classified
+   *supported* throughout (the icon stays green).
 2. **Denylisted host** — show nothing and prompt for nothing: no event, no
    support request, no policy link. We've deliberately decided not to extract
    there, so there's nothing to dispute.

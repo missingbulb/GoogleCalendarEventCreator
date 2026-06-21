@@ -3,7 +3,7 @@
 ## The package
 
 `npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
-files the extension ships (manifest, scripts, `pipeline/`, `icons/`), and
+files the extension ships (manifest, scripts, `extension/pipeline/`, `extension/icons/`), and
 nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
 in **`tools/shipping-files.js`** as the single source of truth, and
 `test/unit/shipping-files.test.js` asserts it stays in sync with what the
@@ -13,7 +13,7 @@ file or smuggle in dead weight. This same zip is what testers load unpacked
 
 ## Versioning
 
-The version users see is `manifest.json`'s `version` (the store reads only
+The version users see is `extension/manifest.json`'s `version` (the store reads only
 that; `package.json` is kept in sync). **It is bumped deliberately, by a human,
 not automatically** — and bumping is a separate step from releasing. Ask Claude
 to **"bump version"** (it edits both files on a branch and lands on `main`
@@ -26,13 +26,13 @@ strictly higher than the live one, so each release must increment it first.
 
 The **Create Release Package** workflow (`.github/workflows/release.yml`) runs
 the tests, builds the zip, and publishes a GitHub Release with it attached, at
-**whatever version is currently committed in `manifest.json`**. It does **not**
+**whatever version is currently committed in `extension/manifest.json`**. It does **not**
 change the version — bump it first (see above).
 
 It runs **automatically when a version bump merges to `main`** (a push to `main`
-that touches `manifest.json`), so cutting a release is just merging the bump PR.
+that touches `extension/manifest.json`), so cutting a release is just merging the bump PR.
 If that version already matches the latest published release (or a `vX.Y.Z` tag
-already exists), the run is a **clean no-op** — so `manifest.json` edits that
+already exists), the run is a **clean no-op** — so `extension/manifest.json` edits that
 aren't version bumps don't cut a release. You can also run it manually from the
 Actions tab → Create Release Package → "Run workflow".
 

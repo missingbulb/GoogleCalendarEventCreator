@@ -13,12 +13,13 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.join(__dirname, "..", "..");
+const EXT = path.join(ROOT, "extension"); // the extension root; pipeline paths are relative to it
 
 function runInFreshSandbox(files) {
   const sandbox = { document: undefined, URL };
   vm.createContext(sandbox);
   for (const file of files) {
-    vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), sandbox);
+    vm.runInContext(fs.readFileSync(path.join(EXT, file), "utf8"), sandbox);
   }
   return sandbox;
 }
@@ -42,7 +43,7 @@ test("a source registers onto GCal.sources whichever order the base files run", 
     const sandbox = runInFreshSandbox(baseOrder);
     assert.doesNotThrow(() => {
       vm.runInContext(
-        fs.readFileSync(path.join(ROOT, "pipeline/sources/meetup.js"), "utf8"),
+        fs.readFileSync(path.join(EXT, "pipeline/sources/meetup.js"), "utf8"),
         sandbox
       );
     }, `meetup.js threw with base order ${baseOrder.join(", ")}`);

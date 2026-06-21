@@ -5,9 +5,12 @@
 // (pipeline/load-order.generated.json) — its completion value is what
 // chrome.scripting.executeScript returns to the popup.
 //
-// The result is always { events: [...], supported } — `events` holds the
-// extracted events (possibly empty) and `supported` is true when a registered
-// source matched this page's host. Each event is fully self-described —
+// The result is always { events: [...], supported, fallback } — `events` holds
+// the extracted events (possibly empty), `supported` is true when a registered
+// source matched this page's host, and `fallback` is true only when a SUPPORTED
+// host's dedicated source found nothing so we ran the generic extractor instead
+// (#456) — the one signal the popup reads to add a "Suggest Correction" link for
+// events the dedicated source missed. Each event is fully self-described —
 // { title, location, description, ctz, times: [ { start, end,
 // eventLengthInMinutes? }, ... ] } — so a caller (the popup) can build a Google
 // Calendar URL for any of its instances without consulting page-level state.
@@ -37,9 +40,11 @@
 // supported host shows its events; an unsupported host shows the generic
 // fallback's events when they're complete enough (title + location + start),
 // and otherwise/also offers a "request this source" link — see ui/popup.js's
-// chooseContent. `supported` is the same answer GCal.isSupportedHost gives the
-// toolbar icon, so the popup's supported/unsupported split and the icon can
-// never disagree.
+// chooseContent. A supported host whose dedicated source found nothing carries
+// `fallback: true`, telling the popup to show the generic fallback's events with
+// that request link too (#456). `supported` is the same answer
+// GCal.isSupportedHost gives the toolbar icon, so the popup's supported/
+// unsupported split and the icon can never disagree.
 //
 // Two distinct paths, depending on whether a site source matches:
 //   - Supported host: the matching site source is SELF-CONTAINED — it produces
@@ -48,7 +53,9 @@
 //     is merged over it. A source may return a single partial event, or its own
 //     `events` array (e.g. sources/telavivcinematheque.js for a series page)
 //     with page-level description/ctz that fill any field an individual event
-//     didn't carry.
+//     didn't carry. If it finds NO events, we run the generic fallback as a
+//     last resort and flag the result `fallback: true` (#456) — never merged
+//     over the source, only used when the source itself came up empty.
 //   - Unsupported host: no per-site extractor exists, so we defer to the
 //     unsupported-site extractor (GCal.unsupportedSiteEvents) for a best-effort
 //     event. The popup presents it when it's complete enough (title + location +
@@ -95,7 +102,22 @@
       };
     };
 
-    const events = group(site ? supportedEvents(site, norm) : fallbackEvents(norm));
+    // Pick the events to show, and whether they came from the generic fallback.
+    // A supported host's dedicated source is self-contained and runs alone — but
+    // when it finds NO events on a page it's expected to handle, fall back to the
+    // generic extractor rather than show an empty popup (#456). The user opened
+    // the popup because they saw an event on the page, so the fallback's
+    // best-effort events are a better answer than nothing; the popup surfaces a
+    // "Suggest Correction" link for them, since the dedicated source missed them.
+    // `fallback` is true ONLY in that case (a supported host's own events, and an
+    // unsupported host's, leave it false) — it's the single signal the popup
+    // (chooseContent) reads to add that correction link on a supported host.
+    let events = group(site ? supportedEvents(site, norm) : fallbackEvents(norm));
+    let fallback = false;
+    if (site && !events.length) {
+      events = group(fallbackEvents(norm));
+      fallback = events.length > 0;
+    }
 
     // Present everything chronologically regardless of the order the page (or a
     // site extractor's performance list) gave it in. start is an ISO-ish string
@@ -106,7 +128,7 @@
     for (const e of events) e.times.sort((a, b) => cmpStart(a.start, b.start));
     events.sort((a, b) => cmpStart(a.times[0].start, b.times[0].start));
 
-    return { events, supported: Boolean(site) };
+    return { events, supported: Boolean(site), fallback };
   }
 
   // Lexicographic start compare with empty/absent sorting last.
@@ -172,9 +194,10 @@
     return event.times.some((t) => t.start) ? [event] : [];
   }
 
-  // Unsupported host: no per-site extractor, so defer to the unsupported-site
-  // extractor for a best-effort event. The popup (chooseContent) decides whether
-  // it's complete enough to present, and whether to offer a source request.
+  // The generic best-effort extractor. Used for an unsupported host (no per-site
+  // extractor exists), and as a last resort on a supported host whose dedicated
+  // source found nothing (#456). The popup (chooseContent) decides whether the
+  // result is complete enough to present, and whether to offer a source request.
   function fallbackEvents(norm) {
     return GCal.unsupportedSiteEvents.extract().map(norm);
   }

@@ -16,9 +16,13 @@
 const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("./shipping-files");
+const { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("./shipping-files");
 
 const ROOT = path.join(__dirname, "..");
+// The extension root — the folder Chrome loads. Shipping paths are relative to
+// it, and the zip is built from inside it, so the archive has manifest.json at
+// its top (no leading repo or extension/ dir).
+const EXT = path.join(ROOT, EXTENSION_DIR);
 const OUT_DIR = path.join(ROOT, "dist");
 const OUT_NAME = "google-calendar-event-creator.zip";
 const OUT_PATH = path.join(OUT_DIR, OUT_NAME);
@@ -30,22 +34,23 @@ function fail(msg) {
 
 // Every shipping path must exist, so a renamed/removed runtime file is a loud
 // build failure rather than a silently incomplete package.
-const missing = SHIPPING_PATHS.filter((p) => !fs.existsSync(path.join(ROOT, p)));
+const missing = SHIPPING_PATHS.filter((p) => !fs.existsSync(path.join(EXT, p)));
 if (missing.length) fail(`shipping path(s) not found: ${missing.join(", ")}`);
 
-const version = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8")).version;
+const version = JSON.parse(fs.readFileSync(path.join(EXT, "manifest.json"), "utf8")).version;
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.rmSync(OUT_PATH, { force: true });
 
 try {
-  // `zip` paths are relative to ROOT so the archive has no leading repo dir —
-  // it unzips straight to a folder containing manifest.json. -r recurses into
-  // the listed directories; -X drops extra file attributes for a tidy archive.
-  // -x drops dev-only files that live under a shipped directory.
+  // `zip` runs with cwd inside the extension root and paths relative to it, so
+  // the archive has no leading repo/extension dir — it unzips straight to a
+  // folder containing manifest.json. -r recurses into the listed directories;
+  // -X drops extra file attributes for a tidy archive. -x drops dev-only files
+  // that live under a shipped directory.
   const args = ["-rX", OUT_PATH, ...SHIPPING_PATHS];
   if (SHIPPING_EXCLUDES.length) args.push("-x", ...SHIPPING_EXCLUDES);
-  execFileSync("zip", args, { cwd: ROOT, stdio: ["ignore", "ignore", "inherit"] });
+  execFileSync("zip", args, { cwd: EXT, stdio: ["ignore", "ignore", "inherit"] });
 } catch (e) {
   if (e.code === "ENOENT") fail("`zip` command not found — install zip (e.g. `apt-get install zip`).");
   fail(`zip failed: ${e.message}`);
