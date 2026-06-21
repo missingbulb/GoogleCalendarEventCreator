@@ -13,13 +13,17 @@ const assert = require("node:assert/strict");
 const { JSDOM } = require("jsdom");
 
 const ROOT = path.join(__dirname, "..");
+// The deployable extension (its files and load list) lives under extension/,
+// which is the extension root. Load-order entries are relative to it
+// ("pipeline/..."), so reads join through EXT.
+const EXT = path.join(ROOT, "extension");
 
 function extractorSources() {
   const files = JSON.parse(
-    readFileSync(path.join(ROOT, "pipeline/load-order.generated.json"), "utf8")
+    readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8")
   );
   assert.ok(files.length > 0, "pipeline/load-order.generated.json is empty");
-  return files.map((file) => ({ file, src: readFileSync(path.join(ROOT, file), "utf8") }));
+  return files.map((file) => ({ file, src: readFileSync(path.join(EXT, file), "utf8") }));
 }
 
 const SOURCES = extractorSources();

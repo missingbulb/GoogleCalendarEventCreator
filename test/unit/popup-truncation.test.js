@@ -25,10 +25,10 @@ before(async () => {
   // exists), but the helper needs one when called, so install a jsdom document.
   global.document = new JSDOM("<!doctype html><body></body>").window.document;
   ({ makeTruncationLabel } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "ui", "popup.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "ui", "popup.js"))
   ));
   ({ GCalConfig } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "config.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "config.js"))
   ));
 });
 

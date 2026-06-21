@@ -15,7 +15,8 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.join(__dirname, "..", "..");
-const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
+const EXT = path.join(ROOT, "extension"); // the extension root Chrome loads; manifest + injected files are relative to it
+const manifest = JSON.parse(fs.readFileSync(path.join(EXT, "manifest.json"), "utf8"));
 
 // Boot the background service worker in a sandbox with just enough of the
 // extension APIs stubbed, recording which event listeners it registers and
@@ -62,7 +63,7 @@ function bootServiceWorker() {
     importScripts() { throw new Error("the worker must not importScripts the pipeline anymore"); },
   };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, workerPath), "utf8"), sandbox);
+  vm.runInContext(fs.readFileSync(path.join(EXT, workerPath), "utf8"), sandbox);
   return { sandbox, registered, handlers, addedRules };
 }
 
@@ -84,10 +85,10 @@ test("the worker registers icon rules at startup, with no tab access", async () 
 test("every injected pipeline file parses as a script", () => {
   // load-order.generated.json is exactly what the popup injects into the page;
   // a syntax error in any of them would break the popup's extraction at runtime.
-  const files = JSON.parse(fs.readFileSync(path.join(ROOT, "pipeline/load-order.generated.json"), "utf8"));
+  const files = JSON.parse(fs.readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8"));
   assert.ok(files.length, "load order lists no files");
   for (const f of files) {
-    const src = fs.readFileSync(path.join(ROOT, f), "utf8");
+    const src = fs.readFileSync(path.join(EXT, f), "utf8");
     assert.doesNotThrow(() => new vm.Script(src, { filename: f }), `${f} must parse as a script`);
   }
 });
@@ -100,6 +101,6 @@ test("every file the manifest references exists", () => {
     ...Object.values(manifest.icons),
   ];
   for (const ref of refs) {
-    assert.ok(fs.existsSync(path.join(ROOT, ref)), `manifest references ${ref}, which does not exist`);
+    assert.ok(fs.existsSync(path.join(EXT, ref)), `manifest references ${ref}, which does not exist`);
   }
 });

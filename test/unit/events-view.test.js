@@ -26,7 +26,7 @@ before(async () => {
     commonTime,
     showPerDayTimes,
     groupHeaderTime,
-  } = await import(pathToFileURL(path.join(__dirname, "..", "..", "ui", "views", "events-view.js"))));
+  } = await import(pathToFileURL(path.join(__dirname, "..", "..", "extension", "ui", "views", "events-view.js"))));
 });
 
 // Floating (offset-free) times parse as local, so these are deterministic

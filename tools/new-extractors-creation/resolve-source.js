@@ -55,15 +55,15 @@ function resolveSourceBaseName(urlOrHost) {
   const run = (rel) =>
     vm.runInContext(fs.readFileSync(path.join(ROOT, rel), "utf8"), sandbox, { filename: rel });
 
-  run("pipeline/registry.js");
+  run("extension/pipeline/registry.js");
   const files = fs
-    .readdirSync(path.join(ROOT, "pipeline/sources"))
+    .readdirSync(path.join(ROOT, "extension/pipeline/sources"))
     .filter((f) => f.endsWith(".js"))
     .sort();
 
   for (const f of files) {
     const before = sandbox.GCal.sources.length;
-    run(`pipeline/sources/${f}`);
+    run(`extension/pipeline/sources/${f}`);
     const added = sandbox.GCal.sources.slice(before);
     if (added.some((s) => typeof s.matches === "function" && s.matches(host))) {
       return f.replace(/\.js$/, "");

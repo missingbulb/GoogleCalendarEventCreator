@@ -29,6 +29,7 @@ const path = require("node:path");
 const { JSDOM } = require("jsdom");
 
 const ROOT = path.join(__dirname, "../../..");
+const EXT = path.join(ROOT, "extension"); // the extension root; load-order entries are relative to it
 const CASES_DIR = path.join(ROOT, "test/extractors/custom");
 const DATA_DIR = path.join(ROOT, "data");
 
@@ -42,8 +43,8 @@ const CRITICAL_FIELDS = ["title", "start", "location"];
 // Load the pipeline files once, in the generated injection order (the single
 // source of truth the popup and harness both read).
 const SOURCES = (() => {
-  const files = JSON.parse(readFileSync(path.join(ROOT, "pipeline/load-order.generated.json"), "utf8"));
-  return files.map((file) => readFileSync(path.join(ROOT, file), "utf8"));
+  const files = JSON.parse(readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8"));
+  return files.map((file) => readFileSync(path.join(EXT, file), "utf8"));
 })();
 
 // Run the real pipeline against `html` loaded at `url`. With clearSources the
@@ -355,7 +356,7 @@ function renderMarkdown(cov, watermark) {
   );
   L.push("");
   L.push(
-    "What the generic **fallback** extractor (`pipeline/extract-unsupported.js`) " +
+    "What the generic **fallback** extractor (`extension/pipeline/extract-unsupported.js`) " +
       "recovers on each integration-test page, compared to that page's **dedicated " +
       "per-site source** — the reviewed-correct extraction the live test pins down. " +
       "For every `test/extractors/custom/*.json` page, `GCal.extract()` is run twice " +

@@ -12,7 +12,7 @@ data/*.html linguist-vendored
 # a normal conflicting merge — still resolvable, only manual. A stale artifact
 # can't slip through: its own test fails (the load-order drift guard, the UI
 # snapshot pixel diff, the coverage gate). See docs/claude/github.md.
-pipeline/load-order.generated.json                                  merge=ours
+extension/pipeline/load-order.generated.json                        merge=ours
 test/extractors/fallback/fallback-coverage.baseline.GENERATED.json  merge=ours
 test/extractors/fallback/fallback-coverage.GENERATED.md             merge=ours
 test/ui/cases/*.png                                                 merge=ours

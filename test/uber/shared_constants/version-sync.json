@@ -2,7 +2,7 @@
   "what": "extension version — must match across manifests (update this entry on every version bump)",
   "value": "\"version\": \"1.2.0\"",
   "counts": {
-    "manifest.json": 1,
+    "extension/manifest.json": 1,
     "package.json": 1
   }
 }

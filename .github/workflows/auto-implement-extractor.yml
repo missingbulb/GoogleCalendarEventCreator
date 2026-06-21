@@ -63,7 +63,7 @@ jobs:
 
       # Pre-flight triage: close + skip the (expensive) agent run when the
       # request is already settled — the host already has a dedicated source,
-      # it's on config.js's fallback allow/denylist, or another in-flight request
+      # it's on extension/config.js's fallback allow/denylist, or another in-flight request
       # already covers its host (its URL is folded into that leader as a sample).
       # Also emits the event URL plus the deterministic
       # slug/caseName the probe and Phase-1 steps below use. Needs only Node +
