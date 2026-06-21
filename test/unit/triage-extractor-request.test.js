@@ -56,7 +56,7 @@ test("the result carries the deterministic new-mode names the workflow needs", a
   assert.equal(res.caseName, "unknown"); // new mode: caseName == slug
   assert.equal(res.branch, "claude/extractor/unknown");
   assert.equal(res.sourcePath, "extension/pipeline/sources/unknown.js");
-  assert.equal(res.casePath, "test/extractors/custom/unknown.json");
+  assert.equal(res.casePath, "executable-requirements/extractors/custom/unknown.json");
 });
 
 test("falls back to the URL in the title when the body has none", async () => {
@@ -105,7 +105,7 @@ test("supported mode keys the case/branch on the EXISTING source file, not the s
   assert.equal(res.sourceBase, "telavivcinematheque");
   assert.equal(res.sourcePath, "extension/pipeline/sources/telavivcinematheque.js");
   assert.equal(res.caseName, "telavivcinematheque-451");
-  assert.equal(res.casePath, "test/extractors/custom/telavivcinematheque-451.json");
+  assert.equal(res.casePath, "executable-requirements/extractors/custom/telavivcinematheque-451.json");
   assert.equal(res.branch, "claude/extractor/telavivcinematheque-451");
 });
 

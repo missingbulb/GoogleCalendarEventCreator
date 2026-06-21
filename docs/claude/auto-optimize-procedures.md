@@ -36,11 +36,16 @@ a real local lesson.
 Scan the local docs for insights that are **portable** — they'd help unseen
 projects, not just this repo (general engineering/agentic practices, portable
 git/GitHub procedure, working-discipline or agent-architecture principle) — and
-that Claudinite does **not** already cover. For each, **open a
-`claudinite-lesson`-labelled issue** (a complete, self-contained proposal —
-Claudinite won't have this repo's context). The existing hand-off Action copies it
-to Claudinite, where the curation routine dedupes and routes it into a docs PR
-([claudinite-handoff.md](claudinite-handoff.md)).
+that Claudinite does **not** already cover. Collect all such items and **open one
+`claudinite-lesson`-labelled issue** listing them — each entry a complete,
+self-contained proposal (Claudinite won't have this repo's context) stating the
+lesson, the shared doc it belongs in, and why it's portable. **One issue, not one
+per item:** the hand-off Action copies it to a single Claudinite issue, where the
+curation routine dedupes/routes each lesson and opens **one** docs PR for the
+batch — so many proposals can't collide as separate same-doc PRs that conflict on
+merge. The curator is the real filter (it confirms and dedupes against the whole
+corpus), so **propose broadly and let it choose** what to keep rather than
+pre-filtering hard here ([claudinite-handoff.md](claudinite-handoff.md)).
 
 **Do not remove the promoted item from the local docs now.** Promotion is a
 *proposal*; Claudinite may reject or reword it. Removal happens **later**, on the
@@ -70,7 +75,7 @@ needs the label pre-created and never errors on a re-run.
 
 - Direction 1 produces a **PR** on `claude/optimize-procedures/<date>-<rand>`
   (the random suffix keeps two same-day runs from colliding); direction 2 produces
-  **issues**. Never a merge.
+  **one bundled issue**. Never a merge.
 - Log each run that produced a PR or an issue as a **dated comment** on this
   routine's own standing tracking issue — the *Auto-Improvements Tracker -
   Optimize Procedures* issue (find it **by title**, not a hard-coded number; open
@@ -89,9 +94,9 @@ the daily routine:
 > Run the daily "optimize procedures" routine for this repository exactly as
 > specified in `docs/claude/auto-optimize-procedures.md`: reconcile the local docs
 > against the pinned Claudinite shared rules in both directions — open a PR that
-> prunes/rephrases local docs the canon now covers, and open a
-> `claudinite-lesson` issue (ensuring the label exists first) for each
-> generalizable local item not yet in Claudinite, **without** removing it locally.
+> prunes/rephrases local docs the canon now covers, and open **one** bundled
+> `claudinite-lesson` issue (ensuring the label exists first) listing every
+> generalizable local item not yet in Claudinite, **without** removing them locally.
 > Follow that doc's discipline, keep `npm run test:offline` green, log the run on
 > the routine's standing tracking issue per the doc, and never merge anything.
 

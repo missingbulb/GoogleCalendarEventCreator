@@ -37,7 +37,7 @@ workflow via `extractor-agent-done`. **Full reference:
     names from the issue (its event payload has no branch), via `plan-names.js`.
   - `scaffold-source.js` — write the `extension/pipeline/sources/<slug>.js` stub (with
     `matches()` filled). New-source mode only.
-  - `scaffold-case.js` — write the empty placeholder `test/extractors/custom/<caseName>.json`.
+  - `scaffold-case.js` — write the empty placeholder `executable-requirements/extractors/custom/<caseName>.json`.
   - `add-supported-domain.js` — register the host in `extension/pipeline/fallback-lists.json`.
     New-source mode only.
   - `case-quality.js` — the finalize workflow's quality floor (`empty` /
@@ -62,8 +62,8 @@ folder:
   factored out.
 
 Shared infrastructure stays where it's shared — this pipeline consumes it, it
-doesn't own it: `data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
-`extension/fallback-policy.js` (the popup's host classifier), and `tools/index.js`
+doesn't own it: `executable-requirements/infra/data/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
+`extension/fallback-policy.js` (the popup's host classifier), and `tools/gen-load-order.js`
 (`npm run index`).
 
 The pure functions here are unit-tested from `test/unit/` (`extractor-naming`,

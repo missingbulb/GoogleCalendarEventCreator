@@ -5,8 +5,8 @@
 `npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
 files the extension ships (manifest, scripts, `extension/pipeline/`, `extension/icons/`), and
 nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
-in **`tools/shipping-files.js`** as the single source of truth, and
-`test/unit/shipping-files.test.js` asserts it stays in sync with what the
+in **`.github/workflows/shipping-files.js`** as the single source of truth, and
+`.github/workflows/tests/shipping-files.test.js` asserts it stays in sync with what the
 manifest and popup actually load — so the zip can't silently drop a runtime
 file or smuggle in dead weight. This same zip is what testers load unpacked
 (see [Install](../README.md#install-developer-mode)) and what you upload to the Web Store.

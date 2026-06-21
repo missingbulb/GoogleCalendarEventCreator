@@ -17,7 +17,7 @@ trap spanning files. See the full locality rule in
 
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
-  in real headless Chrome (`data/render-page.js`) only when `data/spa-shell.js`'s
+  in real headless Chrome (`executable-requirements/infra/data/render-page.js`) only when `executable-requirements/infra/data/spa-shell.js`'s
   `shouldRender` is true — a positive conjunction (`isSpaShell &&
   !hasEventData`), not "the body is small", so it never fires on a generic
   error body or a page that already carries an event date, and bot-challenge pages
@@ -65,7 +65,7 @@ trap spanning files. See the full locality rule in
   `evilexample.com` — pair `hostEquals: "example.com"` with
   `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
   URL→icon match runs inside Chrome, so it's verified only by the CI-only
-  real-Chrome test (`test/fullBrowserHeavyTests/extension-load.chrome.test.js`).
+  real-Chrome test (`executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js`).
 - **Introspecting an MV3 service worker over CDP (the real-Chrome test) has three
   traps that each cost a CI round-trip.** When `Runtime.evaluate`-ing inside the
   worker to verify its startup: (a) **`chrome.*` callback APIs don't reliably
@@ -121,7 +121,7 @@ trap spanning files. See the full locality rule in
 - **The cloud Setup script runs as root starting in the repo's parent dir
   (`/home/user`), not the checkout.** A bare `npm ci` there finds no
   `package.json` and silently installs nothing (the tests then trigger a confusing
-  mid-session install). `scripts/cloud-setup.sh` must `cd` into the checkout first.
+  mid-session install). `.claude/cloud-setup.sh` must `cd` into the checkout first.
   (#186 / #196)
 - **`clean()` collapses all whitespace including newlines — use it only for
   single-line fields.** Title and location are whitespace-collapsed, but a
@@ -137,13 +137,13 @@ trap spanning files. See the full locality rule in
   actual data — JSON-LD or a parsed date — not merely a host match.
 - **Large cached HTML fixtures skew GitHub's language stats — mark them
   `linguist-vendored`.** GitHub reported this JS extension as "mostly HTML" because
-  the full-page `data/*.html` test fixtures dwarf the source by bytes.
-  `.gitattributes` marks `data/*.html linguist-vendored` so Linguist ignores them;
+  the full-page `executable-requirements/data/*.html` test fixtures dwarf the source by bytes.
+  `.gitattributes` marks `executable-requirements/data/*.html linguist-vendored` so Linguist ignores them;
   do the same for any future large generated/fixture files. (#78)
 - **GitHub renders Markdown inside a raw `<td>` only when the cell content is
   blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
   two-column "image left, text right" layout that survives GitHub's renderer
-  (`docs/uiRequirements.md`'s gallery), wrap each row in a literal
+  (`executable-requirements/requirements.md`'s gallery), wrap each row in a literal
   `<table>`/`<tr>`/`<td>` and put a **blank line before and after** the cell's
   content; cmark-gfm then re-enters Markdown mode inside the cell, so `![img]()`,
   `**bold**`, and links render. Without the surrounding blank lines the content is
@@ -152,4 +152,4 @@ trap spanning files. See the full locality rule in
   the line still *starts* as Markdown (how the generator tags its managed
   left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
   two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
-  pipe-table cell can't hold the multi-line prose. (`test/ui/build-requirements-gallery.js`.)
+  pipe-table cell can't hold the multi-line prose. (`executable-requirements/infra/build-requirements-gallery.js`.)

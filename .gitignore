@@ -7,5 +7,5 @@ __pycache__/
 dist/
 
 # UI snapshot test failure artifacts (.actual.png / .diff.png), written here
-# by the tests on a mismatch (see test/ui/snapshot-artifacts-dir.js).
-test/ui/.artifacts/
+# by the tests on a mismatch (see executable-requirements/infra/snapshot-artifacts-dir.js).
+executable-requirements/infra/.artifacts/

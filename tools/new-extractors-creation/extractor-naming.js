@@ -13,7 +13,7 @@
 //               Used for the branch (claude/extractor/<slug>) and the source
 //               file (pipeline/sources/<slug>.js).
 //   caseName  — the fixture / integration-case identifier
-//               (data/<caseName>.{url,html}, test/extractors/custom/<caseName>.json).
+//               (executable-requirements/data/<caseName>.{url,html}, executable-requirements/extractors/custom/<caseName>.json).
 //               Equal to the slug for the first, auto-recorded case; additional
 //               cases for the same host are added by hand later with their own
 //               descriptive names.
