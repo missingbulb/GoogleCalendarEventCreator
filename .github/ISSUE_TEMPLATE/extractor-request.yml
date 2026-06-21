@@ -20,6 +20,11 @@ body:
       description: The event page to add support for.
     validations:
       required: true
+  # Keep this an `input` (text) field. GitHub issue forms only prefill text
+  # fields (input/textarea) from a URL query param; a `dropdown`/`checkboxes`
+  # silently ignores the param. The extension's popup link prefills this count,
+  # so switching to a nicer dropdown/checkbox control would break that prefill.
+  # (See docs/technicalGotchas.md.)
   - type: input
     id: event-count
     attributes:
