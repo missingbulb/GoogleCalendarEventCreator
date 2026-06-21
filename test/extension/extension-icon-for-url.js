@@ -38,31 +38,15 @@ const MANIFEST = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "u
 
 const ASSERT_SIZE = 32; // the most detailed size the toolbar-action pipeline generates
 
-// Nearest-neighbor scale of a decoded bitmap to dw×dh. The worker draws each icon
-// at its native size (drawImage(bitmap, 0,0,size,size) with a size×size source), so
-// this is an identity copy in practice — implemented generally only so the stub
-// canvas behaves like a real one.
-function scaleNearest(src, dw, dh) {
-  if (src.width === dw && src.height === dh) return { width: dw, height: dh, data: Buffer.from(src.data) };
-  const out = Buffer.alloc(dw * dh * 4);
-  for (let y = 0; y < dh; y++) {
-    for (let x = 0; x < dw; x++) {
-      const sx = Math.floor((x * src.width) / dw);
-      const sy = Math.floor((y * src.height) / dh);
-      src.data.copy(out, (y * dw + x) * 4, (sy * src.width + sx) * 4, (sy * src.width + sx) * 4 + 4);
-    }
-  }
-  return { width: dw, height: dh, data: out };
-}
-
 // The browser-side boundaries ui/toolbar-icon.js depends on, supplied so the REAL
 // worker code runs unmodified: the host-list fetch returns the FAKE lists, the icon
 // fetch returns the REAL packaged PNG bytes, and createImageBitmap/OffscreenCanvas
-// decode them to genuine RGBA via pngjs.
+// decode them to genuine RGBA via pngjs. The worker draws each icon at its native
+// size (drawImage(bitmap, 0, 0, size, size) over a size×size source), so the canvas
+// just holds the decoded bitmap and hands its pixels back — no scaling needed.
 function bootWorker(fakeLists) {
   const sandbox = {
     URL,
-    Promise,
     fetch: async (url) => {
       const p = String(url);
       if (p.endsWith(".json")) return { json: async () => fakeLists };
@@ -78,7 +62,7 @@ function bootWorker(fakeLists) {
       getContext() {
         const canvas = this;
         return {
-          drawImage(bitmap, _dx, _dy, dw, dh) { canvas.__img = scaleNearest(bitmap, dw, dh); },
+          drawImage(bitmap) { canvas.__img = bitmap; },
           getImageData() { return canvas.__img; },
         };
       }
