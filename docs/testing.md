@@ -179,10 +179,10 @@ the data, render builds the DOM from it.)
 
 Each case is a self-contained tuple in **`executable-requirements/ui/cases/`**, one per leaf
 requirement: a `<slug>.<id>.case.js` whose filename names the single
-[`uiRequirements.md`](uiRequirements.md) leaf it pins, minimal data isolating that
+[`Requirements.md`](../executable-requirements/Requirements.md) leaf it pins, minimal data isolating that
 one requirement. For the current set with every reference image shown in a
 two-column table beside its requirement (image left, spec right), see the
-generated gallery in **[`uiRequirements.md`](uiRequirements.md)** — it's derived
+generated gallery in **[`Requirements.md`](../executable-requirements/Requirements.md)** — it's derived
 from the cases (so it can't drift) and is the one-page review surface.
 
 A popup `<slug>.<id>.case.js` exports `{ description, data, listing?, tab?, action? }`.

@@ -3,7 +3,7 @@
 Overarching rules for *how we build this*. Specific design decisions and the
 mechanics live in [highLevelDesign.md](highLevelDesign.md) /
 [fileDescriptions.md](fileDescriptions.md); product behavior lives in
-[productRequirements.md](productRequirements.md); tunable product decisions live
+[productRequirements.md](../executable-requirements/productRequirements.md); tunable product decisions live
 in `extension/config.js`.
 
 Portable agent-architecture principles that aren't specific to this project (the

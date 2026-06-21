@@ -22,6 +22,12 @@ change.
 
 @docs/architectureGuidelines.md
 
+All requirements-related documents and the tests that validate them live in one
+top-level folder, `executable-requirements/`. How requirements are modeled (a
+numbered breakdown where every leaf has an external validation case) and how to
+add one (with the available case kinds and when to use `tbd`/untested) are
+documented in [executable-requirements/README.md](executable-requirements/README.md).
+
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `docs/technicalGotchas.md` (imported below).
 

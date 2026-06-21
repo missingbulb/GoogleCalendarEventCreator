@@ -31,13 +31,19 @@ doc, when the mechanics change.
   instant), not extraction bugs; the real gaps are missing fields (`ctz`,
   durations, site-specific descriptions) it can't know generically. (This is the
   same comparison the fallback-coverage gate automates — see below.)
+- **All requirements live in `executable-requirements/`.** The spec docs and
+  every validating test are in that one top-level folder; the document model and
+  the how-to-add-one rules are in
+  [executable-requirements/README.md](../../executable-requirements/README.md).
+  The notes below are the project decisions behind that model.
 - **Every leaf is verified by exactly one CASE, which declares HOW (issue #429,
   #435).** The spec (`executable-requirements/Requirements.md`) is just numbered prose; it does NOT
   tag how a leaf is verified. Each leaf has exactly one `<slug>.<id>.case.js` (the
-  *filename* is the link), and the **case** declares its `kind` (default `"popup"`)
+  *filename* is the link — `<slug>` is the section's component name, `<id>` the
+  dotted leaf number), and the **case** declares its `kind` (default `"popup"`)
   plus an optional `tbd` flag. `executable-requirements/infrastructure/render-snapshot.js` is the one dispatcher
-  that turns a case into a PNG by its `kind` — so there is ONE visual-comparison
-  system:
+  that turns a case into a PNG by its `kind` (only the image kinds have a
+  renderer) — so there is ONE routing system across visual and non-visual leaves:
   - `kind: "popup"` (default) — an image leaf, the popup's real `render()` via
     `executable-requirements/infrastructure/popup-renderer.js`, pinned by a `<slug>.<id>.png` snapshot shown in a
     **two-column table** beside the requirement (image left, spec right) in
@@ -51,13 +57,27 @@ doc, when the mechanics change.
     `executable-requirements/ui/events-view-actions.test.js` (which self-asserts it covers exactly
     the `kind: "behavior"` cases). A `<slug>.<id>.png` for one is the #429 anti-pattern
     and the gate rejects it.
-  - `tbd: true` — an edge case whose behavior isn't decided yet (e.g. `4.2.3`,
-    `4.10`); it still renders a provisional snapshot, shown under a "TO BE DECIDED"
-    banner. The edge-case-review routine (#438) is what resolves these over time.
+  - `kind: "extractor"` — a non-image leaf (§11, "Required explicit support for
+    Extractors"): one per supported host, validated by running the real per-site
+    extractor against a real cached page (`executable-requirements/data/<page>.html`)
+    and asserting the host is recognized as supported and yields a complete event.
+    Verified by `executable-requirements/extractors/extractor-support.test.js`; the
+    case names `{ host, source, page }`. A bot-blocked host with no cacheable page
+    (facebook) is a `tbd` extractor case (unit-tested only).
+  - `kind: "logic"` — a non-image, non-visual product/behavior leaf (§12–§16, the
+    rules converted from `productRequirements.md`). A wired case carries an
+    executable `verify()` run by `executable-requirements/product-requirements.test.js`;
+    a `tbd` logic case is tracked-but-not-wired and names the unit test that covers
+    it today (`coveredBy`).
+  - `tbd: true` — a leaf not (yet) faithfully verified here: an image edge case
+    whose behavior isn't decided yet (e.g. `4.2.3`, `4.10`) still renders a
+    provisional snapshot under a "TO BE DECIDED" banner; a non-image `tbd` case
+    (extractor/logic) is reported skipped with a pointer to its current coverage.
+    The edge-case-review routine (#438) resolves the image ones over time.
 
   `executable-requirements/ui-requirements-coverage.test.js` fails unless **every leaf has exactly
   one case** (and rejects a nonexistent/typo'd/duplicate case, an unknown `kind`, or
-  a behavior case that smuggled in a PNG). A case earns its keep by pinning a
+  a non-image case — behavior/extractor/logic — that smuggled in a PNG). A case earns its keep by pinning a
   requirement's correct rendering/behavior — confirmed by a human against the PNG,
   not "can these pixels be generated?". The popup's pure logic stays pinned by unit
   tests (`popup-content` / `events-view` / `popup-truncation`).
