@@ -16,4 +16,4 @@ up (via a `claudinite-lesson` issue) and, once the canon absorbs them and the
 submodule pin updates, prunes them from this file. So this doc stays small —
 usually just whatever is captured-but-not-yet-upstreamed.
 
-_No locally-captured engineering practices pending promotion right now._
+- **A CI job that reads submodule files must fetch submodules in the checkout step.** `actions/checkout` does not fetch submodules by default — without `submodules: true` (or `recurse-submodules: true`) the submodule folder is an empty directory in CI, and any gate that reads it passes vacuously. The symptom is a green check that validates nothing (e.g. a Dependabot bump PR whose CI was a no-op until the `test.yml` checkout was fixed — #444). Add the flag to every CI job whose tests read submodule content.
