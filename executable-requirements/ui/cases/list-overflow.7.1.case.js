@@ -6,7 +6,7 @@
 // (clipped both ends) instead of 16 — same requirement, fewer pixels.
 "use strict";
 
-const { scrollToMiddle } = require("../../infrastructure/actions");
+const { scrollToMiddle } = require("../../infra/actions");
 const pad = (n) => String(n).padStart(2, "0");
 const filler = (count) => Array.from({ length: count }, (_, i) => {
   const d = new Date(2026, 5, 1 + i);

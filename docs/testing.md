@@ -59,7 +59,7 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- **`data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
+- **`executable-requirements/data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
   that is missing or empty (zero bytes). A failed fetch keeps the previous
   cached HTML file and only warns, so a site outage or bot-blocking never breaks
   the suite.
@@ -166,7 +166,7 @@ from facebook.com, so it can't be cached as a live case.
 
 **`executable-requirements/ui/popup-snapshots.test.js`** is the single visual-comparison engine: it
 renders each UI *case* and compares it pixel-by-pixel (via `pixelmatch`) against a
-committed image. `executable-requirements/infrastructure/render-snapshot.js` picks the renderer by the **case's own
+committed image. `executable-requirements/infra/render-snapshot.js` picks the renderer by the **case's own
 `kind`**: a `"popup"` case (the default) is fed to `extension/ui/popup.js`'s exported
 `render({ data, tab, listing })` — the same `chooseContent` +
 `events-view.js`/`source-request-view.js` code the extension runs — and a
@@ -189,12 +189,12 @@ A popup `<slug>.<id>.case.js` exports `{ description, data, listing?, tab?, acti
 `data` is the fake extraction result (`{ supported, events: [...] }`); `listing` is
 the host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
-from `executable-requirements/infrastructure/actions.js`, since satori can't actually scroll (it pins `#events`
+from `executable-requirements/infra/actions.js`, since satori can't actually scroll (it pins `#events`
 to its end so the bottom-anchored count label is painted). An icon case
 (`kind: "icon"`) instead exports `{ kind, description, tabUrl, lists }` — the faked
 active-tab URL and host lists the toolbar-icon renderer classifies.
 
-`executable-requirements/infrastructure/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
+`executable-requirements/infra/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
 browser). satori has no CSS engine, so the renderer folds the **real
 `extension/ui/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
 with jsdom, inline every declaration) — one source of truth for the styling, no
@@ -220,5 +220,5 @@ After an intentional change to the popup — its views (`extension/ui/popup.js`,
 `extension/ui/views/*.js`) or its styling (`extension/ui/popup.css`) — run `npm run refresh:ui` to
 regenerate the `executable-requirements/ui/cases/*.png` images and commit them so reviewers see the
 before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
-`<name>.diff.png` to `executable-requirements/infrastructure/.artifacts/` (gitignored; see
-`executable-requirements/infrastructure/snapshot-artifacts-dir.js`) and prints their full paths.
+`<name>.diff.png` to `executable-requirements/infra/.artifacts/` (gitignored; see
+`executable-requirements/infra/snapshot-artifacts-dir.js`) and prints their full paths.

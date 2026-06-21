@@ -1,7 +1,7 @@
 // Explicit detection of a JS single-page-app *shell*: an HTTP 200 whose static
 // HTML lacks the event data we extract — only an empty framework root that
 // JavaScript would populate at runtime. This is the ONLY signal that justifies
-// the headless-render fallback (data/render-page.js), so it must be narrow. See
+// the headless-render fallback (executable-requirements/data/render-page.js), so it must be narrow. See
 // issue #310 (visit.tel-aviv.gov.il / #277 is the concrete case: a SharePoint/
 // AngularJS SPA whose recorded HTML had only empty Angular bindings).
 //

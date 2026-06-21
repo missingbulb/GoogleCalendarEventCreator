@@ -16,15 +16,15 @@ leaf requirement is *claimed* by a case (see the honesty caveat at the end).
 - A **leaf** (a requirement with no finer-grained child — `5.6.1` is a leaf,
   `5.6` is not because `5.6.1` exists) **must have exactly one case** that
   externally validates it. The strict bijection "every leaf ↔ exactly one case"
-  is enforced by [`ui-requirements-coverage.test.js`](ui-requirements-coverage.test.js).
+  is enforced by [`requirements-coverage.test.js`](requirements-coverage.test.js).
 
 So the doc can read top-down: several top-level requirements, each a couple of
 sentences of explanation, with the testable detail in the deeper breakdown — and
 every one of those deep leaves is backed by an executable case.
 
-[`productRequirements.md`](productRequirements.md) is the readable **feature
-overview**; its numbered, testable content was converted into `Requirements.md`
-§12–§16.
+The readable, **feature-level overview** of what the extension does lives in the
+top-level [README.md](../README.md); its numbered, testable content is
+`Requirements.md` §12–§16.
 
 ## The rule: a new requirement defines its validation
 
@@ -43,9 +43,9 @@ via its `kind`:
 | `extractor` | a supported host's extractor against a real cached page | [`extractors/extractor-support.test.js`](extractors/extractor-support.test.js) | no |
 | `logic` | a non-visual product/behavior rule | [`product-requirements.test.js`](product-requirements.test.js) | no |
 
-The single dispatcher [`infrastructure/render-snapshot.js`](infrastructure/render-snapshot.js)
+The single dispatcher [`infra/render-snapshot.js`](infra/render-snapshot.js)
 turns a case into a PNG by its `kind` (only the image kinds have a renderer);
-[`infrastructure/build-requirements-gallery.js`](infrastructure/build-requirements-gallery.js)
+[`infra/build-requirements-gallery.js`](infra/build-requirements-gallery.js)
 embeds each leaf in the two-column gallery in `Requirements.md` — an image for an
 image kind, a note for a non-image kind.
 
@@ -69,7 +69,6 @@ or a not-yet-wired behavior, and wire it later (a tracked follow-up).
 ```
 executable-requirements/
   Requirements.md              the numbered, executable spec (the contract)
-  productRequirements.md       feature-level overview (defers detail to Requirements.md)
   README.md                    this guide
   ui/
     cases/                     every leaf's case: <slug>.<id>.case.js (+ <stem>.png for image kinds)
@@ -82,16 +81,22 @@ executable-requirements/
     fallback/                  the generic-fallback coverage gate (+ GENERATED artifacts)
     live.test.js               runs custom/* against the cached pages
     extractor-support.test.js  the §11 extractor leaves (one per supported host)
-  data/                        cached event-page fixtures (<name>.html + <name>.url)
+  data/                        cached event-page fixtures (<name>.html + <name>.url),
+                               plus the recorder/render helpers (refresh-cache.js,
+                               fetch-page.js, render-page.js, spa-shell.js, cdp-client.js)
   fullBrowserHeavyTests/       CI-only real-Chrome e2e (extension load, SPA render)
-  infrastructure/              the renderers, fake-chrome, gallery builder, parsers,
+  infra/                       the renderers, fake-chrome, gallery builder, parsers,
                                snapshot/coverage harnesses (test-only helper code)
-  ui-requirements-coverage.test.js  the leaf↔case bijection + kind routing gate
+  requirements-coverage.test.js  the leaf↔case bijection + kind routing gate
   product-requirements.test.js      runs the wired logic leaves, surfaces the tbd ones
 ```
 
-Code shared with non-requirements callers stays where it's shared (e.g.
-`data/cdp-client.js`, `data/render-page.js`, `data/spa-shell.js`, `test/harness.js`).
+Some of the `data/` helpers are shared with non-requirements callers — the
+recorder (`data/refresh-cache.js`, `data/fetch-page.js`) and the auto-extractor
+pipeline's probe (`tools/new-extractors-creation/probe-url.js`), the e2e tests and
+the SPA-render fallback (`data/render-page.js`, `data/spa-shell.js`,
+`data/cdp-client.js`). The pipeline's jsdom harness `test/harness.js` stays under
+`test/` since the unit tests share it too.
 
 ## Regenerating
 

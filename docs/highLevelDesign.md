@@ -1,7 +1,7 @@
 # High-level design
 
 How the extension is built. What it shows and when — the product behavior — is
-in [productRequirements.md](../executable-requirements/productRequirements.md); the per-file map is in
+in [Requirements.md §12–§16](../executable-requirements/Requirements.md); the per-file map is in
 [fileDescriptions.md](fileDescriptions.md); top-level rules of the road are in
 [architectureGuidelines.md](architectureGuidelines.md).
 
@@ -41,7 +41,7 @@ keys off `supported`, the host's classification against `extension/config.js`'s
 `sourceFallbackDenylist` / `sourceFallbackAllowlist` (via `extension/fallback-policy.js`),
 and whether the fallback event is complete (title + location + start). The five
 resulting states — and what the toolbar icon means alongside them — are specified
-in [productRequirements.md](../executable-requirements/productRequirements.md).
+in [Requirements.md §12–§16](../executable-requirements/Requirements.md).
 
 ## Where decisions live
 
@@ -51,7 +51,7 @@ make output decisions — rendering, whitespace collapse, de-dup, sorting, and
 timezone normalization all live in helpers, applied uniformly — except where it
 must encode its own host's constraints (which elements to read, a fixed `ctz`, a
 yearless date format). So the product rules in
-[productRequirements.md](../executable-requirements/productRequirements.md) — line-break-preserving
+[Requirements.md §12–§16](../executable-requirements/Requirements.md) — line-break-preserving
 descriptions, chronological one-card-per-event, multi-instance grouping (an
 event's showings carried in `times[]` and folded into one card), floating vs.
 absolute times, the default duration and the card cap — are implemented once, in

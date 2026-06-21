@@ -24,8 +24,8 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { loadCases, leafIdOf, CASES_DIR } = require("./infrastructure/cases");
-const { allRequirementIds, leafRequirementIds } = require("./infrastructure/ui-requirements");
+const { loadCases, leafIdOf, CASES_DIR } = require("./infra/cases");
+const { allRequirementIds, leafRequirementIds } = require("./infra/ui-requirements");
 
 const allIds = new Set(allRequirementIds());
 const leaves = leafRequirementIds();

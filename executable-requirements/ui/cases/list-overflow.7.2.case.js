@@ -7,7 +7,7 @@
 // fewer pixels and render time.
 "use strict";
 
-const { restAtTop } = require("../../infrastructure/actions");
+const { restAtTop } = require("../../infra/actions");
 const pad = (n) => String(n).padStart(2, "0");
 const filler = (count) => Array.from({ length: count }, (_, i) => {
   const d = new Date(2026, 5, 1 + i);

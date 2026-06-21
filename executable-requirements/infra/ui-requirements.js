@@ -1,6 +1,6 @@
 // Parses executable-requirements/Requirements.md into its numbered requirement IDs — the single
 // source of truth for the requirement list, shared by the coverage ubertest
-// (executable-requirements/ui-requirements-coverage.test.js) and the gallery generator
+// (executable-requirements/requirements-coverage.test.js) and the gallery generator
 // (build-requirements-gallery.js), so neither hard-codes it.
 //
 // A requirement is a line whose first token is a backtick-wrapped dotted number,
@@ -14,7 +14,7 @@
 // This file only enumerates the requirement NUMBERS. How each leaf is verified —
 // a popup snapshot, the toolbar-icon snapshot, a behavior click test, or a TBD
 // placeholder — is declared by the leaf's CASE (its `kind` / `tbd` fields; see
-// executable-requirements/infrastructure/render-snapshot.js and the coverage ubertest), NOT tagged in the spec.
+// executable-requirements/infra/render-snapshot.js and the coverage ubertest), NOT tagged in the spec.
 "use strict";
 
 const fs = require("node:fs");

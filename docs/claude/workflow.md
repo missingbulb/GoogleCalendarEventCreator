@@ -27,7 +27,7 @@ change is never auto-accepted. The process:
 
 1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
    committed **expected** PNG, run the snapshot test so it fails (the harness
-   writes the rendered `actual` and a highlighted `diff` to `executable-requirements/infrastructure/.artifacts/`),
+   writes the rendered `actual` and a highlighted `diff` to `executable-requirements/infra/.artifacts/`),
    and send three images to the chat: **expected** (committed), **actual**
    (newly-rendered), and the **diff**. When the change alters the PNG's
    **dimensions** (e.g. a fixture shrink), pixelmatch can't diff unequal sizes so
@@ -107,7 +107,7 @@ Claudinite. Route by scope:
   instead** when Claude could hit the trap *without* reading the locus file: a
   mistake of **omission** (you must know it to decide whether to open or avoid
   the file) or a cross-cutting invariant spanning files. One file can split both
-  ways — `data/render-page.js`'s "never give the SPA render the e2e test's
+  ways — `executable-requirements/data/render-page.js`'s "never give the SPA render the e2e test's
   `--no-sandbox`" stays central (you might add it without ever reading the file),
   while its `SIGKILL`-then-`rmSync` teardown race lives inline at the call site
   (you only meet it editing the teardown). Co-locate only **non-portable** traps:

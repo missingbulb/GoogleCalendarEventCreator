@@ -2,7 +2,7 @@
 // produces the right values for each supported site.
 //
 // These run OFFLINE against committed cached HTML files in
-// data/, recorded from each site by data/refresh-cache.js (see also
+// data/, recorded from each site by executable-requirements/data/refresh-cache.js (see also
 // .github/workflows/refresh-cache.yml). Asserting against a cached copy of the
 // real page makes the suite deterministic and runnable anywhere (no network),
 // while still reflecting each site's current markup.
@@ -59,7 +59,7 @@
 //
 // To cover a new website or platform: add a executable-requirements/data/<name>.url with the event
 // page URL and a case file (executable-requirements/extractors/custom/<name>.json) with its
-// `expected`, then record the cached HTML with `node data/refresh-cache.js`
+// `expected`, then record the cached HTML with `node executable-requirements/data/refresh-cache.js`
 // (on a machine with internet) or let CI record it on the next run. Run the
 // suite once to see the actual extracted values in the failure output, then
 // copy them into `expected`.
@@ -106,7 +106,7 @@ for (const file of caseFiles) {
     const cachedHtmlPath = path.join(DATA_DIR, `${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
-      `Missing cached HTML for "${name}". Record it with: node data/refresh-cache.js`
+      `Missing cached HTML for "${name}". Record it with: node executable-requirements/data/refresh-cache.js`
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");

@@ -17,7 +17,7 @@ trap spanning files. See the full locality rule in
 
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
-  in real headless Chrome (`data/render-page.js`) only when `data/spa-shell.js`'s
+  in real headless Chrome (`executable-requirements/data/render-page.js`) only when `executable-requirements/data/spa-shell.js`'s
   `shouldRender` is true — a positive conjunction (`isSpaShell &&
   !hasEventData`), not "the body is small", so it never fires on a generic
   error body or a page that already carries an event date, and bot-challenge pages
@@ -161,4 +161,4 @@ trap spanning files. See the full locality rule in
   the line still *starts* as Markdown (how the generator tags its managed
   left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
   two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
-  pipe-table cell can't hold the multi-line prose. (`executable-requirements/infrastructure/build-requirements-gallery.js`.)
+  pipe-table cell can't hold the multi-line prose. (`executable-requirements/infra/build-requirements-gallery.js`.)

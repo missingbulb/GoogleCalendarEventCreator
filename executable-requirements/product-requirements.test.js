@@ -12,13 +12,13 @@
 //     (Wiring these is an owned follow-up, like the #435 behavior-stub gap.)
 //
 // The strict requirement↔case bijection (every §12–§16 leaf has exactly one case)
-// is enforced by ui-requirements-coverage.test.js; this file executes the wired
+// is enforced by requirements-coverage.test.js; this file executes the wired
 // ones and surfaces the tbd ones.
 "use strict";
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { loadCases, leafIdOf } = require("./infrastructure/cases");
+const { loadCases, leafIdOf } = require("./infra/cases");
 
 const logicCases = loadCases().filter((c) => c.kind === "logic");
 

@@ -15,8 +15,8 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const { buildGallery, markerLines, DOC_PATH } = require("../infrastructure/build-requirements-gallery");
-const { leafRequirementIds } = require("../infrastructure/ui-requirements");
+const { buildGallery, markerLines, DOC_PATH } = require("../infra/build-requirements-gallery");
+const { leafRequirementIds } = require("../infra/ui-requirements");
 
 const isCI = Boolean(process.env.CI);
 

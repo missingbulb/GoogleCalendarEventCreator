@@ -25,7 +25,7 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { JSDOM } = require("jsdom");
-const { loadCases, leafIdOf } = require("../infrastructure/cases");
+const { loadCases, leafIdOf } = require("../infra/cases");
 
 const ROOT = path.join(__dirname, "..", "..");
 const TAB = { url: "https://example.com/events", title: "Example event page", index: 3 };

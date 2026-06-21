@@ -3,7 +3,7 @@
 // page from an automated environment (browser-like headers, retries, timeout).
 //
 // Two callers share it so they can never disagree:
-//   - data/refresh-cache.js  RECORDS a page into the data/ cache.
+//   - executable-requirements/data/refresh-cache.js  RECORDS a page into the data/ cache.
 //   - tools/new-extractors-creation/probe-url.js  PROBES a URL before the
 //                             auto-implement-extractor workflow spends an agent run on it.
 // Because the probe fetches exactly the way the recorder does, a green probe

@@ -4,14 +4,14 @@ The **specific, testable UI requirements** for the extension's popup — what it
 must render, and how it must look and read, down to exact strings, colors,
 placement, and structure.
 
-This is deliberately separate from
-[productRequirements.md](productRequirements.md), which is the **rough,
-feature-level description** of what the extension does and why. The split: "the
-popup turns the page's event into a one-click calendar link" is a feature
-description and lives there; "an off-current-year chip shows a gray pill for a
-past year" is a specific UI requirement and lives here. Anything that isn't a
+The **rough, feature-level description** of what the extension does and why lives
+in the top-level [README.md](../README.md); the testable product behavior is §12–§16
+below. The split: "the popup turns the page's event into a one-click calendar
+link" is a feature description and lives in the README; "an off-current-year chip
+shows a gray pill for a past year" is a specific UI requirement and lives here.
+Anything that isn't a
 pixel-assertable *rendering* — the GitHub source-request issue form, and the
-calendar-URL / timezone *semantics* — stays in productRequirements. This doc
+calendar-URL / timezone *semantics* — stays in the top-level README. This doc
 covers the popup's rendering **and** the toolbar/extension icon (§10): both are
 pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves.
 
@@ -39,7 +39,7 @@ Add new requirements with new numbers; don't renumber or reuse existing ones.
 
 **How each leaf is verified is declared by its CASE, not tagged here.** The spec is
 just numbered prose; each leaf's `<slug>.<id>.case.js` declares how it's verified via
-its own `kind` (default `"popup"`) — and `executable-requirements/infrastructure/render-snapshot.js` dispatches on
+its own `kind` (default `"popup"`) — and `executable-requirements/infra/render-snapshot.js` dispatches on
 it:
 
 - `"popup"` / `"icon"` — an **image** leaf, pinned by a `<slug>.<id>.png` snapshot in
@@ -63,9 +63,8 @@ cases in a single bullet (the parent becomes a heading, the cases its leaves), a
 done for the `5.6`, `5.7`, `6.1`, and `6.2` groups.
 
 The five popup **states** (supported / denylisted / nothing-found / allowlisted /
-unlisted) and *when* each occurs are defined in
-[productRequirements.md](productRequirements.md); this doc specifies how each is
-*rendered*. Tunable values referenced below (`maxCardsShown`,
+unlisted) and *when* each occurs are specified as executable requirements in §12
+below; §1–§3 specify how each is *rendered*. Tunable values referenced below (`maxCardsShown`,
 `maxCardsExpanded`, `cardsVisibleBeforeScroll`) live in `extension/config.js`.
 
 ## 1. Heading
@@ -183,10 +182,10 @@ found no events, the glyph stands **alone** — no link beneath it.
 
 `3.1` **Suggest Correction** — shown in the unlisted-with-event state (state 5),
 and on a supported host where the dedicated source found nothing but the generic
-fallback did (state 1b — see productRequirements). It sits on the **heading line,
+fallback did (state 1b — see §12). It sits on the **heading line,
 right-aligned** (the heading becomes a row: title on the left, link on the right,
 vertically centered). Clicking it opens the prefilled source-request issue (the
-issue form itself is out of scope — see productRequirements).
+issue form itself is out of scope — see §12).
 
 </td>
 </tr>
@@ -806,7 +805,7 @@ the title and the time line.
 `6.6` A card always shows the page's **literal wall-clock** time and day: an
 explicit UTC offset or trailing `Z` is stripped for display and **never re-zoned
 to the viewer's timezone**. (The underlying instant still drives the Calendar
-event — see productRequirements.)
+event — see §12.)
 
 </td>
 </tr>
@@ -1351,6 +1350,8 @@ is covered by unit tests only.
 ## 12. Popup states (what the popup shows)
 
 When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `test/unit/popup-content.test.js`); the one machine-checkable rule, completeness, is wired.
+
+![Flowchart of the popup's five states](../docs/popup-states-flowchart.png)
 
 <table>
 <tr>

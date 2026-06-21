@@ -3,7 +3,7 @@
 // dependency (Node has shipped a global WebSocket since v22). Two callers use it:
 //   - executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js — loads the
 //     unpacked extension and inspects its MV3 service worker.
-//   - data/render-page.js — renders a JS single-page-app shell to extractable
+//   - executable-requirements/data/render-page.js — renders a JS single-page-app shell to extractable
 //     HTML (issue #310).
 //
 // Flat sessions (a sessionId per message) let us talk to the browser and to an

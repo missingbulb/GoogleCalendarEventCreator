@@ -6,7 +6,7 @@
 // "N out of M showing" + "show all" state with a handful of events instead of 40.
 "use strict";
 
-const { scrollToBottom } = require("../../infrastructure/actions");
+const { scrollToBottom } = require("../../infra/actions");
 const pad = (n) => String(n).padStart(2, "0");
 const filler = (count) => Array.from({ length: count }, (_, i) => {
   const d = new Date(2026, 5, 1 + i);

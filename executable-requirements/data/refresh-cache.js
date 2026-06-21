@@ -20,8 +20,8 @@
 // a page ends up with no cached HTML file at all.
 //
 // Usage:
-//   node data/refresh-cache.js            # fetch missing/empty cached HTML files only
-//   node data/refresh-cache.js --force    # re-fetch everything
+//   node executable-requirements/data/refresh-cache.js            # fetch missing/empty cached HTML files only
+//   node executable-requirements/data/refresh-cache.js --force    # re-fetch everything
 "use strict";
 
 const fs = require("node:fs");
@@ -37,7 +37,7 @@ const { fetchPage } = require("./fetch-page");
 const { shouldRender, hasExtractableData } = require("./spa-shell");
 const { renderPage } = require("./render-page");
 
-const DATA_DIR = path.join(__dirname, "..", "executable-requirements", "data");
+const DATA_DIR = __dirname;
 
 function isEmptyOrMissing(filePath) {
   try {

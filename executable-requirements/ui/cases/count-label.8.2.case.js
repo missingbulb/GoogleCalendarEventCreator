@@ -6,7 +6,7 @@
 // the instances-vs-cards count (5 instances across 3 cards) without a long list.
 "use strict";
 
-const { scrollToBottom } = require("../../infrastructure/actions");
+const { scrollToBottom } = require("../../infra/actions");
 const single = (n, day) => ({ title: `Community Meetup #${n}`, start: `2026-06-${day}T18:00:00`, end: `2026-06-${day}T20:00:00`, location: "Pioneer Works, Brooklyn" });
 const screenings = (title, day, times) => ({ title, location: "Tel Aviv Cinematheque", times: times.map((t) => ({ start: `2026-06-${day}T${t}:00`, end: null })) });
 

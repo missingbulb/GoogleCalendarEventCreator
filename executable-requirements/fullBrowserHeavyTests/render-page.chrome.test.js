@@ -1,11 +1,11 @@
-// Real-Chrome smoke test for the SPA-shell render fallback (data/render-page.js,
+// Real-Chrome smoke test for the SPA-shell render fallback (executable-requirements/data/render-page.js,
 // issue #310): a JS single-page-app shell whose content only appears after its
 // script runs must come back from renderPage() with that content present.
 //
 // Self-contained and deterministic: it renders a `data:` URL we author here (no
 // network, so the bot-blocked sandbox/runners can't flake it), whose body is an
 // empty React-style root that a script fills on a timer — exactly the shape
-// data/spa-shell.js flags. The static shell must read as "render me" and the
+// executable-requirements/data/spa-shell.js flags. The static shell must read as "render me" and the
 // rendered HTML must read as "has data", closing the loop the recorder relies on.
 //
 // CI-only, like extension-load.chrome.test.js: it SKIPS without an
@@ -19,8 +19,8 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
-const { renderPage } = require("../../data/render-page");
-const { shouldRender, hasExtractableData } = require("../../data/spa-shell");
+const { renderPage } = require("../data/render-page");
+const { shouldRender, hasExtractableData } = require("../data/spa-shell");
 
 const chromePath = [process.env.CHROME_PATH, process.env.PUPPETEER_EXECUTABLE_PATH].find(
   (p) => p && fs.existsSync(p)

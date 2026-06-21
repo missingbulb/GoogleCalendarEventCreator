@@ -18,7 +18,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { extractFromHtml } = require("../../test/harness");
-const { loadCases, leafIdOf } = require("../infrastructure/cases");
+const { loadCases, leafIdOf } = require("../infra/cases");
 
 const DATA_DIR = path.join(__dirname, "..", "data");
 const extractorCases = loadCases().filter((c) => c.kind === "extractor");
@@ -42,7 +42,7 @@ for (const testCase of extractorCases) {
     const urlPath = path.join(DATA_DIR, `${testCase.page}.url`);
     assert.ok(
       fs.existsSync(htmlPath) && fs.statSync(htmlPath).size > 0,
-      `missing/empty cached page for ${testCase.host}: ${htmlPath} (record it with node data/refresh-cache.js)`
+      `missing/empty cached page for ${testCase.host}: ${htmlPath} (record it with node executable-requirements/data/refresh-cache.js)`
     );
     assert.ok(fs.existsSync(urlPath), `missing source URL: ${urlPath}`);
 

@@ -21,9 +21,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
-const { loadCases, CASES_DIR } = require("../infrastructure/popup-renderer");
-const { renderSnapshot, rendersImage } = require("../infrastructure/render-snapshot");
-const { artifactPath } = require("../infrastructure/snapshot-artifacts-dir");
+const { loadCases, CASES_DIR } = require("../infra/popup-renderer");
+const { renderSnapshot, rendersImage } = require("../infra/render-snapshot");
+const { artifactPath } = require("../infra/snapshot-artifacts-dir");
 
 // Rendering is deterministic (satori + resvg + bundled fonts, no browser), so a
 // snapshot must match its reference EXACTLY — any differing pixel is a real,

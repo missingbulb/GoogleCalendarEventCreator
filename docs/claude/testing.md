@@ -41,16 +41,16 @@ doc, when the mechanics change.
   tag how a leaf is verified. Each leaf has exactly one `<slug>.<id>.case.js` (the
   *filename* is the link — `<slug>` is the section's component name, `<id>` the
   dotted leaf number), and the **case** declares its `kind` (default `"popup"`)
-  plus an optional `tbd` flag. `executable-requirements/infrastructure/render-snapshot.js` is the one dispatcher
+  plus an optional `tbd` flag. `executable-requirements/infra/render-snapshot.js` is the one dispatcher
   that turns a case into a PNG by its `kind` (only the image kinds have a
   renderer) — so there is ONE routing system across visual and non-visual leaves:
   - `kind: "popup"` (default) — an image leaf, the popup's real `render()` via
-    `executable-requirements/infrastructure/popup-renderer.js`, pinned by a `<slug>.<id>.png` snapshot shown in a
+    `executable-requirements/infra/popup-renderer.js`, pinned by a `<slug>.<id>.png` snapshot shown in a
     **two-column table** beside the requirement (image left, spec right) in
-    `executable-requirements/Requirements.md` by `executable-requirements/infrastructure/build-requirements-gallery.js`.
+    `executable-requirements/Requirements.md` by `executable-requirements/infra/build-requirements-gallery.js`.
   - `kind: "icon"` — an image leaf too, but rendered by the real
-    `extension/ui/toolbar-icon.js` loaded into a fake browser (`executable-requirements/infrastructure/icon-renderer.js` +
-    `executable-requirements/infrastructure/fake-chrome.js`), fed the case's faked tab URL + host lists (the
+    `extension/ui/toolbar-icon.js` loaded into a fake browser (`executable-requirements/infra/icon-renderer.js` +
+    `executable-requirements/infra/fake-chrome.js`), fed the case's faked tab URL + host lists (the
     toolbar icon, §10).
   - `kind: "behavior"` — a click/navigation a static image can't observe (e.g.
     `9.1`–`9.3`, `3.4`); the case carries NO image and is verified by
@@ -75,7 +75,7 @@ doc, when the mechanics change.
     (extractor/logic) is reported skipped with a pointer to its current coverage.
     The edge-case-review routine (#438) resolves the image ones over time.
 
-  `executable-requirements/ui-requirements-coverage.test.js` fails unless **every leaf has exactly
+  `executable-requirements/requirements-coverage.test.js` fails unless **every leaf has exactly
   one case** (and rejects a nonexistent/typo'd/duplicate case, an unknown `kind`, or
   a non-image case — behavior/extractor/logic — that smuggled in a PNG). A case earns its keep by pinning a
   requirement's correct rendering/behavior — confirmed by a human against the PNG,
@@ -139,20 +139,20 @@ commission-while-editing trap goes in the file's header comment rather than
   Adding an extractor never fails it.
 - **UI snapshots** — the renderer's satori/resvg limits, CSS inlining (no
   selector specificity), the tall-list clamp, and the `skipRender` initial-shell
-  case are in `executable-requirements/infrastructure/popup-renderer.js`; the pixel-exact diff
+  case are in `executable-requirements/infra/popup-renderer.js`; the pixel-exact diff
   (`MAX_DIFF_RATIO = 0`) and the en-US-locale guard are in
   `executable-requirements/ui/popup-snapshots.test.js`; the scroll/fade gestures are in
-  `executable-requirements/infrastructure/actions.js`. A case is a self-contained per-leaf `<slug>.<id>.case.js`
-  (fake data + an optional DOM action) + `<slug>.<id>.png`; `executable-requirements/infrastructure/render-snapshot.js`
+  `executable-requirements/infra/actions.js`. A case is a self-contained per-leaf `<slug>.<id>.case.js`
+  (fake data + an optional DOM action) + `<slug>.<id>.png`; `executable-requirements/infra/render-snapshot.js`
   picks the renderer by the case's own `kind` (default `"popup"` → the popup's REAL
   `render()`; `"icon"` → the real `extension/ui/toolbar-icon.js` in a fake browser,
   `icon-renderer.js` + `fake-chrome.js`), so a view or icon change moves the
   snapshots automatically. After an intentional popup/view/CSS or toolbar-icon
   change run `npm run refresh:ui` and commit the PNGs + inline gallery
   (deterministic, no CI workflow). The requirement list is parsed from
-  `executable-requirements/Requirements.md` by `executable-requirements/infrastructure/ui-requirements.js` (numbers only — it does
+  `executable-requirements/Requirements.md` by `executable-requirements/infra/ui-requirements.js` (numbers only — it does
   NOT classify leaves), shared with the coverage ubertest
-  (`executable-requirements/ui-requirements-coverage.test.js`); how each leaf is verified
+  (`executable-requirements/requirements-coverage.test.js`); how each leaf is verified
   (`popup` / `icon` / `behavior` / `tbd`) is the **case's** `kind`/`tbd`, not a spec
   tag.
 - **Behavior verification** — `executable-requirements/ui/events-view-actions.test.js` drives the
@@ -161,7 +161,7 @@ commission-while-editing trap goes in the file's header comment rather than
   the cases and self-asserts it covers exactly those leaves. It **stubs** the
   `chrome.tabs.create`/`window.close` boundary, so it's explicitly INCOMPLETE (a
   loud banner in the file; a faithful non-stub verification is owed in #435).
-- **Two-column requirements gallery** — `executable-requirements/infrastructure/build-requirements-gallery.js`
+- **Two-column requirements gallery** — `executable-requirements/infra/build-requirements-gallery.js`
   lays each leaf out as an HTML `<table>` row in `executable-requirements/Requirements.md`: the
   generated `<slug>.<id>.png` (or a behavior-test note) in the **left** cell, the
   hand-authored requirement in the **right** cell. GitHub renders the markdown in
@@ -181,14 +181,14 @@ commission-while-editing trap goes in the file's header comment rather than
   `executable-requirements/fullBrowserHeavyTests/extension-load.chrome.test.js` (`npm run test:e2e` —
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
-- **SPA-shell render fallback** (#310, #328) — the detector (`data/spa-shell.js`,
+- **SPA-shell render fallback** (#310, #328) — the detector (`executable-requirements/data/spa-shell.js`,
   `shouldRender = isSpaShell && !hasEventData`, keying on a machine start date)
   is pure and unit-tested
   offline in `test/unit/spa-shell.test.js`; the headless render itself
-  (`data/render-page.js`, sharing the DevTools client `data/cdp-client.js` with
+  (`executable-requirements/data/render-page.js`, sharing the DevTools client `executable-requirements/data/cdp-client.js` with
   the extension-load test) is exercised by
   `executable-requirements/fullBrowserHeavyTests/render-page.chrome.test.js` against a self-authored
   `data:` URL — CI-only, skips without `CHROME_PATH`. The recorder
-  (`data/refresh-cache.js`) calls the render only when the plain fetch returns a
+  (`executable-requirements/data/refresh-cache.js`) calls the render only when the plain fetch returns a
   data-less SPA shell, and keeps it only if it gained extractable data;
   `refresh-cache.yml` wires `CHROME_PATH` so this happens when recording.
