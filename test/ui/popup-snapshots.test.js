@@ -22,7 +22,7 @@ const path = require("node:path");
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch").default;
 const { loadCases, CASES_DIR } = require("./popup-renderer");
-const { renderSnapshot } = require("./render-snapshot");
+const { renderSnapshot, rendersImage } = require("./render-snapshot");
 const { artifactPath } = require("./snapshot-artifacts-dir");
 
 // Rendering is deterministic (satori + resvg + bundled fonts, no browser), so a
@@ -71,10 +71,12 @@ async function compareToSnapshot(name, pngBuffer) {
   }
 }
 
-const CASES = loadCases();
+// Only the image-producing cases are snapshotted here; a `kind: "behavior"` case
+// has no pixels and is verified by test/unit/events-view-actions.test.js instead.
+const CASES = loadCases().filter(rendersImage);
 
 test("there is at least one UI case", () => {
-  assert.ok(CASES.length > 0, "no test/ui/cases/*.case.js found");
+  assert.ok(CASES.length > 0, "no image-producing test/ui/cases/*.case.js found");
 });
 
 // The popup's date/time copy comes from the real views' toLocale* calls, which

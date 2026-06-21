@@ -1,7 +1,7 @@
 // Parses docs/uiRequirements.md into its numbered requirement IDs — the single
-// source of truth shared by the coverage ubertest
-// (test/uber/ui-requirements-coverage.test.js) and the gallery README generator
-// (build-readme.js), so neither hard-codes the list.
+// source of truth for the requirement list, shared by the coverage ubertest
+// (test/uber/ui-requirements-coverage.test.js) and the gallery generator
+// (build-requirements-gallery.js), so neither hard-codes it.
 //
 // A requirement is a line whose first token is a backtick-wrapped dotted number,
 // e.g. "- `5.6.1` A past year shows a gray pill." The leading list dash is
@@ -9,7 +9,12 @@
 // "`5.6.1` …" (see build-requirements-gallery.js). Section headings ("## 5. Event
 // cards") and in-prose cross-references ("(→ `5.7.2`)") are not at a line's start,
 // so they're ignored. A "leaf" is a requirement with no finer-grained child (5.6
-// is not a leaf because 5.6.1 exists); leaves are what a case must cover.
+// is not a leaf because 5.6.1 exists); every leaf must have exactly one case.
+//
+// This file only enumerates the requirement NUMBERS. How each leaf is verified —
+// a popup snapshot, the toolbar-icon snapshot, a behavior click test, or a TBD
+// placeholder — is declared by the leaf's CASE (its `kind` / `tbd` fields; see
+// test/ui/render-snapshot.js and the coverage ubertest), NOT tagged in the spec.
 "use strict";
 
 const fs = require("node:fs");
@@ -41,52 +46,8 @@ function leafRequirementIds(docPath = DOC_PATH) {
   return ids.filter((id) => !ids.some((other) => other !== id && other.startsWith(`${id}.`)));
 }
 
-// A requirement tagged `_(behavior)_` right after its ID is verified by a
-// BEHAVIOR test (a click/navigation a snapshot can't observe), not a UI snapshot
-// — the segmentation behind the coverage gate (test/ui/behavior-coverage.js,
-// docs/engineeringPractices.md #429). A requirement tagged `_(TBD)_` is a
-// PLACEHOLDER: an edge case whose correct behavior is not yet decided — it's shown
-// with a "TO BE DECIDED" banner and is exempt from the snapshot bijection (it MAY
-// carry a provisional snapshot of current behavior, but isn't required to).
-// Everything else is a "render" leaf, pinned by a snapshot. Returns
-// { "<leafId>": "behavior" | "tbd" | "render" }.
-//
-// Note this is the SPEC-level verification kind (snapshot vs behavior vs placeholder),
-// NOT how a snapshot is rendered. A render leaf's PNG may come from the popup OR the
-// toolbar-icon renderer; that choice is a property of the CASE (its own `kind`
-// field — see test/ui/render-snapshot.js), not of the spec.
-function leafRequirementKinds(docPath = DOC_PATH) {
-  const text = fs.readFileSync(docPath, "utf8");
-  const tag = {};
-  for (const line of text.split("\n")) {
-    const m = /^\s*(?:-\s+)?`(\d+(?:\.\d+)+)`\s+_\((behavior|TBD)\)_/.exec(line);
-    if (m) tag[m[1]] = m[2] === "TBD" ? "tbd" : m[2];
-  }
-  const kinds = {};
-  for (const id of leafRequirementIds(docPath)) kinds[id] = tag[id] || "render";
-  return kinds;
-}
-
-// The leaf IDs of each kind, derived from leafRequirementKinds.
-function behaviorLeafIds(docPath = DOC_PATH) {
-  const kinds = leafRequirementKinds(docPath);
-  return Object.keys(kinds).filter((id) => kinds[id] === "behavior");
-}
-function renderLeafIds(docPath = DOC_PATH) {
-  const kinds = leafRequirementKinds(docPath);
-  return Object.keys(kinds).filter((id) => kinds[id] === "render");
-}
-function tbdLeafIds(docPath = DOC_PATH) {
-  const kinds = leafRequirementKinds(docPath);
-  return Object.keys(kinds).filter((id) => kinds[id] === "tbd");
-}
-
 module.exports = {
   allRequirementIds,
   leafRequirementIds,
-  leafRequirementKinds,
-  behaviorLeafIds,
-  renderLeafIds,
-  tbdLeafIds,
   DOC_PATH,
 };

@@ -11,11 +11,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadCases, CASES_DIR } = require("./popup-renderer");
-const { renderSnapshot } = require("./render-snapshot");
+const { renderSnapshot, rendersImage } = require("./render-snapshot");
 const { buildGallery, DOC_PATH } = require("./build-requirements-gallery");
 
 (async () => {
-  for (const testCase of loadCases()) {
+  // Skip non-image cases (e.g. `kind: "behavior"`): they have no snapshot to write.
+  for (const testCase of loadCases().filter(rendersImage)) {
     const outPath = path.join(CASES_DIR, `${testCase.name}.png`);
     fs.writeFileSync(outPath, await renderSnapshot(testCase));
     console.log(`Wrote ${outPath}`);

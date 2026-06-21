@@ -16,7 +16,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const { buildGallery, markerLines, DOC_PATH } = require("./build-requirements-gallery");
-const { leafRequirementKinds } = require("./ui-requirements");
+const { leafRequirementIds } = require("./ui-requirements");
 
 const isCI = Boolean(process.env.CI);
 
@@ -39,14 +39,14 @@ test("docs/uiRequirements.md gallery matches the generator (run npm run refresh:
 });
 
 test("every leaf — and only a leaf — has exactly one gallery marker", () => {
-  const kinds = leafRequirementKinds();
-  const leaves = Object.keys(kinds);
+  const leaves = leafRequirementIds();
+  const leafSet = new Set(leaves);
   const marks = markerLines(fs.readFileSync(DOC_PATH, "utf8").split("\n"));
 
   const counts = marks.reduce((acc, { id }) => ((acc[id] = (acc[id] || 0) + 1), acc), {});
   const missing = leaves.filter((id) => !counts[id]);
   const dupes = Object.keys(counts).filter((id) => counts[id] > 1);
-  const stray = Object.keys(counts).filter((id) => !(id in kinds));
+  const stray = Object.keys(counts).filter((id) => !leafSet.has(id));
 
   assert.deepEqual(missing, [], "leaves with no `<!-- req-gallery:id -->` row in docs/uiRequirements.md:");
   assert.deepEqual(dupes, [], "leaves with more than one gallery row:");

@@ -1,4 +1,4 @@
-// Per-leaf PROVISIONAL snapshot for requirement 4.10 (_(TBD)_ in the spec): a
+// Per-leaf PROVISIONAL snapshot for requirement 4.10 (a `tbd: true` case): a
 // single instance spanning MULTIPLE MONTHS (Jun 28 → Jul 3). Today its chip shows
 // just the start day ("JUN 28") with an "All day" line — no date range across the
 // span. This image is the CURRENT behavior, shown so we can decide whether a long
@@ -7,6 +7,7 @@
 "use strict";
 
 module.exports = {
+  tbd: true, // behavior not yet decided — this is a PROVISIONAL snapshot of current behavior
   description: "TBD: a single instance spanning Jun 28 → Jul 3 — current chip shows the start day only",
   data: {
     supported: true,

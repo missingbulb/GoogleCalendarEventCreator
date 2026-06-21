@@ -17,41 +17,41 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 
 > # ⚠️ INCOMPLETE TESTING — A GREEN BUILD MEANS "CLAIMED", NOT "FULLY VERIFIED" ⚠️
 >
-> Every *render* leaf below has its own inline snapshot, and every *behavior* leaf
-> a behavior test, so the coverage gate proves each leaf is *claimed* by the right
-> kind of test. What it does **not** prove is how *faithfully* the behavioral
-> leaves are checked: a leaf tagged `_(behavior)_` (a click → new-tab →
-> close-popup action) has no pixels, so it's verified by
-> `test/unit/events-view-actions.test.js`, which **stubs
-> `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the right
-> action, **not** that a real Chrome performs it. A faithful (non-stub)
+> Every leaf below is *claimed* by exactly one case, so the coverage gate proves
+> each leaf is verified by the right kind of test. What it does **not** prove is how
+> *faithfully*: a `kind: "behavior"` case (a click → new-tab → close-popup action)
+> has no pixels, so it's verified by `test/unit/events-view-actions.test.js`, which
+> **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
+> right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
 > [`docs/claude/testing.md`](claude/testing.md). Likewise, the toolbar-icon leaves
 > (§10) are verified offline through a **fake Chrome**, so they pin the icon the
 > extension *generates*, not that real Chrome *paints* it — only the e2e test does
 > that.
 
-**Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). A
-UI snapshot case (`test/ui/`) names the requirement(s) it verifies by number, so a
-case and the requirement it pins can be cross-checked. Add new requirements with
-new numbers; don't renumber or reuse existing ones.
+**Numbering.** Every leaf requirement carries a stable number (e.g. `5.6.1`). Each
+leaf has exactly one case named `req-<id>.case.js`, so a case and the requirement it
+pins are cross-checked by number. Add new requirements with new numbers; don't
+renumber or reuse existing ones.
 
-**Verification kind.** Most leaves are *render* requirements, each pinned by a UI
-snapshot shown in a **two-column table** below — the generated image on the left,
-the requirement on the right. A leaf tagged **`_(behavior)_`** right after its
-number is instead verified by a behavior test (a click/navigation a static image
-can't observe), and its left cell carries a note rather than an image. A leaf
-tagged **`_(TBD)_`** is a **placeholder** — an edge case whose correct behavior
-isn't decided yet; its left cell shows a loud "TO BE DECIDED" banner (with a
-provisional render of *current* behavior when one exists), and it's exempt from
-the one-snapshot-per-leaf rule until the decision is made. So the coverage gate is
-**segmented** into snapshot vs behavior (`test/ui/behavior-coverage.js`): a render
-leaf carries one `req-<id>` snapshot, a behavior leaf a note. How a render leaf's
-snapshot is *rendered* is a property of its **case**, not of the spec — most cases
-are the popup, but a case may set `kind: "icon"` to be drawn instead by the real
-`ui/toolbar-icon.js` in a fake browser (the toolbar icon, §10);
-`test/ui/render-snapshot.js` dispatches by the case's kind. The left cells are
-generated; don't hand-edit a line carrying a `<!-- req-gallery:… -->` marker.
+**How each leaf is verified is declared by its CASE, not tagged here.** The spec is
+just numbered prose; each leaf's `req-<id>.case.js` declares how it's verified via
+its own `kind` (default `"popup"`) — and `test/ui/render-snapshot.js` dispatches on
+it:
+
+- `"popup"` / `"icon"` — an **image** leaf, pinned by a `req-<id>.png` snapshot in
+  the **two-column table** below (image left, requirement right). `"popup"` is the
+  popup's real `render()`; `"icon"` is the real `ui/toolbar-icon.js` in a fake
+  browser (the toolbar icon, §10).
+- `"behavior"` — a click/navigation a static image can't observe; the case carries
+  no image, its left cell shows a note, and it's verified by
+  `test/unit/events-view-actions.test.js`.
+- a case may also set **`tbd: true`** — an edge case whose correct behavior isn't
+  decided yet; its left cell shows a loud "TO BE DECIDED" banner above its
+  provisional (current-behavior) snapshot.
+
+The left cells are generated from the cases; don't hand-edit a line carrying a
+`<!-- req-gallery:… -->` marker.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
 specification. When a rendering is conditional — "in case X render Y, in case Z
@@ -230,7 +230,7 @@ underline at rest, underline on hover) so neither reads as a primary action.
 </td>
 <td valign="top">
 
-`3.4` _(behavior)_ Each link opens its target in a **new tab** (adjacent to the
+`3.4` Each link opens its target in a **new tab** (adjacent to the
 current one) and closes the popup.
 
 </td>
@@ -298,7 +298,7 @@ one card per event.
 </td>
 <td valign="top">
 
-`4.2.3` _(TBD)_ Edge case — **one event** with three instances: one in June, one a
+`4.2.3` Edge case — **one event** with three instances: one in June, one a
 **multi-day instance spanning June → July**, and one in July. Today the spanning
 instance groups by its **start** (June), so it shows under June only and never
 under July (provisional render at left). Whether a cross-month instance should
@@ -442,7 +442,7 @@ order.)
 </td>
 <td valign="top">
 
-`4.10` _(TBD)_ A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
+`4.10` A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
 today its chip shows just the **start day** (provisional render at left). Whether a
 long or multi-month span should instead show a **date range** on the calendar chip
 — and how the span should read on the line — is **to be decided**.
@@ -988,7 +988,7 @@ count.
 </td>
 <td valign="top">
 
-`9.1` _(behavior)_ Clicking a single card opens that event's prefilled Google
+`9.1` Clicking a single card opens that event's prefilled Google
 Calendar template in a new browser tab.
 
 </td>
@@ -1004,7 +1004,7 @@ Calendar template in a new browser tab.
 </td>
 <td valign="top">
 
-`9.2` _(behavior)_ Clicking a grouped card's instance button opens that
+`9.2` Clicking a grouped card's instance button opens that
 **specific showing's** template in a new tab.
 
 </td>
@@ -1020,7 +1020,7 @@ Calendar template in a new browser tab.
 </td>
 <td valign="top">
 
-`9.3` _(behavior)_ A template opens in a tab **adjacent** to the current one,
+`9.3` A template opens in a tab **adjacent** to the current one,
 and the popup then closes.
 
 </td>

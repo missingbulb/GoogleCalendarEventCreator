@@ -23,7 +23,8 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { leafRequirementKinds, DOC_PATH } = require("./ui-requirements");
+const { DOC_PATH } = require("./ui-requirements");
+const { loadCases } = require("./cases");
 
 const CASES_DIR = path.join(__dirname, "cases");
 // docs/uiRequirements.md → test/ui/cases/ is two levels up then back down.
@@ -37,19 +38,19 @@ function marker(id) {
   return `<!-- req-gallery:${id} -->`;
 }
 
-// The canonical managed left-cell content for one leaf, with the marker as the
-// trailing token: the image for a render leaf, a note for a behavior leaf, and a
-// loud "TO BE DECIDED" banner for a tbd leaf (followed by a provisional snapshot
-// of CURRENT behavior when a req-<id>.png exists, so a reviewer can see what the
-// undecided edge case renders as today).
-function managedLine(id, kind) {
+// The canonical managed left-cell content for one leaf, derived from its CASE (its
+// `kind` / `tbd` fields), with the marker as the trailing token: a note for a
+// `kind: "behavior"` case (no image — a click a snapshot can't show); otherwise the
+// req-<id>.png image (popup or icon — same embed either way), prefixed with a loud
+// "TO BE DECIDED" banner when the case is `tbd` (so a reviewer sees the provisional
+// render of CURRENT behavior under the banner).
+function managedLine(id, testCase) {
+  const kind = (testCase && testCase.kind) || "popup";
   if (kind === "behavior") {
     return `\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${marker(id)}`;
   }
-  // A render leaf AND an icon leaf both carry a req-<id>.png snapshot (only the
-  // renderer behind it differs — see render-snapshot.js), so they embed identically.
   const img = `![req-${id}](${IMG_REL}/req-${id}.png)`;
-  if (kind === "tbd") {
+  if (testCase && testCase.tbd) {
     const hasProvisional = fs.existsSync(path.join(CASES_DIR, `req-${id}.png`));
     const banner = "⚠️ **TO BE DECIDED** — behavior not yet decided";
     return hasProvisional
@@ -73,13 +74,13 @@ function markerLines(lines) {
 // line's leading indentation); leave every other line — scaffolding and prose —
 // untouched.
 function buildGallery(docPath = DOC_PATH) {
-  const kinds = leafRequirementKinds(docPath);
+  const caseById = new Map(loadCases().map((c) => [c.name.replace(/^req-/, ""), c]));
   const lines = fs.readFileSync(docPath, "utf8").split("\n");
   const out = lines.map((line) => {
     const m = MARKER_RE.exec(line);
     if (!m) return line;
     const lead = line.match(/^\s*/)[0];
-    return `${lead}${managedLine(m[1], kinds[m[1]] || "render")}`;
+    return `${lead}${managedLine(m[1], caseById.get(m[1]))}`;
   });
   return out.join("\n");
 }

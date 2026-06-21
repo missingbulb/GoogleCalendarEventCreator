@@ -34,4 +34,12 @@ function renderSnapshot(testCase) {
   return renderer(testCase);
 }
 
-module.exports = { renderSnapshot, RENDERERS, DEFAULT_KIND };
+// Does this case produce a snapshot image? True for an image kind (popup/icon),
+// false for a kind with no renderer (e.g. "behavior", verified by a click test, no
+// pixels). The snapshot runner and the refresh script use this to skip non-image
+// cases.
+function rendersImage(testCase) {
+  return Boolean(RENDERERS[testCase.kind || DEFAULT_KIND]);
+}
+
+module.exports = { renderSnapshot, rendersImage, RENDERERS, DEFAULT_KIND };
