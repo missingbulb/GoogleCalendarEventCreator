@@ -76,10 +76,11 @@ A Markdown table, most-recent-activity first:
 
 | Branch | Last commit (date) | Ahead | PR | Status | Safe to delete? |
 
-`Status` ∈ `merged/stale` · `unmerged work` · `orphaned (pre-rewrite)`. Below the
-table, a **Details** subsection: one short paragraph per branch with commits ahead
-that isn't merged, describing its changes. End with a one-line recommendation of
-which branches are safe to delete.
+`Status` ∈ `merged/stale` · `superseded` · `unmerged work` · `orphaned
+(pre-rewrite)`. Below the table, a **Details** subsection: one short paragraph per
+branch with commits ahead that isn't merged, describing its changes — and for a
+`superseded` branch, where in `main` its content now lives. End with a one-line
+recommendation of which branches are safe to delete.
 
 ## Where it posts
 
