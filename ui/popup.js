@@ -102,9 +102,11 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     // state via its action instead (see test/ui/actions.js).
     eventsEl.addEventListener("scroll", updateScrollFades);
 
-    // State 5: a complete fallback event on an unlisted host — a quiet
-    // right-aligned "Suggest Correction" link next to the heading text. (Only
-    // fires when events are shown, so it lives on the heading line.)
+    // A quiet right-aligned "Suggest Correction" link next to the heading text,
+    // shown when chooseContent returns a `request`: State 5 (a complete fallback
+    // event on an unlisted host) or State 1b (a supported host whose dedicated
+    // source missed, #456). Only fires when events are shown, so it lives on the
+    // heading line.
     if (request) {
       const view = await import("./views/source-request-view.js");
       headingEl.classList.add("with-link");
@@ -222,6 +224,12 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 //   State 1 — supported host (a per-site source matched): show its events.
 //     `supported` is the same GCal.isSupportedHost check that colors the toolbar
 //     icon, so the popup's supported/unsupported split and the icon agree.
+//   State 1b — supported host whose per-site source found NOTHING, so the
+//     orchestrator ran the generic fallback (`data.fallback`): show the
+//     fallback's complete events AND a "Suggest Correction" link, since the
+//     dedicated source missed them (#456). Decided before the denylist, like
+//     State 1. Falls through to the bare empty state if the fallback found
+//     nothing complete either.
 //   State 2 — denylisted host: "No events found", and NO prompt — we've
 //     explicitly decided not to extract there, so we don't surface a fallback
 //     event, a support request, or even the policy link. Decided before the
@@ -235,9 +243,25 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 export function chooseContent(data, listing = "none") {
   const all = data && data.events && data.events.length ? [...data.events] : [];
 
-  // State 1.
-  if (data && data.supported) {
+  // State 1 — a supported host whose dedicated source produced its own events:
+  // show them. It's self-contained, so no request button and no policy link.
+  if (data && data.supported && !data.fallback) {
     return { events: all, request: null, policyLink: false };
+  }
+
+  // State 1b — a supported host whose dedicated source found NOTHING, so the
+  // orchestrator fell back to the generic extractor (data.fallback). Show its
+  // complete events AND offer the "Suggest Correction" link: the dedicated source
+  // missed them, so a correction is exactly what we want (regardless of the
+  // host's allow/deny listing — a supported host's miss is always worth
+  // reporting). When the fallback turned up nothing complete, fall through to the
+  // bare empty state — no policy link, since a supported host isn't disputing the
+  // extraction policy.
+  if (data && data.supported && data.fallback) {
+    const presentable = all.filter(isPresentableFallbackEvent);
+    return presentable.length
+      ? { events: presentable, request: presentable[0], policyLink: false }
+      : { events: [], request: null, policyLink: false };
   }
 
   // State 2: a denylisted host shows nothing and prompts for nothing — that

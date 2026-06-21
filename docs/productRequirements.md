@@ -38,7 +38,14 @@ When opened, the popup lands in one of five states:
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 
-1. **Supported host** — show the events the dedicated extractor found.
+1. **Supported host** — show the events the dedicated extractor found. If the
+   dedicated extractor finds **none**, fall back to the generic extractor: when
+   that turns up a *complete* event, show it **and** offer "Suggest Correction"
+   (as in state 5) so the page the dedicated source missed can be reported — a
+   user most likely opens the popup when they see an event, so a best-effort
+   result beats an empty popup. When the fallback also finds nothing, the empty
+   state shows (state 2's bare glyph — no policy link). The host stays classified
+   *supported* throughout (the icon stays green).
 2. **Denylisted host** — show nothing and prompt for nothing: no event, no
    support request, no policy link. We've deliberately decided not to extract
    there, so there's nothing to dispute.

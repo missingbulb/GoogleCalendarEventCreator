@@ -7,11 +7,13 @@
 // event), and a quiet "Disagree?" link to the public policy doc. The five
 // states, in the order they're decided (issue #192):
 //
-//   1 supported host                    -> events only
-//   2 denylisted host                   -> "No events found" (no link, no prompt)
-//   3 not denylisted, nothing complete  -> "No events found" + Disagree? link
-//   4 complete event, allowlisted       -> events only (no support ask)
-//   5 complete event, on neither list   -> events + request button
+//   1  supported host                    -> events only
+//   1b supported host, dedicated source   -> the generic fallback's events +
+//      found nothing (#456)                  a "Suggest Correction" request link
+//   2  denylisted host                   -> "No events found" (no link, no prompt)
+//   3  not denylisted, nothing complete  -> "No events found" + Disagree? link
+//   4  complete event, allowlisted       -> events only (no support ask)
+//   5  complete event, on neither list   -> events + request button
 //
 // This supersedes the strict #101 rule that an unsupported host must NEVER
 // surface a scraped event: #192 deliberately shows a *complete* fallback event
@@ -99,6 +101,41 @@ test("State 1 — supported host: events only, no request, no policy link", () =
 test("State 1 — supported host with no events: empty events, no extras", () => {
   const view = chooseContent({ events: [], supported: true }, "none");
   assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false);
+});
+
+// --- State 1b: supported host whose dedicated source found nothing (#456) ---
+// The orchestrator (assemble-events.js) sets `fallback: true` when a SUPPORTED
+// host's dedicated source returned no events and it therefore ran the generic
+// extractor. The popup shows the fallback's complete events WITH the "Suggest
+// Correction" link (the dedicated source missed them — a correction is exactly
+// what we want), regardless of the host's allow/deny listing.
+
+test("State 1b — supported host, dedicated source empty, fallback found a complete event: events AND a request link", () => {
+  const view = chooseContent({ events: [FULL], supported: true, fallback: true }, "none");
+  assert.deepEqual(view.events, [FULL]);
+  assert.equal(view.request, FULL);
+  assert.equal(view.policyLink, false);
+});
+
+test("State 1b — the correction link shows even on an allowlisted supported host", () => {
+  // meetup.com is both supported AND allowlisted; a dedicated miss is still a
+  // defect worth reporting, so the request link shows regardless of listing.
+  const view = chooseContent({ events: [FULL], supported: true, fallback: true }, "allow");
+  assert.equal(view.request, FULL);
+});
+
+test("State 1b — fallback found only an incomplete event: bare empty state, no link", () => {
+  const view = chooseContent({ events: [NO_LOCATION], supported: true, fallback: true }, "none");
+  assert.equal(view.events.length, 0);
+  assert.equal(view.request, null);
+  assert.equal(view.policyLink, false); // a supported host isn't disputing policy
+});
+
+test("State 1 — a supported host's OWN events (fallback false) get no correction link", () => {
+  const view = chooseContent({ events: [FULL], supported: true, fallback: false }, "none");
+  assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, null);
   assert.equal(view.policyLink, false);
 });

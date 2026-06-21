@@ -1,7 +1,11 @@
 #!/usr/bin/env node
-// Regenerates docs/popup-states-flowchart.png — a simple flowchart of the five
-// states the popup can render (issue #192; the same decision ui/popup.js's
-// chooseContent makes, see docs/productRequirements.md).
+// Regenerates docs/popup-states-flowchart.png — a flowchart of the states the
+// popup can render (issue #192; State 1b added in #456). It mirrors the decision
+// ui/popup.js's chooseContent makes (see docs/productRequirements.md): a
+// supported host shows its dedicated extractor's events (State 1), or — when that
+// extractor finds nothing — falls back to the generic one and shows its events
+// with a "Suggest Correction" link (State 1b); an unsupported host runs the
+// denylist / fallback / allowlist chain (States 2–5).
 //
 //   node tools/gen-states-flowchart.js
 //
@@ -15,8 +19,8 @@ const path = require("node:path");
 const { Resvg } = require("@resvg/resvg-js");
 
 const ROOT = path.join(__dirname, "..");
-const W = 960;
-const H = 790;
+const W = 1320;
+const H = 700;
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -57,7 +61,6 @@ const tag = (x, y, t) =>
 const SHOW = { fill: "#e8f0fe", stroke: "#aecbfa" };
 const NONE = { fill: "#f1f3f4", stroke: "#cfd4d9" };
 
-const SPINE = 250; // x of the start box + decision diamonds
 const parts = [];
 
 // Title
@@ -65,46 +68,72 @@ parts.push(
   `<text x="${W / 2}" y="30" font-family="Liberation Sans, sans-serif" font-size="16" font-weight="700" fill="#202124" text-anchor="middle">How the popup decides what to show</text>`
 );
 
-const STATEX = 710; // center of the right-hand state boxes
-const SW = 400;
-const SLEFT = STATEX - SW / 2; // left edge the arrows point at
+// The flow forks at the top: a SUPPORTED host (left column, spine x=SUP) runs the
+// dedicated source then a fallback; an UNSUPPORTED host (right column, spine
+// x=UNS) runs the denylist / fallback / allowlist chain. Terminal state boxes
+// hang off each spine — left of SUP, right of UNS.
+const SUP = 500; // supported-column decision spine
+const UNS = 820; // unsupported-column decision spine
+const LBOX = 180; // center x of the left (supported) state boxes
+const RBOX = 1140; // center x of the right (unsupported) state boxes
+const MID = (SUP + UNS) / 2; // start box / first diamond center
 
 // Start
-parts.push(box(SPINE, 70, 220, 40, ["Popup opens on a page"], { fill: "#fff", stroke: "#dadce0", weight: 600 }));
-parts.push(line(SPINE, 90, SPINE, 121));
+parts.push(box(MID, 64, 240, 40, ["Popup opens on a page"], { fill: "#fff", stroke: "#dadce0", weight: 600 }));
+parts.push(line(MID, 84, MID, 109));
 
-// 1. Per-site source? -> State 1
-parts.push(diamond(SPINE, 165, 210, 84, ["Page host has a", "per-site source?"]));
-parts.push(line(355, 165, SLEFT, 165));
-parts.push(tag(437, 156, "yes"));
-parts.push(box(STATEX, 165, SW, 52, ["State 1 — supported host", "Show the extractor’s events"], SHOW));
-parts.push(line(SPINE, 207, SPINE, 270));
-parts.push(tag(266, 240, "no"));
+// Fork: per-site source? -> left (supported) / right (unsupported)
+parts.push(diamond(MID, 152, 250, 86, ["Page host has a", "per-site source?"]));
+parts.push(line(MID - 125, 152, SUP, 224));
+parts.push(tag(MID - 150, 178, "yes"));
+parts.push(line(MID + 125, 152, UNS, 224));
+parts.push(tag(MID + 150, 178, "no"));
 
-// 2. On the denylist? -> State 2 (no event, no prompt)
-parts.push(diamond(SPINE, 313, 210, 84, ["Host on the", "denylist?"]));
-parts.push(line(355, 313, SLEFT, 313));
-parts.push(tag(437, 304, "yes"));
-parts.push(box(STATEX, 313, SW, 52, ["State 2 — denylisted", "“No events found” (no prompt)"], NONE));
-parts.push(line(SPINE, 355, SPINE, 421));
-parts.push(tag(266, 390, "no"));
+// --- Supported column (left) ---
 
-// 3. Fallback found a complete event? -> State 3 (no)
-parts.push(diamond(SPINE, 472, 250, 100, ["Fallback finds a", "complete event?", "(title + location + start)"]));
-parts.push(line(375, 472, SLEFT, 472));
-parts.push(tag(447, 463, "no"));
-parts.push(box(STATEX, 472, SW, 52, ["State 3 — nothing found", "“No events found” + “Disagree?” link"], NONE));
-parts.push(line(SPINE, 522, SPINE, 607));
-parts.push(tag(266, 566, "yes"));
+// Did the dedicated source find events? -> State 1
+parts.push(diamond(SUP, 270, 220, 92, ["Dedicated source", "found events?"]));
+parts.push(line(SUP - 110, 270, LBOX + 150, 270));
+parts.push(tag(SUP - 140, 261, "yes"));
+parts.push(box(LBOX, 270, 300, 54, ["State 1 — supported host", "Show the extractor’s events"], SHOW));
+parts.push(line(SUP, 316, SUP, 374));
+parts.push(tag(SUP - 20, 347, "no"));
 
-// 4. On the allowlist? -> State 4 (yes) / State 5 (no)
-parts.push(diamond(SPINE, 650, 210, 84, ["Host on the", "allowlist?"]));
-parts.push(line(355, 650, SLEFT, 612));
-parts.push(tag(444, 618, "yes"));
-parts.push(box(STATEX, 610, SW, 52, ["State 4 — allowlisted", "Show the event (no support ask)"], SHOW));
-parts.push(line(355, 650, SLEFT, 715));
-parts.push(tag(444, 700, "no"));
-parts.push(box(STATEX, 715, SW, 56, ["State 5 — unlisted", "Show the event + “Suggest Correction”"], SHOW));
+// Dedicated source empty -> generic fallback finds a complete event? -> State 1b
+parts.push(diamond(SUP, 412, 250, 100, ["Generic fallback finds", "a complete event?", "(title + location + start)"]));
+parts.push(line(SUP - 125, 412, LBOX + 150, 412));
+parts.push(tag(SUP - 152, 403, "yes"));
+parts.push(box(LBOX, 412, 300, 56, ["State 1b — supported (fallback)", "Show event + “Suggest Correction”"], SHOW));
+parts.push(line(SUP, 462, SUP, 552));
+parts.push(tag(SUP - 20, 510, "no"));
+parts.push(box(SUP, 580, 320, 56, ["Supported host, nothing found", "“No events found” (no prompt)"], NONE));
+
+// --- Unsupported column (right) ---
+
+// On the denylist? -> State 2 (no event, no prompt)
+parts.push(diamond(UNS, 270, 220, 86, ["Host on the", "denylist?"]));
+parts.push(line(UNS + 110, 270, RBOX - 150, 270));
+parts.push(tag(UNS + 140, 261, "yes"));
+parts.push(box(RBOX, 270, 300, 54, ["State 2 — denylisted", "“No events found” (no prompt)"], NONE));
+parts.push(line(UNS, 313, UNS, 374));
+parts.push(tag(UNS + 20, 347, "no"));
+
+// Fallback found a complete event? -> State 3 (no)
+parts.push(diamond(UNS, 412, 250, 100, ["Generic fallback finds", "a complete event?", "(title + location + start)"]));
+parts.push(line(UNS + 125, 412, RBOX - 150, 412));
+parts.push(tag(UNS + 152, 403, "no"));
+parts.push(box(RBOX, 412, 300, 56, ["State 3 — nothing found", "“No events found” + “Disagree?”"], NONE));
+parts.push(line(UNS, 462, UNS, 520));
+parts.push(tag(UNS + 20, 494, "yes"));
+
+// On the allowlist? -> State 4 (yes) / State 5 (no)
+parts.push(diamond(UNS, 558, 220, 86, ["Host on the", "allowlist?"]));
+parts.push(line(UNS + 110, 558, RBOX - 150, 540));
+parts.push(tag(UNS + 140, 532, "yes"));
+parts.push(box(RBOX, 540, 300, 54, ["State 4 — allowlisted", "Show the event (no support ask)"], SHOW));
+parts.push(line(UNS + 110, 558, RBOX - 150, 632));
+parts.push(tag(UNS + 140, 616, "no"));
+parts.push(box(RBOX, 632, 300, 56, ["State 5 — unlisted", "Show event + “Suggest Correction”"], SHOW));
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
