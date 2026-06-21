@@ -21,22 +21,39 @@ opened in a new tab, in one click.
 
 ## Toolbar icon
 
-The icon signals how the current page's host is classified:
+The icon signals how the current page's host is classified, before the user
+clicks. It reflects the host's classification, not whether an event was found —
+the icon can't read the page, so a page where the generic fallback later finds an
+event still shows the blue (default) icon.
 
-- **green** — the host has a dedicated extractor;
-- **red** — the host is on the fallback denylist, where we've deliberately
-  decided not to extract (the "denylisted host" popup state below);
-- **blue** — every other page.
+Each state below is its own sub-requirement: a description and the exact icon the
+extension paints. Every image is generated and pixel-asserted from the shipped
+icons by `test/extension/extension-icon-states.test.js`, with the variant chosen
+by the real `ui/toolbar-icon.js` classification — so it always shows what Chrome
+actually paints.
 
-![The toolbar icon in each of its three states](extension-icon-states.png)
+### Supported host — green
 
-(The image above is generated and pixel-asserted from the shipped icons by
-`test/extension/extension-icon-states.test.js`, so it always shows what Chrome
-actually paints.)
+![The green toolbar icon shown on a supported host](extension-icon-supported.png)
 
-It reflects the host's classification, not whether an event was found — the icon
-can't read the page, so a page where the generic fallback later finds an event
-still shows the blue icon.
+The host has a dedicated, first-class extractor (e.g. `bandsintown.com`). The
+green icon tells the user a one-click extraction will use that first-class source.
+
+### Denylisted host — gray
+
+![The gray toolbar icon shown on a denylisted host](extension-icon-denylisted.png)
+
+The host is on the fallback denylist (e.g. `cnn.com`), where we've deliberately
+decided not to extract — see the "denylisted host" popup state below. The gray
+icon signals the extension will stay out of the way there.
+
+### Any other page — blue (default)
+
+![The blue default toolbar icon shown on any other page](extension-icon-default.png)
+
+The host is neither supported nor denylisted. The icon stays the manifest default
+(blue), since the icon can't read the page; the generic fallback may still find an
+event when the popup opens.
 
 ## What the popup shows
 

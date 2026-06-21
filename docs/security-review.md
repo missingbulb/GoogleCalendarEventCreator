@@ -47,7 +47,7 @@ A) Toolbar icon coloring (declarative; the browser matches, the extension never
      -> on runtime.onInstalled / onStartup, registers chrome.declarativeContent
         rules from pipeline/fallback-lists.json (supported/denied host patterns)
      -> the BROWSER matches a tab's URL against those patterns and swaps the
-        action icon (green/red/blue) — no tab.url is ever read by extension code
+        action icon (green/gray/blue) — no tab.url is ever read by extension code
         (no "tabs" permission)
 
 B) Event extraction (only while the popup is open, a user-initiated action)
