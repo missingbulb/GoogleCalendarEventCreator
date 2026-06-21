@@ -9,7 +9,7 @@
 //       * "popup" / "icon" — an image leaf, pinned by a `req-<id>.png` snapshot
 //         (rendered by render-snapshot.js, compared by popup-snapshots.test.js).
 //       * "behavior"       — a click/navigation a static image can't observe, so it
-//         carries NO image and is verified by test/unit/events-view-actions.test.js
+//         carries NO image and is verified by test/ui/events-view-actions.test.js
 //         (which self-asserts it covers exactly the kind:"behavior" cases). A PNG
 //         "covering" a behavior is the #429 anti-pattern, so we forbid one here.
 //   - A `tbd: true` case is an undecided edge case: it still renders (a provisional

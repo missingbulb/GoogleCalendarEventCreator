@@ -48,7 +48,7 @@ doc, when the mechanics change.
     toolbar icon, §10).
   - `kind: "behavior"` — a click/navigation a static image can't observe (e.g.
     `9.1`–`9.3`, `3.4`); the case carries NO image and is verified by
-    `test/unit/events-view-actions.test.js` (which self-asserts it covers exactly
+    `test/ui/events-view-actions.test.js` (which self-asserts it covers exactly
     the `kind: "behavior"` cases). A `req-<id>.png` for one is the #429 anti-pattern
     and the gate rejects it.
   - `tbd: true` — an edge case whose behavior isn't decided yet (e.g. `4.2.3`,
@@ -122,7 +122,7 @@ Read the file when you touch it; the one-liners here are just a map.
   (`test/uber/ui-requirements-coverage.test.js`); how each leaf is verified
   (`popup` / `icon` / `behavior` / `tbd`) is the **case's** `kind`/`tbd`, not a spec
   tag.
-- **Behavior verification** — `test/unit/events-view-actions.test.js` drives the
+- **Behavior verification** — `test/ui/events-view-actions.test.js` drives the
   clicks the snapshots can't (the `kind: "behavior"` leaves: a card / instance
   button / affordance link opens an adjacent new tab and closes the popup); it reads
   the cases and self-asserts it covers exactly those leaves. It **stubs** the

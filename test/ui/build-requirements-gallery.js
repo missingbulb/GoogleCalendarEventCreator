@@ -29,7 +29,7 @@ const { loadCases } = require("./cases");
 const CASES_DIR = path.join(__dirname, "cases");
 // docs/uiRequirements.md → test/ui/cases/ is two levels up then back down.
 const IMG_REL = "../test/ui/cases";
-const BEHAVIOR_TEST = "test/unit/events-view-actions.test.js";
+const BEHAVIOR_TEST = "test/ui/events-view-actions.test.js";
 
 // The ID-bearing marker that tags a managed left-cell line.
 const MARKER_RE = /<!--\s*req-gallery:(\d+(?:\.\d+)+)\s*-->/;

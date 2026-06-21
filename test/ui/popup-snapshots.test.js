@@ -72,7 +72,7 @@ async function compareToSnapshot(name, pngBuffer) {
 }
 
 // Only the image-producing cases are snapshotted here; a `kind: "behavior"` case
-// has no pixels and is verified by test/unit/events-view-actions.test.js instead.
+// has no pixels and is verified by test/ui/events-view-actions.test.js instead.
 const CASES = loadCases().filter(rendersImage);
 
 test("there is at least one UI case", () => {

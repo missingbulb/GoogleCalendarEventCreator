@@ -20,7 +20,7 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > Every leaf below is *claimed* by exactly one case, so the coverage gate proves
 > each leaf is verified by the right kind of test. What it does **not** prove is how
 > *faithfully*: a `kind: "behavior"` case (a click → new-tab → close-popup action)
-> has no pixels, so it's verified by `test/unit/events-view-actions.test.js`, which
+> has no pixels, so it's verified by `test/ui/events-view-actions.test.js`, which
 > **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
 > right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
@@ -45,7 +45,7 @@ it:
   browser (the toolbar icon, §10).
 - `"behavior"` — a click/navigation a static image can't observe; the case carries
   no image, its left cell shows a note, and it's verified by
-  `test/unit/events-view-actions.test.js`.
+  `test/ui/events-view-actions.test.js`.
 - a case may also set **`tbd: true`** — an edge case whose correct behavior isn't
   decided yet; its left cell shows a loud "TO BE DECIDED" banner above its
   provisional (current-behavior) snapshot.
@@ -225,7 +225,7 @@ underline at rest, underline on hover) so neither reads as a primary action.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:3.4 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:3.4 -->
 
 </td>
 <td valign="top">
@@ -983,7 +983,7 @@ count.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.1 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.1 -->
 
 </td>
 <td valign="top">
@@ -999,7 +999,7 @@ Calendar template in a new browser tab.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.2 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.2 -->
 
 </td>
 <td valign="top">
@@ -1015,7 +1015,7 @@ Calendar template in a new browser tab.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `test/unit/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.3 -->
+🚩 _Behavior leaf — verified by `test/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.3 -->
 
 </td>
 <td valign="top">
