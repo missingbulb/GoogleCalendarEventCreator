@@ -52,6 +52,25 @@ test("markdown links in the description become HTML anchors (kept verbatim)", ()
   assert.ok(details.includes('<a href="https://y.com">B</a>'));
 });
 
+test("a markdown link with a dangerous scheme is left literal, not turned into an <a>", () => {
+  // The description is page-controlled. A javascript:/data:/vbscript: URL must
+  // never become an <a href> in the HTML-rendered Calendar details — keep the
+  // raw markdown text instead, so no dangerous-scheme anchor is emitted.
+  const description =
+    "click [here](javascript:alert(1)) or [there](data:text/html,<b>x</b>) or [x](vbscript:msgbox)";
+  const url = buildCalendarUrl({ title: "Talk", description }, TAB);
+  const details = paramsOf(url).get("details");
+  assert.ok(!details.includes("<a href"), "no anchor emitted for a dangerous scheme");
+  assert.ok(details.includes("[here](javascript:alert(1))"), "javascript: link kept literal");
+  assert.ok(details.includes("[there](data:text/html,<b>x</b>)"), "data: link kept literal");
+  assert.ok(details.includes("[x](vbscript:msgbox)"), "vbscript: link kept literal");
+});
+
+test("a mailto: link in the description still becomes an HTML anchor", () => {
+  const url = buildCalendarUrl({ title: "Talk", description: "email [us](mailto:a@b.com)" }, TAB);
+  assert.ok(paramsOf(url).get("details").includes('<a href="mailto:a@b.com">us</a>'));
+});
+
 test("bold markdown in the description becomes <b> (Calendar renders details as HTML)", () => {
   const url = buildCalendarUrl({ title: "Talk", description: "Featuring **Jane Doe** and **John**" }, TAB);
   assert.equal(paramsOf(url).get("details"), `${TAB.url}\n\nFeaturing <b>Jane Doe</b> and <b>John</b>`);
