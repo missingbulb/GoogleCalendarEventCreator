@@ -14,6 +14,12 @@ inline gallery
 `https://github.com/<owner>/<repo>/blob/<branch>/docs/uiRequirements.md`, each
 requirement with its snapshot beside it — for one-page review.
 
+When the owner asks to **show** or **see** a visual artifact (a snapshot, a diff,
+a generated diagram), deliver the actual image **into the chat**, not a path or a
+link — surface the file itself so it renders inline; a link makes the owner go
+fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact
+nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
+
 When a change to a `test/ui/cases/*` case — its spec or its rendering — makes
 the snapshot tests **fail** (the pixels moved), don't silently regenerate the
 baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel

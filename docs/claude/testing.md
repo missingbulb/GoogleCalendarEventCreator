@@ -70,6 +70,15 @@ doc, when the mechanics change.
   it separately). A loud banner in `docs/uiRequirements.md` says the same: a green
   build means every leaf is *claimed*, not that every leaf is *faithfully*
   verified.
+- **An executable requirements test case declares HOW it's verified, with a default
+  — never a parallel classifier.** When each numbered requirement is pinned by its
+  own executable case (`req-<id>.case.js`), the case carries its verification kind as
+  its own field (`kind`, defaulting to the common one, plus a flag like `tbd`) rather
+  than the spec prose tagging it or a side manifest keyed by id. One source of truth
+  means a case can't desync from its classifier, and it collapses parallel routing
+  systems into one dispatcher: this repo folded the `_(icon)_` / `_(behavior)_` /
+  `_(TBD)_` spec tags **and** a behavior-coverage manifest into the per-case
+  `kind`/`tbd` described in the bullet above.
 
 ## Adding a cached integration case
 

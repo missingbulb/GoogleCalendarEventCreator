@@ -24,9 +24,3 @@ usually just whatever is captured-but-not-yet-upstreamed.
   assistant's instruction-following is the enforcement mechanism; the hook provides
   the check. Stay silent on success — only emit when something requires the user's
   decision. (`.claude/hooks/session-start.sh` is a worked example.)
-- **When the user asks to "show"/"see" a visual artifact, deliver the actual file
-  into the chat — a path or link is not "showing" it.** Surface the file itself (an
-  upload / send-file affordance) so it renders inline; pointing at where it lives on
-  disk or in a repo makes the user go fetch it. If the artifact is tiny (e.g. a
-  16/32px icon), also send an exact nearest-neighbor upscale so the detail is
-  visible, labelled as enlarged.
