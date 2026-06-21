@@ -57,7 +57,7 @@ as a Dependabot submodule-bump PR. Lessons are *captured locally* (above) and on
 the daily `optimize-procedures` routine bridges them up to Claudinite (see
 [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
 and `docs/claude/auto-optimize-procedures.md`). A fresh clone needs
-`git submodule update --init` (`scripts/cloud-setup.sh` runs it) or
+`git submodule update --init` (`.claude/cloud-setup.sh` runs it) or
 `docs/claude/shared/` is an empty folder and these imports resolve to nothing.
 
 @docs/claude/shared/engineeringPractices.md

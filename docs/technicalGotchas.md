@@ -121,7 +121,7 @@ trap spanning files. See the full locality rule in
 - **The cloud Setup script runs as root starting in the repo's parent dir
   (`/home/user`), not the checkout.** A bare `npm ci` there finds no
   `package.json` and silently installs nothing (the tests then trigger a confusing
-  mid-session install). `scripts/cloud-setup.sh` must `cd` into the checkout first.
+  mid-session install). `.claude/cloud-setup.sh` must `cd` into the checkout first.
   (#186 / #196)
 - **`clean()` collapses all whitespace including newlines — use it only for
   single-line fields.** Title and location are whitespace-collapsed, but a

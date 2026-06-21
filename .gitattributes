@@ -7,7 +7,7 @@ executable-requirements/data/*.html linguist-vendored
 # On a merge conflict the `ours` driver keeps one side automatically; you then
 # rerun the generator and commit the result, so there's nothing to resolve by
 # hand (and the PNGs are binary — they can't be 3-way merged at all). The driver
-# is per-clone git config set by scripts/cloud-setup.sh (and the one-time local
+# is per-clone git config set by .claude/cloud-setup.sh (and the one-time local
 # setup in docs/claude/github.md); a clone without it just falls back to
 # a normal conflicting merge — still resolvable, only manual. A stale artifact
 # can't slip through: its own test fails (the load-order drift guard, the UI
