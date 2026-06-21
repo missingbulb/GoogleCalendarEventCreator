@@ -152,7 +152,7 @@ trap spanning files. See the full locality rule in
 - **GitHub renders Markdown inside a raw `<td>` only when the cell content is
   blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
   two-column "image left, text right" layout that survives GitHub's renderer
-  (`executable-requirements/Requirements.md`'s gallery), wrap each row in a literal
+  (`executable-requirements/requirements.md`'s gallery), wrap each row in a literal
   `<table>`/`<tr>`/`<td>` and put a **blank line before and after** the cell's
   content; cmark-gfm then re-enters Markdown mode inside the cell, so `![img]()`,
   `**bold**`, and links render. Without the surrounding blank lines the content is

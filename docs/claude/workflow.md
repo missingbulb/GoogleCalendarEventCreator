@@ -11,7 +11,7 @@ project-specific working rules, plus the two owner-triggered defined instruction
 Whenever a change regenerates the UI gallery (via `npm run refresh:ui`), link the
 branch's copy in the chat in the same turn you commit it — the requirement-first
 inline gallery
-`https://github.com/<owner>/<repo>/blob/<branch>/executable-requirements/Requirements.md`, each
+`https://github.com/<owner>/<repo>/blob/<branch>/executable-requirements/requirements.md`, each
 requirement with its snapshot beside it — for one-page review.
 
 When the owner asks to **show** or **see** a visual artifact (a snapshot, a diff,

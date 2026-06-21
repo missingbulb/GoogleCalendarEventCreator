@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 5.1: the calendar chip \u2014 the popup's single "addable event" motif.
 // The filename (event-cards-appearance.5.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.1 in executable-requirements/Requirements.md.
+// image inline beneath 5.1 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

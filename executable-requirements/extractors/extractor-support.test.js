@@ -1,5 +1,5 @@
 // Validation for the "Required explicit support for Extractors" requirements
-// (Requirements.md §11): each supported host's dedicated extractor, run against a
+// (requirements.md §11): each supported host's dedicated extractor, run against a
 // REAL cached page, must recognize the page as supported and produce a COMPLETE
 // event (title + location + start). One `kind: "extractor"` case per supported
 // host declares the host, its source file, and the cached page to validate

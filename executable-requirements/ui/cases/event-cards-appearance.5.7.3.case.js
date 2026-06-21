@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 5.7.3: an all-day month card shows a location-only header with day chips.
 // The filename (event-cards-appearance.5.7.3) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.7.3 in executable-requirements/Requirements.md.
+// image inline beneath 5.7.3 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 8.2: the label counts event instances, not cards.
 // The filename (count-label.8.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.2 in executable-requirements/Requirements.md.
+// image inline beneath 8.2 in executable-requirements/requirements.md.
 //
 // Shrunken per issue #439: a tiny cardsVisibleBeforeScroll + short viewport shows
 // the instances-vs-cards count (5 instances across 3 cards) without a long list.

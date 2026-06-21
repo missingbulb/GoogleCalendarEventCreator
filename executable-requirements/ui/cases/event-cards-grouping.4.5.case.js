@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 4.5: a day with two showings keeps a button per showing, not peeled off.
 // The filename (event-cards-grouping.4.5) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.5 in executable-requirements/Requirements.md.
+// image inline beneath 4.5 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

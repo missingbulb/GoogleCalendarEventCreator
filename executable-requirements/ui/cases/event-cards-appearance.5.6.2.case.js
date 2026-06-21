@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 5.6.2: a future year shows a green (upcoming) pill.
 // The filename (event-cards-appearance.5.6.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.6.2 in executable-requirements/Requirements.md.
+// image inline beneath 5.6.2 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

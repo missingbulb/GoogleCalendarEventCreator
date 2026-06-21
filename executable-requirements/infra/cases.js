@@ -6,7 +6,7 @@
 // Each case is a per-leaf module `<slug>.<leaf-id>.case.js`, where <slug> is the
 // requirement section's component/feature name (e.g. `event-cards-grouping`) and
 // <leaf-id> is the dotted requirement number it pins (e.g. `4.2.1`). The FILENAME
-// names the single Requirements.md leaf it pins (the coverage gate reads the
+// names the single requirements.md leaf it pins (the coverage gate reads the
 // trailing leaf id via `leafIdOf`), and the case supplies only fake data (+ an
 // optional DOM action) fed to the popup's real render(). Keying on the section's
 // name rather than a bare `req-<id>` means renumbering a top-level section doesn't

@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 4.4: a single-showing card is one whole-card click target.
 // The filename (event-cards-grouping.4.4) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.4 in executable-requirements/Requirements.md.
+// image inline beneath 4.4 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

@@ -1,7 +1,7 @@
 # File descriptions
 
 A per-file map of the repo. See [highLevelDesign.md](highLevelDesign.md) for how
-extraction works, [Requirements.md §12–§16](../executable-requirements/Requirements.md) for what the
+extraction works, [requirements.md §12–§16](../executable-requirements/requirements.md) for what the
 extension does, and [architectureGuidelines.md](architectureGuidelines.md) for
 the rules of the road.
 

@@ -1,4 +1,4 @@
-// Ubertest: the traceability spine between executable-requirements/Requirements.md and the cases
+// Ubertest: the traceability spine between executable-requirements/requirements.md and the cases
 // that verify it. The spec enumerates the requirement NUMBERS; the CASES declare,
 // each for itself, how its leaf is verified (its `kind` / `tbd`). This gate is the
 // strict bijection between them, plus the routing rules each kind implies:
@@ -40,8 +40,8 @@ const KNOWN_KINDS = new Set(["popup", "icon", "behavior", "extractor", "logic"])
 // The kinds with no rendered image — verified by a dedicated test, not a snapshot.
 const NON_IMAGE_KINDS = new Set(["behavior", "extractor", "logic"]);
 
-test("executable-requirements/Requirements.md yields leaf requirements", () => {
-  assert.ok(allIds.size > 0, "no `N.M` requirement IDs parsed from executable-requirements/Requirements.md");
+test("executable-requirements/requirements.md yields leaf requirements", () => {
+  assert.ok(allIds.size > 0, "no `N.M` requirement IDs parsed from executable-requirements/requirements.md");
   assert.ok(leaves.length > 0, "no leaf requirements computed");
 });
 

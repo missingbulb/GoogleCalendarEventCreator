@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 7.1: the height cap clips both ends, showing a peek of the cut cards.
 // The filename (list-overflow.7.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 7.1 in executable-requirements/Requirements.md.
+// image inline beneath 7.1 in executable-requirements/requirements.md.
 //
 // Shrunken per issue #439: a short viewport makes a handful of cards overflow
 // (clipped both ends) instead of 16 — same requirement, fewer pixels.

@@ -37,7 +37,7 @@ doc, when the mechanics change.
   [executable-requirements/README.md](../../executable-requirements/README.md).
   The notes below are the project decisions behind that model.
 - **Every leaf is verified by exactly one CASE, which declares HOW (issue #429,
-  #435).** The spec (`executable-requirements/Requirements.md`) is just numbered prose; it does NOT
+  #435).** The spec (`executable-requirements/requirements.md`) is just numbered prose; it does NOT
   tag how a leaf is verified. Each leaf has exactly one `<slug>.<id>.case.js` (the
   *filename* is the link — `<slug>` is the section's component name, `<id>` the
   dotted leaf number), and the **case** declares its `kind` (default `"popup"`)
@@ -47,7 +47,7 @@ doc, when the mechanics change.
   - `kind: "popup"` (default) — an image leaf, the popup's real `render()` via
     `executable-requirements/infra/popup-renderer.js`, pinned by a `<slug>.<id>.png` snapshot shown in a
     **two-column table** beside the requirement (image left, spec right) in
-    `executable-requirements/Requirements.md` by `executable-requirements/infra/build-requirements-gallery.js`.
+    `executable-requirements/requirements.md` by `executable-requirements/infra/build-requirements-gallery.js`.
   - `kind: "icon"` — an image leaf too, but rendered by the real
     `extension/ui/toolbar-icon.js` loaded into a fake browser (`executable-requirements/infra/icon-renderer.js` +
     `executable-requirements/infra/fake-chrome.js`), fed the case's faked tab URL + host lists (the
@@ -87,7 +87,7 @@ doc, when the mechanics change.
   `chrome.tabs.create`/`window.close` — so it confirms our code *asks* for the
   right action, not that a real Chrome performs it. A faithful (non-stub)
   verification of the `kind: "behavior"` leaves is still owed (the owner will address
-  it separately). A loud banner in `executable-requirements/Requirements.md` says the same: a green
+  it separately). A loud banner in `executable-requirements/requirements.md` says the same: a green
   build means every leaf is *claimed*, not that every leaf is *faithfully*
   verified.
 - **An executable requirements test case declares HOW it's verified, with a default
@@ -150,7 +150,7 @@ commission-while-editing trap goes in the file's header comment rather than
   snapshots automatically. After an intentional popup/view/CSS or toolbar-icon
   change run `npm run refresh:ui` and commit the PNGs + inline gallery
   (deterministic, no CI workflow). The requirement list is parsed from
-  `executable-requirements/Requirements.md` by `executable-requirements/infra/ui-requirements.js` (numbers only — it does
+  `executable-requirements/requirements.md` by `executable-requirements/infra/ui-requirements.js` (numbers only — it does
   NOT classify leaves), shared with the coverage ubertest
   (`executable-requirements/requirements-coverage.test.js`); how each leaf is verified
   (`popup` / `icon` / `behavior` / `tbd`) is the **case's** `kind`/`tbd`, not a spec
@@ -162,12 +162,12 @@ commission-while-editing trap goes in the file's header comment rather than
   `chrome.tabs.create`/`window.close` boundary, so it's explicitly INCOMPLETE (a
   loud banner in the file; a faithful non-stub verification is owed in #435).
 - **Two-column requirements gallery** — `executable-requirements/infra/build-requirements-gallery.js`
-  lays each leaf out as an HTML `<table>` row in `executable-requirements/Requirements.md`: the
+  lays each leaf out as an HTML `<table>` row in `executable-requirements/requirements.md`: the
   generated `<slug>.<id>.png` (or a behavior-test note) in the **left** cell, the
   hand-authored requirement in the **right** cell. GitHub renders the markdown in
   each `<td>` because the cell content is blank-line-separated. The generator
   rewrites **only** the managed left-cell line — tagged `<!-- req-gallery:<id> -->`
-  — never the scaffolding or prose, so `executable-requirements/Requirements.md` is
+  — never the scaffolding or prose, so `executable-requirements/requirements.md` is
   part-generated/part-authored and is **not** on the `ours` merge driver (a prose
   conflict is resolved by hand; the left cells regenerate via `npm run regen`).
   Gated by `executable-requirements/ui/requirements-gallery.test.js` (refresh-then-gate locally,

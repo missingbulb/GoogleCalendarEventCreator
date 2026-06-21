@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 4.3: instances are never merged: a consecutive run is one button per day.
 // The filename (event-cards-grouping.4.3) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.3 in executable-requirements/Requirements.md.
+// image inline beneath 4.3 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 7.2: only a prefix of many cards renders at first (the card cap).
 // The filename (list-overflow.7.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 7.2 in executable-requirements/Requirements.md.
+// image inline beneath 7.2 in executable-requirements/requirements.md.
 //
 // Shrunken per issue #439: a tiny maxCardsShown cap + short viewport exercises
 // the card cap with a handful of events instead of 40 — same requirement, far

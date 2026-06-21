@@ -1,4 +1,4 @@
-// Parses executable-requirements/Requirements.md into its numbered requirement IDs — the single
+// Parses executable-requirements/requirements.md into its numbered requirement IDs — the single
 // source of truth for the requirement list, shared by the coverage ubertest
 // (executable-requirements/requirements-coverage.test.js) and the gallery generator
 // (build-requirements-gallery.js), so neither hard-codes it.
@@ -20,7 +20,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const DOC_PATH = path.join(__dirname, "..", "Requirements.md");
+const DOC_PATH = path.join(__dirname, "..", "requirements.md");
 
 // Matches a requirement at line start: optional list dash, then `<dotted-number>`.
 const REQ_LINE = /^\s*(?:-\s+)?`(\d+(?:\.\d+)+)`/;

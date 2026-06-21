@@ -3,7 +3,7 @@
 // through render-snapshot.js, which dispatches to the popup renderer or the
 // toolbar-icon renderer by leaf kind), plus the requirement-first INLINE gallery:
 // each per-leaf PNG embedded directly under its requirement in
-// executable-requirements/Requirements.md (build-requirements-gallery.js). Run after an intentional
+// executable-requirements/requirements.md (build-requirements-gallery.js). Run after an intentional
 // change to the popup, its views, ui/popup.css, or the toolbar icon, and commit the
 // PNGs + the gallery so reviewers see the before/after in the diff.
 "use strict";

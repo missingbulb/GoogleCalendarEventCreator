@@ -32,7 +32,7 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    a reviewed `executable-requirements/extractors/custom/<name>.json` (`description`
    + `expected`) plus its cached `executable-requirements/data/<name>.{html,url}`.
 5. Record the host as an **executable extractor-support requirement**: add a leaf
-   to `executable-requirements/Requirements.md` §11 ("Required explicit support for
+   to `executable-requirements/requirements.md` §11 ("Required explicit support for
    Extractors") with a `kind: "extractor"` case
    (`executable-requirements/ui/cases/extractor-support.11.<n>.case.js`) naming
    `{ host, source, page }`, so the new host is validated against a real cached

@@ -1,4 +1,4 @@
-// Validation for the product/behavior requirements (Requirements.md §12–§16):
+// Validation for the product/behavior requirements (requirements.md §12–§16):
 // the non-visual, logic leaves converted from the old productRequirements.md —
 // the five popup states, the events model, field rules, timezone rules, and the
 // support-request flow. Each is a `kind: "logic"` case:

@@ -1,5 +1,5 @@
 // Keeps the two-column gallery (the generated left-cell image/note lines, tagged
-// `<!-- req-gallery:<id> -->`, in executable-requirements/Requirements.md) in sync with the cases,
+// `<!-- req-gallery:<id> -->`, in executable-requirements/requirements.md) in sync with the cases,
 // the same REFRESH-then-GATE way as the snapshots: a refresh test rewrites the
 // managed lines into the working tree (skipped in CI), and a gate test asserts
 // the committed file already matches (the read-only truth in CI). So flipping a
@@ -22,18 +22,18 @@ const isCI = Boolean(process.env.CI);
 
 test("two-column gallery is refreshed (skipped in CI)", (t) => {
   if (isCI) {
-    t.skip("CI: read-only gate — the committed executable-requirements/Requirements.md is the reviewed truth");
+    t.skip("CI: read-only gate — the committed executable-requirements/requirements.md is the reviewed truth");
     return;
   }
   fs.writeFileSync(DOC_PATH, buildGallery());
 });
 
-test("executable-requirements/Requirements.md gallery matches the generator (run npm run refresh:ui)", () => {
+test("executable-requirements/requirements.md gallery matches the generator (run npm run refresh:ui)", () => {
   const committed = fs.existsSync(DOC_PATH) ? fs.readFileSync(DOC_PATH, "utf8") : "";
   assert.equal(
     committed,
     buildGallery(),
-    "executable-requirements/Requirements.md's generated left-cell lines are stale. " +
+    "executable-requirements/requirements.md's generated left-cell lines are stale. " +
       "Run `npm run refresh:ui` (or `npm test` locally) and commit the result."
   );
 });
@@ -48,7 +48,7 @@ test("every leaf — and only a leaf — has exactly one gallery marker", () => 
   const dupes = Object.keys(counts).filter((id) => counts[id] > 1);
   const stray = Object.keys(counts).filter((id) => !leafSet.has(id));
 
-  assert.deepEqual(missing, [], "leaves with no `<!-- req-gallery:id -->` row in executable-requirements/Requirements.md:");
+  assert.deepEqual(missing, [], "leaves with no `<!-- req-gallery:id -->` row in executable-requirements/requirements.md:");
   assert.deepEqual(dupes, [], "leaves with more than one gallery row:");
   assert.deepEqual(stray, [], "gallery markers for IDs that aren't leaf requirements:");
 });

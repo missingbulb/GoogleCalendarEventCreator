@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 8.4: every card shown but taller than fits reads "N events showing" with no link.
 // The filename (count-label.8.4) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.4 in executable-requirements/Requirements.md.
+// image inline beneath 8.4 in executable-requirements/requirements.md.
 //
 // Shrunken per issue #439: a tiny cardsVisibleBeforeScroll + short viewport gives
 // the "all shown but taller than fits" cue with a few events instead of 10.

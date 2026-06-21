@@ -1,4 +1,4 @@
-// Maintains the two-column gallery embedded in executable-requirements/Requirements.md: each leaf
+// Maintains the two-column gallery embedded in executable-requirements/requirements.md: each leaf
 // requirement is laid out as a small HTML <table> row — LEFT cell the generated
 // snapshot image (for a render leaf) or a behavior-test note (for a behavior
 // leaf), RIGHT cell the hand-authored requirement text. GitHub renders the
@@ -17,7 +17,7 @@
 // So a re-run only ever changes a left-cell image line; the gate
 // (requirements-gallery.test.js) checks (a) the committed file equals this
 // generator's output and (b) every leaf has exactly one marker. Deterministic, no
-// timestamps. executable-requirements/Requirements.md is therefore part-generated / part-authored
+// timestamps. executable-requirements/requirements.md is therefore part-generated / part-authored
 // and is NOT on the `ours` merge driver — a prose conflict is resolved by hand.
 "use strict";
 
@@ -27,7 +27,7 @@ const { DOC_PATH } = require("./ui-requirements");
 const { loadCases, leafIdOf } = require("./cases");
 
 const CASES_DIR = path.join(__dirname, "..", "ui", "cases");
-// executable-requirements/Requirements.md → executable-requirements/ui/cases/ is two levels up then back down.
+// executable-requirements/requirements.md → executable-requirements/ui/cases/ is two levels up then back down.
 const IMG_REL = "ui/cases";
 const BEHAVIOR_TEST = "executable-requirements/ui/events-view-actions.test.js";
 const EXTRACTOR_TEST = "executable-requirements/extractors/extractor-support.test.js";

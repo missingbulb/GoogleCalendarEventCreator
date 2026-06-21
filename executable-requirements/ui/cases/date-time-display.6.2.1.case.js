@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 6.2.1: a start with an end shows an en-dash time range.
 // The filename (date-time-display.6.2.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 6.2.1 in executable-requirements/Requirements.md.
+// image inline beneath 6.2.1 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {

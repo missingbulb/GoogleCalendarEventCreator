@@ -8,7 +8,7 @@ leaf requirement is *claimed* by a case (see the honesty caveat at the end).
 
 ## The document model
 
-[`Requirements.md`](Requirements.md) is a **numbered breakdown**. Two roles:
+[`requirements.md`](requirements.md) is a **numbered breakdown**. Two roles:
 
 - A **top-level requirement** (a `##` section, e.g. "§5 Event cards — appearance")
   may carry a short prose **"how it works"** explanation of a feature or
@@ -24,12 +24,12 @@ every one of those deep leaves is backed by an executable case.
 
 The readable, **feature-level overview** of what the extension does lives in the
 top-level [README.md](../README.md); its numbered, testable content is
-`Requirements.md` §12–§16.
+`requirements.md` §12–§16.
 
 ## The rule: a new requirement defines its validation
 
 **Adding a requirement means adding its external validation test in the same
-change.** Add a leaf number in `Requirements.md`, then add its one case under
+change.** Add a leaf number in `requirements.md`, then add its one case under
 [`ui/cases/`](ui/cases/), named `<slug>.<leaf-id>.case.js` — where `<slug>` is the
 section's component/feature name and `<leaf-id>` is the dotted number (e.g.
 `event-cards-appearance.5.6.1.case.js`). The case declares **how** it's verified
@@ -46,7 +46,7 @@ via its `kind`:
 The single dispatcher [`infra/render-snapshot.js`](infra/render-snapshot.js)
 turns a case into a PNG by its `kind` (only the image kinds have a renderer);
 [`infra/build-requirements-gallery.js`](infra/build-requirements-gallery.js)
-embeds each leaf in the two-column gallery in `Requirements.md` — an image for an
+embeds each leaf in the two-column gallery in `requirements.md` — an image for an
 image kind, a note for a non-image kind.
 
 ### `tbd` / untested
@@ -68,7 +68,7 @@ or a not-yet-wired behavior, and wire it later (a tracked follow-up).
 
 ```
 executable-requirements/
-  Requirements.md              the numbered, executable spec (the contract)
+  requirements.md              the numbered, executable spec (the contract)
   README.md                    this guide
   ui/
     cases/                     every leaf's case: <slug>.<id>.case.js (+ <stem>.png for image kinds)
@@ -103,7 +103,7 @@ harness `test/harness.js` stays under `test/` since the unit tests share it too.
 
 - `npm run test:ui` — the pixel-exact snapshot tests.
 - `npm run refresh:ui` — regenerate the `ui/cases/*.png` snapshots + the inline
-  gallery in `Requirements.md` after an intentional popup/view/CSS/icon change.
+  gallery in `requirements.md` after an intentional popup/view/CSS/icon change.
   **Never** silently re-baseline a moved snapshot — surface the visual diff for
   approval (see [`docs/claude/workflow.md`](../docs/claude/workflow.md)).
 - `npm run regen` — load lists + UI snapshots + fallback-coverage baseline.
@@ -114,7 +114,7 @@ harness `test/harness.js` stays under `test/` since the unit tests share it too.
 
 Adding a per-site extractor is its own documented flow — see
 [`docs/claude/adding-a-source.md`](../docs/claude/adding-a-source.md). It adds a
-row to `Requirements.md` §11 (an `extractor` leaf) plus a reviewed live case under
+row to `requirements.md` §11 (an `extractor` leaf) plus a reviewed live case under
 `extractors/custom/`.
 
 ## Honesty caveat
@@ -123,4 +123,4 @@ A green build means every leaf is **claimed** by a case of the right kind, **not
 that every leaf is *faithfully* verified. The `behavior` cases stub the
 `chrome.tabs.create`/`window.close` boundary; many `logic` leaves are `tbd`
 (covered today by unit tests, not yet wired here). These gaps are deliberate and
-tracked — see the banner in `Requirements.md` and `docs/claude/testing.md`.
+tracked — see the banner in `requirements.md` and `docs/claude/testing.md`.

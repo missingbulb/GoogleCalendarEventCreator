@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 7.3: with list above and below, both edge fades show.
 // The filename (list-overflow.7.3) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 7.3 in executable-requirements/Requirements.md.
+// image inline beneath 7.3 in executable-requirements/requirements.md.
 //
 // Shrunken per issue #439: a short viewport leaves list above and below (both
 // fades) with a handful of cards instead of 16.

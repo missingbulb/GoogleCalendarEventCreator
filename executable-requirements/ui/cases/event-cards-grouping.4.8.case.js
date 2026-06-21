@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 4.8: a single instance spanning several days stays one card, not split per day.
 // The filename (event-cards-grouping.4.8) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.8 in executable-requirements/Requirements.md.
+// image inline beneath 4.8 in executable-requirements/requirements.md.
 "use strict";
 
 module.exports = {
