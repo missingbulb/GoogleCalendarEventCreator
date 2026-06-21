@@ -1,4 +1,4 @@
-// Per-leaf PROVISIONAL snapshot for requirement 4.2.3 (_(TBD)_ in the spec): the
+// Per-leaf PROVISIONAL snapshot for requirement 4.2.3 (a `tbd: true` case): the
 // cross-month-instance grouping edge case. One event with three instances — Jun 15,
 // a multi-day instance spanning Jun 28 → Jul 3, and Jul 10. Today the spanning
 // instance groups by its START (June), so the render shows a June grouped card
@@ -8,6 +8,7 @@
 "use strict";
 
 module.exports = {
+  tbd: true, // behavior not yet decided — this is a PROVISIONAL snapshot of current behavior
   description: "TBD edge: one event with Jun 15, a Jun 28→Jul 3 span, and Jul 10 — current grouping",
   data: {
     supported: true,

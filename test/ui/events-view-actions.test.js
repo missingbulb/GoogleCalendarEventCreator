@@ -2,8 +2,8 @@
 // UI snapshot structurally cannot verify (3.4, 9.1, 9.2, 9.3): clicking a card,
 // a grouped instance button, or an affordance link OPENS the right URL in an
 // ADJACENT new tab and CLOSES the popup. A PNG has no pixels for "a tab opened",
-// so these are routed here instead of onto a snapshot case (the segmented gate —
-// test/ui/behavior-coverage.js, docs/engineeringPractices.md, issue #429).
+// so these leaves declare `kind: "behavior"` in their case and are routed here
+// instead of onto a snapshot image (docs/engineeringPractices.md, issue #429).
 //
 // =====================================================================
 // !!!  INCOMPLETE VERIFICATION — READ BEFORE TRUSTING THIS TEST  !!!
@@ -25,7 +25,7 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { JSDOM } = require("jsdom");
-const { BEHAVIOR_COVERAGE } = require("../ui/behavior-coverage");
+const { loadCases } = require("./cases");
 
 const ROOT = path.join(__dirname, "..", "..");
 const TAB = { url: "https://example.com/events", title: "Example event page", index: 3 };
@@ -129,13 +129,18 @@ for (const [label, build] of [
   });
 }
 
-// Guard the segmentation manifest itself: this test must exercise exactly the
-// leaves behavior-coverage.js claims — no more (a stale claim), no fewer (a leaf
-// the gate thinks is covered here but isn't).
-test("covers exactly the leaves behavior-coverage.js routes to it", () => {
+// Guard the routing itself: this test must exercise exactly the leaves whose case
+// declares `kind: "behavior"` — no more (a stale `kind`), no fewer (a behavior leaf
+// the gate routes here but that this test forgot). The behavior cases are the
+// single source of truth for which leaves are behavioral.
+test("covers exactly the leaves whose case declares kind:\"behavior\"", () => {
+  const behaviorLeaves = loadCases()
+    .filter((c) => c.kind === "behavior")
+    .map((c) => c.name.replace(/^req-/, ""))
+    .sort();
   assert.deepEqual(
-    Object.keys(BEHAVIOR_COVERAGE).sort(),
+    behaviorLeaves,
     ["3.4", "9.1", "9.2", "9.3"],
-    "the behavioral-leaf manifest drifted from what this test actually verifies"
+    "the kind:\"behavior\" cases drifted from what this test actually verifies"
   );
 });

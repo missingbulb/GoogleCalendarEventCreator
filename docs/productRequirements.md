@@ -10,27 +10,16 @@ This file is a **rough, feature-level description**. The **specific, numbered UI
 requirements** for the popup — exact text, layout, colors, card structure, the
 count label, scroll cues — live in [uiRequirements.md](uiRequirements.md) (the
 popup's testable contract, referenced by the UI snapshot tests). The rule of
-thumb: the *what and why* of a feature is here; the *exact rendering* of the popup
-is there. The toolbar icon and the source-request issue form are features in their
-own right and stay here.
+thumb: the *what and why* of a feature is here; the *exact rendering* is there.
+The **toolbar icon** is pixel-assertable like the popup, so its requirements live
+with the other visual requirements in [uiRequirements.md](uiRequirements.md)
+(§10 — "Toolbar icon"); the source-request issue form is a feature in its own
+right and stays here.
 
 ## Purpose
 
 Turn the event on the current web page into a pre-filled Google Calendar event,
 opened in a new tab, in one click.
-
-## Toolbar icon
-
-The icon signals how the current page's host is classified:
-
-- **green** — the host has a dedicated extractor;
-- **gray** — the host is on the fallback denylist, where we've deliberately
-  decided not to extract (the "denylisted host" popup state below);
-- **blue** — every other page.
-
-It reflects the host's classification, not whether an event was found — the icon
-can't read the page, so a page where the generic fallback later finds an event
-still shows the blue icon.
 
 ## What the popup shows
 
