@@ -166,16 +166,16 @@ from facebook.com, so it can't be cached as a live case.
 
 **`test/ui/popup-snapshots.test.js`** is the single visual-comparison engine: it
 renders each UI *case* and compares it pixel-by-pixel (via `pixelmatch`) against a
-committed image. `test/ui/render-snapshot.js` picks the renderer by the leaf's kind
-in [`uiRequirements.md`](uiRequirements.md): a **popup** case (render/TBD) is fed
-to `ui/popup.js`'s exported `render({ data, tab, listing })` — the same
-`chooseContent` + `events-view.js`/`source-request-view.js` code the extension runs
-— and an **`_(icon)_`** case (§10, the toolbar icon) is fed to the real
-`ui/toolbar-icon.js` loaded into a fake browser (`icon-renderer.js` +
-`fake-chrome.js`). Either way the pixels come from shipped code, so a change to a
-view or to the icon is caught automatically; the comparison, naming, storage, and
-refresh are shared. (`render()` is split out of `init()` for exactly this: init
-does the chrome/fetch I/O to gather the data, render builds the DOM from it.)
+committed image. `test/ui/render-snapshot.js` picks the renderer by the **case's own
+`kind`**: a `"popup"` case (the default) is fed to `ui/popup.js`'s exported
+`render({ data, tab, listing })` — the same `chooseContent` +
+`events-view.js`/`source-request-view.js` code the extension runs — and a
+`"icon"` case (§10, the toolbar icon) is fed to the real `ui/toolbar-icon.js`
+loaded into a fake browser (`icon-renderer.js` + `fake-chrome.js`). Either way the
+pixels come from shipped code, so a change to a view or to the icon is caught
+automatically; the comparison, naming, storage, and refresh are shared. (`render()`
+is split out of `init()` for exactly this: init does the chrome/fetch I/O to gather
+the data, render builds the DOM from it.)
 
 Each case is a self-contained tuple in **`test/ui/cases/`**, one per leaf
 requirement: a `req-<id>.case.js` whose filename names the single
@@ -190,8 +190,8 @@ A popup `req-<id>.case.js` exports `{ description, data, listing?, tab?, action?
 the host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
 from `test/ui/actions.js`, since satori can't actually scroll (it pins `#events`
-to its end so the bottom-anchored count label is painted). An `_(icon)_`
-`req-<id>.case.js` instead exports `{ description, tabUrl, lists }` — the faked
+to its end so the bottom-anchored count label is painted). An icon case
+(`kind: "icon"`) instead exports `{ kind, description, tabUrl, lists }` — the faked
 active-tab URL and host lists the toolbar-icon renderer classifies.
 
 `test/ui/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no

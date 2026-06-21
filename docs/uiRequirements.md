@@ -26,8 +26,8 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the right
 > action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [`docs/claude/testing.md`](claude/testing.md). Likewise, an `_(icon)_` leaf
-> (§10) is verified offline through a **fake Chrome**, so it pins the icon the
+> [`docs/claude/testing.md`](claude/testing.md). Likewise, the toolbar-icon leaves
+> (§10) are verified offline through a **fake Chrome**, so they pin the icon the
 > extension *generates*, not that real Chrome *paints* it — only the e2e test does
 > that.
 
@@ -44,16 +44,14 @@ can't observe), and its left cell carries a note rather than an image. A leaf
 tagged **`_(TBD)_`** is a **placeholder** — an edge case whose correct behavior
 isn't decided yet; its left cell shows a loud "TO BE DECIDED" banner (with a
 provisional render of *current* behavior when one exists), and it's exempt from
-the one-snapshot-per-leaf rule until the decision is made. A leaf tagged
-**`_(icon)_`** is the toolbar/extension icon: pinned by a `req-<id>` snapshot
-exactly like a render leaf — same naming, same gallery, same comparison — only its
-PNG is produced by a different renderer (the real `ui/toolbar-icon.js` loaded into
-a fake browser, `test/ui/icon-renderer.js`) instead of the popup's `render()`
-(`render-snapshot.js` dispatches by kind). So the coverage gate is **segmented**
-only into snapshot vs behavior (`test/ui/behavior-coverage.js`): render and icon
-leaves each carry one `req-<id>` snapshot, a behavior leaf carries a note instead.
-The left cells are generated; don't hand-edit a line carrying a
-`<!-- req-gallery:… -->` marker.
+the one-snapshot-per-leaf rule until the decision is made. So the coverage gate is
+**segmented** into snapshot vs behavior (`test/ui/behavior-coverage.js`): a render
+leaf carries one `req-<id>` snapshot, a behavior leaf a note. How a render leaf's
+snapshot is *rendered* is a property of its **case**, not of the spec — most cases
+are the popup, but a case may set `kind: "icon"` to be drawn instead by the real
+`ui/toolbar-icon.js` in a fake browser (the toolbar icon, §10);
+`test/ui/render-snapshot.js` dispatches by the case's kind. The left cells are
+generated; don't hand-edit a line carrying a `<!-- req-gallery:… -->` marker.
 
 **One spec per leaf.** Each leaf requirement states exactly one display
 specification. When a rendering is conditional — "in case X render Y, in case Z
@@ -1036,9 +1034,10 @@ before the popup is even opened — so the user knows at a glance whether a one-
 extraction is first-class. It reflects the *host's classification*, not whether an
 event was found (the icon can't read the page, so a page where the generic fallback
 later finds an event still shows the blue icon). When the host is denylisted **or**
-supported it would otherwise show two icons; supported wins. Unlike the rest of
-this doc, these leaves are pinned by the **icon** snapshot test, not a popup
-snapshot (see "Verification kind" above).
+supported it would otherwise show two icons; supported wins. These are ordinary
+snapshot leaves whose cases set `kind: "icon"`, so their images are rendered by the
+real `ui/toolbar-icon.js` in a fake browser rather than the popup (see
+"Verification kind" above).
 
 <table>
 <tr>
@@ -1049,7 +1048,7 @@ snapshot (see "Verification kind" above).
 </td>
 <td valign="top">
 
-`10.1` _(icon)_ On a host with a dedicated, first-class extractor (the **supported
+`10.1` On a host with a dedicated, first-class extractor (the **supported
 list**), the icon is **green**.
 
 </td>
@@ -1065,7 +1064,7 @@ list**), the icon is **green**.
 </td>
 <td valign="top">
 
-`10.2` _(icon)_ On a host on the fallback **denylist** (where we've deliberately
+`10.2` On a host on the fallback **denylist** (where we've deliberately
 decided not to extract), the icon is **gray**.
 
 </td>
@@ -1081,7 +1080,7 @@ decided not to extract), the icon is **gray**.
 </td>
 <td valign="top">
 
-`10.3` _(icon)_ On any **other** page — neither supported nor denylisted, including
+`10.3` On any **other** page — neither supported nor denylisted, including
 an allowlisted host — the icon stays the manifest default, **blue**.
 
 </td>

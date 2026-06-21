@@ -39,17 +39,15 @@ doc, when the mechanics change.
     image is shown in a **two-column table** beside the requirement (image left,
     spec right) in `docs/uiRequirements.md` by
     `test/ui/build-requirements-gallery.js`. The gate enforces a strict
-    one-case-per-leaf bijection: a render leaf with no case (or two) fails. The PNG
-    is the popup's real `render()` rasterized (`test/ui/popup-renderer.js`).
-  - An **icon** leaf (tagged `_(icon)_` — the toolbar/extension icon, §10) is a
-    snapshot leaf treated **identically** to a render leaf (same
-    `req-<id>.case.js` → `req-<id>.png`, same two-column gallery, same
-    one-case-per-leaf bijection); only the PNG's renderer differs — the real
-    `ui/toolbar-icon.js` loaded into a fake browser (`test/ui/icon-renderer.js` +
-    `test/ui/fake-chrome.js`), fed the case's faked tab URL + host lists instead of
-    popup data. `test/ui/render-snapshot.js` is the one dispatcher that picks the
-    renderer by leaf kind, shared by the snapshot test and the refresh script — so
-    there is ONE visual-comparison system, not two.
+    one-case-per-leaf bijection: a render leaf with no case (or two) fails. **How
+    the PNG is rendered is the CASE's choice, not a spec kind**: a case declares its
+    own `kind` (default `"popup"` — the popup's real `render()` via
+    `test/ui/popup-renderer.js`; or `"icon"` — the real `ui/toolbar-icon.js` loaded
+    into a fake browser, `test/ui/icon-renderer.js` + `test/ui/fake-chrome.js`, fed
+    the case's faked tab URL + host lists). `test/ui/render-snapshot.js` is the one
+    dispatcher that picks the renderer by the case's `kind`, shared by the snapshot
+    test and the refresh script — so there is ONE visual-comparison system, and the
+    toolbar icon (§10) is just render leaves whose cases set `kind: "icon"`.
   - A **behavior** leaf (tagged `_(behavior)_` in the spec — a click/navigation a
     static image can't observe, e.g. `9.1`–`9.3`, `3.4`) is routed to a behavior
     test (`test/unit/events-view-actions.test.js`) via the manifest
@@ -117,14 +115,16 @@ Read the file when you touch it; the one-liners here are just a map.
   `test/ui/popup-snapshots.test.js`; the scroll/fade gestures are in
   `test/ui/actions.js`. A case is a self-contained per-leaf `req-<id>.case.js`
   (fake data + an optional DOM action) + `req-<id>.png`; `test/ui/render-snapshot.js`
-  feeds a render/TBD case the popup's REAL `render()` and an `_(icon)_` case the
-  real `ui/toolbar-icon.js` (in a fake browser; `icon-renderer.js` + `fake-chrome.js`),
-  so a view or icon change moves the snapshots automatically. After an intentional
-  popup/view/CSS or toolbar-icon change run `npm run refresh:ui` and commit the PNGs
-  + inline gallery (deterministic, no CI workflow). The requirement list — and each
-  leaf's **kind** (render / `_(behavior)_` / `_(icon)_` / `_(TBD)_`) — is parsed
-  from `docs/uiRequirements.md` by `test/ui/ui-requirements.js`, shared with the
-  coverage ubertest (`test/uber/ui-requirements-coverage.test.js`).
+  picks the renderer by the case's own `kind` (default `"popup"` → the popup's REAL
+  `render()`; `"icon"` → the real `ui/toolbar-icon.js` in a fake browser,
+  `icon-renderer.js` + `fake-chrome.js`), so a view or icon change moves the
+  snapshots automatically. After an intentional popup/view/CSS or toolbar-icon
+  change run `npm run refresh:ui` and commit the PNGs + inline gallery
+  (deterministic, no CI workflow). The requirement list — and each leaf's
+  spec-level **kind** (render / `_(behavior)_` / `_(TBD)_`) — is parsed from
+  `docs/uiRequirements.md` by `test/ui/ui-requirements.js`, shared with the coverage
+  ubertest (`test/uber/ui-requirements-coverage.test.js`); the render-vs-icon
+  renderer split is the case's `kind`, not a spec kind.
 - **Behavior verification** — `test/unit/events-view-actions.test.js` drives the
   clicks the snapshots can't (the `_(behavior)_` leaves: a card / instance button
   / affordance link opens an adjacent new tab and closes the popup), routed to it

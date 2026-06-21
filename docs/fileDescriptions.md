@@ -36,9 +36,9 @@ the rules of the road.
 | `test/ui/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
 | `test/ui/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |
 | `test/ui/popup-renderer.js` | Builds each popup case's DOM via the popup's real `render()` and rasterizes to PNG (satori + resvg, no browser), inlining the real `ui/popup.css` first; prunes off-screen list rows so resvg doesn't choke on a tall SVG |
-| `test/ui/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `ui/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind an `_(icon)_` snapshot case |
+| `test/ui/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `ui/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind a `kind: "icon"` snapshot case |
 | `test/ui/fake-chrome.js` | The fake browser (`chrome.*` + `fetch`/`OffscreenCanvas`) that `icon-renderer.js` loads `ui/toolbar-icon.js` into, then queries "what icon at this URL?" |
-| `test/ui/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the leaf's kind in `docs/uiRequirements.md` |
+| `test/ui/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's own `kind` field (default `"popup"`) |
 | `test/ui/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `test/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `test/ui/popup-snapshots.test.js` | The single visual-comparison engine: renders each `test/ui/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
