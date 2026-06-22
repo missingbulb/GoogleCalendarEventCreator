@@ -46,9 +46,11 @@ const WIDTH = 304;
 
 // The "current year" the cases render against. Pinned (not the real year) so a
 // card's year-pill decision — and therefore every snapshot — is deterministic
-// forever: a case dated this year shows no pill, off-year dates do. The existing
-// cases all use 2026 dates, so 2026 keeps them pill-free.
-const REFERENCE_YEAR = 2026;
+// forever: a case dated this year shows no pill, off-year dates do. Sourced from
+// the shared reference-time module so the popup renderer and the behavior test
+// share one pinned "now" (see ../reference-time.js); the cases all use 2026 dates,
+// so this keeps them pill-free.
+const { REFERENCE_YEAR } = require("../reference-time");
 
 const POPUP_CSS = fs.readFileSync(path.join(ROOT, "extension", "events-popup", "popup.css"), "utf8");
 const POPUP_HTML = fs.readFileSync(path.join(ROOT, "extension", "events-popup", "popup.html"), "utf8");
