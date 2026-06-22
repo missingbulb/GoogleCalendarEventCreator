@@ -33,6 +33,9 @@ before(async () => {
 // everywhere; only the locale's formatting differs, which the checks avoid.
 const ROUND = "2026-06-17T20:00:00";
 const ODD = "2026-06-17T20:30:00";
+// A fixed reference "now" so the corner-pill (past / future-year) assertions are
+// deterministic regardless of the real clock.
+const NOW = new Date(2026, 5, 22, 12, 0, 0); // 2026-06-22
 
 test("formatWhen: no start is labeled, not blank", () => {
   assert.equal(formatWhen(""), "No date found");
@@ -82,8 +85,8 @@ test("formatWhen: an offset end is also shown as its literal clock time", () => 
 test("dateChip: an offset that would shift the UTC day still shows the page's day", () => {
   // 00:30 +02:00 is the previous day in UTC; the chip must read the written day.
   assert.deepEqual(
-    dateChip("2026-12-07T00:30:00+02:00", 2026),
-    dateChip("2026-12-07T00:30:00", 2026)
+    dateChip("2026-12-07T00:30:00+02:00", NOW),
+    dateChip("2026-12-07T00:30:00", NOW)
   );
 });
 
@@ -114,10 +117,16 @@ test("dateChip: no usable date yields null (button then shows no chip)", () => {
   assert.equal(dateChip(""), null);
 });
 
-test("dateChip: an off-year date carries its year, the current year omits it", () => {
-  assert.equal(dateChip("2026-06-17T20:00:00", 2026).year, undefined);
-  assert.equal(dateChip("2025-06-17T20:00:00", 2026).year, "2025"); // past
-  assert.equal(dateChip("2027-06-17T20:00:00", 2026).year, "2027"); // future
+test("dateChip: a past date shows `past`, a future year shows its `year`, the current period neither", () => {
+  // now = 2026-06-22
+  assert.equal(dateChip("2025-06-17T20:00:00", NOW).past, true); // a prior year is past
+  assert.equal(dateChip("2026-06-17T20:00:00", NOW).past, true); // earlier THIS year is now past too
+  const current = dateChip("2026-06-30T20:00:00", NOW); // later this year: no pill
+  assert.equal(current.past, undefined);
+  assert.equal(current.year, undefined);
+  const future = dateChip("2027-06-17T20:00:00", NOW); // a future year: green year pill, not past
+  assert.equal(future.past, undefined);
+  assert.equal(future.year, "2027");
 });
 
 test("summarize: eventLengthInMinutes with no end shows a time range", () => {

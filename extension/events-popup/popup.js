@@ -39,15 +39,16 @@ async function init() {
 // with fake data by the UI snapshot tests (dev/requirements/{popup,icon}/), which pass `data`, a stub
 // `tab`, and the host `listing` directly. Builds into the global `document` (the
 // popup document in the extension; a jsdom document under test).
-// `currentYear` (the year against which a card decides whether to show a year
-// pill — see events-view's chip helpers) defaults to the real current year; the
-// UI snapshot tests pass a fixed one so their PNGs stay deterministic.
+// `now` (the reference instant against which a card decides its corner pill — a
+// gray "past" pill for an event before today, a green year pill for a future-year
+// event; see events-view's chip helpers) defaults to the real clock; the UI
+// snapshot tests pass a fixed one so their PNGs stay deterministic.
 // `configurationOverrides` overrides the GCalConfig product values render reads
 // (the list-size limits maxCardsShown / maxCardsExpanded / cardsVisibleBeforeScroll);
 // production never passes it, but a UI snapshot case can shrink them so a tiny
 // event list still exercises an overflow requirement (issue #439) — same
 // behavior, a fraction of the pixels.
-export async function render({ data, tab, listing, currentYear = new Date().getFullYear(), configurationOverrides }) {
+export async function render({ data, tab, listing, now = new Date(), configurationOverrides }) {
   const config = { ...GCalConfig, ...configurationOverrides };
   const headingEl = document.getElementById("heading");
   const eventsEl = document.getElementById("events");
@@ -77,7 +78,7 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     // "show all" expands to maxCardsExpanded.
     const renderList = (limit) => {
       const shown = cards.slice(0, limit);
-      const items = shown.map((card) => renderCard(card, tab, currentYear));
+      const items = shown.map((card) => renderCard(card, tab, now));
       const shownEvents = shown.reduce((n, c) => n + c.instances.length, 0);
       const label = makeTruncationLabel(
         shown.length,

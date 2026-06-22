@@ -44,13 +44,14 @@ const FONTS = [
 // popup.css's body is 280px wide + 12px padding each side.
 const WIDTH = 304;
 
-// The "current year" the cases render against. Pinned (not the real year) so a
-// card's year-pill decision — and therefore every snapshot — is deterministic
-// forever: a case dated this year shows no pill, off-year dates do. Sourced from
-// the shared reference-time module so the popup renderer and the behavior test
-// share one pinned "now" (see ../reference-time.js); the cases all use 2026 dates,
-// so this keeps them pill-free.
-const { REFERENCE_YEAR } = require("../reference-time");
+// The reference "now" the cases render against. Pinned (not the real clock) so a
+// card's corner-pill decision — gray "past" for an event before today, green year
+// pill for a future year — and therefore every snapshot is deterministic forever
+// instead of rotting as the wall-clock advances. Sourced from the shared
+// reference-time module so the popup renderer and the behavior test share one
+// pinned instant (see ../reference-time.js); cases dated on/after this day in its
+// year stay pill-free.
+const { REFERENCE_NOW } = require("../reference-time");
 
 const POPUP_CSS = fs.readFileSync(path.join(ROOT, "extension", "events-popup", "popup.css"), "utf8");
 const POPUP_HTML = fs.readFileSync(path.join(ROOT, "extension", "events-popup", "popup.html"), "utf8");
@@ -237,7 +238,7 @@ async function renderCasePng(testCase) {
     // "Reading page…" state render() never produces); everything else runs the
     // real render() and any DOM action on top of it.
     if (!testCase.skipRender) {
-      await render({ data: testCase.data, tab, listing: testCase.listing || "none", currentYear: REFERENCE_YEAR, configurationOverrides: testCase.configurationOverrides });
+      await render({ data: testCase.data, tab, listing: testCase.listing || "none", now: REFERENCE_NOW, configurationOverrides: testCase.configurationOverrides });
       if (testCase.action) testCase.action(doc);
     }
 

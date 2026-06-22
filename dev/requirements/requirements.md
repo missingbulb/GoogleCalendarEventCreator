@@ -560,8 +560,9 @@ inner chip buttons instead.
 </tr>
 </table>
 
-- `5.6` **Year pill.** A chip whose date falls outside the current year carries a
-  small year pill on the corner of its calendar icon.
+- `5.6` **Date pill.** A chip carries a small pill on the corner of its calendar
+  icon for an event that isn't simply upcoming this year: a gray "past" pill for a
+  past event, or a green pill showing the year for a future year.
 
 <table>
 <tr>
@@ -572,7 +573,8 @@ inner chip buttons instead.
 </td>
 <td valign="top">
 
-`5.6.1` A **past** year shows a **gray** pill.
+`5.6.1` A **past** event shows a **gray** pill reading "**past**" (the word, not
+the year).
 
 </td>
 </tr>
@@ -587,8 +589,8 @@ inner chip buttons instead.
 </td>
 <td valign="top">
 
-`5.6.2` A **future** year shows a **green** ("upcoming") pill — never red
-(a next-year event isn't an error).
+`5.6.2` A **future** year shows a **green** ("upcoming") pill with the year —
+never red (a next-year event isn't an error).
 
 </td>
 </tr>
@@ -603,7 +605,23 @@ inner chip buttons instead.
 </td>
 <td valign="top">
 
-`5.6.3` The **current** year shows **no** pill.
+`5.6.3` A **current, upcoming** date (this year, not yet past) shows **no** pill.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.4](popup/cases/event-cards-appearance.5.6.4.png) <!-- req-gallery:5.6.4 -->
+
+</td>
+<td valign="top">
+
+`5.6.4` The "past" pill marks **any** past event, not only a prior year — an event
+earlier **this** year (before today) shows it too.
 
 </td>
 </tr>

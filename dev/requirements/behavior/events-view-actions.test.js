@@ -26,12 +26,13 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { JSDOM } = require("jsdom");
 const { loadCases, leafIdOf } = require("../shared/cases");
-const { REFERENCE_YEAR } = require("../shared/reference-time");
+const { REFERENCE_NOW } = require("../shared/reference-time");
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 const TAB = { url: "https://example.com/events", title: "Example event page", index: 3 };
-// Render cards against the pinned reference year (not the real clock), so a card's
-// year-pill decision is deterministic forever — same fixed "now" the snapshots use.
+// Render cards against the pinned reference "now" (not the real clock), so a card's
+// corner-pill decision is deterministic forever — the same fixed instant the
+// snapshots use.
 
 let renderCard, toCards, makeSourceRequestLink, makePolicyLink;
 let created; // captured chrome.tabs.create() calls
@@ -79,7 +80,7 @@ async function click(el) {
 // then closes the popup.
 test("9.1/9.3: clicking a single card opens its template in an adjacent tab and closes the popup", async () => {
   const [card] = toCards([{ title: "Solo Show", start: "2026-06-19T19:00:00", location: "The Venue" }]);
-  const el = renderCard(card, TAB, REFERENCE_YEAR);
+  const el = renderCard(card, TAB, REFERENCE_NOW);
   await click(el);
 
   assert.equal(created.length, 1, "expected exactly one tab opened");
@@ -102,7 +103,7 @@ test("9.2/9.3: clicking a grouped card's instance button opens that showing's te
     },
   ]);
   assert.equal(card.kind, "month", "two showings in one month form a grouped card");
-  const el = renderCard(card, TAB, REFERENCE_YEAR);
+  const el = renderCard(card, TAB, REFERENCE_NOW);
   const buttons = el.querySelectorAll("button.chip-btn");
   assert.equal(buttons.length, 2, "one button per showing");
 
