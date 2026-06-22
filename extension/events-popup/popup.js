@@ -36,7 +36,7 @@ async function init() {
 // (when there's nothing to show) an empty-state glyph with the State-3
 // "Disagree?" link beneath it. Split out from init() — which does the
 // chrome/fetch I/O to gather `data` — so the SAME real view code can be driven
-// with fake data by the UI snapshot tests (dev/requirements/ui/), which pass `data`, a stub
+// with fake data by the UI snapshot tests (dev/requirements/{popup,icon}/), which pass `data`, a stub
 // `tab`, and the host `listing` directly. Builds into the global `document` (the
 // popup document in the extension; a jsdom document under test).
 // `currentYear` (the year against which a card decides whether to show a year
@@ -99,7 +99,7 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     // Edge fades: a scroll cue that there's more list above/below. Keep them in
     // sync as the user scrolls. In a real browser the scroll metrics are live;
     // under the static snapshot renderer they're 0, so a case drives the fade
-    // state via its action instead (see dev/requirements/infra/actions.js).
+    // state via its action instead (see dev/requirements/shared/render/actions.js).
     eventsEl.addEventListener("scroll", updateScrollFades);
 
     // A quiet right-aligned "Suggest Correction" link next to the heading text,
@@ -219,7 +219,7 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 // buttons to show (possibly empty), `request` is the prefill for a "request
 // support" button (or null), `policyLink` is whether to show the "Disagree?"
 // link. The five states, in the order they're decided (specified in
-// dev/requirements/requirements.md §12–§16; diagram in dev/requirements/popup-states-flowchart.png):
+// dev/requirements/requirements.md §12–§16; diagram in dev/requirements/shared/popup-states-flowchart.png):
 //
 //   State 1 — supported host (a per-site source matched): show its events.
 //     `supported` is the same GCal.isSupportedHost check that colors the toolbar

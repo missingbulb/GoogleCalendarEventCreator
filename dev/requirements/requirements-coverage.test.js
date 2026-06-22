@@ -9,7 +9,7 @@
 //       * "popup" / "icon" — an image leaf, pinned by a `<slug>.<id>.png` snapshot
 //         (rendered by render-snapshot.js, compared by popup-snapshots.test.js).
 //       * "behavior"       — a click/navigation a static image can't observe, so it
-//         carries NO image and is verified by dev/requirements/ui/events-view-actions.test.js
+//         carries NO image and is verified by dev/requirements/behavior/events-view-actions.test.js
 //         (which self-asserts it covers exactly the kind:"behavior" cases). A PNG
 //         "covering" a behavior is the #429 anti-pattern, so we forbid one here.
 //   - A `tbd: true` case is an undecided edge case: it still renders (a provisional
@@ -23,9 +23,9 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const path = require("node:path");
-const { loadCases, leafIdOf, CASES_DIR } = require("./infra/cases");
-const { allRequirementIds, leafRequirementIds } = require("./infra/ui-requirements");
+const { loadCases, leafIdOf, snapshotPath } = require("./shared/cases");
+const { allRequirementIds, leafRequirementIds } = require("./shared/ui-requirements");
+const { KIND_NAMES, IMAGE_KINDS } = require("./shared/kinds");
 
 const allIds = new Set(allRequirementIds());
 const leaves = leafRequirementIds();
@@ -35,10 +35,12 @@ const cases = loadCases();
 // then the dotted requirement number it pins. The leaf id is the trailing run.
 const PER_LEAF = /^[a-z][a-z0-9-]*\.(\d+(?:\.\d+)+)$/;
 const idOf = (c) => leafIdOf(c.name);
-const kindOf = (c) => c.kind || "popup";
-const KNOWN_KINDS = new Set(["popup", "icon", "behavior", "extractor", "logic"]);
-// The kinds with no rendered image — verified by a dedicated test, not a snapshot.
-const NON_IMAGE_KINDS = new Set(["behavior", "extractor", "logic"]);
+const kindOf = (c) => c.kind;
+// Kinds are auto-discovered from the <kind>/kind.js descriptors (shared/kinds.js),
+// so this gate hardcodes no list — adding a kind folder extends it for free.
+const KNOWN_KINDS = new Set(KIND_NAMES);
+// The kinds with no rendered image — verified by a dedicated runner, not a snapshot.
+const NON_IMAGE_KINDS = new Set(KIND_NAMES.filter((k) => !IMAGE_KINDS.includes(k)));
 
 test("dev/requirements/requirements.md yields leaf requirements", () => {
   assert.ok(allIds.size > 0, "no `N.M` requirement IDs parsed from dev/requirements/requirements.md");
@@ -70,7 +72,7 @@ test("every case declares a known kind", () => {
 
 test("a non-image case carries no snapshot image (a PNG can't verify a click or an extraction — #429)", () => {
   const bad = cases
-    .filter((c) => NON_IMAGE_KINDS.has(kindOf(c)) && fs.existsSync(path.join(CASES_DIR, `${c.name}.png`)))
+    .filter((c) => NON_IMAGE_KINDS.has(kindOf(c)) && fs.existsSync(snapshotPath(c)))
     .map((c) => `${c.name}.png`);
-  assert.deepEqual(bad, [], "behavior/extractor leaves must not carry a snapshot image:");
+  assert.deepEqual(bad, [], "behavior/extractor/logic leaves must not carry a snapshot image:");
 });

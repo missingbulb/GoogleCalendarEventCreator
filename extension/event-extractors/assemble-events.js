@@ -63,7 +63,7 @@
 //
 // To support a new event platform, add event-extractors/custom/<site>.js that pushes
 // onto GCal.sources (see custom/meetup.js for the pattern), run `npm run index`
-// to regenerate the load list, and add a test case under dev/requirements/extractors/custom/.
+// to regenerate the load list, and add a test case under dev/requirements/extractor/expected/.
 //
 // The orchestrator is exposed as GCal.extract() — THE single top-level
 // extractor every caller goes through (the popup, the test harness). It picks

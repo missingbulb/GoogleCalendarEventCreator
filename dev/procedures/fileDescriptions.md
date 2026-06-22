@@ -22,31 +22,31 @@ the rules of the road.
 | `extension/events-popup/build-calendar-url.js` | Builds the pre-filled Google Calendar template URL (incl. markdown→HTML for details) |
 | `extension/event-extractors/assemble-events.js` | Orchestrator `GCal.extract()`: runs the matched self-contained source, else the unsupported-site fallback; normalizes/sorts events and reports `supported` |
 | `extension/event-extractors/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
-| `dev/requirements/extractors/custom/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
-| `dev/requirements/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
-| `dev/requirements/infra/data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
-| `dev/requirements/extractors/live.test.js` | Runs the reviewed assertions against the cached HTML files |
+| `dev/requirements/extractor/expected/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
+| `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
+| `dev/requirements/extractor/page-infra/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
+| `dev/requirements/extractor/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |
 | `extension-test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
-| `dev/requirements/extractors/fallback/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
-| `dev/requirements/extractors/fallback/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `dev/requirements/extractors/fallback/fallback-coverage.GENERATED.md` and ratchets the baseline locally |
-| `dev/requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json` | Stored high-watermark percentages the coverage gate asserts against (test-rewritten; `GENERATED` in the name flags it — don't hand-merge) |
-| `dev/requirements/extractors/fallback/fallback-coverage.GENERATED.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
-| `dev/requirements/ui/cases/<name>.case.js` | One UI snapshot case: fake data (`{ description, data, listing?, tab?, action? }`) fed to the popup's real `render()`. Its scenario lives only here — no shared gallery |
-| `dev/requirements/ui/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
-| `dev/requirements/infra/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |
-| `dev/requirements/infra/popup-renderer.js` | Builds each popup case's DOM via the popup's real `render()` and rasterizes to PNG (satori + resvg, no browser), inlining the real `extension/events-popup/popup.css` first; prunes off-screen list rows so resvg doesn't choke on a tall SVG |
-| `dev/requirements/infra/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `extension/icon/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind a `kind: "icon"` snapshot case |
-| `dev/requirements/infra/fake-chrome.js` | The fake browser (`chrome.*` + `fetch`/`OffscreenCanvas`) that `icon-renderer.js` loads `extension/icon/toolbar-icon.js` into, then queries "what icon at this URL?" |
-| `dev/requirements/infra/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's own `kind` field (default `"popup"`) |
-| `dev/requirements/infra/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
-| `dev/requirements/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
-| `dev/requirements/ui/popup-snapshots.test.js` | The single visual-comparison engine: renders each `dev/requirements/ui/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
-| `dev/requirements/infra/refresh-popup-snapshots.js` | Regenerates the `dev/requirements/ui/cases/*.png` snapshots (popup and icon) + the inline gallery |
+| `dev/requirements/extractor/fallback/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
+| `dev/requirements/extractor/fallback/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md` and ratchets the baseline locally |
+| `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json` | Stored high-watermark percentages the coverage gate asserts against (test-rewritten; `GENERATED` in the name flags it — don't hand-merge) |
+| `dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
+| `dev/requirements/<kind>/cases/<name>.case.js` | One UI snapshot case: fake data (`{ description, data, listing?, tab?, action? }`) fed to the popup's real `render()`. Its scenario lives only here — no shared gallery |
+| `dev/requirements/<kind>/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
+| `dev/requirements/shared/render/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |
+| `dev/requirements/shared/render/popup-renderer.js` | Builds each popup case's DOM via the popup's real `render()` and rasterizes to PNG (satori + resvg, no browser), inlining the real `extension/events-popup/popup.css` first; prunes off-screen list rows so resvg doesn't choke on a tall SVG |
+| `dev/requirements/shared/render/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `extension/icon/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind a `kind: "icon"` snapshot case |
+| `dev/requirements/shared/render/fake-chrome.js` | The fake browser (`chrome.*` + `fetch`/`OffscreenCanvas`) that `icon-renderer.js` loads `extension/icon/toolbar-icon.js` into, then queries "what icon at this URL?" |
+| `dev/requirements/shared/render/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's own `kind` field (default `"popup"`) |
+| `dev/requirements/shared/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
+| `dev/requirements/shared/render/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
+| `dev/requirements/shared/render/visual-snapshots.test.js` | The single visual-comparison engine: renders each `dev/requirements/<kind>/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
+| `dev/requirements/shared/render/refresh-snapshots.js` | Regenerates the `dev/requirements/<kind>/cases/*.png` snapshots (popup and icon) + the inline gallery |
 | `dev/deployment/generate_icons.py` | Regenerates every icon into `extension/icon/images/` (Python stdlib only): the small flat toolbar glyphs `icon{16,32}*.png` (base + supported/denied state variants) and the polished calendar art at the larger sizes — `chromeStoreIcon.png` (manifest 128px icon, also uploaded by hand as the Web Store listing icon) and `chromeExtensionManagementIcon.png` (48px management page). See `dev/deployment/README.md` |
 | `.github/workflows/shipping-files.js` | Single source of truth for the files that ship in the release zip |
 | `.github/workflows/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
 | `dev/tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `dev/procedures/claude/auto-extractor.md` |
 | `dev/tools/new-extractors-creation/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
-| `dev/requirements/infra/gen-states-flowchart.js` | Regenerates `dev/requirements/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
+| `dev/requirements/shared/gen-states-flowchart.js` | Regenerates `dev/requirements/shared/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
 | `.github/workflows/tests/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |

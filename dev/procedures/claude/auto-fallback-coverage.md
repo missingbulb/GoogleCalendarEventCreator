@@ -4,7 +4,7 @@ A daily Claude **Opus** Claude Code routine (not a GitHub Actions workflow) trie
 to make the **generic** fallback extractor recover **more** of what the dedicated
 per-site sources get, measured by the fallback-coverage gate. Like the lessons
 digest it runs unattended on a fresh clone, fully **offline** against the committed
-`dev/requirements/data/*.html` fixtures (the environment may block live fetches) — and **most runs
+`dev/requirements/extractor/data/*.html` fixtures (the environment may block live fetches) — and **most runs
 correctly change nothing**: the gate already captures every prior win, so a
 genuinely new *generic* win is rare, and a forced or fake one is worse than
 nothing. A no-win run means no branch and no PR.
@@ -23,7 +23,7 @@ isn't generic.
 
 ## How it measures (the gate)
 
-The fallback-coverage gate lives in `dev/requirements/extractors/fallback/` and runs in
+The fallback-coverage gate lives in `dev/requirements/extractor/fallback/` and runs in
 `test:live`: `fallback-coverage.test.js` (the high-watermark gate; logic in
 `fallback-coverage.js`), the scorecard `fallback-coverage.GENERATED.md`, and the
 watermark `fallback-coverage.baseline.GENERATED.json`. Gate mechanics are

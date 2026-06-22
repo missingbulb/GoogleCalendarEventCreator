@@ -29,12 +29,12 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    icon rules from it — so the green "supported" icon only appears once the host
    is listed here.
 4. Add an integration case for a real page on the site (see `dev/procedures/testing.md`) —
-   a reviewed `dev/requirements/extractors/custom/<name>.json` (`description`
-   + `expected`) plus its cached `dev/requirements/data/<name>.{html,url}`.
+   a reviewed `dev/requirements/extractor/expected/<name>.json` (`description`
+   + `expected`) plus its cached `dev/requirements/extractor/data/<name>.{html,url}`.
 5. Record the host as an **executable extractor-support requirement**: add a leaf
    to `dev/requirements/requirements.md` §11 ("Required explicit support for
    Extractors") with a `kind: "extractor"` case
-   (`dev/requirements/ui/cases/extractor-support.11.<n>.case.js`) naming
+   (`dev/requirements/<kind>/cases/extractor-support.11.<n>.case.js`) naming
    `{ host, source, page }`, so the new host is validated against a real cached
-   page by `dev/requirements/extractors/extractor-support.test.js`. See
+   page by `dev/requirements/extractor/extractor-support.test.js`. See
    [../../requirements/README.md](../../requirements/README.md).

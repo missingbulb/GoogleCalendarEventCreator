@@ -27,12 +27,12 @@ if (require.main === module) {
     console.error("scaffold-case: no case name given");
     process.exit(1);
   }
-  const dest = path.join(__dirname, "..", "..", "requirements", "extractors", "custom", `${caseName}.json`);
+  const dest = path.join(__dirname, "..", "..", "requirements", "extractor", "expected", `${caseName}.json`);
   if (fs.existsSync(dest)) {
     console.error(`scaffold-case: ${dest} already exists — refusing to overwrite`);
     process.exit(1);
   }
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, JSON.stringify(caseStub(host), null, 2) + "\n");
-  console.log(`scaffold-case: wrote dev/requirements/extractors/custom/${caseName}.json`);
+  console.log(`scaffold-case: wrote dev/requirements/extractor/expected/${caseName}.json`);
 }

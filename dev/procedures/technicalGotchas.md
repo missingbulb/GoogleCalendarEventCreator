@@ -17,7 +17,7 @@ trap spanning files. See the full locality rule in
 
 - **The SPA-shell render fallback executes untrusted page JS — never give it the
   e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
-  in real headless Chrome (`dev/requirements/infra/data/render-page.js`) only when `dev/requirements/infra/data/spa-shell.js`'s
+  in real headless Chrome (`dev/requirements/extractor/page-infra/render-page.js`) only when `dev/requirements/extractor/page-infra/spa-shell.js`'s
   `shouldRender` is true — a positive conjunction (`isSpaShell &&
   !hasEventData`), not "the body is small", so it never fires on a generic
   error body or a page that already carries an event date, and bot-challenge pages
@@ -66,7 +66,7 @@ trap spanning files. See the full locality rule in
   `evilexample.com` — pair `hostEquals: "example.com"` with
   `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
   URL→icon match runs inside Chrome, so it's verified only by the CI-only
-  real-Chrome test (`dev/requirements/fullBrowserHeavyTests/extension-load.chrome.test.js`).
+  real-Chrome test (`dev/requirements/heavy/extension-load.chrome.test.js`).
 - **Introspecting an MV3 service worker over CDP (the real-Chrome test) has three
   traps that each cost a CI round-trip.** When `Runtime.evaluate`-ing inside the
   worker to verify its startup: (a) **`chrome.*` callback APIs don't reliably
@@ -138,8 +138,8 @@ trap spanning files. See the full locality rule in
   actual data — JSON-LD or a parsed date — not merely a host match.
 - **Large cached HTML fixtures skew GitHub's language stats — mark them
   `linguist-vendored`.** GitHub reported this JS extension as "mostly HTML" because
-  the full-page `dev/requirements/data/*.html` test fixtures dwarf the source by bytes.
-  `.gitattributes` marks `dev/requirements/data/*.html linguist-vendored` so Linguist ignores them;
+  the full-page `dev/requirements/extractor/data/*.html` test fixtures dwarf the source by bytes.
+  `.gitattributes` marks `dev/requirements/extractor/data/*.html linguist-vendored` so Linguist ignores them;
   do the same for any future large generated/fixture files. (#78)
 - **GitHub renders Markdown inside a raw `<td>` only when the cell content is
   blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
@@ -153,4 +153,4 @@ trap spanning files. See the full locality rule in
   the line still *starts* as Markdown (how the generator tags its managed
   left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
   two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
-  pipe-table cell can't hold the multi-line prose. (`dev/requirements/infra/build-requirements-gallery.js`.)
+  pipe-table cell can't hold the multi-line prose. (`dev/requirements/shared/build-requirements-gallery.js`.)
