@@ -36,14 +36,14 @@ default branch (before you check anything out):**
      ```
      - **branch**: `claude/extractor/$SLUG`
      - **source**: `extension/event-extractors/custom/$SLUG.js` (scaffolded, `matches()` filled)
-     - **case**: `dev/requirements/extractors/custom/$SLUG.json` (placeholder, `events: []`)
+     - **case**: `dev/requirements/extractor/expected/$SLUG.json` (placeholder, `events: []`)
      - **cached page**: `data/$SLUG.html` (URL in `data/$SLUG.url`)
    - **`BASE` is non-empty → add-a-case mode.** `$BASE` is the existing source's
      file name (e.g. `telavivcinematheque`). The names carry the issue number so
      each request for a supported host gets its own case + branch:
      - **branch**: `claude/extractor/$BASE-<issue>`
      - **source**: `extension/event-extractors/custom/$BASE.js` — **already shipped and working**
-     - **case**: `dev/requirements/extractors/custom/$BASE-<issue>.json` (placeholder, `events: []`)
+     - **case**: `dev/requirements/extractor/expected/$BASE-<issue>.json` (placeholder, `events: []`)
      - **cached page**: `data/$BASE-<issue>.html` (URL in `data/$BASE-<issue>.url`)
 3. Check the branch out and install deps:
    ```bash

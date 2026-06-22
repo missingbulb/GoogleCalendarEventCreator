@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Pre-flight URL probe for the auto-implement-extractor workflow. Given an event
-// URL, fetch it the same way dev/requirements/infra/data/refresh-cache.js records pages (shared
-// dev/requirements/infra/data/fetch-page.js — browser headers, retries), then decide whether the page
+// URL, fetch it the same way dev/requirements/extractor/page-infra/refresh-cache.js records pages (shared
+// dev/requirements/extractor/page-infra/fetch-page.js — browser headers, retries), then decide whether the page
 // is actually usable as a static test case.
 //
 // The workflow runs this BEFORE npm ci and the agent. Two ways a page is "not
@@ -29,7 +29,7 @@
 // Usage: node dev/tools/new-extractors-creation/probe-url.js "<url>"
 "use strict";
 
-const { fetchPage } = require("../../requirements/infra/data/fetch-page");
+const { fetchPage } = require("../../requirements/extractor/page-infra/fetch-page");
 
 // Real event pages are tens to hundreds of KB. A 2xx body smaller than this is
 // almost never a real page — it's an interstitial/stub — so treat it as a

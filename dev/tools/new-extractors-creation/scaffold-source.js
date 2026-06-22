@@ -25,7 +25,7 @@ function sourceStub(url) {
 //
 // TODO(agent): document the page's structure and where each field is read from,
 // mirroring event-extractors/custom/meetup.js. The real page is cached at
-// dev/requirements/data/${caseName}.html.
+// dev/requirements/extractor/data/${caseName}.html.
 //
 // A matched host runs THIS source only — it must produce every field itself; the
 // generic fallback extractor does not run for a supported host. Lean on the
@@ -38,7 +38,7 @@ function sourceStub(url) {
     name: "${slug}",
     matches: (host) => ${matchesRegex}.test(host),
     extract() {
-      // TODO(agent): refine these selectors against dev/requirements/data/${caseName}.html, and
+      // TODO(agent): refine these selectors against dev/requirements/extractor/data/${caseName}.html, and
       // add location / description / ctz as the page needs them.
       const dom = {
         title: text("h1"),

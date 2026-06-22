@@ -53,7 +53,7 @@ test("if ANY event lacks a location the case is degenerate", () => {
 });
 
 test("every committed integration case clears the floor (guards against false rejects)", () => {
-  const dir = path.join(__dirname, "..", "..", "requirements", "extractors", "custom");
+  const dir = path.join(__dirname, "..", "..", "requirements", "extractor", "expected");
   for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".json"))) {
     const obj = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
     // Only assert cases that actually carry events (some may be intentionally empty).

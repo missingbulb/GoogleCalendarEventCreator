@@ -20,7 +20,7 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > Every leaf below is *claimed* by exactly one case, so the coverage gate proves
 > each leaf is verified by the right kind of test. What it does **not** prove is how
 > *faithfully*: a `kind: "behavior"` case (a click → new-tab → close-popup action)
-> has no pixels, so it's verified by `dev/requirements/ui/events-view-actions.test.js`, which
+> has no pixels, so it's verified by `dev/requirements/behavior/events-view-actions.test.js`, which
 > **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
 > right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
@@ -39,7 +39,7 @@ Add new requirements with new numbers; don't renumber or reuse existing ones.
 
 **How each leaf is verified is declared by its CASE, not tagged here.** The spec is
 just numbered prose; each leaf's `<slug>.<id>.case.js` declares how it's verified via
-its own `kind` (default `"popup"`) — and `dev/requirements/infra/render-snapshot.js` dispatches on
+its own `kind` (default `"popup"`) — and `dev/requirements/shared/render/render-snapshot.js` dispatches on
 it:
 
 - `"popup"` / `"icon"` — an **image** leaf, pinned by a `<slug>.<id>.png` snapshot in
@@ -48,7 +48,7 @@ it:
   browser (the toolbar icon, §10).
 - `"behavior"` — a click/navigation a static image can't observe; the case carries
   no image, its left cell shows a note, and it's verified by
-  `dev/requirements/ui/events-view-actions.test.js`.
+  `dev/requirements/behavior/events-view-actions.test.js`.
 - a case may also set **`tbd: true`** — an edge case whose correct behavior isn't
   decided yet; its left cell shows a loud "TO BE DECIDED" banner above its
   provisional (current-behavior) snapshot.
@@ -73,7 +73,7 @@ below; §1–§3 specify how each is *rendered*. Tunable values referenced below
 <tr>
 <td valign="top" width="320">
 
-![heading.1.1](ui/cases/heading.1.1.png) <!-- req-gallery:1.1 -->
+![heading.1.1](popup/cases/heading.1.1.png) <!-- req-gallery:1.1 -->
 
 </td>
 <td valign="top">
@@ -88,7 +88,7 @@ below; §1–§3 specify how each is *rendered*. Tunable values referenced below
 <tr>
 <td valign="top" width="320">
 
-![heading.1.2](ui/cases/heading.1.2.png) <!-- req-gallery:1.2 -->
+![heading.1.2](popup/cases/heading.1.2.png) <!-- req-gallery:1.2 -->
 
 </td>
 <td valign="top">
@@ -104,7 +104,7 @@ Calendar"**.
 <tr>
 <td valign="top" width="320">
 
-![heading.1.3](ui/cases/heading.1.3.png) <!-- req-gallery:1.3 -->
+![heading.1.3](popup/cases/heading.1.3.png) <!-- req-gallery:1.3 -->
 
 </td>
 <td valign="top">
@@ -123,7 +123,7 @@ page"**.
 <tr>
 <td valign="top" width="320">
 
-![empty-state.2.1](ui/cases/empty-state.2.1.png) <!-- req-gallery:2.1 -->
+![empty-state.2.1](popup/cases/empty-state.2.1.png) <!-- req-gallery:2.1 -->
 
 </td>
 <td valign="top">
@@ -140,7 +140,7 @@ generous vertical spacing — so the popup has a "face" rather than a bare line.
 <tr>
 <td valign="top" width="320">
 
-![empty-state.2.2](ui/cases/empty-state.2.2.png) <!-- req-gallery:2.2 -->
+![empty-state.2.2](popup/cases/empty-state.2.2.png) <!-- req-gallery:2.2 -->
 
 </td>
 <td valign="top">
@@ -156,7 +156,7 @@ generous vertical spacing — so the popup has a "face" rather than a bare line.
 <tr>
 <td valign="top" width="320">
 
-![empty-state.2.3](ui/cases/empty-state.2.3.png) <!-- req-gallery:2.3 -->
+![empty-state.2.3](popup/cases/empty-state.2.3.png) <!-- req-gallery:2.3 -->
 
 </td>
 <td valign="top">
@@ -175,7 +175,7 @@ found no events, the glyph stands **alone** — no link beneath it.
 <tr>
 <td valign="top" width="320">
 
-![affordance-links.3.1](ui/cases/affordance-links.3.1.png) <!-- req-gallery:3.1 -->
+![affordance-links.3.1](popup/cases/affordance-links.3.1.png) <!-- req-gallery:3.1 -->
 
 </td>
 <td valign="top">
@@ -195,7 +195,7 @@ issue form itself is out of scope — see §12).
 <tr>
 <td valign="top" width="320">
 
-![affordance-links.3.2](ui/cases/affordance-links.3.2.png) <!-- req-gallery:3.2 -->
+![affordance-links.3.2](popup/cases/affordance-links.3.2.png) <!-- req-gallery:3.2 -->
 
 </td>
 <td valign="top">
@@ -212,7 +212,7 @@ doc.
 <tr>
 <td valign="top" width="320">
 
-![affordance-links.3.3](ui/cases/affordance-links.3.3.png) <!-- req-gallery:3.3 -->
+![affordance-links.3.3](popup/cases/affordance-links.3.3.png) <!-- req-gallery:3.3 -->
 
 </td>
 <td valign="top">
@@ -228,7 +228,7 @@ underline at rest, underline on hover) so neither reads as a primary action.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `dev/requirements/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:3.4 -->
+🚩 _Behavior leaf — verified by `dev/requirements/behavior/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:3.4 -->
 
 </td>
 <td valign="top">
@@ -247,7 +247,7 @@ current one) and closes the popup.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.1](ui/cases/event-cards-grouping.4.1.png) <!-- req-gallery:4.1 -->
+![event-cards-grouping.4.1](popup/cases/event-cards-grouping.4.1.png) <!-- req-gallery:4.1 -->
 
 </td>
 <td valign="top">
@@ -266,7 +266,7 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.2.1](ui/cases/event-cards-grouping.4.2.1.png) <!-- req-gallery:4.2.1 -->
+![event-cards-grouping.4.2.1](popup/cases/event-cards-grouping.4.2.1.png) <!-- req-gallery:4.2.1 -->
 
 </td>
 <td valign="top">
@@ -281,7 +281,7 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.2.2](ui/cases/event-cards-grouping.4.2.2.png) <!-- req-gallery:4.2.2 -->
+![event-cards-grouping.4.2.2](popup/cases/event-cards-grouping.4.2.2.png) <!-- req-gallery:4.2.2 -->
 
 </td>
 <td valign="top">
@@ -296,7 +296,7 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.2.3](ui/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.2.3](popup/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
 
 </td>
 <td valign="top">
@@ -315,7 +315,7 @@ also surface in the later month is **to be decided**.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.3](ui/cases/event-cards-grouping.4.3.png) <!-- req-gallery:4.3 -->
+![event-cards-grouping.4.3](popup/cases/event-cards-grouping.4.3.png) <!-- req-gallery:4.3 -->
 
 </td>
 <td valign="top">
@@ -332,7 +332,7 @@ ones — a run is never collapsed into a single spanning event.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.4](ui/cases/event-cards-grouping.4.4.png) <!-- req-gallery:4.4 -->
+![event-cards-grouping.4.4](popup/cases/event-cards-grouping.4.4.png) <!-- req-gallery:4.4 -->
 
 </td>
 <td valign="top">
@@ -351,7 +351,7 @@ isn't capturable by the static renderer — see note below the gallery.)
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.5](ui/cases/event-cards-grouping.4.5.png) <!-- req-gallery:4.5 -->
+![event-cards-grouping.4.5](popup/cases/event-cards-grouping.4.5.png) <!-- req-gallery:4.5 -->
 
 </td>
 <td valign="top">
@@ -368,7 +368,7 @@ showings are told apart by their time (→ `5.3`).
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.6](ui/cases/event-cards-grouping.4.6.png) <!-- req-gallery:4.6 -->
+![event-cards-grouping.4.6](popup/cases/event-cards-grouping.4.6.png) <!-- req-gallery:4.6 -->
 
 </td>
 <td valign="top">
@@ -385,7 +385,7 @@ button per showing**. A month with a single showing is a single card (→ `4.4`)
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.7](ui/cases/event-cards-grouping.4.7.png) <!-- req-gallery:4.7 -->
+![event-cards-grouping.4.7](popup/cases/event-cards-grouping.4.7.png) <!-- req-gallery:4.7 -->
 
 </td>
 <td valign="top">
@@ -401,7 +401,7 @@ buttons (→ `5`) are its calendar visuals.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.8](ui/cases/event-cards-grouping.4.8.png) <!-- req-gallery:4.8 -->
+![event-cards-grouping.4.8](popup/cases/event-cards-grouping.4.8.png) <!-- req-gallery:4.8 -->
 
 </td>
 <td valign="top">
@@ -421,7 +421,7 @@ multi-month span *should* show a range is the open question in `4.10`.)
 <tr>
 <td valign="top" width="320">
 
-![event-cards-grouping.4.9](ui/cases/event-cards-grouping.4.9.png) <!-- req-gallery:4.9 -->
+![event-cards-grouping.4.9](popup/cases/event-cards-grouping.4.9.png) <!-- req-gallery:4.9 -->
 
 </td>
 <td valign="top">
@@ -440,7 +440,7 @@ order.)
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.10](ui/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
+⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.10](popup/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
 
 </td>
 <td valign="top">
@@ -461,7 +461,7 @@ long or multi-month span should instead show a **date range** on the calendar ch
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.1](ui/cases/event-cards-appearance.5.1.png) <!-- req-gallery:5.1 -->
+![event-cards-appearance.5.1](popup/cases/event-cards-appearance.5.1.png) <!-- req-gallery:5.1 -->
 
 </td>
 <td valign="top">
@@ -479,7 +479,7 @@ of a grouped card's instance buttons.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.2](ui/cases/event-cards-appearance.5.2.png) <!-- req-gallery:5.2 -->
+![event-cards-appearance.5.2](popup/cases/event-cards-appearance.5.2.png) <!-- req-gallery:5.2 -->
 
 </td>
 <td valign="top">
@@ -499,7 +499,7 @@ as a single card's left indicator and as a month card's per-day buttons.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.3.1](ui/cases/event-cards-appearance.5.3.1.png) <!-- req-gallery:5.3.1 -->
+![event-cards-appearance.5.3.1](popup/cases/event-cards-appearance.5.3.1.png) <!-- req-gallery:5.3.1 -->
 
 </td>
 <td valign="top">
@@ -514,7 +514,7 @@ as a single card's left indicator and as a month card's per-day buttons.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.3.2](ui/cases/event-cards-appearance.5.3.2.png) <!-- req-gallery:5.3.2 -->
+![event-cards-appearance.5.3.2](popup/cases/event-cards-appearance.5.3.2.png) <!-- req-gallery:5.3.2 -->
 
 </td>
 <td valign="top">
@@ -530,7 +530,7 @@ the button (e.g. JUN 19 / 4:30 PM – 6:18 PM).
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.4](ui/cases/event-cards-appearance.5.4.png) <!-- req-gallery:5.4 -->
+![event-cards-appearance.5.4](popup/cases/event-cards-appearance.5.4.png) <!-- req-gallery:5.4 -->
 
 </td>
 <td valign="top">
@@ -547,7 +547,7 @@ chevron** as the resting cue that the card itself is the button.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.5](ui/cases/event-cards-appearance.5.5.png) <!-- req-gallery:5.5 -->
+![event-cards-appearance.5.5](popup/cases/event-cards-appearance.5.5.png) <!-- req-gallery:5.5 -->
 
 </td>
 <td valign="top">
@@ -567,7 +567,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.6.1](ui/cases/event-cards-appearance.5.6.1.png) <!-- req-gallery:5.6.1 -->
+![event-cards-appearance.5.6.1](popup/cases/event-cards-appearance.5.6.1.png) <!-- req-gallery:5.6.1 -->
 
 </td>
 <td valign="top">
@@ -582,7 +582,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.6.2](ui/cases/event-cards-appearance.5.6.2.png) <!-- req-gallery:5.6.2 -->
+![event-cards-appearance.5.6.2](popup/cases/event-cards-appearance.5.6.2.png) <!-- req-gallery:5.6.2 -->
 
 </td>
 <td valign="top">
@@ -598,7 +598,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.6.3](ui/cases/event-cards-appearance.5.6.3.png) <!-- req-gallery:5.6.3 -->
+![event-cards-appearance.5.6.3](popup/cases/event-cards-appearance.5.6.3.png) <!-- req-gallery:5.6.3 -->
 
 </td>
 <td valign="top">
@@ -615,7 +615,7 @@ inner chip buttons instead.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.7.1](ui/cases/event-cards-appearance.5.7.1.png) <!-- req-gallery:5.7.1 -->
+![event-cards-appearance.5.7.1](popup/cases/event-cards-appearance.5.7.1.png) <!-- req-gallery:5.7.1 -->
 
 </td>
 <td valign="top">
@@ -631,7 +631,7 @@ header line ("7 PM · &lt;location&gt;") and the buttons stay bare day chips.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.7.2](ui/cases/event-cards-appearance.5.7.2.png) <!-- req-gallery:5.7.2 -->
+![event-cards-appearance.5.7.2](popup/cases/event-cards-appearance.5.7.2.png) <!-- req-gallery:5.7.2 -->
 
 </td>
 <td valign="top">
@@ -648,7 +648,7 @@ and the header is location-only.
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.7.3](ui/cases/event-cards-appearance.5.7.3.png) <!-- req-gallery:5.7.3 -->
+![event-cards-appearance.5.7.3](popup/cases/event-cards-appearance.5.7.3.png) <!-- req-gallery:5.7.3 -->
 
 </td>
 <td valign="top">
@@ -666,7 +666,7 @@ day" label beside the location, mirroring a single all-day card's line. (If only
 <tr>
 <td valign="top" width="320">
 
-![event-cards-appearance.5.8](ui/cases/event-cards-appearance.5.8.png) <!-- req-gallery:5.8 -->
+![event-cards-appearance.5.8](popup/cases/event-cards-appearance.5.8.png) <!-- req-gallery:5.8 -->
 
 </td>
 <td valign="top">
@@ -687,7 +687,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.1.1](ui/cases/date-time-display.6.1.1.png) <!-- req-gallery:6.1.1 -->
+![date-time-display.6.1.1](popup/cases/date-time-display.6.1.1.png) <!-- req-gallery:6.1.1 -->
 
 </td>
 <td valign="top">
@@ -702,7 +702,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.1.2](ui/cases/date-time-display.6.1.2.png) <!-- req-gallery:6.1.2 -->
+![date-time-display.6.1.2](popup/cases/date-time-display.6.1.2.png) <!-- req-gallery:6.1.2 -->
 
 </td>
 <td valign="top">
@@ -719,7 +719,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.2.1](ui/cases/date-time-display.6.2.1.png) <!-- req-gallery:6.2.1 -->
+![date-time-display.6.2.1](popup/cases/date-time-display.6.2.1.png) <!-- req-gallery:6.2.1 -->
 
 </td>
 <td valign="top">
@@ -735,7 +735,7 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.2.2](ui/cases/date-time-display.6.2.2.png) <!-- req-gallery:6.2.2 -->
+![date-time-display.6.2.2](popup/cases/date-time-display.6.2.2.png) <!-- req-gallery:6.2.2 -->
 
 </td>
 <td valign="top">
@@ -751,7 +751,7 @@ shown.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.3](ui/cases/date-time-display.6.3.png) <!-- req-gallery:6.3 -->
+![date-time-display.6.3](popup/cases/date-time-display.6.3.png) <!-- req-gallery:6.3 -->
 
 </td>
 <td valign="top">
@@ -766,7 +766,7 @@ shown.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.4](ui/cases/date-time-display.6.4.png) <!-- req-gallery:6.4 -->
+![date-time-display.6.4](popup/cases/date-time-display.6.4.png) <!-- req-gallery:6.4 -->
 
 </td>
 <td valign="top">
@@ -781,7 +781,7 @@ shown.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.5](ui/cases/date-time-display.6.5.png) <!-- req-gallery:6.5 -->
+![date-time-display.6.5](popup/cases/date-time-display.6.5.png) <!-- req-gallery:6.5 -->
 
 </td>
 <td valign="top">
@@ -797,7 +797,7 @@ the title and the time line.
 <tr>
 <td valign="top" width="320">
 
-![date-time-display.6.6](ui/cases/date-time-display.6.6.png) <!-- req-gallery:6.6 -->
+![date-time-display.6.6](popup/cases/date-time-display.6.6.png) <!-- req-gallery:6.6 -->
 
 </td>
 <td valign="top">
@@ -818,7 +818,7 @@ event — see §12.)
 <tr>
 <td valign="top" width="320">
 
-![list-overflow.7.1](ui/cases/list-overflow.7.1.png) <!-- req-gallery:7.1 -->
+![list-overflow.7.1](popup/cases/list-overflow.7.1.png) <!-- req-gallery:7.1 -->
 
 </td>
 <td valign="top">
@@ -835,7 +835,7 @@ past that.
 <tr>
 <td valign="top" width="320">
 
-![list-overflow.7.2](ui/cases/list-overflow.7.2.png) <!-- req-gallery:7.2 -->
+![list-overflow.7.2](popup/cases/list-overflow.7.2.png) <!-- req-gallery:7.2 -->
 
 </td>
 <td valign="top">
@@ -851,7 +851,7 @@ it's a height limit); "show all" (→ `8.5`) expands to `maxCardsExpanded`.
 <tr>
 <td valign="top" width="320">
 
-![list-overflow.7.3](ui/cases/list-overflow.7.3.png) <!-- req-gallery:7.3 -->
+![list-overflow.7.3](popup/cases/list-overflow.7.3.png) <!-- req-gallery:7.3 -->
 
 </td>
 <td valign="top">
@@ -871,7 +871,7 @@ there's more in that direction. An edge with nothing beyond it shows no fade.
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.1](ui/cases/count-label.8.1.png) <!-- req-gallery:8.1 -->
+![count-label.8.1](popup/cases/count-label.8.1.png) <!-- req-gallery:8.1 -->
 
 </td>
 <td valign="top">
@@ -887,7 +887,7 @@ scrolls with the cards, so it's seen only once scrolled to the end).
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.2](ui/cases/count-label.8.2.png) <!-- req-gallery:8.2 -->
+![count-label.8.2](popup/cases/count-label.8.2.png) <!-- req-gallery:8.2 -->
 
 </td>
 <td valign="top">
@@ -903,7 +903,7 @@ so its numbers can exceed the card count.
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.3](ui/cases/count-label.8.3.png) <!-- req-gallery:8.3 -->
+![count-label.8.3](popup/cases/count-label.8.3.png) <!-- req-gallery:8.3 -->
 
 </td>
 <td valign="top">
@@ -918,7 +918,7 @@ so its numbers can exceed the card count.
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.4](ui/cases/count-label.8.4.png) <!-- req-gallery:8.4 -->
+![count-label.8.4](popup/cases/count-label.8.4.png) <!-- req-gallery:8.4 -->
 
 </td>
 <td valign="top">
@@ -934,7 +934,7 @@ showing**" — a scroll cue, with no "out of" and no link.
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.5](ui/cases/count-label.8.5.png) <!-- req-gallery:8.5 -->
+![count-label.8.5](popup/cases/count-label.8.5.png) <!-- req-gallery:8.5 -->
 
 </td>
 <td valign="top">
@@ -951,7 +951,7 @@ expands the list to the `maxCardsExpanded` cap.
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.6](ui/cases/count-label.8.6.png) <!-- req-gallery:8.6 -->
+![count-label.8.6](popup/cases/count-label.8.6.png) <!-- req-gallery:8.6 -->
 
 </td>
 <td valign="top">
@@ -967,7 +967,7 @@ expands the list to the `maxCardsExpanded` cap.
 <tr>
 <td valign="top" width="320">
 
-![count-label.8.7](ui/cases/count-label.8.7.png) <!-- req-gallery:8.7 -->
+![count-label.8.7](popup/cases/count-label.8.7.png) <!-- req-gallery:8.7 -->
 
 </td>
 <td valign="top">
@@ -986,7 +986,7 @@ count.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `dev/requirements/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.1 -->
+🚩 _Behavior leaf — verified by `dev/requirements/behavior/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.1 -->
 
 </td>
 <td valign="top">
@@ -1002,7 +1002,7 @@ Calendar template in a new browser tab.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `dev/requirements/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.2 -->
+🚩 _Behavior leaf — verified by `dev/requirements/behavior/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.2 -->
 
 </td>
 <td valign="top">
@@ -1018,7 +1018,7 @@ Calendar template in a new browser tab.
 <tr>
 <td valign="top" width="320">
 
-🚩 _Behavior leaf — verified by `dev/requirements/ui/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.3 -->
+🚩 _Behavior leaf — verified by `dev/requirements/behavior/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.3 -->
 
 </td>
 <td valign="top">
@@ -1046,7 +1046,7 @@ real `extension/icon/toolbar-icon.js` in a fake browser rather than the popup (s
 <tr>
 <td valign="top" width="320">
 
-![toolbar-icon.10.1](ui/cases/toolbar-icon.10.1.png) <!-- req-gallery:10.1 -->
+![toolbar-icon.10.1](icon/cases/toolbar-icon.10.1.png) <!-- req-gallery:10.1 -->
 
 </td>
 <td valign="top">
@@ -1062,7 +1062,7 @@ list**), the icon is **green**.
 <tr>
 <td valign="top" width="320">
 
-![toolbar-icon.10.2](ui/cases/toolbar-icon.10.2.png) <!-- req-gallery:10.2 -->
+![toolbar-icon.10.2](icon/cases/toolbar-icon.10.2.png) <!-- req-gallery:10.2 -->
 
 </td>
 <td valign="top">
@@ -1078,7 +1078,7 @@ decided not to extract), the icon is **gray**.
 <tr>
 <td valign="top" width="320">
 
-![toolbar-icon.10.3](ui/cases/toolbar-icon.10.3.png) <!-- req-gallery:10.3 -->
+![toolbar-icon.10.3](icon/cases/toolbar-icon.10.3.png) <!-- req-gallery:10.3 -->
 
 </td>
 <td valign="top">
@@ -1098,11 +1098,11 @@ source under `extension/event-extractors/custom/` whose `matches(host)` claims t
 so the toolbar icon goes green and the popup extracts the event from that site's
 own markup (not the generic fallback). This section is the **executable
 catalogue** of that support: each leaf is one supported host, validated by a
-`kind: "extractor"` case (`dev/requirements/ui/cases/extractor-support.<id>.case.js`)
+`kind: "extractor"` case (`dev/requirements/<kind>/cases/extractor-support.<id>.case.js`)
 that runs the real extractor against a **real cached page**
-(`dev/requirements/data/<page>.html`) and asserts the host is recognized as
+(`dev/requirements/extractor/data/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
-`dev/requirements/extractors/extractor-support.test.js`. Adding a new source
+`dev/requirements/extractor/extractor-support.test.js`. Adding a new source
 (see `dev/procedures/claude/adding-a-source.md`) adds a row here. A bot-blocked host with no
 cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
 is covered by unit tests only.
@@ -1111,7 +1111,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `meetup-nyc-tech-mixer` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.1 -->
+🧩 _Extractor leaf — validated against cached page `meetup-nyc-tech-mixer` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.1 -->
 
 </td>
 <td valign="top">
@@ -1126,7 +1126,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `eventbrite-games-for-change` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.2 -->
+🧩 _Extractor leaf — validated against cached page `eventbrite-games-for-change` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.2 -->
 
 </td>
 <td valign="top">
@@ -1141,7 +1141,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `edinburghfringe-daniel-sloss` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.3 -->
+🧩 _Extractor leaf — validated against cached page `edinburghfringe-daniel-sloss` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.3 -->
 
 </td>
 <td valign="top">
@@ -1156,7 +1156,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `telavivcinematheque-sentimental-value` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.4 -->
+🧩 _Extractor leaf — validated against cached page `telavivcinematheque-sentimental-value` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.4 -->
 
 </td>
 <td valign="top">
@@ -1171,7 +1171,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `ticketmaster-ravid-plotnik` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.5 -->
+🧩 _Extractor leaf — validated against cached page `ticketmaster-ravid-plotnik` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.5 -->
 
 </td>
 <td valign="top">
@@ -1186,7 +1186,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `bandsintown-berry-sakharof` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.6 -->
+🧩 _Extractor leaf — validated against cached page `bandsintown-berry-sakharof` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.6 -->
 
 </td>
 <td valign="top">
@@ -1201,7 +1201,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `barby` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.7 -->
+🧩 _Extractor leaf — validated against cached page `barby` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.7 -->
 
 </td>
 <td valign="top">
@@ -1216,7 +1216,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `dash-datadoghq` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.8 -->
+🧩 _Extractor leaf — validated against cached page `dash-datadoghq` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.8 -->
 
 </td>
 <td valign="top">
@@ -1231,7 +1231,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `eventim-co-il-the90sshow` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.9 -->
+🧩 _Extractor leaf — validated against cached page `eventim-co-il-the90sshow` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.9 -->
 
 </td>
 <td valign="top">
@@ -1246,7 +1246,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `events-datadoghq` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.10 -->
+🧩 _Extractor leaf — validated against cached page `events-datadoghq` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.10 -->
 
 </td>
 <td valign="top">
@@ -1261,7 +1261,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `luma-event` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.11 -->
+🧩 _Extractor leaf — validated against cached page `luma-event` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.11 -->
 
 </td>
 <td valign="top">
@@ -1276,7 +1276,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `secrettelaviv-world-cup-eve` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.12 -->
+🧩 _Extractor leaf — validated against cached page `secrettelaviv-world-cup-eve` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.12 -->
 
 </td>
 <td valign="top">
@@ -1291,7 +1291,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `tabitisrael` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.13 -->
+🧩 _Extractor leaf — validated against cached page `tabitisrael` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.13 -->
 
 </td>
 <td valign="top">
@@ -1306,7 +1306,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `thinkdrink-quantum-lecture` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.14 -->
+🧩 _Extractor leaf — validated against cached page `thinkdrink-quantum-lecture` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.14 -->
 
 </td>
 <td valign="top">
@@ -1321,7 +1321,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `visit-tel-aviv` by `dev/requirements/extractors/extractor-support.test.js`._ <!-- req-gallery:11.15 -->
+🧩 _Extractor leaf — validated against cached page `visit-tel-aviv` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.15 -->
 
 </td>
 <td valign="top">
@@ -1432,7 +1432,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — verified by `dev/requirements/product-requirements.test.js`._ <!-- req-gallery:12.6 -->
+🔧 _Logic leaf — verified by `dev/requirements/logic/product-requirements.test.js`._ <!-- req-gallery:12.6 -->
 
 </td>
 <td valign="top">
@@ -1481,7 +1481,7 @@ How distinct events and their showings map onto cards. The exact card grouping, 
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/requirements/ui/cases/event-cards-grouping.4.2.1.case.js`._ <!-- req-gallery:13.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `dev/requirements/<kind>/cases/event-cards-grouping.4.2.1.case.js`._ <!-- req-gallery:13.3 -->
 
 </td>
 <td valign="top">
@@ -1515,7 +1515,7 @@ Field-level rules for the values that land in the Calendar event. Single-line fi
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — verified by `dev/requirements/product-requirements.test.js`._ <!-- req-gallery:14.2 -->
+🔧 _Logic leaf — verified by `dev/requirements/logic/product-requirements.test.js`._ <!-- req-gallery:14.2 -->
 
 </td>
 <td valign="top">
@@ -1579,7 +1579,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — verified by `dev/requirements/product-requirements.test.js`._ <!-- req-gallery:15.4 -->
+🔧 _Logic leaf — verified by `dev/requirements/logic/product-requirements.test.js`._ <!-- req-gallery:15.4 -->
 
 </td>
 <td valign="top">
@@ -1594,7 +1594,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — verified by `dev/requirements/product-requirements.test.js`._ <!-- req-gallery:15.5 -->
+🔧 _Logic leaf — verified by `dev/requirements/logic/product-requirements.test.js`._ <!-- req-gallery:15.5 -->
 
 </td>
 <td valign="top">

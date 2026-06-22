@@ -36,8 +36,8 @@ resync gotchas — are portable and live in
 ## Open the PR early when a change touches e2e / heavy / UI tests
 
 The usual default is to hold a PR until asked. **Reverse that when a change adds
-or modifies an e2e/heavy-browser (`dev/requirements/fullBrowserHeavyTests/`) or UI-snapshot
-(`dev/requirements/ui/`) test**: those can't be exercised locally (the sandbox has no Chrome;
+or modifies an e2e/heavy-browser (`dev/requirements/heavy/`) or UI-snapshot
+(`dev/requirements/{popup,icon}/`) test**: those can't be exercised locally (the sandbox has no Chrome;
 see [../technicalGotchas.md](../technicalGotchas.md)), and their reviewable
 artifacts only exist on a PR — CI runs the heavy/e2e suites against the branch,
 and a UI change's reviewable output (the pixel diff GitHub renders, and the
@@ -115,12 +115,12 @@ the fallback-coverage gate.
 Files under this rule (kept in sync with `.gitattributes`):
 
 - `extension/event-extractors/load-order.generated.json` — from `npm run index`.
-- `dev/requirements/ui/cases/*.png` — from `npm run refresh:ui`. (The inline gallery in
+- `dev/requirements/<kind>/cases/*.png` — from `npm run refresh:ui`. (The inline gallery in
   `dev/requirements/requirements.md`, also refreshed by that script, is part-authored prose,
   so it is **not** on the `ours` driver — its image lines are reconciled by `npm
   run regen` + the gallery drift gate, not by taking one side.)
-- `dev/requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json` and
-  `dev/requirements/extractors/fallback/fallback-coverage.GENERATED.md` — from the
+- `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json` and
+  `dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md` — from the
   fallback-coverage test, which `npm run regen` runs (it rewrites them locally;
   in CI the gate is read-only). If `regen` reports a coverage regression here,
   that's the real gate firing — review it, don't paper over it.

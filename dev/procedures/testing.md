@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`dev/requirements/extractors/`, `extension-test/` (which mirrors `extension/`'s layout), and `dev/requirements/ui/`:
+`dev/requirements/extractor/`, `extension-test/` (which mirrors `extension/`'s layout), and `dev/requirements/ui/`:
 
 ```sh
 npm install
@@ -15,8 +15,8 @@ npm test               # everything above (offline + live + UI)
 
 ### Integration tests — the ones you review
 
-**`dev/requirements/extractors/live.test.js`** is driven by declarative JSON files in
-`dev/requirements/extractors/custom/` — the values the extractor must produce for a page.
+**`dev/requirements/extractor/live.test.js`** is driven by declarative JSON files in
+`dev/requirements/extractor/expected/` — the values the extractor must produce for a page.
 These are the assertions a human reviews to confirm each site is handled
 correctly.
 
@@ -46,7 +46,7 @@ an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The case's **source URL is not in the case file** — it lives next to the cached
-HTML, in `dev/requirements/data/<name>.url` (a plain-text file holding just the URL). That one
+HTML, in `dev/requirements/extractor/data/<name>.url` (a plain-text file holding just the URL). That one
 file is the single source of truth for the page's URL: `refresh-cache.js`
 fetches it, and the live test loads the cached HTML into a DOM at that URL.
 Keeping it out of the reviewed case file means a test (`description` +
@@ -59,7 +59,7 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- **`dev/requirements/infra/data/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
+- **`dev/requirements/extractor/page-infra/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
   that is missing or empty (zero bytes). A failed fetch keeps the previous
   cached HTML file and only warns, so a site outage or bot-blocking never breaks
   the suite.
@@ -76,7 +76,7 @@ site's markup at the time it was recorded:
   push doesn't fire the push trigger.) It's the *only* thing that fetches live
   pages and commits cached HTML, which keeps the Tests workflow simple. To
   re-record a cached file that already exists — e.g. when a site changes its
-  markup — delete `dev/requirements/data/<name>.html` on your branch and push; the now-missing
+  markup — delete `dev/requirements/extractor/data/<name>.html` on your branch and push; the now-missing
   file is refetched like any other.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
@@ -88,27 +88,27 @@ against that commit ever re-triggering CI.
 shared index to edit, so parallel branches never collide. The expected
 sequence is:
 
-1. Add the extractor (if needed), a `dev/requirements/data/<name>.url` with the event page URL,
-   and the new case file (`dev/requirements/extractors/custom/<name>.json`) with its
+1. Add the extractor (if needed), a `dev/requirements/extractor/data/<name>.url` with the event page URL,
+   and the new case file (`dev/requirements/extractor/expected/<name>.json`) with its
    `expected`. Commit that change.
 2. Run `npm run refresh` locally on the same branch (needs internet) — this
    is the same `refresh-cache.js` step the **Refresh cached HTML files**
-   workflow runs, and it fetches the new page's HTML from `dev/requirements/data/<name>.url`.
-3. Commit the resulting `dev/requirements/data/<name>.html` as a follow-up commit on the branch.
+   workflow runs, and it fetches the new page's HTML from `dev/requirements/extractor/data/<name>.url`.
+3. Commit the resulting `dev/requirements/extractor/data/<name>.html` as a follow-up commit on the branch.
 
 Until a cached HTML file exists for the new case, `test:live` (and so the Tests
 workflow) will fail with `Missing cached HTML for "<name>"`. Note that cases
 also need occasional gardening: when an event page is eventually taken down,
-point `dev/requirements/data/<name>.url` at a newer event (and refresh its cached HTML the same
+point `dev/requirements/extractor/data/<name>.url` at a newer event (and refresh its cached HTML the same
 way).
 
 ### Fallback-coverage gate — how the generic extractor stacks up
 
-**`dev/requirements/extractors/fallback/fallback-coverage.test.js`** (part of `test:live`) measures
+**`dev/requirements/extractor/fallback/fallback-coverage.test.js`** (part of `test:live`) measures
 what the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`)
 recovers on each cached case page, relative to that page's **dedicated source**
 — the reviewed-correct ground truth. The comparison logic lives in
-**`dev/requirements/extractors/fallback/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
+**`dev/requirements/extractor/fallback/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
 — once normally, once with `GCal.sources` emptied (the documented way to force
 the unsupported-host path) — and grades the fallback's **primary event**
 (`events[0]` after the chronological sort) field-by-field against the custom
@@ -123,7 +123,7 @@ miss against the fallback's offset-bearing instant (a floating time read an hour
 off, or one that dropped its time, still is).
 
 The two percentages are a **high-watermark gate** stored in
-`dev/requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json`, which holds the percentages
+`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json`, which holds the percentages
 **plus the list of `cases` they were computed over**. The gate compares the
 current run to the watermark over the cases they **share**, so a newly added case
 (absent from `cases`) is excluded and **adding an extractor never fails the
@@ -136,7 +136,7 @@ error to fix. *Caveat:* with a single aggregate watermark, a regression bundled
 into the same change as a case-set change can be re-anchored over rather than
 caught — don't commit a re-anchored baseline while the gate is red.
 
-Running locally also rewrites the human-readable **`dev/requirements/extractors/fallback/fallback-coverage.GENERATED.md`**
+Running locally also rewrites the human-readable **`dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md`**
 report (headline score, the shared-subset gate, and per-host / per-field-type /
 per-case tables — the per-case matrix stays committed so a gate failure shows
 which case/field regressed without re-running the old code) — commit it like the
@@ -164,9 +164,9 @@ from facebook.com, so it can't be cached as a live case.
 
 ### UI snapshot test
 
-**`dev/requirements/ui/popup-snapshots.test.js`** is the single visual-comparison engine: it
+**`dev/requirements/shared/render/visual-snapshots.test.js`** is the single visual-comparison engine: it
 renders each UI *case* and compares it pixel-by-pixel (via `pixelmatch`) against a
-committed image. `dev/requirements/infra/render-snapshot.js` picks the renderer by the **case's own
+committed image. `dev/requirements/shared/render/render-snapshot.js` picks the renderer by the **case's own
 `kind`**: a `"popup"` case (the default) is fed to `extension/events-popup/popup.js`'s exported
 `render({ data, tab, listing })` — the same `chooseContent` +
 `events-view.js`/`source-request-view.js` code the extension runs — and a
@@ -177,7 +177,7 @@ automatically; the comparison, naming, storage, and refresh are shared. (`render
 is split out of `init()` for exactly this: init does the chrome/fetch I/O to gather
 the data, render builds the DOM from it.)
 
-Each case is a self-contained tuple in **`dev/requirements/ui/cases/`**, one per leaf
+Each case is a self-contained tuple in **`dev/requirements/<kind>/cases/`**, one per leaf
 requirement: a `<slug>.<id>.case.js` whose filename names the single
 [`requirements.md`](../requirements/requirements.md) leaf it pins, minimal data isolating that
 one requirement. For the current set with every reference image shown in a
@@ -189,12 +189,12 @@ A popup `<slug>.<id>.case.js` exports `{ description, data, listing?, tab?, acti
 `data` is the fake extraction result (`{ supported, events: [...] }`); `listing` is
 the host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
-from `dev/requirements/infra/actions.js`, since satori can't actually scroll (it pins `#events`
+from `dev/requirements/shared/render/actions.js`, since satori can't actually scroll (it pins `#events`
 to its end so the bottom-anchored count label is painted). An icon case
 (`kind: "icon"`) instead exports `{ kind, description, tabUrl, lists }` — the faked
 active-tab URL and host lists the toolbar-icon renderer classifies.
 
-`dev/requirements/infra/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
+`dev/requirements/shared/render/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
 browser). satori has no CSS engine, so the renderer folds the **real
 `extension/events-popup/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
 with jsdom, inline every declaration) — one source of truth for the styling, no
@@ -218,7 +218,7 @@ install step.
 
 After an intentional change to the popup — its views (`extension/events-popup/popup.js`,
 `extension/events-popup/*.js`) or its styling (`extension/events-popup/popup.css`) — run `npm run refresh:ui` to
-regenerate the `dev/requirements/ui/cases/*.png` images and commit them so reviewers see the
+regenerate the `dev/requirements/<kind>/cases/*.png` images and commit them so reviewers see the
 before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
-`<name>.diff.png` to `dev/requirements/infra/.artifacts/` (gitignored; see
-`dev/requirements/infra/snapshot-artifacts-dir.js`) and prints their full paths.
+`<name>.diff.png` to `dev/requirements/shared/.artifacts/` (gitignored; see
+`dev/requirements/shared/snapshot-artifacts-dir.js`) and prints their full paths.

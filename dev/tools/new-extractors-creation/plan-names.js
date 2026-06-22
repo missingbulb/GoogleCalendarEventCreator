@@ -43,7 +43,7 @@ function planNames(url, issueNumber) {
 
   const branch = sourceBase ? `claude/extractor/${caseName}` : "";
   const sourcePath = sourceBase ? `extension/event-extractors/custom/${sourceBase}.js` : "";
-  const casePath = caseName ? `dev/requirements/extractors/custom/${caseName}.json` : "";
+  const casePath = caseName ? `dev/requirements/extractor/expected/${caseName}.json` : "";
 
   return { host, slug, mode, sourceBase, caseName, branch, sourcePath, casePath, matchesRegex };
 }

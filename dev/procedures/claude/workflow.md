@@ -20,14 +20,14 @@ link — surface the file itself so it renders inline; a link makes the owner go
 fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact
 nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
 
-When a change to a `dev/requirements/ui/cases/*` case — its spec or its rendering — makes
+When a change to a `dev/requirements/<kind>/cases/*` case — its spec or its rendering — makes
 the snapshot tests **fail** (the pixels moved), don't silently regenerate the
 baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel
 change is never auto-accepted. The process:
 
 1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
    committed **expected** PNG, run the snapshot test so it fails (the harness
-   writes the rendered `actual` and a highlighted `diff` to `dev/requirements/infra/.artifacts/`),
+   writes the rendered `actual` and a highlighted `diff` to `dev/requirements/shared/.artifacts/`),
    and send three images to the chat: **expected** (committed), **actual**
    (newly-rendered), and the **diff**. When the change alters the PNG's
    **dimensions** (e.g. a fixture shrink), pixelmatch can't diff unequal sizes so
@@ -107,7 +107,7 @@ Claudinite. Route by scope:
   instead** when Claude could hit the trap *without* reading the locus file: a
   mistake of **omission** (you must know it to decide whether to open or avoid
   the file) or a cross-cutting invariant spanning files. One file can split both
-  ways — `dev/requirements/infra/data/render-page.js`'s "never give the SPA render the e2e test's
+  ways — `dev/requirements/extractor/page-infra/render-page.js`'s "never give the SPA render the e2e test's
   `--no-sandbox`" stays central (you might add it without ever reading the file),
   while its `SIGKILL`-then-`rmSync` teardown race lives inline at the call site
   (you only meet it editing the teardown). Co-locate only **non-portable** traps:

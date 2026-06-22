@@ -1,0 +1,12 @@
+// Extractor-support leaf 11.6: bandsintown.com has a dedicated extractor
+// (extension/event-extractors/custom/bandsintown.js), validated against the real cached page
+// dev/requirements/extractor/data/bandsintown-berry-sakharof.html by extractor-support.test.js — the
+// page is recognized as supported and yields a complete event.
+"use strict";
+
+module.exports = {
+  description: "bandsintown.com — extracted by custom/bandsintown.js",
+  host: "bandsintown.com",
+  source: "extension/event-extractors/custom/bandsintown.js",
+  page: "bandsintown-berry-sakharof",
+};
