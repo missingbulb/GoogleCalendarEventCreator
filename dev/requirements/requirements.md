@@ -1349,20 +1349,22 @@ is covered by unit tests only.
 
 ## 12. Popup states (what the popup shows)
 
-When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `extension-test/events-popup/popup.test.js`); the one machine-checkable rule, completeness, is wired.
+When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found (`chooseContent` + the host classifier); *how* each state renders is §1–§3, and those renderings are already pinned there by snapshots: the denylisted empty state (`2.3`), the nothing-found "Disagree?" state (`2.2`/`3.2`), and an unlisted host's event with "Suggest Correction" (`3.1`). This section pins only the two slices §1–§3 don't — each a **real popup snapshot** driven through the production `chooseContent`: whether a **supported** host shows the "Suggest Correction" label (`12.4`), and the completeness rule that decides whether a fallback event is shown at all (`12.6`).
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 
+- `12.4` **Supported host — the "Suggest Correction" label.** A supported host always shows its dedicated extractor's events (icon stays green); whether it *also* offers "Suggest Correction" depends on where the shown events came from:
+
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.1 -->
+![popup-states.12.4.1](popup/cases/popup-states.12.4.1.png) <!-- req-gallery:12.4.1 -->
 
 </td>
 <td valign="top">
 
-`12.1` Supported host shows the dedicated extractor's events; when it finds none, the generic fallback is shown if it yields a complete event (with "Suggest Correction") and the empty state otherwise — the host stays classified supported throughout (icon green).
+`12.4.1` When the dedicated extractor returned the events, the "Suggest Correction" label is **not** shown — the dedicated source did its job.
 
 </td>
 </tr>
@@ -1372,12 +1374,29 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.2 -->
+![popup-states.12.4.2](popup/cases/popup-states.12.4.2.png) <!-- req-gallery:12.4.2 -->
 
 </td>
 <td valign="top">
 
-`12.2` Denylisted host shows nothing and prompts for nothing: no event, no support request, no policy link.
+`12.4.2` When the dedicated extractor found nothing but the generic fallback did, the events are shown **with** the "Suggest Correction" label — the dedicated source missed them, so a correction is worth offering.
+
+</td>
+</tr>
+</table>
+
+- `12.6` **Fallback completeness.** A fallback (non-dedicated) event is shown only when it has all three of a title, a location, and a start; missing any one, the popup shows the empty "nothing found" state:
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![popup-states.12.6.1](popup/cases/popup-states.12.6.1.png) <!-- req-gallery:12.6.1 -->
+
+</td>
+<td valign="top">
+
+`12.6.1` A fallback event with **no title** is treated as nothing found.
 
 </td>
 </tr>
@@ -1387,12 +1406,12 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.3 -->
+![popup-states.12.6.2](popup/cases/popup-states.12.6.2.png) <!-- req-gallery:12.6.2 -->
 
 </td>
 <td valign="top">
 
-`12.3` Unsupported host with no complete fallback event shows the empty state with a link to the public policy doc.
+`12.6.2` A fallback event with **no location** is treated as nothing found.
 
 </td>
 </tr>
@@ -1402,42 +1421,12 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.4 -->
+![popup-states.12.6.3](popup/cases/popup-states.12.6.3.png) <!-- req-gallery:12.6.3 -->
 
 </td>
 <td valign="top">
 
-`12.4` Allowlisted host with an event shows the event and does NOT ask for support (the generic result is already trusted there).
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.5 -->
-
-</td>
-<td valign="top">
-
-`12.5` Unlisted host with an event shows the event AND offers to request first-class support (a prefilled GitHub issue).
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — verified by `dev/requirements/logic/product-requirements.test.js`._ <!-- req-gallery:12.6 -->
-
-</td>
-<td valign="top">
-
-`12.6` A fallback (non-dedicated) event counts as COMPLETE only when it has all three of a title, a location, and a start; anything less is "nothing found".
+`12.6.3` A fallback event with **no start** is treated as nothing found.
 
 </td>
 </tr>
@@ -1445,52 +1434,13 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 
 ## 13. Events model
 
-How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/events-popup/events-view.test.js` and the §4 snapshots).
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.1 -->
-
-</td>
-<td valign="top">
-
-`13.1` One card per distinct event on the page: an ordinary event page yields one; a listing or series page (a film week, a festival) yields one card per event.
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.2 -->
-
-</td>
-<td valign="top">
-
-`13.2` A multi-instance event folds showings that match on title, location, description, and timezone (differing only in time) into ONE event with several instances; distinct events that merely share a title stay separate.
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `dev/requirements/<kind>/cases/event-cards-grouping.4.2.1.case.js`._ <!-- req-gallery:13.3 -->
-
-</td>
-<td valign="top">
-
-`13.3` An event's instances are grouped BY MONTH into one or more cards — a single card for a month with one showing, or a grouped card with a button per showing.
-
-</td>
-</tr>
-</table>
+How distinct events and their showings map onto cards — one card per distinct
+event, multi-instance folding, and month-grouping — is specified **visually in
+§4–§5** and pinned by those snapshots (e.g. `4.1` one card per distinct event;
+`4.2.1`/`4.2.2` grouping an event's instances by month), with the non-visual
+folding logic (which showings collapse into one multi-instance event) covered by
+`extension-test/events-popup/events-view.test.js`. There are no separate leaves
+here: the rendered §4–§5 requirements are the executable contract.
 
 ## 14. Event fields
 
