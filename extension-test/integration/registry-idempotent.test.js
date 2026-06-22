@@ -14,7 +14,7 @@ const { JSDOM } = require("jsdom");
 const ROOT = path.join(__dirname, "..", "..");
 const EXT = path.join(ROOT, "extension"); // the extension root; load-order entries are relative to it
 const FILES = JSON.parse(
-  readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8")
+  readFileSync(path.join(EXT, "event-extractors/load-order.generated.json"), "utf8")
 ).map((file) => readFileSync(path.join(EXT, file), "utf8"));
 
 // Inject the whole pipeline into a window exactly as executeScript does.

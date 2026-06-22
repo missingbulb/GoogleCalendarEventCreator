@@ -19,14 +19,15 @@ const SHIPPING_PATHS = [
   "manifest.json",
   "config.js", // tunable product decisions; imported by the popup modules at runtime
   "fallback-policy.js", // host classifier for the generic fallback; imported by the popup at runtime
-  "pipeline", // the extraction pipeline + generated load list (popup fetches/injects)
-  "ui", // popup (html/css/js + views) and the toolbar-icon service worker
-  "icons", // toolbar icons: the per-size PNGs the manifest references
+  "fallback-lists.json", // the allow/deny/supported host lists; fetched by the worker, imported by config.js
+  "event-extractors", // the extractors (custom sources + helpers + orchestrator) + generated load list (popup fetches/injects)
+  "events-popup", // popup (html/css/js + views) and the calendar-URL builder
+  "icon", // the toolbar-icon service worker and its images/ PNGs the manifest references
 ];
 
 // Files that live UNDER a shipped directory but must NOT ship — dev-only
 // artifacts the runtime never loads. Exact repo-relative paths. Currently none:
-// the UI-snapshot inputs live under test/ (already unshipped), not under ui/.
+// the UI-snapshot inputs live under dev/requirements/, not under events-popup/.
 const SHIPPING_EXCLUDES = [];
 
 module.exports = { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES };

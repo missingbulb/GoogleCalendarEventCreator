@@ -1,7 +1,7 @@
 // Builds a pre-filled Google Calendar event-template URL from an extracted
 // event object — the page → events → calendar-URL pipeline's final step.
 //
-// An ES module imported by ui/views/events-view.js (popup-document only, so it
+// An ES module imported by events-popup/events-view.js (popup-document only, so it
 // can be a module — it is never injected into the page). `buildCalendarUrl` and
 // `formatDatesParam` are exported; the rest are module-private helpers.
 //

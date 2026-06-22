@@ -1,4 +1,4 @@
-// Offline unit tests for pipeline/build-calendar-url.js's Google Calendar URL
+// Offline unit tests for events-popup/build-calendar-url.js's Google Calendar URL
 // building: the `dates` parameter formats and the composition of the `details`
 // field.
 "use strict";
@@ -12,7 +12,7 @@ const { pathToFileURL } = require("node:url");
 let buildCalendarUrl, formatDatesParam;
 before(async () => {
   ({ buildCalendarUrl, formatDatesParam } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "extension", "pipeline", "build-calendar-url.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "build-calendar-url.js"))
   ));
 });
 const TAB = { title: "Tab Title", url: "https://example.com/events/picnic", index: 0 };

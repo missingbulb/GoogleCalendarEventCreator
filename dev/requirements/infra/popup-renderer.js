@@ -6,15 +6,15 @@
 // The key property: the DOM rendered here is the popup's REAL output. Each case
 // (dev/requirements/ui/cases/<name>.case.js) supplies only fake data — an extraction result,
 // a stub tab, a host listing, and an optional DOM action (e.g. "scroll to the
-// bottom"). We feed that to ui/popup.js's real `render()`, which runs the same
+// bottom"). We feed that to events-popup/popup.js's real `render()`, which runs the same
 // chooseContent + events-view + source-request-view + truncation code the
-// extension runs, into a jsdom document seeded from the real ui/popup.html. So
+// extension runs, into a jsdom document seeded from the real events-popup/popup.html. So
 // there is NO hand-maintained copy of the popup markup anywhere: change a view
 // and the snapshots move with it.
 //
 // satori has no CSS engine — it ignores <style>/<link> and reads only inline
 // styles — so we keep ONE source of truth for the popup's look (the real
-// ui/popup.css) and fold the WHOLE stylesheet onto the rendered DOM before
+// events-popup/popup.css) and fold the WHOLE stylesheet onto the rendered DOM before
 // drawing: parse popup.css into rules, match each against the DOM with jsdom (the
 // engine the popup runs in), and inline EVERY declaration. Nothing is
 // cherry-picked: satori quietly ignores what it doesn't use (cursor, transition,
@@ -50,8 +50,8 @@ const WIDTH = 304;
 // cases all use 2026 dates, so 2026 keeps them pill-free.
 const REFERENCE_YEAR = 2026;
 
-const POPUP_CSS = fs.readFileSync(path.join(ROOT, "extension", "ui", "popup.css"), "utf8");
-const POPUP_HTML = fs.readFileSync(path.join(ROOT, "extension", "ui", "popup.html"), "utf8");
+const POPUP_CSS = fs.readFileSync(path.join(ROOT, "extension", "events-popup", "popup.css"), "utf8");
+const POPUP_HTML = fs.readFileSync(path.join(ROOT, "extension", "events-popup", "popup.html"), "utf8");
 const { loadCases, CASES_DIR } = require("./cases");
 
 // Stub tab the cases render against. Only the calendar-URL/link hrefs read it
@@ -65,7 +65,7 @@ const DEFAULT_TAB = { url: "https://example.com/events", title: "Example event p
 let renderPromise;
 function loadRender() {
   if (!renderPromise) {
-    renderPromise = import(pathToFileURL(path.join(ROOT, "extension", "ui", "popup.js")).href).then((m) => m.render);
+    renderPromise = import(pathToFileURL(path.join(ROOT, "extension", "events-popup", "popup.js")).href).then((m) => m.render);
   }
   return renderPromise;
 }
@@ -144,7 +144,7 @@ function styleObject(styleAttr) {
 // purely a rasterization bound, the painted result is identical because the
 // dropped rows are clipped anyway. A card is >= its 52px min-height + 8px margin
 // = 60px, so this many rows always more than fills (and overflows) the cap.
-const EVENTS_VIEWPORT_PX = 500; // mirrors #events max-height in ui/popup.css
+const EVENTS_VIEWPORT_PX = 500; // mirrors #events max-height in events-popup/popup.css
 const MIN_ROW_PX = 60;
 const visibleRowsFor = (viewportPx) => Math.ceil(viewportPx / MIN_ROW_PX) + 3; // + safety/peek
 
@@ -255,7 +255,7 @@ async function renderCasePng(testCase) {
       // The popup body has no explicit background, so it's white (and square) in
       // Chrome. satori would otherwise leave the box transparent — making the PNG
       // look like rounded cards floating on nothing — so paint it white here to
-      // match the browser. A test-only choice; it doesn't touch ui/popup.html.
+      // match the browser. A test-only choice; it doesn't touch events-popup/popup.html.
       backgroundColor: "#fff",
     });
     const svg = await satori(vdom, { width: WIDTH, fonts: FONTS });

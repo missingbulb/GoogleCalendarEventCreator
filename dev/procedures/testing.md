@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`dev/requirements/extractors/`, `extension-test/extension/`, `test/unit/`, and `dev/requirements/ui/`:
+`dev/requirements/extractors/`, `extension-test/` (which mirrors `extension/`'s layout), and `dev/requirements/ui/`:
 
 ```sh
 npm install
@@ -105,7 +105,7 @@ way).
 ### Fallback-coverage gate — how the generic extractor stacks up
 
 **`dev/requirements/extractors/fallback/fallback-coverage.test.js`** (part of `test:live`) measures
-what the generic **fallback** extractor (`extension/pipeline/extract-unsupported.js`)
+what the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`)
 recovers on each cached case page, relative to that page's **dedicated source**
 — the reviewed-correct ground truth. The comparison logic lives in
 **`dev/requirements/extractors/fallback/fallback-coverage.js`**: it runs `GCal.extract()` twice on the same HTML
@@ -151,9 +151,9 @@ in the baseline file) when that's the intended cause.
 
 ### Unit tests — the internal safety net
 
-**`extension-test/unit/extraction.test.js`** pins down the extraction logic (site
+**`extension-test/event-extractors/extraction.test.js`** pins down the extraction logic (site
 selectors, JSON-LD handling, text date parsing, multiple-event detection) and
-**`extension-test/unit/calendar-url.test.js`** covers the Google Calendar URL building
+**`extension-test/events-popup/build-calendar-url.test.js`** covers the Google Calendar URL building
 (`dates` formats, the `details` field layout). Both use small synthetic
 HTML snippets written inline — no network, never flake — so a regression is
 caught on every PR even when a third-party site or its cached HTML is
@@ -167,10 +167,10 @@ from facebook.com, so it can't be cached as a live case.
 **`dev/requirements/ui/popup-snapshots.test.js`** is the single visual-comparison engine: it
 renders each UI *case* and compares it pixel-by-pixel (via `pixelmatch`) against a
 committed image. `dev/requirements/infra/render-snapshot.js` picks the renderer by the **case's own
-`kind`**: a `"popup"` case (the default) is fed to `extension/ui/popup.js`'s exported
+`kind`**: a `"popup"` case (the default) is fed to `extension/events-popup/popup.js`'s exported
 `render({ data, tab, listing })` — the same `chooseContent` +
 `events-view.js`/`source-request-view.js` code the extension runs — and a
-`"icon"` case (§10, the toolbar icon) is fed to the real `extension/ui/toolbar-icon.js`
+`"icon"` case (§10, the toolbar icon) is fed to the real `extension/icon/toolbar-icon.js`
 loaded into a fake browser (`icon-renderer.js` + `fake-chrome.js`). Either way the
 pixels come from shipped code, so a change to a view or to the icon is caught
 automatically; the comparison, naming, storage, and refresh are shared. (`render()`
@@ -196,7 +196,7 @@ active-tab URL and host lists the toolbar-icon renderer classifies.
 
 `dev/requirements/infra/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
 browser). satori has no CSS engine, so the renderer folds the **real
-`extension/ui/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
+`extension/events-popup/popup.css`** onto the rendered DOM as inline styles first (parse rules, match
 with jsdom, inline every declaration) — one source of truth for the styling, no
 duplicated values. Nothing is cherry-picked: satori ignores what it doesn't use;
 the only adjustments are its one structural rule (a box with element children
@@ -216,8 +216,8 @@ Rendering is deterministic, so this is fast and dependency-light enough to run
 as part of `npm test`/`test:ui` everywhere, with no separate CI job or browser
 install step.
 
-After an intentional change to the popup — its views (`extension/ui/popup.js`,
-`extension/ui/views/*.js`) or its styling (`extension/ui/popup.css`) — run `npm run refresh:ui` to
+After an intentional change to the popup — its views (`extension/events-popup/popup.js`,
+`extension/events-popup/*.js`) or its styling (`extension/events-popup/popup.css`) — run `npm run refresh:ui` to
 regenerate the `dev/requirements/ui/cases/*.png` images and commit them so reviewers see the
 before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
 `<name>.diff.png` to `dev/requirements/infra/.artifacts/` (gitignored; see

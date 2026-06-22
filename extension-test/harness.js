@@ -3,7 +3,7 @@
 // detection behaves exactly like in the browser).
 //
 // The list of files — and their injection order — is read from the generated
-// pipeline/load-order.generated.json (the same list popup.js injects), so the
+// event-extractors/load-order.generated.json (the same list popup.js injects), so the
 // tests always exercise exactly what the popup injects.
 "use strict";
 
@@ -15,14 +15,14 @@ const { JSDOM } = require("jsdom");
 const ROOT = path.join(__dirname, "..");
 // The deployable extension (its files and load list) lives under extension/,
 // which is the extension root. Load-order entries are relative to it
-// ("pipeline/..."), so reads join through EXT.
+// ("event-extractors/..."), so reads join through EXT.
 const EXT = path.join(ROOT, "extension");
 
 function extractorSources() {
   const files = JSON.parse(
-    readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8")
+    readFileSync(path.join(EXT, "event-extractors/load-order.generated.json"), "utf8")
   );
-  assert.ok(files.length > 0, "extension/pipeline/load-order.generated.json is empty");
+  assert.ok(files.length > 0, "extension/event-extractors/load-order.generated.json is empty");
   return files.map((file) => ({ file, src: readFileSync(path.join(EXT, file), "utf8") }));
 }
 

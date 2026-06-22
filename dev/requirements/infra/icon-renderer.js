@@ -1,5 +1,5 @@
 // Generate the PNG the extension's toolbar icon would be for a given tab URL, by
-// loading the REAL extension/ui/toolbar-icon.js into a fake browser (fake-chrome.js),
+// loading the REAL extension/icon/toolbar-icon.js into a fake browser (fake-chrome.js),
 // letting it register its declarativeContent rules through the worker's own
 // installRules() path, then asking the fake what icon it would paint at that URL.
 //
@@ -15,10 +15,10 @@ const { PNG } = require("pngjs");
 const { FakeBrowser } = require("./fake-chrome");
 
 // The shipped extension lives under extension/; the worker's own fetch paths
-// ("pipeline/…", "icons/…") are extension-root-relative, so the fake browser reads
+// ("fallback-lists.json", "icon/images/…") are extension-root-relative, so the fake browser reads
 // from EXT_ROOT.
 const EXT_ROOT = path.join(__dirname, "..", "..", "..", "extension");
-const WORKER = path.join(EXT_ROOT, "ui/toolbar-icon.js");
+const WORKER = path.join(EXT_ROOT, "icon/toolbar-icon.js");
 const MANIFEST = JSON.parse(fs.readFileSync(path.join(EXT_ROOT, "manifest.json"), "utf8"));
 
 const ASSERT_SIZE = 32;

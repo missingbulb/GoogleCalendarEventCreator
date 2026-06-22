@@ -11,13 +11,13 @@ nothing. A no-win run means no branch and no PR.
 
 ## Scope — the only code it may change
 
-Just the **generic** extractor: `extension/pipeline/extract-unsupported.js` and the shared
-`extension/pipeline/helpers/*.js`. *Generic* means a change that keys off a **widely-used**
+Just the **generic** extractor: `extension/event-extractors/extract-unsupported.js` and the shared
+`extension/event-extractors/helpers/*.js`. *Generic* means a change that keys off a **widely-used**
 convention and would plausibly help unseen sites — display conventions
 (date↔time separators, start–end time ranges, "Event @ Venue" titles, ordinals)
 or standard machine-readable signals (schema.org JSON-LD, Open Graph/meta,
 microdata, `<time datetime>`). **Not** generic, so out of scope: lifting one
-`extension/pipeline/sources/<site>.js`'s logic into the fallback, or special-casing a host —
+`extension/event-extractors/custom/<site>.js`'s logic into the fallback, or special-casing a host —
 if the only beneficiary is a single case and the rule wouldn't fire elsewhere, it
 isn't generic.
 
@@ -46,7 +46,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
   (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../technicalGotchas.md).)
 - **(b) deliberate decisions.** Some misses are intentional and pinned by a unit
   test (e.g. a date with intervening non-separator text before its time is
-  all-day, in `extension-test/unit/extraction.test.js`). Never "fix" what a test
+  all-day, in `extension-test/event-extractors/extraction.test.js`). Never "fix" what a test
   deliberately asserts. And `ctz` (an IANA zone) and `eventLengthInMinutes` are
   usually not derivable generically — don't invent them (a wrong `ctz` is worse
   than none); `start`/`end` match when they resolve to the same instant, so don't
@@ -56,7 +56,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
 
 Red-before-green (confirm the new test fails on the pre-change code, passes
 after); cover every change with an existing integration case or a focused unit
-test in `extension-test/unit/extraction.test.js`; full suite green (`npm test`) and
+test in `extension-test/event-extractors/extraction.test.js`; full suite green (`npm test`) and
 `npm run test:live` regenerates the GENERATED artifacts. Every gated % must be
 **≥** its previous value (no field regressed) and at least one must improve — a
 change that lifts one field but drops another isn't clean, so drop it. Never

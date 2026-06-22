@@ -44,7 +44,7 @@ it:
 
 - `"popup"` / `"icon"` — an **image** leaf, pinned by a `<slug>.<id>.png` snapshot in
   the **two-column table** below (image left, requirement right). `"popup"` is the
-  popup's real `render()`; `"icon"` is the real `extension/ui/toolbar-icon.js` in a fake
+  popup's real `render()`; `"icon"` is the real `extension/icon/toolbar-icon.js` in a fake
   browser (the toolbar icon, §10).
 - `"behavior"` — a click/navigation a static image can't observe; the case carries
   no image, its left cell shows a note, and it's verified by
@@ -1039,7 +1039,7 @@ event was found (the icon can't read the page, so a page where the generic fallb
 later finds an event still shows the blue icon). When the host is denylisted **or**
 supported it would otherwise show two icons; supported wins. These are ordinary
 snapshot leaves whose cases set `kind: "icon"`, so their images are rendered by the
-real `extension/ui/toolbar-icon.js` in a fake browser rather than the popup (see
+real `extension/icon/toolbar-icon.js` in a fake browser rather than the popup (see
 "Verification kind" above).
 
 <table>
@@ -1094,7 +1094,7 @@ an allowlisted host — the icon stays the manifest default, **blue**.
 ## 11. Required explicit support for Extractors
 
 Each host below has **explicit, dedicated extractor support** — a self-contained
-source under `extension/pipeline/sources/` whose `matches(host)` claims the page,
+source under `extension/event-extractors/custom/` whose `matches(host)` claims the page,
 so the toolbar icon goes green and the popup extracts the event from that site's
 own markup (not the generic fallback). This section is the **executable
 catalogue** of that support: each leaf is one supported host, validated by a
@@ -1116,7 +1116,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.1` `meetup.com` — extracted by the dedicated source `extension/pipeline/sources/meetup.js`, validated against the cached `meetup-nyc-tech-mixer` page.
+`11.1` `meetup.com` — extracted by the dedicated source `extension/event-extractors/custom/meetup.js`, validated against the cached `meetup-nyc-tech-mixer` page.
 
 </td>
 </tr>
@@ -1131,7 +1131,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.2` `eventbrite.com` — extracted by the dedicated source `extension/pipeline/sources/eventbrite.js`, validated against the cached `eventbrite-games-for-change` page.
+`11.2` `eventbrite.com` — extracted by the dedicated source `extension/event-extractors/custom/eventbrite.js`, validated against the cached `eventbrite-games-for-change` page.
 
 </td>
 </tr>
@@ -1146,7 +1146,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.3` `edfringe.com` — extracted by the dedicated source `extension/pipeline/sources/edinburghfringe.js`, validated against the cached `edinburghfringe-daniel-sloss` page.
+`11.3` `edfringe.com` — extracted by the dedicated source `extension/event-extractors/custom/edinburghfringe.js`, validated against the cached `edinburghfringe-daniel-sloss` page.
 
 </td>
 </tr>
@@ -1161,7 +1161,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.4` `cinema.co.il` — extracted by the dedicated source `extension/pipeline/sources/telavivcinematheque.js`, validated against the cached `telavivcinematheque-sentimental-value` page.
+`11.4` `cinema.co.il` — extracted by the dedicated source `extension/event-extractors/custom/telavivcinematheque.js`, validated against the cached `telavivcinematheque-sentimental-value` page.
 
 </td>
 </tr>
@@ -1176,7 +1176,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.5` `ticketmaster.co.il` — extracted by the dedicated source `extension/pipeline/sources/ticketmaster.js`, validated against the cached `ticketmaster-ravid-plotnik` page.
+`11.5` `ticketmaster.co.il` — extracted by the dedicated source `extension/event-extractors/custom/ticketmaster.js`, validated against the cached `ticketmaster-ravid-plotnik` page.
 
 </td>
 </tr>
@@ -1191,7 +1191,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.6` `bandsintown.com` — extracted by the dedicated source `extension/pipeline/sources/bandsintown.js`, validated against the cached `bandsintown-berry-sakharof` page.
+`11.6` `bandsintown.com` — extracted by the dedicated source `extension/event-extractors/custom/bandsintown.js`, validated against the cached `bandsintown-berry-sakharof` page.
 
 </td>
 </tr>
@@ -1206,7 +1206,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.7` `barby.co.il` — extracted by the dedicated source `extension/pipeline/sources/barby.js`, validated against the cached `barby` page.
+`11.7` `barby.co.il` — extracted by the dedicated source `extension/event-extractors/custom/barby.js`, validated against the cached `barby` page.
 
 </td>
 </tr>
@@ -1221,7 +1221,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.8` `dash.datadoghq.com` — extracted by the dedicated source `extension/pipeline/sources/dash-datadoghq.js`, validated against the cached `dash-datadoghq` page.
+`11.8` `dash.datadoghq.com` — extracted by the dedicated source `extension/event-extractors/custom/dash-datadoghq.js`, validated against the cached `dash-datadoghq` page.
 
 </td>
 </tr>
@@ -1236,7 +1236,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.9` `eventim.co.il` — extracted by the dedicated source `extension/pipeline/sources/eventim-co-il.js`, validated against the cached `eventim-co-il-the90sshow` page.
+`11.9` `eventim.co.il` — extracted by the dedicated source `extension/event-extractors/custom/eventim-co-il.js`, validated against the cached `eventim-co-il-the90sshow` page.
 
 </td>
 </tr>
@@ -1251,7 +1251,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.10` `events.datadoghq.com` — extracted by the dedicated source `extension/pipeline/sources/events-datadoghq.js`, validated against the cached `events-datadoghq` page.
+`11.10` `events.datadoghq.com` — extracted by the dedicated source `extension/event-extractors/custom/events-datadoghq.js`, validated against the cached `events-datadoghq` page.
 
 </td>
 </tr>
@@ -1266,7 +1266,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.11` `lu.ma` — extracted by the dedicated source `extension/pipeline/sources/luma.js`, validated against the cached `luma-event` page.
+`11.11` `lu.ma` — extracted by the dedicated source `extension/event-extractors/custom/luma.js`, validated against the cached `luma-event` page.
 
 </td>
 </tr>
@@ -1281,7 +1281,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.12` `secrettelaviv.com` — extracted by the dedicated source `extension/pipeline/sources/secrettelaviv.js`, validated against the cached `secrettelaviv-world-cup-eve` page.
+`11.12` `secrettelaviv.com` — extracted by the dedicated source `extension/event-extractors/custom/secrettelaviv.js`, validated against the cached `secrettelaviv-world-cup-eve` page.
 
 </td>
 </tr>
@@ -1296,7 +1296,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.13` `tabitisrael.co.il` — extracted by the dedicated source `extension/pipeline/sources/tabitisrael.js`, validated against the cached `tabitisrael` page.
+`11.13` `tabitisrael.co.il` — extracted by the dedicated source `extension/event-extractors/custom/tabitisrael.js`, validated against the cached `tabitisrael` page.
 
 </td>
 </tr>
@@ -1311,7 +1311,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.14` `thinkdrink.co.il` — extracted by the dedicated source `extension/pipeline/sources/thinkdrink.js`, validated against the cached `thinkdrink-quantum-lecture` page.
+`11.14` `thinkdrink.co.il` — extracted by the dedicated source `extension/event-extractors/custom/thinkdrink.js`, validated against the cached `thinkdrink-quantum-lecture` page.
 
 </td>
 </tr>
@@ -1326,7 +1326,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.15` `visit.tel-aviv.gov.il` — extracted by the dedicated source `extension/pipeline/sources/visit-tel-aviv.js`, validated against the cached `visit-tel-aviv` page.
+`11.15` `visit.tel-aviv.gov.il` — extracted by the dedicated source `extension/event-extractors/custom/visit-tel-aviv.js`, validated against the cached `visit-tel-aviv` page.
 
 </td>
 </tr>
@@ -1341,7 +1341,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.16` `facebook.com` — extracted by the dedicated source `extension/pipeline/sources/facebook.js`. No cached live case (bot-blocked); covered by unit tests only.
+`11.16` `facebook.com` — extracted by the dedicated source `extension/event-extractors/custom/facebook.js`. No cached live case (bot-blocked); covered by unit tests only.
 
 </td>
 </tr>
@@ -1349,7 +1349,7 @@ is covered by unit tests only.
 
 ## 12. Popup states (what the popup shows)
 
-When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `extension-test/unit/popup-content.test.js`); the one machine-checkable rule, completeness, is wired.
+When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `extension-test/events-popup/popup.test.js`); the one machine-checkable rule, completeness, is wired.
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 
@@ -1357,7 +1357,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.1 -->
 
 </td>
 <td valign="top">
@@ -1372,7 +1372,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.2 -->
 
 </td>
 <td valign="top">
@@ -1387,7 +1387,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.3 -->
 
 </td>
 <td valign="top">
@@ -1402,7 +1402,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.4 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.4 -->
 
 </td>
 <td valign="top">
@@ -1417,7 +1417,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.5 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.5 -->
 
 </td>
 <td valign="top">
@@ -1445,13 +1445,13 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 
 ## 13. Events model
 
-How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/unit/events-view.test.js` and the §4 snapshots).
+How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/events-popup/events-view.test.js` and the §4 snapshots).
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/events-view.test.js`._ <!-- req-gallery:13.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.1 -->
 
 </td>
 <td valign="top">
@@ -1466,7 +1466,7 @@ How distinct events and their showings map onto cards. The exact card grouping, 
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/events-view.test.js`._ <!-- req-gallery:13.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.2 -->
 
 </td>
 <td valign="top">
@@ -1500,7 +1500,7 @@ Field-level rules for the values that land in the Calendar event. Single-line fi
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:14.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:14.1 -->
 
 </td>
 <td valign="top">
@@ -1528,13 +1528,13 @@ Field-level rules for the values that land in the Calendar event. Single-line fi
 
 ## 15. Dates, times & timezones
 
-The rules that govern the *instant* the Calendar event lands on (how a time is *displayed* on a card is §6). Most timezone rules are tracked but not yet wired (covered today by `extension-test/unit/extraction.test.js`); the all-day and default-duration rules are wired.
+The rules that govern the *instant* the Calendar event lands on (how a time is *displayed* on a card is §6). Most timezone rules are tracked but not yet wired (covered today by `extension-test/event-extractors/extraction.test.js`); the all-day and default-duration rules are wired.
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:15.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:15.1 -->
 
 </td>
 <td valign="top">
@@ -1549,7 +1549,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:15.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:15.2 -->
 
 </td>
 <td valign="top">
@@ -1564,7 +1564,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:15.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:15.3 -->
 
 </td>
 <td valign="top">
@@ -1607,13 +1607,13 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/unit/source-request.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/source-request.test.js`._ <!-- req-gallery:16.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/source-request-view.test.js`._ <!-- req-gallery:16.1 -->
 
 </td>
 <td valign="top">

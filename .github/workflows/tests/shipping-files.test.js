@@ -41,8 +41,8 @@ test("manifest-referenced files ship", () => {
 });
 
 test("every injected extractor file ships", () => {
-  // pipeline/load-order.generated.json is the list popup.js injects into the page.
-  const files = JSON.parse(read("pipeline/load-order.generated.json"));
+  // event-extractors/load-order.generated.json is the list popup.js injects into the page.
+  const files = JSON.parse(read("event-extractors/load-order.generated.json"));
   assert.ok(files.length > 0, "load-order.generated.json lists no files");
   for (const f of files) {
     assert.ok(fs.existsSync(path.join(EXT, f)), `load order lists ${f}, which does not exist`);
@@ -51,14 +51,14 @@ test("every injected extractor file ships", () => {
 });
 
 test("popup's module script and stylesheet ship", () => {
-  const html = read("ui/popup.html");
+  const html = read("events-popup/popup.html");
   const scripts = [...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(scripts, ["popup.js"]); // a single ES-module controller; views load via import()
   const styles = [...html.matchAll(/<link[^>]*href="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(styles, ["popup.css"]);
-  // Both are relative to ui/popup.html.
+  // Both are relative to events-popup/popup.html.
   for (const ref of [...scripts, ...styles]) {
-    assert.ok(isShipped(`ui/${ref}`), `popup loads ${ref}, but ui/${ref} is not in the shipping set`);
+    assert.ok(isShipped(`events-popup/${ref}`), `popup loads ${ref}, but events-popup/${ref} is not in the shipping set`);
   }
 });
 
@@ -67,10 +67,10 @@ test("the service worker's runtime resources ship", () => {
   // it fetches the host lists and decodes the per-state icon PNGs into ImageData
   // (it no longer importScripts the pipeline). Every resource it fetches must
   // ship — and exist, so a renamed icon variant fails here, not at runtime.
-  const resources = ["pipeline/fallback-lists.json"];
+  const resources = ["fallback-lists.json"];
   for (const size of [16, 32]) {
     for (const suffix of ["", "-supported", "-denied"]) {
-      resources.push(`icons/icon${size}${suffix}.png`);
+      resources.push(`icon/images/icon${size}${suffix}.png`);
     }
   }
   for (const r of resources) {

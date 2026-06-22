@@ -2,7 +2,7 @@
 // (dev/tools/new-extractors-creation/triage-extractor-request.js): the workflow step that closes a request
 // whose host is already on config.js's fallback allow/denylist, before spending
 // an agent run. Lists are injected so the cases don't depend on the shipped
-// (empty) config; the host-matching itself is covered in popup-content.test.js.
+// (empty) config; the host-matching itself is covered in fallback-policy.test.js.
 "use strict";
 
 const { test } = require("node:test");
@@ -55,7 +55,7 @@ test("the result carries the deterministic new-mode names the workflow needs", a
   assert.equal(res.sourceBase, "unknown");
   assert.equal(res.caseName, "unknown"); // new mode: caseName == slug
   assert.equal(res.branch, "claude/extractor/unknown");
-  assert.equal(res.sourcePath, "extension/pipeline/sources/unknown.js");
+  assert.equal(res.sourcePath, "extension/event-extractors/custom/unknown.js");
   assert.equal(res.casePath, "dev/requirements/extractors/custom/unknown.json");
 });
 
@@ -103,7 +103,7 @@ test("supported mode keys the case/branch on the EXISTING source file, not the s
   const res = await runTriage({ body: bodyWith("https://www.cinema.co.il/event/1"), number: 451 });
   assert.equal(res.reason, "supported");
   assert.equal(res.sourceBase, "telavivcinematheque");
-  assert.equal(res.sourcePath, "extension/pipeline/sources/telavivcinematheque.js");
+  assert.equal(res.sourcePath, "extension/event-extractors/custom/telavivcinematheque.js");
   assert.equal(res.caseName, "telavivcinematheque-451");
   assert.equal(res.casePath, "dev/requirements/extractors/custom/telavivcinematheque-451.json");
   assert.equal(res.branch, "claude/extractor/telavivcinematheque-451");

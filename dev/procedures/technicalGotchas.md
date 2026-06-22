@@ -38,11 +38,12 @@ trap spanning files. See the full locality rule in
   positions. CI-only: the cloud sandbox can't even download Chrome (below), so the
   render no-ops locally and is verified only in CI (#310).
 - **Service-worker paths must be extension-root absolute.** The background service
-  worker runs from `ui/toolbar-icon.js` (relative to the extension root,
+  worker runs from `icon/toolbar-icon.js` (relative to the extension root,
   `extension/`), so any path it hands a Chrome API
   (`importScripts`, `action.setIcon`) or `fetch` must be extension-root absolute —
   a leading slash or `chrome.runtime.getURL(...)`. A bare relative path
-  (`icons/...`, `pipeline/...`) resolves against `ui/` and silently fails: the
+  (`images/...`, `event-extractors/...`) resolves against `icon/` (the worker's
+  own folder) and silently fails: the
   import aborts the worker (#146), or `setIcon` rejects with "Failed to fetch" and
   the icon never changes (#204). Don't be fooled by stale web guides (Chromium
   #1262029) that say `setIcon({path})` is a silent no-op in a worker needing an
@@ -60,7 +61,7 @@ trap spanning files. See the full locality rule in
   registration time. Building that `imageData` in the service worker can't use a
   DOM `<canvas>`/`<img>` (there's no DOM) — decode the packaged PNG with
   `fetch(getURL(icon)) → blob → createImageBitmap → OffscreenCanvas.drawImage →
-  getImageData`. (Used by `ui/toolbar-icon.js` to color the icon without the
+  getImageData`. (Used by `icon/toolbar-icon.js` to color the icon without the
   `tabs` permission. Also: a bare `hostSuffix: "example.com"` matcher also matches
   `evilexample.com` — pair `hostEquals: "example.com"` with
   `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
@@ -100,7 +101,7 @@ trap spanning files. See the full locality rule in
   extraction can therefore pass against cached HTML yet find nothing in Chrome;
   treat body-text results as jsdom-optimistic, and don't add an integration case
   that only passes because of this (same jsdom-vs-Chrome class as the `<noscript>`
-  gotcha below, and the note in `sources/telavivcinematheque.js`).
+  gotcha below, and the note in `custom/telavivcinematheque.js`).
 - **jsdom's default `runScripts: "outside-only"` parses `<noscript>` into live DOM
   — the opposite of a real browser.** With scripting off, jsdom turns `<noscript>`
   content into real elements, so a `textContent` read looks clean in a test but

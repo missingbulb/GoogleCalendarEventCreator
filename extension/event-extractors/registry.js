@@ -2,7 +2,7 @@
 // the generated load order, and is DOM-free so it runs identically in the page
 // (injected content script), the popup, and the service worker.
 //
-// `GCal.sources` is the registry: each pipeline/sources/<site>.js pushes
+// `GCal.sources` is the registry: each event-extractors/custom/<site>.js pushes
 //   { name, matches(hostname), extract() }
 // onto it, and assemble-events.js runs the first source whose `matches` returns
 // true. Each source produces a partial event object with these optional fields:
@@ -28,7 +28,7 @@
 // would stack a duplicate matcher on every reopen.
 //
 // `GCal.sourceFallbackDenylist` is set asynchronously by the service worker
-// (ui/toolbar-icon.js fetches pipeline/fallback-lists.json at startup).
+// (icon/toolbar-icon.js fetches fallback-lists.json at startup).
 // It is not available in the page-injection context — extractors don't need it.
 // isDeniedHost() reads it at call time via `|| []` so it degrades gracefully.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
@@ -36,7 +36,7 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, {
 
   // THE single source of truth for "is this page a supported site": its
   // hostname has a registered source whose `matches` returns true. The toolbar
-  // service worker (ui/toolbar-icon.js) derives the icon color from this;
+  // service worker (icon/toolbar-icon.js) derives the icon color from this;
   // the popup gets the same answer from the injected extraction result
   // (assemble-events.js reports whether a source matched). DOM-free, so it runs
   // the same in the service worker, the popup, and content-script contexts.
@@ -51,7 +51,8 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, {
 
   // True when the host is on the fallback denylist — the popup suppresses
   // fallback events there, and the toolbar icon shows a gray tile.
-  // Reads GCal.sourceFallbackDenylist populated by pipeline/fallback-lists.js.
+  // Reads GCal.sourceFallbackDenylist, set by the service worker fetching
+  // fallback-lists.json at startup (icon/toolbar-icon.js).
   isDeniedHost(url) {
     try {
       const host = new URL(url).hostname.replace(/^www\./, "");
