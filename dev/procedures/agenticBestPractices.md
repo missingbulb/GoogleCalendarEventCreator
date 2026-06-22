@@ -24,11 +24,3 @@ usually just whatever is captured-but-not-yet-upstreamed.
   assistant's instruction-following is the enforcement mechanism; the hook provides
   the check. Stay silent on success — only emit when something requires the user's
   decision. (`.claude/hooks/session-start.sh` is a worked example.)
-- **After moving a file, the editor tool may treat the new path as unread — a
-  Write/Edit in the same batch silently refuses, leaving the moved file stale.**
-  When you relocate a file (e.g. `git mv`) meaning to rewrite it, re-read it at the
-  *new* path before editing. And check each result in a batched set of tool calls: a
-  single refused write (or any silent failure) buried in a batch is easy to miss,
-  and the stale artifact it leaves surfaces much later as a confusing error far from
-  its cause (here a moved-but-not-rewritten module read the old layout and
-  `ENOENT`'d at load, two steps downstream).

@@ -167,3 +167,15 @@ invariant — live in the shared rules:
   update --init` re-registered it, any operation that consulted `.git/config`
   (submodule status, checkout) saw the stale entry. Always run both commands after
   renaming a directory that houses a submodule.
+
+## Re-read a file after `git mv` before rewriting it
+
+- **`git mv` leaves the moved file looking unread to the editor tool — a
+  `Write`/`Edit` in the same batch silently refuses, leaving the file stale.** The
+  common reorg move is `git mv old new` then rewrite `new`; the editor tracks reads
+  by path, so the moved path reads as never-seen and the write is rejected. Re-read
+  the file at its **new** path before editing it. And check each result in a batched
+  set of tool calls: a single refused write (or any silent failure) buried in a batch
+  is easy to miss, and the stale (moved-but-not-rewritten) file surfaces much later
+  as a confusing error far from its cause — here a relocated module kept its old
+  contents and `ENOENT`'d at load two steps downstream.
