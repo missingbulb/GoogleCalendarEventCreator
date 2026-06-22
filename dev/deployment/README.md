@@ -12,7 +12,7 @@ steps see [`../procedures/releasing.md`](../procedures/releasing.md).
 | `generate_icons.py` | Generator (stdlib only) for **every** icon — both looks. | See below. |
 
 The Web Store **listing icon** is not a separate file: upload
-`extension/icons/icon128.png` (below) by hand in the Dashboard.
+`extension/icons/chromeStoreIcon.png` (below) by hand in the Dashboard.
 
 ## Where each icon comes from
 
@@ -22,8 +22,8 @@ different looks, writing each straight into `extension/icons/`:
 **Polished calendar art** (anti-aliased, with a 16px safe zone so it doubles as
 the store listing icon):
 
-- `extension/icons/icon128.png` — the manifest 128px icon Chrome shows in the
-  install dialog, and the file uploaded by hand as the store listing icon.
+- `extension/icons/chromeStoreIcon.png` — the manifest 128px icon Chrome shows
+  in the install dialog, and the file uploaded by hand as the store listing icon.
 - `extension/icons/chromeExtensionManagementIcon.png` — the 48px icon the
   `chrome://extensions` management page shows.
 

@@ -118,7 +118,7 @@ If minting fails, the symptoms map to fixes like this:
    [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
    (one-time \$5 fee).
 2. **Add new item** and upload the release zip.
-3. Complete the store listing: the store icon (`extension/icons/icon128.png`),
+3. Complete the store listing: the store icon (`extension/icons/chromeStoreIcon.png`),
    description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
    tab — justify each requested permission (`activeTab`, `scripting`,
    `declarativeContent`; see [Permissions](../README.md#permissions)) and declare

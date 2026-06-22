@@ -16,7 +16,7 @@ store image guidelines: https://developer.chrome.com/docs/webstore/images#icons
   Polished calendar art — the larger sizes Chrome and the store show, from one
   anti-aliased render definition (96x96 art in a 16px transparent safe zone per
   the store guidelines):
-      extension/icons/icon128.png          manifest 128px icon (install dialog);
+      extension/icons/chromeStoreIcon.png  manifest 128px icon (install dialog);
           also the file uploaded by hand as the Web Store LISTING icon.
       extension/icons/chromeExtensionManagementIcon.png   48px management-page icon.
 """
@@ -188,7 +188,7 @@ def main():
     # Polished calendar art: 48 (management) + 128 (manifest, and the file
     # uploaded by hand as the store listing icon).
     for name, px in [
-        ("icon128.png", render(128)),
+        ("chromeStoreIcon.png", render(128)),
         ("chromeExtensionManagementIcon.png", render(48)),
     ]:
         write_png(os.path.join(ext_icons, name), px)
