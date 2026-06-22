@@ -54,8 +54,21 @@ jobs:
             --label claudinite-lesson)"
           echo "Created $new_url"
 
-          # Link back and close the source issue (tracking continues in
-          # Claudinite), using THIS repo's token — the PAT is Claudinite-only.
-          GH_TOKEN="$SRC_TOKEN" gh issue close "$SRC_NUM" --repo "$SRC_REPO" \
-            --reason "not planned" \
-            --comment "Handed off to Claudinite for curation: $new_url — tracking continues there."
+          # Guard: only close the source after the Claudinite copy exists, so a
+          # failed hand-off leaves the source issue open (set -e already aborts on
+          # a non-zero gh exit; this also catches an empty/garbled URL).
+          if [ -z "$new_url" ] || [ "$new_url" = "${new_url#https://}" ]; then
+            echo "Claudinite issue was not created (no URL returned); leaving source open." >&2
+            exit 1
+          fi
+
+          # Close the source as a DUPLICATE of the canonical Claudinite issue
+          # (tracking continues there), using THIS repo's token — the PAT is
+          # Claudinite-only. The REST `duplicate_of` field only resolves an issue
+          # number WITHIN the same repo, so it can't point at the cross-repo
+          # Claudinite issue; instead we post an explicit "Duplicate of <full URL>"
+          # comment for the linkage, then close with state_reason "duplicate".
+          GH_TOKEN="$SRC_TOKEN" gh issue comment "$SRC_NUM" --repo "$SRC_REPO" \
+            --body "Duplicate of $new_url — handed off to Claudinite for curation; tracking continues there."
+          GH_TOKEN="$SRC_TOKEN" gh api -X PATCH "repos/$SRC_REPO/issues/$SRC_NUM" \
+            -f state=closed -f state_reason=duplicate
