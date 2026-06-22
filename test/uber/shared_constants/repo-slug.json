@@ -1,8 +1,0 @@
-{
-  "what": "GitHub repo slug",
-  "value": "missingbulb/GoogleCalendarEventCreator",
-  "counts": {
-    "extension/ui/views/source-request-view.js": 1,
-    "test/unit/source-request.test.js": 1
-  }
-}

@@ -16,7 +16,7 @@
 //               icons ("א׳ 21/6" + "12:00"). The displayed date has NO YEAR, so
 //               the year is inferred as the nearest upcoming one (a reservation
 //               is in the future) off GCal.now() — injectable in tests so the
-//               asserted date can't rot (see helpers/dates.js / test/harness.js).
+//               asserted date can't rot (see helpers/dates.js / extension-test/harness.js).
 //   end         not shown on the page -> omitted (single start time only)
 //   description .description block (the saved-reservation confirmation message,
 //               multi-line — blockText preserves its <br> line breaks)
@@ -41,7 +41,7 @@
   // page's "<day-of-week> D/M" date and "HH:MM" time. The year is absent on the
   // page, so pick the nearest upcoming year for that day/month. Uses UTC
   // component math throughout to avoid the local-midnight/toISOString day shift
-  // (docs/technicalGotchas.md).
+  // (dev/procedures/technicalGotchas.md).
   function buildStart(dateRaw, timeRaw) {
     const dm = (dateRaw || "").match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
     const tm = (timeRaw || "").match(/(\d{1,2}):(\d{2})/);

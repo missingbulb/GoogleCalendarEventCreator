@@ -1,8 +1,8 @@
 # Hand a portable lesson off to the shared Claudinite repo. Portable lessons
 # can't be edited in this repo — the shared rules live in a read-only submodule
-# (docs/claude/shared) — so the "learned lessons" pass files a labelled issue
+# (dev/procedures/claude/shared) — so the "learned lessons" pass files a labelled issue
 # here and this workflow copies it to Claudinite, where a curation routine
-# dedupes/routes it into a docs PR. See docs/claude/claudinite-handoff.md and #364.
+# dedupes/routes it into a docs PR. See dev/procedures/claude/claudinite-handoff.md and #364.
 #
 # Needs the CLAUDINITE_ISSUE_TOKEN secret: a fine-grained PAT with Issues: write
 # on missingbulb/Claudinite (the automatic GITHUB_TOKEN can't write cross-repo).

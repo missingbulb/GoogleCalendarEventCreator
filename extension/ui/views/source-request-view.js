@@ -32,9 +32,9 @@ const SOURCE_REQUEST_LABEL = "extractor-request";
 
 // The public doc the "Disagree?" link opens — a short, user-facing explanation
 // of how the extension decides what's an event. Path is relative to the repo
-// root on the default branch; an existence test (test/unit/source-request.test.js)
+// root on the default branch; an existence test (extension-test/unit/source-request.test.js)
 // fails if the file is moved without updating this, so the link can't rot.
-const POLICY_DOC_PATH = "docs/extraction-policy.md";
+const POLICY_DOC_PATH = "dev/procedures/extraction-policy.md";
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query

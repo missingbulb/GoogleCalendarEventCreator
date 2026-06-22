@@ -1,6 +1,6 @@
-# Dependabot keeps the Claudinite shared-rules submodule (docs/claude/shared)
+# Dependabot keeps the Claudinite shared-rules submodule (dev/procedures/claude/shared)
 # current: when Claudinite's `main` advances past our pinned commit, it opens a
-# PR bumping the gitlink. CI (notably test/unit/docs-reachable.test.js) runs on
+# PR bumping the gitlink. CI (notably dev/procedures/test/docs-reachable.test.js) runs on
 # that PR, and it auto-merges on green (branch protection is the gate). The
 # bump PR's diff is only the gitlink line, not the rule text — review the actual
 # change at the Claudinite compare link in the PR body. See issue #364.

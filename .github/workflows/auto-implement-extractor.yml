@@ -10,7 +10,7 @@ name: Auto-implement extractor (prepare)
 # finishes it adds `extractor-agent-done`, which fires finalize-extractor.yml
 # (Phase 2: blast-radius guard, re-verify, PR). Everything deterministic stays in
 # the workflows; the agent owns only the judgment step. See
-# docs/claude/auto-extractor.md.
+# dev/procedures/claude/auto-extractor.md.
 #
 # The GITHUB_TOKEN is standard and always available; no other secret is needed
 # (the agent runs in Claude Code on the web, not here).
@@ -75,7 +75,7 @@ jobs:
           ISSUE_BODY:   ${{ github.event.issue.body }}
           ISSUE_TITLE:  ${{ github.event.issue.title }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: node tools/new-extractors-creation/triage-extractor-request.js
+        run: node dev/tools/new-extractors-creation/triage-extractor-request.js
 
       # A same-host request in flight isn't discarded: its event page is folded
       # into the LEADER issue as an extra sample, so that extractor can pick up a
@@ -90,7 +90,7 @@ jobs:
           SAMPLE_URL: ${{ steps.triage.outputs.url }}
         run: |
           ISSUE_BODY="$(gh issue view "$LEADER" --repo "${{ github.repository }}" --json body -q .body)" \
-            node tools/new-extractors-creation/attach-sample-url.js > /tmp/leader-body.md
+            node dev/tools/new-extractors-creation/attach-sample-url.js > /tmp/leader-body.md
           gh issue edit "$LEADER" --repo "${{ github.repository }}" --body-file /tmp/leader-body.md
           echo "Attached $SAMPLE_URL to leader #$LEADER as an additional sample."
 
@@ -104,7 +104,7 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
       # Pre-flight URL probe. Fetch the event page the same way the recorder will
-      # (tools/new-extractors-creation/probe-url.js → executable-requirements/infra/data/fetch-page.js: browser headers + retries) and
+      # (dev/tools/new-extractors-creation/probe-url.js → dev/requirements/infra/data/fetch-page.js: browser headers + retries) and
       # judge whether it's usable as a static case — a 2xx that's actually a
       # bot-challenge / interstitial counts as NOT usable (probe-url.js sniffs the
       # body). If it isn't usable — URL missing, non-2xx, unreachable, behind a
@@ -129,7 +129,7 @@ jobs:
             exit 0
           fi
           set +e
-          REASON="$(node tools/new-extractors-creation/probe-url.js "$EVENT_URL")"
+          REASON="$(node dev/tools/new-extractors-creation/probe-url.js "$EVENT_URL")"
           CODE=$?
           set -e
           echo "$REASON"
@@ -169,9 +169,9 @@ jobs:
           DOWNLOAD_FAILED: ${{ steps.probe.outputs.downloadFailed }}
         run: |
           if [ "$DOWNLOAD_FAILED" = "true" ]; then
-            gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+            gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see dev/procedures/claude/adding-a-source.md. ([run log]($RUN_URL))"
           else
-            gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started, and a re-run can't fix this. This needs a human: the site can be added by hand — see docs/claude/adding-a-source.md. ([run log]($RUN_URL))"
+            gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started, and a re-run can't fix this. This needs a human: the site can be added by hand — see dev/procedures/claude/adding-a-source.md. ([run log]($RUN_URL))"
           fi
           # Make sure the label exists before adding it (idempotent — ignore "already exists").
           gh label create "extractor-blocked-needs-human" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
@@ -203,7 +203,7 @@ jobs:
 
       # Provide a Chrome for Testing binary so Phase 1's `npm run refresh` can
       # render a data-less JS single-page-app shell into extractable HTML
-      # (executable-requirements/infra/data/render-page.js / executable-requirements/infra/data/spa-shell.js, issues #310/#334). Without this
+      # (dev/requirements/infra/data/render-page.js / dev/requirements/infra/data/spa-shell.js, issues #310/#334). Without this
       # the recorder records the empty shell and the agent bails on every SPA
       # (barby #325, visit.tel-aviv #277). Same on-demand fetch + monthly cache as
       # refresh-cache.yml and the e2e smoke test — no project dependency added.
@@ -222,7 +222,7 @@ jobs:
       # RENDER_NO_SANDBOX is set for the same reason as refresh-cache.yml: the
       # hosted runner can't run Chrome's sandbox, and the ephemeral runner is the
       # isolation boundary for the untrusted, user-supplied event URL (see
-      # docs/technicalGotchas.md — the recorder already renders such URLs this way).
+      # dev/procedures/technicalGotchas.md — the recorder already renders such URLs this way).
       - name: Set up Chrome for Testing
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         run: |
@@ -257,20 +257,20 @@ jobs:
           HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: bash tools/new-extractors-creation/phase1-prepare.sh
+        run: bash dev/tools/new-extractors-creation/phase1-prepare.sh
 
       # Hand off to the agent: the branch is scaffolded + pushed, so swap the
       # label — remove `extractor-request`, add `extractor-agent-ready`. Adding
       # that label is what triggers the Claude Code on the web routine that writes
       # extract() + the case (it derives the branch/file names from the issue URL
       # itself). The agent then adds `extractor-agent-done`, firing
-      # finalize-extractor.yml. See tools/new-extractors-creation/handoff-to-agent.sh.
+      # finalize-extractor.yml. See dev/tools/new-extractors-creation/handoff-to-agent.sh.
       - name: Hand off to the implementation agent
         if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: bash tools/new-extractors-creation/handoff-to-agent.sh
+        run: bash dev/tools/new-extractors-creation/handoff-to-agent.sh
 
       # One comment for a GENUINE failure only. An expected stop (unfetchable /
       # challenge page) no longer fails the job — those are handled green by their
@@ -283,4 +283,4 @@ jobs:
           ISSUE_NUMBER:  ${{ github.event.issue.number }}
           RUN_URL:       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed unexpectedly. [View run]($RUN_URL). Manual implementation may be needed — see docs/claude/adding-a-source.md."
+          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed unexpectedly. [View run]($RUN_URL). Manual implementation may be needed — see dev/procedures/claude/adding-a-source.md."
