@@ -4,7 +4,7 @@
 // file. A count mismatch means the value was renamed in some places but not
 // all, or an old value was left behind after a rename.
 //
-// To add a constant: drop a new JSON file in dev/tools/test/uber/shared_constants/.
+// To add a constant: drop a new JSON file in dev/procedures/test/uber/shared_constants/.
 // Entry shape:
 //   { "what": "...", "value": "...", "counts": { "repo/relative/path": N, ... } }
 "use strict";

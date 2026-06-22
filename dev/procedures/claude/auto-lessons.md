@@ -26,7 +26,7 @@ unattended, so most days it correctly adds **nothing**.
 
 Its write surface is **Markdown docs only** — never code, tests, or workflows. If
 an edit lands in a doc a test reads (e.g. one tracked under
-`dev/tools/test/uber/shared_constants/`), run `npm install` if needed then
+`dev/procedures/test/uber/shared_constants/`), run `npm install` if needed then
 `npm run test:offline` and keep it green before pushing.
 
 ## Output: a PR, never a merge

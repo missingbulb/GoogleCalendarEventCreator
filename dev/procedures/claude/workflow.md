@@ -45,7 +45,7 @@ change is never auto-accepted. The process:
 
 When the repo owner says **"bump version"**, treat it as a defined instruction:
 raise the extension's version by editing the `version` field in
-**both** `extension/manifest.json` and `package.json` (they must stay in sync), update the `value` in `dev/tools/test/uber/shared_constants/version-sync.json` to match, on a
+**both** `extension/manifest.json` and `package.json` (they must stay in sync), update the `value` in `dev/procedures/test/uber/shared_constants/version-sync.json` to match, on a
 branch, to be merged into `main` through the normal PR flow. Default to a
 **minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an explicit target ("bump version
 to 1.4.0") or level ("bump patch" / "bump major") when given. Bumping the
