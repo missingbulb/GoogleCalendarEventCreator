@@ -54,7 +54,7 @@ not redundancy.
   **ensures it exists idempotently** before applying it (create-if-missing,
   no-op-if-present), so it needs no manual pre-creation and never errors on a
   re-run. It is drift-guarded on the workflow by
-  `dev/tools/test/uber/shared_constants/claudinite-lesson-label.json`.
+  `dev/procedures/test/uber/shared_constants/claudinite-lesson-label.json`.
 
 ## The token
 
