@@ -14,3 +14,9 @@ it should leave alone. Recorded so they bite only once.
   strings that need it (not external URLs, not files already under the target), or
   apply it then do a targeted post-pass reverting any match that lives inside a
   URL or that doubled the prefix.
+- **Deleting (or renaming) a file isn't done until you've grepped the repo for
+  inbound references to it.** A removed doc/module leaves dangling links, imports,
+  or index entries behind that no test necessarily catches (a README docs-index
+  link to a deleted `dev/procedures/*.md` stays green). Right after the removal,
+  `grep` the whole tree for the old path/filename and fix every hit in the same
+  change — don't wait to be told the link is broken.
