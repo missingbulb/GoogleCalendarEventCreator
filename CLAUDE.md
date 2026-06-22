@@ -14,6 +14,7 @@ own file under `dev/procedures/claude/` and is imported here:
 @dev/procedures/claude/auto-branch-report.md
 @dev/procedures/claude/claudinite-handoff.md
 @dev/procedures/claude/auto-optimize-procedures.md
+@dev/procedures/claude/textAndFileManipulation.md
 
 The project's top-level architectural rules of the road live in
 `dev/procedures/architectureGuidelines.md` (imported below). Whenever we agree on a new or
