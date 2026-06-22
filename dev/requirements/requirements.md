@@ -1111,12 +1111,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `meetup-nyc-tech-mixer` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.1 -->
+🧩 _Validated against [fusion-la-israel](extractor/expected/meetup-fusion-la-israel.json), [nyc-tech-mixer](extractor/expected/meetup-nyc-tech-mixer.json), [startup-designers](extractor/expected/meetup-startup-designers.json)._ <!-- req-gallery:11.1 -->
 
 </td>
 <td valign="top">
 
-`11.1` `meetup.com` — extracted by the dedicated source `extension/event-extractors/custom/meetup.js`, validated against the cached `meetup-nyc-tech-mixer` page.
+`11.1` Support `meetup.com`.
 
 </td>
 </tr>
@@ -1126,12 +1126,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `eventbrite-games-for-change` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.2 -->
+🧩 _Validated against [1989775742810](extractor/expected/eventbrite-1989775742810.json), [games-for-change](extractor/expected/eventbrite-games-for-change.json)._ <!-- req-gallery:11.2 -->
 
 </td>
 <td valign="top">
 
-`11.2` `eventbrite.com` — extracted by the dedicated source `extension/event-extractors/custom/eventbrite.js`, validated against the cached `eventbrite-games-for-change` page.
+`11.2` Support `eventbrite.com`.
 
 </td>
 </tr>
@@ -1141,12 +1141,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `edinburghfringe-daniel-sloss` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.3 -->
+🧩 _Validated against [daniel-sloss](extractor/expected/edinburghfringe-daniel-sloss.json), [kristen-schaal](extractor/expected/edinburghfringe-kristen-schaal.json), [mr-chonkers](extractor/expected/edinburghfringe-mr-chonkers.json), [richard-herring-rhlstp](extractor/expected/edinburghfringe-richard-herring-rhlstp.json), [sophie-duker](extractor/expected/edinburghfringe-sophie-duker.json)._ <!-- req-gallery:11.3 -->
 
 </td>
 <td valign="top">
 
-`11.3` `edfringe.com` — extracted by the dedicated source `extension/event-extractors/custom/edinburghfringe.js`, validated against the cached `edinburghfringe-daniel-sloss` page.
+`11.3` Support `edfringe.com`.
 
 </td>
 </tr>
@@ -1156,12 +1156,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `telavivcinematheque-sentimental-value` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.4 -->
+🧩 _Validated against [left-handed-girl](extractor/expected/telavivcinematheque-left-handed-girl.json), [poetry-bookstores](extractor/expected/telavivcinematheque-poetry-bookstores.json), [sentimental-value](extractor/expected/telavivcinematheque-sentimental-value.json), [taiwan-week](extractor/expected/telavivcinematheque-taiwan-week.json)._ <!-- req-gallery:11.4 -->
 
 </td>
 <td valign="top">
 
-`11.4` `cinema.co.il` — extracted by the dedicated source `extension/event-extractors/custom/telavivcinematheque.js`, validated against the cached `telavivcinematheque-sentimental-value` page.
+`11.4` Support `cinema.co.il`.
 
 </td>
 </tr>
@@ -1171,12 +1171,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `ticketmaster-ravid-plotnik` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.5 -->
+🧩 _Validated against [ravid-plotnik](extractor/expected/ticketmaster-ravid-plotnik.json)._ <!-- req-gallery:11.5 -->
 
 </td>
 <td valign="top">
 
-`11.5` `ticketmaster.co.il` — extracted by the dedicated source `extension/event-extractors/custom/ticketmaster.js`, validated against the cached `ticketmaster-ravid-plotnik` page.
+`11.5` Support `ticketmaster.co.il`.
 
 </td>
 </tr>
@@ -1186,12 +1186,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `bandsintown-berry-sakharof` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.6 -->
+🧩 _Validated against [berry-sakharof](extractor/expected/bandsintown-berry-sakharof.json)._ <!-- req-gallery:11.6 -->
 
 </td>
 <td valign="top">
 
-`11.6` `bandsintown.com` — extracted by the dedicated source `extension/event-extractors/custom/bandsintown.js`, validated against the cached `bandsintown-berry-sakharof` page.
+`11.6` Support `bandsintown.com`.
 
 </td>
 </tr>
@@ -1201,12 +1201,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `barby` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.7 -->
+🧩 _Validated against [barby](extractor/expected/barby.json)._ <!-- req-gallery:11.7 -->
 
 </td>
 <td valign="top">
 
-`11.7` `barby.co.il` — extracted by the dedicated source `extension/event-extractors/custom/barby.js`, validated against the cached `barby` page.
+`11.7` Support `barby.co.il`.
 
 </td>
 </tr>
@@ -1216,12 +1216,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `dash-datadoghq` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.8 -->
+🧩 _Validated against [dash-datadoghq](extractor/expected/dash-datadoghq.json)._ <!-- req-gallery:11.8 -->
 
 </td>
 <td valign="top">
 
-`11.8` `dash.datadoghq.com` — extracted by the dedicated source `extension/event-extractors/custom/dash-datadoghq.js`, validated against the cached `dash-datadoghq` page.
+`11.8` Support `dash.datadoghq.com`.
 
 </td>
 </tr>
@@ -1231,12 +1231,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `eventim-co-il-the90sshow` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.9 -->
+🧩 _Validated against [the90sshow](extractor/expected/eventim-co-il-the90sshow.json)._ <!-- req-gallery:11.9 -->
 
 </td>
 <td valign="top">
 
-`11.9` `eventim.co.il` — extracted by the dedicated source `extension/event-extractors/custom/eventim-co-il.js`, validated against the cached `eventim-co-il-the90sshow` page.
+`11.9` Support `eventim.co.il`.
 
 </td>
 </tr>
@@ -1246,12 +1246,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `events-datadoghq` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.10 -->
+🧩 _Validated against [events-datadoghq](extractor/expected/events-datadoghq.json)._ <!-- req-gallery:11.10 -->
 
 </td>
 <td valign="top">
 
-`11.10` `events.datadoghq.com` — extracted by the dedicated source `extension/event-extractors/custom/events-datadoghq.js`, validated against the cached `events-datadoghq` page.
+`11.10` Support `events.datadoghq.com`.
 
 </td>
 </tr>
@@ -1261,12 +1261,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `luma-event` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.11 -->
+🧩 _Validated against [event](extractor/expected/luma-event.json)._ <!-- req-gallery:11.11 -->
 
 </td>
 <td valign="top">
 
-`11.11` `lu.ma` — extracted by the dedicated source `extension/event-extractors/custom/luma.js`, validated against the cached `luma-event` page.
+`11.11` Support `lu.ma`.
 
 </td>
 </tr>
@@ -1276,12 +1276,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `secrettelaviv-world-cup-eve` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.12 -->
+🧩 _Validated against [world-cup-eve](extractor/expected/secrettelaviv-world-cup-eve.json)._ <!-- req-gallery:11.12 -->
 
 </td>
 <td valign="top">
 
-`11.12` `secrettelaviv.com` — extracted by the dedicated source `extension/event-extractors/custom/secrettelaviv.js`, validated against the cached `secrettelaviv-world-cup-eve` page.
+`11.12` Support `secrettelaviv.com`.
 
 </td>
 </tr>
@@ -1291,12 +1291,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `tabitisrael` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.13 -->
+🧩 _Validated against [tabitisrael](extractor/expected/tabitisrael.json)._ <!-- req-gallery:11.13 -->
 
 </td>
 <td valign="top">
 
-`11.13` `tabitisrael.co.il` — extracted by the dedicated source `extension/event-extractors/custom/tabitisrael.js`, validated against the cached `tabitisrael` page.
+`11.13` Support `tabitisrael.co.il`.
 
 </td>
 </tr>
@@ -1306,12 +1306,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `thinkdrink-quantum-lecture` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.14 -->
+🧩 _Validated against [quantum-lecture](extractor/expected/thinkdrink-quantum-lecture.json)._ <!-- req-gallery:11.14 -->
 
 </td>
 <td valign="top">
 
-`11.14` `thinkdrink.co.il` — extracted by the dedicated source `extension/event-extractors/custom/thinkdrink.js`, validated against the cached `thinkdrink-quantum-lecture` page.
+`11.14` Support `thinkdrink.co.il`.
 
 </td>
 </tr>
@@ -1321,12 +1321,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `visit-tel-aviv` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.15 -->
+🧩 _Validated against [visit-tel-aviv](extractor/expected/visit-tel-aviv.json)._ <!-- req-gallery:11.15 -->
 
 </td>
 <td valign="top">
 
-`11.15` `visit.tel-aviv.gov.il` — extracted by the dedicated source `extension/event-extractors/custom/visit-tel-aviv.js`, validated against the cached `visit-tel-aviv` page.
+`11.15` Support `visit.tel-aviv.gov.il`.
 
 </td>
 </tr>
@@ -1341,7 +1341,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.16` `facebook.com` — extracted by the dedicated source `extension/event-extractors/custom/facebook.js`. No cached live case (bot-blocked); covered by unit tests only.
+`11.16` Support `facebook.com`.
 
 </td>
 </tr>
