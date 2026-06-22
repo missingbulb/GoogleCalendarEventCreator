@@ -217,7 +217,7 @@ as part of `npm test`/`test:ui` everywhere, with no separate CI job or browser
 install step.
 
 After an intentional change to the popup — its views (`extension/events-popup/popup.js`,
-`extension/events-popup/views/*.js`) or its styling (`extension/events-popup/popup.css`) — run `npm run refresh:ui` to
+`extension/events-popup/*.js`) or its styling (`extension/events-popup/popup.css`) — run `npm run refresh:ui` to
 regenerate the `dev/requirements/ui/cases/*.png` images and commit them so reviewers see the
 before/after in the diff. On mismatch, the test writes `<name>.actual.png` and
 `<name>.diff.png` to `dev/requirements/infra/.artifacts/` (gitignored; see

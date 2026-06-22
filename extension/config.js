@@ -4,7 +4,7 @@
 // (not something buried in a refactor).
 //
 // An ES module imported by the popup-document scripts that need these values
-// (events-popup/build-calendar-url.js, events-popup/popup.js, events-popup/views/events-view.js) and,
+// (events-popup/build-calendar-url.js, events-popup/popup.js, events-popup/events-view.js) and,
 // in Node, by the tests via dynamic import(). It is never injected into pages
 // — the extractors don't read product config — so it stays a plain module
 // rather than the GCal-global classic scripts the page injection uses.

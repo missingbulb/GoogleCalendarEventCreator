@@ -18,8 +18,8 @@
 // `toCards` and `renderCard` are the controller's entry points; the pure display
 // helpers (formatWhen, summarize, dateChip, sameDayLabel) are also exported for
 // the unit tests and the UI-snapshot renderer.
-import { buildCalendarUrl } from "../build-calendar-url.js";
-import { GCalConfig } from "../../config.js";
+import { buildCalendarUrl } from "./build-calendar-url.js";
+import { GCalConfig } from "../config.js";
 
 // An event's instances (showings) — the times[] of the multi-instance model.
 // A flat single-occurrence event ({ start, end, eventLengthInMinutes } on the

@@ -48,7 +48,7 @@ other fields (name, time, location, …) are optional context the agent can use 
 sanity-check its extraction.
 
 This is the **same form the extension's popup opens** from its "Request support
-for this site" button (`extension/events-popup/views/source-request-view.js`), so an end-user request
+for this site" button (`extension/events-popup/source-request-view.js`), so an end-user request
 flows straight into the pipeline.
 
 You can also trigger it on any existing issue by adding the `extractor-request`

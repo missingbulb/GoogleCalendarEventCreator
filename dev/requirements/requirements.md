@@ -1445,13 +1445,13 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 
 ## 13. Events model
 
-How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/events-popup/views/events-view.test.js` and the §4 snapshots).
+How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/events-popup/events-view.test.js` and the §4 snapshots).
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/views/events-view.test.js`._ <!-- req-gallery:13.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.1 -->
 
 </td>
 <td valign="top">
@@ -1466,7 +1466,7 @@ How distinct events and their showings map onto cards. The exact card grouping, 
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/views/events-view.test.js`._ <!-- req-gallery:13.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.2 -->
 
 </td>
 <td valign="top">
@@ -1607,13 +1607,13 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/views/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/views/source-request-view.test.js`._ <!-- req-gallery:16.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/source-request-view.test.js`._ <!-- req-gallery:16.1 -->
 
 </td>
 <td valign="top">

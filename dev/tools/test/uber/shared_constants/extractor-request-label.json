@@ -5,7 +5,7 @@
     ".github/ISSUE_TEMPLATE/extractor-request.yml": 1,
     ".github/workflows/auto-implement-extractor.yml": 7,
     "dev/tools/new-extractors-creation/handoff-to-agent.sh": 2,
-    "extension/events-popup/views/source-request-view.js": 5,
-    "extension-test/events-popup/views/source-request-view.test.js": 4
+    "extension/events-popup/source-request-view.js": 5,
+    "extension-test/events-popup/source-request-view.test.js": 4
   }
 }

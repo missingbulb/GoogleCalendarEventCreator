@@ -14,8 +14,8 @@ doc, when the mechanics change.
 - **`extension-test/` mirrors `extension/`'s tree, one test per source file.**
   A source file `extension/<area>/<name>.js` is tested by
   `extension-test/<area>/<name>.test.js` — same relative path, `.test.js`
-  suffix (e.g. `extension/events-popup/views/events-view.js` →
-  `extension-test/events-popup/views/events-view.test.js`). The path **is** the
+  suffix (e.g. `extension/events-popup/events-view.js` →
+  `extension-test/events-popup/events-view.test.js`). The path **is** the
   link, so a source file never names its own test in a comment. Two deliberate
   departures from a literal mirror:
   - **`extension-test/integration/`** holds tests that exercise an *interaction*
@@ -103,7 +103,7 @@ doc, when the mechanics change.
   a non-image case — behavior/extractor/logic — that smuggled in a PNG). A case earns its keep by pinning a
   requirement's correct rendering/behavior — confirmed by a human against the PNG,
   not "can these pixels be generated?". The popup's pure logic stays pinned by unit
-  tests (`events-popup/popup` / `events-popup/views/events-view`).
+  tests (`events-popup/popup` / `events-popup/events-view`).
 
   **⚠️ This verification is deliberately INCOMPLETE — tracked in #435.** Every leaf
   is *claimed* by the right kind of test, but the behavior test **stubs**

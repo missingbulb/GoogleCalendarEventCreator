@@ -11,8 +11,8 @@ the rules of the road.
 | `extension/config.js` | Tunable product decisions (durations, the event cap, the fallback host allow/denylist); imported by the popup modules |
 | `extension/fallback-policy.js` | The generic fallback's host classifier (`classifyHost`) + presentability gate, shared by the popup and the auto-extractor triage |
 | `extension/events-popup/popup.html`, `extension/events-popup/popup.css`, `extension/events-popup/popup.js` | Toolbar popup: controller that runs the extractor, picks a view (`chooseContent`), and renders it (markup + extracted styles) |
-| `extension/events-popup/views/events-view.js` | Renders one card per event — a clickable button for a single occurrence, or a grouped card with a button per showing for a multi-instance event (loaded on demand via `import()`) |
-| `extension/events-popup/views/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
+| `extension/events-popup/events-view.js` | Renders one card per event — a clickable button for a single occurrence, or a grouped card with a button per showing for a multi-instance event (loaded on demand via `import()`) |
+| `extension/events-popup/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
 | [`dev/procedures/extraction-policy.md`](extraction-policy.md) | Short public "how this extension finds events" doc the "Disagree?" link opens |
 | `extension/icon/toolbar-icon.js` | Background service worker: registers `chrome.declarativeContent` rules (from `fallback-lists.json`) so the browser colors the toolbar icon by host pattern — green on supported hosts, gray on denylisted ones, blue elsewhere — without the extension reading any tab URL |
 | `extension/event-extractors/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |

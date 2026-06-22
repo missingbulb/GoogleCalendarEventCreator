@@ -57,7 +57,7 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
   if (allEvents.length) {
     headingEl.textContent = "Add to Google Calendar";
 
-    const { toCards, renderCard } = await import("./views/events-view.js");
+    const { toCards, renderCard } = await import("./events-view.js");
 
     // Turn the events into cards: a single occurrence is one clickable card, and
     // a multi-instance event is grouped by month into one or more cards (a grouped
@@ -108,7 +108,7 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     // source missed, #456). Only fires when events are shown, so it lives on the
     // heading line.
     if (request) {
-      const view = await import("./views/source-request-view.js");
+      const view = await import("./source-request-view.js");
       headingEl.classList.add("with-link");
       // allEvents here is the fallback's presentable events; its length tells the
       // form whether the page carries multiple events (pre-selects the dropdown).
@@ -123,7 +123,7 @@ export async function render({ data, tab, listing, currentYear = new Date().getF
     // event-less supported host (policyLink false) show the glyph alone.
     let policyLinkEl = null;
     if (policyLink) {
-      const view = await import("./views/source-request-view.js");
+      const view = await import("./source-request-view.js");
       policyLinkEl = view.makePolicyLink(tab);
     }
     eventsEl.appendChild(makeEmptyState(policyLinkEl));

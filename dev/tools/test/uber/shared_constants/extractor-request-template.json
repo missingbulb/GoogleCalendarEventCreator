@@ -2,7 +2,7 @@
   "what": "extractor-request.yml template filename",
   "value": "extractor-request.yml",
   "counts": {
-    "extension/events-popup/views/source-request-view.js": 2,
-    "extension-test/events-popup/views/source-request-view.test.js": 2
+    "extension/events-popup/source-request-view.js": 2,
+    "extension-test/events-popup/source-request-view.test.js": 2
   }
 }

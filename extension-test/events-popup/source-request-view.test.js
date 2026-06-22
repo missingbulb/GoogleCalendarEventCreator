@@ -1,6 +1,6 @@
 // Offline unit tests for the source-request URL building: the prefilled GitHub
 // issue-form link the popup opens on an unsupported page (the
-// events-popup/views/source-request-view.js makeSourceRequestLink flow).
+// events-popup/source-request-view.js makeSourceRequestLink flow).
 "use strict";
 
 const { test, before } = require("node:test");
@@ -13,7 +13,7 @@ const { pathToFileURL } = require("node:url");
 let buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill;
 before(async () => {
   ({ buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "..", "extension", "events-popup", "views", "source-request-view.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "source-request-view.js"))
   ));
 });
 
@@ -92,7 +92,7 @@ test("omits empty fields so the user fills them in on the form", () => {
 // each "- type:" block).
 function templateFields() {
   const template = fs.readFileSync(
-    path.join(__dirname, "..", "..", "..", ".github", "ISSUE_TEMPLATE", "extractor-request.yml"),
+    path.join(__dirname, "..", "..", ".github", "ISSUE_TEMPLATE", "extractor-request.yml"),
     "utf8"
   );
   return template
@@ -167,6 +167,6 @@ test("the policy doc the link points at actually exists on disk (the link can't 
   // .../blob/<branch>/<repo-relative-path>
   const m = new URL(buildPolicyDocUrl()).pathname.match(/\/blob\/[^/]+\/(.+)$/);
   assert.ok(m, "policy URL must be a /blob/<branch>/<path> link");
-  const docPath = path.join(__dirname, "..", "..", "..", m[1]);
+  const docPath = path.join(__dirname, "..", "..", m[1]);
   assert.ok(fs.existsSync(docPath), `policy doc missing on disk: ${m[1]}`);
 });

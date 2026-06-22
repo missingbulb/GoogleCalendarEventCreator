@@ -1,5 +1,5 @@
 // Offline unit tests for the popup's pure display helpers in
-// events-popup/views/events-view.js: the date-chip and the "when" line. These used to be
+// events-popup/events-view.js: the date-chip and the "when" line. These used to be
 // exercised only indirectly through the UI snapshot renderer; now the snapshots
 // render a static gallery, so the formatting logic is pinned down here instead.
 //
@@ -26,7 +26,7 @@ before(async () => {
     commonTime,
     showPerDayTimes,
     groupHeaderTime,
-  } = await import(pathToFileURL(path.join(__dirname, "..", "..", "..", "extension", "events-popup", "views", "events-view.js"))));
+  } = await import(pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "events-view.js"))));
 });
 
 // Floating (offset-free) times parse as local, so these are deterministic
