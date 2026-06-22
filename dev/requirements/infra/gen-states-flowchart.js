@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Regenerates dev/requirements/popup-states-flowchart.png — a flowchart of the states the
 // popup can render (issue #192; State 1b added in #456). It mirrors the decision
-// ui/popup.js's chooseContent makes (see dev/requirements/requirements.md §12–§16): a
+// events-popup/popup.js's chooseContent makes (see dev/requirements/requirements.md §12–§16): a
 // supported host shows its dedicated extractor's events (State 1), or — when that
 // extractor finds nothing — falls back to the generic one and shows its events
 // with a "Suggest Correction" link (State 1b); an unsupported host runs the

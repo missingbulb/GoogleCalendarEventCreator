@@ -114,7 +114,7 @@ the fallback-coverage gate.
 
 Files under this rule (kept in sync with `.gitattributes`):
 
-- `extension/pipeline/load-order.generated.json` — from `npm run index`.
+- `extension/event-extractors/load-order.generated.json` — from `npm run index`.
 - `dev/requirements/ui/cases/*.png` — from `npm run refresh:ui`. (The inline gallery in
   `dev/requirements/requirements.md`, also refreshed by that script, is part-authored prose,
   so it is **not** on the `ours` driver — its image lines are reconciled by `npm

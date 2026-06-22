@@ -1,5 +1,5 @@
 // Fallback-vs-custom extraction coverage: measures what the GENERIC fallback
-// extractor (pipeline/extract-unsupported.js) recovers on each integration-test
+// extractor (event-extractors/extract-unsupported.js) recovers on each integration-test
 // page, relative to that page's dedicated per-site source (the ground truth).
 //
 // For every dev/requirements/extractors/custom/*.json page we run GCal.extract() twice
@@ -34,16 +34,16 @@ const CASES_DIR = path.join(ROOT, "dev/requirements/extractors/custom");
 const DATA_DIR = path.join(ROOT, "dev/requirements/data");
 
 // The seven normalized event fields GCal.extract() returns (see
-// pipeline/assemble-events.js's norm()). CRITICAL is the subset the popup
+// event-extractors/assemble-events.js's norm()). CRITICAL is the subset the popup
 // requires before it will surface a fallback event at all (title + location +
-// start — see ui/popup.js's chooseContent / config.js).
+// start — see events-popup/popup.js's chooseContent / config.js).
 const ALL_FIELDS = ["title", "start", "end", "location", "ctz", "eventLengthInMinutes", "description"];
 const CRITICAL_FIELDS = ["title", "start", "location"];
 
 // Load the pipeline files once, in the generated injection order (the single
 // source of truth the popup and harness both read).
 const SOURCES = (() => {
-  const files = JSON.parse(readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8"));
+  const files = JSON.parse(readFileSync(path.join(EXT, "event-extractors/load-order.generated.json"), "utf8"));
   return files.map((file) => readFileSync(path.join(EXT, file), "utf8"));
 })();
 
@@ -356,7 +356,7 @@ function renderMarkdown(cov, watermark) {
   );
   L.push("");
   L.push(
-    "What the generic **fallback** extractor (`extension/pipeline/extract-unsupported.js`) " +
+    "What the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`) " +
       "recovers on each integration-test page, compared to that page's **dedicated " +
       "per-site source** — the reviewed-correct extraction the live test pins down. " +
       "For every `dev/requirements/extractors/custom/*.json` page, `GCal.extract()` is run twice " +

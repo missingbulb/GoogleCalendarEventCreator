@@ -5,14 +5,14 @@
 // existing source). See dev/procedures/claude/auto-extractor.md.
 //
 // The crux: a source's file name is NOT derivable from the host (cinema.co.il is
-// handled by pipeline/sources/telavivcinematheque.js, slug "cinema" ≠ basename
+// handled by event-extractors/custom/telavivcinematheque.js, slug "cinema" ≠ basename
 // "telavivcinematheque"). The only authority on "which source owns this host" is
 // the sources' own matches() — exactly what the orchestrator uses to pick the
 // extractor. So we LOAD each source and ask it, attributing each matcher to the
 // file that pushed it.
 //
-// DOM-free, pure Node vm — the same boot as extension-test/unit/supported-domains.test.js
-// and extension-test/extension/extension-loads.test.js: registry.js sets globalThis.GCal,
+// DOM-free, pure Node vm — the same boot as extension-test/integration/supported-domains.test.js
+// and extension-test/integration/extension-loads.test.js: registry.js sets globalThis.GCal,
 // each source pushes its matcher onto GCal.sources, and only matches() (a pure
 // host regex) runs here. We load sources ONE AT A TIME so a newly-pushed matcher
 // can be attributed to the file that added it.
@@ -55,15 +55,15 @@ function resolveSourceBaseName(urlOrHost) {
   const run = (rel) =>
     vm.runInContext(fs.readFileSync(path.join(ROOT, rel), "utf8"), sandbox, { filename: rel });
 
-  run("extension/pipeline/registry.js");
+  run("extension/event-extractors/registry.js");
   const files = fs
-    .readdirSync(path.join(ROOT, "extension/pipeline/sources"))
+    .readdirSync(path.join(ROOT, "extension/event-extractors/custom"))
     .filter((f) => f.endsWith(".js"))
     .sort();
 
   for (const f of files) {
     const before = sandbox.GCal.sources.length;
-    run(`extension/pipeline/sources/${f}`);
+    run(`extension/event-extractors/custom/${f}`);
     const added = sandbox.GCal.sources.slice(before);
     if (added.some((s) => typeof s.matches === "function" && s.matches(host))) {
       return f.replace(/\.js$/, "");

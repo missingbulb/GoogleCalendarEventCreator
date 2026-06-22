@@ -12,7 +12,7 @@ dev/requirements/data/*.html linguist-vendored
 # a normal conflicting merge — still resolvable, only manual. A stale artifact
 # can't slip through: its own test fails (the load-order drift guard, the UI
 # snapshot pixel diff, the coverage gate). See dev/procedures/claude/github.md.
-extension/pipeline/load-order.generated.json                        merge=ours
+extension/event-extractors/load-order.generated.json                merge=ours
 dev/requirements/extractors/fallback/fallback-coverage.baseline.GENERATED.json  merge=ours
 dev/requirements/extractors/fallback/fallback-coverage.GENERATED.md             merge=ours
 dev/requirements/ui/cases/*.png                                                 merge=ours

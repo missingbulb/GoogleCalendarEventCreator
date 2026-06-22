@@ -3,7 +3,7 @@
 ## The package
 
 `npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
-files the extension ships (manifest, scripts, `extension/pipeline/`, `extension/icons/`), and
+files the extension ships (manifest, `extension/event-extractors/`, `extension/events-popup/`, `extension/icon/`, and the shared root modules), and
 nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
 in **`.github/workflows/shipping-files.js`** as the single source of truth, and
 `.github/workflows/tests/shipping-files.test.js` asserts it stays in sync with what the

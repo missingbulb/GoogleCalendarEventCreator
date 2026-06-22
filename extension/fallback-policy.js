@@ -1,10 +1,10 @@
 // The top-level classifier for the generic FALLBACK extractor — the events
-// scraped on a host that has no per-site source (pipeline/sources/<site>.js).
+// scraped on a host that has no per-site source (event-extractors/custom/<site>.js).
 // It answers two questions: is a scraped event complete enough to present, and
 // how should we treat a given host?
 //
 // Shared (single source of truth) by:
-//   - the popup (ui/popup.js's chooseContent) — to decide what to render;
+//   - the popup (events-popup/popup.js's chooseContent) — to decide what to render;
 //   - the auto-extractor triage (dev/tools/new-extractors-creation/triage-extractor-request.js) — to
 //     auto-close a request whose host is already on a list, before spending an
 //     agent run.
@@ -43,8 +43,8 @@ function hostFromUrl(url) {
 
 // True when `url`'s host already has a dedicated per-site source, per
 // config.js's supportedDomains. That list is a static mirror of the sources'
-// own matches(); the runtime truth is GCal.isSupportedHost (pipeline/
-// registry.js), which runs the matchers directly. Used ONLY by the
+// own matches(); the runtime truth is GCal.isSupportedHost
+// (event-extractors/registry.js), which runs the matchers directly. Used ONLY by the
 // auto-extractor triage to close a request for a site we already cover before
 // spending an agent run. Subdomain-aware, same host match as the allow/deny
 // lists. `lists` defaults to the shipped config; tests pass their own.

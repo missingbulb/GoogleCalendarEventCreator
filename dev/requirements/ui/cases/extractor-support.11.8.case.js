@@ -1,13 +1,13 @@
 // Extractor-support leaf 11.8: dash.datadoghq.com has a dedicated extractor
-// (extension/pipeline/sources/dash-datadoghq.js), validated against the real cached page
+// (extension/event-extractors/custom/dash-datadoghq.js), validated against the real cached page
 // dev/requirements/data/dash-datadoghq.html by extractor-support.test.js — the
 // page is recognized as supported and yields a complete event.
 "use strict";
 
 module.exports = {
   kind: "extractor",
-  description: "dash.datadoghq.com — extracted by sources/dash-datadoghq.js",
+  description: "dash.datadoghq.com — extracted by custom/dash-datadoghq.js",
   host: "dash.datadoghq.com",
-  source: "extension/pipeline/sources/dash-datadoghq.js",
+  source: "extension/event-extractors/custom/dash-datadoghq.js",
   page: "dash-datadoghq",
 };

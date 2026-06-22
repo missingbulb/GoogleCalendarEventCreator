@@ -13,4 +13,4 @@ in the shared rules:
 worked examples for both are this repo's auto-extractor pipeline
 ([claude/auto-extractor.md](claude/auto-extractor.md)).
 
-- Adding support for a new host is the most common change — the architecture must keep it a single, self-contained new file (`extension/pipeline/sources/<site>.js`) plus regenerating the load list, touching nothing else and assuming nothing about other extractors.
+- Adding support for a new host is the most common change — the architecture must keep it a single, self-contained new file (`extension/event-extractors/custom/<site>.js`) plus regenerating the load list, touching nothing else and assuming nothing about other extractors.

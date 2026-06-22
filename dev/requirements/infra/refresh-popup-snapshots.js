@@ -4,7 +4,7 @@
 // toolbar-icon renderer by leaf kind), plus the requirement-first INLINE gallery:
 // each per-leaf PNG embedded directly under its requirement in
 // dev/requirements/requirements.md (build-requirements-gallery.js). Run after an intentional
-// change to the popup, its views, ui/popup.css, or the toolbar icon, and commit the
+// change to the popup, its views, events-popup/popup.css, or the toolbar icon, and commit the
 // PNGs + the gallery so reviewers see the before/after in the diff.
 "use strict";
 

@@ -1,4 +1,4 @@
-// Guards pipeline/load-order.generated.json against drift: it must match what
+// Guards event-extractors/load-order.generated.json against drift: it must match what
 // `npm run index` (dev/tools/gen-load-order.js) would produce from the current extractor
 // files. If this fails, an extractor was added/removed/renamed without
 // regenerating the list — run `npm run index` and commit the result.
@@ -21,24 +21,24 @@ test("the committed load order matches `npm run index`", () => {
   assert.equal(
     committed,
     render(computeLoadOrder()),
-    "extension/pipeline/load-order.generated.json is stale — run `npm run index` and commit it"
+    "extension/event-extractors/load-order.generated.json is stale — run `npm run index` and commit it"
   );
 });
 
 test("the registry loads first and the orchestrator loads last", () => {
   const list = computeLoadOrder();
-  assert.equal(list[0], "pipeline/registry.js", "the registry must load first");
+  assert.equal(list[0], "event-extractors/registry.js", "the registry must load first");
   // After the registry, the helpers form a contiguous block before any
   // extract layer or source.
   const afterRegistry = list.slice(1);
-  const firstNonHelper = afterRegistry.findIndex((f) => !f.startsWith("pipeline/helpers/"));
+  const firstNonHelper = afterRegistry.findIndex((f) => !f.startsWith("event-extractors/helpers/"));
   assert.ok(
-    afterRegistry.slice(firstNonHelper).every((f) => !f.startsWith("pipeline/helpers/")),
+    afterRegistry.slice(firstNonHelper).every((f) => !f.startsWith("event-extractors/helpers/")),
     "the helpers must load before the extract layers and sources"
   );
   assert.equal(
     list[list.length - 1],
-    "pipeline/assemble-events.js",
+    "event-extractors/assemble-events.js",
     "the orchestrator (assemble-events.js) must load last"
   );
 });

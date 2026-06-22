@@ -68,7 +68,7 @@ def write_png(path, px):
 
 
 def main():
-    out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "icons")
+    out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "extension", "icon", "images")
     os.makedirs(out_dir, exist_ok=True)
     for suffix, plus_color, header_color in VARIANTS:
         for size in (16, 32, 48, 128):
