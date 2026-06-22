@@ -24,7 +24,7 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    it's stale.
 3. Add the new host to `supportedDomains` in `extension/fallback-lists.json`. This
    static list is the static mirror of the sources' `matches()`
-   (`extension-test/unit/supported-domains.test.js` fails if it drifts), and the toolbar
+   (`extension-test/integration/supported-domains.test.js` fails if it drifts), and the toolbar
    service worker (`extension/icon/toolbar-icon.js`) builds its `chrome.declarativeContent`
    icon rules from it — so the green "supported" icon only appears once the host
    is listed here.

@@ -3,7 +3,7 @@
 // register a new source's host before the agent runs (the agent no longer edits
 // the list). Idempotent: re-running for an existing host is a no-op write.
 //
-// The drift guard extension-test/unit/supported-domains.test.js still enforces that every
+// The drift guard extension-test/integration/supported-domains.test.js still enforces that every
 // entry is accepted by some source's matches() and vice-versa, so the workflow
 // scaffolds the source (with its matches() filled) before calling this.
 //

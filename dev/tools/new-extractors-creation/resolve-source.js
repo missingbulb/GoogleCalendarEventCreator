@@ -11,8 +11,8 @@
 // extractor. So we LOAD each source and ask it, attributing each matcher to the
 // file that pushed it.
 //
-// DOM-free, pure Node vm — the same boot as extension-test/unit/supported-domains.test.js
-// and extension-test/extension/extension-loads.test.js: registry.js sets globalThis.GCal,
+// DOM-free, pure Node vm — the same boot as extension-test/integration/supported-domains.test.js
+// and extension-test/integration/extension-loads.test.js: registry.js sets globalThis.GCal,
 // each source pushes its matcher onto GCal.sources, and only matches() (a pure
 // host regex) runs here. We load sources ONE AT A TIME so a newly-pushed matcher
 // can be attributed to the file that added it.

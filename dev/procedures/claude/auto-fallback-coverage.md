@@ -46,7 +46,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
   (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../technicalGotchas.md).)
 - **(b) deliberate decisions.** Some misses are intentional and pinned by a unit
   test (e.g. a date with intervening non-separator text before its time is
-  all-day, in `extension-test/unit/extraction.test.js`). Never "fix" what a test
+  all-day, in `extension-test/event-extractors/extraction.test.js`). Never "fix" what a test
   deliberately asserts. And `ctz` (an IANA zone) and `eventLengthInMinutes` are
   usually not derivable generically — don't invent them (a wrong `ctz` is worse
   than none); `start`/`end` match when they resolve to the same instant, so don't
@@ -56,7 +56,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
 
 Red-before-green (confirm the new test fails on the pre-change code, passes
 after); cover every change with an existing integration case or a focused unit
-test in `extension-test/unit/extraction.test.js`; full suite green (`npm test`) and
+test in `extension-test/event-extractors/extraction.test.js`; full suite green (`npm test`) and
 `npm run test:live` regenerates the GENERATED artifacts. Every gated % must be
 **≥** its previous value (no field regressed) and at least one must improve — a
 change that lifts one field but drops another isn't clean, so drop it. Never

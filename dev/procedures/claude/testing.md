@@ -11,12 +11,35 @@ doc, when the mechanics change.
 
 ## Project testing decisions
 
+- **`extension-test/` mirrors `extension/`'s tree, one test per source file.**
+  A source file `extension/<area>/<name>.js` is tested by
+  `extension-test/<area>/<name>.test.js` — same relative path, `.test.js`
+  suffix (e.g. `extension/events-popup/views/events-view.js` →
+  `extension-test/events-popup/views/events-view.test.js`). The path **is** the
+  link, so a source file never names its own test in a comment. Two deliberate
+  departures from a literal mirror:
+  - **`extension-test/integration/`** holds tests that exercise an *interaction*
+    or the *whole extension* rather than a single source file — the
+    whole-extension load smoke (`extension-loads`), the GCal-assembly
+    order/idempotency tests (`load-order`, `registry-idempotent`), and the
+    `supportedDomains`↔sources drift guard (`supported-domains`).
+  - **No mirror for `custom/*` sources or data/markup files.** Per-site
+    extractors are validated by the reviewed integration cases under
+    `dev/requirements/extractors/` (not unit tests here); `popup.html`/`.css`,
+    `manifest.json`, `fallback-lists.json`, and the generated load list are
+    covered by the UI snapshots / load-order drift guard elsewhere. So the
+    mirror is *almost* identical, not identical.
+  `extension-test/harness.js` is shared infra (not a test) and stays at the
+  root. `npm test` discovers tests by glob (`extension-test/**/*.test.js`); the
+  explicit `test:offline` list in `package.json` must be kept in sync when a
+  test file is added, moved, or removed.
+
 - **Integration cases are the reviewed contract.** A person reads
   `dev/requirements/extractors/custom/` to confirm the behavior is right; nobody reviews the
   unit tests. So every required change or bugfix must be covered by an
   integration case — add or update one whenever you add/change support for a
   site or fix an extraction bug (one real, focused event page per distinct
-  behavior). Unit tests (`extension-test/unit/`) are a supplementary safety net for logic
+  behavior). The unit tests under `extension-test/` are a supplementary safety net for logic
   that doesn't depend on a third-party page (date math, URL building, parsing),
   not a substitute.
 - **Keep integration cases as simple as possible.** This matters a lot, because
@@ -80,7 +103,7 @@ doc, when the mechanics change.
   a non-image case — behavior/extractor/logic — that smuggled in a PNG). A case earns its keep by pinning a
   requirement's correct rendering/behavior — confirmed by a human against the PNG,
   not "can these pixels be generated?". The popup's pure logic stays pinned by unit
-  tests (`popup-content` / `events-view` / `popup-truncation`).
+  tests (`events-popup/popup` / `events-popup/views/events-view`).
 
   **⚠️ This verification is deliberately INCOMPLETE — tracked in #435.** Every leaf
   is *claimed* by the right kind of test, but the behavior test **stubs**
@@ -175,7 +198,7 @@ commission-while-editing trap goes in the file's header comment rather than
   requirement-first gallery **replaced** the old case-first `dev/requirements/ui/README.md`
   (since removed).
 - **"Does the extension load?"** is guarded in two layers:
-  `extension-test/extension/extension-loads.test.js` (always-on, no browser — boots the
+  `extension-test/integration/extension-loads.test.js` (always-on, no browser — boots the
   service worker through a Chrome-faithful `importScripts` and checks every
   injected/manifest file, #146) and
   `dev/requirements/fullBrowserHeavyTests/extension-load.chrome.test.js` (`npm run test:e2e` —

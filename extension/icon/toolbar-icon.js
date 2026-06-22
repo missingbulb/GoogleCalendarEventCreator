@@ -12,7 +12,7 @@
 // The host lists come from fallback-lists.json — the same single
 // source of truth the popup's classifier (config.js / fallback-policy.js) reads.
 // `supportedDomains` is the static mirror of the sources' own matches() (kept
-// honest by extension-test/unit/supported-domains.test.js); the icon decides at host
+// honest by a drift-guard test); the icon decides at host
 // granularity, exactly as the old GCal.isSupportedHost/isDeniedHost did, so the
 // declarative host patterns reproduce the previous behavior.
 

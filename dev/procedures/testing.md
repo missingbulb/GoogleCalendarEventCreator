@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`dev/requirements/extractors/`, `extension-test/extension/`, `test/unit/`, and `dev/requirements/ui/`:
+`dev/requirements/extractors/`, `extension-test/` (which mirrors `extension/`'s layout), and `dev/requirements/ui/`:
 
 ```sh
 npm install
@@ -151,9 +151,9 @@ in the baseline file) when that's the intended cause.
 
 ### Unit tests — the internal safety net
 
-**`extension-test/unit/extraction.test.js`** pins down the extraction logic (site
+**`extension-test/event-extractors/extraction.test.js`** pins down the extraction logic (site
 selectors, JSON-LD handling, text date parsing, multiple-event detection) and
-**`extension-test/unit/calendar-url.test.js`** covers the Google Calendar URL building
+**`extension-test/events-popup/build-calendar-url.test.js`** covers the Google Calendar URL building
 (`dates` formats, the `details` field layout). Both use small synthetic
 HTML snippets written inline — no network, never flake — so a regression is
 caught on every PR even when a third-party site or its cached HTML is

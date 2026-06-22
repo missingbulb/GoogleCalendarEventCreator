@@ -7,7 +7,7 @@
 //
 // Each source's matches() is a regex, not a domain literal, so we can't read the
 // domain out of it — instead we LOAD the real sources (DOM-free, pure Node vm,
-// the same way extension-test/extension/extension-loads.test.js boots them: only
+// the same way extension-test/integration/extension-loads.test.js boots them: only
 // matches() runs here, and that's a pure host check) and run the matchers
 // against the list, both directions:
 //   - every listed domain is matched by some source  (no stale/orphan entries);

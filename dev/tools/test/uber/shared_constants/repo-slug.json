@@ -3,6 +3,6 @@
   "value": "missingbulb/GoogleCalendarEventCreator",
   "counts": {
     "extension/events-popup/views/source-request-view.js": 1,
-    "extension-test/unit/source-request.test.js": 1
+    "extension-test/events-popup/views/source-request-view.test.js": 1
   }
 }

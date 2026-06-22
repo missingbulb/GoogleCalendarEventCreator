@@ -81,8 +81,8 @@ export const GCalConfig = {
   // request for a site we already cover, before spending an agent run. The
   // runtime never reads it: the extension derives "is this supported?" straight
   // from the sources via GCal.isSupportedHost (event-extractors/registry.js). The list
-  // can't silently drift from the sources — extension-test/unit/supported-domains.test.js
-  // loads the real sources and asserts each entry is matched by a source and
-  // each source is matched by an entry.
+  // can't silently drift from the sources — a drift-guard test loads the real
+  // sources and asserts each entry is matched by a source and each source is
+  // matched by an entry.
   supportedDomains: fallbackLists.supportedDomains,
 };

@@ -1349,7 +1349,7 @@ is covered by unit tests only.
 
 ## 12. Popup states (what the popup shows)
 
-When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `extension-test/unit/popup-content.test.js`); the one machine-checkable rule, completeness, is wired.
+When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `extension-test/events-popup/popup.test.js`); the one machine-checkable rule, completeness, is wired.
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 
@@ -1357,7 +1357,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.1 -->
 
 </td>
 <td valign="top">
@@ -1372,7 +1372,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.2 -->
 
 </td>
 <td valign="top">
@@ -1387,7 +1387,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.3 -->
 
 </td>
 <td valign="top">
@@ -1402,7 +1402,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.4 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.4 -->
 
 </td>
 <td valign="top">
@@ -1417,7 +1417,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/popup-content.test.js`._ <!-- req-gallery:12.5 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.5 -->
 
 </td>
 <td valign="top">
@@ -1445,13 +1445,13 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 
 ## 13. Events model
 
-How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/unit/events-view.test.js` and the §4 snapshots).
+How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/events-popup/views/events-view.test.js` and the §4 snapshots).
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/events-view.test.js`._ <!-- req-gallery:13.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/views/events-view.test.js`._ <!-- req-gallery:13.1 -->
 
 </td>
 <td valign="top">
@@ -1466,7 +1466,7 @@ How distinct events and their showings map onto cards. The exact card grouping, 
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/events-view.test.js`._ <!-- req-gallery:13.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/views/events-view.test.js`._ <!-- req-gallery:13.2 -->
 
 </td>
 <td valign="top">
@@ -1500,7 +1500,7 @@ Field-level rules for the values that land in the Calendar event. Single-line fi
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:14.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:14.1 -->
 
 </td>
 <td valign="top">
@@ -1528,13 +1528,13 @@ Field-level rules for the values that land in the Calendar event. Single-line fi
 
 ## 15. Dates, times & timezones
 
-The rules that govern the *instant* the Calendar event lands on (how a time is *displayed* on a card is §6). Most timezone rules are tracked but not yet wired (covered today by `extension-test/unit/extraction.test.js`); the all-day and default-duration rules are wired.
+The rules that govern the *instant* the Calendar event lands on (how a time is *displayed* on a card is §6). Most timezone rules are tracked but not yet wired (covered today by `extension-test/event-extractors/extraction.test.js`); the all-day and default-duration rules are wired.
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:15.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:15.1 -->
 
 </td>
 <td valign="top">
@@ -1549,7 +1549,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:15.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:15.2 -->
 
 </td>
 <td valign="top">
@@ -1564,7 +1564,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/extraction.test.js`._ <!-- req-gallery:15.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/event-extractors/extraction.test.js`._ <!-- req-gallery:15.3 -->
 
 </td>
 <td valign="top">
@@ -1607,13 +1607,13 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/unit/source-request.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/views/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
 
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/unit/source-request.test.js`._ <!-- req-gallery:16.1 -->
+🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/views/source-request-view.test.js`._ <!-- req-gallery:16.1 -->
 
 </td>
 <td valign="top">

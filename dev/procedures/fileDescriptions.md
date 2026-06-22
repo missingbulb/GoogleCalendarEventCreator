@@ -26,7 +26,7 @@ the rules of the road.
 | `dev/requirements/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
 | `dev/requirements/infra/data/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
 | `dev/requirements/extractors/live.test.js` | Runs the reviewed assertions against the cached HTML files |
-| `extension-test/unit/extraction.test.js`, `extension-test/unit/calendar-url.test.js` | Internal offline unit tests |
+| `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |
 | `extension-test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
 | `dev/requirements/extractors/fallback/fallback-coverage.js` | Compares the generic fallback to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
 | `dev/requirements/extractors/fallback/fallback-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `dev/requirements/extractors/fallback/fallback-coverage.GENERATED.md` and ratchets the baseline locally |
