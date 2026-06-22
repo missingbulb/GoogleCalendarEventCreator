@@ -1,36 +1,73 @@
 #!/usr/bin/env python3
-"""Generate the "pretty" calendar icons from one art definition (stdlib only).
+"""Generate every PNG icon the extension and its Web Store listing use (stdlib only).
 
-This renders the on-brand calendar-with-plus art at the larger sizes Chrome and
-the Web Store show — the polished look, as opposed to the tiny functional toolbar
-glyphs in extension/icons/icon{16,32}*.png (those, with their green/gray state
-variants, come from dev/tools/gen_icons.py). One render definition, written
-straight to each consumer's folder so the copies can't drift and nothing is
-hand-copied:
+Two deliberately different looks, one generator. See dev/deployment/README.md;
+store image guidelines: https://developer.chrome.com/docs/webstore/images#icons
 
-  dev/deployment/chromeStoreIcon.png            the Web Store LISTING icon —
-      uploaded manually in the Developer Dashboard, NOT shipped in the zip.
-  extension/icons/icon128.png                   the manifest 128px icon Chrome
-      shows in the install dialog (and as its high-res source).
-  extension/icons/chromeExtensionManagementIcon.png   the 48px icon the
-      chrome://extensions management page shows.
+  Small toolbar glyphs — extension/icons/icon{16,32}*.png
+    A flat calendar glyph at the two toolbar-action sizes, in three state variants
+    the service worker (ui/toolbar-icon.js) swaps at runtime via
+    chrome.declarativeContent:
+      icon{size}.png            blue  — page not yet classified
+      icon{size}-supported.png  green — site has a first-class extractor
+      icon{size}-denied.png     gray  — site is on the fallback denylist
+    These are tiny, so the glyph fills the frame for legibility.
 
-The store-icon guidelines (https://developer.chrome.com/docs/webstore/images#icons)
-want a 128x128 PNG whose artwork sits in a centered 96x96 "safe zone" (16px
-transparent padding per side) and reads on light or dark backgrounds (white card
-body + blue header); the geometry below already lives in that safe zone, so the
-same render serves the in-browser icons too. It's supersampled and box-filtered
-(premultiplied alpha) for clean anti-aliased edges.
+  Polished calendar art — the larger sizes Chrome and the store show, from one
+  anti-aliased render definition (96x96 art in a 16px transparent safe zone per
+  the store guidelines):
+      extension/icons/icon128.png          manifest 128px icon (install dialog);
+          also the file uploaded by hand as the Web Store LISTING icon.
+      extension/icons/chromeExtensionManagementIcon.png   48px management-page icon.
 """
 import os
 import struct
 import zlib
 
-# Brand palette, shared with dev/tools/gen_icons.py.
-BLUE = (26, 115, 232)
-DARK_BLUE = (23, 78, 166)
-WHITE = (255, 255, 255)
-CLEAR = (0, 0, 0, 0)
+# Brand palette.
+BLUE       = (26, 115, 232)   # #1a73e8
+DARK_BLUE  = (23, 78, 166)    # #174ea6
+GREEN      = (52, 168, 83)    # #34a853
+DARK_GREEN = (30, 142, 62)    # #1e8e3e
+GRAY       = (95, 99, 104)    # #5f6368
+DARK_GRAY  = (60, 64, 67)     # #3c4043
+WHITE      = (255, 255, 255)
+CLEAR      = (0, 0, 0, 0)
+
+
+# --- Small toolbar glyphs (flat, filling the frame) --------------------------
+
+VARIANTS = [
+    ("",           BLUE,  DARK_BLUE),
+    ("-supported", GREEN, DARK_GREEN),
+    ("-denied",    GRAY,  DARK_GRAY),
+]
+
+
+def make_glyph(size, plus_color, header_color):
+    px = [[(0, 0, 0, 0)] * size for _ in range(size)]
+    left, right = round(size * 0.08), round(size * 0.92)
+    top, bottom = round(size * 0.10), round(size * 0.94)
+    header_h = round(size * 0.24)
+    for y in range(top, bottom):
+        for x in range(left, right):
+            color = header_color if y < top + header_h else WHITE
+            px[y][x] = (*color, 255)
+    body_top = top + header_h
+    cx = (left + right) // 2
+    cy = (body_top + bottom) // 2
+    arm = max(2, round(size * 0.18))
+    thick = max(1, round(size * 0.07))
+    for y in range(cy - arm, cy + arm + 1):
+        for x in range(cx - thick, cx + thick + 1):
+            px[y][x] = (*plus_color, 255)
+    for y in range(cy - thick, cy + thick + 1):
+        for x in range(cx - arm, cx + arm + 1):
+            px[y][x] = (*plus_color, 255)
+    return px
+
+
+# --- Polished calendar art (anti-aliased, in a safe zone) --------------------
 
 # Geometry is defined in a 128px coordinate system; render() maps any output size
 # onto it, so the same art renders cleanly at 128 (store/manifest) and 48
@@ -117,6 +154,8 @@ def render(size, ss=4):
     return out
 
 
+# --- Shared PNG writer -------------------------------------------------------
+
 def write_png(path, px):
     size = len(px)
     raw = b"".join(b"\x00" + b"".join(bytes(p) for p in row) for row in px)
@@ -139,18 +178,21 @@ def main():
     ext_icons = os.path.join(repo_root, "extension", "icons")
     os.makedirs(ext_icons, exist_ok=True)
 
-    art128 = render(128)
-    art48 = render(48)
+    # Small toolbar glyphs: sizes 16/32, each in 3 state variants.
+    for suffix, plus_color, header_color in VARIANTS:
+        for size in (16, 32):
+            name = f"icon{size}{suffix}.png"
+            write_png(os.path.join(ext_icons, name), make_glyph(size, plus_color, header_color))
+            print(f"extension/icons/{name}")
 
-    # (path, pixels, label) — written straight to each consumer, no copies.
-    targets = [
-        (os.path.join(deployment_dir, "chromeStoreIcon.png"), art128, "dev/deployment/chromeStoreIcon.png"),
-        (os.path.join(ext_icons, "icon128.png"), art128, "extension/icons/icon128.png"),
-        (os.path.join(ext_icons, "chromeExtensionManagementIcon.png"), art48, "extension/icons/chromeExtensionManagementIcon.png"),
-    ]
-    for path, px, label in targets:
-        write_png(path, px)
-        print(label)
+    # Polished calendar art: 48 (management) + 128 (manifest, and the file
+    # uploaded by hand as the store listing icon).
+    for name, px in [
+        ("icon128.png", render(128)),
+        ("chromeExtensionManagementIcon.png", render(48)),
+    ]:
+        write_png(os.path.join(ext_icons, name), px)
+        print(f"extension/icons/{name}")
 
 
 if __name__ == "__main__":
