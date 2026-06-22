@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Generate all toolbar icon variants as PNGs (stdlib only).
+"""Generate the small toolbar glyph icons as PNGs (stdlib only).
+
+Sizes 16 and 32 only — these are the toolbar-action sizes the service worker
+actually shows, and the ONLY sizes with green/gray state variants. The larger
+48px (management page) and 128px (install dialog / store) icons are the polished
+calendar art from dev/deployment/gen_store_icon.py, not these flat glyphs.
 
 Three variants per size — base (blue/unknown), supported (green), denied (gray):
-  icon{size}.png          blue  — page not yet classified
+  icon{size}.png            blue  — page not yet classified
   icon{size}-supported.png  green — site has a first-class extractor
   icon{size}-denied.png     gray  — site is on the fallback denylist (bad guesses)
 
 The toolbar service worker (ui/toolbar-icon.js) swaps between these at runtime
-based on GCal.isSupportedHost / GCal.isDeniedHost."""
+via chrome.declarativeContent, keyed on the host's support state."""
 import os
 import struct
 import zlib
@@ -68,10 +73,10 @@ def write_png(path, px):
 
 
 def main():
-    out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "icons")
+    out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "extension", "icons")
     os.makedirs(out_dir, exist_ok=True)
     for suffix, plus_color, header_color in VARIANTS:
-        for size in (16, 32, 48, 128):
+        for size in (16, 32):
             name = f"icon{size}{suffix}.png"
             write_png(os.path.join(out_dir, name), make_icon(size, plus_color, header_color))
             print(name)

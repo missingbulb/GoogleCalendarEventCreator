@@ -43,8 +43,8 @@ the rules of the road.
 | `dev/requirements/ui/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `dev/requirements/ui/popup-snapshots.test.js` | The single visual-comparison engine: renders each `dev/requirements/ui/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
 | `dev/requirements/infra/refresh-popup-snapshots.js` | Regenerates the `dev/requirements/ui/cases/*.png` snapshots (popup and icon) + the inline gallery |
-| `dev/tools/gen_icons.py` | Regenerates the shipped toolbar PNG icons (Python stdlib only) |
-| `dev/deployment/gen_store_icon.py` | Regenerates the Chrome Web Store icon `dev/deployment/icon-128.png` (Python stdlib only); a listing asset, not shipped in the zip |
+| `dev/tools/gen_icons.py` | Regenerates the small toolbar glyph icons `extension/icons/icon{16,32}*.png` (base + supported/denied state variants; Python stdlib only) |
+| `dev/deployment/gen_store_icon.py` | Regenerates the polished calendar art at the larger sizes from one definition: the Web Store listing icon `dev/deployment/chromeStoreIcon.png` (a listing asset, not shipped), the manifest `extension/icons/icon128.png`, and the management-page `extension/icons/chromeExtensionManagementIcon.png` (Python stdlib only). See `dev/deployment/README.md` |
 | `.github/workflows/shipping-files.js` | Single source of truth for the files that ship in the release zip |
 | `.github/workflows/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
 | `dev/tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `dev/procedures/claude/auto-extractor.md` |

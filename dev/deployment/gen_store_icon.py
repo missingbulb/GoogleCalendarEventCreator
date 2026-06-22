@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-"""Generate the Chrome Web Store store icon (dev/deployment/icon-128.png).
+"""Generate the "pretty" calendar icons from one art definition (stdlib only).
 
-This is the listing's "store icon" — the face of the item on the Chrome Web
-Store — and is deliberately separate from the extension's toolbar icons in
-icons/ (tiny functional glyphs). It follows the store image guidelines:
-https://developer.chrome.com/docs/webstore/images#icons
+This renders the on-brand calendar-with-plus art at the larger sizes Chrome and
+the Web Store show — the polished look, as opposed to the tiny functional toolbar
+glyphs in extension/icons/icon{16,32}*.png (those, with their green/gray state
+variants, come from dev/tools/gen_icons.py). One render definition, written
+straight to each consumer's folder so the copies can't drift and nothing is
+hand-copied:
 
-  - 128x128 PNG total.
-  - Artwork lives in the centered 96x96 "safe zone" (16px transparent padding
-    per side); padding stays transparent.
-  - Reads on both light and dark backgrounds (white card body + blue header).
+  dev/deployment/chromeStoreIcon.png            the Web Store LISTING icon —
+      uploaded manually in the Developer Dashboard, NOT shipped in the zip.
+  extension/icons/icon128.png                   the manifest 128px icon Chrome
+      shows in the install dialog (and as its high-res source).
+  extension/icons/chromeExtensionManagementIcon.png   the 48px icon the
+      chrome://extensions management page shows.
 
-The art is an on-brand calendar-with-plus matching dev/tools/gen_icons.py. It's
-rendered at 4x and box-downsampled (premultiplied alpha) for clean anti-aliased
-edges, using only the standard library.
+The store-icon guidelines (https://developer.chrome.com/docs/webstore/images#icons)
+want a 128x128 PNG whose artwork sits in a centered 96x96 "safe zone" (16px
+transparent padding per side) and reads on light or dark backgrounds (white card
+body + blue header); the geometry below already lives in that safe zone, so the
+same render serves the in-browser icons too. It's supersampled and box-filtered
+(premultiplied alpha) for clean anti-aliased edges.
 """
 import os
 import struct
@@ -25,12 +32,11 @@ DARK_BLUE = (23, 78, 166)
 WHITE = (255, 255, 255)
 CLEAR = (0, 0, 0, 0)
 
-SIZE = 128          # final image edge
-SS = 4              # supersampling factor
-S = SIZE * SS       # working buffer edge
-
-# Geometry in final 128px space. The calendar card and its binding tabs all sit
-# inside the 16..112 safe zone (16px padding on every side).
+# Geometry is defined in a 128px coordinate system; render() maps any output size
+# onto it, so the same art renders cleanly at 128 (store/manifest) and 48
+# (management). The calendar card and its binding tabs all sit inside the 16..112
+# safe zone (16px padding on every side).
+DESIGN = 128.0
 CARD = (22.0, 32.0, 106.0, 108.0)   # left, top, right, bottom
 CARD_RADIUS = 12.0
 HEADER_BOTTOM = 54.0                 # blue header band ends here
@@ -64,7 +70,7 @@ def in_plus(x, y):
 
 
 def sample(x, y):
-    """Opaque RGBA for a point in 128px space, or transparent."""
+    """Opaque RGBA for a point in 128px design space, or transparent."""
     # Binding tabs sit behind the card so they appear to emerge from its top.
     color = None
     for tab in TABS:
@@ -87,32 +93,27 @@ def sample(x, y):
     return (*color, 255)
 
 
-def render():
-    """Supersample then box-downsample (premultiplied alpha) to 128x128 RGBA."""
-    hi = [[CLEAR] * S for _ in range(S)]
-    for sy in range(S):
-        fy = (sy + 0.5) / SS
-        row = hi[sy]
-        for sx in range(S):
-            row[sx] = sample((sx + 0.5) / SS, fy)
+def render(size, ss=4):
+    """Render the art to `size`x`size` RGBA, supersampled ss x ss per pixel.
 
-    out = [[(0, 0, 0, 0)] * SIZE for _ in range(SIZE)]
-    n = SS * SS
-    for y in range(SIZE):
-        for x in range(SIZE):
+    Each output pixel maps onto the 128px design space (scale = 128/size) and is
+    box-filtered over its ss*ss subsamples with premultiplied alpha."""
+    scale = DESIGN / size
+    n = ss * ss
+    out = [[(0, 0, 0, 0)] * size for _ in range(size)]
+    for y in range(size):
+        for x in range(size):
             pr = pg = pb = pa = 0
-            for j in range(SS):
-                srow = hi[y * SS + j]
-                for i in range(SS):
-                    r, g, b, a = srow[x * SS + i]
+            for j in range(ss):
+                oy = (y + (j + 0.5) / ss) * scale
+                for i in range(ss):
+                    ox = (x + (i + 0.5) / ss) * scale
+                    r, g, b, a = sample(ox, oy)
                     pr += r * a
                     pg += g * a
                     pb += b * a
                     pa += a
-            if pa == 0:
-                out[y][x] = (0, 0, 0, 0)
-            else:
-                out[y][x] = (pr // pa, pg // pa, pb // pa, pa // n)
+            out[y][x] = (0, 0, 0, 0) if pa == 0 else (pr // pa, pg // pa, pb // pa, pa // n)
     return out
 
 
@@ -133,11 +134,23 @@ def write_png(path, px):
 
 
 def main():
-    out_dir = os.path.dirname(__file__)
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "icon-128.png")
-    write_png(path, render())
-    print("dev/deployment/icon-128.png")
+    deployment_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(os.path.dirname(deployment_dir))
+    ext_icons = os.path.join(repo_root, "extension", "icons")
+    os.makedirs(ext_icons, exist_ok=True)
+
+    art128 = render(128)
+    art48 = render(48)
+
+    # (path, pixels, label) — written straight to each consumer, no copies.
+    targets = [
+        (os.path.join(deployment_dir, "chromeStoreIcon.png"), art128, "dev/deployment/chromeStoreIcon.png"),
+        (os.path.join(ext_icons, "icon128.png"), art128, "extension/icons/icon128.png"),
+        (os.path.join(ext_icons, "chromeExtensionManagementIcon.png"), art48, "extension/icons/chromeExtensionManagementIcon.png"),
+    ]
+    for path, px, label in targets:
+        write_png(path, px)
+        print(label)
 
 
 if __name__ == "__main__":
