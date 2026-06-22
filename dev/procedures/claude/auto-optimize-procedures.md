@@ -20,7 +20,7 @@ on an earlier run (see direction 2), now merged into the canon and pulled in by 
 submodule bump — the local copy is now redundant. The routine:
 
 - **Removes** the now-duplicated local item (typically from the local working-set
-  docs `dev/procedures/engineeringPractices.md` / `dev/procedures/agenticBestPractices.md`, but any
+  docs in `dev/procedures/*`, but any
   local doc qualifies), since the canon is the single source of truth.
 - **Rephrases / reframes** a local procedure when Claudinite's wording of the same
   idea has changed, so the local docs stay consistent with the canon they point
