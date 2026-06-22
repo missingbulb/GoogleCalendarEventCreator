@@ -17,14 +17,14 @@
     "default_icon": {
       "16": "icon/images/icon16.png",
       "32": "icon/images/icon32.png",
-      "48": "icon/images/icon48.png",
-      "128": "icon/images/icon128.png"
+      "48": "icon/images/chromeExtensionManagementIcon.png",
+      "128": "icon/images/chromeStoreIcon.png"
     }
   },
   "icons": {
     "16": "icon/images/icon16.png",
     "32": "icon/images/icon32.png",
-    "48": "icon/images/icon48.png",
-    "128": "icon/images/icon128.png"
+    "48": "icon/images/chromeExtensionManagementIcon.png",
+    "128": "icon/images/chromeStoreIcon.png"
   }
 }
