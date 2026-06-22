@@ -110,13 +110,8 @@ export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
   // time to show, so each chip becomes a TIME chip (date banner + that showing's
   // time) so the showings are told apart. Any all-day/dateless session falls back
   // to plain day chips.
-  return makeGroupCard(
-    card,
-    tab,
-    showPerDayTimes(card.instances)
-      ? (it) => timeChip(it.t, currentYear)
-      : (it) => dayChip(it.t.start, currentYear)
-  );
+  const preferTime = showPerDayTimes(card.instances);
+  return makeGroupCard(card, tab, (it) => chipForInstance(it.t, currentYear, preferTime));
 }
 
 // A single clickable event button. A calendar-style date chip on the left, then
@@ -128,7 +123,7 @@ function makeSingleCard(event, it, tab, currentYear) {
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = dayChip(it.t.start, currentYear);
+  const chip = chipForInstance(it.t, currentYear, false);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
@@ -370,6 +365,55 @@ function timeChip(instance, currentYear) {
     year: c && c.year,
     yearPast: c && c.yearPast,
   };
+}
+
+// The end of an instance as a Date, parsed the SAME way as the start so an all-day
+// end (a bare YYYY-MM-DD) anchors to LOCAL midnight (not UTC) and lands on the
+// right day: an explicit end first, else the duration-derived end (effectiveEnd),
+// else null.
+function instanceEndDate(instance) {
+  if (instance.end) return eventStart(instance.end);
+  return effectiveEnd(instance);
+}
+
+// True when a single instance spans 2+ distinct calendar days (its end falls on a
+// later day than its start) — a genuinely multi-day event (an all-day run, or a
+// timed event crossing midnight). It stays ONE card/button showing a date RANGE,
+// never split per day.
+function isMultiDaySpan(instance) {
+  const s = eventStart(instance.start);
+  const e = instanceEndDate(instance);
+  if (!s || !e) return false;
+  return e.getFullYear() !== s.getFullYear() || e.getMonth() !== s.getMonth() || e.getDate() !== s.getDate();
+}
+
+// A date-RANGE chip for a multi-day span: the month(s) as the banner over the day
+// range as the body — "SEP" over "15–18" within one month, "JUN–JUL" over "28–3"
+// across months. The off-year pill (if any) follows the START year.
+function rangeChip(instance, currentYear) {
+  const s = eventStart(instance.start);
+  const e = instanceEndDate(instance);
+  if (!s || !e) return null;
+  const mon = (d) => d.toLocaleDateString(undefined, { month: "short" }).toUpperCase();
+  const sMon = mon(s);
+  const eMon = mon(e);
+  const sameMonth = sMon === eMon && s.getFullYear() === e.getFullYear();
+  return {
+    banner: sameMonth ? sMon : `${sMon}–${eMon}`,
+    body: `${s.getDate()}–${e.getDate()}`,
+    kind: "range",
+    ...offYear(s, currentYear),
+  };
+}
+
+// The chip for one instance: a date-range chip for a multi-day span, else a time
+// chip (when the card shows per-showing times) or a plain day chip. Used by both a
+// single card's indicator and a grouped card's per-instance buttons, so a span
+// renders identically whether it stands alone or sits among other showings.
+function chipForInstance(instance, currentYear, preferTime) {
+  if (isMultiDaySpan(instance)) return rangeChip(instance, currentYear);
+  if (preferTime) return timeChip(instance, currentYear);
+  return dayChip(instance.start, currentYear);
 }
 
 // The chip's year-pill fields when `date` falls outside `currentYear`: { year }

@@ -296,16 +296,16 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.2.3](popup/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
+![event-cards-grouping.4.2.3](popup/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
 
 </td>
 <td valign="top">
 
 `4.2.3` Edge case — **one event** with three instances: one in June, one a
-**multi-day instance spanning June → July**, and one in July. Today the spanning
-instance groups by its **start** (June), so it shows under June only and never
-under July (provisional render at left). Whether a cross-month instance should
-also surface in the later month is **to be decided**.
+**multi-day instance spanning June → July**, and one in July. The spanning
+instance groups by its **start month** (June): it shows in the June card as a
+**date-range chip** (`JUN–JUL` / `28–3`) beside the Jun 15 showing, and never
+duplicates under July (which holds the Jul 10 single card).
 
 </td>
 </tr>
@@ -408,10 +408,10 @@ buttons (→ `5`) are its calendar visuals.
 
 `4.8` An event whose **single instance's own start–end crosses several days**
 stays one **single card** — it is *not* split into a button per day (only
-separate instances ever become multiple buttons). Its chip shows **just the start
-day** (today there is **no** date range on the calendar chip) and its line shows
-the instance's time (or "All day"), not a per-day breakdown. (Whether a long /
-multi-month span *should* show a range is the open question in `4.10`.)
+separate instances ever become multiple buttons). Its calendar chip shows the
+**start–end day range** (within one month, the month over a `15–18` day range; a
+cross-month span is `4.10`) and its line shows the instance's time (or "All day"),
+not a per-day breakdown.
 
 </td>
 </tr>
@@ -440,15 +440,15 @@ order.)
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.10](popup/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
+![event-cards-grouping.4.10](popup/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
 
 </td>
 <td valign="top">
 
-`4.10` A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
-today its chip shows just the **start day** (provisional render at left). Whether a
-long or multi-month span should instead show a **date range** on the calendar chip
-— and how the span should read on the line — is **to be decided**.
+`4.10` A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3) shows
+a **date range** on its calendar chip: the month range as the banner over the day
+range as the body (**`JUN–JUL`** over **`28–3`**). Its line reads the instance's
+time (or "All day") as usual.
 
 </td>
 </tr>

@@ -295,6 +295,12 @@ body {
   font-size: 11px;
   white-space: nowrap;
 }
+/* A multi-day span's day range ("15–18", "28–3") — one line, between the day and
+   time sizes so the two days fit beside the month(s) banner. */
+.e-chip-body.range {
+  font-size: 14px;
+  white-space: nowrap;
+}
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
 .event-btn .e-body,
