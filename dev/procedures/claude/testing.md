@@ -95,10 +95,11 @@ doc, when the mechanics change.
     a `tbd` logic case is tracked-but-not-wired and names the unit test that covers
     it today (`coveredBy`).
   - `tbd: true` — a leaf not (yet) faithfully verified here: an image edge case
-    whose behavior isn't decided yet (e.g. `4.2.3`, `4.10`) still renders a
-    provisional snapshot under a "TO BE DECIDED" banner; a non-image `tbd` case
-    (extractor/logic) is reported skipped with a pointer to its current coverage.
-    The edge-case-review routine (#438) resolves the image ones over time.
+    whose behavior isn't decided yet still renders a provisional snapshot under a
+    "TO BE DECIDED" banner (none at present — `4.2.3`/`4.10` were resolved into the
+    date-range chip); a non-image `tbd` case (extractor/logic) is reported skipped
+    with a pointer to its current coverage. The edge-case-review routine (#438)
+    resolves the image ones over time.
 
   `dev/requirements/requirements-coverage.test.js` fails unless **every leaf has exactly
   one case** (and rejects a nonexistent/typo'd/duplicate case, an unknown `kind`, or
