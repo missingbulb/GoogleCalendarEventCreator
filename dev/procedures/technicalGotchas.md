@@ -80,6 +80,7 @@ trap spanning files. See the full locality rule in
   it, and the first read still races startup — so **poll** until the global
   appears. (Bound every probe and add a test-level timeout regardless, per the
   hang-proofing rule in [engineeringPractices.md](claude/shared/engineeringPractices.md).)
+- **`git mv` on a directory containing a submodule updates `.gitmodules` and the index but leaves `.git/config` stale — run `git submodule sync && git submodule update --init` after.** When `docs/claude/shared/` (the Claudinite submodule) moved to `dev/procedures/claude/shared/` via `git mv docs dev/procedures`, git correctly rewrote `.gitmodules` and the index; but the local `.git/config` still had `[submodule "docs/claude/shared"]` pointing at the old path. Until `git submodule sync` propagated the new path into `.git/config` and `git submodule update --init` re-registered it, any operation that consulted `.git/config` (submodule status, checkout) saw the stale entry. Always run both commands after renaming a directory that houses a submodule.
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
   with the rest of the portable GitHub procedures in
