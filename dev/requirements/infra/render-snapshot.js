@@ -6,7 +6,7 @@
 // name it — nothing here or in the spec parser changes.
 //
 //   kind: "popup" (default) -> the popup's real render() via satori (popup-renderer.js)
-//   kind: "icon"            -> the real extension/ui/toolbar-icon.js loaded into a fake browser
+//   kind: "icon"            -> the real extension/icon/toolbar-icon.js loaded into a fake browser
 //                              (icon-renderer.js), fed the case's faked tabUrl + lists
 //
 // The comparison, storage (dev/requirements/ui/cases/<slug>.<id>.png), naming, and refresh are all

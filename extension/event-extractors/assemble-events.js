@@ -2,7 +2,7 @@
 // the events found on it, plus whether the page is on a supported host.
 //
 // Must be the LAST file in the generated load list
-// (pipeline/load-order.generated.json) — its completion value is what
+// (event-extractors/load-order.generated.json) — its completion value is what
 // chrome.scripting.executeScript returns to the popup.
 //
 // The result is always { events: [...], supported, fallback } — `events` holds
@@ -39,7 +39,7 @@
 // The popup reads `supported` (with the events) to decide what to render: a
 // supported host shows its events; an unsupported host shows the generic
 // fallback's events when they're complete enough (title + location + start),
-// and otherwise/also offers a "request this source" link — see ui/popup.js's
+// and otherwise/also offers a "request this source" link — see events-popup/popup.js's
 // chooseContent. A supported host whose dedicated source found nothing carries
 // `fallback: true`, telling the popup to show the generic fallback's events with
 // that request link too (#456). `supported` is the same answer
@@ -51,7 +51,7 @@
 //     every field of its events itself (reusing shared helpers, including the
 //     GCal.embeddedEvents reader, as it sees fit). No other extractor's output
 //     is merged over it. A source may return a single partial event, or its own
-//     `events` array (e.g. sources/telavivcinematheque.js for a series page)
+//     `events` array (e.g. custom/telavivcinematheque.js for a series page)
 //     with page-level description/ctz that fill any field an individual event
 //     didn't carry. If it finds NO events, we run the generic fallback as a
 //     last resort and flag the result `fallback: true` (#456) — never merged
@@ -61,8 +61,8 @@
 //     event. The popup presents it when it's complete enough (title + location +
 //     start) and otherwise falls back to the "request this source" flow.
 //
-// To support a new event platform, add pipeline/sources/<site>.js that pushes
-// onto GCal.sources (see sources/meetup.js for the pattern), run `npm run index`
+// To support a new event platform, add event-extractors/custom/<site>.js that pushes
+// onto GCal.sources (see custom/meetup.js for the pattern), run `npm run index`
 // to regenerate the load list, and add a test case under dev/requirements/extractors/custom/.
 //
 // The orchestrator is exposed as GCal.extract() — THE single top-level

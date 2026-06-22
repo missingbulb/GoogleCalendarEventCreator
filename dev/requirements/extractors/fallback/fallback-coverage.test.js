@@ -1,5 +1,5 @@
 // The integration test for the GENERIC fallback extractor
-// (pipeline/extract-unsupported.js): a high-watermark gate on how much it
+// (event-extractors/extract-unsupported.js): a high-watermark gate on how much it
 // recovers, per page, relative to each page's dedicated per-site source.
 //
 // The comparison itself lives in dev/requirements/extractors/fallback/fallback-coverage.js (run GCal.extract()

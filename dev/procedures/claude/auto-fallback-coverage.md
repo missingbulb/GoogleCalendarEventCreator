@@ -11,13 +11,13 @@ nothing. A no-win run means no branch and no PR.
 
 ## Scope — the only code it may change
 
-Just the **generic** extractor: `extension/pipeline/extract-unsupported.js` and the shared
-`extension/pipeline/helpers/*.js`. *Generic* means a change that keys off a **widely-used**
+Just the **generic** extractor: `extension/event-extractors/extract-unsupported.js` and the shared
+`extension/event-extractors/helpers/*.js`. *Generic* means a change that keys off a **widely-used**
 convention and would plausibly help unseen sites — display conventions
 (date↔time separators, start–end time ranges, "Event @ Venue" titles, ordinals)
 or standard machine-readable signals (schema.org JSON-LD, Open Graph/meta,
 microdata, `<time datetime>`). **Not** generic, so out of scope: lifting one
-`extension/pipeline/sources/<site>.js`'s logic into the fallback, or special-casing a host —
+`extension/event-extractors/custom/<site>.js`'s logic into the fallback, or special-casing a host —
 if the only beneficiary is a single case and the rule wouldn't fire elsewhere, it
 isn't generic.
 

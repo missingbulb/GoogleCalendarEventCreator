@@ -1,6 +1,6 @@
 // Events view: turns the extracted events into the popup's cards. An event keeps
 // its showings in times[] (the multi-instance model in
-// pipeline/assemble-events.js); this module decides how those instances become
+// event-extractors/assemble-events.js); this module decides how those instances become
 // cards and renders them. Loaded on demand by the popup controller (popup.js)
 // via dynamic import().
 //
@@ -18,7 +18,7 @@
 // `toCards` and `renderCard` are the controller's entry points; the pure display
 // helpers (formatWhen, summarize, dateChip, sameDayLabel) are also exported for
 // the unit tests and the UI-snapshot renderer.
-import { buildCalendarUrl } from "../../pipeline/build-calendar-url.js";
+import { buildCalendarUrl } from "../build-calendar-url.js";
 import { GCalConfig } from "../../config.js";
 
 // An event's instances (showings) — the times[] of the multi-instance model.

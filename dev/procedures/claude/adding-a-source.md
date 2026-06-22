@@ -1,31 +1,31 @@
 # Adding a site extractor
 
 When a site source's `matches(host)` is true, that source is the **only**
-extractor the orchestrator runs for the page (`extension/pipeline/assemble-events.js`) — it
+extractor the orchestrator runs for the page (`extension/event-extractors/assemble-events.js`) — it
 must produce every field itself; the generic fallback heuristics run only for
 *unsupported* hosts and are never merged over a site source. What a source *can*
 lean on is the page's own schema.org JSON-LD: the convention is to return
 `merge(domFields, embeddedEvents.toEvent(embeddedEvents.find()[0]))`, so the
 source's DOM values win and JSON-LD fills the gaps they leave. The flow:
 
-1. Add `extension/pipeline/sources/<site>.js` that pushes onto `GCal.sources` with
+1. Add `extension/event-extractors/custom/<site>.js` that pushes onto `GCal.sources` with
    `name`, an inline `matches(hostname)`, and an `extract()` returning a partial
    event object. The `matches` function is the single thing that makes a page
    count as supported — it both gates the source and drives the green
-   ("supported") vs. red toolbar icon. Follow `extension/pipeline/sources/meetup.js` as
+   ("supported") vs. red toolbar icon. Follow `extension/event-extractors/custom/meetup.js` as
    the template, including the header comment describing the HTML it expects.
-   Use the shared helpers on `GCal` (see `extension/pipeline/helpers/`); return only the
+   Use the shared helpers on `GCal` (see `extension/event-extractors/helpers/`); return only the
    fields this site needs.
 2. Run `npm run index` to regenerate the load list from the sources on disk:
-   `extension/pipeline/load-order.generated.json` (the single source of truth the popup
+   `extension/event-extractors/load-order.generated.json` (the single source of truth the popup
    injects and the tests read). The generator pins `registry.js`/`helpers/`
    first and `assemble-events.js` last and sorts the rest, so you never hand-edit
-   the list — and adding a source touches no file in `extension/ui/`; a CI test fails if
+   the list — and adding a source touches no file in `extension/events-popup/`; a CI test fails if
    it's stale.
-3. Add the new host to `supportedDomains` in `extension/pipeline/fallback-lists.json`. This
+3. Add the new host to `supportedDomains` in `extension/fallback-lists.json`. This
    static list is the static mirror of the sources' `matches()`
    (`extension-test/unit/supported-domains.test.js` fails if it drifts), and the toolbar
-   service worker (`extension/ui/toolbar-icon.js`) builds its `chrome.declarativeContent`
+   service worker (`extension/icon/toolbar-icon.js`) builds its `chrome.declarativeContent`
    icon rules from it — so the green "supported" icon only appears once the host
    is listed here.
 4. Add an integration case for a real page on the site (see `dev/procedures/testing.md`) —

@@ -24,9 +24,9 @@ const manifest = JSON.parse(fs.readFileSync(path.join(EXT, "manifest.json"), "ut
 // worker aborts here just as it aborts the real worker — before any listener
 // registers. (The worker no longer importScripts the pipeline: it colors the
 // icon via chrome.declarativeContent, so it never loads the sources or builds
-// GCal — see ui/toolbar-icon.js.)
+// GCal — see icon/toolbar-icon.js.)
 function bootServiceWorker() {
-  const workerPath = manifest.background.service_worker; // e.g. "ui/toolbar-icon.js"
+  const workerPath = manifest.background.service_worker; // e.g. "icon/toolbar-icon.js"
   const registered = [];
   const handlers = {};
   const listener = (name) => ({ addListener: (fn) => { registered.push(name); handlers[name] = fn; } });
@@ -85,7 +85,7 @@ test("the worker registers icon rules at startup, with no tab access", async () 
 test("every injected pipeline file parses as a script", () => {
   // load-order.generated.json is exactly what the popup injects into the page;
   // a syntax error in any of them would break the popup's extraction at runtime.
-  const files = JSON.parse(fs.readFileSync(path.join(EXT, "pipeline/load-order.generated.json"), "utf8"));
+  const files = JSON.parse(fs.readFileSync(path.join(EXT, "event-extractors/load-order.generated.json"), "utf8"));
   assert.ok(files.length, "load order lists no files");
   for (const f of files) {
     const src = fs.readFileSync(path.join(EXT, f), "utf8");

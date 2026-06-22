@@ -9,7 +9,7 @@
 // history". (The old design listened to chrome.tabs.onActivated/onUpdated and
 // read tab.url for every tab, which is exactly what required "tabs".)
 //
-// The host lists come from pipeline/fallback-lists.json — the same single
+// The host lists come from fallback-lists.json — the same single
 // source of truth the popup's classifier (config.js / fallback-policy.js) reads.
 // `supportedDomains` is the static mirror of the sources' own matches() (kept
 // honest by extension-test/unit/supported-domains.test.js); the icon decides at host
@@ -35,8 +35,8 @@ async function loadImageData(iconPath, size) {
 // green, "-denied" gray). 16 and 32 are the toolbar-action sizes.
 async function iconImageData(suffix) {
   const [px16, px32] = await Promise.all([
-    loadImageData(`icons/icon16${suffix}.png`, 16),
-    loadImageData(`icons/icon32${suffix}.png`, 32),
+    loadImageData(`icon/images/icon16${suffix}.png`, 16),
+    loadImageData(`icon/images/icon32${suffix}.png`, 32),
   ]);
   return { 16: px16, 32: px32 };
 }
@@ -59,7 +59,7 @@ function hostMatchers(host) {
 // Denied is listed before supported so that if a host ever appeared on both, the
 // later (supported/green) action would win; today the lists don't overlap.
 async function buildRules() {
-  const lists = await fetch(chrome.runtime.getURL("pipeline/fallback-lists.json")).then((r) => r.json());
+  const lists = await fetch(chrome.runtime.getURL("fallback-lists.json")).then((r) => r.json());
   const green = await iconImageData("-supported");
   const gray = await iconImageData("-denied");
 

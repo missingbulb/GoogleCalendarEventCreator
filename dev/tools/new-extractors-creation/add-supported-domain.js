@@ -1,4 +1,4 @@
-// Adds a host to supportedDomains in pipeline/fallback-lists.json — sorted, no
+// Adds a host to supportedDomains in fallback-lists.json — sorted, no
 // duplicate. The auto-implement-extractor workflow runs this in Phase 1 to
 // register a new source's host before the agent runs (the agent no longer edits
 // the list). Idempotent: re-running for an existing host is a no-op write.
@@ -13,7 +13,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join(__dirname, "..", "..", "..", "extension", "pipeline", "fallback-lists.json");
+const FILE = path.join(__dirname, "..", "..", "..", "extension", "fallback-lists.json");
 
 // Pure: return `list` with `host` present, sorted and de-duplicated.
 function withDomain(list, host) {

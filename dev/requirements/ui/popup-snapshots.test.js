@@ -2,13 +2,13 @@
 // requirement. Each case (dev/requirements/ui/cases/<name>.case.js) supplies fake data;
 // render-snapshot.js turns it into a PNG with the RIGHT renderer, chosen by the
 // case's own `kind` (the popup's REAL render() by default; the real
-// extension/ui/toolbar-icon.js in a fake browser for a `kind: "icon"` case — §10), and the
+// extension/icon/toolbar-icon.js in a fake browser for a `kind: "icon"` case — §10), and the
 // result is compared pixel-by-pixel (via pixelmatch) against the committed
 // reference PNG (dev/requirements/ui/cases/<name>.png). So the
 // snapshots track the shipped code directly; there is no hand-maintained copy of
 // the popup markup or the icon art. The comparison, naming, and refresh below are
 // shared across both — only the pixel source differs. Run `npm run refresh:ui` to
-// regenerate after an intentional change to the popup, the views, ui/popup.css, or
+// regenerate after an intentional change to the popup, the views, events-popup/popup.css, or
 // the toolbar icon.
 //
 // A case is a self-contained scenario: its data lives only in the case file

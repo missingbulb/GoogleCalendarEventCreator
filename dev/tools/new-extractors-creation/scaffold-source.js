@@ -1,4 +1,4 @@
-// Writes the initial pipeline/sources/<slug>.js stub for the auto-implement-
+// Writes the initial event-extractors/custom/<slug>.js stub for the auto-implement-
 // extractor workflow. Everything in the stub is deterministic from the event URL
 // (slug, host, matches() regex), so the workflow can scaffold it — and then run
 // `npm run index` + register the host — BEFORE the agent runs. The agent's only
@@ -24,7 +24,7 @@ function sourceStub(url) {
   return `// ${host} event pages: ${url}
 //
 // TODO(agent): document the page's structure and where each field is read from,
-// mirroring pipeline/sources/meetup.js. The real page is cached at
+// mirroring event-extractors/custom/meetup.js. The real page is cached at
 // dev/requirements/data/${caseName}.html.
 //
 // A matched host runs THIS source only — it must produce every field itself; the
@@ -63,11 +63,11 @@ if (require.main === module) {
     console.error(`scaffold-source: no usable slug from URL ${JSON.stringify(url)}`);
     process.exit(1);
   }
-  const dest = path.join(__dirname, "..", "..", "..", "extension", "pipeline", "sources", `${slug}.js`);
+  const dest = path.join(__dirname, "..", "..", "..", "extension", "event-extractors", "custom", `${slug}.js`);
   if (fs.existsSync(dest)) {
     console.error(`scaffold-source: ${dest} already exists — refusing to overwrite`);
     process.exit(1);
   }
   fs.writeFileSync(dest, sourceStub(url));
-  console.log(`scaffold-source: wrote extension/pipeline/sources/${slug}.js`);
+  console.log(`scaffold-source: wrote extension/event-extractors/custom/${slug}.js`);
 }

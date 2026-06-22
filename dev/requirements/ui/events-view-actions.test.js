@@ -54,10 +54,10 @@ before(async () => {
   };
 
   ({ renderCard, toCards } = await import(
-    pathToFileURL(path.join(ROOT, "extension", "ui", "views", "events-view.js"))
+    pathToFileURL(path.join(ROOT, "extension", "events-popup", "views", "events-view.js"))
   ));
   ({ makeSourceRequestLink, makePolicyLink } = await import(
-    pathToFileURL(path.join(ROOT, "extension", "ui", "views", "source-request-view.js"))
+    pathToFileURL(path.join(ROOT, "extension", "events-popup", "views", "source-request-view.js"))
   ));
 });
 

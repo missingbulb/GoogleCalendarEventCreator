@@ -6,8 +6,8 @@ in [requirements.md §12–§16](../requirements/requirements.md); the per-file 
 [architectureGuidelines.md](architectureGuidelines.md).
 
 `toolbar-icon.js` colors the toolbar icon by host (a source matches or it doesn't). On
-click, `popup.js` injects `pipeline/` and runs `assemble-events.js`, which picks
-the matching `sources/<site>.js` (or `extract-unsupported.js`);
+click, `popup.js` injects `event-extractors/` and runs `assemble-events.js`, which picks
+the matching `custom/<site>.js` (or `extract-unsupported.js`);
 `build-calendar-url.js` builds the URL `events-view.js` renders.
 
 ## How extraction works
@@ -21,17 +21,17 @@ any instance without consulting page-level state. Events that match on every
 non-time field are folded into one multi-instance event by the assembler. It
 picks a path by whether the page's host has a per-site source:
 
-1. **Supported host** — a **self-contained site scraper** in `extension/pipeline/sources/`.
+1. **Supported host** — a **self-contained site scraper** in `extension/event-extractors/custom/`.
    It produces every field of its events itself; no other extractor's output is
    merged over it. Each lives in its own file with a comment describing the HTML
    it expects; to support a new platform, add a file there following the same
    pattern and run `npm run index` to regenerate the load list
-   (`extension/pipeline/load-order.generated.json`). A source may reuse shared helpers —
+   (`extension/event-extractors/load-order.generated.json`). A source may reuse shared helpers —
    including the embedded-events reader for schema.org JSON-LD — to gather a
    field the page only states in embedded data (e.g. an end time).
 
 2. **Unsupported host** — no per-site source, so the single **unsupported-site
-   extractor** (`extension/pipeline/extract-unsupported.js`) scrapes a best-effort event
+   extractor** (`extension/event-extractors/extract-unsupported.js`) scrapes a best-effort event
    from the page's embedded JSON-LD and generic heuristics (microdata, Open Graph
    / meta tags, `<time datetime>`, `<h1>`/`<address>`, venue/location-named
    elements, and finally a date/time scan over the visible text).
@@ -55,7 +55,7 @@ yearless date format). So the product rules in
 descriptions, chronological one-card-per-event, multi-instance grouping (an
 event's showings carried in `times[]` and folded into one card), floating vs.
 absolute times, the default duration and the card cap — are implemented once, in
-helpers, `extension/pipeline/assemble-events.js`, and `extension/config.js`, never per source.
+helpers, `extension/event-extractors/assemble-events.js`, and `extension/config.js`, never per source.
 
 ## Timezone handling
 

@@ -12,7 +12,7 @@ async function init() {
 
   // The files to inject (and their order) come from the generated load list,
   // the single source of truth shared with the tests — see dev/tools/gen-load-order.js.
-  const loadOrder = await fetch(chrome.runtime.getURL("pipeline/load-order.generated.json"));
+  const loadOrder = await fetch(chrome.runtime.getURL("event-extractors/load-order.generated.json"));
   const files = await loadOrder.json();
 
   let data = {};

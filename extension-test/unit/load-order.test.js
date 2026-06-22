@@ -26,7 +26,7 @@ function runInFreshSandbox(files) {
 
 test("a helper loaded before the registry still leaves both intact", () => {
   // Deliberately load a helper before registry.js (the reverse of the load order).
-  const sandbox = runInFreshSandbox(["pipeline/helpers/dom.js", "pipeline/registry.js"]);
+  const sandbox = runInFreshSandbox(["event-extractors/helpers/dom.js", "event-extractors/registry.js"]);
 
   // registry.js must not have wiped out the helper's contribution...
   assert.equal(typeof sandbox.GCal.clean, "function", "the dom helper survives");
@@ -37,13 +37,13 @@ test("a helper loaded before the registry still leaves both intact", () => {
 
 test("a source registers onto GCal.sources whichever order the base files run", () => {
   for (const baseOrder of [
-    ["pipeline/registry.js", "pipeline/helpers/dom.js"],
-    ["pipeline/helpers/dom.js", "pipeline/registry.js"],
+    ["event-extractors/registry.js", "event-extractors/helpers/dom.js"],
+    ["event-extractors/helpers/dom.js", "event-extractors/registry.js"],
   ]) {
     const sandbox = runInFreshSandbox(baseOrder);
     assert.doesNotThrow(() => {
       vm.runInContext(
-        fs.readFileSync(path.join(EXT, "pipeline/sources/meetup.js"), "utf8"),
+        fs.readFileSync(path.join(EXT, "event-extractors/custom/meetup.js"), "utf8"),
         sandbox
       );
     }, `meetup.js threw with base order ${baseOrder.join(", ")}`);

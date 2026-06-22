@@ -11,7 +11,7 @@
 //                 events.datadoghq.com  -> events-datadoghq
 //                 dice.fm               -> dice
 //               Used for the branch (claude/extractor/<slug>) and the source
-//               file (pipeline/sources/<slug>.js).
+//               file (event-extractors/custom/<slug>.js).
 //   caseName  — the fixture / integration-case identifier
 //               (dev/requirements/data/<caseName>.{url,html}, dev/requirements/extractors/custom/<caseName>.json).
 //               Equal to the slug for the first, auto-recorded case; additional

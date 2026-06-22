@@ -1,4 +1,4 @@
-// A minimal FAKE of the browser environment extension/ui/toolbar-icon.js runs in: the
+// A minimal FAKE of the browser environment extension/icon/toolbar-icon.js runs in: the
 // chrome.* extension APIs it calls, plus the few web-platform globals it uses
 // (fetch, createImageBitmap, OffscreenCanvas). It lets a test load the REAL worker
 // unmodified, have it register its declarativeContent rules exactly as in
@@ -25,7 +25,7 @@ const decodeBitmap = (bytes) => {
 
 class FakeBrowser {
   // root: repo root the worker's fetch() paths resolve against.
-  // lists: the object served for the host-list fetch (pipeline/fallback-lists.json).
+  // lists: the object served for the host-list fetch (fallback-lists.json).
   // defaultIcon: manifest action.default_icon, { "16": path, "32": path, ... }, shown
   //   when no rule matches (Chrome's behavior).
   constructor({ root, lists, defaultIcon }) {

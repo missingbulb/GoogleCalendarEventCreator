@@ -51,7 +51,7 @@
 // one event with several instances for a multi-screening/multi-night run). When
 // a cache refresh legitimately changes a page, update `expected` to match.
 //
-// Per event: `details` is what pipeline/build-calendar-url.js's
+// Per event: `details` is what events-popup/build-calendar-url.js's
 // buildCalendarUrl() puts in the `details=` param (a link back to the source
 // page followed by the description). `ctz` is the timezone a site extractor
 // pinned the event to
@@ -79,7 +79,7 @@ const DATA_DIR = path.join(__dirname, "..", "data");
 let buildCalendarUrl;
 before(async () => {
   ({ buildCalendarUrl } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "..", "extension", "pipeline", "build-calendar-url.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "..", "extension", "events-popup", "build-calendar-url.js"))
   ));
 });
 
