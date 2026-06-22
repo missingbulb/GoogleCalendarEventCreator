@@ -4,9 +4,11 @@ A nightly Claude **Opus** Claude Code routine that reports every open branch's
 status against `main` and which are safe to delete — the scheduled version of the
 manual branch analysis. It is **read-only on the repo**: it never pushes, deletes,
 or merges anything; its only writes are a comment on its standing tracking issue
-(#399) when the branch picture has changed, and reopening that issue if it was
-closed while branches still need tracking. Like the lessons/fallback digests it
-stays **silent when nothing moved** — an unchanged night posts no comment.
+(#399) when the branch picture has changed, and **opening or closing** that issue
+to mirror whether the latest report lists any branch that's safe to delete (open
+when there's cleanup pending, closed when there isn't). Like the lessons/fallback
+digests it stays **silent when nothing moved** — an unchanged night posts no
+comment.
 
 ## What it reports
 
@@ -86,21 +88,35 @@ recommendation of which branches are safe to delete.
 
 The report lands on the standing issue titled
 **`Open Branches Cleanup Tracker`** (find it **by title** — currently
-**#399**, not a hard-coded
-number; if it doesn't exist, open it). Then decide whether to post by **what
-changed**, so the issue stays a signal rather than a daily wall of identical
-tables — read the most recent comment on the issue to compare against:
+**#399**, not a hard-coded number; if it doesn't exist, open it). The issue is a
+**cleanup tracker, and its open/closed state mirrors whether there is cleanup
+pending** — i.e. whether the latest report lists **any** branch that's safe to
+delete. So each run makes two independent decisions: whether to **post a comment**
+(by what changed), and what the issue's **open/closed state** should be (by
+whether anything is safe to delete on the report it just produced).
 
-- **No branches other than `main`** → **do nothing**: no comment, no reopen.
-  There's nothing to track.
-- **Open branches exist but the issue is closed** → **reopen it** (it's
-  long-lived; a closure while branches still need tracking is stale). Reopening is
-  itself the signal, so it happens regardless of the comment decision below.
+First the comment, so the issue stays a signal rather than a daily wall of
+identical tables — read the most recent comment on the issue to compare against:
+
+- **No branches other than `main`** → **don't comment**. There's nothing to track
+  (but still apply the close rule below).
 - **This run's report is substantially identical to the last one posted** (same
   set of branches, and same status + safe-to-delete for each) → **don't comment**.
 - **The report changed** (a branch appeared or was pruned, or any branch's status
   or safe-to-delete flipped) → **post it** as a new dated comment, so the issue
   accumulates a scrollable history.
+
+Then set the issue state from **the latest report** (the comment just posted, or
+the most recent existing one when this run didn't comment):
+
+- **The latest report lists ≥1 branch that's safe to delete** → the issue should
+  be **open**: reopen it if it was closed. There's cleanup pending, so the tracker
+  stays open until it's done.
+- **The latest report lists no safe-to-delete branch** (including the "no branches
+  other than `main`" case) → **close** the issue. Nothing is awaiting cleanup, so
+  the tracker rests closed; the next run that finds a safe-to-delete branch reopens
+  it. (A branch flagged **orphaned (pre-rewrite)** *needs a human eye* and is not
+  "safe to delete", so it alone does not keep the issue open.)
 
 ## The launcher (Claude Code Routine)
 
@@ -113,9 +129,10 @@ into the nightly routine:
 > specified in `dev/procedures/claude/auto-branch-report.md`: analyze every open branch's
 > status against `main` (squash-aware, per that doc), then post to the routine's
 > standing tracking issue (#399) only per that doc's rules — comment when the
-> branch picture changed, stay silent when it didn't, reopen the issue if it was
-> closed while branches still need tracking, and do nothing when no branches but
-> `main` exist. You are read-only on the repo — never push, delete, or merge.
+> branch picture changed and stay silent when it didn't, and set the issue's
+> open/closed state to mirror the latest report: open it when the report lists any
+> branch that's safe to delete, close it when none is (including when no branches
+> but `main` exist). You are read-only on the repo — never push, delete, or merge.
 
 Schedule it nightly in the Claude Code Routines UI; the repo can't schedule
 itself, so the doc is the spec and the routine is the trigger.

@@ -9,3 +9,7 @@ dist/
 # UI snapshot test failure artifacts (.actual.png / .diff.png), written here
 # by the tests on a mismatch (see dev/requirements/infra/snapshot-artifacts-dir.js).
 dev/requirements/infra/.artifacts/
+
+# Stray clone of the Claudinite shared submodule that some environments check
+# out at the wrong path (canonical location is dev/procedures/claude/shared/).
+docs/
