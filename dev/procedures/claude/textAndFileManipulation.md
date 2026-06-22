@@ -20,3 +20,13 @@ it should leave alone. Recorded so they bite only once.
   link to a deleted `dev/procedures/*.md` stays green). Right after the removal,
   `grep` the whole tree for the old path/filename and fix every hit in the same
   change — don't wait to be told the link is broken.
+- **A path rewrite silently MISSES references that aren't one contiguous
+  slash-joined string.** The grep/sed that finds `extension/ui/popup.js` won't
+  match the same path built from `path.join` **segment arrays**
+  (`path.join(__dirname, "..", "extension", "ui", "popup.js")`) or one **wrapped
+  across a line** in a comment, so it survives the rewrite and breaks only at run
+  time — a directory move passed every path-string grep yet produced a wave of
+  `ERR_MODULE_NOT_FOUND` (dynamic `import()` of moved modules) caught only when
+  the tests ran. After the mechanical pass, also search the segment tokens (e.g.
+  `"ui", "popup`) and **run the test suite** — it, not the grep, is what surfaces
+  a missed reference.
