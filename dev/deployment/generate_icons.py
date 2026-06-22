@@ -4,9 +4,9 @@
 Two deliberately different looks, one generator. See dev/deployment/README.md;
 store image guidelines: https://developer.chrome.com/docs/webstore/images#icons
 
-  Small toolbar glyphs — extension/icons/icon{16,32}*.png
+  Small toolbar glyphs — extension/icon/images/icon{16,32}*.png
     A flat calendar glyph at the two toolbar-action sizes, in three state variants
-    the service worker (ui/toolbar-icon.js) swaps at runtime via
+    the service worker (icon/toolbar-icon.js) swaps at runtime via
     chrome.declarativeContent:
       icon{size}.png            blue  — page not yet classified
       icon{size}-supported.png  green — site has a first-class extractor
@@ -16,9 +16,9 @@ store image guidelines: https://developer.chrome.com/docs/webstore/images#icons
   Polished calendar art — the larger sizes Chrome and the store show, from one
   anti-aliased render definition (96x96 art in a 16px transparent safe zone per
   the store guidelines):
-      extension/icons/chromeStoreIcon.png  manifest 128px icon (install dialog);
-          also the file uploaded by hand as the Web Store LISTING icon.
-      extension/icons/chromeExtensionManagementIcon.png   48px management-page icon.
+      extension/icon/images/chromeStoreIcon.png  manifest 128px icon (install
+          dialog); also the file uploaded by hand as the Web Store LISTING icon.
+      extension/icon/images/chromeExtensionManagementIcon.png   48px management page.
 """
 import os
 import struct
@@ -175,7 +175,7 @@ def write_png(path, px):
 def main():
     deployment_dir = os.path.dirname(os.path.abspath(__file__))
     repo_root = os.path.dirname(os.path.dirname(deployment_dir))
-    ext_icons = os.path.join(repo_root, "extension", "icons")
+    ext_icons = os.path.join(repo_root, "extension", "icon", "images")
     os.makedirs(ext_icons, exist_ok=True)
 
     # Small toolbar glyphs: sizes 16/32, each in 3 state variants.
@@ -183,7 +183,7 @@ def main():
         for size in (16, 32):
             name = f"icon{size}{suffix}.png"
             write_png(os.path.join(ext_icons, name), make_glyph(size, plus_color, header_color))
-            print(f"extension/icons/{name}")
+            print(f"extension/icon/images/{name}")
 
     # Polished calendar art: 48 (management) + 128 (manifest, and the file
     # uploaded by hand as the store listing icon).
@@ -192,7 +192,7 @@ def main():
         ("chromeExtensionManagementIcon.png", render(48)),
     ]:
         write_png(os.path.join(ext_icons, name), px)
-        print(f"extension/icons/{name}")
+        print(f"extension/icon/images/{name}")
 
 
 if __name__ == "__main__":
