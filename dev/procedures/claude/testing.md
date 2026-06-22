@@ -59,35 +59,37 @@ doc, when the mechanics change.
   the how-to-add-one rules are in
   [dev/requirements/README.md](../../requirements/README.md).
   The notes below are the project decisions behind that model.
-- **Every leaf is verified by exactly one CASE, which declares HOW (issue #429,
-  #435).** The spec (`dev/requirements/requirements.md`) is just numbered prose; it does NOT
-  tag how a leaf is verified. Each leaf has exactly one `<slug>.<id>.case.js` (the
-  *filename* is the link — `<slug>` is the section's component name, `<id>` the
-  dotted leaf number), and the **case** declares its `kind` (default `"popup"`)
-  plus an optional `tbd` flag. `dev/requirements/shared/render/render-snapshot.js` is the one dispatcher
-  that turns a case into a PNG by its `kind` (only the image kinds have a
-  renderer) — so there is ONE routing system across visual and non-visual leaves:
-  - `kind: "popup"` (default) — an image leaf, the popup's real `render()` via
+- **Every leaf is verified by exactly one CASE, and its KIND is the folder it lives
+  in (issue #429, #435).** The spec (`dev/requirements/requirements.md`) is just
+  numbered prose; it does NOT tag how a leaf is verified. Each leaf has exactly one
+  `<kind>/cases/<slug>.<id>.case.js` (the *filename* names the leaf — `<slug>` is the
+  section's component name, `<id>` the dotted leaf number; the **folder** names the
+  kind, so the case module carries no `kind` field), plus an optional `tbd` flag.
+  `dev/requirements/shared/kinds.js` auto-discovers the kinds and
+  `dev/requirements/shared/render/render-snapshot.js` turns an image case into a PNG
+  by its kind (only the image kinds have a renderer) — so there is ONE routing system
+  across visual and non-visual leaves:
+  - **popup** (default) — an image leaf, the popup's real `render()` via
     `dev/requirements/shared/render/popup-renderer.js`, pinned by a `<slug>.<id>.png` snapshot shown in a
     **two-column table** beside the requirement (image left, spec right) in
     `dev/requirements/requirements.md` by `dev/requirements/shared/build-requirements-gallery.js`.
-  - `kind: "icon"` — an image leaf too, but rendered by the real
+  - **icon** — an image leaf too, but rendered by the real
     `extension/icon/toolbar-icon.js` loaded into a fake browser (`dev/requirements/shared/render/icon-renderer.js` +
     `dev/requirements/shared/render/fake-chrome.js`), fed the case's faked tab URL + host lists (the
     toolbar icon, §10).
-  - `kind: "behavior"` — a click/navigation a static image can't observe (e.g.
+  - **behavior** — a click/navigation a static image can't observe (e.g.
     `9.1`–`9.3`, `3.4`); the case carries NO image and is verified by
     `dev/requirements/behavior/events-view-actions.test.js` (which self-asserts it covers exactly
-    the `kind: "behavior"` cases). A `<slug>.<id>.png` for one is the #429 anti-pattern
+    the behavior-folder cases). A `<slug>.<id>.png` for one is the #429 anti-pattern
     and the gate rejects it.
-  - `kind: "extractor"` — a non-image leaf (§11, "Required explicit support for
+  - **extractor** — a non-image leaf (§11, "Required explicit support for
     Extractors"): one per supported host, validated by running the real per-site
     extractor against a real cached page (`dev/requirements/extractor/data/<page>.html`)
     and asserting the host is recognized as supported and yields a complete event.
     Verified by `dev/requirements/extractor/extractor-support.test.js`; the
     case names `{ host, source, page }`. A bot-blocked host with no cacheable page
     (facebook) is a `tbd` extractor case (unit-tested only).
-  - `kind: "logic"` — a non-image, non-visual product/behavior leaf (§12–§16, the
+  - **logic** — a non-image, non-visual product/behavior leaf (§12–§16, the
     rules converted from `productRequirements.md`). A wired case carries an
     executable `verify()` run by `dev/requirements/logic/product-requirements.test.js`;
     a `tbd` logic case is tracked-but-not-wired and names the unit test that covers
@@ -113,15 +115,17 @@ doc, when the mechanics change.
   it separately). A loud banner in `dev/requirements/requirements.md` says the same: a green
   build means every leaf is *claimed*, not that every leaf is *faithfully*
   verified.
-- **An executable requirements test case declares HOW it's verified, with a default
-  — never a parallel classifier.** When each numbered requirement is pinned by its
-  own executable case (`<slug>.<id>.case.js`), the case carries its verification kind as
-  its own field (`kind`, defaulting to the common one, plus a flag like `tbd`) rather
-  than the spec prose tagging it or a side manifest keyed by id. One source of truth
-  means a case can't desync from its classifier, and it collapses parallel routing
-  systems into one dispatcher: this repo folded the `_(icon)_` / `_(behavior)_` /
-  `_(TBD)_` spec tags **and** a behavior-coverage manifest into the per-case
-  `kind`/`tbd` described in the bullet above.
+- **A requirement case's verification KIND has exactly one classifier — and here it's
+  the folder the case lives in.** The spec prose must not tag how a leaf is verified,
+  and there must be no side manifest keyed by id; one source of truth means a case
+  can't desync from its classifier. This repo first folded the `_(icon)_` /
+  `_(behavior)_` / `_(TBD)_` spec tags and a behavior-coverage manifest into a
+  per-case `kind` field, then removed even that field: a case now lives under
+  `<kind>/cases/`, so the **folder is the single classifier** and adding a kind is a
+  self-contained folder drop (`<kind>/kind.js`, auto-discovered by
+  `dev/requirements/shared/kinds.js`). The lesson generalizes: collapse parallel
+  classifiers to one, and prefer a structural classifier (location) the code can't
+  desync from over a hand-set field.
 
 ## Adding a cached integration case
 
@@ -167,8 +171,8 @@ commission-while-editing trap goes in the file's header comment rather than
   `dev/requirements/shared/render/visual-snapshots.test.js`; the scroll/fade gestures are in
   `dev/requirements/shared/render/actions.js`. A case is a self-contained per-leaf `<slug>.<id>.case.js`
   (fake data + an optional DOM action) + `<slug>.<id>.png`; `dev/requirements/shared/render/render-snapshot.js`
-  picks the renderer by the case's own `kind` (default `"popup"` → the popup's REAL
-  `render()`; `"icon"` → the real `extension/icon/toolbar-icon.js` in a fake browser,
+  picks the renderer by the case's kind — its folder (`popup/` → the popup's REAL
+  `render()`; `icon/` → the real `extension/icon/toolbar-icon.js` in a fake browser,
   `icon-renderer.js` + `fake-chrome.js`), so a view or icon change moves the
   snapshots automatically. After an intentional popup/view/CSS or toolbar-icon
   change run `npm run refresh:ui` and commit the PNGs + inline gallery
@@ -176,8 +180,8 @@ commission-while-editing trap goes in the file's header comment rather than
   `dev/requirements/requirements.md` by `dev/requirements/shared/ui-requirements.js` (numbers only — it does
   NOT classify leaves), shared with the coverage ubertest
   (`dev/requirements/requirements-coverage.test.js`); how each leaf is verified
-  (`popup` / `icon` / `behavior` / `tbd`) is the **case's** `kind`/`tbd`, not a spec
-  tag.
+  (`popup` / `icon` / `behavior` / `tbd`) is the case's **folder** (its kind) + `tbd`,
+  not a spec tag.
 - **Behavior verification** — `dev/requirements/behavior/events-view-actions.test.js` drives the
   clicks the snapshots can't (the `kind: "behavior"` leaves: a card / instance
   button / affordance link opens an adjacent new tab and closes the popup); it reads

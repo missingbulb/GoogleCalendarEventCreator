@@ -33,8 +33,9 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    + `expected`) plus its cached `dev/requirements/extractor/data/<name>.{html,url}`.
 5. Record the host as an **executable extractor-support requirement**: add a leaf
    to `dev/requirements/requirements.md` §11 ("Required explicit support for
-   Extractors") with a `kind: "extractor"` case
-   (`dev/requirements/<kind>/cases/extractor-support.11.<n>.case.js`) naming
-   `{ host, source, page }`, so the new host is validated against a real cached
-   page by `dev/requirements/extractor/extractor-support.test.js`. See
+   Extractors") with an extractor case
+   (`dev/requirements/extractor/cases/extractor-support.11.<n>.case.js` — the
+   `extractor/` folder is its kind) naming `{ host, source, page }`, so the new host
+   is validated against a real cached page by
+   `dev/requirements/extractor/extractor-support.test.js`. See
    [../../requirements/README.md](../../requirements/README.md).

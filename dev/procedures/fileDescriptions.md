@@ -38,7 +38,7 @@ the rules of the road.
 | `dev/requirements/shared/render/popup-renderer.js` | Builds each popup case's DOM via the popup's real `render()` and rasterizes to PNG (satori + resvg, no browser), inlining the real `extension/events-popup/popup.css` first; prunes off-screen list rows so resvg doesn't choke on a tall SVG |
 | `dev/requirements/shared/render/icon-renderer.js` | Generates the toolbar icon for a tab URL by loading the real `extension/icon/toolbar-icon.js` into a fake browser and reading back the `ImageData` it bakes; the renderer behind a `kind: "icon"` snapshot case |
 | `dev/requirements/shared/render/fake-chrome.js` | The fake browser (`chrome.*` + `fetch`/`OffscreenCanvas`) that `icon-renderer.js` loads `extension/icon/toolbar-icon.js` into, then queries "what icon at this URL?" |
-| `dev/requirements/shared/render/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's own `kind` field (default `"popup"`) |
+| `dev/requirements/shared/render/render-snapshot.js` | One dispatcher: renders a snapshot case to PNG via the popup renderer or the icon renderer, chosen by the case's kind — the folder it lives in (`popup/` or `icon/`) |
 | `dev/requirements/shared/snapshot-artifacts-dir.js` | Path of the gitignored dir the UI tests write `.actual.png`/`.diff.png` to on a mismatch |
 | `dev/requirements/shared/render/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `dev/requirements/shared/render/visual-snapshots.test.js` | The single visual-comparison engine: renders each `dev/requirements/<kind>/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
