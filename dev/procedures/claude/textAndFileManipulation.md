@@ -30,3 +30,13 @@ it should leave alone. Recorded so they bite only once.
   the tests ran. After the mechanical pass, also search the segment tokens (e.g.
   `"ui", "popup`) and **run the test suite** — it, not the grep, is what surfaces
   a missed reference.
+- **An ordered specific→catch-all path rewrite half-converts a bare-directory
+  reference the specific rule's trailing slash missed.** Renaming `old/sub/` →
+  `new/leaf/` with sed, the specific rule is anchored on a trailing slash
+  (`s#old/sub/#new/leaf/#`) while a catch-all handles the parent (`s#old/#new/#`). A
+  reference *without* the trailing slash — `path.join(root, "old/sub")`, a
+  `git add old/sub`, a prose mention — escapes the specific rule; the catch-all then
+  rewrites only its **parent** (`old/sub` → `new/sub`, not `new/leaf`), a
+  half-converted path that fails at *run time*, not at the rewrite. Match both the
+  slashed and the bare form, then after the sweep grep the bare-dir form (at a
+  quote / paren / line-end) and run the tests.
