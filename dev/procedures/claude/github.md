@@ -154,3 +154,16 @@ generated files — merging across a file relocation, merging in content that
 predates a branch-wide invariant, and porting old work forward across a changed
 invariant — live in the shared rules:
 [shared/git-and-github.md](shared/git-and-github.md).
+
+## Renaming a directory that houses a submodule
+
+- **`git mv` on a directory containing a submodule updates `.gitmodules` and the
+  index but leaves `.git/config` stale — run `git submodule sync && git submodule
+  update --init` after.** When `docs/claude/shared/` (the Claudinite submodule)
+  moved to `dev/procedures/claude/shared/` via `git mv docs dev/procedures`, git
+  correctly rewrote `.gitmodules` and the index; but the local `.git/config` still
+  had `[submodule "docs/claude/shared"]` pointing at the old path. Until `git
+  submodule sync` propagated the new path into `.git/config` and `git submodule
+  update --init` re-registered it, any operation that consulted `.git/config`
+  (submodule status, checkout) saw the stale entry. Always run both commands after
+  renaming a directory that houses a submodule.
