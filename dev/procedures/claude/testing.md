@@ -127,6 +127,18 @@ doc, when the mechanics change.
   `dev/requirements/shared/kinds.js`). The lesson generalizes: collapse parallel
   classifiers to one, and prefer a structural classifier (location) the code can't
   desync from over a hand-set field.
+- **Requirement tests render against a pinned reference "now", not the real clock.**
+  The popup's only date-dependent output is the card corner-pill (`events-view.js`
+  `cornerPill` — a gray "past" pill for an event before today, a green year pill for
+  a future year, none for a current/upcoming date), so a single pinned instant
+  (`dev/requirements/shared/reference-time.js` `REFERENCE_NOW`, currently 2026-06-01)
+  is threaded as `render({ now })` into every test entry point (the snapshot renderer
+  and the behavior test) so date-bearing snapshots stay deterministic forever instead
+  of rotting as the wall clock advances. **The pinned day is the floor of the cases'
+  dates: author a neutral/upcoming case on or after it (≥ 2026-06-01) so it's
+  pill-free** — an earlier date renders a "past" pill it didn't intend; use a past
+  date (earlier in 2026, or a prior year) or a future year only when the case is
+  *pinning* a pill (5.6.1/5.6.4 past, 5.6.2 future, 5.6.3 none).
 
 ## Adding a cached integration case
 

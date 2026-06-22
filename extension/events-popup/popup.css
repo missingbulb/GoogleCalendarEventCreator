@@ -209,15 +209,16 @@ body {
   display: flex;
   flex-shrink: 0;
 }
-/* The small year pill, overlaid on the month banner and overhanging the icon's
-   right edge, tilted 30° clockwise like a sticker. Shown only for a past or
-   future year — the current year is implied. The background color is set ONLY
-   on the .past/.future variant (a calm green "upcoming" pill for a future year,
-   a muted-gray one for a past year — never an alarm-red future pill, which read
-   as an error on a perfectly fine next-year event), never on the base
-   class: the UI snapshot renderer inlines CSS without selector specificity
-   (last-declared wins), so a base-class background would override the variant's
-   in the snapshot. */
+/* The small corner pill, overlaid on the month banner and overhanging the icon's
+   right edge, tilted 30° clockwise like a sticker. Shown for a past event (the
+   gray ".past" variant, reading "past") or a future year (the green ".future"
+   variant, reading the year) — a current, not-yet-past date carries none. The
+   background color is set ONLY on the .past/.future variant (a calm green
+   "upcoming" pill for a future year, a muted-gray one for a past event — never an
+   alarm-red future pill, which read as an error on a perfectly fine next-year
+   event), never on the base class: the UI snapshot renderer inlines CSS without
+   selector specificity (last-declared wins), so a base-class background would
+   override the variant's in the snapshot. */
 .event-btn .e-year,
 .event-group .e-year {
   position: absolute;

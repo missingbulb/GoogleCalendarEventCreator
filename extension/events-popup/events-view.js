@@ -96,12 +96,13 @@ function pushInto(map, key, value) {
 // single "addable event" motif: on a single occurrence it's the date indicator
 // and the WHOLE card is the click target; on a grouped card (same-day or month)
 // each showing is its OWN chip BUTTON — a day chip per date (month card) or a
-// time chip per showing (same-day card). `currentYear` decides which chips carry
-// a year pill (any year but this one); it defaults to the real current year and
-// is threaded down from render() so the UI snapshots can pin it.
-export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
+// time chip per showing (same-day card). `now` (a reference instant) decides which
+// chips carry a corner pill: a gray "past" pill for an event before today, a green
+// year pill for a future-year event. It defaults to the real clock and is threaded
+// down from render() so the UI snapshots can pin it.
+export function renderCard(card, tab, now = new Date()) {
   if (card.kind === "single") {
-    return makeSingleCard(card.event, card.instances[0], tab, currentYear);
+    return makeSingleCard(card.event, card.instances[0], tab, now);
   }
   // A grouped "month" card: every showing that month as its own chip button.
   // When the showings all share one time, that time leads the header (commonTime)
@@ -111,19 +112,19 @@ export function renderCard(card, tab, currentYear = new Date().getFullYear()) {
   // time) so the showings are told apart. Any all-day/dateless session falls back
   // to plain day chips.
   const preferTime = showPerDayTimes(card.instances);
-  return makeGroupCard(card, tab, (it) => chipForInstance(it.t, currentYear, preferTime));
+  return makeGroupCard(card, tab, (it) => chipForInstance(it.t, now, preferTime));
 }
 
 // A single clickable event button. A calendar-style date chip on the left, then
 // the title over a muted time (plus location); clicking opens the instance's
 // Calendar template.
-function makeSingleCard(event, it, tab, currentYear) {
+function makeSingleCard(event, it, tab, now) {
   const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, it.i);
 
   const btn = document.createElement("button");
   btn.className = "event-btn";
 
-  const chip = chipForInstance(it.t, currentYear, false);
+  const chip = chipForInstance(it.t, now, false);
   if (chip) btn.appendChild(chipEl(chip));
 
   const body = document.createElement("span");
@@ -238,14 +239,15 @@ function titleEl(event, tab) {
   return el;
 }
 
-// Build a calendar chip from a descriptor { banner, body, kind, year?, yearPast? }
+// Build a calendar chip from a descriptor { banner, body, kind, past?, year? }
 // — the popup's single "addable event" motif: a colored banner (the shared
 // context — a month, or a full date) over a prominent body (the pick — a day or
 // a time). `kind` ("day" | "time") tunes the body font (see .e-chip-body.* in
-// popup.css). An off-`currentYear` chip carries a small
-// year pill stacked on its corner (then the chip is wrapped so the pill can sit
-// over it); a current-year chip returns the bare chip.
-function chipEl({ banner, body, kind = "day", year, yearPast }) {
+// popup.css). A chip carries a small corner pill stacked on its calendar icon
+// (then the chip is wrapped so the pill can sit over it): a gray "past" pill when
+// `past` is set, else a green pill showing `year` for a future-year chip. A chip
+// that is neither (this year, not yet past) returns bare, with no pill.
+function chipEl({ banner, body, kind = "day", past, year }) {
   const el = document.createElement("span");
   el.className = "e-chip";
 
@@ -259,15 +261,15 @@ function chipEl({ banner, body, kind = "day", year, yearPast }) {
   bodyEl.textContent = body;
   el.appendChild(bodyEl);
 
-  if (!year) return el;
+  if (!past && !year) return el;
 
   const wrap = document.createElement("span");
   wrap.className = "e-cal";
   wrap.appendChild(el);
-  const yearEl = document.createElement("span");
-  yearEl.className = yearPast ? "e-year past" : "e-year future";
-  yearEl.textContent = year;
-  wrap.appendChild(yearEl);
+  const pillEl = document.createElement("span");
+  pillEl.className = past ? "e-year past" : "e-year future";
+  pillEl.textContent = past ? "past" : year;
+  wrap.appendChild(pillEl);
   return wrap;
 }
 
@@ -331,15 +333,16 @@ function eventStart(start) {
 
 // The left date chip's two lines (short month + day-of-month), or null when
 // there's no usable date — then the button shows just title + "when" text. A
-// chip whose year isn't `currentYear` also carries that year (rendered as a pill
-// on top of the calendar icon); a current-year chip omits it.
-export function dateChip(start, currentYear = new Date().getFullYear()) {
+// chip for a past event also carries `past` (rendered as a gray "past" pill on top
+// of the calendar icon); a future-year chip carries its `year` (a green pill); a
+// current-year, not-yet-past chip carries neither.
+export function dateChip(start, now = new Date()) {
   const date = eventStart(start);
   if (!date) return null;
   return {
     month: date.toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: String(date.getDate()),
-    ...offYear(date, currentYear),
+    ...cornerPill(date, now),
   };
 }
 
@@ -348,22 +351,22 @@ export function dateChip(start, currentYear = new Date().getFullYear()) {
 
 // A single day: month banner over the day-of-month body. Used as a single card's
 // indicator and as each per-date button on a month card. null with no date.
-function dayChip(start, currentYear) {
-  const c = dateChip(start, currentYear);
-  return c && { banner: c.month, body: c.day, kind: "day", year: c.year, yearPast: c.yearPast };
+function dayChip(start, now) {
+  const c = dateChip(start, now);
+  return c && { banner: c.month, body: c.day, kind: "day", past: c.past, year: c.year };
 }
 
 // One showing among several on the same date: the DATE is the banner (the shared
 // context) and the TIME is the body (what tells the showings apart) — e.g.
 // "JUN 19" over "4:30 PM – 6:18 PM". Falls back to a bare time when undated.
-function timeChip(instance, currentYear) {
-  const c = dateChip(instance.start, currentYear);
+function timeChip(instance, now) {
+  const c = dateChip(instance.start, now);
   return {
     banner: c ? `${c.month} ${c.day}` : "",
     body: sameDayLabel(instance),
     kind: "time",
+    past: c && c.past,
     year: c && c.year,
-    yearPast: c && c.yearPast,
   };
 }
 
@@ -389,8 +392,9 @@ function isMultiDaySpan(instance) {
 
 // A date-RANGE chip for a multi-day span: the month(s) as the banner over the day
 // range as the body — "SEP" over "15–18" within one month, "JUN–JUL" over "28–3"
-// across months. The off-year pill (if any) follows the START year.
-function rangeChip(instance, currentYear) {
+// across months. The corner pill keys "past" off the span's END day (a span still
+// running isn't past) and the future year off the START year.
+function rangeChip(instance, now) {
   const s = eventStart(instance.start);
   const e = instanceEndDate(instance);
   if (!s || !e) return null;
@@ -402,7 +406,7 @@ function rangeChip(instance, currentYear) {
     banner: sameMonth ? sMon : `${sMon}–${eMon}`,
     body: `${s.getDate()}–${e.getDate()}`,
     kind: "range",
-    ...offYear(s, currentYear),
+    ...cornerPill(s, now, e),
   };
 }
 
@@ -410,20 +414,28 @@ function rangeChip(instance, currentYear) {
 // chip (when the card shows per-showing times) or a plain day chip. Used by both a
 // single card's indicator and a grouped card's per-instance buttons, so a span
 // renders identically whether it stands alone or sits among other showings.
-function chipForInstance(instance, currentYear, preferTime) {
-  if (isMultiDaySpan(instance)) return rangeChip(instance, currentYear);
-  if (preferTime) return timeChip(instance, currentYear);
-  return dayChip(instance.start, currentYear);
+function chipForInstance(instance, now, preferTime) {
+  if (isMultiDaySpan(instance)) return rangeChip(instance, now);
+  if (preferTime) return timeChip(instance, now);
+  return dayChip(instance.start, now);
 }
 
-// The chip's year-pill fields when `date` falls outside `currentYear`: { year }
-// plus `yearPast` true for a past year (rendered as a gray pill) vs false for a
-// future one (an accent pill). An empty object for a current-year date, so the
-// chip carries no `year` and shows no pill.
-function offYear(date, currentYear) {
+// The chip's corner-pill descriptor, decided against the reference instant `now`:
+//   - { past: true } — the event has already happened: its day is before TODAY.
+//     For a multi-day span pass the END day as `endDate` (a span still running
+//     isn't past); for a single date `endDate` defaults to `date`. Rendered as a
+//     gray "past" pill — past events of ANY date, not just prior years.
+//   - { year } — a future-YEAR event (not past, and its year is past now's year).
+//     Rendered as a green pill showing that year.
+//   - {} — this year and not yet past: no pill.
+// Comparison is at DAY granularity (local midnight), so an event later today is
+// not "past" and a pill never flips mid-day.
+function cornerPill(date, now, endDate = date) {
+  const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  if (day(endDate) < day(now)) return { past: true };
   const y = date.getFullYear();
-  if (y === currentYear) return {};
-  return { year: String(y), yearPast: y < currentYear };
+  if (y > now.getFullYear()) return { year: String(y) };
+  return {};
 }
 
 // Format a clock time, dropping ":00" for round hours ("10 AM", not
