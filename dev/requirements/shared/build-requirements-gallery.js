@@ -29,8 +29,27 @@ const { loadCases, leafIdOf } = require("./cases");
 // requirements.md and the per-kind cases/ dirs are siblings under dev/requirements/,
 // so a leaf's snapshot embeds by the relative path "<kind>/cases/<stem>.png".
 const BEHAVIOR_TEST = "dev/requirements/behavior/events-view-actions.test.js";
-const EXTRACTOR_TEST = "dev/requirements/extractor/extractor-support.test.js";
 const LOGIC_TEST = "dev/requirements/logic/product-requirements.test.js";
+
+// A §11 extractor leaf's left cell links to ALL the reviewed expected extractions
+// for its host — every dev/requirements/extractor/expected/<page>.json whose stem
+// is the source's basename or starts with it (e.g. meetup.js -> meetup-*). They're
+// discovered from disk, so a newly-recorded cached page shows up without editing
+// the case. (The single page the support test runs is testCase.page; these links
+// are the broader live.test.js corpus the host is validated against.)
+const EXPECTED_DIR = path.join(__dirname, "..", "extractor", "expected");
+const sourceBase = (testCase) =>
+  testCase && testCase.source ? path.basename(testCase.source, ".js") : "";
+function expectedPagesFor(testCase) {
+  const base = sourceBase(testCase);
+  if (!base || !fs.existsSync(EXPECTED_DIR)) return [];
+  return fs
+    .readdirSync(EXPECTED_DIR)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(/\.json$/, ""))
+    .filter((stem) => stem === base || stem.startsWith(`${base}-`))
+    .sort();
+}
 
 // The ID-bearing marker that tags a managed left-cell line.
 const MARKER_RE = /<!--\s*req-gallery:(\d+(?:\.\d+)+)\s*-->/;
@@ -42,8 +61,9 @@ function marker(id) {
 // The canonical managed left-cell content for one leaf, derived from its CASE (its
 // `kind` / `tbd` fields), with the marker as the trailing token. The non-image
 // kinds carry a note instead of a picture: a `kind: "behavior"` case (a click a
-// snapshot can't show) and a `kind: "extractor"` case (a host's extractor
-// validated against a cached page, not a rendered surface). An image kind
+// snapshot can't show) and a `kind: "extractor"` case (a host's extractor, with
+// links to the reviewed expected extractions it's validated against, not a
+// rendered surface). An image kind
 // (popup / icon) embeds the <slug>.<id>.png snapshot — same embed either way —
 // prefixed with a loud "TO BE DECIDED" banner when the case is `tbd` (so a
 // reviewer sees the provisional render of CURRENT behavior under the banner). The
@@ -55,10 +75,16 @@ function managedLine(id, testCase) {
     return `\u{1F6A9} _Behavior leaf — verified by \`${BEHAVIOR_TEST}\` (a click a snapshot can't show), not an image._ ${marker(id)}`;
   }
   if (kind === "extractor") {
-    const note = testCase && testCase.tbd
-      ? `no cached page (bot-blocked) — covered by unit tests only`
-      : `validated against cached page \`${(testCase && testCase.page) || "?"}\` by \`${EXTRACTOR_TEST}\``;
-    return `\u{1F9E9} _Extractor leaf — ${note}._ ${marker(id)}`;
+    if (testCase && testCase.tbd) {
+      return `\u{1F9E9} _Extractor leaf — no cached page (bot-blocked) — covered by unit tests only._ ${marker(id)}`;
+    }
+    const base = sourceBase(testCase);
+    const links = expectedPagesFor(testCase).map((page) => {
+      const short = base && page.startsWith(`${base}-`) ? page.slice(base.length + 1) : page;
+      return `[${short}](extractor/expected/${page}.json)`;
+    });
+    const list = links.length ? links.join(", ") : `\`${(testCase && testCase.page) || "?"}\``;
+    return `\u{1F9E9} _Validated against ${list}._ ${marker(id)}`;
   }
   if (kind === "logic") {
     const note = testCase && testCase.tbd

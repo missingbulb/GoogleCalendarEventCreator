@@ -296,16 +296,16 @@ one card per event.
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.2.3](popup/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
+![event-cards-grouping.4.2.3](popup/cases/event-cards-grouping.4.2.3.png) <!-- req-gallery:4.2.3 -->
 
 </td>
 <td valign="top">
 
 `4.2.3` Edge case — **one event** with three instances: one in June, one a
-**multi-day instance spanning June → July**, and one in July. Today the spanning
-instance groups by its **start** (June), so it shows under June only and never
-under July (provisional render at left). Whether a cross-month instance should
-also surface in the later month is **to be decided**.
+**multi-day instance spanning June → July**, and one in July. The spanning
+instance groups by its **start month** (June): it shows in the June card as a
+**date-range chip** (`JUN–JUL` / `28–3`) beside the Jun 15 showing, and never
+duplicates under July (which holds the Jul 10 single card).
 
 </td>
 </tr>
@@ -408,10 +408,10 @@ buttons (→ `5`) are its calendar visuals.
 
 `4.8` An event whose **single instance's own start–end crosses several days**
 stays one **single card** — it is *not* split into a button per day (only
-separate instances ever become multiple buttons). Its chip shows **just the start
-day** (today there is **no** date range on the calendar chip) and its line shows
-the instance's time (or "All day"), not a per-day breakdown. (Whether a long /
-multi-month span *should* show a range is the open question in `4.10`.)
+separate instances ever become multiple buttons). Its calendar chip shows the
+**start–end day range** (within one month, the month over a `15–18` day range; a
+cross-month span is `4.10`) and its line shows the instance's time (or "All day"),
+not a per-day breakdown.
 
 </td>
 </tr>
@@ -440,15 +440,15 @@ order.)
 <tr>
 <td valign="top" width="320">
 
-⚠️ **TO BE DECIDED** — behavior not yet decided; provisional render of CURRENT behavior: ![event-cards-grouping.4.10](popup/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
+![event-cards-grouping.4.10](popup/cases/event-cards-grouping.4.10.png) <!-- req-gallery:4.10 -->
 
 </td>
 <td valign="top">
 
-`4.10` A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3):
-today its chip shows just the **start day** (provisional render at left). Whether a
-long or multi-month span should instead show a **date range** on the calendar chip
-— and how the span should read on the line — is **to be decided**.
+`4.10` A single instance spanning **multiple months** (e.g. Jun 28 → Jul 3) shows
+a **date range** on its calendar chip: the month range as the banner over the day
+range as the body (**`JUN–JUL`** over **`28–3`**). Its line reads the instance's
+time (or "All day") as usual.
 
 </td>
 </tr>
@@ -1111,12 +1111,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `meetup-nyc-tech-mixer` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.1 -->
+🧩 _Validated against [fusion-la-israel](extractor/expected/meetup-fusion-la-israel.json), [nyc-tech-mixer](extractor/expected/meetup-nyc-tech-mixer.json), [startup-designers](extractor/expected/meetup-startup-designers.json)._ <!-- req-gallery:11.1 -->
 
 </td>
 <td valign="top">
 
-`11.1` `meetup.com` — extracted by the dedicated source `extension/event-extractors/custom/meetup.js`, validated against the cached `meetup-nyc-tech-mixer` page.
+`11.1` Support `meetup.com`.
 
 </td>
 </tr>
@@ -1126,12 +1126,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `eventbrite-games-for-change` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.2 -->
+🧩 _Validated against [1989775742810](extractor/expected/eventbrite-1989775742810.json), [games-for-change](extractor/expected/eventbrite-games-for-change.json)._ <!-- req-gallery:11.2 -->
 
 </td>
 <td valign="top">
 
-`11.2` `eventbrite.com` — extracted by the dedicated source `extension/event-extractors/custom/eventbrite.js`, validated against the cached `eventbrite-games-for-change` page.
+`11.2` Support `eventbrite.com`.
 
 </td>
 </tr>
@@ -1141,12 +1141,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `edinburghfringe-daniel-sloss` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.3 -->
+🧩 _Validated against [daniel-sloss](extractor/expected/edinburghfringe-daniel-sloss.json), [kristen-schaal](extractor/expected/edinburghfringe-kristen-schaal.json), [mr-chonkers](extractor/expected/edinburghfringe-mr-chonkers.json), [richard-herring-rhlstp](extractor/expected/edinburghfringe-richard-herring-rhlstp.json), [sophie-duker](extractor/expected/edinburghfringe-sophie-duker.json)._ <!-- req-gallery:11.3 -->
 
 </td>
 <td valign="top">
 
-`11.3` `edfringe.com` — extracted by the dedicated source `extension/event-extractors/custom/edinburghfringe.js`, validated against the cached `edinburghfringe-daniel-sloss` page.
+`11.3` Support `edfringe.com`.
 
 </td>
 </tr>
@@ -1156,12 +1156,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `telavivcinematheque-sentimental-value` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.4 -->
+🧩 _Validated against [left-handed-girl](extractor/expected/telavivcinematheque-left-handed-girl.json), [poetry-bookstores](extractor/expected/telavivcinematheque-poetry-bookstores.json), [sentimental-value](extractor/expected/telavivcinematheque-sentimental-value.json), [taiwan-week](extractor/expected/telavivcinematheque-taiwan-week.json)._ <!-- req-gallery:11.4 -->
 
 </td>
 <td valign="top">
 
-`11.4` `cinema.co.il` — extracted by the dedicated source `extension/event-extractors/custom/telavivcinematheque.js`, validated against the cached `telavivcinematheque-sentimental-value` page.
+`11.4` Support `cinema.co.il`.
 
 </td>
 </tr>
@@ -1171,12 +1171,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `ticketmaster-ravid-plotnik` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.5 -->
+🧩 _Validated against [ravid-plotnik](extractor/expected/ticketmaster-ravid-plotnik.json)._ <!-- req-gallery:11.5 -->
 
 </td>
 <td valign="top">
 
-`11.5` `ticketmaster.co.il` — extracted by the dedicated source `extension/event-extractors/custom/ticketmaster.js`, validated against the cached `ticketmaster-ravid-plotnik` page.
+`11.5` Support `ticketmaster.co.il`.
 
 </td>
 </tr>
@@ -1186,12 +1186,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `bandsintown-berry-sakharof` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.6 -->
+🧩 _Validated against [berry-sakharof](extractor/expected/bandsintown-berry-sakharof.json)._ <!-- req-gallery:11.6 -->
 
 </td>
 <td valign="top">
 
-`11.6` `bandsintown.com` — extracted by the dedicated source `extension/event-extractors/custom/bandsintown.js`, validated against the cached `bandsintown-berry-sakharof` page.
+`11.6` Support `bandsintown.com`.
 
 </td>
 </tr>
@@ -1201,12 +1201,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `barby` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.7 -->
+🧩 _Validated against [barby](extractor/expected/barby.json)._ <!-- req-gallery:11.7 -->
 
 </td>
 <td valign="top">
 
-`11.7` `barby.co.il` — extracted by the dedicated source `extension/event-extractors/custom/barby.js`, validated against the cached `barby` page.
+`11.7` Support `barby.co.il`.
 
 </td>
 </tr>
@@ -1216,12 +1216,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `dash-datadoghq` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.8 -->
+🧩 _Validated against [dash-datadoghq](extractor/expected/dash-datadoghq.json)._ <!-- req-gallery:11.8 -->
 
 </td>
 <td valign="top">
 
-`11.8` `dash.datadoghq.com` — extracted by the dedicated source `extension/event-extractors/custom/dash-datadoghq.js`, validated against the cached `dash-datadoghq` page.
+`11.8` Support `dash.datadoghq.com`.
 
 </td>
 </tr>
@@ -1231,12 +1231,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `eventim-co-il-the90sshow` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.9 -->
+🧩 _Validated against [the90sshow](extractor/expected/eventim-co-il-the90sshow.json)._ <!-- req-gallery:11.9 -->
 
 </td>
 <td valign="top">
 
-`11.9` `eventim.co.il` — extracted by the dedicated source `extension/event-extractors/custom/eventim-co-il.js`, validated against the cached `eventim-co-il-the90sshow` page.
+`11.9` Support `eventim.co.il`.
 
 </td>
 </tr>
@@ -1246,12 +1246,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `events-datadoghq` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.10 -->
+🧩 _Validated against [events-datadoghq](extractor/expected/events-datadoghq.json)._ <!-- req-gallery:11.10 -->
 
 </td>
 <td valign="top">
 
-`11.10` `events.datadoghq.com` — extracted by the dedicated source `extension/event-extractors/custom/events-datadoghq.js`, validated against the cached `events-datadoghq` page.
+`11.10` Support `events.datadoghq.com`.
 
 </td>
 </tr>
@@ -1261,12 +1261,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `luma-event` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.11 -->
+🧩 _Validated against [event](extractor/expected/luma-event.json)._ <!-- req-gallery:11.11 -->
 
 </td>
 <td valign="top">
 
-`11.11` `lu.ma` — extracted by the dedicated source `extension/event-extractors/custom/luma.js`, validated against the cached `luma-event` page.
+`11.11` Support `lu.ma`.
 
 </td>
 </tr>
@@ -1276,12 +1276,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `secrettelaviv-world-cup-eve` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.12 -->
+🧩 _Validated against [world-cup-eve](extractor/expected/secrettelaviv-world-cup-eve.json)._ <!-- req-gallery:11.12 -->
 
 </td>
 <td valign="top">
 
-`11.12` `secrettelaviv.com` — extracted by the dedicated source `extension/event-extractors/custom/secrettelaviv.js`, validated against the cached `secrettelaviv-world-cup-eve` page.
+`11.12` Support `secrettelaviv.com`.
 
 </td>
 </tr>
@@ -1291,12 +1291,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `tabitisrael` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.13 -->
+🧩 _Validated against [tabitisrael](extractor/expected/tabitisrael.json)._ <!-- req-gallery:11.13 -->
 
 </td>
 <td valign="top">
 
-`11.13` `tabitisrael.co.il` — extracted by the dedicated source `extension/event-extractors/custom/tabitisrael.js`, validated against the cached `tabitisrael` page.
+`11.13` Support `tabitisrael.co.il`.
 
 </td>
 </tr>
@@ -1306,12 +1306,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `thinkdrink-quantum-lecture` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.14 -->
+🧩 _Validated against [quantum-lecture](extractor/expected/thinkdrink-quantum-lecture.json)._ <!-- req-gallery:11.14 -->
 
 </td>
 <td valign="top">
 
-`11.14` `thinkdrink.co.il` — extracted by the dedicated source `extension/event-extractors/custom/thinkdrink.js`, validated against the cached `thinkdrink-quantum-lecture` page.
+`11.14` Support `thinkdrink.co.il`.
 
 </td>
 </tr>
@@ -1321,12 +1321,12 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Extractor leaf — validated against cached page `visit-tel-aviv` by `dev/requirements/extractor/extractor-support.test.js`._ <!-- req-gallery:11.15 -->
+🧩 _Validated against [visit-tel-aviv](extractor/expected/visit-tel-aviv.json)._ <!-- req-gallery:11.15 -->
 
 </td>
 <td valign="top">
 
-`11.15` `visit.tel-aviv.gov.il` — extracted by the dedicated source `extension/event-extractors/custom/visit-tel-aviv.js`, validated against the cached `visit-tel-aviv` page.
+`11.15` Support `visit.tel-aviv.gov.il`.
 
 </td>
 </tr>
@@ -1341,7 +1341,7 @@ is covered by unit tests only.
 </td>
 <td valign="top">
 
-`11.16` `facebook.com` — extracted by the dedicated source `extension/event-extractors/custom/facebook.js`. No cached live case (bot-blocked); covered by unit tests only.
+`11.16` Support `facebook.com`.
 
 </td>
 </tr>
@@ -1349,20 +1349,22 @@ is covered by unit tests only.
 
 ## 12. Popup states (what the popup shows)
 
-When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found. *Which* state occurs is product/behavior logic (the popup's `chooseContent` + the host classifier); *how* each renders is §1–§3. Most leaves here are tracked but not yet wired into the executable runner (covered today by `extension-test/events-popup/popup.test.js`); the one machine-checkable rule, completeness, is wired.
+When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found (`chooseContent` + the host classifier); *how* each state renders is §1–§3, and those renderings are already pinned there by snapshots: the denylisted empty state (`2.3`), the nothing-found "Disagree?" state (`2.2`/`3.2`), and an unlisted host's event with "Suggest Correction" (`3.1`). This section pins only the two slices §1–§3 don't — each a **real popup snapshot** driven through the production `chooseContent`: whether a **supported** host shows the "Suggest Correction" label (`12.4`), and the completeness rule that decides whether a fallback event is shown at all (`12.6`).
 
 ![Flowchart of the popup's five states](popup-states-flowchart.png)
 
+- `12.4` **Supported host — the "Suggest Correction" label.** A supported host always shows its dedicated extractor's events (icon stays green); whether it *also* offers "Suggest Correction" depends on where the shown events came from:
+
 <table>
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.1 -->
+![popup-states.12.4.1](popup/cases/popup-states.12.4.1.png) <!-- req-gallery:12.4.1 -->
 
 </td>
 <td valign="top">
 
-`12.1` Supported host shows the dedicated extractor's events; when it finds none, the generic fallback is shown if it yields a complete event (with "Suggest Correction") and the empty state otherwise — the host stays classified supported throughout (icon green).
+`12.4.1` When the dedicated extractor returned the events, the "Suggest Correction" label is **not** shown — the dedicated source did its job.
 
 </td>
 </tr>
@@ -1372,12 +1374,29 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.2 -->
+![popup-states.12.4.2](popup/cases/popup-states.12.4.2.png) <!-- req-gallery:12.4.2 -->
 
 </td>
 <td valign="top">
 
-`12.2` Denylisted host shows nothing and prompts for nothing: no event, no support request, no policy link.
+`12.4.2` When the dedicated extractor found nothing but the generic fallback did, the events are shown **with** the "Suggest Correction" label — the dedicated source missed them, so a correction is worth offering.
+
+</td>
+</tr>
+</table>
+
+- `12.6` **Fallback completeness.** A fallback (non-dedicated) event is shown only when it has all three of a title, a location, and a start; missing any one, the popup shows the empty "nothing found" state:
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![popup-states.12.6.1](popup/cases/popup-states.12.6.1.png) <!-- req-gallery:12.6.1 -->
+
+</td>
+<td valign="top">
+
+`12.6.1` A fallback event with **no title** is treated as nothing found.
 
 </td>
 </tr>
@@ -1387,12 +1406,12 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.3 -->
+![popup-states.12.6.2](popup/cases/popup-states.12.6.2.png) <!-- req-gallery:12.6.2 -->
 
 </td>
 <td valign="top">
 
-`12.3` Unsupported host with no complete fallback event shows the empty state with a link to the public policy doc.
+`12.6.2` A fallback event with **no location** is treated as nothing found.
 
 </td>
 </tr>
@@ -1402,42 +1421,12 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.4 -->
+![popup-states.12.6.3](popup/cases/popup-states.12.6.3.png) <!-- req-gallery:12.6.3 -->
 
 </td>
 <td valign="top">
 
-`12.4` Allowlisted host with an event shows the event and does NOT ask for support (the generic result is already trusted there).
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/popup.test.js`._ <!-- req-gallery:12.5 -->
-
-</td>
-<td valign="top">
-
-`12.5` Unlisted host with an event shows the event AND offers to request first-class support (a prefilled GitHub issue).
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — verified by `dev/requirements/logic/product-requirements.test.js`._ <!-- req-gallery:12.6 -->
-
-</td>
-<td valign="top">
-
-`12.6` A fallback (non-dedicated) event counts as COMPLETE only when it has all three of a title, a location, and a start; anything less is "nothing found".
+`12.6.3` A fallback event with **no start** is treated as nothing found.
 
 </td>
 </tr>
@@ -1445,52 +1434,13 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 
 ## 13. Events model
 
-How distinct events and their showings map onto cards. The exact card grouping, ordering, and appearance are specified visually in §4–§5; the model below is the behavior those renderings encode (covered today by `extension-test/events-popup/events-view.test.js` and the §4 snapshots).
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.1 -->
-
-</td>
-<td valign="top">
-
-`13.1` One card per distinct event on the page: an ordinary event page yields one; a listing or series page (a film week, a festival) yields one card per event.
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `extension-test/events-popup/events-view.test.js`._ <!-- req-gallery:13.2 -->
-
-</td>
-<td valign="top">
-
-`13.2` A multi-instance event folds showings that match on title, location, description, and timezone (differing only in time) into ONE event with several instances; distinct events that merely share a title stay separate.
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td valign="top" width="320">
-
-🔧 _Logic leaf — **untested here** — currently covered by `dev/requirements/<kind>/cases/event-cards-grouping.4.2.1.case.js`._ <!-- req-gallery:13.3 -->
-
-</td>
-<td valign="top">
-
-`13.3` An event's instances are grouped BY MONTH into one or more cards — a single card for a month with one showing, or a grouped card with a button per showing.
-
-</td>
-</tr>
-</table>
+How distinct events and their showings map onto cards — one card per distinct
+event, multi-instance folding, and month-grouping — is specified **visually in
+§4–§5** and pinned by those snapshots (e.g. `4.1` one card per distinct event;
+`4.2.1`/`4.2.2` grouping an event's instances by month), with the non-visual
+folding logic (which showings collapse into one multi-instance event) covered by
+`extension-test/events-popup/events-view.test.js`. There are no separate leaves
+here: the rendered §4–§5 requirements are the executable contract.
 
 ## 14. Event fields
 

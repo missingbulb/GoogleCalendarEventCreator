@@ -1,14 +1,11 @@
-// Per-leaf PROVISIONAL snapshot for requirement 4.10 (a `tbd: true` case): a
-// single instance spanning MULTIPLE MONTHS (Jun 28 → Jul 3). Today its chip shows
-// just the start day ("JUN 28") with an "All day" line — no date range across the
-// span. This image is the CURRENT behavior, shown so we can decide whether a long
-// / multi-month span should instead render a date range (see the TO BE DECIDED
-// banner on 4.10).
+// Per-leaf snapshot for requirement 4.10: a single instance spanning MULTIPLE
+// MONTHS (Jun 28 → Jul 3) renders as a date-RANGE chip — the month range as the
+// banner ("JUN–JUL") over the day range as the body ("28–3") — with its time (or
+// "All day") on the line as usual.
 "use strict";
 
 module.exports = {
-  tbd: true, // behavior not yet decided — this is a PROVISIONAL snapshot of current behavior
-  description: "TBD: a single instance spanning Jun 28 → Jul 3 — current chip shows the start day only",
+  description: "a single instance spanning Jun 28 → Jul 3 shows a JUN–JUL / 28–3 date-range chip",
   data: {
     supported: true,
     events: [

@@ -1,15 +1,13 @@
-// Per-leaf PROVISIONAL snapshot for requirement 4.2.3 (a `tbd: true` case): the
-// cross-month-instance grouping edge case. One event with three instances — Jun 15,
-// a multi-day instance spanning Jun 28 → Jul 3, and Jul 10. Today the spanning
-// instance groups by its START (June), so the render shows a June grouped card
-// (Jun 15 + Jun 28) and a July single card (Jul 10) — the span never surfaces under
-// July. This image is the CURRENT behavior, shown so the right behavior can be
-// decided (see the TO BE DECIDED banner on 4.2.3).
+// Per-leaf snapshot for requirement 4.2.3: the cross-month-instance grouping edge
+// case. One event with three instances — Jun 15, a multi-day instance spanning
+// Jun 28 → Jul 3, and Jul 10. The spanning instance groups by its START month
+// (June), so it renders as a date-range chip (JUN–JUL / 28–3) in the June grouped
+// card beside Jun 15; July holds the Jul 10 single card. It never duplicates under
+// July.
 "use strict";
 
 module.exports = {
-  tbd: true, // behavior not yet decided — this is a PROVISIONAL snapshot of current behavior
-  description: "TBD edge: one event with Jun 15, a Jun 28→Jul 3 span, and Jul 10 — current grouping",
+  description: "one event with Jun 15, a Jun 28→Jul 3 span (lumped under June as a range chip), and Jul 10",
   data: {
     supported: true,
     events: [
