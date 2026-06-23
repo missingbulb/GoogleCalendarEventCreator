@@ -230,9 +230,12 @@ test("showPerDayTimes: one shared time -> false (the header carries it instead)"
   assert.equal(showPerDayTimes([inst("2026-06-05T19:00:00"), inst("2026-06-25T19:00:00")]), false);
 });
 
-test("showPerDayTimes: any all-day/dateless session -> false (plain day chips)", () => {
-  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("2026-08-25")]), false);
-  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("")]), false);
+test("showPerDayTimes: a mix of timed and all-day showings -> true (each chip shows its own label so they differ)", () => {
+  assert.equal(showPerDayTimes([inst("2026-08-05T18:00:00"), inst("2026-08-25")]), true);
+});
+
+test("showPerDayTimes: all all-day showings -> false (plain day chips, 'All day' header)", () => {
+  assert.equal(showPerDayTimes([inst("2026-08-05"), inst("2026-08-25")]), false);
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
