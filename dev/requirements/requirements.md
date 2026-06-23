@@ -674,7 +674,27 @@ and the header is location-only.
 `5.7.3` When a month card's days are **all all-day** (no time), the buttons stay
 plain day chips and the header reads **"All day · &lt;location&gt;"** — the "All
 day" label beside the location, mirroring a single all-day card's line. (If only
-*some* days are all-day, no single time fits, so the header stays location-only.)
+*some* days are all-day, no single time fits, so the header stays location-only and
+each chip carries its own label — see `5.7.4`.)
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.7.4](popup/cases/event-cards-appearance.5.7.4.png) <!-- req-gallery:5.7.4 -->
+
+</td>
+<td valign="top">
+
+`5.7.4` When a month card **mixes** an all-day showing with a timed one, each
+button becomes a **time chip** so the two visually differ: the timed chip shows its
+own start time and the all-day chip reads **"All day"** (rather than both
+collapsing to identical bare day chips, which would hide the timed showing's time).
+The header stays location-only.
 
 </td>
 </tr>

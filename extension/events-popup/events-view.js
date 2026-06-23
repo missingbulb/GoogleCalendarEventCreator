@@ -483,15 +483,21 @@ export function groupHeaderTime(instances) {
   return instances.every((it) => it.t.start && isAllDay(it.t.start)) ? "All day" : "";
 }
 
-// True when a month card's days carry DIFFERENT times that all deserve showing:
-// every session is timed (no all-day/dateless one to muddy it) and they aren't
-// all the same time. Then each chip shows its day's own time (a time chip)
-// rather than a bare day; a shared time goes in the header via commonTime
-// instead, and a mix with an all-day session keeps plain day chips.
+// True when a month card's showings carry DIFFERENT per-chip labels that each
+// deserve showing — so each chip becomes a time chip (its own time, or "All day")
+// instead of a bare day chip. This fires both when the days are all timed at
+// DIFFERENT times (5.7.2) and when the card MIXES an all-day showing with a timed
+// one (5.7.4): the timed chip then shows its start time while the all-day chip
+// reads "All day", so the two visually differ rather than collapsing to identical
+// day chips. When every showing shares one label — all the same time, or all
+// all-day — there's nothing to tell apart, so it returns false: a shared time
+// goes in the header via commonTime (5.7.1), and an all-day-only card keeps plain
+// day chips with an "All day" header (5.7.3). (A dateless showing never reaches a
+// month card — it splits into its own single card — so only dated showings, whose
+// label is a time or "All day", are compared here.)
 export function showPerDayTimes(instances) {
-  const times = instances.map((it) => timeRange(it.t));
-  if (times.some((t) => !t)) return false;
-  return !times.every((t) => t === times[0]);
+  const labels = instances.map((it) => sameDayLabel(it.t));
+  return !labels.every((l) => l === labels[0]);
 }
 
 // Human-readable date/time line for the popup (separate from
