@@ -356,9 +356,11 @@ isn't capturable by the static renderer — see note below the gallery.)
 </td>
 <td valign="top">
 
-`4.5` A day with **two or more showings** contributes **one button per showing**
-to its month's grouped card — it is **not** peeled off into a separate card; the
-showings are told apart by their time (→ `5.3`).
+`4.5` A day with **more showings than the month's regular (modal) per-date count**
+— e.g. two showings on a day amid a once-per-date run — is **peeled into its own
+card**, its showings told apart by their **time** (→ `5.3`), rather than sitting
+among the run's bare day chips (#509). The surrounding run resumes after it (→
+`4.11`).
 
 </td>
 </tr>
@@ -449,6 +451,27 @@ order.)
 a **date range** on its calendar chip: the month range as the banner over the day
 range as the body (**`JUN–JUL`** over **`28–3`**). Its line reads the instance's
 time (or "All day") as usual.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-grouping.4.11](popup/cases/event-cards-grouping.4.11.png) <!-- req-gallery:4.11 -->
+
+</td>
+<td valign="top">
+
+`4.11` Showings in a card should **differ only by date**, so a date carrying an
+**extra** showing splits the stream into separate cards (#509): the regular
+once-per-date **run before** it (day chips under their shared time), the **busy date
+on its own** (its showings shown by time), then the **run after** it as a fresh
+card. So a daily run with one doubled-up date reads as run · that date · run, rather
+than forcing every chip in one card to repeat the shared time just to disambiguate
+the one busy date.
 
 </td>
 </tr>

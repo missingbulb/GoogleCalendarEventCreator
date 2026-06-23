@@ -77,13 +77,68 @@ function eventCards(event) {
   return cards;
 }
 
-// The single card for one month's worth of an event's instances: a "single" card
-// when there's just one showing, otherwise one "month" card holding EVERY showing
-// that month as its own button (a day with two showings contributes two buttons —
-// showings are never peeled off into a separate card). Instances are never merged.
+// Split one month's worth of an event's showings into cards (#509). Showings grouped
+// in a card should "differ only by date", so a date carrying MORE showings than the
+// month's regular (modal) per-date count is an ANOMALY: it's peeled into its OWN card
+// (its several showings told apart by time) and BREAKS the surrounding run of regular
+// single-per-date dates — the run resumes in a fresh card after it, so a stream reads
+// as [run before · the busy date · run after]. With no anomaly the whole month is one
+// card (a "single" card for a lone showing, else a grouped "month" card), exactly as
+// before. Instances are never merged.
 function monthCards(event, instances) {
-  if (instances.length === 1) return [{ event, kind: "single", instances }];
-  return [{ event, kind: "month", instances }];
+  const byDate = groupByDateInOrder(instances);
+  const regular = regularPerDateCount(byDate);
+
+  const cards = [];
+  let run = [];
+  const flushRun = () => {
+    if (run.length) cards.push(runCard(event, run));
+    run = [];
+  };
+  for (const day of byDate) {
+    if (day.length > regular) {
+      flushRun();
+      cards.push({ event, kind: "month", instances: day }); // the busy date, its own card
+    } else {
+      run.push(...day);
+    }
+  }
+  flushRun();
+  return cards;
+}
+
+// A run of regular (single-per-date) showings as one card: a whole-clickable "single"
+// card for a lone date, else a grouped "month" card.
+function runCard(event, instances) {
+  return instances.length === 1
+    ? { event, kind: "single", instances }
+    : { event, kind: "month", instances };
+}
+
+// This month's showings bucketed by day, the buckets returned in date order; each
+// bucket is the array of showings that fall on that date.
+function groupByDateInOrder(instances) {
+  const byDate = new Map();
+  for (const it of instances) pushInto(byDate, dateKey(it.t.start), it);
+  return [...byDate.entries()].sort((a, b) => cmpStart(a[0], b[0])).map(([, list]) => list);
+}
+
+// The "regular" number of showings a date carries this month — the most common
+// per-date count (the mode), tie-broken toward the SMALLER count so a lone busy date
+// still reads as the anomaly against an even split. A date carrying MORE than this is
+// peeled into its own card.
+function regularPerDateCount(byDate) {
+  const freq = new Map();
+  for (const day of byDate) freq.set(day.length, (freq.get(day.length) || 0) + 1);
+  let best = Infinity;
+  let bestFreq = -1;
+  for (const [count, f] of freq) {
+    if (f > bestFreq || (f === bestFreq && count < best)) {
+      best = count;
+      bestFreq = f;
+    }
+  }
+  return best === Infinity ? 1 : best;
 }
 
 function pushInto(map, key, value) {

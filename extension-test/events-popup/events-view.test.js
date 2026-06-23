@@ -239,10 +239,11 @@ test("showPerDayTimes: all all-day showings -> false (plain day chips, 'All day'
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
-// with one showing is a "single" card; a month with two or more showings is one
-// "month" card holding every showing as its own button (a day with several
-// showings keeps a button per showing — never a separate card). Instances are
-// NEVER merged — a card built from X instances exposes X buttons.
+// with one showing is a "single" card; a month with two or more once-per-date
+// showings is one "month" card holding each as its own button. A date carrying MORE
+// showings than the month's regular (modal) per-date count is peeled into its OWN
+// card and breaks the surrounding run (#509). Instances are NEVER merged — a card
+// built from X instances exposes X buttons.
 
 const card = (events) => toCards(events);
 const ev = (title, times) => ({ title, location: "Hall", ctz: "", times });
@@ -331,9 +332,9 @@ test("toCards: a one-day month with two times is one 'month' card with both time
   assert.equal(cards[0].instances.length, 2);
 });
 
-test("toCards: a month's showings — including a day with two — are one 'month' card", () => {
-  // Jun 10 / Jun 11 x2 / Jun 12 -> ONE June month card holding all four showings,
-  // never peeling the two-showing day (Jun 11) out into its own card.
+test("toCards: a day with more showings than the regular count is peeled into its own card, breaking the run (#509)", () => {
+  // Jun 10 / Jun 11 x2 / Jun 12 -> the busy day (Jun 11) is its OWN card, splitting
+  // the regular run into Jun 10 (before) and Jun 12 (after): single · month · single.
   const cards = card([
     ev("Series", [
       { start: "2026-06-10T20:00:00" },
@@ -342,25 +343,45 @@ test("toCards: a month's showings — including a day with two — are one 'mont
       { start: "2026-06-12T23:00:00" },
     ]),
   ]);
-  assert.deepEqual(cards.map((c) => c.kind), ["month"]);
+  assert.deepEqual(cards.map((c) => c.kind), ["single", "month", "single"]);
+  assert.deepEqual(cards[0].instances.map((it) => it.t.start.slice(0, 10)), ["2026-06-10"]);
   assert.deepEqual(
-    cards[0].instances.map((it) => it.t.start.slice(0, 10)),
-    ["2026-06-10", "2026-06-11", "2026-06-11", "2026-06-12"]
+    cards[1].instances.map((it) => it.t.start.slice(0, 10)),
+    ["2026-06-11", "2026-06-11"],
+    "the anomaly card holds exactly the busy date's showings"
   );
+  assert.deepEqual(cards[2].instances.map((it) => it.t.start.slice(0, 10)), ["2026-06-12"]);
 });
 
-test("toCards: instances keep their original times[] index (for the right URL)", () => {
+test("toCards: a longer regular run resumes after the anomaly as a fresh card (#509)", () => {
+  // Aug 3,4,5 (run) / Aug 6 x2 (busy) / Aug 7 (run) -> month · month · single.
+  const cards = card([
+    ev("Daily", [
+      { start: "2026-08-03T13:55:00" },
+      { start: "2026-08-04T13:55:00" },
+      { start: "2026-08-05T13:55:00" },
+      { start: "2026-08-06T13:55:00" },
+      { start: "2026-08-06T16:00:00" },
+      { start: "2026-08-07T13:55:00" },
+    ]),
+  ]);
+  assert.deepEqual(cards.map((c) => c.kind), ["month", "month", "single"]);
+  assert.deepEqual(cards[0].instances.map((it) => it.t.start.slice(0, 10)), ["2026-08-03", "2026-08-04", "2026-08-05"]);
+  assert.equal(cards[1].instances.length, 2); // the busy Aug 6
+  assert.deepEqual(cards[2].instances.map((it) => it.t.start.slice(0, 10)), ["2026-08-07"]);
+});
+
+test("toCards: instances keep their original times[] index across the split (for the right URL)", () => {
+  // Jun 10 x2 (busy) / Jun 11 (run) -> a 'month' anomaly card (indices 1,2) + a
+  // 'single' run card (index 0); every original index is preserved on the right card.
   const cards = card([
     ev("Fest", [
-      { start: "2026-06-11T21:00:00" }, // index 0, but later in time
+      { start: "2026-06-11T21:00:00" }, // index 0
       { start: "2026-06-10T20:00:00" }, // index 1
       { start: "2026-06-10T21:00:00" }, // index 2
     ]),
   ]);
-  assert.deepEqual(cards.map((c) => c.kind), ["month"]);
-  assert.deepEqual(
-    cards[0].instances.map((it) => it.i).sort(),
-    [0, 1, 2],
-    "the month card carries every original index, regardless of sort order"
-  );
+  assert.deepEqual(cards.map((c) => c.kind), ["month", "single"]);
+  assert.deepEqual(cards[0].instances.map((it) => it.i).sort(), [1, 2]);
+  assert.deepEqual(cards[1].instances.map((it) => it.i), [0]);
 });
