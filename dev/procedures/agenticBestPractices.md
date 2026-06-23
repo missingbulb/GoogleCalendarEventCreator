@@ -24,3 +24,18 @@ usually just whatever is captured-but-not-yet-upstreamed.
   assistant's instruction-following is the enforcement mechanism; the hook provides
   the check. Stay silent on success — only emit when something requires the user's
   decision. (`.claude/hooks/session-start.sh` is a worked example.)
+
+- **For an open-ended visual/layout requirement, render real candidate designs and
+  let the owner pick — before building one.** When the spec leaves *how it looks or
+  groups* open, the fastest way to converge is to drive the **production renderer**
+  with hand-shaped fake data and put 2–4 **actually-rendered** options in front of
+  the owner (delivered as images), not prose descriptions. Fully implementing,
+  testing, and snapshot-approving a single interpretation before showing
+  alternatives risks discarding it wholesale when the owner reorients — here an
+  in-place card design (#509) was built end-to-end and merged-ready, then replaced
+  by a stream-split chosen from rendered mockups, wasting the whole first build and
+  its approval cycles. Reach for throwaway mockups through the real render path
+  (e.g. the snapshot renderer fed a fake data object) at the first sign of layout
+  ambiguity, *ahead* of the implement→test→snapshot-approve cycle. (This is the
+  design-exploration complement to the existing "drive snapshots through the real
+  code path" and snapshot-review rules, which only kick in *after* a change exists.)
