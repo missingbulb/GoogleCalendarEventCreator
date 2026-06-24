@@ -28,7 +28,7 @@ Grab the packaged extension — just the files that ship, not the whole repo:
 1. Download
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
-   [Create Release Package workflow](dev/procedures/releasing.md#creating-a-release-package)) and extract
+   [Release: Create Package workflow](dev/procedures/releasing.md#creating-a-release-package)) and extract
    it. It unpacks into a folder containing `manifest.json` — that folder is the
    one to load. As a secondary
    option, download

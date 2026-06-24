@@ -1,4 +1,4 @@
-name: Create Release Package
+name: "Release: Create Package"
 
 # Builds and publishes a GitHub Release of the extension at the version that is
 # currently committed in extension/manifest.json. It does NOT change the version — bumping
@@ -12,8 +12,8 @@ name: Create Release Package
 # no-op — so extension/manifest.json edits that aren't version bumps don't cut a release.
 # It's also runnable from the Actions tab.
 #
-# Pushing to the Chrome Web Store is the one remaining manual step (the "Publish
-# to Chrome Web Store" workflow).
+# Pushing to the Chrome Web Store is the one remaining manual step (the
+# "Release: Publish to Chrome Web Store" workflow).
 on:
   workflow_dispatch: {}
   push:

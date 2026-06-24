@@ -1,4 +1,4 @@
-name: Publish to Chrome Web Store
+name: "Release: Publish to Chrome Web Store"
 
 # Takes the google-calendar-event-creator.zip from a GitHub Release and uploads
 # it to the Chrome Web Store (optionally publishing it to users), via the Web
