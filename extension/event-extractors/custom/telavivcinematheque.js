@@ -54,6 +54,21 @@
 (() => {
   const { clean, meta, richText } = GCal;
 
+  // A category listing page shows many films, one per `.catagory-grid-box`.
+  // Each box has a title (h3), next screening date+time (`.n_block_r p`), and
+  // a description (`.paragraph p`). The date format is the same "DD-MM-YYYY"
+  // as the series box, so parseBoxDate() handles it unchanged.
+  function categoryEvents() {
+    return [...document.querySelectorAll(".catagory-grid-box")]
+      .map((box) => {
+        const title = clean((box.querySelector(".title h3") || {}).textContent);
+        const start = parseBoxDate(clean((box.querySelector(".n_block_r p") || {}).textContent));
+        const description = clean((box.querySelector(".paragraph p") || {}).textContent);
+        return title && start ? { title, start, location: location(), description } : null;
+      })
+      .filter(Boolean);
+  }
+
   // A series/festival page lists several different films, one per `.box`.
   function seriesEvents() {
     return [...document.querySelectorAll(".register-series-boxes .box")]
@@ -241,6 +256,11 @@
           description: clean(meta("og:description")),
           ctz: "Asia/Jerusalem",
         };
+      }
+
+      const cats = categoryEvents();
+      if (cats.length) {
+        return { events: cats, ctz: "Asia/Jerusalem" };
       }
 
       const dates = screeningDates();
