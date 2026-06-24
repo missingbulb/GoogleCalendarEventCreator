@@ -129,6 +129,44 @@ test("dateChip: a past date shows `past`, a future year shows its `year`, the cu
   assert.equal(future.year, "2027");
 });
 
+test("dateChip: a TIMED event is past once its start time has passed, even earlier today (#507)", () => {
+  // now = 2026-06-22 12:00 — a timed event's pill is time-of-day aware.
+  assert.equal(dateChip("2026-06-22T09:00:00", NOW).past, true); // earlier today, already passed → past
+  const laterToday = dateChip("2026-06-22T20:00:00", NOW); // later today, not yet → no pill
+  assert.equal(laterToday.past, undefined);
+  assert.equal(laterToday.year, undefined);
+});
+
+test("dateChip: an ALL-DAY event stays day-granular — today's all-day event is not yet past", () => {
+  // now = 2026-06-22 12:00. An all-day event has no time-of-day, so it's past only
+  // once its whole day has ended (unlike a timed event earlier the same day).
+  assert.equal(dateChip("2026-06-22", NOW).past, undefined); // all-day today: not past
+  assert.equal(dateChip("2026-06-21", NOW).past, true); // all-day yesterday: past
+});
+
+test("dateChip: a started event with an end still in the FUTURE is `ongoing`, not past", () => {
+  // now = 2026-06-22 12:00. The end is consulted ONLY to split ongoing-vs-past.
+  const timedNow = dateChip("2026-06-22T09:00:00", NOW, new Date(2026, 5, 22, 18, 0, 0));
+  assert.equal(timedNow.ongoing, true); // started 9am, ends 6pm → happening now
+  assert.equal(timedNow.past, undefined);
+
+  const timedOver = dateChip("2026-06-22T06:00:00", NOW, new Date(2026, 5, 22, 9, 0, 0));
+  assert.equal(timedOver.past, true); // started 6am, ended 9am → over → past
+  assert.equal(timedOver.ongoing, undefined);
+
+  const span = dateChip("2026-06-20", NOW, new Date(2026, 5, 25)); // all-day run 20→25, mid-run
+  assert.equal(span.ongoing, true);
+});
+
+test("dateChip: start in the past but NO end is `past` (not ongoing); a future start ignores its end", () => {
+  // now = 2026-06-22 12:00.
+  assert.equal(dateChip("2026-06-22T09:00:00", NOW).past, true); // no end → past, never ongoing
+  assert.equal(dateChip("2026-06-22T09:00:00", NOW).ongoing, undefined);
+  const upcoming = dateChip("2026-06-30T09:00:00", NOW, new Date(2026, 5, 30, 18, 0, 0));
+  assert.equal(upcoming.ongoing, undefined); // not started yet → not ongoing
+  assert.equal(upcoming.past, undefined);
+});
+
 test("summarize: eventLengthInMinutes with no end shows a time range", () => {
   const text = summarize({ start: ROUND, eventLengthInMinutes: 90 });
   assert.ok(text.includes("–"), `expected a range in "${text}"`);

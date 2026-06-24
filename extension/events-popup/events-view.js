@@ -152,9 +152,10 @@ function pushInto(map, key, value) {
 // and the WHOLE card is the click target; on a grouped card (same-day or month)
 // each showing is its OWN chip BUTTON — a day chip per date (month card) or a
 // time chip per showing (same-day card). `now` (a reference instant) decides which
-// chips carry a corner pill: a gray "past" pill for an event before today, a green
-// year pill for a future-year event. It defaults to the real clock and is threaded
-// down from render() so the UI snapshots can pin it.
+// chips carry a corner pill: a gray "past" pill for an event already over, a red
+// "ongoing" pill for one happening now (started, end still ahead), or a green year
+// pill for a future-year event — see cornerPill. It defaults to the real clock and
+// is threaded down from render() so the UI snapshots can pin it.
 export function renderCard(card, tab, now = new Date()) {
   if (card.kind === "single") {
     return makeSingleCard(card.event, card.instances[0], tab, now);
@@ -294,15 +295,16 @@ function titleEl(event, tab) {
   return el;
 }
 
-// Build a calendar chip from a descriptor { banner, body, kind, past?, year? }
+// Build a calendar chip from a descriptor { banner, body, kind, past?, ongoing?, year? }
 // — the popup's single "addable event" motif: a colored banner (the shared
 // context — a month, or a full date) over a prominent body (the pick — a day or
 // a time). `kind` ("day" | "time") tunes the body font (see .e-chip-body.* in
 // popup.css). A chip carries a small corner pill stacked on its calendar icon
 // (then the chip is wrapped so the pill can sit over it): a gray "past" pill when
-// `past` is set, else a green pill showing `year` for a future-year chip. A chip
-// that is neither (this year, not yet past) returns bare, with no pill.
-function chipEl({ banner, body, kind = "day", past, year }) {
+// `past` is set, a red "ongoing" pill when `ongoing` is set (the event is happening
+// now), else a green pill showing `year` for a future-year chip. A chip that is
+// none of these (not yet started, this year) returns bare, with no pill.
+function chipEl({ banner, body, kind = "day", past, ongoing, year }) {
   const el = document.createElement("span");
   el.className = "e-chip";
 
@@ -316,14 +318,14 @@ function chipEl({ banner, body, kind = "day", past, year }) {
   bodyEl.textContent = body;
   el.appendChild(bodyEl);
 
-  if (!past && !year) return el;
+  if (!past && !ongoing && !year) return el;
 
   const wrap = document.createElement("span");
   wrap.className = "e-cal";
   wrap.appendChild(el);
   const pillEl = document.createElement("span");
-  pillEl.className = past ? "e-year past" : "e-year future";
-  pillEl.textContent = past ? "past" : year;
+  pillEl.className = ongoing ? "e-year ongoing" : past ? "e-year past" : "e-year future";
+  pillEl.textContent = ongoing ? "ongoing" : past ? "past" : year;
   wrap.appendChild(pillEl);
   return wrap;
 }
@@ -387,17 +389,19 @@ function eventStart(start) {
 }
 
 // The left date chip's two lines (short month + day-of-month), or null when
-// there's no usable date — then the button shows just title + "when" text. A
-// chip for a past event also carries `past` (rendered as a gray "past" pill on top
-// of the calendar icon); a future-year chip carries its `year` (a green pill); a
-// current-year, not-yet-past chip carries neither.
-export function dateChip(start, now = new Date()) {
+// there's no usable date — then the button shows just title + "when" text. The
+// chip also carries its corner-pill flag (see cornerPill): `past` (gray pill),
+// `ongoing` (red pill, when the optional `endDate` is still in the future), or
+// `year` (green future-year pill); a current, not-started chip carries none.
+// `endDate` (a Date, or null) is the instance's effective end — passed so a
+// started event with an end still ahead reads as ongoing rather than past.
+export function dateChip(start, now = new Date(), endDate = null) {
   const date = eventStart(start);
   if (!date) return null;
   return {
     month: date.toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: String(date.getDate()),
-    ...cornerPill(date, now),
+    ...cornerPill(date, now, { allDay: isAllDay(start), endDate }),
   };
 }
 
@@ -405,22 +409,24 @@ export function dateChip(start, now = new Date()) {
 // the { banner, body, kind } the chipEl renderer takes. ---
 
 // A single day: month banner over the day-of-month body. Used as a single card's
-// indicator and as each per-date button on a month card. null with no date.
-function dayChip(start, now) {
-  const c = dateChip(start, now);
-  return c && { banner: c.month, body: c.day, kind: "day", past: c.past, year: c.year };
+// indicator and as each per-date button on a month card. Takes the whole instance
+// so its end feeds the ongoing pill. null with no date.
+function dayChip(instance, now) {
+  const c = dateChip(instance.start, now, instanceEndDate(instance));
+  return c && { banner: c.month, body: c.day, kind: "day", past: c.past, ongoing: c.ongoing, year: c.year };
 }
 
 // One showing among several on the same date: the DATE is the banner (the shared
 // context) and the TIME is the body (what tells the showings apart) — e.g.
 // "JUN 19" over "4:30 PM – 6:18 PM". Falls back to a bare time when undated.
 function timeChip(instance, now) {
-  const c = dateChip(instance.start, now);
+  const c = dateChip(instance.start, now, instanceEndDate(instance));
   return {
     banner: c ? `${c.month} ${c.day}` : "",
     body: sameDayLabel(instance),
     kind: "time",
     past: c && c.past,
+    ongoing: c && c.ongoing,
     year: c && c.year,
   };
 }
@@ -447,8 +453,9 @@ function isMultiDaySpan(instance) {
 
 // A date-RANGE chip for a multi-day span: the month(s) as the banner over the day
 // range as the body — "SEP" over "15–18" within one month, "JUN–JUL" over "28–3"
-// across months. The corner pill keys "past" off the span's END day (a span still
-// running isn't past) and the future year off the START year.
+// across months. The corner pill keys "past"/future off the span's START; its END
+// is passed so a span whose start has passed but whose end is still ahead reads as
+// "ongoing" rather than past.
 function rangeChip(instance, now) {
   const s = eventStart(instance.start);
   const e = instanceEndDate(instance);
@@ -461,7 +468,7 @@ function rangeChip(instance, now) {
     banner: sameMonth ? sMon : `${sMon}–${eMon}`,
     body: `${s.getDate()}–${e.getDate()}`,
     kind: "range",
-    ...cornerPill(s, now, e),
+    ...cornerPill(s, now, { allDay: isAllDay(instance.start), endDate: e }),
   };
 }
 
@@ -472,24 +479,38 @@ function rangeChip(instance, now) {
 function chipForInstance(instance, now, preferTime) {
   if (isMultiDaySpan(instance)) return rangeChip(instance, now);
   if (preferTime) return timeChip(instance, now);
-  return dayChip(instance.start, now);
+  return dayChip(instance, now);
 }
 
-// The chip's corner-pill descriptor, decided against the reference instant `now`:
-//   - { past: true } — the event has already happened: its day is before TODAY.
-//     For a multi-day span pass the END day as `endDate` (a span still running
-//     isn't past); for a single date `endDate` defaults to `date`. Rendered as a
-//     gray "past" pill — past events of ANY date, not just prior years.
-//   - { year } — a future-YEAR event (not past, and its year is past now's year).
-//     Rendered as a green pill showing that year.
-//   - {} — this year and not yet past: no pill.
-// Comparison is at DAY granularity (local midnight), so an event later today is
-// not "past" and a pill never flips mid-day.
-function cornerPill(date, now, endDate = date) {
-  const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  if (day(endDate) < day(now)) return { past: true };
-  const y = date.getFullYear();
-  if (y > now.getFullYear()) return { year: String(y) };
+// The chip's corner-pill descriptor, decided against the reference instant `now`.
+// Whether the START has passed, and whether the event is a future YEAR, are decided
+// from the START alone; the end is consulted ONLY to split a started event into
+// ongoing-vs-past (never to decide past/future):
+//   - { past: true } — the start has passed and the event is over: it has no end,
+//     or its end has passed too. A TIMED event's start is past once its start
+//     instant has passed (so an event earlier TODAY whose time is gone is past,
+//     #507); an ALL-DAY event is day-granular — its start is past only once its
+//     whole start day has ended (today's all-day event is not yet past). Rendered
+//     as a gray "past" pill — past events of ANY date, not just prior years.
+//   - { ongoing: true } — the start has passed but a non-null end is still in the
+//     future: the event is happening now (a multi-day run, or a timed event mid-way
+//     through). Rendered as a red "ongoing" pill.
+//   - { year } — a future-YEAR event by its start year (not started, year past
+//     now's). Rendered as a green pill showing that year.
+//   - {} — not started and not a future year: no pill.
+// `allDay` selects the granularity for BOTH boundaries: an all-day point is "gone"
+// only after its whole day ends (local next-midnight), a timed one after its own
+// instant — so a timed pill can flip mid-day while an all-day pill never does.
+function cornerPill(date, now, { allDay = true, endDate = null } = {}) {
+  const nextMidnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+  const goneAt = (d) => (allDay ? nextMidnight(d) : d); // instant after which `d` has passed
+  if (goneAt(date) <= now) {
+    // The start has passed. A non-null end still in the future means ongoing;
+    // otherwise (no end, or the end has passed too) the event is over.
+    if (endDate && goneAt(endDate) > now) return { ongoing: true };
+    return { past: true };
+  }
+  if (date.getFullYear() > now.getFullYear()) return { year: String(date.getFullYear()) };
   return {};
 }
 

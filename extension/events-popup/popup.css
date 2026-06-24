@@ -211,14 +211,16 @@ body {
 }
 /* The small corner pill, overlaid on the month banner and overhanging the icon's
    right edge, tilted 30° clockwise like a sticker. Shown for a past event (the
-   gray ".past" variant, reading "past") or a future year (the green ".future"
-   variant, reading the year) — a current, not-yet-past date carries none. The
-   background color is set ONLY on the .past/.future variant (a calm green
-   "upcoming" pill for a future year, a muted-gray one for a past event — never an
-   alarm-red future pill, which read as an error on a perfectly fine next-year
-   event), never on the base class: the UI snapshot renderer inlines CSS without
-   selector specificity (last-declared wins), so a base-class background would
-   override the variant's in the snapshot. */
+   gray ".past" variant, reading "past"), an event happening now (the red
+   ".ongoing" variant, reading "ongoing"), or a future year (the green ".future"
+   variant, reading the year) — a not-yet-started, current-year date carries none.
+   The background color is set ONLY on the .past/.ongoing/.future variant (a calm
+   green "upcoming" pill for a future year, a muted-gray one for a past event, a
+   red one for an event in progress — red reads as an error on a fine next-year
+   event, which is why future stays green, but it's apt for "live now"), never on
+   the base class: the UI snapshot renderer inlines CSS without selector
+   specificity (last-declared wins), so a base-class background would override the
+   variant's in the snapshot. */
 .event-btn .e-year,
 .event-group .e-year {
   position: absolute;
@@ -241,6 +243,10 @@ body {
 .event-btn .e-year.past,
 .event-group .e-year.past {
   background-color: #80868b;
+}
+.event-btn .e-year.ongoing,
+.event-group .e-year.ongoing {
+  background-color: #d93025;
 }
 /* THE calendar chip — the popup's single "addable event" motif: a colored banner
    (the shared context — a month, or a full date) over a prominent body (the pick

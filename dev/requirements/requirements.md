@@ -584,8 +584,15 @@ inner chip buttons instead.
 </table>
 
 - `5.6` **Date pill.** A chip carries a small pill on the corner of its calendar
-  icon for an event that isn't simply upcoming this year: a gray "past" pill for a
-  past event, or a green pill showing the year for a future year.
+  icon for an event that isn't simply upcoming this year: a gray "past" pill for an
+  event that's over, a red "ongoing" pill for one happening now, or a green pill
+  showing the year for a future year. Whether the start has passed is time-of-day
+  aware for a **timed** event (started once its start time passes, even earlier
+  today) but whole-day for an **all-day** event (started once its day ends). The
+  start alone decides past-vs-future; the end is consulted only to split a started
+  event into ongoing (end still ahead) vs. past (no end, or end passed). Every pill
+  is decided per chip — so each instance button in a grouped card is marked by its
+  own start/end.
 
 <table>
 <tr>
@@ -645,6 +652,91 @@ never red (a next-year event isn't an error).
 
 `5.6.4` The "past" pill marks **any** past event, not only a prior year — an event
 earlier **this** year (before today) shows it too.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.5](popup/cases/event-cards-appearance.5.6.5.png) <!-- req-gallery:5.6.5 -->
+
+</td>
+<td valign="top">
+
+`5.6.5` For a **timed** event the pill is **time-of-day aware** — an event earlier
+**today** whose start time has already passed shows the gray "past" pill (an
+all-day event, by contrast, is past only once its whole day has ended).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.6](popup/cases/event-cards-appearance.5.6.6.png) <!-- req-gallery:5.6.6 -->
+
+</td>
+<td valign="top">
+
+`5.6.6` The pill is decided **per chip**: within a grouped card each instance
+button is marked by its **own** time — a showing that has already passed carries
+the "past" pill while a later showing the same day does not.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.7](popup/cases/event-cards-appearance.5.6.7.png) <!-- req-gallery:5.6.7 -->
+
+</td>
+<td valign="top">
+
+`5.6.7` The same per-chip rule applies to the **future-year** pill: within a
+grouped card each instance button for a future year carries its own green year
+pill.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.8](popup/cases/event-cards-appearance.5.6.8.png) <!-- req-gallery:5.6.8 -->
+
+</td>
+<td valign="top">
+
+`5.6.8` An event that has **started** but whose **end** is still in the future
+shows a **red "ongoing"** pill (it's happening now). A started event with **no**
+end is "past" instead (→ `5.6.5`).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.9](popup/cases/event-cards-appearance.5.6.9.png) <!-- req-gallery:5.6.9 -->
+
+</td>
+<td valign="top">
+
+`5.6.9` The "ongoing" pill is decided **per chip** too: within a grouped card a
+showing that has finished reads "past" while a showing in progress reads
+"ongoing", side by side.
 
 </td>
 </tr>
@@ -1382,7 +1474,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Validated against [visit-tel-aviv](extractor/expected/visit-tel-aviv.json)._ <!-- req-gallery:11.15 -->
+🧩 _Validated against [visit-tel-aviv](extractor/expected/visit-tel-aviv.json), [timed](extractor/expected/visit-tel-aviv-timed.json)._ <!-- req-gallery:11.15 -->
 
 </td>
 <td valign="top">
