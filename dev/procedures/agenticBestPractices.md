@@ -39,3 +39,11 @@ usually just whatever is captured-but-not-yet-upstreamed.
   ambiguity, *ahead* of the implement→test→snapshot-approve cycle. (This is the
   design-exploration complement to the existing "drive snapshots through the real
   code path" and snapshot-review rules, which only kick in *after* a change exists.)
+
+- **After merging a PR back to main, start follow-up work on a NEW branch — don't
+  reuse the just-merged branch.** When the repo auto-deletes the head branch on
+  merge, the remote branch vanishes while a stale local tracking ref lingers; a
+  later `git push --force-with-lease` then fails with "stale info" and the rebase
+  dance to re-home commits is needless friction. Branching fresh off the updated
+  `main` is trivial — `git checkout -b <new> origin/main` — so just do that for the
+  next unit of work instead of continuing on a branch whose PR already landed.
