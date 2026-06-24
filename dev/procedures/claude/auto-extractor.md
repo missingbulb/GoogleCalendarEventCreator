@@ -19,7 +19,7 @@ workflows with a Claude Code on the web routine between them:
 
 ```
 extractor-request      → prepare workflow (auto-implement-extractor.yml)
-                           triage + probe + scaffold, then swaps the label:
+                           triage + scaffold (records the page), then swaps the label:
                            −extractor-request  +extractor-agent-ready
 extractor-agent-ready  → Claude Code web routine (the agent)
                            writes extract() + the case, pushes, then re-labels:
@@ -33,7 +33,7 @@ extractor-agent-done   → finalize workflow (finalize-extractor.yml)
 The agent moved **out** of Actions (it used to be a `claude` CLI step) and into a
 web routine wired to the `extractor-agent-ready` label, so the API-key/spend-cap
 concerns now live with that routine, not in this repo. Everything deterministic —
-before the agent (triage, probe, scaffold) and after it (blast-radius, re-verify,
+before the agent (triage, scaffold) and after it (blast-radius, re-verify,
 PR) — stays in the two workflows; the agent owns only the judgment step. This
 covers the mechanics; what a *correct* extractor looks like lives in
 `dev/procedures/claude/adding-a-source.md`.
@@ -64,7 +64,7 @@ Almost everything for this pipeline is one self-contained folder,
   the agent to pick its mode (new-source vs add-a-case) and derive the branch +
   file names from the issue's event URL itself (the same `resolve-source.js` /
   `extractor-naming.js` the workflow used).
-- `triage-extractor-request.js`, `attach-sample-url.js`, `probe-url.js`,
+- `triage-extractor-request.js`, `attach-sample-url.js`,
   `extractor-naming.js`, `resolve-source.js`, `plan-names.js`, `derive-names.js`,
   `scaffold-source.js`, `scaffold-case.js`, `add-supported-domain.js`,
   `case-quality.js` — the deterministic Node steps the workflows run around the
@@ -86,10 +86,11 @@ stay put and refer back to the folder:
   can't be relocated or factored out.
 
 Shared infrastructure the scripts lean on stays where it's shared, **not** in the
-folder: `dev/requirements/extractor/page-infra/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
-`extension/fallback-policy.js` (the popup's host classifier), and `dev/tools/gen-load-order.js`
-(`npm run index`, run by every source addition). The pipeline *consumes* these; it
-doesn't own them.
+folder: `extension/config.js` / `extension/fallback-policy.js` (the popup's host
+classifier), and `dev/tools/gen-load-order.js` (`npm run index`, run by every
+source addition). The pipeline *consumes* these; it doesn't own them. (Target-page
+fetching is no longer a shared module — it's the inline `record_page` curl →
+ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)
 
 ## Stage 1 — the prepare workflow
 
@@ -98,7 +99,7 @@ doesn't own them.
 1. Checks out the repo.
 2. **Triages the request** (`triage-extractor-request.js`): pulls the event URL
    from the issue, computes every mode-aware name (`plan-names.js`), and decides
-   how to handle it. Two of the dispositions **proceed** (probe + scaffold + agent);
+   how to handle it. Two of the dispositions **proceed** (scaffold + agent);
    the other three **close** the issue as "not planned" and skip every remaining
    step. The dispositions:
    - **supported** *(proceeds, add-a-case mode)* — an existing source already
@@ -129,34 +130,16 @@ doesn't own them.
    `slug`/`sourceBase`/`caseName`/`branch`/`sourcePath` (`plan-names.js`) the later
    steps consume. Runs before `npm ci`, so a triaged request costs almost nothing,
    and fails **open** — any error proceeds.
-3. **Probes the event URL** (`probe-url.js`): fetches it the same way the recorder
-   will (shared `dev/requirements/extractor/page-infra/fetch-page.js` — via ScraperAPI
-   when `SCRAPER_API_KEY` is set) and decides whether the page can be **downloaded**.
-   Not usable when the URL is missing, or the fetch fails outright — ScraperAPI
-   couldn't deliver the page (non-2xx), or a network error / timeout. ScraperAPI
-   owns getting past proxies, bot walls, and CAPTCHAs, so the probe no longer sniffs
-   bodies for challenge markers; a soft-200 interstitial is ScraperAPI's to defeat
-   or fail on, and a download failure surfaces as a thrown fetch. In every
-   not-usable case there's no real page to record against, so the run **stops** —
-   but stopping is an **expected outcome, not a failure**: the probe records its
-   decision in `proceed`, the downstream steps gate on `proceed == 'true'`, and the
-   run ends **green**. Because the failure isn't fixable by a re-run or the agent,
-   it **hands the issue to a human**: a single step **drops `extractor-request` and
-   adds `extractor-blocked-needs-human`**, with a comment naming the blocker. The
-   fetch that **fails outright** (`probe-url.js` exit 3) sets a `downloadFailed`
-   output so it gets a specific "couldn't download the HTML" comment, the same
-   hand-off as a missing URL. (A page that downloads but turns out to be a
-   listing/index rather than one event is caught later by the agent's judgment.)
-   Runs before `npm ci`.
-4. Installs dependencies and configures git. No headless-browser setup any more:
-   Phase 1's `npm run refresh` fetches through ScraperAPI, which renders the page's
-   JS itself (`render=true`), so a JS single-page-app records with real data instead
-   of an empty shell (previously needed a local Chrome — #334, barby #325,
-   visit.tel-aviv #277).
-5. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
-   branches `<branch>` off `main`; records the page inline (`dev/requirements/extractor/data/<caseName>.url` +
-   the empty `.html` signal → `npm run refresh`, which fetches+renders via
-   ScraperAPI, asserted non-empty); then, **in
+3. Installs dependencies and configures git. (No pre-flight probe and no
+   headless-browser setup any more: ScraperAPI owns bot/CAPTCHA bypass *and* JS
+   rendering, so there's nothing to pre-check and no local Chrome to install —
+   previously #334, barby #325, visit.tel-aviv #277.)
+4. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
+   branches `<branch>` off `main`; records the event page
+   (`dev/requirements/extractor/data/<caseName>.url` → `record_page`, a `curl -f`
+   through ScraperAPI with `render=true` so a JS single-page-app records real data,
+   asserted non-empty — an **undownloadable page fails the job here**, and the
+   "Comment on failure" step then hands the issue to a human); then, **in
    new-source mode**, scaffolds `extension/event-extractors/custom/<slug>.js` with `matches()` filled
    (`scaffold-source.js`) + the placeholder case (`scaffold-case.js`), registers the
    host in `supportedDomains` (`add-supported-domain.js`), and runs `npm run index`;
@@ -164,9 +147,8 @@ doesn't own them.
    source (no new source, no `supportedDomains` entry, no load-list change). Either
    way it requires a green baseline `npm run test:offline`, then commits + pushes.
    The commit message starts `chore: scaffold …` — Phase 2 finds the **scaffold
-   commit** by that prefix. (A `GITHUB_TOKEN` push doesn't fire `refresh-cache.yml`,
-   so the page is recorded once.)
-6. **Hands off to the agent (`handoff-to-agent.sh`):** posts a human-readable
+   commit** by that prefix.
+5. **Hands off to the agent (`handoff-to-agent.sh`):** posts a human-readable
    status comment, then swaps the label: removes `extractor-request`, adds
    `extractor-agent-ready`. **Adding that label is the trigger for the web
    routine.** No machine-readable hand-off is needed — the agent recomputes its mode
@@ -194,8 +176,8 @@ then re-labels:
 - **success** → removes `extractor-agent-ready`, adds `extractor-agent-done` (the
   finalize trigger). It does **not** open the PR.
 - **bail** → the cached page isn't **one specific event** (a login page, or a
-  listing/index/artist/tour page showing many dates — something the probe's
-  download check can't judge, since it only confirms the page came back). It
+  listing/index/artist/tour page showing many dates — something the page-download
+  step can't judge, since it only confirms the page came back). It
   leaves the case's `events`
   empty, **posts a one-sentence diagnosis comment itself**, removes
   `extractor-agent-ready`, and adds `extractor-blocked-needs-human`. It does **not**
@@ -265,15 +247,12 @@ The same `GITHUB_TOKEN` rule is exactly what makes the three-stage relay work:
 - The agent adds `extractor-agent-done` with the **App's own token, not
   `GITHUB_TOKEN`**, so it *does* start the finalize workflow.
 
-(And the same rule keeps Phase 1's `git push` from re-firing `refresh-cache.yml`,
-so the page is recorded once.)
-
 ## Required secrets
 
 | Secret | Purpose |
 |--------|---------|
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
-| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, `fetch-page.js` routes every target-page fetch (the probe + Phase 1's `npm run refresh`) through ScraperAPI's residential proxy, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) by event sites — the IP, not the User-Agent, is what gets blocked. Unset, fetches go direct (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. |
+| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `record_page` (the inline `curl` in `phase1-prepare.sh`) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. |
 
 No Anthropic API key is needed in this repo any more: the agent runs in the Claude
 Code on the web routine, which carries its own credentials/limits. (The old
@@ -300,8 +279,10 @@ lives in the web routine, not here.
 
 ## Outcomes and comments
 
-Every run that touches an issue leaves a comment. The expected stops **finish
-green** — only a genuine break is red:
+Every run that touches an issue leaves a comment. Most expected stops **finish
+green**; the one exception is an undownloadable page, which now fails Phase 1
+**red** (ScraperAPI owns the bot/CAPTCHA walls a probe used to flag green, so a
+download that still fails is a genuine break):
 
 - **Already supported → adds a case** (green, prepare → PR) — the host has a
   dedicated source, so instead of closing, the pipeline runs in **add-a-case mode**:
@@ -309,12 +290,12 @@ green** — only a genuine break is red:
   the agent adds a fresh integration case (hardening that source), which finalize
   turns into a PR like any other. (A page that turns out not to be one usable event
   still bails via Stage 2 / the quality floor, same as new-source mode.)
-- **Page not usable → handed to a human** (green, prepare) — the probe couldn't
-  download the page: a missing URL, or an outright fetch failure (exit 3 —
-  ScraperAPI couldn't deliver it, or a network error / timeout). No agent involved.
-  Because this isn't fixable by a re-run, a single step removes `extractor-request`,
-  adds `extractor-blocked-needs-human`, and names the blocker; the download-failure
-  case gets a "couldn't download the HTML" comment.
+- **Page can't be downloaded → red build** (failure, prepare) — Phase 1's
+  `record_page` couldn't fetch the page (a missing URL, or ScraperAPI couldn't
+  deliver it — non-2xx / network error / timeout), so `curl -f` fails the job. No
+  agent involved. Unlike the other stops this one is **red**: the "Comment on
+  failure" step posts the generic failure comment pointing at the manual process
+  (`adding-a-source.md`). It isn't fixable by a re-run.
 - **Bailed — not a single event** (green, Stage 2) — the agent judged the cached
   page a login or listing/index page (not one event), commented its diagnosis, and
   set `extractor-blocked-needs-human`. No PR; scaffolding stays on the branch.

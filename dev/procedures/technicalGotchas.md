@@ -16,11 +16,12 @@ trap spanning files. See the full locality rule in
 [claude/workflow.md](claude/workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
-  us.** Page fetching is delegated wholesale to ScraperAPI (see `fetch-page.js` /
-  the bot-block gotcha below), and `render=true` makes it execute the page's JS and
-  return the post-render HTML — so a JS app records with real data instead of an
-  empty shell. The repo no longer carries any SPA-shell detection or headless-Chrome
-  render of its own (the former `spa-shell.js` / `render-page.js` and their
+  us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in
+  `dev/tools/new-extractors-creation/phase1-prepare.sh` / the bot-block gotcha
+  below), and `render=true` makes it execute the page's JS and return the
+  post-render HTML — so a JS app records with real data instead of an empty shell.
+  The repo no longer carries any SPA-shell detection or headless-Chrome render of
+  its own (the former `spa-shell.js` / `render-page.js` and their
   `RENDER_NO_SANDBOX` CI plumbing were removed). One consequence survives: rendered
   output isn't deterministic, so a re-record can legitimately shift a live case's
   `expected` — treat such drift like a site-markup change, and prefer extracting
@@ -80,19 +81,19 @@ trap spanning files. See the full locality rule in
 - **Automated environments are bot-blocked from fetching target sites — the
   block is the datacenter IP, not the headers.** A live-page fetch that works on
   your machine often fails from CI/sandboxes regardless of how browser-like the
-  User-Agent is: `npm run refresh` gets HTTP 403 in the cloud sandbox, and GitHub
+  User-Agent is: a direct fetch gets HTTP 403 in the cloud sandbox, and GitHub
   Actions runners get HTTP 400 from `facebook.com`. The escape hatch is the
-  optional **`SCRAPER_API_KEY`** secret: when set, `fetch-page.js` routes every
-  fetch through ScraperAPI's residential proxy (one chokepoint, inherited by the
-  recorder, the probe, and live tests), so a CI run fetches from a non-datacenter
-  IP. Unset (e.g. a fresh clone with no secret, or the cloud sandbox), it fetches
-  directly and stays bot-blocked — so the **Refresh cached HTML files** workflow
-  (which has the secret wired) is still where new cached HTML gets filled, not a
-  local `npm run refresh`. ScraperAPI also renders JS (`render=true`), so a
-  single-page-app records with real data — there is no separate render step. If
-  ScraperAPI ever underperforms, swap the vendor in `fetch-page.js`; that one
-  function is the whole fetching surface. Facebook returns a hard 400 even through
-  the proxy, so it remains unit-tests-only — it can't be a cached live case.
+  optional **`SCRAPER_API_KEY`** secret: when set, the pipeline's only page fetch
+  (`record_page` in `dev/tools/new-extractors-creation/phase1-prepare.sh`) routes
+  through ScraperAPI's residential proxy, so the prepare workflow fetches from a
+  non-datacenter IP. Unset (e.g. a fresh clone, or the cloud sandbox), it fetches
+  directly and stays bot-blocked — so a target page can only be recorded by the
+  auto-extractor pipeline running in CI (where the secret is wired), not locally.
+  ScraperAPI also renders JS (`render=true`), so a single-page-app records with
+  real data — there is no separate render step. If ScraperAPI ever underperforms,
+  swap the vendor in that one `record_page` function — it's the whole fetching
+  surface. Facebook returns a hard 400 even through the proxy, so it remains
+  unit-tests-only — it can't be a cached live case.
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
   textContent`) returns `textContent` in tests — including `<select>`/`<option>`
   and hidden text a real browser's `innerText` omits. A generic visible-text

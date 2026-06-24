@@ -138,8 +138,6 @@ dev/requirements/
     cases/<slug>.<id>.case.js      the §11 support leaves (one per host)
     expected/<page>.json           reviewed exact-value contracts (live.test.js)
     data/<page>.{html,url}         cached event-page fixtures
-    page-infra/                    recorder + fetcher (refresh-cache, fetch-page
-                                   + fetch-page.test.js; fetching delegated to ScraperAPI)
 
   heavy/                         CI-only real-Chrome e2e (extension load; cdp-client),
                                  kept out of every default test lane (no kind.js yet)

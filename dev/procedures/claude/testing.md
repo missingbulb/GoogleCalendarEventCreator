@@ -221,11 +221,12 @@ commission-while-editing trap goes in the file's header comment rather than
   `dev/requirements/heavy/extension-load.chrome.test.js` (`npm run test:e2e` —
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
-- **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching
-  (`dev/requirements/extractor/page-infra/fetch-page.js`) routes through ScraperAPI
-  when `SCRAPER_API_KEY` is set, and `render=true` makes it execute the page's JS,
+- **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
+  the inline curl→ScraperAPI in `record_page`
+  (`dev/tools/new-extractors-creation/phase1-prepare.sh`), which uses
+  `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
   so a single-page-app records with real data. The repo carries no SPA-shell
   detector or headless-Chrome render of its own any more (`spa-shell.js` /
   `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
-  fetching moved to ScraperAPI). The recorder
-  (`dev/requirements/extractor/page-infra/refresh-cache.js`) is now just fetch → write.
+  fetching moved to ScraperAPI). The recorder (`record_page` in
+  `dev/tools/new-extractors-creation/phase1-prepare.sh`) is now just fetch → write.

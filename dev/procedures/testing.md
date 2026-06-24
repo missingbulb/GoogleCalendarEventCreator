@@ -8,7 +8,6 @@ npm install
 npm run test:live      # integration: the REVIEWED assertions for each supported site
 npm run test:offline   # unit: internal tests of the extraction logic
 npm run test:ui        # UI: rendered popup vs. the stored snapshot image
-npm run refresh        # fetch any missing cached HTML files (needs internet)
 npm run refresh:ui     # regenerate the popup UI snapshot after an intentional change
 npm test               # everything above (offline + live + UI)
 ```
@@ -47,8 +46,9 @@ an ordinary page, several for a listing/series page. See the header comment in
 
 The case's **source URL is not in the case file** — it lives next to the cached
 HTML, in `dev/requirements/extractor/data/<name>.url` (a plain-text file holding just the URL). That one
-file is the single source of truth for the page's URL: `refresh-cache.js`
-fetches it, and the live test loads the cached HTML into a DOM at that URL.
+file is the single source of truth for the page's URL: the auto-extractor
+pipeline fetches it (see below), and the live test loads the cached HTML into a
+DOM at that URL.
 Keeping it out of the reviewed case file means a test (`description` +
 `expected`) and the fetch/provenance record stay separate concerns.
 
@@ -59,25 +59,20 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- **`dev/requirements/extractor/page-infra/refresh-cache.js`** (`npm run refresh`) fetches any cached HTML file
-  that is missing or empty (zero bytes). A failed fetch keeps the previous
-  cached HTML file and only warns, so a site outage or bot-blocking never breaks
-  the suite.
+- Cached HTML is recorded by the **auto-extractor pipeline**: the `record_page`
+  bash function in `dev/tools/new-extractors-creation/phase1-prepare.sh` fetches
+  the event page via an inline curl→ScraperAPI (`render=true`, so a single-page-app
+  records with real data) when Phase 1 runs.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
   push to `main`: it runs the unit tests, then the integration tests against
   the cached HTML files **already committed** in `data/` — it never fetches or
   refreshes anything itself, so it's fast and has no network dependency.
-- The **Refresh cached HTML files** workflow
-  (`.github/workflows/refresh-cache.yml`) **runs automatically** when you push a
-  branch (other than `main`) that adds or removes a `data/` file: it records any
-  missing or empty cached HTML, runs the integration tests, and commits the
-  result back to the branch. (It's also runnable from the Actions tab, and the
-  auto-implement-extractor workflow dispatches it explicitly — its `GITHUB_TOKEN`
-  push doesn't fire the push trigger.) It's the *only* thing that fetches live
-  pages and commits cached HTML, which keeps the Tests workflow simple. To
-  re-record a cached file that already exists — e.g. when a site changes its
-  markup — delete `dev/requirements/extractor/data/<name>.html` on your branch and push; the now-missing
-  file is refetched like any other.
+- There is **no standalone refresh workflow** anymore. A cached page is
+  (re)recorded only by the auto-extractor pipeline — file (or re-file) an
+  `extractor-request` issue for the page and it's fetched via ScraperAPI in
+  Phase 1 — or by hand by fetching the `.url` through ScraperAPI with a key (see
+  `record_page` in `phase1-prepare.sh`). There's no one-step push path to refresh
+  a drifted fixture now.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
 never trigger another workflow run), carries a `[skip ci]` marker, and the
@@ -91,9 +86,11 @@ sequence is:
 1. Add the extractor (if needed), a `dev/requirements/extractor/data/<name>.url` with the event page URL,
    and the new case file (`dev/requirements/extractor/expected/<name>.json`) with its
    `expected`. Commit that change.
-2. Run `npm run refresh` locally on the same branch (needs internet) — this
-   is the same `refresh-cache.js` step the **Refresh cached HTML files**
-   workflow runs, and it fetches the new page's HTML from `dev/requirements/extractor/data/<name>.url`.
+2. Record the HTML by submitting the page through an `extractor-request` issue —
+   the auto-extractor pipeline fetches it via ScraperAPI — or fetch it by hand
+   with a ScraperAPI key (see `record_page` in
+   `dev/tools/new-extractors-creation/phase1-prepare.sh`), writing it to
+   `dev/requirements/extractor/data/<name>.html`.
 3. Commit the resulting `dev/requirements/extractor/data/<name>.html` as a follow-up commit on the branch.
 
 Until a cached HTML file exists for the new case, `test:live` (and so the Tests

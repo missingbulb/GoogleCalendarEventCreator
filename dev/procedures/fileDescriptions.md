@@ -24,7 +24,7 @@ the rules of the road.
 | `extension/event-extractors/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `dev/requirements/extractor/expected/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
-| `dev/requirements/extractor/page-infra/refresh-cache.js` | Fetches any missing or empty cached HTML file from its `<name>.url`          |
+| `dev/tools/new-extractors-creation/phase1-prepare.sh` | Records the event page via an inline curl→ScraperAPI (`record_page`) during the auto-extractor Phase-1 pipeline |
 | `dev/requirements/extractor/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |
 | `extension-test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
