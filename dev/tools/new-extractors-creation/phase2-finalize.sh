@@ -128,9 +128,18 @@ Closes #$ISSUE_NUMBER
 EOF
 fi
 
-if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+# Surface the work as an OPEN PR for review. Detect an existing one with
+# `gh pr list --state open` — NOT `gh pr view`, which also matches a stale CLOSED
+# PR (e.g. a prior attempt on the same slug-only new-source branch
+# `claude/extractor/<slug>`). The old `gh pr view` check skipped creation whenever
+# ANY PR existed, then surfaced that closed PR as "ready for review" (a re-trigger
+# of #276 pointed at the long-closed #278). A closed PR doesn't block creating a
+# fresh one, so create when there's no OPEN PR.
+PR_URL=$(gh pr list --head "$BRANCH" --base main --state open --json url -q '.[0].url' 2>/dev/null || echo "")
+if [ -z "$PR_URL" ]; then
   gh pr create --base main --head "$BRANCH" \
     --title "$PR_TITLE" --body-file /tmp/pr-body.md
+  PR_URL=$(gh pr list --head "$BRANCH" --base main --state open --json url -q '.[0].url' 2>/dev/null || echo "")
 fi
 
 # A GITHUB_TOKEN push/PR doesn't start test.yml; dispatch it so checks attach to
@@ -144,7 +153,6 @@ curl -s -X POST \
   "https://api.github.com/repos/$REPO/actions/workflows/test.yml/dispatches" \
   -d "{\"ref\":\"$BRANCH\"}" || echo "warning: test.yml dispatch failed — dispatch it manually"
 
-PR_URL=$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo "")
 if [ "$MODE" = "supported" ]; then
   gh issue comment "$ISSUE_NUMBER" --body "✅ Already-supported host — added a fresh integration case hardening \`$SOURCE_BASE\`. PR ready for review: $PR_URL  (asserts against the real cached page; review the case values and any \`$SRC\` change before merging)."
 else
