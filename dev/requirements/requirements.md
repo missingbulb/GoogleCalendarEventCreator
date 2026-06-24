@@ -688,6 +688,23 @@ the "past" pill while a later showing the same day does not.
 </tr>
 </table>
 
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.7](popup/cases/event-cards-appearance.5.6.7.png) <!-- req-gallery:5.6.7 -->
+
+</td>
+<td valign="top">
+
+`5.6.7` The same per-chip rule applies to the **future-year** pill: within a
+grouped card each instance button for a future year carries its own green year
+pill.
+
+</td>
+</tr>
+</table>
+
 - `5.7` **Grouped-card header time.**
 
 <table>
