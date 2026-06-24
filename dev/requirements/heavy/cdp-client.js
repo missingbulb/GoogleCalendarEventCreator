@@ -1,10 +1,10 @@
-// Minimal DevTools Protocol client over one WebSocket — the single definition
-// shared by everything in this repo that drives a real Chrome with no npm
-// dependency (Node has shipped a global WebSocket since v22). Two callers use it:
-//   - dev/requirements/heavy/extension-load.chrome.test.js — loads the
-//     unpacked extension and inspects its MV3 service worker.
-//   - dev/requirements/extractor/page-infra/render-page.js — renders a JS single-page-app shell to extractable
-//     HTML (issue #310).
+// Minimal DevTools Protocol client over one WebSocket — drives a real Chrome with
+// no npm dependency (Node has shipped a global WebSocket since v22). Its one
+// caller is the sibling extension-load.chrome.test.js (it loads the unpacked
+// extension and inspects its MV3 service worker), so it lives here in heavy/
+// next to it. (It used to be shared with an SPA-render recorder under
+// page-infra/, removed when page fetching moved to ScraperAPI — which renders JS
+// itself — so this no longer belongs under the extractor infra.)
 //
 // Flat sessions (a sessionId per message) let us talk to the browser and to an
 // attached target through the same socket. Events (messages with a `method`)
