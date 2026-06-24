@@ -12,26 +12,27 @@
 // gets HTTP 403 from hosts that serve a real Chrome UA fine, so a curl-based
 // probe would false-reject requests the recorder could actually fulfil.
 //
-// IP REPUTATION — the SCRAPER_API_KEY escape hatch. Browser-like headers aren't
-// enough from an automated environment: GitHub Actions and Claude Code web egress
-// from DATACENTER IPs that Cloudflare / AWS WAF / DataDome block on sight, no
-// matter the User-Agent — the block is the IP, not the headers. When
-// SCRAPER_API_KEY is set we route every fetch through ScraperAPI, which fetches
-// the target from a residential IP and hands back its HTML, so the bot wall never
-// fires. With NO key we fetch directly (the unchanged path) — a developer's own
-// machine is already on a residential IP and needs no key. This is the ONE place
-// the proxy is wired in, so every caller (recorder, probe, live tests) inherits
-// it for free. NOTE: this only addresses the IP block; a JS single-page-app that
-// returns a real-but-empty 2xx shell is a DIFFERENT problem still handled by the
-// headless-render fallback in refresh-cache.js (ScraperAPI's plain call returns
-// the same empty shell — paying for its JS rendering would cost 10-25x credits).
+// IP REPUTATION + the whole "get me the real page" job is delegated to ScraperAPI.
+// Browser-like headers aren't enough from an automated environment: GitHub Actions
+// and Claude Code web egress from DATACENTER IPs that Cloudflare / AWS WAF /
+// DataDome block on sight, no matter the User-Agent — the block is the IP, not the
+// headers. When SCRAPER_API_KEY is set we route every fetch through ScraperAPI,
+// which owns the residential proxy, the bot/CAPTCHA bypass, AND the JS rendering
+// (render=true) — so this repo carries NO parallel implementation of any of those.
+// We hand it a URL and take back the rendered HTML; if it can't deliver the page
+// it returns a non-2xx and we treat that as "can't get this page" (the caller's
+// concern, not ours to diagnose). If ScraperAPI ever underperforms, swap the
+// vendor here — this one function is the entire fetching surface. With NO key we
+// fetch directly (the unchanged path) — a developer's own machine is already on a
+// residential IP and needs no key. Every caller (recorder, probe, live tests)
+// inherits this for free.
 "use strict";
 
 const FETCH_ATTEMPTS = 3;
 const FETCH_TIMEOUT_MS = 20_000;
-// ScraperAPI proxies the request and retries upstream on its own side, so a
-// single call legitimately takes far longer than a direct fetch — give it room
-// before AbortSignal fires (their docs recommend a 60s+ client-side timeout).
+// ScraperAPI proxies the request, renders JS, and retries upstream on its own
+// side, so a single call legitimately takes far longer than a direct fetch — give
+// it room before AbortSignal fires (their docs recommend a 60s+ client timeout).
 const SCRAPER_TIMEOUT_MS = 70_000;
 // Event sites tend to reject clients that don't look like a browser.
 const BROWSER_HEADERS = {
@@ -42,12 +43,15 @@ const BROWSER_HEADERS = {
 };
 
 // The ScraperAPI request URL for a target page, or null when SCRAPER_API_KEY is
-// unset/empty (→ fetch directly). URLSearchParams percent-encodes the target,
-// including its own `&`/spaces, so its query can't leak up as sibling params.
+// unset/empty (→ fetch directly). `render=true` makes ScraperAPI execute the
+// page's JS and return the post-render HTML, so a JS single-page-app records with
+// real data instead of an empty shell — that's why this repo needs no SPA-render
+// code of its own. URLSearchParams percent-encodes the target, including its own
+// `&`/spaces, so its query can't leak up as sibling params.
 function scraperApiUrl(url) {
   const key = process.env.SCRAPER_API_KEY;
   if (!key) return null;
-  const params = new URLSearchParams({ api_key: key, url });
+  const params = new URLSearchParams({ api_key: key, render: "true", url });
   return `https://api.scraperapi.com/?${params}`;
 }
 

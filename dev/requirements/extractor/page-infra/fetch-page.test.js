@@ -43,6 +43,9 @@ test("key set → routes through api.scraperapi.com with the key", () => {
     assert.equal(u.origin, "https://api.scraperapi.com");
     assert.equal(u.searchParams.get("api_key"), "SECRET123");
     assert.equal(u.searchParams.get("url"), "https://example.com/event");
+    // render=true: ScraperAPI executes the page's JS, so a JS single-page-app
+    // records with real data — this is why we carry no SPA-render code.
+    assert.equal(u.searchParams.get("render"), "true");
   });
 });
 
