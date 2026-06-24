@@ -1,9 +1,9 @@
 {
-  "what": "extractor-request trigger label. Counts include comments AND the substring inside the filename dev/tools/new-extractors-creation/triage-extractor-request.js (the guard counts substrings). Spans: the prepare workflow (header/handoff comments, trigger guard, gh issue list filter, the download-failure remove-label, the triage-script filename), the hand-off script's swap, the popup's request button, and its test.",
+  "what": "extractor-request trigger label. Counts include comments AND the substring inside the filename dev/tools/new-extractors-creation/triage-extractor-request.js (the guard counts substrings). Spans: the prepare workflow (header comments, trigger guard, gh issue list filter, the triage-script filename), the hand-off script's swap, the popup's request button, and its test.",
   "value": "extractor-request",
   "counts": {
     ".github/ISSUE_TEMPLATE/extractor-request.yml": 1,
-    ".github/workflows/auto-implement-extractor.yml": 7,
+    ".github/workflows/auto-implement-extractor.yml": 6,
     "dev/tools/new-extractors-creation/handoff-to-agent.sh": 2,
     "extension/events-popup/source-request-view.js": 5,
     "extension-test/events-popup/source-request-view.test.js": 4
