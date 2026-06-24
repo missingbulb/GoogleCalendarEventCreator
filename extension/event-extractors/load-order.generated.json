@@ -18,6 +18,7 @@
   "event-extractors/custom/luma.js",
   "event-extractors/custom/meetup.js",
   "event-extractors/custom/secrettelaviv.js",
+  "event-extractors/custom/seetickets.js",
   "event-extractors/custom/tabitisrael.js",
   "event-extractors/custom/telavivcinematheque.js",
   "event-extractors/custom/thinkdrink.js",

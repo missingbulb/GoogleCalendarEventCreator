@@ -1,0 +1,176 @@
+{
+  "description": "seetickets.com tour page: UK tour dates for The Mary Wallopers (Oct–Dec 2026), one event per venue extracted from the embedded MusicEvent JSON-LD array; duplicate listings (Liverpool, Leeds) deduplicated to one instance each",
+  "expected": {
+    "events": [
+      {
+        "title": "The Mary Wallopers",
+        "location": "Edinburgh Corn Exchange",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-13T18:00:00Z",
+            "end": "2026-10-13",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "O2 City Hall, Newcastle",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-14T18:00:00Z",
+            "end": "2026-10-14",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "The Great Hall, Cardiff Students' Union",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-16T18:00:00Z",
+            "end": "2026-10-16",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "Brighton Centre",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-17T17:30:00Z",
+            "end": "2026-10-17",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "The Octagon, Sheffield",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-19T18:00:00Z",
+            "end": "2026-10-19",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "Corn Exchange, Cambridge",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-20T18:30:00Z",
+            "end": "2026-10-20",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "Liverpool Olympia",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-22T18:00:00Z",
+            "end": "2026-10-22",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "O2 Victoria Warehouse, Manchester",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-23T18:00:00Z",
+            "end": "2026-10-23",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "Rock City, Nottingham",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-26T19:00:00Z",
+            "end": "2026-10-26",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "O2 Academy Leeds",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-27T19:00:00Z",
+            "end": "2026-10-27",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "O2 Academy Birmingham",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-29T19:00:00Z",
+            "end": "2026-10-29",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "O2 Academy Brixton, London",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-10-30T19:00:00Z",
+            "end": "2026-10-30",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The Mary Wallopers",
+        "location": "OVO Hydro, Glasgow",
+        "ctz": null,
+        "details": "https://www.seetickets.com/tour/the-mary-wallopers?src=mk_hpmusicicon\n\nBuy The Mary Wallopers tickets and sign-up for latest tour alerts. Find The Mary Wallopers tour dates, reviews, times and event details.",
+        "times": [
+          {
+            "start": "2026-12-19T18:30:00Z",
+            "end": "2026-12-19",
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
+  }
+}
