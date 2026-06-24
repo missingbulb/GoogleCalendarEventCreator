@@ -27,6 +27,12 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    # Route fetches through ScraperAPI (a residential-proxy endpoint) so this
+    # datacenter runner isn't bot-blocked by event sites. Optional: if the secret
+    # is unset, fetch-page.js fetches directly (see its header). Job-level so every
+    # fetching step (the refresh below) inherits it.
+    env:
+      SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
     steps:
       - uses: actions/checkout@v5
 

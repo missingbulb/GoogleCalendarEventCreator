@@ -89,12 +89,21 @@ trap spanning files. See the full locality rule in
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `extension-test/harness.js`.
   Run `npm install` and re-run — don't look for another cause first.
-- **Automated environments are bot-blocked from fetching target sites.** A
-  live-page fetch that works on your machine often fails from CI/sandboxes:
-  `npm run refresh` gets HTTP 403 in the cloud sandbox (so new cached HTML is
-  filled by the **Refresh cached HTML files** workflow, not locally), and GitHub
-  Actions runners get HTTP 400 from `facebook.com` (so Facebook is covered by unit
-  tests only — it can't be a cached live case).
+- **Automated environments are bot-blocked from fetching target sites — the
+  block is the datacenter IP, not the headers.** A live-page fetch that works on
+  your machine often fails from CI/sandboxes regardless of how browser-like the
+  User-Agent is: `npm run refresh` gets HTTP 403 in the cloud sandbox, and GitHub
+  Actions runners get HTTP 400 from `facebook.com`. The escape hatch is the
+  optional **`SCRAPER_API_KEY`** secret: when set, `fetch-page.js` routes every
+  fetch through ScraperAPI's residential proxy (one chokepoint, inherited by the
+  recorder, the probe, and live tests), so a CI run fetches from a non-datacenter
+  IP. Unset (e.g. a fresh clone with no secret, or the cloud sandbox), it fetches
+  directly and stays bot-blocked — so the **Refresh cached HTML files** workflow
+  (which has the secret wired) is still where new cached HTML gets filled, not a
+  local `npm run refresh`. ScraperAPI's *plain* fetch still returns a data-less
+  SPA shell unchanged, so the headless-render fallback (below) is orthogonal and
+  stays. Facebook returns a hard 400 even through the proxy, so it remains
+  unit-tests-only — it can't be a cached live case.
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
   textContent`) returns `textContent` in tests — including `<select>`/`<option>`
   and hidden text a real browser's `innerText` omits. A generic visible-text

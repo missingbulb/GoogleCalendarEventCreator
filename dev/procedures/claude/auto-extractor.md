@@ -276,6 +276,7 @@ so the page is recorded once.)
 | Secret | Purpose |
 |--------|---------|
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
+| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, `fetch-page.js` routes every target-page fetch (the probe + Phase 1's `npm run refresh`) through ScraperAPI's residential proxy, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) by event sites — the IP, not the User-Agent, is what gets blocked. Unset, fetches go direct (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. |
 
 No Anthropic API key is needed in this repo any more: the agent runs in the Claude
 Code on the web routine, which carries its own credentials/limits. (The old

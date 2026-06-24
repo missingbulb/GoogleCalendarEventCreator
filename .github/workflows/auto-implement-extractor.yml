@@ -24,6 +24,12 @@ permissions:
 
 jobs:
   implement:
+    # Route every target-page fetch (the probe and Phase 1's `npm run refresh`)
+    # through ScraperAPI's residential proxy so this datacenter runner isn't
+    # bot-blocked. Optional: with the secret unset, fetch-page.js fetches directly
+    # (see its header). Job-level so both fetching steps inherit it.
+    env:
+      SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
     if: github.event.label.name == 'extractor-request'
     runs-on: ubuntu-latest
     timeout-minutes: 90
