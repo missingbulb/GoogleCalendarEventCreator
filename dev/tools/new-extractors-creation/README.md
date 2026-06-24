@@ -29,8 +29,6 @@ workflow via `extractor-agent-done`. **Full reference:
   - `attach-sample-url.js` — fold a deferred same-host request's event URL into
     the leader issue body as an extra sample (idempotent; the `gh` read/write is
     in the prepare workflow).
-  - `probe-url.js` — fetch the event URL the way the recorder will; stop on
-    anything but a usable 2xx.
   - `extractor-naming.js` — derive the deterministic `slug` / `caseName` / matches
     regex from the URL (used by `plan-names.js`).
   - `derive-names.js` — the finalize workflow's re-derivation of those mode-aware
@@ -61,8 +59,10 @@ folder:
   GitHub renders (the popup opens it by filename); it can't be relocated or
   factored out.
 
-Shared infrastructure stays where it's shared — this pipeline consumes it, it
-doesn't own it: `dev/requirements/extractor/page-infra/fetch-page.js` (also used by `refresh-cache`), `extension/config.js` /
+Target-page fetching is no longer a shared module: it's the inline
+`curl → ScraperAPI` call in the `record_page` bash function in
+`phase1-prepare.sh`. The remaining shared infrastructure stays where it's shared —
+this pipeline consumes it, it doesn't own it: `extension/config.js` /
 `extension/fallback-policy.js` (the popup's host classifier), and `dev/tools/gen-load-order.js`
 (`npm run index`).
 

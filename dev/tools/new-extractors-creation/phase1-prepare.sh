@@ -23,11 +23,40 @@ cd "$HERE/../../.."
 
 MODE="${MODE:-new}"
 
+# Record the event page's HTML — the ONE place this project fetches a target page.
+# Fetching is delegated wholesale to ScraperAPI (residential proxy + bot/CAPTCHA
+# bypass + render=true JS rendering) when SCRAPER_API_KEY is set: the datacenter
+# runner is otherwise bot-blocked, and render=true makes a JS single-page-app
+# record with real data instead of an empty shell. With no key, fetch directly with
+# a browser UA (a developer on a residential IP needs none). `curl -f` makes a
+# non-2xx a hard failure, so an undownloadable page fails the job (the "Comment on
+# failure" step then hands the issue to a human). Swap vendors by changing this one
+# function. (jq is preinstalled on the runner; it percent-encodes the target URL so
+# its own query can't leak up as sibling ScraperAPI params.)
+record_page() {
+  local url="$1" out="$2"
+  if [ -n "${SCRAPER_API_KEY:-}" ]; then
+    local encoded; encoded="$(jq -rn --arg u "$url" '$u|@uri')"
+    curl -fsS --max-time 90 --retry 3 --retry-delay 2 --retry-all-errors \
+      "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&render=true&url=${encoded}" -o "$out"
+  else
+    curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors \
+      -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" \
+      "$url" -o "$out"
+  fi
+}
+
+if [ -z "${EVENT_URL:-}" ]; then
+  echo "phase1-prepare: no event URL provided — cannot record a page" >&2
+  exit 1
+fi
+
 git checkout -b "$BRANCH"
 
+# The .url file is the single source of truth for the page's URL (live.test.js reads
+# it to set the DOM origin); the .html is the recorded page the tests assert against.
 printf '%s' "$EVENT_URL" > "dev/requirements/extractor/data/$CASE_NAME.url"
-: > "dev/requirements/extractor/data/$CASE_NAME.html"            # empty file = the recorder's "fetch me" signal
-npm run refresh
+record_page "$EVENT_URL" "dev/requirements/extractor/data/$CASE_NAME.html"
 test -s "dev/requirements/extractor/data/$CASE_NAME.html"        # the page must have actually been recorded
 
 if [ "$MODE" = "supported" ]; then

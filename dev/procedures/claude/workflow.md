@@ -107,10 +107,12 @@ Claudinite. Route by scope:
   instead** when Claude could hit the trap *without* reading the locus file: a
   mistake of **omission** (you must know it to decide whether to open or avoid
   the file) or a cross-cutting invariant spanning files. One file can split both
-  ways — `dev/requirements/extractor/page-infra/render-page.js`'s "never give the SPA render the e2e test's
-  `--no-sandbox`" stays central (you might add it without ever reading the file),
-  while its `SIGKILL`-then-`rmSync` teardown race lives inline at the call site
-  (you only meet it editing the teardown). Co-locate only **non-portable** traps:
+  ways — `extension-test/harness.js`'s jsdom traps ("`body.innerText` is null",
+  "`<noscript>` parses into live DOM") stay central in `technicalGotchas.md` (a
+  generic extraction can hit them without ever reading the harness), while the
+  harness's own `runScripts: "dangerously"` fragment-parsing mechanic lives inline
+  in its header (you only meet it editing the harness). Co-locate only
+  **non-portable** traps:
   a portable lesson buried in a code comment escapes the optimize-procedures
   promotion path, so those still go to the practice docs below.
 - **Portable** lessons (general engineering practices, agentic best practices):

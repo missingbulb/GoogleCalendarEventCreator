@@ -1,9 +1,7 @@
 {
-  "what": "extractor-blocked-needs-human label — the human-triage signal added when the automation can't proceed and hands the issue to a person: the prepare workflow's page-not-usable path (auto-implement-extractor.yml — any not-usable probe outcome: soft-200 challenge, missing URL, or outright download failure), the agent's bail path (agent-prompt-extractor.md), the probe's reason text (probe-url.js), and the finalize anomaly hand-off (phase2-finalize.sh). Created idempotently before use. Counts include comments.",
+  "what": "extractor-blocked-needs-human label — the human-triage signal added when the automation can't proceed and hands the issue to a person: the agent's bail path (agent-prompt-extractor.md) and the finalize anomaly hand-off (phase2-finalize.sh). (The prepare workflow no longer hands off here — an undownloadable page just fails Phase 1, caught by its 'Comment on failure' step.) Created idempotently before use. Counts include comments.",
   "value": "extractor-blocked-needs-human",
   "counts": {
-    ".github/workflows/auto-implement-extractor.yml": 3,
-    "dev/tools/new-extractors-creation/probe-url.js": 1,
     "dev/tools/new-extractors-creation/phase2-finalize.sh": 3,
     "dev/tools/new-extractors-creation/agent-prompt-extractor.md": 4
   }

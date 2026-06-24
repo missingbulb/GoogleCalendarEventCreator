@@ -221,14 +221,12 @@ commission-while-editing trap goes in the file's header comment rather than
   `dev/requirements/heavy/extension-load.chrome.test.js` (`npm run test:e2e` —
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
-- **SPA-shell render fallback** (#310, #328) — the detector (`dev/requirements/extractor/page-infra/spa-shell.js`,
-  `shouldRender = isSpaShell && !hasEventData`, keying on a machine start date)
-  is pure and unit-tested
-  offline in `dev/requirements/extractor/page-infra/spa-shell.test.js`; the headless render itself
-  (`dev/requirements/extractor/page-infra/render-page.js`, sharing the DevTools client `dev/requirements/extractor/page-infra/cdp-client.js` with
-  the extension-load test) is exercised by
-  `dev/requirements/heavy/render-page.chrome.test.js` against a self-authored
-  `data:` URL — CI-only, skips without `CHROME_PATH`. The recorder
-  (`dev/requirements/extractor/page-infra/refresh-cache.js`) calls the render only when the plain fetch returns a
-  data-less SPA shell, and keeps it only if it gained extractable data;
-  `refresh-cache.yml` wires `CHROME_PATH` so this happens when recording.
+- **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
+  the inline curl→ScraperAPI in `record_page`
+  (`dev/tools/new-extractors-creation/phase1-prepare.sh`), which uses
+  `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
+  so a single-page-app records with real data. The repo carries no SPA-shell
+  detector or headless-Chrome render of its own any more (`spa-shell.js` /
+  `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
+  fetching moved to ScraperAPI). The recorder (`record_page` in
+  `dev/tools/new-extractors-creation/phase1-prepare.sh`) is now just fetch → write.

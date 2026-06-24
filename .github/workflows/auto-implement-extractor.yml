@@ -1,9 +1,10 @@
 name: Auto-implement extractor (prepare)
 
 # Triggered when the 'extractor-request' label is added to an issue.
-# Triages the request, probes the event URL, and — only when the page is
-# actually fetchable — prepares a branch with the page cached AND the extractor
-# scaffolded (matches(), supportedDomains, load lists). It does NOT run the agent
+# Triages the request, then prepares a branch with the event page downloaded
+# (record_page → ScraperAPI) AND the extractor scaffolded (matches(),
+# supportedDomains, load lists). If the page can't be downloaded, Phase 1 fails and
+# the "Comment on failure" step hands the issue to a human. It does NOT run the agent
 # any more: the implementation step is a Claude Code on the web routine wired to
 # the `extractor-agent-ready` label, so the last thing this workflow does is swap
 # `extractor-request` → `extractor-agent-ready` (the hand-off). When the agent
@@ -24,6 +25,12 @@ permissions:
 
 jobs:
   implement:
+    # Route Phase 1's page download (record_page in phase1-prepare.sh) through
+    # ScraperAPI's residential proxy so this datacenter runner isn't bot-blocked.
+    # Optional: with the secret unset, record_page fetches directly. Job-level so
+    # the Prepare step inherits it.
+    env:
+      SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
     if: github.event.label.name == 'extractor-request'
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -66,7 +73,7 @@ jobs:
       # it's on extension/config.js's fallback allow/denylist, or another in-flight request
       # already covers its host (its URL is folded into that leader as a sample).
       # Also emits the event URL plus the deterministic
-      # slug/caseName the probe and Phase-1 steps below use. Needs only Node +
+      # slug/caseName the Phase-1 step below uses. Needs only Node +
       # the repo (no deps), so it runs before `npm ci`. The issue fields come
       # from the event payload via env, so free-form text isn't shell-interpolated.
       - name: Triage the request
@@ -103,86 +110,20 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" --body-file /tmp/triage-message.md
           gh issue close "$ISSUE_NUMBER" --reason "not planned"
 
-      # Pre-flight URL probe. Fetch the event page the same way the recorder will
-      # (dev/tools/new-extractors-creation/probe-url.js → dev/requirements/extractor/page-infra/fetch-page.js: browser headers + retries) and
-      # judge whether it's usable as a static case — a 2xx that's actually a
-      # bot-challenge / interstitial counts as NOT usable (probe-url.js sniffs the
-      # body). If it isn't usable — URL missing, non-2xx, unreachable, behind a
-      # login/bot wall, or a challenge page — an agent run would only produce
-      # synthetic coverage, so we STOP. But stopping here is an EXPECTED outcome,
-      # not a failure: this step never fails the job; it records the decision in
-      # `proceed` (and a human-readable `reason`), the downstream steps gate on
-      # `proceed == 'true'`, and the run ends GREEN via the "page not usable"
-      # comment below. Runs before `npm ci` (probe-url.js uses only Node built-ins).
-      - name: Probe the event URL
-        id: probe
-        if: success() && steps.triage.outputs.skipAgent != 'true'
-        env:
-          EVENT_URL: ${{ steps.triage.outputs.url }}
-        run: |
-          if [ -z "$EVENT_URL" ]; then
-            {
-              echo "proceed=false"
-              echo "reason=no event URL was found in the issue body"
-            } >> "$GITHUB_OUTPUT"
-            echo "No event URL found in the issue — nothing to probe."
-            exit 0
-          fi
-          set +e
-          REASON="$(node dev/tools/new-extractors-creation/probe-url.js "$EVENT_URL")"
-          CODE=$?
-          set -e
-          echo "$REASON"
-          if [ "$CODE" -eq 0 ]; then
-            echo "proceed=true" >> "$GITHUB_OUTPUT"
-          else
-            {
-              echo "proceed=false"
-              echo "reason=$REASON"
-            } >> "$GITHUB_OUTPUT"
-            # Exit 3 = the HTML couldn't be downloaded at all (403 / unreachable).
-            # That's not something a re-run or the agent can fix, so flag it for
-            # the hand-off-to-a-human step below.
-            if [ "$CODE" -eq 3 ]; then
-              echo "downloadFailed=true" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-
-      # The probe decided the page can't back a static test case — a soft-200
-      # bot-challenge / interstitial, an outright download failure (exit 3), or
-      # no event URL at all. NONE of these is fixable by a re-run or the agent
-      # (a Cloudflare/WAF wall from a CI IP won't clear on retry any more than a
-      # 403 will), so every not-usable page is handed to a human the same way:
-      # post a comment naming the blocker, drop the trigger label (so the
-      # automation won't re-fire), and add `extractor-blocked-needs-human`. This
-      # is still an EXPECTED stop, so the run finishes GREEN — only a genuine
-      # break goes red via "Comment on failure" below. The download-failure case
-      # (exit 3) keeps its own, more specific comment; everything else shares the
-      # generic "page not usable" one.
-      - name: Hand off to a human — page not usable
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed != 'true'
-        env:
-          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER:    ${{ github.event.issue.number }}
-          RUN_URL:         ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          REASON:          ${{ steps.probe.outputs.reason }}
-          DOWNLOAD_FAILED: ${{ steps.probe.outputs.downloadFailed }}
-        run: |
-          if [ "$DOWNLOAD_FAILED" = "true" ]; then
-            gh issue comment "$ISSUE_NUMBER" --body "🚫 Auto-implementation stopped: **the HTML for this page couldn't be downloaded from the server** ($REASON). Without the page's HTML there's nothing to record a test case against, so no agent run was started — and a re-run can't fix this, since the server is refusing the request. This needs a human: the site can be added by hand from a manually-saved copy of the page — see dev/procedures/claude/adding-a-source.md. ([run log]($RUN_URL))"
-          else
-            gh issue comment "$ISSUE_NUMBER" --body "🚫 Couldn't auto-implement this extractor — $REASON. There's no real page to record a test case against, so no agent run was started, and a re-run can't fix this. This needs a human: the site can be added by hand — see dev/procedures/claude/adding-a-source.md. ([run log]($RUN_URL))"
-          fi
-          # Make sure the label exists before adding it (idempotent — ignore "already exists").
-          gh label create "extractor-blocked-needs-human" --color B60205 --description "Automation could not proceed; a maintainer needs to take this over by hand" 2>/dev/null || true
-          gh issue edit "$ISSUE_NUMBER" --remove-label "extractor-request" --add-label "extractor-blocked-needs-human"
+      # No pre-flight probe any more: ScraperAPI owns getting past proxies, bot
+      # walls, and CAPTCHAs, so there's nothing cheap left to judge before the
+      # agent. The page is downloaded in Phase 1 (record_page in phase1-prepare.sh,
+      # `curl -f` through ScraperAPI). If it can't be downloaded, Phase 1 fails and
+      # the "Comment on failure" step hands the issue to a human. (A page that
+      # downloads but isn't one event — a listing/login page — is still the agent's
+      # bail in Stage 2.)
 
       # Supported mode: the host already has a dedicated source. We're NOT closing
       # the request — the pipeline adds a fresh integration case to that existing
       # source. Leave a note on the issue so it's clear this isn't a new-source run
       # and which source it relates to. (Green; informational.)
       - name: Note the already-supported relationship (supported mode)
-        if: success() && steps.triage.outputs.mode == 'supported' && steps.probe.outputs.proceed == 'true'
+        if: success() && steps.triage.outputs.mode == 'supported'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -192,63 +133,26 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" --body "ℹ️ \`$HOST\` is already supported by \`$SOURCE_PATH\`. Rather than close this, the pipeline will add a fresh integration case from your event page to harden that existing extractor — the agent runs next and a PR will follow."
 
       - name: Install npm dependencies
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         run: npm ci
 
       - name: Configure git
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Provide a Chrome for Testing binary so Phase 1's `npm run refresh` can
-      # render a data-less JS single-page-app shell into extractable HTML
-      # (dev/requirements/extractor/page-infra/render-page.js / dev/requirements/extractor/page-infra/spa-shell.js, issues #310/#334). Without this
-      # the recorder records the empty shell and the agent bails on every SPA
-      # (barby #325, visit.tel-aviv #277). Same on-demand fetch + monthly cache as
-      # refresh-cache.yml and the e2e smoke test — no project dependency added.
-      - name: Chrome for Testing cache key
-        id: cft-key
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        run: echo "key=cft-${{ runner.os }}-$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
-      - name: Cache Chrome for Testing
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/cft
-          key: ${{ steps.cft-key.outputs.key }}
-      # Resolve (or install) Chrome and export CHROME_PATH + RENDER_NO_SANDBOX to
-      # the job env so the Prepare step's `npm run refresh` renders SPA shells.
-      # RENDER_NO_SANDBOX is set for the same reason as refresh-cache.yml: the
-      # hosted runner can't run Chrome's sandbox, and the ephemeral runner is the
-      # isolation boundary for the untrusted, user-supplied event URL (see
-      # dev/procedures/technicalGotchas.md — the recorder already renders such URLs this way).
-      - name: Set up Chrome for Testing
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        run: |
-          CHROME_PATH="$(find "${RUNNER_TEMP}/cft" -type f -name chrome 2>/dev/null | head -n1)"
-          if [ -z "$CHROME_PATH" ]; then
-            out="$(npx --yes @puppeteer/browsers install chrome@stable --path "${RUNNER_TEMP}/cft")"
-            echo "$out"
-            CHROME_PATH="$(echo "$out" | tail -n1 | awk '{print $NF}')"
-          fi
-          echo "Using Chrome at: $CHROME_PATH"
-          {
-            echo "CHROME_PATH=$CHROME_PATH"
-            echo "RENDER_NO_SANDBOX=1"
-          } >> "$GITHUB_ENV"
-
       # Phase 1 — everything deterministic, done in the workflow (not the agent):
-      # branch off main, record the page inline (same fetcher the probe used),
-      # scaffold the source with its matches() filled, register the host in
-      # supportedDomains, and regenerate the load lists. A baseline test:offline
-      # must be green before handing off. The commit message is `chore: scaffold
-      # <slug> extractor …` — the finalize workflow finds the scaffold commit by
-      # it. (A push made with GITHUB_TOKEN doesn't fire refresh-cache.yml's push
-      # trigger, so the page is recorded exactly once.)
+      # branch off main, download the event page (record_page → curl through
+      # ScraperAPI, which proxies + renders JS itself, so a JS single-page-app
+      # records with real data without a local headless browser), scaffold the
+      # source with its matches() filled, register the host in supportedDomains, and
+      # regenerate the load lists. A baseline test:offline must be green before
+      # handing off. The commit message is `chore: scaffold <slug> extractor …` —
+      # the finalize workflow finds the scaffold commit by it.
       - name: Prepare branch — record page + scaffold extractor
         id: prepare
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
           MODE:         ${{ steps.triage.outputs.mode }}
           BRANCH:       ${{ steps.triage.outputs.branch }}
@@ -266,7 +170,7 @@ jobs:
       # itself). The agent then adds `extractor-agent-done`, firing
       # finalize-extractor.yml. See dev/tools/new-extractors-creation/handoff-to-agent.sh.
       - name: Hand off to the implementation agent
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
+        if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}

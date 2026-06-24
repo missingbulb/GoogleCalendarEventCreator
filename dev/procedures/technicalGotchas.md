@@ -15,28 +15,17 @@ Claude could hit it *without* reading the locus file — a mistake of **omission
 trap spanning files. See the full locality rule in
 [claude/workflow.md](claude/workflow.md).
 
-- **The SPA-shell render fallback executes untrusted page JS — never give it the
-  e2e test's `--no-sandbox`, and gate it tightly.** The recorder renders a page
-  in real headless Chrome (`dev/requirements/extractor/page-infra/render-page.js`) only when `dev/requirements/extractor/page-infra/spa-shell.js`'s
-  `shouldRender` is true — a positive conjunction (`isSpaShell &&
-  !hasEventData`), not "the body is small", so it never fires on a generic
-  error body or a page that already carries an event date, and bot-challenge pages
-  are excluded for free (no framework-root marker). The trigger keys on a
-  **machine-readable start date** (`<time datetime>` / JSON-LD `startDate`), *not*
-  on og:title or visible-text length: an SPA shell can carry the event name in
-  og:title and kilobytes of nav/footer chrome yet hide every date+venue behind JS,
-  which silently skipped the render for the motivating #277 page (#328). The
-  separate `hasExtractableData` predicate (og:title / JSON-LD / text) is the
-  *keep* check — whether a finished render gained content — not the trigger. Two traps: (a) the URL is
-  user-supplied, so this runs *attacker-influenceable* JS — unlike
-  `extension-load.chrome.test.js` (our own extension), it keeps Chrome's sandbox
-  ON by default; `RENDER_NO_SANDBOX=1` is only for runners that can't support it,
-  consciously leaning on the ephemeral CI runner as the boundary. (b) SPA output
-  isn't deterministic, so a re-record can legitimately shift a live case's
-  `expected` — treat a render-fallback case's drift like a site markup change, and
-  prefer extracting JSON-LD/`og:` (which SPAs often still inject) over brittle DOM
-  positions. CI-only: the cloud sandbox can't even download Chrome (below), so the
-  render no-ops locally and is verified only in CI (#310).
+- **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
+  us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in
+  `dev/tools/new-extractors-creation/phase1-prepare.sh` / the bot-block gotcha
+  below), and `render=true` makes it execute the page's JS and return the
+  post-render HTML — so a JS app records with real data instead of an empty shell.
+  The repo no longer carries any SPA-shell detection or headless-Chrome render of
+  its own (the former `spa-shell.js` / `render-page.js` and their
+  `RENDER_NO_SANDBOX` CI plumbing were removed). One consequence survives: rendered
+  output isn't deterministic, so a re-record can legitimately shift a live case's
+  `expected` — treat such drift like a site-markup change, and prefer extracting
+  JSON-LD/`og:` (which apps often still inject) over brittle DOM positions.
 - **Service-worker paths must be extension-root absolute.** The background service
   worker runs from `icon/toolbar-icon.js` (relative to the extension root,
   `extension/`), so any path it hands a Chrome API
@@ -89,12 +78,22 @@ trap spanning files. See the full locality rule in
   bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
   cloud sandbox); `jsdom` is a test-only devDependency loaded by `extension-test/harness.js`.
   Run `npm install` and re-run — don't look for another cause first.
-- **Automated environments are bot-blocked from fetching target sites.** A
-  live-page fetch that works on your machine often fails from CI/sandboxes:
-  `npm run refresh` gets HTTP 403 in the cloud sandbox (so new cached HTML is
-  filled by the **Refresh cached HTML files** workflow, not locally), and GitHub
-  Actions runners get HTTP 400 from `facebook.com` (so Facebook is covered by unit
-  tests only — it can't be a cached live case).
+- **Automated environments are bot-blocked from fetching target sites — the
+  block is the datacenter IP, not the headers.** A live-page fetch that works on
+  your machine often fails from CI/sandboxes regardless of how browser-like the
+  User-Agent is: a direct fetch gets HTTP 403 in the cloud sandbox, and GitHub
+  Actions runners get HTTP 400 from `facebook.com`. The escape hatch is the
+  optional **`SCRAPER_API_KEY`** secret: when set, the pipeline's only page fetch
+  (`record_page` in `dev/tools/new-extractors-creation/phase1-prepare.sh`) routes
+  through ScraperAPI's residential proxy, so the prepare workflow fetches from a
+  non-datacenter IP. Unset (e.g. a fresh clone, or the cloud sandbox), it fetches
+  directly and stays bot-blocked — so a target page can only be recorded by the
+  auto-extractor pipeline running in CI (where the secret is wired), not locally.
+  ScraperAPI also renders JS (`render=true`), so a single-page-app records with
+  real data — there is no separate render step. If ScraperAPI ever underperforms,
+  swap the vendor in that one `record_page` function — it's the whole fetching
+  surface. Facebook returns a hard 400 even through the proxy, so it remains
+  unit-tests-only — it can't be a cached live case.
 - **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
   textContent`) returns `textContent` in tests — including `<select>`/`<option>`
   and hidden text a real browser's `innerText` omits. A generic visible-text

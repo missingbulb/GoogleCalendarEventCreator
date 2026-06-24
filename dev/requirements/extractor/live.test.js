@@ -2,10 +2,11 @@
 // produces the right values for each supported site.
 //
 // These run OFFLINE against committed cached HTML files in
-// data/, recorded from each site by dev/requirements/extractor/page-infra/refresh-cache.js (see also
-// .github/workflows/refresh-cache.yml). Asserting against a cached copy of the
-// real page makes the suite deterministic and runnable anywhere (no network),
-// while still reflecting each site's current markup.
+// data/, recorded from each site by the auto-extractor pipeline
+// (dev/tools/new-extractors-creation/phase1-prepare.sh's record_page, which
+// fetches through ScraperAPI). Asserting against a cached copy of the real page
+// makes the suite deterministic and runnable anywhere (no network), while still
+// reflecting each site's current markup.
 //
 // Each JSON file in dev/requirements/extractor/expected/ describes one scenario. The
 // extractor always returns a list of events; each event carries its timing in
@@ -34,8 +35,9 @@
 //   }
 //
 // The scenario's source URL lives alongside the cached HTML, in
-// dev/requirements/extractor/data/<name>.url (the single source of truth — refresh-cache.js fetches it,
-// and the suite loads the HTML into a DOM at that URL so hostname-based site
+// dev/requirements/extractor/data/<name>.url (the single source of truth —
+// record_page fetches it, and the suite loads the HTML into a DOM at that URL so
+// hostname-based site
 // detection behaves as in Chrome). It is NOT repeated in the case file.
 //
 // `expected.events` must be the *complete*, exact array the extractor
@@ -59,10 +61,12 @@
 //
 // To cover a new website or platform: add a dev/requirements/extractor/data/<name>.url with the event
 // page URL and a case file (dev/requirements/extractor/expected/<name>.json) with its
-// `expected`, then record the cached HTML with `node dev/requirements/extractor/page-infra/refresh-cache.js`
-// (on a machine with internet) or let CI record it on the next run. Run the
-// suite once to see the actual extracted values in the failure output, then
-// copy them into `expected`.
+// `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
+// `extractor-request` issue with the page URL — Phase 1 fetches it via ScraperAPI);
+// to record one by hand, fetch the .url through ScraperAPI with a key (see
+// dev/tools/new-extractors-creation/phase1-prepare.sh's record_page). Run the suite
+// once to see the actual extracted values in the failure output, then copy them
+// into `expected`.
 "use strict";
 
 const { test, before } = require("node:test");
@@ -106,7 +110,7 @@ for (const file of caseFiles) {
     const cachedHtmlPath = path.join(DATA_DIR, `${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
-      `Missing cached HTML for "${name}". Record it with: node dev/requirements/extractor/page-infra/refresh-cache.js`
+      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see dev/tools/new-extractors-creation/phase1-prepare.sh`
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");
