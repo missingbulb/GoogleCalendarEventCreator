@@ -130,37 +130,33 @@ doesn't own them.
    steps consume. Runs before `npm ci`, so a triaged request costs almost nothing,
    and fails **open** — any error proceeds.
 3. **Probes the event URL** (`probe-url.js`): fetches it the same way the recorder
-   will (shared `dev/requirements/extractor/page-infra/fetch-page.js` — browser headers + retries) and decides
-   whether the page is **usable** as a static case. Not usable when: the URL is
-   missing; the fetch returns anything but a 2xx (unreachable, login/bot wall);
-   **or** it returns a 2xx whose body is actually a bot-challenge / interstitial —
-   `detectChallenge` sniffs the body for known vendor markers (AWS WAF, Cloudflare,
-   DataDome, PerimeterX, Imperva, reCAPTCHA/hCaptcha) and a suspiciously-small
-   size, the one soft-200 block we can catch cheaply before handing off (#279
-   StubHub). In every not-usable case there's no real page to record against, so
-   the run **stops** — but stopping is an **expected outcome, not a failure**: the
-   probe records its decision in `proceed`, the downstream steps gate on
-   `proceed == 'true'`, and the run ends **green**. Because **none** of the
-   not-usable outcomes is fixable by a re-run or the agent (a Cloudflare/WAF wall
-   from a CI IP won't clear on retry any more than a 403 will), every one of them
-   **hands the issue to a human** the same way: a single step **drops
-   `extractor-request` and adds `extractor-blocked-needs-human`**, with a comment
-   naming the blocker. The fetch that **fails outright** (`probe-url.js` exit 3 — a
-   403 / unreachable host / login or bot wall, where the HTML never downloaded)
-   sets a `downloadFailed` output so it gets a more specific "couldn't download the
-   HTML" comment, but the label hand-off is identical to a soft-200 challenge or a
-   missing URL. (A JS-rendered SPA shell that returns a full-but-empty page still
-   slips past — a real 2xx with no markers — and is caught later by the agent's
-   judgment.) Runs before `npm ci`.
-4. Installs dependencies, configures git, and sets up a Chrome for Testing binary
-   (`CHROME_PATH` + `RENDER_NO_SANDBOX`, mirroring `refresh-cache.yml`) so Phase 1's
-   `npm run refresh` can render a JS single-page-app shell instead of recording an
-   empty one (#334; without it every SPA — barby #325, visit.tel-aviv #277 —
-   records a shell and the agent bails).
+   will (shared `dev/requirements/extractor/page-infra/fetch-page.js` — via ScraperAPI
+   when `SCRAPER_API_KEY` is set) and decides whether the page can be **downloaded**.
+   Not usable when the URL is missing, or the fetch fails outright — ScraperAPI
+   couldn't deliver the page (non-2xx), or a network error / timeout. ScraperAPI
+   owns getting past proxies, bot walls, and CAPTCHAs, so the probe no longer sniffs
+   bodies for challenge markers; a soft-200 interstitial is ScraperAPI's to defeat
+   or fail on, and a download failure surfaces as a thrown fetch. In every
+   not-usable case there's no real page to record against, so the run **stops** —
+   but stopping is an **expected outcome, not a failure**: the probe records its
+   decision in `proceed`, the downstream steps gate on `proceed == 'true'`, and the
+   run ends **green**. Because the failure isn't fixable by a re-run or the agent,
+   it **hands the issue to a human**: a single step **drops `extractor-request` and
+   adds `extractor-blocked-needs-human`**, with a comment naming the blocker. The
+   fetch that **fails outright** (`probe-url.js` exit 3) sets a `downloadFailed`
+   output so it gets a specific "couldn't download the HTML" comment, the same
+   hand-off as a missing URL. (A page that downloads but turns out to be a
+   listing/index rather than one event is caught later by the agent's judgment.)
+   Runs before `npm ci`.
+4. Installs dependencies and configures git. No headless-browser setup any more:
+   Phase 1's `npm run refresh` fetches through ScraperAPI, which renders the page's
+   JS itself (`render=true`), so a JS single-page-app records with real data instead
+   of an empty shell (previously needed a local Chrome — #334, barby #325,
+   visit.tel-aviv #277).
 5. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
    branches `<branch>` off `main`; records the page inline (`dev/requirements/extractor/data/<caseName>.url` +
-   the empty `.html` signal → `npm run refresh`, rendering an SPA shell via headless
-   Chrome when `dev/requirements/extractor/page-infra/spa-shell.js` flags one, asserted non-empty); then, **in
+   the empty `.html` signal → `npm run refresh`, which fetches+renders via
+   ScraperAPI, asserted non-empty); then, **in
    new-source mode**, scaffolds `extension/event-extractors/custom/<slug>.js` with `matches()` filled
    (`scaffold-source.js`) + the placeholder case (`scaffold-case.js`), registers the
    host in `supportedDomains` (`add-supported-domain.js`), and runs `npm run index`;
@@ -197,9 +193,10 @@ then re-labels:
 
 - **success** → removes `extractor-agent-ready`, adds `extractor-agent-done` (the
   finalize trigger). It does **not** open the PR.
-- **bail** → the cached page isn't **one specific event** (a bot/CAPTCHA/login/
-  SPA-shell page, or a listing/index/artist/tour page showing many dates — a soft
-  2xx the probe's `detectChallenge` can't see). It leaves the case's `events`
+- **bail** → the cached page isn't **one specific event** (a login page, or a
+  listing/index/artist/tour page showing many dates — something the probe's
+  download check can't judge, since it only confirms the page came back). It
+  leaves the case's `events`
   empty, **posts a one-sentence diagnosis comment itself**, removes
   `extractor-agent-ready`, and adds `extractor-blocked-needs-human`. It does **not**
   add `extractor-agent-done`, so finalize never runs.
@@ -312,16 +309,15 @@ green** — only a genuine break is red:
   the agent adds a fresh integration case (hardening that source), which finalize
   turns into a PR like any other. (A page that turns out not to be one usable event
   still bails via Stage 2 / the quality floor, same as new-source mode.)
-- **Page not usable → handed to a human** (green, prepare) — the probe judged the
-  page unusable: a 2xx bot-challenge / interstitial, a missing URL, or an outright
-  download failure (exit 3 — a 403 / unreachable host / login or bot wall). No
-  agent involved. Because none of these is fixable by a re-run, a single step
-  removes `extractor-request`, adds `extractor-blocked-needs-human`, and names the
-  blocker; the download-failure case gets a more specific "couldn't download the
-  HTML" comment.
+- **Page not usable → handed to a human** (green, prepare) — the probe couldn't
+  download the page: a missing URL, or an outright fetch failure (exit 3 —
+  ScraperAPI couldn't deliver it, or a network error / timeout). No agent involved.
+  Because this isn't fixable by a re-run, a single step removes `extractor-request`,
+  adds `extractor-blocked-needs-human`, and names the blocker; the download-failure
+  case gets a "couldn't download the HTML" comment.
 - **Bailed — not a single event** (green, Stage 2) — the agent judged the cached
-  page a bot wall / SPA shell / listing page, commented its diagnosis, and set
-  `extractor-blocked-needs-human`. No PR; scaffolding stays on the branch.
+  page a login or listing/index page (not one event), commented its diagnosis, and
+  set `extractor-blocked-needs-human`. No PR; scaffolding stays on the branch.
 - **Anomaly handed to a human** (green, finalize) — `extractor-agent-done` arrived
   but the case is `empty` or `degenerate` (quality floor). Phase 2 comments and
   sets `extractor-blocked-needs-human`. No PR.
