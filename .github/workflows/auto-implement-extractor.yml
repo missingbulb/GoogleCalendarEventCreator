@@ -1,4 +1,4 @@
-name: Auto-implement extractor (prepare)
+name: "Auto-Implement Extractor: Prepare"
 # Distinct per-run title so this phase is discernible in the Actions list (every
 # `issues: labeled` event fires all the label-routed workflows; without this each
 # run shows only the issue title). Evaluated at run start — there's no way to

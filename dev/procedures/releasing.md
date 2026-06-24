@@ -24,7 +24,7 @@ strictly higher than the live one, so each release must increment it first.
 
 ## Creating a release package
 
-The **Create Release Package** workflow (`.github/workflows/release.yml`) runs
+The **Release: Create Package** workflow (`.github/workflows/release.yml`) runs
 the tests, builds the zip, and publishes a GitHub Release with it attached, at
 **whatever version is currently committed in `extension/manifest.json`**. It does **not**
 change the version — bump it first (see above).
@@ -34,7 +34,7 @@ that touches `extension/manifest.json`), so cutting a release is just merging th
 If that version already matches the latest published release (or a `vX.Y.Z` tag
 already exists), the run is a **clean no-op** — so `extension/manifest.json` edits that
 aren't version bumps don't cut a release. You can also run it manually from the
-Actions tab → Create Release Package → "Run workflow".
+Actions tab → Release: Create Package → "Run workflow".
 
 On a real bump it tags `vX.Y.Z` at the released commit and attaches the zip under
 a stable name, so the newest build is always at a fixed URL:
@@ -44,7 +44,7 @@ step (see below).
 
 ## Publishing to the store
 
-The **Publish to Chrome Web Store** workflow
+The **Release: Publish to Chrome Web Store** workflow
 (`.github/workflows/publish-chrome-store.yml`) takes the zip from a GitHub
 Release and uploads it to the store (publishing to users by default), via the
 [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api)
@@ -130,7 +130,7 @@ If minting fails, the symptoms map to fixes like this:
 1. Make the change (open an issue first per the project workflow) and merge it.
 2. Bump the version (ask Claude to "bump version" = next minor) and merge that
    PR — merging it to `main` cuts the GitHub Release automatically.
-3. Run the **Publish to Chrome Web Store** workflow to ship it.
+3. Run the **Release: Publish to Chrome Web Store** workflow to ship it.
 
 Once the store approves it, Chrome auto-pushes the update to existing users
 within a few hours — no reinstall. (For the very first listing, do the one-time

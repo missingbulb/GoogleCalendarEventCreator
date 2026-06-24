@@ -1,4 +1,4 @@
-name: Finalize extractor (Phase 2)
+name: "Auto-Implement Extractor: Finalize"
 # Distinct per-run title (see the note in auto-implement-extractor.yml) so the
 # finalize phase is discernible from prepare/claudinite in the Actions list.
 run-name: "Finalize extractor · #${{ github.event.issue.number }} — ${{ github.event.issue.title }}"

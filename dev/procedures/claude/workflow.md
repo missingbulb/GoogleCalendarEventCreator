@@ -50,7 +50,7 @@ branch, to be merged into `main` through the normal PR flow. Default to a
 **minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an explicit target ("bump version
 to 1.4.0") or level ("bump patch" / "bump major") when given. Bumping the
 version is the *only* prerequisite to releasing: merging the bump PR to `main`
-triggers the **Create Release Package** workflow, which builds and publishes
+triggers the **Release: Create Package** workflow, which builds and publishes
 whatever version is committed in `extension/manifest.json` (and no-ops if that version is
 already the latest release). The release workflow never changes the version
 itself.
