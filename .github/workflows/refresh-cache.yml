@@ -44,35 +44,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Provide a Chrome for Testing binary so the recorder can render a
-      # data-less JS single-page-app shell into extractable HTML (issue #310;
-      # dev/requirements/extractor/page-infra/render-page.js). Same on-demand fetch + monthly cache as the e2e
-      # smoke test in test.yml — no project dependency added. Without this the
-      # recorder simply keeps the static HTML (the render step no-ops).
-      - name: Chrome for Testing cache key
-        id: cft-key
-        run: echo "key=cft-${{ runner.os }}-$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
-      - name: Cache Chrome for Testing
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/cft
-          key: ${{ steps.cft-key.outputs.key }}
-
-      # Fetches any cached HTML file that is missing or empty (zero bytes), and
-      # renders SPA shells via headless Chrome (render-page.js). RENDER_NO_SANDBOX
-      # is set because GitHub's hosted runner can't run Chrome's sandbox here; the
-      # ephemeral disposable runner is the isolation boundary (see render-page.js).
+      # Fetches any cached HTML file that is missing or empty (zero bytes) through
+      # ScraperAPI (SCRAPER_API_KEY, job-level env), which proxies + renders JS
+      # itself — so there's no headless-Chrome setup here any more.
       - name: Refresh cached HTML files
-        run: |
-          CHROME_PATH="$(find "${RUNNER_TEMP}/cft" -type f -name chrome 2>/dev/null | head -n1)"
-          if [ -z "$CHROME_PATH" ]; then
-            out="$(npx --yes @puppeteer/browsers install chrome@stable --path "${RUNNER_TEMP}/cft")"
-            echo "$out"
-            CHROME_PATH="$(echo "$out" | tail -n1 | awk '{print $NF}')"
-          fi
-          export CHROME_PATH RENDER_NO_SANDBOX=1
-          echo "Using Chrome at: $CHROME_PATH"
-          npm run refresh
+        run: npm run refresh
 
       # Run the live assertions against the fetched pages, so a site that
       # changed its markup turns this run red.

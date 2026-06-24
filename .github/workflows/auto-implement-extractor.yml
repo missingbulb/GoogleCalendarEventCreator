@@ -207,42 +207,11 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Provide a Chrome for Testing binary so Phase 1's `npm run refresh` can
-      # render a data-less JS single-page-app shell into extractable HTML
-      # (dev/requirements/extractor/page-infra/render-page.js / dev/requirements/extractor/page-infra/spa-shell.js, issues #310/#334). Without this
-      # the recorder records the empty shell and the agent bails on every SPA
-      # (barby #325, visit.tel-aviv #277). Same on-demand fetch + monthly cache as
-      # refresh-cache.yml and the e2e smoke test — no project dependency added.
-      - name: Chrome for Testing cache key
-        id: cft-key
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        run: echo "key=cft-${{ runner.os }}-$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
-      - name: Cache Chrome for Testing
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}/cft
-          key: ${{ steps.cft-key.outputs.key }}
-      # Resolve (or install) Chrome and export CHROME_PATH + RENDER_NO_SANDBOX to
-      # the job env so the Prepare step's `npm run refresh` renders SPA shells.
-      # RENDER_NO_SANDBOX is set for the same reason as refresh-cache.yml: the
-      # hosted runner can't run Chrome's sandbox, and the ephemeral runner is the
-      # isolation boundary for the untrusted, user-supplied event URL (see
-      # dev/procedures/technicalGotchas.md — the recorder already renders such URLs this way).
-      - name: Set up Chrome for Testing
-        if: success() && steps.triage.outputs.skipAgent != 'true' && steps.probe.outputs.proceed == 'true'
-        run: |
-          CHROME_PATH="$(find "${RUNNER_TEMP}/cft" -type f -name chrome 2>/dev/null | head -n1)"
-          if [ -z "$CHROME_PATH" ]; then
-            out="$(npx --yes @puppeteer/browsers install chrome@stable --path "${RUNNER_TEMP}/cft")"
-            echo "$out"
-            CHROME_PATH="$(echo "$out" | tail -n1 | awk '{print $NF}')"
-          fi
-          echo "Using Chrome at: $CHROME_PATH"
-          {
-            echo "CHROME_PATH=$CHROME_PATH"
-            echo "RENDER_NO_SANDBOX=1"
-          } >> "$GITHUB_ENV"
+      # No Chrome setup here any more: Phase 1's `npm run refresh` fetches through
+      # ScraperAPI (SCRAPER_API_KEY, job-level env), which proxies + renders JS
+      # itself, so a JS single-page-app records with real data without a local
+      # headless browser (previously issues #310/#334, barby #325, visit.tel-aviv
+      # #277).
 
       # Phase 1 — everything deterministic, done in the workflow (not the agent):
       # branch off main, record the page inline (same fetcher the probe used),
