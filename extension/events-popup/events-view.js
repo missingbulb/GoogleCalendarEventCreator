@@ -399,7 +399,7 @@ export function dateChip(start, now = new Date()) {
   return {
     month: date.toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: String(date.getDate()),
-    ...cornerPill(date, now, { allDay: isAllDay(start) }),
+    ...cornerPill(date, now, isAllDay(start)),
   };
 }
 
@@ -449,8 +449,8 @@ function isMultiDaySpan(instance) {
 
 // A date-RANGE chip for a multi-day span: the month(s) as the banner over the day
 // range as the body — "SEP" over "15–18" within one month, "JUN–JUL" over "28–3"
-// across months. The corner pill keys "past" off the span's END day (a span still
-// running isn't past) and the future year off the START year.
+// across months. The corner pill keys "past" and the future year off the span's
+// START (its end is never consulted — a span whose start has passed is "past").
 function rangeChip(instance, now) {
   const s = eventStart(instance.start);
   const e = instanceEndDate(instance);
@@ -463,7 +463,7 @@ function rangeChip(instance, now) {
     banner: sameMonth ? sMon : `${sMon}–${eMon}`,
     body: `${s.getDate()}–${e.getDate()}`,
     kind: "range",
-    ...cornerPill(s, now, { endDate: e, allDay: isAllDay(instance.start) }),
+    ...cornerPill(s, now, isAllDay(instance.start)),
   };
 }
 
@@ -477,25 +477,27 @@ function chipForInstance(instance, now, preferTime) {
   return dayChip(instance.start, now);
 }
 
-// The chip's corner-pill descriptor, decided against the reference instant `now`:
-//   - { past: true } — the event is already over. A TIMED event is past once its
-//     start instant has passed, so an event earlier TODAY whose time is gone is
-//     marked past (#507); an ALL-DAY event has no time-of-day, so it stays
-//     day-granular — past only once its whole day has ended (today's all-day event
-//     is not yet past). For a multi-day span pass the END as `endDate` (a span
-//     still running isn't past); for a single date `endDate` defaults to `date`.
-//     Rendered as a gray "past" pill — past events of ANY date, not just prior years.
-//   - { year } — a future-YEAR event (not past, and its year is past now's year).
+// The chip's corner-pill descriptor, decided against the reference instant `now`.
+// Past and future are decided from the event's START alone — never its end (so a
+// still-running multi-day event whose start has passed is "past", and the end is
+// irrelevant):
+//   - { past: true } — the start has passed. A TIMED event is past once its start
+//     instant has passed, so an event earlier TODAY whose time is gone is marked
+//     past (#507); an ALL-DAY event has no time-of-day, so it stays day-granular —
+//     past only once its whole (start) day has ended (today's all-day event is not
+//     yet past). Rendered as a gray "past" pill — past events of ANY date, not just
+//     prior years.
+//   - { year } — a future-YEAR event by its start year (not past, year past now's).
 //     Rendered as a green pill showing that year.
 //   - {} — not yet past and not a future year: no pill.
-// `allDay` selects the granularity: an all-day event is past after the day it ends
-// (local next-midnight), a timed one after its own instant — so a timed pill can
-// flip mid-day while an all-day pill never does.
-function cornerPill(date, now, { endDate = date, allDay = true } = {}) {
+// `allDay` selects the granularity: an all-day event is past after its start day
+// ends (local next-midnight), a timed one after its own start instant — so a timed
+// pill can flip mid-day while an all-day pill never does.
+function cornerPill(date, now, allDay = true) {
   const nextMidnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-  // The instant after which the event is past: end-of-day for an all-day event,
-  // the (start/end) instant itself for a timed one.
-  const pastAfter = allDay ? nextMidnight(endDate) : endDate;
+  // The instant after which the event is past, from its START: end-of-(start-)day
+  // for an all-day event, the start instant itself for a timed one.
+  const pastAfter = allDay ? nextMidnight(date) : date;
   if (pastAfter <= now) return { past: true };
   const y = date.getFullYear();
   if (y > now.getFullYear()) return { year: String(y) };
