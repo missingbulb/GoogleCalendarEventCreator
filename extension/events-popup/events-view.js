@@ -152,8 +152,10 @@ function pushInto(map, key, value) {
 // and the WHOLE card is the click target; on a grouped card (same-day or month)
 // each showing is its OWN chip BUTTON — a day chip per date (month card) or a
 // time chip per showing (same-day card). `now` (a reference instant) decides which
-// chips carry a corner pill: a gray "past" pill for an event before today, a green
-// year pill for a future-year event. It defaults to the real clock and is threaded
+// chips carry a corner pill: a gray "past" pill for an event already over (a timed
+// one once its time has passed, an all-day one once its day has ended — see
+// cornerPill), a green year pill for a future-year event. It defaults to the real
+// clock and is threaded
 // down from render() so the UI snapshots can pin it.
 export function renderCard(card, tab, now = new Date()) {
   if (card.kind === "single") {
@@ -397,7 +399,7 @@ export function dateChip(start, now = new Date()) {
   return {
     month: date.toLocaleDateString(undefined, { month: "short" }).toUpperCase(),
     day: String(date.getDate()),
-    ...cornerPill(date, now),
+    ...cornerPill(date, now, { allDay: isAllDay(start) }),
   };
 }
 
@@ -461,7 +463,7 @@ function rangeChip(instance, now) {
     banner: sameMonth ? sMon : `${sMon}–${eMon}`,
     body: `${s.getDate()}–${e.getDate()}`,
     kind: "range",
-    ...cornerPill(s, now, e),
+    ...cornerPill(s, now, { endDate: e, allDay: isAllDay(instance.start) }),
   };
 }
 
@@ -476,18 +478,25 @@ function chipForInstance(instance, now, preferTime) {
 }
 
 // The chip's corner-pill descriptor, decided against the reference instant `now`:
-//   - { past: true } — the event has already happened: its day is before TODAY.
-//     For a multi-day span pass the END day as `endDate` (a span still running
-//     isn't past); for a single date `endDate` defaults to `date`. Rendered as a
-//     gray "past" pill — past events of ANY date, not just prior years.
+//   - { past: true } — the event is already over. A TIMED event is past once its
+//     start instant has passed, so an event earlier TODAY whose time is gone is
+//     marked past (#507); an ALL-DAY event has no time-of-day, so it stays
+//     day-granular — past only once its whole day has ended (today's all-day event
+//     is not yet past). For a multi-day span pass the END as `endDate` (a span
+//     still running isn't past); for a single date `endDate` defaults to `date`.
+//     Rendered as a gray "past" pill — past events of ANY date, not just prior years.
 //   - { year } — a future-YEAR event (not past, and its year is past now's year).
 //     Rendered as a green pill showing that year.
-//   - {} — this year and not yet past: no pill.
-// Comparison is at DAY granularity (local midnight), so an event later today is
-// not "past" and a pill never flips mid-day.
-function cornerPill(date, now, endDate = date) {
-  const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  if (day(endDate) < day(now)) return { past: true };
+//   - {} — not yet past and not a future year: no pill.
+// `allDay` selects the granularity: an all-day event is past after the day it ends
+// (local next-midnight), a timed one after its own instant — so a timed pill can
+// flip mid-day while an all-day pill never does.
+function cornerPill(date, now, { endDate = date, allDay = true } = {}) {
+  const nextMidnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+  // The instant after which the event is past: end-of-day for an all-day event,
+  // the (start/end) instant itself for a timed one.
+  const pastAfter = allDay ? nextMidnight(endDate) : endDate;
+  if (pastAfter <= now) return { past: true };
   const y = date.getFullYear();
   if (y > now.getFullYear()) return { year: String(y) };
   return {};

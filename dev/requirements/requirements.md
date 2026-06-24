@@ -585,7 +585,11 @@ inner chip buttons instead.
 
 - `5.6` **Date pill.** A chip carries a small pill on the corner of its calendar
   icon for an event that isn't simply upcoming this year: a gray "past" pill for a
-  past event, or a green pill showing the year for a future year.
+  past event, or a green pill showing the year for a future year. "Past" is
+  time-of-day aware for a **timed** event (past once its start time has passed,
+  even earlier today) but whole-day for an **all-day** event (past only once its
+  day has ended), and is decided per chip — so each instance button in a grouped
+  card is marked by its own time.
 
 <table>
 <tr>
@@ -645,6 +649,40 @@ never red (a next-year event isn't an error).
 
 `5.6.4` The "past" pill marks **any** past event, not only a prior year — an event
 earlier **this** year (before today) shows it too.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.5](popup/cases/event-cards-appearance.5.6.5.png) <!-- req-gallery:5.6.5 -->
+
+</td>
+<td valign="top">
+
+`5.6.5` For a **timed** event the pill is **time-of-day aware** — an event earlier
+**today** whose start time has already passed shows the gray "past" pill (an
+all-day event, by contrast, is past only once its whole day has ended).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.6.6](popup/cases/event-cards-appearance.5.6.6.png) <!-- req-gallery:5.6.6 -->
+
+</td>
+<td valign="top">
+
+`5.6.6` The pill is decided **per chip**: within a grouped card each instance
+button is marked by its **own** time — a showing that has already passed carries
+the "past" pill while a later showing the same day does not.
 
 </td>
 </tr>
@@ -1382,7 +1420,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Validated against [visit-tel-aviv](extractor/expected/visit-tel-aviv.json)._ <!-- req-gallery:11.15 -->
+🧩 _Validated against [visit-tel-aviv](extractor/expected/visit-tel-aviv.json), [timed](extractor/expected/visit-tel-aviv-timed.json)._ <!-- req-gallery:11.15 -->
 
 </td>
 <td valign="top">
