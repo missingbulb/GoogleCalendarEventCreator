@@ -10,6 +10,9 @@
 # (GitHub silently drops an unknown label on issue creation — create it once,
 # see the doc).
 name: Claudinite lesson hand-off
+# Distinct per-run title so this (unrelated) label-routed workflow doesn't read as
+# the issue title alongside the extractor phases in the Actions list.
+run-name: "Claudinite lesson hand-off · #${{ github.event.issue.number }}"
 
 on:
   issues:

@@ -1,4 +1,9 @@
 name: Auto-implement extractor (prepare)
+# Distinct per-run title so this phase is discernible in the Actions list (every
+# `issues: labeled` event fires all the label-routed workflows; without this each
+# run shows only the issue title). Evaluated at run start — there's no way to
+# rename a run afterwards.
+run-name: "Prepare extractor · #${{ github.event.issue.number }} — ${{ github.event.issue.title }}"
 
 # Triggered when the 'extractor-request' label is added to an issue.
 # Triages the request, then prepares a branch with the event page downloaded
