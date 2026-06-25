@@ -87,5 +87,4 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [File descriptions](dev/procedures/this_project/fileDescriptions.md) — the per-file map.
 - [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](dev/release/releasing.md) — building the zip and publishing to the Chrome Web Store.
-- [Resources](dev/procedures/resources.md) — external references relevant to the project.
 - Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/claude/`).
