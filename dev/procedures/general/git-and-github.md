@@ -1,11 +1,9 @@
 # Portable git & GitHub procedures (local working set)
 
-Portable git/GitHub gotchas captured **in this repo** that haven't (yet) been
-promoted into the shared canon
-([claude/shared/git-and-github.md](../claude/shared/git-and-github.md)), which is
-what the rest of the docs link to. The daily **optimize-procedures** routine
-promotes generalizable items from here up; once the canon absorbs one, the local
-copy is pruned.
+Portable git/GitHub gotchas captured here, not yet in the shared canon
+([claude/shared/git-and-github.md](../claude/shared/git-and-github.md)).
+`optimize-procedures` promotes these up and prunes them once the canon absorbs
+them (capture is always local — see [claude/workflow.md](../claude/workflow.md)).
 
 ## Sync early to keep merge conflicts small
 

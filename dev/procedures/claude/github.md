@@ -11,7 +11,7 @@ shared rules: [shared/git-and-github.md](shared/git-and-github.md). The two
 owner-triggered defined instructions that also land through this PR flow — "bump
 version" and "learned lessons" — keep their definitions in
 [workflow.md](workflow.md) (they reference the flow here). Portable git/GitHub
-gotchas captured here but **not yet** in the canon live in the local working set
+gotchas not yet in the canon are in
 [../general/git-and-github.md](../general/git-and-github.md).
 
 ## Merge to main command
@@ -46,9 +46,9 @@ against the branch, and a UI change's reviewable output (the pixel diff GitHub
 renders, and the inline gallery in the branch's `dev/requirements/requirements.md`)
 needs a branch pushed to GitHub to view at all.
 
-(Three portable CI/automation rules that used to live here — `GITHUB_TOKEN`
-doesn't trigger another workflow, an automated job needs a unique branch per run,
-and a workflow adding a brand-new label must create it first — now live in
+(Three portable CI/automation rules — `GITHUB_TOKEN` doesn't trigger another
+workflow, an automated job needs a unique branch per run, and a workflow adding a
+brand-new label must create it first — are in
 [shared/git-and-github.md](shared/git-and-github.md). This repo's auto-extractor
 pipeline relies on all three; see [auto-extractor.md](../this_project/auto-extractor.md).)
 
@@ -145,11 +145,9 @@ addition: when starting work on a branch, `git merge origin/main` (or rebase) **
 run `npm run regen`** first, so the branch carries freshly-generated artifacts, not
 just the latest sources.
 
-The generic cross-branch merge gotchas that aren't specific to this repo's
-generated files — merging across a file relocation, merging in content that
-predates a branch-wide invariant, and porting old work forward across a changed
-invariant — live in the shared rules:
-[shared/git-and-github.md](shared/git-and-github.md). Two portable git-mv gotchas
-captured here but not yet in the canon (renaming a directory that houses a
-submodule; re-reading a moved file before rewriting it) now live in the local
-working set [../general/git-and-github.md](../general/git-and-github.md).
+The generic cross-branch merge gotchas — merging across a file relocation,
+merging in content that predates a branch-wide invariant, and porting old work
+forward across a changed invariant — are in
+[shared/git-and-github.md](shared/git-and-github.md); two more git-mv gotchas
+(renaming a directory that houses a submodule; re-reading a moved file before
+rewriting it) are in [../general/git-and-github.md](../general/git-and-github.md).

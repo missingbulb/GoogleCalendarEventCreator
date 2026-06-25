@@ -1,11 +1,9 @@
 # Working discipline (local working set)
 
-Portable working-discipline practices captured **in this repo** that haven't (yet)
-been promoted into the shared canon
-([claude/shared/working-discipline.md](../claude/shared/working-discipline.md)),
-which is what the rest of the docs link to. The daily **optimize-procedures**
-routine promotes generalizable items from here up; once the canon absorbs one, the
-local copy is pruned.
+Portable working-discipline practices captured here, not yet in the shared canon
+([claude/shared/working-discipline.md](../claude/shared/working-discipline.md)).
+`optimize-procedures` promotes these up and prunes them once the canon absorbs
+them (capture is always local — see [claude/workflow.md](../claude/workflow.md)).
 
 ## An approval applies only backward
 
