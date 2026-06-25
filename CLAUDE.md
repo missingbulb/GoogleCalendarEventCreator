@@ -16,12 +16,11 @@ own file under `dev/procedures/claude/` and is imported here:
 @dev/procedures/claude/auto-optimize-procedures.md
 @dev/procedures/general/textAndFileManipulation.md
 
-The project's top-level architectural rules of the road live in
-`dev/procedures/architectureGuidelines.md` (imported below). Whenever we agree on a new or
-changed top-level architectural guideline, update that file as part of the same
-change.
-
-@dev/procedures/architectureGuidelines.md
+The project's top-level architectural rules of the road live in the "Architecture
+rules of the road" section of
+[`dev/procedures/this_project/highLevelDesign.md`](dev/procedures/this_project/highLevelDesign.md).
+Whenever we agree on a new or changed top-level architectural guideline, update
+that section as part of the same change.
 
 All requirements-related documents and the tests that validate them live in one
 top-level folder, `dev/requirements/`. How requirements are modeled (a

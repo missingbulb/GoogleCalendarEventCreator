@@ -2,7 +2,7 @@
 
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
-live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
+live in [this_project/highLevelDesign.md](this_project/highLevelDesign.md); project-agnostic
 engineering practices in [engineeringPractices.md](claude/shared/engineeringPractices.md).
 
 **Scope — project-wide footguns only.** A trap you'd only trip over *while

@@ -193,7 +193,7 @@ IIFE, as `meetup.js` does, rather than touch `extension/event-extractors/helpers
 `.github/workflows/finalize-extractor.yml`, on `extractor-agent-done`. This is the
 **external enforcement** of the agent's containment — it runs in a runner the agent
 doesn't control, so the blast-radius guard is a guarantee rather than a request
-(`dev/procedures/architectureGuidelines.md`). It:
+(`dev/procedures/this_project/highLevelDesign.md`). It:
 
 1. **Re-derives the names** (`derive-names.js` → `plan-names.js`) from the issue's
    event URL — the same `mode`/`sourceBase`/`caseName`/`branch`/`host` Phase 1 used,

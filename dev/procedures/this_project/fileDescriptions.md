@@ -1,9 +1,9 @@
 # File descriptions
 
-A per-file map of the repo. See [highLevelDesign.md](../highLevelDesign.md) for how
-extraction works, [requirements.md §12–§16](../../requirements/requirements.md) for what the
-extension does, and [architectureGuidelines.md](../architectureGuidelines.md) for
-the rules of the road.
+A per-file map of the repo. See [highLevelDesign.md](highLevelDesign.md) for how
+extraction works (and its "rules of the road" section), and
+[requirements.md §12–§16](../../requirements/requirements.md) for what the
+extension does.
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |

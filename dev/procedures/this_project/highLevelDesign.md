@@ -1,14 +1,31 @@
 # High-level design
 
 How the extension is built. What it shows and when — the product behavior — is
-in [requirements.md §12–§16](../requirements/requirements.md); the per-file map is in
-[fileDescriptions.md](this_project/fileDescriptions.md); top-level rules of the road are in
-[architectureGuidelines.md](architectureGuidelines.md).
+in [requirements.md §12–§16](../../requirements/requirements.md); the per-file map is in
+[fileDescriptions.md](fileDescriptions.md); tunable product decisions live in
+`extension/config.js`.
 
 `toolbar-icon.js` colors the toolbar icon by host (a source matches or it doesn't). On
 click, `popup.js` injects `event-extractors/` and runs `assemble-events.js`, which picks
 the matching `custom/<site>.js` (or `extract-unsupported.js`);
 `build-calendar-url.js` builds the URL `events-view.js` renders.
+
+## Architecture rules of the road
+
+Overarching rules for *how we build this* (whenever we agree on a new or changed
+top-level architectural guideline, update this section as part of the same change):
+
+- Adding support for a new host is the most common change — the architecture must
+  keep it a single, self-contained new file
+  (`extension/event-extractors/custom/<site>.js`) plus regenerating the load list,
+  touching nothing else and assuming nothing about other extractors.
+
+Portable agent-architecture principles that aren't specific to this project (the
+unattended-agent judgment boundary, the bounded-and-enforced write surface) live
+in the shared rules:
+[claude/shared/agent-architecture.md](../claude/shared/agent-architecture.md). The
+worked examples for both are this repo's auto-extractor pipeline
+([claude/auto-extractor.md](../claude/auto-extractor.md)).
 
 ## How extraction works
 
@@ -41,7 +58,7 @@ keys off `supported`, the host's classification against `extension/config.js`'s
 `sourceFallbackDenylist` / `sourceFallbackAllowlist` (via `extension/fallback-policy.js`),
 and whether the fallback event is complete (title + location + start). The five
 resulting states — and what the toolbar icon means alongside them — are specified
-in [requirements.md §12–§16](../requirements/requirements.md).
+in [requirements.md §12–§16](../../requirements/requirements.md).
 
 ## Where decisions live
 
@@ -51,20 +68,11 @@ make output decisions — rendering, whitespace collapse, de-dup, sorting, and
 timezone normalization all live in helpers, applied uniformly — except where it
 must encode its own host's constraints (which elements to read, a fixed `ctz`, a
 yearless date format). So the product rules in
-[requirements.md §12–§16](../requirements/requirements.md) — line-break-preserving
+[requirements.md §12–§16](../../requirements/requirements.md) — line-break-preserving
 descriptions, chronological one-card-per-event, multi-instance grouping (an
 event's showings carried in `times[]` and folded into one card), floating vs.
 absolute times, the default duration and the card cap — are implemented once, in
 helpers, `extension/event-extractors/assemble-events.js`, and `extension/config.js`, never per source.
-
-## Timezone handling
-
-A source emits a date in one of three shapes: a floating local time (no offset),
-an exact instant (an offset or trailing `Z`), or a date with no time. The shared
-helpers pass a floating time straight through and convert an instant to UTC. A
-source that knows an event's location is fixed (e.g. a festival that only runs in
-one city) sets `ctz` to that timezone (e.g. `"GB"`), which is passed straight
-through as the Calendar URL's `ctz` parameter; when `ctz` is set, an absolute
-start/end is re-expressed as the floating local wall-clock time in that zone, so
-the value reads as the event's own city shows it and `ctz` places it correctly
-for any viewer.
+The timezone rules in particular — floating local vs. exact instant vs. a
+fixed-city `ctz` — are specified in
+[requirements.md §15](../../requirements/requirements.md).

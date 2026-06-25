@@ -19,7 +19,7 @@ unattended, so most days it correctly adds **nothing**.
    than adding nothing.
 4. **Route each to the doc that owns it**, keeping every addition terse: gotchas →
    `dev/procedures/technicalGotchas.md`, practices → `dev/procedures/engineeringPractices.md`,
-   architecture → `dev/procedures/architectureGuidelines.md`, project mechanics →
+   architecture → `dev/procedures/this_project/highLevelDesign.md`, project mechanics →
    `dev/procedures/claude/*`.
 5. **Most days: nothing** — no branch, no PR, no edits. That's what keeps the
    digest worth reading.
