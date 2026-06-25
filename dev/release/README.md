@@ -1,10 +1,10 @@
-# Deployment assets
+# Release assets
 
 Chrome Web Store **listing** assets and the icon generator — used when
 publishing. The screenshot here is **not** shipped in the extension zip
-(`.github/workflows/shipping-files.js` excludes `dev/deployment/`); the icons are
-generated into `extension/icon/images/` (which does ship). For the end-to-end publish
-steps see [`../procedures/releasing.md`](../procedures/releasing.md).
+(`dev/release/shipping-files.js` ships only `extension/`, so `dev/release/` is
+excluded); the icons are generated into `extension/icon/images/` (which does
+ship). For the end-to-end publish steps see [`releasing.md`](releasing.md).
 
 | File | What it is | Where it goes |
 |------|------------|---------------|
@@ -36,5 +36,5 @@ the store listing icon):
 Regenerate (deterministic — an unchanged run produces no diff):
 
 ```sh
-python3 dev/deployment/generate_icons.py
+python3 dev/release/generate_icons.py
 ```

@@ -28,7 +28,7 @@ Grab the packaged extension — just the files that ship, not the whole repo:
 1. Download
    [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
    (`google-calendar-event-creator.zip`, built by the
-   [Release: Create Package workflow](dev/procedures/releasing.md#creating-a-release-package)) and extract
+   [Release: Create Package workflow](dev/release/releasing.md#creating-a-release-package)) and extract
    it. It unpacks into a folder containing `manifest.json` — that folder is the
    one to load. As a secondary
    option, download
@@ -86,6 +86,6 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [High-level design](dev/procedures/this_project/highLevelDesign.md) — how extraction works, plus the top-level architecture rules of the road.
 - [File descriptions](dev/procedures/this_project/fileDescriptions.md) — the per-file map.
 - [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
-- [Releasing](dev/procedures/releasing.md) — building the zip and publishing to the Chrome Web Store.
+- [Releasing](dev/release/releasing.md) — building the zip and publishing to the Chrome Web Store.
 - [Resources](dev/procedures/resources.md) — external references relevant to the project.
 - Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/claude/`).

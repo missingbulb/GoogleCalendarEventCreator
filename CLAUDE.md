@@ -28,6 +28,13 @@ numbered breakdown where every leaf has an external validation case) and how to
 add one (with the available case kinds and when to use `tbd`/untested) are
 documented in [dev/requirements/README.md](dev/requirements/README.md).
 
+For all release-related actions — building the shippable zip, the
+version-bump → release flow, publishing to the Chrome Web Store, and the listing
+assets / icon generator — everything is self-contained in
+[`dev/release/`](dev/release/) (start at [`dev/release/releasing.md`](dev/release/releasing.md)).
+Look there **only** when you're actually cutting or publishing a release; it's not
+needed for day-to-day development.
+
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `dev/procedures/technicalGotchas.md` (imported below).
 
