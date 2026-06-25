@@ -129,7 +129,10 @@ trap spanning files. See the full locality rule in
   actual data — JSON-LD or a parsed date — not merely a host match.
 - **Two portable GitHub gotchas this repo relies on — large fixtures need
   `linguist-vendored`, and Markdown inside a raw `<td>` needs surrounding blank
-  lines** — now live in the local working set
+  lines.** The `linguist-vendored` rule now lives in the shared canon
+  [claude/shared/git-and-github.md](claude/shared/git-and-github.md); the `<td>`
+  blank-lines rule (with this repo's `<!-- … -->`-marker-last-token nuance, not yet
+  upstreamed) is in the local working set
   [general/git-and-github.md](general/git-and-github.md). Here they apply to the
   `dev/requirements/extractor/data/*.html` fixtures (`.gitattributes`, #78) and the
   two-column gallery in `dev/requirements/requirements.md`

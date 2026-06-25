@@ -49,14 +49,6 @@ single refused write buried in a batch is easy to miss, and the stale
 (moved-but-not-rewritten) file surfaces much later as a confusing error far from its
 cause.
 
-## Mark large committed fixtures `linguist-vendored` to fix language stats
-
-Large committed fixture files (full-page HTML, generated data dumps) can dwarf the
-actual source by byte count and make GitHub mislabel the repo's primary language.
-Add a `.gitattributes` entry for each such path (e.g. `test/fixtures/*.html
-linguist-vendored`) so Linguist ignores it; apply the same annotation whenever you
-add another large generated or fixture file.
-
 ## GitHub renders Markdown inside a `<td>` only with surrounding blank lines
 
 GitHub's cmark-gfm re-enters Markdown mode inside a raw `<td>` only when blank
