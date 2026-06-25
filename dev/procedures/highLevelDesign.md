@@ -2,7 +2,7 @@
 
 How the extension is built. What it shows and when — the product behavior — is
 in [requirements.md §12–§16](../requirements/requirements.md); the per-file map is in
-[fileDescriptions.md](fileDescriptions.md); top-level rules of the road are in
+[fileDescriptions.md](this_project/fileDescriptions.md); top-level rules of the road are in
 [architectureGuidelines.md](architectureGuidelines.md).
 
 `toolbar-icon.js` colors the toolbar icon by host (a source matches or it doesn't). On

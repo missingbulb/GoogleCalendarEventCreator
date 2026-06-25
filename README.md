@@ -85,7 +85,7 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [Executable requirements](dev/requirements/README.md) — how requirements are modeled (a numbered breakdown where every leaf has a validating case) and how to add one.
 - [Requirements](dev/requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
 - [High-level design](dev/procedures/highLevelDesign.md) — how extraction works.
-- [File descriptions](dev/procedures/fileDescriptions.md) — the per-file map.
+- [File descriptions](dev/procedures/this_project/fileDescriptions.md) — the per-file map.
 - [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](dev/procedures/releasing.md) — building the zip and publishing to the Chrome Web Store.
 - [Resources](dev/procedures/resources.md) — external references relevant to the project.

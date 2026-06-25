@@ -2,7 +2,7 @@
 
 Overarching rules for *how we build this*. Specific design decisions and the
 mechanics live in [highLevelDesign.md](highLevelDesign.md) /
-[fileDescriptions.md](fileDescriptions.md); product behavior lives in
+[fileDescriptions.md](this_project/fileDescriptions.md); product behavior lives in
 [requirements.md §12–§16](../requirements/requirements.md); tunable product decisions live
 in `extension/config.js`.
 
