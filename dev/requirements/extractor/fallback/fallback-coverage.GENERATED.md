@@ -8,13 +8,13 @@ What the generic **fallback** extractor (`extension/event-extractors/extract-uns
 
 ## Score
 
-Headline coverage over all 28 cases in the corpus:
+Headline coverage over all 29 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **52.4%** | 44 / 84 |
-| **All fields** | **34.9%** | 59 / 169 |
-| Event coverage *(informational)* | 22.2% | 34 / 153 |
+| **Critical fields** (title + start + location) | **52.9%** | 46 / 87 |
+| **All fields** | **35.5%** | 61 / 172 |
+| Event coverage *(informational)* | 35.7% | 66 / 185 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 52.4% | 52.4% | ✓ |
-| All fields | 34.9% | 34.9% | ✓ |
+| Critical fields | 52.9% | 52.9% | ✓ |
+| All fields | 35.5% | 35.5% | ✓ |
 
-Gated over **28** shared case(s).
+Gated over **29** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
@@ -33,10 +33,10 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 28 | 20 | 2 | 6 | 71.4% |
-| `start` **(critical)** | 28 | 12 | 10 | 6 | 42.9% |
+| `title` **(critical)** | 29 | 21 | 2 | 6 | 72.4% |
+| `start` **(critical)** | 29 | 13 | 10 | 6 | 44.8% |
 | `end` | 19 | 11 | 0 | 8 | 57.9% |
-| `location` **(critical)** | 28 | 12 | 3 | 13 | 42.9% |
+| `location` **(critical)** | 29 | 12 | 4 | 13 | 41.4% |
 | `ctz` | 27 | 0 | 0 | 27 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
 | `description` | 28 | 4 | 13 | 11 | 14.3% |
@@ -53,6 +53,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `eventbrite.com` | 2 | 2/2 | 100% | 57.1% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 66.7% |
 | `events.datadoghq.com` | 1 | 1/1 | 0% | 0% |
+| `livenation.de` | 1 | 32/32 | 66.7% | 66.7% |
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
@@ -80,6 +81,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `eventbrite-games-for-change` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ~ |
 | `eventim-co-il-the90sshow` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `events-datadoghq` | 1/1 | ~ | ~ | — | ✗ | ✗ | — | ~ |
+| `livenation` | 39/32 | ✓ | ✓ | — | ~ | — | — | — |
 | `luma-event` | 1/1 | ✓ | ✓ | ✓ | ~ | ✗ | — | ✓ |
 | `meetup-fusion-la-israel` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-nyc-tech-mixer` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
