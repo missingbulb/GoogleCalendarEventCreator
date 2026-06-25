@@ -14,16 +14,11 @@ inline gallery
 `https://github.com/<owner>/<repo>/blob/<branch>/dev/requirements/requirements.md`, each
 requirement with its snapshot beside it — for one-page review.
 
-When the owner asks to **show** or **see** a visual artifact (a snapshot, a diff,
-a generated diagram), deliver the actual image **into the chat**, not a path or a
-link — surface the file itself so it renders inline; a link makes the owner go
-fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact
-nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
-
-When a change to a `dev/requirements/<kind>/cases/*` case — its spec or its rendering — makes
-the snapshot tests **fail** (the pixels moved), don't silently regenerate the
-baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel
-change is never auto-accepted. The process:
+The general principle — a moved snapshot/golden baseline needs owner approval, not
+silent regeneration — is in
+[../general/testingPractices.md](../general/testingPractices.md). The project
+process when a change to a `dev/requirements/<kind>/cases/*` case (its spec or its
+rendering) makes the snapshot tests **fail** (the pixels moved):
 
 1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
    committed **expected** PNG, run the snapshot test so it fails (the harness

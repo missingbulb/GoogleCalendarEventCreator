@@ -24,3 +24,24 @@ broken production path — two that recur:
   splices the `<noscript>` markup into the value in Chrome (which, scripting on,
   keeps `<noscript>` as raw text). To reproduce the browser, parse a script-free
   fragment with `runScripts: "dangerously"`.
+
+## A moved snapshot / golden baseline needs owner approval, not silent regeneration
+
+When a change makes a snapshot/golden test fail because the *output* legitimately
+moved (the pixels or bytes changed), don't quietly regenerate the baseline to make
+the suite green — an unreviewed baseline change is an unreviewed behavior change.
+Surface the diff (the committed **expected**, the newly-rendered **actual**, and a
+highlighted **diff**) and get explicit owner approval before re-baselining. While
+waiting, keep the *reverted* (expected) baseline committed so the branch honestly
+shows the test red-pending — never commit the new baseline first. On approval,
+regenerate and confirm green; on rejection, leave the change in place and discuss.
+
+## Render time-dependent tests against a pinned reference "now", not the wall clock
+
+Any test whose output depends on the current date/time (a "past"/"upcoming" badge, a
+relative date) rots as the wall clock advances if it reads the real clock — a
+snapshot authored today silently changes meaning next month. Thread a single pinned
+reference instant into every test entry point and render against that, so
+date-bearing snapshots stay deterministic forever. Author neutral cases on or after
+the pinned day so they don't accidentally trip a date-dependent branch; reach for a
+past or future date only when a case is deliberately pinning that branch.

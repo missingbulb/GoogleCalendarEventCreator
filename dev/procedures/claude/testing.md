@@ -124,10 +124,11 @@ doc, when the mechanics change.
   per-case `kind` field, then removed even that field: a case now lives under
   `<kind>/cases/`, so the **folder is the single classifier** and adding a kind is a
   self-contained folder drop (`<kind>/kind.js`, auto-discovered by
-  `dev/requirements/shared/kinds.js`). The lesson generalizes: collapse parallel
-  classifiers to one, and prefer a structural classifier (location) the code can't
-  desync from over a hand-set field.
-- **Requirement tests render against a pinned reference "now", not the real clock.**
+  `dev/requirements/shared/kinds.js`). (The general lesson — collapse parallel
+  classifiers, prefer a structural one the code can't desync from — is in
+  [../general/engineeringPractices.md](../general/engineeringPractices.md).)
+- **Requirement tests render against a pinned reference "now", not the real clock**
+  (the general rationale is in [../general/testingPractices.md](../general/testingPractices.md)).
   The popup's only date-dependent output is the card corner-pill (`events-view.js`
   `cornerPill` — a gray "past" pill for an event before today, a green year pill for
   a future year, none for a current/upcoming date), so a single pinned instant

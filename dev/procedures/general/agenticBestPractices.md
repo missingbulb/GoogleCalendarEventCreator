@@ -31,6 +31,8 @@ usually just whatever is captured-but-not-yet-upstreamed.
   design-exploration complement to the existing "drive snapshots through the real
   code path" and snapshot-review rules, which only kick in *after* a change exists.)
 
+- **When the user asks to *show* or *see* a visual artifact, deliver the image into the chat — not a path or a link.** Surface the file itself so it renders inline; a link or a bare path makes the user go fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
+
 - **After merging a PR back to main, start follow-up work on a NEW branch — don't
   reuse the just-merged branch.** When the repo auto-deletes the head branch on
   merge, the remote branch vanishes while a stale local tracking ref lingers; a
