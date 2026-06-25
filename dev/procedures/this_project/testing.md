@@ -20,7 +20,7 @@ green-twice-before-merge, snapshot-through-the-real-code-path, high-watermark
 gating, self-diagnosing remote tests — lives in
 [`../general/engineeringPractices.md`](../general/engineeringPractices.md) and
 [`../general/testingPractices.md`](../general/testingPractices.md); jsdom-vs-Chrome
-traps live in [`../technicalGotchas.md`](../technicalGotchas.md). This file is the
+traps live in [`technicalGotchas.md`](technicalGotchas.md). This file is the
 project-specific testing decisions plus how to run and extend the suites. The
 detailed mechanics of each test harness live as comments **in that harness**
 (mapped at the end), not here — edit the comment, not this doc, when the mechanics
@@ -227,7 +227,7 @@ against that commit ever re-triggering CI.
 ### Adding a cached integration case
 
 New cached HTML can't be fetched here (the sandbox is bot-blocked — see
-[`../technicalGotchas.md`](../technicalGotchas.md)), so record the cached HTML *before* writing the case
+[`technicalGotchas.md`](technicalGotchas.md)), so record the cached HTML *before* writing the case
 and read its exact `expected` off the committed file instead of guessing:
 
 1. Commit two new files — but **not** the case file yet:
@@ -378,7 +378,7 @@ lives in the file's own header/inline comments, so it can't drift from the code.
 Read the file when you touch it; the one-liners here are just a map. (This same
 co-location applies to **any** file-local footgun, not just harness mechanics — a
 commission-while-editing trap goes in the file's header comment rather than
-[`../technicalGotchas.md`](../technicalGotchas.md); see the locality rule in
+[`technicalGotchas.md`](technicalGotchas.md); see the locality rule in
 [workflow.md](workflow.md).)
 
 - **Fallback-coverage gate** — `dev/requirements/extractor/fallback/fallback-coverage.js`

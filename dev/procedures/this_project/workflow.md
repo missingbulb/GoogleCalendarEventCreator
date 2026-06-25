@@ -90,9 +90,9 @@ Claudinite. Route by scope:
   `dev/procedures/this_project/` (adding-a-source, auto-extractor);
   top-level project architecture rules to the "Architecture rules of the road"
   section of `dev/procedures/this_project/highLevelDesign.md`;
-  non-obvious **project-wide** codebase footguns to `dev/procedures/technicalGotchas.md`
+  non-obvious **project-wide** codebase footguns to `dev/procedures/this_project/technicalGotchas.md`
   (file-local footguns go in the file instead — see the next bullet).
-- **File-local** footguns go in the file, not `dev/procedures/technicalGotchas.md`. A trap
+- **File-local** footguns go in the file, not `dev/procedures/this_project/technicalGotchas.md`. A trap
   you'd only trip over *while editing one specific file or function* — a mistake
   of **commission** you make with that file open in front of you — belongs in
   that file's **top-of-file header comment** (the self-documenting convention

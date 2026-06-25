@@ -40,7 +40,7 @@ produced by CI — is in
 [../general/git-and-github.md](../general/git-and-github.md). In this repo that
 means a change that adds or modifies an e2e/heavy-browser (`dev/requirements/heavy/`)
 or UI-snapshot (`dev/requirements/{popup,icon}/`) test: those can't be exercised
-locally (the sandbox has no Chrome; see [../technicalGotchas.md](../technicalGotchas.md)),
+locally (the sandbox has no Chrome; see [technicalGotchas.md](technicalGotchas.md)),
 and their reviewable artifacts only exist on a PR — CI runs the heavy/e2e suites
 against the branch, and a UI change's reviewable output (the pixel diff GitHub
 renders, and the inline gallery in the branch's `dev/requirements/requirements.md`)

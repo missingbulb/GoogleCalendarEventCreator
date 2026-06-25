@@ -1597,7 +1597,7 @@ here: the rendered §4–§5 requirements are the executable contract.
 
 ## 14. Event fields
 
-Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `dev/procedures/technicalGotchas.md`).
+Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `dev/procedures/this_project/technicalGotchas.md`).
 
 <table>
 <tr>

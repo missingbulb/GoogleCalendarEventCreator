@@ -36,9 +36,9 @@ Look there **only** when you're actually cutting or publishing a release; it's n
 needed for day-to-day development.
 
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
-time — live in `dev/procedures/technicalGotchas.md` (imported below).
+time — live in `dev/procedures/this_project/technicalGotchas.md` (imported below).
 
-@dev/procedures/technicalGotchas.md
+@dev/procedures/this_project/technicalGotchas.md
 
 General engineering and agentic practices learned **in this repo** are captured
 locally in the working-set docs below (capture is always local — see

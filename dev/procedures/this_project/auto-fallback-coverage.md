@@ -43,7 +43,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
   `grep -n "<value>" data/<case>.html` and reject it if it lives inside a
   `<script>` or hidden markup. A real win comes from visible text or a
   Chrome-read DOM attribute (meta / JSON-LD / microdata / `<time datetime>`).
-  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../technicalGotchas.md).)
+  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](technicalGotchas.md).)
 - **(b) deliberate decisions.** Some misses are intentional and pinned by a unit
   test (e.g. a date with intervening non-separator text before its time is
   all-day, in `extension-test/event-extractors/extraction.test.js`). Never "fix" what a test

@@ -2,8 +2,8 @@
 
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
-live in [this_project/highLevelDesign.md](this_project/highLevelDesign.md); project-agnostic
-engineering practices in [engineeringPractices.md](claude/shared/engineeringPractices.md).
+live in [this_project/highLevelDesign.md](highLevelDesign.md); project-agnostic
+engineering practices in [engineeringPractices.md](../claude/shared/engineeringPractices.md).
 
 **Scope — project-wide footguns only.** A trap you'd only trip over *while
 editing one specific file or function* (a mistake of **commission**, made with
@@ -13,7 +13,7 @@ stays off the always-loaded `CLAUDE.md` budget. Keep an entry here only when
 Claude could hit it *without* reading the locus file — a mistake of **omission**
 (you must know it to decide whether to open/avoid the file) or a cross-cutting
 trap spanning files. See the full locality rule in
-[this_project/workflow.md](this_project/workflow.md).
+[this_project/workflow.md](workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
   us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in
@@ -69,17 +69,13 @@ trap spanning files. See the full locality rule in
   tab/event listeners a test can trigger, attaching to the target is what starts
   it, and the first read still races startup — so **poll** until the global
   appears. (Bound every probe and add a test-level timeout regardless, per the
-  hang-proofing rule in [engineeringPractices.md](claude/shared/engineeringPractices.md).)
+  hang-proofing rule in [engineeringPractices.md](../claude/shared/engineeringPractices.md).)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
   with the rest of the portable GitHub procedures in
-  [claude/shared/git-and-github.md](claude/shared/git-and-github.md).
-- **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
-  bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
-  cloud sandbox); `jsdom` is a test-only devDependency loaded by `extension-test/harness.js`.
-  Run `npm install` and re-run — don't look for another cause first.
+  [claude/shared/git-and-github.md](../claude/shared/git-and-github.md).
 - **Bot-blocking from CI is by datacenter IP (the general rule is in
-  [general/engineeringPractices.md](general/engineeringPractices.md)); here the
+  [general/engineeringPractices.md](../general/engineeringPractices.md)); here the
   escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
   only page fetch (`record_page` in
   `dev/tools/new-extractors-creation/phase1-prepare.sh`) routes through ScraperAPI's
@@ -95,7 +91,7 @@ trap spanning files. See the full locality rule in
   text), and the default `runScripts: "outside-only"` parses `<noscript>` into live
   DOM (the opposite of a real browser). Both let a green test hide a broken live
   extraction; they're portable test-harness gotchas, documented in
-  [general/testingPractices.md](general/testingPractices.md). In this repo they bit
+  [general/testingPractices.md](../general/testingPractices.md). In this repo they bit
   the body-text scan, `extension-test/harness.js`, and `custom/telavivcinematheque.js`
   (#130 / #137).
 - **The shared `GCal` global is assembled by many files and re-injected on every
@@ -111,7 +107,7 @@ trap spanning files. See the full locality rule in
 - **The cloud Setup script runs as root starting in the repo's parent dir
   (`/home/user`), not the checkout** — a project instance of the general
   "setup script may start above the checkout" rule in
-  [general/engineeringPractices.md](general/engineeringPractices.md). A bare
+  [general/engineeringPractices.md](../general/engineeringPractices.md). A bare
   `npm ci` there finds no `package.json` and silently installs nothing (the tests
   then trigger a confusing mid-session install); `.claude/cloud-setup.sh` must `cd`
   into the checkout first. (#186 / #196)
@@ -130,10 +126,10 @@ trap spanning files. See the full locality rule in
 - **Two portable GitHub gotchas this repo relies on — large fixtures need
   `linguist-vendored`, and Markdown inside a raw `<td>` needs surrounding blank
   lines.** The `linguist-vendored` rule now lives in the shared canon
-  [claude/shared/git-and-github.md](claude/shared/git-and-github.md); the `<td>`
+  [claude/shared/git-and-github.md](../claude/shared/git-and-github.md); the `<td>`
   blank-lines rule (with this repo's `<!-- … -->`-marker-last-token nuance, not yet
   upstreamed) is in the local working set
-  [general/git-and-github.md](general/git-and-github.md). Here they apply to the
+  [general/git-and-github.md](../general/git-and-github.md). Here they apply to the
   `dev/requirements/extractor/data/*.html` fixtures (`.gitattributes`, #78) and the
   two-column gallery in `dev/requirements/requirements.md`
   (`dev/requirements/shared/build-requirements-gallery.js`).
