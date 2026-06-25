@@ -139,7 +139,8 @@ ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)
    (`dev/requirements/extractor/data/<caseName>.url` → `record_page`, a `curl -f`
    through ScraperAPI with `render=true` so a JS single-page-app records real data,
    asserted non-empty — an **undownloadable page fails the job here**, and the
-   "Comment on failure" step then hands the issue to a human); then, **in
+   "Comment on failure and hand off to a human" step then drops `extractor-request`
+   and adds `extractor-blocked-needs-human`); then, **in
    new-source mode**, scaffolds `extension/event-extractors/custom/<slug>.js` with `matches()` filled
    (`scaffold-source.js`) + the placeholder case (`scaffold-case.js`), registers the
    host in `supportedDomains` (`add-supported-domain.js`), and runs `npm run index`;
@@ -290,12 +291,16 @@ download that still fails is a genuine break):
   the agent adds a fresh integration case (hardening that source), which finalize
   turns into a PR like any other. (A page that turns out not to be one usable event
   still bails via Stage 2 / the quality floor, same as new-source mode.)
-- **Page can't be downloaded → red build** (failure, prepare) — Phase 1's
-  `record_page` couldn't fetch the page (a missing URL, or ScraperAPI couldn't
-  deliver it — non-2xx / network error / timeout), so `curl -f` fails the job. No
-  agent involved. Unlike the other stops this one is **red**: the "Comment on
-  failure" step posts the generic failure comment pointing at the manual process
-  (`adding-a-source.md`). It isn't fixable by a re-run.
+- **Page can't be downloaded → red build, handed to a human** (failure, prepare) —
+  Phase 1's `record_page` couldn't fetch the page (a missing URL, or ScraperAPI
+  couldn't deliver it — non-2xx / network error / timeout), so `curl -f` fails the
+  job. No agent involved. Unlike the other stops this one is **red**, but it still
+  flags the issue for a person: the "Comment on failure and hand off to a human"
+  step posts the failure comment pointing at the manual process
+  (`adding-a-source.md`) **and** drops `extractor-request` + adds
+  `extractor-blocked-needs-human` — the same human-triage signal the Stage 2 / Stage 3
+  stops use, so the issue doesn't sit looking like an unprocessed request. It isn't
+  fixable by a plain re-run; retrying means re-adding `extractor-request`.
 - **Bailed — not a single event** (green, Stage 2) — the agent judged the cached
   page a login or listing/index page (not one event), commented its diagnosis, and
   set `extractor-blocked-needs-human`. No PR; scaffolding stays on the branch.
@@ -306,7 +311,10 @@ download that still fails is a genuine break):
   opens, the link is commented, `extractor-agent-done` is cleared.
 - **Unexpected failure** (red) — only a genuine break reaches a `failure()`
   comment (in either workflow). Common causes: the scaffold baseline or the
-  re-verify went red; `npm ci` / page recording / git or PR work failed.
+  re-verify went red; `npm ci` / page recording / git or PR work failed. In the
+  **prepare** workflow this path also hands the issue to a human
+  (`extractor-blocked-needs-human`, dropping `extractor-request`), same as the
+  undownloadable-page case above.
 
 In any of these, fall back to the manual process in
 `dev/procedures/this_project/adding-a-source.md`.
