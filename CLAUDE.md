@@ -71,11 +71,10 @@ the daily `optimize-procedures` routine bridges them up to Claudinite (see
 [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
 and `dev/procedures/general/auto-optimize-procedures.md`). A fresh clone needs
 `git submodule update --init` (`.claude/cloud-setup.sh` runs it) or
-`dev/procedures/claude/shared/` is an empty folder and these imports resolve to nothing.
+`dev/procedures/claude/shared/` is an empty folder and this import resolves to nothing.
 
-@dev/procedures/claude/shared/engineeringPractices.md
-@dev/procedures/claude/shared/agenticBestPractices.md
-@dev/procedures/claude/shared/git-and-github.md
-@dev/procedures/claude/shared/working-discipline.md
-@dev/procedures/claude/shared/agent-architecture.md
-@dev/procedures/claude/shared/ownerPreferences.md
+We import only the submodule's own top-level `CLAUDE.md` — the single entry point
+Claudinite maintains — and let it traverse to the individual canon docs from there,
+so the list of shared files lives upstream and never has to be mirrored here.
+
+@dev/procedures/claude/shared/CLAUDE.md
