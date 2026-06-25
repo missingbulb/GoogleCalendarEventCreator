@@ -1,6 +1,6 @@
 // Logic leaf 16.1 (tracked, untested in the executable runner): "Suggest Correction" opens a prefilled GitHub "Event source request" issue.
 // Currently covered by extension-test/events-popup/source-request-view.test.js. Marked tbd until a faithful executable
-// validation is wired here (see dev/procedures/claude/testing.md on the kind:"logic" path).
+// validation is wired here (see dev/procedures/this_project/testing.md on the kind:"logic" path).
 "use strict";
 
 module.exports = {

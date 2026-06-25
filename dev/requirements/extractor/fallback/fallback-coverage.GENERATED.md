@@ -1,10 +1,10 @@
 # Fallback extractor coverage
 
-> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` (logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten whenever the tests run locally. See `dev/procedures/claude/testing.md`.
+> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` (logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten whenever the tests run locally. See `dev/procedures/this_project/testing.md`.
 
 What the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`) recovers on each integration-test page, compared to that page's **dedicated per-site source** — the reviewed-correct extraction the live test pins down. For every `dev/requirements/extractor/expected/*.json` page, `GCal.extract()` is run twice on the same cached HTML: once normally (custom) and once with the site registry emptied (fallback). We grade the fallback's **primary event** (`events[0]` after the chronological sort) field-by-field against the custom primary event, counting a field only when the custom event filled it.
 
-`start`/`end` count as a match when the values are byte-identical **or** resolve to the same absolute instant — a dedicated source localizing to a floating time via its `ctz` is the same moment as the fallback's offset-bearing time, not a miss (see `dev/procedures/claude/testing.md`). A floating time read an hour off, or a date that dropped its time, is a real miss.
+`start`/`end` count as a match when the values are byte-identical **or** resolve to the same absolute instant — a dedicated source localizing to a floating time via its `ctz` is the same moment as the fallback's offset-bearing time, not a miss (see `dev/procedures/this_project/testing.md`). A floating time read an hour off, or a date that dropped its time, is a real miss.
 
 ## Score
 

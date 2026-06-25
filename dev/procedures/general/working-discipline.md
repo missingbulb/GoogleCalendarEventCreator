@@ -3,7 +3,7 @@
 Portable working-discipline practices captured here, not yet in the shared canon
 ([claude/shared/working-discipline.md](../claude/shared/working-discipline.md)).
 `optimize-procedures` promotes these up and prunes them once the canon absorbs
-them (capture is always local — see [claude/workflow.md](../claude/workflow.md)).
+them (capture is always local — see [this_project/workflow.md](../this_project/workflow.md)).
 
 ## An approval applies only backward
 

@@ -4,7 +4,7 @@ name: "Release: Create Package"
 # currently committed in extension/manifest.json. It does NOT change the version — bumping
 # is a deliberate, human step (ask Claude to "bump version"; it edits
 # extension/manifest.json/package.json on a branch and lands on main via a normal PR — see
-# dev/procedures/claude/workflow.md).
+# dev/procedures/this_project/workflow.md).
 #
 # It runs automatically when a version bump merges to main (a push to main that
 # touches extension/manifest.json), so cutting a release is just "merge the bump PR". If

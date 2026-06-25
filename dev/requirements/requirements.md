@@ -24,7 +24,7 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
 > right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [`dev/procedures/claude/testing.md`](claude/testing.md). Likewise, the toolbar-icon leaves
+> [`dev/procedures/this_project/testing.md`](../procedures/this_project/testing.md). Likewise, the toolbar-icon leaves
 > (§10) are verified offline through a **fake Chrome**, so they pin the icon the
 > extension *generates*, not that real Chrome *paints* it — only the e2e test does
 > that.

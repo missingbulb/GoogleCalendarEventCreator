@@ -4,7 +4,7 @@ General engineering-practice lessons captured here, not yet in the shared canon
 ([claude/shared/engineeringPractices.md](../claude/shared/engineeringPractices.md)).
 `optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
 prunes them once the canon absorbs them (capture is always local — see
-[claude/workflow.md](../claude/workflow.md)).
+[this_project/workflow.md](../this_project/workflow.md)).
 
 - **A bug report you can't reproduce against HEAD may already be fixed but unreleased — check the SHIPPED version before theorizing about the cause.** A user runs the released build, not your checkout. When a reported behavior doesn't reproduce against `main`, compare the manifest/`package.json` version to the latest release and `git log -S"<the logic>"` the relevant code before inventing explanations. In #507 the "past" pill not showing was the released v1.3.0 deciding it by *year only*; the same-year fix had already merged to `main` but wasn't released — several wrong "mid-day / viewed-before-the-event" theories would have been skipped by checking the version first.
 

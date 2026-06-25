@@ -13,7 +13,7 @@ stays off the always-loaded `CLAUDE.md` budget. Keep an entry here only when
 Claude could hit it *without* reading the locus file — a mistake of **omission**
 (you must know it to decide whether to open/avoid the file) or a cross-cutting
 trap spanning files. See the full locality rule in
-[claude/workflow.md](claude/workflow.md).
+[this_project/workflow.md](this_project/workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
   us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in

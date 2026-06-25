@@ -5,7 +5,7 @@ shared canon
 ([claude/shared/agenticBestPractices.md](../claude/shared/agenticBestPractices.md)).
 `optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
 prunes them once the canon absorbs them (capture is always local — see
-[claude/workflow.md](../claude/workflow.md)).
+[this_project/workflow.md](../this_project/workflow.md)).
 
 - **For an open-ended visual/layout requirement, render real candidate designs and
   let the owner pick — before building one.** When the spec leaves *how it looks or

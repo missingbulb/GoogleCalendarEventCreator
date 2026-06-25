@@ -322,7 +322,7 @@ The agent never merges the PR. A human must review:
   existing source — that the diff is a minimal, correct change (no refactor, no
   regression to the other cases the source already covers).
 
-"LGTM" from the repo owner is the merge signal (see `dev/procedures/claude/github.md`). CI
+"LGTM" from the repo owner is the merge signal (see `dev/procedures/this_project/github.md`). CI
 must go green before merging; the extractor branch adds a deterministic offline
 integration case (not an e2e/heavy-browser test), so one green run suffices.
 

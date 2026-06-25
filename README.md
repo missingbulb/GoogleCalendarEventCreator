@@ -85,6 +85,6 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [Requirements](dev/requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
 - [High-level design](dev/procedures/this_project/highLevelDesign.md) — how extraction works, plus the top-level architecture rules of the road.
 - [File descriptions](dev/procedures/this_project/fileDescriptions.md) — the per-file map.
-- [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
+- [Testing](dev/procedures/this_project/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
 - [Releasing](dev/release/releasing.md) — building the zip and publishing to the Chrome Web Store.
-- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/claude/`).
+- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/this_project/`, `dev/procedures/general/`, and the shared `dev/procedures/claude/shared/` canon).

@@ -3,7 +3,7 @@
 Portable test-discipline practices captured here, not yet in the shared canon
 ([claude/shared/testingPractices.md](../claude/shared/testingPractices.md)).
 `optimize-procedures` promotes these up and prunes them once the canon absorbs
-them (capture is always local — see [claude/workflow.md](../claude/workflow.md)).
+them (capture is always local — see [this_project/workflow.md](../this_project/workflow.md)).
 
 ## jsdom traps that don't match a real browser
 

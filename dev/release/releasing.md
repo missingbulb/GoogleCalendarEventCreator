@@ -18,7 +18,7 @@ that; `package.json` is kept in sync). **It is bumped deliberately, by a human,
 not automatically** — and bumping is a separate step from releasing. Ask Claude
 to **"bump version"** (it edits both files on a branch and lands on `main`
 through a normal PR; default is the next minor — see
-[`dev/procedures/claude/workflow.md`](../procedures/claude/workflow.md)). The release workflow never
+[`dev/procedures/this_project/workflow.md`](../procedures/this_project/workflow.md)). The release workflow never
 changes the version itself. The store rejects an upload whose version isn't
 strictly higher than the live one, so each release must increment it first.
 

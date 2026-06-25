@@ -9,7 +9,7 @@
 //               live.test.js pins it to the case's `expected`).
 //   - fallback: the SAME pipeline with GCal.sources emptied, which forces the
 //               unsupported-host path (assemble-events.js -> fallbackEvents),
-//               exactly as dev/procedures/claude/testing.md describes for inspecting the
+//               exactly as dev/procedures/this_project/testing.md describes for inspecting the
 //               generic extractor on a supported page.
 //
 // We then grade, field by field, how close the fallback's PRIMARY event
@@ -84,7 +84,7 @@ function flattenPrimary(event) {
 // --- Date equivalence -------------------------------------------------------
 // A dedicated source localizes a known-timezone event to a FLOATING wall-clock
 // plus a ctz; the fallback (no ctz) keeps the absolute instant. These are the
-// same moment in different clothes, and dev/procedures/claude/testing.md says not to
+// same moment in different clothes, and dev/procedures/this_project/testing.md says not to
 // treat that representation gap as a miss. So start/end count as a match when
 // EITHER the raw strings are equal (the dedicated source only added a ctz, e.g.
 // bandsintown) OR both values resolve to the same absolute instant (e.g.
@@ -274,7 +274,7 @@ function pct(hits, gradeable) {
 // were computed over. The gate compares the current run to the watermark over
 // the cases they SHARE, so a newly added case (absent from the watermark's list)
 // is excluded and can't drag the aggregate below the bar — adding an extractor
-// never fails the gate. See dev/procedures/claude/testing.md for the accepted masking
+// never fails the gate. See dev/procedures/this_project/testing.md for the accepted masking
 // caveat (a regression bundled with a case-set change can be re-anchored over).
 
 // Aggregate critical/all coverage over a named subset of the run's cases.
@@ -352,7 +352,7 @@ function renderMarkdown(cov, watermark) {
   L.push(
     "> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` " +
       "(logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten " +
-      "whenever the tests run locally. See `dev/procedures/claude/testing.md`."
+      "whenever the tests run locally. See `dev/procedures/this_project/testing.md`."
   );
   L.push("");
   L.push(
@@ -370,7 +370,7 @@ function renderMarkdown(cov, watermark) {
     "`start`/`end` count as a match when the values are byte-identical **or** resolve " +
       "to the same absolute instant — a dedicated source localizing to a floating " +
       "time via its `ctz` is the same moment as the fallback's offset-bearing time, " +
-      "not a miss (see `dev/procedures/claude/testing.md`). A floating time read an hour off, " +
+      "not a miss (see `dev/procedures/this_project/testing.md`). A floating time read an hour off, " +
       "or a date that dropped its time, is a real miss."
   );
   L.push("");

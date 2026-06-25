@@ -4,10 +4,10 @@ Project conventions and how-tos, split by topic so unrelated changes touch
 different files instead of colliding in one monolith. Each section lives in its
 own file under `dev/procedures/` and is imported here:
 
-@dev/procedures/claude/workflow.md
-@dev/procedures/claude/github.md
+@dev/procedures/this_project/workflow.md
+@dev/procedures/this_project/github.md
 @dev/procedures/this_project/adding-a-source.md
-@dev/procedures/claude/testing.md
+@dev/procedures/this_project/testing.md
 @dev/procedures/this_project/auto-extractor.md
 @dev/procedures/general/auto-lessons.md
 @dev/procedures/this_project/auto-fallback-coverage.md
@@ -42,7 +42,7 @@ time — live in `dev/procedures/technicalGotchas.md` (imported below).
 
 General engineering and agentic practices learned **in this repo** are captured
 locally in the working-set docs below (capture is always local — see
-`dev/procedures/claude/workflow.md`). They start near-empty; the curated canon lives in the
+`dev/procedures/this_project/workflow.md`). They start near-empty; the curated canon lives in the
 shared submodule (next section), and the `optimize-procedures` routine moves
 generalizable items up and prunes them here once the canon absorbs them. The
 portable-by-topic working-set docs under `dev/procedures/general/` (git/GitHub and
