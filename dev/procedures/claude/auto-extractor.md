@@ -252,7 +252,7 @@ The same `GITHUB_TOKEN` rule is exactly what makes the three-stage relay work:
 | Secret | Purpose |
 |--------|---------|
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
-| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `record_page` (the inline `curl` in `phase1-prepare.sh`) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. |
+| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `record_page` (the inline `curl` in `phase1-prepare.sh`) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. The account's usage/request analytics — handy when investigating a failed or unexpected fetch — are at <https://dashboard.scraperapi.com/analytics>. |
 
 No Anthropic API key is needed in this repo any more: the agent runs in the Claude
 Code on the web routine, which carries its own credentials/limits. (The old
