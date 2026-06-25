@@ -1256,7 +1256,7 @@ that runs the real extractor against a **real cached page**
 (`dev/requirements/extractor/data/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
 `dev/requirements/extractor/extractor-support.test.js`. Adding a new source
-(see `dev/procedures/claude/adding-a-source.md`) adds a row here. A bot-blocked host with no
+(see `dev/procedures/this_project/adding-a-source.md`) adds a row here. A bot-blocked host with no
 cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
 is covered by unit tests only.
 
@@ -1710,7 +1710,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/this_project/auto-extractor.md`.
 
 <table>
 <tr>

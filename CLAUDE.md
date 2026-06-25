@@ -2,15 +2,15 @@
 
 Project conventions and how-tos, split by topic so unrelated changes touch
 different files instead of colliding in one monolith. Each section lives in its
-own file under `dev/procedures/claude/` and is imported here:
+own file under `dev/procedures/` and is imported here:
 
 @dev/procedures/claude/workflow.md
 @dev/procedures/claude/github.md
-@dev/procedures/claude/adding-a-source.md
+@dev/procedures/this_project/adding-a-source.md
 @dev/procedures/claude/testing.md
-@dev/procedures/claude/auto-extractor.md
+@dev/procedures/this_project/auto-extractor.md
 @dev/procedures/claude/auto-lessons.md
-@dev/procedures/claude/auto-fallback-coverage.md
+@dev/procedures/this_project/auto-fallback-coverage.md
 @dev/procedures/claude/auto-branch-report.md
 @dev/procedures/claude/claudinite-handoff.md
 @dev/procedures/claude/auto-optimize-procedures.md

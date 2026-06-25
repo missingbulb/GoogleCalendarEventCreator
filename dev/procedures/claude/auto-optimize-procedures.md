@@ -82,7 +82,7 @@ needs the label pre-created and never errors on a re-run.
   it if missing, reopen it if it was closed while the routine is still producing
   output), matching the own-tracking-issue convention of the other daily routines
   ([auto-lessons.md](auto-lessons.md) #365,
-  [auto-fallback-coverage.md](auto-fallback-coverage.md) #366). A quiet day logs
+  [auto-fallback-coverage.md](../this_project/auto-fallback-coverage.md) #366). A quiet day logs
   nothing.
 
 ## The launcher (Claude Code Routine)

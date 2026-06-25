@@ -2,7 +2,7 @@
 # Phase 2 of the auto-implement-extractor pipeline — deterministic wrap-up, run by
 # the finalize workflow (.github/workflows/finalize-extractor.yml) when the agent
 # adds the `extractor-agent-done` label, NOT by the agent. See
-# dev/procedures/claude/auto-extractor.md.
+# dev/procedures/this_project/auto-extractor.md.
 #
 # Since the agent now runs in a separate environment (Claude Code on the web,
 # triggered by the `extractor-agent-ready` label) it commits and pushes its two
@@ -89,13 +89,13 @@ VERDICT=$(CASE_FILE="$CASE_FILE" node dev/tools/new-extractors-creation/case-qua
 
 if [ "$VERDICT" = "empty" ]; then
   echo "Case is empty but the agent marked it done — handing to a human. No PR."
-  hand_off_to_human "🛑 The implementation agent marked this done, but the integration case came back empty — there's no extraction to ship. The page likely wasn't a single usable event (a bot/login wall or a JavaScript single-page-app shell). No dedicated extractor was added; the site can be added by hand — see dev/procedures/claude/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
+  hand_off_to_human "🛑 The implementation agent marked this done, but the integration case came back empty — there's no extraction to ship. The page likely wasn't a single usable event (a bot/login wall or a JavaScript single-page-app shell). No dedicated extractor was added; the site can be added by hand — see dev/procedures/this_project/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
   exit 0
 fi
 
 if [ "$VERDICT" = "degenerate" ]; then
   echo "Extraction is degenerate (an event has no location) — likely a listing page. No PR."
-  hand_off_to_human "🛑 Didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue. Point the request at one specific event page on this site, or add it by hand — see dev/procedures/claude/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
+  hand_off_to_human "🛑 Didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue. Point the request at one specific event page on this site, or add it by hand — see dev/procedures/this_project/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
   exit 0
 fi
 

@@ -36,7 +36,7 @@ concerns now live with that routine, not in this repo. Everything deterministic 
 before the agent (triage, scaffold) and after it (blast-radius, re-verify,
 PR) — stays in the two workflows; the agent owns only the judgment step. This
 covers the mechanics; what a *correct* extractor looks like lives in
-`dev/procedures/claude/adding-a-source.md`.
+`dev/procedures/this_project/adding-a-source.md`.
 
 ## How to trigger it
 
@@ -309,7 +309,7 @@ download that still fails is a genuine break):
   re-verify went red; `npm ci` / page recording / git or PR work failed.
 
 In any of these, fall back to the manual process in
-`dev/procedures/claude/adding-a-source.md`.
+`dev/procedures/this_project/adding-a-source.md`.
 
 ## Review gate
 

@@ -91,7 +91,8 @@ common, expected outcome; don't manufacture one.
 Claudinite. Route by scope:
 
 - **Project-specific** lessons: project mechanics to the matching file under
-  `dev/procedures/claude/` (workflow, github, testing, adding-a-source, auto-extractor);
+  `dev/procedures/claude/` (workflow, github, testing) or
+  `dev/procedures/this_project/` (adding-a-source, auto-extractor);
   top-level project architecture rules to the "Architecture rules of the road"
   section of `dev/procedures/this_project/highLevelDesign.md`;
   non-obvious **project-wide** codebase footguns to `dev/procedures/technicalGotchas.md`

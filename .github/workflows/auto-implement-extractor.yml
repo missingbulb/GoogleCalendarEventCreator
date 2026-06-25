@@ -16,7 +16,7 @@ run-name: "Prepare extractor · #${{ github.event.issue.number }} — ${{ github
 # finishes it adds `extractor-agent-done`, which fires finalize-extractor.yml
 # (Phase 2: blast-radius guard, re-verify, PR). Everything deterministic stays in
 # the workflows; the agent owns only the judgment step. See
-# dev/procedures/claude/auto-extractor.md.
+# dev/procedures/this_project/auto-extractor.md.
 #
 # The GITHUB_TOKEN is standard and always available; no other secret is needed
 # (the agent runs in Claude Code on the web, not here).
@@ -192,4 +192,4 @@ jobs:
           ISSUE_NUMBER:  ${{ github.event.issue.number }}
           RUN_URL:       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed unexpectedly. [View run]($RUN_URL). Manual implementation may be needed — see dev/procedures/claude/adding-a-source.md."
+          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed unexpectedly. [View run]($RUN_URL). Manual implementation may be needed — see dev/procedures/this_project/adding-a-source.md."

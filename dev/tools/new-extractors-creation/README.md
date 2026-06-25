@@ -8,7 +8,7 @@ source (**add-a-case mode**), hardening it against a second real page. The flow 
 label relay: the **prepare** workflow hands off to a Claude Code on the web routine
 (the agent) via `extractor-agent-ready`, and the agent hands off to the **finalize**
 workflow via `extractor-agent-done`. **Full reference:
-[`dev/procedures/claude/auto-extractor.md`](../../procedures/claude/auto-extractor.md).**
+[`dev/procedures/this_project/auto-extractor.md`](../../procedures/this_project/auto-extractor.md).**
 
 ## What's in this folder
 

@@ -55,4 +55,4 @@ keeps its **own** such issue — a running self-improvement log of what it did o
 time. **This applies to future daily routines too:** when a new one is added, open
 its own tracking issue and log its output the same way — as comments (e.g. the
 fallback extractor coverage routine logs to #366 — see
-[auto-fallback-coverage.md](auto-fallback-coverage.md)).
+[auto-fallback-coverage.md](../this_project/auto-fallback-coverage.md)).

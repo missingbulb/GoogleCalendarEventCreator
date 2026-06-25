@@ -10,7 +10,7 @@ run-name: "Finalize extractor · #${{ github.event.issue.number }} — ${{ githu
 # split out because the agent now runs in its own environment (web), not inside
 # Actions. It re-derives the branch from the issue, enforces the agent's two-file
 # blast radius against the scaffold commit, runs the quality floor, re-verifies,
-# opens the PR, and dispatches test.yml. See dev/procedures/claude/auto-extractor.md.
+# opens the PR, and dispatches test.yml. See dev/procedures/this_project/auto-extractor.md.
 #
 # Why a label (not the agent calling the script directly): Phase 2 is the EXTERNAL
 # enforcement of the agent's containment — the blast-radius guard reverts whatever
@@ -94,4 +94,4 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           RUN_URL:      ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The finalize-extractor workflow failed unexpectedly. [View run]($RUN_URL). The agent's work is on its branch; manual finalization may be needed — see dev/procedures/claude/adding-a-source.md."
+          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The finalize-extractor workflow failed unexpectedly. [View run]($RUN_URL). The agent's work is on its branch; manual finalization may be needed — see dev/procedures/this_project/adding-a-source.md."

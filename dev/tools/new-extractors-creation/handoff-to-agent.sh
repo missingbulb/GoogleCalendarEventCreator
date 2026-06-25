@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Hand-off step of the auto-implement-extractor pipeline — run by the prepare
 # workflow (.github/workflows/auto-implement-extractor.yml) once Phase 1 has
-# scaffolded and pushed the branch. See dev/procedures/claude/auto-extractor.md.
+# scaffolded and pushed the branch. See dev/procedures/this_project/auto-extractor.md.
 #
 # The agent run no longer happens inside Actions: it's a Claude Code on the web
 # routine wired to fire when the `extractor-agent-ready` label is added. So this

@@ -52,7 +52,7 @@ the first one running as early as possible.
 doesn't trigger another workflow, an automated job needs a unique branch per run,
 and a workflow adding a brand-new label must create it first — now live in
 [shared/git-and-github.md](shared/git-and-github.md). This repo's auto-extractor
-pipeline relies on all three; see [auto-extractor.md](auto-extractor.md).)
+pipeline relies on all three; see [auto-extractor.md](../this_project/auto-extractor.md).)
 
 ## Driving a merge cheaply (wall time + tokens)
 
