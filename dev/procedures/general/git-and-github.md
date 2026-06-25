@@ -48,3 +48,22 @@ path before editing it. And check each result in a batched set of tool calls: a
 single refused write buried in a batch is easy to miss, and the stale
 (moved-but-not-rewritten) file surfaces much later as a confusing error far from its
 cause.
+
+## Mark large committed fixtures `linguist-vendored` to fix language stats
+
+Large committed fixture files (full-page HTML, generated data dumps) can dwarf the
+actual source by byte count and make GitHub mislabel the repo's primary language.
+Add a `.gitattributes` entry for each such path (e.g. `test/fixtures/*.html
+linguist-vendored`) so Linguist ignores it; apply the same annotation whenever you
+add another large generated or fixture file.
+
+## GitHub renders Markdown inside a `<td>` only with surrounding blank lines
+
+GitHub's cmark-gfm re-enters Markdown mode inside a raw `<td>` only when blank
+lines surround the cell's content — without them the cell is treated as a raw HTML
+block and shown verbatim (no `![img]()`, no `**bold**`, no links). A leading inline
+`<!-- … -->` also starts an HTML block, so keep any marker as the **last** token on
+the line so the line still *starts* as Markdown. The sanitizer strips `style`/CSS
+(a flexbox `<div>` two-column won't render) but keeps `<table>` +
+`align`/`valign`/`width`; a GFM pipe-table cell can't hold multi-line prose, so use
+the raw `<table>` form when a cell needs it.
