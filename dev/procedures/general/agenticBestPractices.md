@@ -31,3 +31,11 @@ prunes them once the canon absorbs them (capture is always local — see
   dance to re-home commits is needless friction. Branching fresh off the updated
   `main` is trivial — `git checkout -b <new> origin/main` — so just do that for the
   next unit of work instead of continuing on a branch whose PR already landed.
+
+- **When a change regenerates a reviewable artifact, link it into the chat the same
+  turn you commit it.** A regenerated gallery, snapshot set, or report is only
+  useful to the owner if they can see it without going to fetch it — surface the
+  branch's copy (a URL, or the file itself rendered inline) in the same message as
+  the commit, so review is one click away rather than a hunt. (Complements the
+  "deliver the image into the chat" rule above: that's for an artifact the owner
+  asked to *see*; this is for one a routine *regenerates*.)
