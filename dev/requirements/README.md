@@ -107,7 +107,7 @@ surfaces *actual*, *expected*, and the *diff*, and asks the owner to approve or
 reject — it never edits the success criterion itself.** For the visual kinds the
 mechanics (revert the baseline, render the diff, ask via a popup, only re-baseline
 on approval) live in
-[`dev/procedures/claude/workflow.md`](../procedures/claude/workflow.md); the same
+[`dev/procedures/this_project/workflow.md`](../procedures/this_project/workflow.md); the same
 discipline applies to an `extractor` JSON diff and a `logic`/`behavior` assertion.
 
 ## Layout
@@ -150,7 +150,7 @@ dev/requirements/
   gallery in `requirements.md` after an intentional popup/view/CSS/icon change.
   **Never** silently re-baseline a moved snapshot — surface the visual diff for the
   owner's approval (see [The owner-approval contract](#the-owner-approval-contract)
-  and [`dev/procedures/claude/workflow.md`](../procedures/claude/workflow.md)).
+  and [`dev/procedures/this_project/workflow.md`](../procedures/this_project/workflow.md)).
 - `npm run regen` — load lists + UI snapshots + fallback-coverage baseline.
 - `npm run test:live` — the extractor live/support + fallback-coverage suites
   (offline, against the committed `extractor/data/` fixtures).
@@ -158,7 +158,7 @@ dev/requirements/
 ## How to add a new supported site
 
 Adding a per-site extractor is its own documented flow — see
-[`dev/procedures/claude/adding-a-source.md`](../procedures/claude/adding-a-source.md).
+[`dev/procedures/this_project/adding-a-source.md`](../procedures/this_project/adding-a-source.md).
 It adds an `extractor` leaf to `requirements.md` §11 plus a reviewed live case under
 `extractor/expected/`.
 
@@ -169,4 +169,4 @@ that every leaf is *faithfully* verified. The `behavior` cases stub the
 `chrome.tabs.create`/`window.close` boundary; many `logic` leaves are `tbd`
 (covered today by unit tests, not yet wired here). These gaps are deliberate and
 tracked — see the banner in `requirements.md` and
-[`dev/procedures/claude/testing.md`](../procedures/claude/testing.md).
+[`dev/procedures/this_project/testing.md`](../procedures/this_project/testing.md).

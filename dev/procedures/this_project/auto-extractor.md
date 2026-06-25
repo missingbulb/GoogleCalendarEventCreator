@@ -36,7 +36,7 @@ concerns now live with that routine, not in this repo. Everything deterministic 
 before the agent (triage, scaffold) and after it (blast-radius, re-verify,
 PR) — stays in the two workflows; the agent owns only the judgment step. This
 covers the mechanics; what a *correct* extractor looks like lives in
-`dev/procedures/claude/adding-a-source.md`.
+`dev/procedures/this_project/adding-a-source.md`.
 
 ## How to trigger it
 
@@ -193,7 +193,7 @@ IIFE, as `meetup.js` does, rather than touch `extension/event-extractors/helpers
 `.github/workflows/finalize-extractor.yml`, on `extractor-agent-done`. This is the
 **external enforcement** of the agent's containment — it runs in a runner the agent
 doesn't control, so the blast-radius guard is a guarantee rather than a request
-(`dev/procedures/architectureGuidelines.md`). It:
+(`dev/procedures/this_project/highLevelDesign.md`). It:
 
 1. **Re-derives the names** (`derive-names.js` → `plan-names.js`) from the issue's
    event URL — the same `mode`/`sourceBase`/`caseName`/`branch`/`host` Phase 1 used,
@@ -309,7 +309,7 @@ download that still fails is a genuine break):
   re-verify went red; `npm ci` / page recording / git or PR work failed.
 
 In any of these, fall back to the manual process in
-`dev/procedures/claude/adding-a-source.md`.
+`dev/procedures/this_project/adding-a-source.md`.
 
 ## Review gate
 
@@ -322,7 +322,7 @@ The agent never merges the PR. A human must review:
   existing source — that the diff is a minimal, correct change (no refactor, no
   regression to the other cases the source already covers).
 
-"LGTM" from the repo owner is the merge signal (see `dev/procedures/claude/github.md`). CI
+"LGTM" from the repo owner is the merge signal (see `dev/procedures/this_project/github.md`). CI
 must go green before merging; the extractor branch adds a deterministic offline
 integration case (not an e2e/heavy-browser test), so one green run suffices.
 

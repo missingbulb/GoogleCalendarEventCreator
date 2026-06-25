@@ -1,9 +1,9 @@
 # File descriptions
 
 A per-file map of the repo. See [highLevelDesign.md](highLevelDesign.md) for how
-extraction works, [requirements.md §12–§16](../requirements/requirements.md) for what the
-extension does, and [architectureGuidelines.md](architectureGuidelines.md) for
-the rules of the road.
+extraction works (and its "rules of the road" section), and
+[requirements.md §12–§16](../../requirements/requirements.md) for what the
+extension does.
 
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
@@ -13,7 +13,7 @@ the rules of the road.
 | `extension/events-popup/popup.html`, `extension/events-popup/popup.css`, `extension/events-popup/popup.js` | Toolbar popup: controller that runs the extractor, picks a view (`chooseContent`), and renders it (markup + extracted styles) |
 | `extension/events-popup/events-view.js` | Renders one card per event — a clickable button for a single occurrence, or a grouped card with a button per showing for a multi-instance event (loaded on demand via `import()`) |
 | `extension/events-popup/source-request-view.js` | The two heading-line links for an unsupported host (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (opens the policy doc) |
-| [`dev/procedures/extraction-policy.md`](extraction-policy.md) | Short public "how this extension finds events" doc the "Disagree?" link opens |
+| [`extraction-policy.md`](../../../extraction-policy.md) | Short public "how this extension finds events" doc the "Disagree?" link opens |
 | `extension/icon/toolbar-icon.js` | Background service worker: registers `chrome.declarativeContent` rules (from `fallback-lists.json`) so the browser colors the toolbar icon by host pattern — green on supported hosts, gray on denylisted ones, blue elsewhere — without the extension reading any tab URL |
 | `extension/event-extractors/registry.js` | Bootstraps `GCal`, the `GCal.sources` registry, and `isSupportedHost` |
 | `extension/event-extractors/helpers/` | Shared utilities any extractor may use, split by concern: DOM, text (rich-text/`htmlToText`/`parts`), dates, timezones, timezone-names, merge, and `embedded-events` (the `GCal.embeddedEvents` schema.org JSON-LD reader) |
@@ -43,10 +43,10 @@ the rules of the road.
 | `dev/requirements/shared/render/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `dev/requirements/shared/render/visual-snapshots.test.js` | The single visual-comparison engine: renders each `dev/requirements/<kind>/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
 | `dev/requirements/shared/render/refresh-snapshots.js` | Regenerates the `dev/requirements/<kind>/cases/*.png` snapshots (popup and icon) + the inline gallery |
-| `dev/deployment/generate_icons.py` | Regenerates every icon into `extension/icon/images/` (Python stdlib only): the small flat toolbar glyphs `icon{16,32}*.png` (base + supported/denied state variants) and the polished calendar art at the larger sizes — `chromeStoreIcon.png` (manifest 128px icon, also uploaded by hand as the Web Store listing icon) and `chromeExtensionManagementIcon.png` (48px management page). See `dev/deployment/README.md` |
-| `.github/workflows/shipping-files.js` | Single source of truth for the files that ship in the release zip |
-| `.github/workflows/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
-| `dev/tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `dev/procedures/claude/auto-extractor.md` |
+| `dev/release/generate_icons.py` | Regenerates every icon into `extension/icon/images/` (Python stdlib only): the small flat toolbar glyphs `icon{16,32}*.png` (base + supported/denied state variants) and the polished calendar art at the larger sizes — `chromeStoreIcon.png` (manifest 128px icon, also uploaded by hand as the Web Store listing icon) and `chromeExtensionManagementIcon.png` (48px management page). See `dev/release/README.md` |
+| `dev/release/shipping-files.js` | Single source of truth for the files that ship in the release zip |
+| `dev/release/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
+| `dev/tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `dev/procedures/this_project/auto-extractor.md` |
 | `dev/tools/new-extractors-creation/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
 | `dev/requirements/shared/gen-states-flowchart.js` | Regenerates `dev/requirements/shared/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
-| `.github/workflows/tests/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
+| `dev/release/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |

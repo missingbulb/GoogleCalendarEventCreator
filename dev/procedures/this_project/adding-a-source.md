@@ -28,7 +28,7 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    service worker (`extension/icon/toolbar-icon.js`) builds its `chrome.declarativeContent`
    icon rules from it — so the green "supported" icon only appears once the host
    is listed here.
-4. Add an integration case for a real page on the site (see `dev/procedures/testing.md`) —
+4. Add an integration case for a real page on the site (see `dev/procedures/this_project/testing.md`) —
    a reviewed `dev/requirements/extractor/expected/<name>.json` (`description`
    + `expected`) plus its cached `dev/requirements/extractor/data/<name>.{html,url}`.
 5. Record the host as an **executable extractor-support requirement**: add a leaf

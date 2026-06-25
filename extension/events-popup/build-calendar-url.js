@@ -5,8 +5,8 @@
 // can be a module — it is never injected into the page). `buildCalendarUrl` and
 // `formatDatesParam` are exported; the rest are module-private helpers.
 //
-// GOTCHAS — read before editing (file-local footguns; see dev/procedures/claude/workflow.md
-// for why these live here and not in dev/procedures/technicalGotchas.md):
+// GOTCHAS — read before editing (file-local footguns; see dev/procedures/this_project/workflow.md
+// for why these live here and not in dev/procedures/this_project/technicalGotchas.md):
 //   * Google Calendar renders the `details` param as HTML, not Markdown. A bare
 //     `**bold**` shows literal asterisks; a bare URL is auto-linked (so it needs
 //     no `<a>`). `markdownToHtml` below translates the Markdown that survives
@@ -19,6 +19,15 @@
 //     `Date.UTC(y, m-1, d+1)` + `getUTC*` instead. The UTC/`C.UTF-8` sandbox/CI
 //     default parses floating times as UTC, so a unit test there won't surface
 //     the shift — it only shows in a positive-offset locale.
+//
+// REFERENCES — external pages on the Calendar URL format this file builds:
+//   * Build a Google Calendar link — the `calendar/render?action=TEMPLATE`
+//     params used here: https://sadev.co.za/build-google-calendar-link
+//   * List of tz database time zones — IANA zone names for the `ctz` param:
+//     https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+//   * Kalinka, a similar add-to-Calendar tool: https://kalinka.tardate.com/
+//   * SO: create a link to add a calendar entry (Google/Outlook/etc.):
+//     https://stackoverflow.com/questions/5831877/how-do-i-create-a-link-to-add-an-entry-to-a-calendar
 
 import { GCalConfig } from "../config.js";
 

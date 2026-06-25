@@ -2,26 +2,25 @@
 
 Project conventions and how-tos, split by topic so unrelated changes touch
 different files instead of colliding in one monolith. Each section lives in its
-own file under `dev/procedures/claude/` and is imported here:
+own file under `dev/procedures/` and is imported here:
 
-@dev/procedures/claude/workflow.md
-@dev/procedures/claude/github.md
-@dev/procedures/claude/adding-a-source.md
-@dev/procedures/claude/testing.md
-@dev/procedures/claude/auto-extractor.md
-@dev/procedures/claude/auto-lessons.md
-@dev/procedures/claude/auto-fallback-coverage.md
-@dev/procedures/claude/auto-branch-report.md
-@dev/procedures/claude/claudinite-handoff.md
-@dev/procedures/claude/auto-optimize-procedures.md
-@dev/procedures/claude/textAndFileManipulation.md
+@dev/procedures/this_project/workflow.md
+@dev/procedures/this_project/github.md
+@dev/procedures/this_project/adding-a-source.md
+@dev/procedures/this_project/testing.md
+@dev/procedures/this_project/auto-extractor.md
+@dev/procedures/general/auto-lessons.md
+@dev/procedures/this_project/auto-fallback-coverage.md
+@dev/procedures/general/auto-branch-report.md
+@dev/procedures/general/claudinite-handoff.md
+@dev/procedures/general/auto-optimize-procedures.md
+@dev/procedures/general/textAndFileManipulation.md
 
-The project's top-level architectural rules of the road live in
-`dev/procedures/architectureGuidelines.md` (imported below). Whenever we agree on a new or
-changed top-level architectural guideline, update that file as part of the same
-change.
-
-@dev/procedures/architectureGuidelines.md
+The project's top-level architectural rules of the road live in the "Architecture
+rules of the road" section of
+[`dev/procedures/this_project/highLevelDesign.md`](dev/procedures/this_project/highLevelDesign.md).
+Whenever we agree on a new or changed top-level architectural guideline, update
+that section as part of the same change.
 
 All requirements-related documents and the tests that validate them live in one
 top-level folder, `dev/requirements/`. How requirements are modeled (a
@@ -29,19 +28,32 @@ numbered breakdown where every leaf has an external validation case) and how to
 add one (with the available case kinds and when to use `tbd`/untested) are
 documented in [dev/requirements/README.md](dev/requirements/README.md).
 
-Non-obvious technical gotchas — codebase footguns that have cost real debugging
-time — live in `dev/procedures/technicalGotchas.md` (imported below).
+For all release-related actions — building the shippable zip, the
+version-bump → release flow, publishing to the Chrome Web Store, and the listing
+assets / icon generator — everything is self-contained in
+[`dev/release/`](dev/release/) (start at [`dev/release/releasing.md`](dev/release/releasing.md)).
+Look there **only** when you're actually cutting or publishing a release; it's not
+needed for day-to-day development.
 
-@dev/procedures/technicalGotchas.md
+Non-obvious technical gotchas — codebase footguns that have cost real debugging
+time — live in `dev/procedures/this_project/technicalGotchas.md` (imported below).
+
+@dev/procedures/this_project/technicalGotchas.md
 
 General engineering and agentic practices learned **in this repo** are captured
 locally in the working-set docs below (capture is always local — see
-`dev/procedures/claude/workflow.md`). They start near-empty; the curated canon lives in the
+`dev/procedures/this_project/workflow.md`). They start near-empty; the curated canon lives in the
 shared submodule (next section), and the `optimize-procedures` routine moves
-generalizable items up and prunes them here once the canon absorbs them.
+generalizable items up and prunes them here once the canon absorbs them. The
+portable-by-topic working-set docs under `dev/procedures/general/` (git/GitHub and
+working-discipline gotchas already generalized, awaiting promotion) are part of the
+same local capture surface.
 
-@dev/procedures/engineeringPractices.md
-@dev/procedures/agenticBestPractices.md
+@dev/procedures/general/engineeringPractices.md
+@dev/procedures/general/agenticBestPractices.md
+@dev/procedures/general/git-and-github.md
+@dev/procedures/general/working-discipline.md
+@dev/procedures/general/testingPractices.md
 
 ## Shared portable rules (the Claudinite submodule)
 
@@ -57,13 +69,12 @@ It is consumed **read-only**: a rule change happens in Claudinite and arrives he
 as a Dependabot submodule-bump PR. Lessons are *captured locally* (above) and only
 the daily `optimize-procedures` routine bridges them up to Claudinite (see
 [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
-and `dev/procedures/claude/auto-optimize-procedures.md`). A fresh clone needs
+and `dev/procedures/general/auto-optimize-procedures.md`). A fresh clone needs
 `git submodule update --init` (`.claude/cloud-setup.sh` runs it) or
-`dev/procedures/claude/shared/` is an empty folder and these imports resolve to nothing.
+`dev/procedures/claude/shared/` is an empty folder and this import resolves to nothing.
 
-@dev/procedures/claude/shared/engineeringPractices.md
-@dev/procedures/claude/shared/agenticBestPractices.md
-@dev/procedures/claude/shared/git-and-github.md
-@dev/procedures/claude/shared/working-discipline.md
-@dev/procedures/claude/shared/agent-architecture.md
-@dev/procedures/claude/shared/ownerPreferences.md
+We import only the submodule's own top-level `CLAUDE.md` — the single entry point
+Claudinite maintains — and let it traverse to the individual canon docs from there,
+so the list of shared files lives upstream and never has to be mirrored here.
+
+@dev/procedures/claude/shared/CLAUDE.md

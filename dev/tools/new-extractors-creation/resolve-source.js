@@ -2,7 +2,7 @@
 // lookup the auto-implement-extractor pipeline needs for its "supported" mode
 // (a request whose host already has a dedicated extractor: instead of closing it,
 // the pipeline adds a fresh integration case for the submitted page, hardening the
-// existing source). See dev/procedures/claude/auto-extractor.md.
+// existing source). See dev/procedures/this_project/auto-extractor.md.
 //
 // The crux: a source's file name is NOT derivable from the host (cinema.co.il is
 // handled by event-extractors/custom/telavivcinematheque.js, slug "cinema" ≠ basename

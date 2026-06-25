@@ -43,7 +43,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
   `grep -n "<value>" data/<case>.html` and reject it if it lives inside a
   `<script>` or hidden markup. A real win comes from visible text or a
   Chrome-read DOM attribute (meta / JSON-LD / microdata / `<time datetime>`).
-  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../technicalGotchas.md).)
+  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](technicalGotchas.md).)
 - **(b) deliberate decisions.** Some misses are intentional and pinned by a unit
   test (e.g. a date with intervening non-separator text before its time is
   all-day, in `extension-test/event-extractors/extraction.test.js`). Never "fix" what a test
@@ -83,5 +83,5 @@ so it accumulates a scrollable history of every run over time; also reference th
 issue from the PR (`Refs #366`). The issue is long-lived: if it was **closed**,
 **reopen it** when a run needs logging (a closure while the routine is still
 producing PRs is stale), matching the open-branch report's behavior
-([auto-branch-report.md](auto-branch-report.md)). Each daily routine keeps its own
-such issue — the lessons digest's is #365 (see [auto-lessons.md](auto-lessons.md)).
+([auto-branch-report.md](../general/auto-branch-report.md)). Each daily routine keeps its own
+such issue — the lessons digest's is #365 (see [auto-lessons.md](../general/auto-lessons.md)).

@@ -2,14 +2,14 @@
 // Builds the shippable extension zip — the artifact uploaded to the Chrome Web
 // Store and attached to GitHub Releases for "Load unpacked" testing.
 //
-//   node .github/workflows/build-zip.js        ->  dist/google-calendar-event-creator.zip
+//   node dev/release/build-zip.js              ->  dist/google-calendar-event-creator.zip
 //
 // The zip name is stable (not version-stamped) so a GitHub Release can serve it
 // at a permanent URL:
 //   https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip
 // The version it contains is manifest.json's `version`, printed below.
 //
-// Contents come from .github/workflows/shipping-files.js (the single source of truth), so
+// Contents come from dev/release/shipping-files.js (the single source of truth), so
 // the zip and the manifest can't drift. Uses the system `zip` (preinstalled on
 // the GitHub Ubuntu runners and on macOS/Linux) to avoid adding a runtime dep.
 

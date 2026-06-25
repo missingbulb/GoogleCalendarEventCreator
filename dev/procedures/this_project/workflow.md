@@ -4,7 +4,7 @@ The GitHub issue → branch → PR → merge lifecycle, the **merge-to-main comm
 and the CI-interaction practices live in [github.md](github.md). The general,
 project-agnostic working discipline (confirm-before-building, the warnings
 policy) now lives in the shared rules:
-[shared/working-discipline.md](shared/working-discipline.md). This file holds the
+[shared/working-discipline.md](../claude/shared/working-discipline.md). This file holds the
 project-specific working rules, plus the two owner-triggered defined instructions
 ("bump version", "learned lessons").
 
@@ -14,16 +14,11 @@ inline gallery
 `https://github.com/<owner>/<repo>/blob/<branch>/dev/requirements/requirements.md`, each
 requirement with its snapshot beside it — for one-page review.
 
-When the owner asks to **show** or **see** a visual artifact (a snapshot, a diff,
-a generated diagram), deliver the actual image **into the chat**, not a path or a
-link — surface the file itself so it renders inline; a link makes the owner go
-fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact
-nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
-
-When a change to a `dev/requirements/<kind>/cases/*` case — its spec or its rendering — makes
-the snapshot tests **fail** (the pixels moved), don't silently regenerate the
-baseline. The owner's approval of the visual diff is the gate; an unreviewed pixel
-change is never auto-accepted. The process:
+The general principle — a moved snapshot/golden baseline needs owner approval, not
+silent regeneration — is in
+[../general/testingPractices.md](../general/testingPractices.md). The project
+process when a change to a `dev/requirements/<kind>/cases/*` case (its spec or its
+rendering) makes the snapshot tests **fail** (the pixels moved):
 
 1. **Surface the diff immediately, don't carry on.** Revert the baseline to the
    committed **expected** PNG, run the snapshot test so it fails (the harness
@@ -82,7 +77,7 @@ Flag specifically any process that **returns its result but then wastes time on
 shutdown** — one that could be safely killed once its output is in hand rather
 than waited out. Close with a **terse verdict**: either one concrete speed-up
 recommendation (route it like any other lesson — a project mechanic to the
-matching `dev/procedures/claude/*`, a portable practice to `dev/procedures/agenticBestPractices.md`),
+matching `dev/procedures/claude/*`, a portable practice to `dev/procedures/general/agenticBestPractices.md`),
 or an explicit **"no changes recommended"**. The bar is high — most
 conversations won't yield a new process note, so "no changes recommended" is the
 common, expected outcome; don't manufacture one.
@@ -91,11 +86,13 @@ common, expected outcome; don't manufacture one.
 Claudinite. Route by scope:
 
 - **Project-specific** lessons: project mechanics to the matching file under
-  `dev/procedures/claude/` (workflow, github, testing, adding-a-source, auto-extractor);
-  top-level project architecture rules to `dev/procedures/architectureGuidelines.md`;
-  non-obvious **project-wide** codebase footguns to `dev/procedures/technicalGotchas.md`
+  `dev/procedures/claude/` (workflow, github, testing) or
+  `dev/procedures/this_project/` (adding-a-source, auto-extractor);
+  top-level project architecture rules to the "Architecture rules of the road"
+  section of `dev/procedures/this_project/highLevelDesign.md`;
+  non-obvious **project-wide** codebase footguns to `dev/procedures/this_project/technicalGotchas.md`
   (file-local footguns go in the file instead — see the next bullet).
-- **File-local** footguns go in the file, not `dev/procedures/technicalGotchas.md`. A trap
+- **File-local** footguns go in the file, not `dev/procedures/this_project/technicalGotchas.md`. A trap
   you'd only trip over *while editing one specific file or function* — a mistake
   of **commission** you make with that file open in front of you — belongs in
   that file's **top-of-file header comment** (the self-documenting convention
@@ -116,14 +113,14 @@ Claudinite. Route by scope:
   a portable lesson buried in a code comment escapes the optimize-procedures
   promotion path, so those still go to the practice docs below.
 - **Portable** lessons (general engineering practices, agentic best practices):
-  to the local working-set docs `dev/procedures/engineeringPractices.md` and
-  `dev/procedures/agenticBestPractices.md`. These are local capture surfaces; the curated,
+  to the local working-set docs `dev/procedures/general/engineeringPractices.md` and
+  `dev/procedures/general/agenticBestPractices.md`. These are local capture surfaces; the curated,
   project-agnostic canon lives read-only in the Claudinite submodule
   (`dev/procedures/claude/shared/`). Don't try to edit the shared docs or file a Claudinite
   issue here — just write the best local doc.
 
 You never hand a lesson to Claudinite at capture time. The daily
-**optimize-procedures** routine ([auto-optimize-procedures.md](auto-optimize-procedures.md))
+**optimize-procedures** routine ([auto-optimize-procedures.md](../general/auto-optimize-procedures.md))
 is the *only* thing that bridges to Claudinite: it later promotes generalizable
 local items up (via a `claudinite-lesson` issue) and prunes the local copy once
 the canon absorbs it. So a portable insight captured locally isn't "stuck" here —
@@ -135,5 +132,5 @@ practice docs so optimize-procedures can carry them upstream.
 
 A scheduled workflow runs this same pass automatically once a day over the last
 24h of commits and issue/PR activity, opening a PR for review
-(`dev/procedures/claude/auto-lessons.md`); saying "learned lessons" is the on-demand
+(`dev/procedures/general/auto-lessons.md`); saying "learned lessons" is the on-demand
 version of it.

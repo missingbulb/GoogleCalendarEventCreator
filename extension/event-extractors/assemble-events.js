@@ -27,7 +27,7 @@
 //
 // Sources still emit the FLAT shape per occurrence ({ title, start, end, ... },
 // or an `events` array of them) — keeping "add a source" a single self-contained
-// file (dev/procedures/architectureGuidelines.md). norm() wraps each into a one-instance
+// file (dev/procedures/this_project/highLevelDesign.md). norm() wraps each into a one-instance
 // event, and group() then folds together any events that share every non-time
 // field (title + location + description + ctz), concatenating their instances.
 // So a listing/series page's per-showing emissions (Edinburgh Fringe

@@ -34,7 +34,7 @@ const SOURCE_REQUEST_LABEL = "extractor-request";
 // of how the extension decides what's an event. Path is relative to the repo
 // root on the default branch; an existence test fails if the file is moved
 // without updating this, so the link can't rot.
-const POLICY_DOC_PATH = "dev/procedures/extraction-policy.md";
+const POLICY_DOC_PATH = "extraction-policy.md";
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query

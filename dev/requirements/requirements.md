@@ -24,7 +24,7 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
 > right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [`dev/procedures/claude/testing.md`](claude/testing.md). Likewise, the toolbar-icon leaves
+> [`dev/procedures/this_project/testing.md`](../procedures/this_project/testing.md). Likewise, the toolbar-icon leaves
 > (§10) are verified offline through a **fake Chrome**, so they pin the icon the
 > extension *generates*, not that real Chrome *paints* it — only the e2e test does
 > that.
@@ -1256,7 +1256,7 @@ that runs the real extractor against a **real cached page**
 (`dev/requirements/extractor/data/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
 `dev/requirements/extractor/extractor-support.test.js`. Adding a new source
-(see `dev/procedures/claude/adding-a-source.md`) adds a row here. A bot-blocked host with no
+(see `dev/procedures/this_project/adding-a-source.md`) adds a row here. A bot-blocked host with no
 cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
 is covered by unit tests only.
 
@@ -1597,7 +1597,7 @@ here: the rendered §4–§5 requirements are the executable contract.
 
 ## 14. Event fields
 
-Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `dev/procedures/technicalGotchas.md`).
+Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `dev/procedures/this_project/technicalGotchas.md`).
 
 <table>
 <tr>
@@ -1710,7 +1710,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/claude/auto-extractor.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/procedures/this_project/auto-extractor.md`.
 
 <table>
 <tr>

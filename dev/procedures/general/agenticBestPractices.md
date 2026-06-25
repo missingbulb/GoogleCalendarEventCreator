@@ -1,20 +1,11 @@
 # Agentic best practices (local working set)
 
-Practices specific to building and running AI agents, captured **in this repo**
-that haven't (yet) been promoted into the shared canon. The curated,
-project-agnostic canon lives read-only in the Claudinite submodule —
-[claude/shared/agenticBestPractices.md](claude/shared/agenticBestPractices.md) —
-which is what the rest of the docs link to.
-
-This file is a **local capture surface**: the "learned lessons" command and the
-daily auto-lessons digest write new agentic-practice insights here (capture is
-always local — see [claude/workflow.md](claude/workflow.md)). The daily
-**optimize-procedures** routine
-([claude/auto-optimize-procedures.md](claude/auto-optimize-procedures.md)) is the
-only thing that bridges to Claudinite: it promotes generalizable items from here
-up (via a `claudinite-lesson` issue) and, once the canon absorbs them and the
-submodule pin updates, prunes them from this file. So this doc stays small —
-usually just whatever is captured-but-not-yet-upstreamed.
+Practices for building and running AI agents, captured here, not yet in the
+shared canon
+([claude/shared/agenticBestPractices.md](../claude/shared/agenticBestPractices.md)).
+`optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
+prunes them once the canon absorbs them (capture is always local — see
+[this_project/workflow.md](../this_project/workflow.md)).
 
 - **For an open-ended visual/layout requirement, render real candidate designs and
   let the owner pick — before building one.** When the spec leaves *how it looks or
@@ -31,6 +22,8 @@ usually just whatever is captured-but-not-yet-upstreamed.
   design-exploration complement to the existing "drive snapshots through the real
   code path" and snapshot-review rules, which only kick in *after* a change exists.)
 
+- **When the user asks to *show* or *see* a visual artifact, deliver the image into the chat — not a path or a link.** Surface the file itself so it renders inline; a link or a bare path makes the user go fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
+
 - **After merging a PR back to main, start follow-up work on a NEW branch — don't
   reuse the just-merged branch.** When the repo auto-deletes the head branch on
   merge, the remote branch vanishes while a stale local tracking ref lingers; a
@@ -38,3 +31,11 @@ usually just whatever is captured-but-not-yet-upstreamed.
   dance to re-home commits is needless friction. Branching fresh off the updated
   `main` is trivial — `git checkout -b <new> origin/main` — so just do that for the
   next unit of work instead of continuing on a branch whose PR already landed.
+
+- **When a change regenerates a reviewable artifact, link it into the chat the same
+  turn you commit it.** A regenerated gallery, snapshot set, or report is only
+  useful to the owner if they can see it without going to fetch it — surface the
+  branch's copy (a URL, or the file itself rendered inline) in the same message as
+  the commit, so review is one click away rather than a hunt. (Complements the
+  "deliver the image into the chat" rule above: that's for an artifact the owner
+  asked to *see*; this is for one a routine *regenerates*.)

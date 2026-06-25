@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 1 of the auto-implement-extractor pipeline — all deterministic, run by the
 # workflow (.github/workflows/auto-implement-extractor.yml), not the agent. See
-# dev/procedures/claude/auto-extractor.md.
+# dev/procedures/this_project/auto-extractor.md.
 #
 # Two modes (set by triage via $MODE):
 #   new       — the host has no source yet. Branch off main, record the event page,

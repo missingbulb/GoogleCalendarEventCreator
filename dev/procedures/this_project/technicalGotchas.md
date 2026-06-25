@@ -2,8 +2,8 @@
 
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
-live in [architectureGuidelines.md](architectureGuidelines.md); project-agnostic
-engineering practices in [engineeringPractices.md](claude/shared/engineeringPractices.md).
+live in [this_project/highLevelDesign.md](highLevelDesign.md); project-agnostic
+engineering practices in [engineeringPractices.md](../claude/shared/engineeringPractices.md).
 
 **Scope — project-wide footguns only.** A trap you'd only trip over *while
 editing one specific file or function* (a mistake of **commission**, made with
@@ -13,7 +13,7 @@ stays off the always-loaded `CLAUDE.md` budget. Keep an entry here only when
 Claude could hit it *without* reading the locus file — a mistake of **omission**
 (you must know it to decide whether to open/avoid the file) or a cross-cutting
 trap spanning files. See the full locality rule in
-[claude/workflow.md](claude/workflow.md).
+[this_project/workflow.md](workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
   us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in
@@ -69,45 +69,31 @@ trap spanning files. See the full locality rule in
   tab/event listeners a test can trigger, attaching to the target is what starts
   it, and the first read still races startup — so **poll** until the global
   appears. (Bound every probe and add a test-level timeout regardless, per the
-  hang-proofing rule in [engineeringPractices.md](claude/shared/engineeringPractices.md).)
+  hang-proofing rule in [engineeringPractices.md](../claude/shared/engineeringPractices.md).)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
   with the rest of the portable GitHub procedures in
-  [claude/shared/git-and-github.md](claude/shared/git-and-github.md).
-- **`Cannot find module 'jsdom'` means the dev deps aren't installed, not a code
-  bug.** `node_modules` starts empty on a fresh checkout (including the ephemeral
-  cloud sandbox); `jsdom` is a test-only devDependency loaded by `extension-test/harness.js`.
-  Run `npm install` and re-run — don't look for another cause first.
-- **Automated environments are bot-blocked from fetching target sites — the
-  block is the datacenter IP, not the headers.** A live-page fetch that works on
-  your machine often fails from CI/sandboxes regardless of how browser-like the
-  User-Agent is: a direct fetch gets HTTP 403 in the cloud sandbox, and GitHub
-  Actions runners get HTTP 400 from `facebook.com`. The escape hatch is the
-  optional **`SCRAPER_API_KEY`** secret: when set, the pipeline's only page fetch
-  (`record_page` in `dev/tools/new-extractors-creation/phase1-prepare.sh`) routes
-  through ScraperAPI's residential proxy, so the prepare workflow fetches from a
-  non-datacenter IP. Unset (e.g. a fresh clone, or the cloud sandbox), it fetches
-  directly and stays bot-blocked — so a target page can only be recorded by the
-  auto-extractor pipeline running in CI (where the secret is wired), not locally.
-  ScraperAPI also renders JS (`render=true`), so a single-page-app records with
-  real data — there is no separate render step. If ScraperAPI ever underperforms,
-  swap the vendor in that one `record_page` function — it's the whole fetching
-  surface. Facebook returns a hard 400 even through the proxy, so it remains
-  unit-tests-only — it can't be a cached live case.
-- **jsdom's `body.innerText` is null**, so `GCal.bodyText()` (`innerText ||
-  textContent`) returns `textContent` in tests — including `<select>`/`<option>`
-  and hidden text a real browser's `innerText` omits. A generic visible-text
-  extraction can therefore pass against cached HTML yet find nothing in Chrome;
-  treat body-text results as jsdom-optimistic, and don't add an integration case
-  that only passes because of this (same jsdom-vs-Chrome class as the `<noscript>`
-  gotcha below, and the note in `custom/telavivcinematheque.js`).
-- **jsdom's default `runScripts: "outside-only"` parses `<noscript>` into live DOM
-  — the opposite of a real browser.** With scripting off, jsdom turns `<noscript>`
-  content into real elements, so a `textContent` read looks clean in a test but
-  splices `<img>`/markup into the value in Chrome (which, scripting on, keeps
-  `<noscript>` as raw text). To reproduce the browser, parse a script-free
-  fragment with `runScripts: "dangerously"` (see `extension-test/harness.js`) — a green test
-  here can otherwise hide a broken live extraction. (#130 / #137)
+  [claude/shared/git-and-github.md](../claude/shared/git-and-github.md).
+- **Bot-blocking from CI is by datacenter IP (the general rule is in
+  [general/engineeringPractices.md](../general/engineeringPractices.md)); here the
+  escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
+  only page fetch (`record_page` in
+  `dev/tools/new-extractors-creation/phase1-prepare.sh`) routes through ScraperAPI's
+  residential proxy (with `render=true`, so a single-page-app records real data).
+  Unset (a fresh clone, the cloud sandbox), it fetches directly and stays
+  bot-blocked — so a target page can only be recorded by the auto-extractor
+  pipeline running in CI (where the secret is wired), not locally. ScraperAPI is the
+  whole fetching surface — swap the vendor in that one function if it underperforms.
+  Facebook returns a hard 400 even through the proxy, so it stays unit-tests-only —
+  it can't be a cached live case.
+- **jsdom-vs-Chrome DOM traps** — `body.innerText` is null (so `GCal.bodyText()`'s
+  `innerText || textContent` returns `textContent`, including `<select>`/hidden
+  text), and the default `runScripts: "outside-only"` parses `<noscript>` into live
+  DOM (the opposite of a real browser). Both let a green test hide a broken live
+  extraction; they're portable test-harness gotchas, documented in
+  [general/testingPractices.md](../general/testingPractices.md). In this repo they bit
+  the body-text scan, `extension-test/harness.js`, and `custom/telavivcinematheque.js`
+  (#130 / #137).
 - **The shared `GCal` global is assembled by many files and re-injected on every
   popup open — augment it, and reset per-load state.** Two traps from one fact
   (`GCal` is a mutable global, loaded repeatedly into a page world that persists
@@ -119,10 +105,12 @@ trap spanning files. See the full locality rule in
   and is pinned first in the load order (#189). Anything that runs at injection
   time must be safe to run again.
 - **The cloud Setup script runs as root starting in the repo's parent dir
-  (`/home/user`), not the checkout.** A bare `npm ci` there finds no
-  `package.json` and silently installs nothing (the tests then trigger a confusing
-  mid-session install). `.claude/cloud-setup.sh` must `cd` into the checkout first.
-  (#186 / #196)
+  (`/home/user`), not the checkout** — a project instance of the general
+  "setup script may start above the checkout" rule in
+  [general/engineeringPractices.md](../general/engineeringPractices.md). A bare
+  `npm ci` there finds no `package.json` and silently installs nothing (the tests
+  then trigger a confusing mid-session install); `.claude/cloud-setup.sh` must `cd`
+  into the checkout first. (#186 / #196)
 - **`clean()` collapses all whitespace including newlines — use it only for
   single-line fields.** Title and location are whitespace-collapsed, but a
   description run through `clean()` loses every line break (it bit Meetup,
@@ -135,21 +123,13 @@ trap spanning files. See the full locality rule in
   host count as one, surfacing a phantom event (og:title + a footer location +
   "No date found") on e.g. the site's home page (#133). A real event must require
   actual data — JSON-LD or a parsed date — not merely a host match.
-- **Large cached HTML fixtures skew GitHub's language stats — mark them
-  `linguist-vendored`.** GitHub reported this JS extension as "mostly HTML" because
-  the full-page `dev/requirements/extractor/data/*.html` test fixtures dwarf the source by bytes.
-  `.gitattributes` marks `dev/requirements/extractor/data/*.html linguist-vendored` so Linguist ignores them;
-  do the same for any future large generated/fixture files. (#78)
-- **GitHub renders Markdown inside a raw `<td>` only when the cell content is
-  blank-line-separated — and a CSS/`<div>` layout is sanitized away.** To get a
-  two-column "image left, text right" layout that survives GitHub's renderer
-  (`dev/requirements/requirements.md`'s gallery), wrap each row in a literal
-  `<table>`/`<tr>`/`<td>` and put a **blank line before and after** the cell's
-  content; cmark-gfm then re-enters Markdown mode inside the cell, so `![img]()`,
-  `**bold**`, and links render. Without the surrounding blank lines the content is
-  swallowed into the HTML block and shown verbatim. A leading inline `<!-- … -->`
-  also starts an HTML block — keep any marker as the **last** token on the line so
-  the line still *starts* as Markdown (how the generator tags its managed
-  left-cell line). GitHub's sanitizer strips `style`/CSS (so a flexbox `<div>`
-  two-column won't work) but keeps `<table>` + `align`/`valign`/`width`; and a GFM
-  pipe-table cell can't hold the multi-line prose. (`dev/requirements/shared/build-requirements-gallery.js`.)
+- **Two portable GitHub gotchas this repo relies on — large fixtures need
+  `linguist-vendored`, and Markdown inside a raw `<td>` needs surrounding blank
+  lines.** The `linguist-vendored` rule now lives in the shared canon
+  [claude/shared/git-and-github.md](../claude/shared/git-and-github.md); the `<td>`
+  blank-lines rule (with this repo's `<!-- … -->`-marker-last-token nuance, not yet
+  upstreamed) is in the local working set
+  [general/git-and-github.md](../general/git-and-github.md). Here they apply to the
+  `dev/requirements/extractor/data/*.html` fixtures (`.gitattributes`, #78) and the
+  two-column gallery in `dev/requirements/requirements.md`
+  (`dev/requirements/shared/build-requirements-gallery.js`).
