@@ -1,7 +1,7 @@
 # Testing
 
 There are three kinds of tests, with different audiences, separated under
-`dev/requirements/extractor/`, `extension-test/` (which mirrors `extension/`'s layout), and `dev/requirements/ui/`:
+`dev/requirements/extractor/`, `extension-test/` (which mirrors `extension/`'s layout), and `dev/requirements/` (per-leaf UI snapshot cases under `<kind>/cases/`, rendered by the shared engine in `dev/requirements/shared/render/`):
 
 ```sh
 npm install
@@ -163,11 +163,11 @@ from facebook.com, so it can't be cached as a live case.
 
 **`dev/requirements/shared/render/visual-snapshots.test.js`** is the single visual-comparison engine: it
 renders each UI *case* and compares it pixel-by-pixel (via `pixelmatch`) against a
-committed image. `dev/requirements/shared/render/render-snapshot.js` picks the renderer by the **case's own
-`kind`**: a `"popup"` case (the default) is fed to `extension/events-popup/popup.js`'s exported
+committed image. `dev/requirements/shared/render/render-snapshot.js` picks the renderer by the **case's
+folder (its kind)**: a `popup/` case (the default) is fed to `extension/events-popup/popup.js`'s exported
 `render({ data, tab, listing })` — the same `chooseContent` +
-`events-view.js`/`source-request-view.js` code the extension runs — and a
-`"icon"` case (§10, the toolbar icon) is fed to the real `extension/icon/toolbar-icon.js`
+`events-view.js`/`source-request-view.js` code the extension runs — and an
+`icon/` case (§10, the toolbar icon) is fed to the real `extension/icon/toolbar-icon.js`
 loaded into a fake browser (`icon-renderer.js` + `fake-chrome.js`). Either way the
 pixels come from shipped code, so a change to a view or to the icon is caught
 automatically; the comparison, naming, storage, and refresh are shared. (`render()`
@@ -187,8 +187,8 @@ A popup `<slug>.<id>.case.js` exports `{ description, data, listing?, tab?, acti
 the host classification (`none`/`allow`/`deny`); `action` is an optional
 `(document) => void` gesture applied before snapshotting — e.g. `scrollToBottom`
 from `dev/requirements/shared/render/actions.js`, since satori can't actually scroll (it pins `#events`
-to its end so the bottom-anchored count label is painted). An icon case
-(`kind: "icon"`) instead exports `{ kind, description, tabUrl, lists }` — the faked
+to its end so the bottom-anchored count label is painted). An icon case (one in
+`icon/`) instead exports `{ description, tabUrl, lists }` — the faked
 active-tab URL and host lists the toolbar-icon renderer classifies.
 
 `dev/requirements/shared/render/popup-renderer.js` rasterizes with `satori` + `@resvg/resvg-js` (no
