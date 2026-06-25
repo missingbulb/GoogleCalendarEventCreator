@@ -3,7 +3,7 @@
 `npm test` runs everything. General test discipline — see a test fail before
 trusting it, green-twice-before-merge, snapshot-through-the-real-code-path,
 high-watermark gating, self-diagnosing remote tests — lives in
-`dev/procedures/engineeringPractices.md`; jsdom-vs-Chrome traps live in
+`dev/procedures/general/engineeringPractices.md`; jsdom-vs-Chrome traps live in
 `dev/procedures/technicalGotchas.md`. This file is the project-specific testing decisions
 that aren't tied to one file. The detailed mechanics of each test harness live as
 comments **in that harness** (linked below), not here — edit the comment, not this

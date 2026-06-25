@@ -82,7 +82,7 @@ Flag specifically any process that **returns its result but then wastes time on
 shutdown** — one that could be safely killed once its output is in hand rather
 than waited out. Close with a **terse verdict**: either one concrete speed-up
 recommendation (route it like any other lesson — a project mechanic to the
-matching `dev/procedures/claude/*`, a portable practice to `dev/procedures/agenticBestPractices.md`),
+matching `dev/procedures/claude/*`, a portable practice to `dev/procedures/general/agenticBestPractices.md`),
 or an explicit **"no changes recommended"**. The bar is high — most
 conversations won't yield a new process note, so "no changes recommended" is the
 common, expected outcome; don't manufacture one.
@@ -118,8 +118,8 @@ Claudinite. Route by scope:
   a portable lesson buried in a code comment escapes the optimize-procedures
   promotion path, so those still go to the practice docs below.
 - **Portable** lessons (general engineering practices, agentic best practices):
-  to the local working-set docs `dev/procedures/engineeringPractices.md` and
-  `dev/procedures/agenticBestPractices.md`. These are local capture surfaces; the curated,
+  to the local working-set docs `dev/procedures/general/engineeringPractices.md` and
+  `dev/procedures/general/agenticBestPractices.md`. These are local capture surfaces; the curated,
   project-agnostic canon lives read-only in the Claudinite submodule
   (`dev/procedures/claude/shared/`). Don't try to edit the shared docs or file a Claudinite
   issue here — just write the best local doc.

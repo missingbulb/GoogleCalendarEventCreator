@@ -49,8 +49,8 @@ portable-by-topic working-set docs under `dev/procedures/general/` (git/GitHub a
 working-discipline gotchas already generalized, awaiting promotion) are part of the
 same local capture surface.
 
-@dev/procedures/engineeringPractices.md
-@dev/procedures/agenticBestPractices.md
+@dev/procedures/general/engineeringPractices.md
+@dev/procedures/general/agenticBestPractices.md
 @dev/procedures/general/git-and-github.md
 @dev/procedures/general/working-discipline.md
 
