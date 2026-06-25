@@ -1,8 +1,9 @@
 {
-  "what": "extractor-blocked-needs-human label — the human-triage signal added when the automation can't proceed and hands the issue to a person: the agent's bail path (agent-prompt-extractor.md) and the finalize anomaly hand-off (phase2-finalize.sh). (The prepare workflow no longer hands off here — an undownloadable page just fails Phase 1, caught by its 'Comment on failure' step.) Created idempotently before use. Counts include comments.",
+  "what": "extractor-blocked-needs-human label — the human-triage signal added when the automation can't proceed and hands the issue to a person: the agent's bail path (agent-prompt-extractor.md), the finalize anomaly hand-off (phase2-finalize.sh), and the prepare workflow's failure step (auto-implement-extractor.yml) when Phase 1 breaks before the hand-off (e.g. an undownloadable page). Created idempotently before use. Counts include comments.",
   "value": "extractor-blocked-needs-human",
   "counts": {
     "dev/tools/new-extractors-creation/phase2-finalize.sh": 3,
-    "dev/tools/new-extractors-creation/agent-prompt-extractor.md": 4
+    "dev/tools/new-extractors-creation/agent-prompt-extractor.md": 4,
+    ".github/workflows/auto-implement-extractor.yml": 6
   }
 }

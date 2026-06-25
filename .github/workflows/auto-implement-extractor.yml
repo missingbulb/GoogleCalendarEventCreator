@@ -8,8 +8,11 @@ run-name: "Prepare extractor · #${{ github.event.issue.number }} — ${{ github
 # Triggered when the 'extractor-request' label is added to an issue.
 # Triages the request, then prepares a branch with the event page downloaded
 # (record_page → ScraperAPI) AND the extractor scaffolded (matches(),
-# supportedDomains, load lists). If the page can't be downloaded, Phase 1 fails and
-# the "Comment on failure" step hands the issue to a human. It does NOT run the agent
+# supportedDomains, load lists). If the page can't be downloaded (or anything else
+# breaks before the hand-off), Phase 1 fails and the "Comment on failure and hand
+# off to a human" step drops `extractor-request` and adds
+# `extractor-blocked-needs-human` — the same human-triage signal the agent and
+# finalize stops use. It does NOT run the agent
 # any more: the implementation step is a Claude Code on the web routine wired to
 # the `extractor-agent-ready` label, so the last thing this workflow does is swap
 # `extractor-request` → `extractor-agent-ready` (the hand-off). When the agent
@@ -119,7 +122,7 @@ jobs:
       # walls, and CAPTCHAs, so there's nothing cheap left to judge before the
       # agent. The page is downloaded in Phase 1 (record_page in phase1-prepare.sh,
       # `curl -f` through ScraperAPI). If it can't be downloaded, Phase 1 fails and
-      # the "Comment on failure" step hands the issue to a human. (A page that
+      # the "Comment on failure and hand off to a human" step flags the issue. (A page that
       # downloads but isn't one event — a listing/login page — is still the agent's
       # bail in Stage 2.)
 
@@ -181,15 +184,31 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: bash dev/tools/new-extractors-creation/handoff-to-agent.sh
 
-      # One comment for a GENUINE failure only. An expected stop (unfetchable /
-      # challenge page) no longer fails the job — those are handled green by their
-      # own comment steps above. So reaching here means something actually broke
-      # (npm ci, scaffolding, the page recording, …).
-      - name: Comment on failure
+      # One comment for a GENUINE failure only. An expected stop (triaged close,
+      # agent bail) is handled green elsewhere, so reaching here means something
+      # actually broke before the hand-off — most often the page couldn't be
+      # downloaded (record_page → 403), or npm ci / scaffolding / git failed.
+      # Hand the issue to a human the SAME way the agent (Stage 2) and finalize
+      # (Stage 3) stops do: drop the `extractor-request` trigger and flag
+      # `extractor-blocked-needs-human`, so the "needs a human" state is consistent
+      # across every stop path — the issue no longer sits looking like an
+      # unprocessed request, and a re-add of `extractor-request` is what it now
+      # takes to retry (against a site that may well just fail to download again).
+      # Create the label idempotently first (GitHub won't make it on demand). The
+      # remove-label is guarded: if the hand-off already removed `extractor-request`
+      # before failing, the combined edit would error, so fall back to add-only.
+      - name: Comment on failure and hand off to a human
         if: failure()
         env:
           GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER:  ${{ github.event.issue.number }}
           RUN_URL:       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed unexpectedly. [View run]($RUN_URL). Manual implementation may be needed — see dev/procedures/this_project/adding-a-source.md."
+          gh label create "extractor-blocked-needs-human" --color B60205 \
+            --description "Automation could not proceed; a maintainer needs to take this over by hand" \
+            2>/dev/null || true
+          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed before it could hand off to the agent. [View run]($RUN_URL). Flagging \`extractor-blocked-needs-human\` — manual implementation may be needed, see dev/procedures/this_project/adding-a-source.md."
+          gh issue edit "$ISSUE_NUMBER" \
+            --add-label "extractor-blocked-needs-human" \
+            --remove-label "extractor-request" \
+            || gh issue edit "$ISSUE_NUMBER" --add-label "extractor-blocked-needs-human"
