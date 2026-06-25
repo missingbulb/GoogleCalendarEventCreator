@@ -10,7 +10,9 @@ new-label creation, and the generic cross-branch merge gotchas — live in the
 shared rules: [shared/git-and-github.md](shared/git-and-github.md). The two
 owner-triggered defined instructions that also land through this PR flow — "bump
 version" and "learned lessons" — keep their definitions in
-[workflow.md](workflow.md) (they reference the flow here).
+[workflow.md](workflow.md) (they reference the flow here). Portable git/GitHub
+gotchas captured here but **not yet** in the canon live in the local working set
+[../general/git-and-github.md](../general/git-and-github.md).
 
 ## Merge to main command
 
@@ -21,12 +23,10 @@ test-flakiness gate in
 [shared/engineeringPractices.md](shared/engineeringPractices.md) (twice-green)
 applies only when the change adds or touches an e2e/heavy-browser test.
 
-A merge approval (like any approval) applies **only backward**, to the work
-already in front of the owner when it's given — never to anything requested or
-done *after* it. A later follow-up, even a fix to the just-merged change, needs
-its own explicit approval before it may be merged; don't carry one approval
-forward, and don't treat a chosen answer to an `AskUserQuestion` as merge
-authorization because an option's wording happened to mention merging. When in
+A merge approval, like any approval, applies **only backward** — a later
+follow-up, even a fix to the just-merged change, needs its own explicit approval
+before it may be merged (the general principle is in
+[../general/working-discipline.md](../general/working-discipline.md)). When in
 doubt, open the PR, get CI green, and wait for a fresh approval.
 
 (The branch/commit-history rules — commit-in-layers, and the squash-merge branch
@@ -35,18 +35,16 @@ resync gotchas — are portable and live in
 
 ## Open the PR early when a change touches e2e / heavy / UI tests
 
-The usual default is to hold a PR until asked. **Reverse that when a change adds
-or modifies an e2e/heavy-browser (`dev/requirements/heavy/`) or UI-snapshot
-(`dev/requirements/{popup,icon}/`) test**: those can't be exercised locally (the sandbox has no Chrome;
-see [../technicalGotchas.md](../technicalGotchas.md)), and their reviewable
-artifacts only exist on a PR — CI runs the heavy/e2e suites against the branch,
-and a UI change's reviewable output (the pixel diff GitHub renders, and the
-inline gallery in the branch's `dev/requirements/requirements.md`) needs a branch
-pushed to GitHub to view at all. So opening the PR *is* how you see the change
-working and surface failures; doing it up front (rather than after a round of
-local-only iteration that proves nothing for these classes) is the faster path to
-a working, reviewable result. Each CI iteration costs a full round-trip, so get
-the first one running as early as possible.
+The general rule — open the PR early when a change's only reviewable output is
+produced by CI — is in
+[../general/git-and-github.md](../general/git-and-github.md). In this repo that
+means a change that adds or modifies an e2e/heavy-browser (`dev/requirements/heavy/`)
+or UI-snapshot (`dev/requirements/{popup,icon}/`) test: those can't be exercised
+locally (the sandbox has no Chrome; see [../technicalGotchas.md](../technicalGotchas.md)),
+and their reviewable artifacts only exist on a PR — CI runs the heavy/e2e suites
+against the branch, and a UI change's reviewable output (the pixel diff GitHub
+renders, and the inline gallery in the branch's `dev/requirements/requirements.md`)
+needs a branch pushed to GitHub to view at all.
 
 (Three portable CI/automation rules that used to live here — `GITHUB_TOKEN`
 doesn't trigger another workflow, an automated job needs a unique branch per run,
@@ -141,41 +139,17 @@ Without them nothing breaks — the generated files just fall back to a normal
 
 ### Keep divergence small
 
-Conflict size scales with how long a branch lives and how far it drifts from
-`main`. Sync early rather than at the end: when starting work on a branch,
-`git merge origin/main` (or rebase) and `npm run regen` first, so the branch
-carries the latest sources and freshly-generated artifacts instead of
-discovering the gap at merge time. The one-commit-per-PR squash history (the
-merge-to-main command above) keeps each branch a single reviewable unit, so
-shorter-lived branches are the norm.
+The general "sync early to keep conflicts small" rule is in
+[../general/git-and-github.md](../general/git-and-github.md). The project-specific
+addition: when starting work on a branch, `git merge origin/main` (or rebase) **and
+run `npm run regen`** first, so the branch carries freshly-generated artifacts, not
+just the latest sources.
 
 The generic cross-branch merge gotchas that aren't specific to this repo's
 generated files — merging across a file relocation, merging in content that
 predates a branch-wide invariant, and porting old work forward across a changed
 invariant — live in the shared rules:
-[shared/git-and-github.md](shared/git-and-github.md).
-
-## Renaming a directory that houses a submodule
-
-- **`git mv` on a directory containing a submodule updates `.gitmodules` and the
-  index but leaves `.git/config` stale — run `git submodule sync && git submodule
-  update --init` after.** When `docs/claude/shared/` (the Claudinite submodule)
-  moved to `dev/procedures/claude/shared/` via `git mv docs dev/procedures`, git
-  correctly rewrote `.gitmodules` and the index; but the local `.git/config` still
-  had `[submodule "docs/claude/shared"]` pointing at the old path. Until `git
-  submodule sync` propagated the new path into `.git/config` and `git submodule
-  update --init` re-registered it, any operation that consulted `.git/config`
-  (submodule status, checkout) saw the stale entry. Always run both commands after
-  renaming a directory that houses a submodule.
-
-## Re-read a file after `git mv` before rewriting it
-
-- **`git mv` leaves the moved file looking unread to the editor tool — a
-  `Write`/`Edit` in the same batch silently refuses, leaving the file stale.** The
-  common reorg move is `git mv old new` then rewrite `new`; the editor tracks reads
-  by path, so the moved path reads as never-seen and the write is rejected. Re-read
-  the file at its **new** path before editing it. And check each result in a batched
-  set of tool calls: a single refused write (or any silent failure) buried in a batch
-  is easy to miss, and the stale (moved-but-not-rewritten) file surfaces much later
-  as a confusing error far from its cause — here a relocated module kept its old
-  contents and `ENOENT`'d at load two steps downstream.
+[shared/git-and-github.md](shared/git-and-github.md). Two portable git-mv gotchas
+captured here but not yet in the canon (renaming a directory that houses a
+submodule; re-reading a moved file before rewriting it) now live in the local
+working set [../general/git-and-github.md](../general/git-and-github.md).

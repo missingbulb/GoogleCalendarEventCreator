@@ -44,10 +44,15 @@ General engineering and agentic practices learned **in this repo** are captured
 locally in the working-set docs below (capture is always local — see
 `dev/procedures/claude/workflow.md`). They start near-empty; the curated canon lives in the
 shared submodule (next section), and the `optimize-procedures` routine moves
-generalizable items up and prunes them here once the canon absorbs them.
+generalizable items up and prunes them here once the canon absorbs them. The
+portable-by-topic working-set docs under `dev/procedures/general/` (git/GitHub and
+working-discipline gotchas already generalized, awaiting promotion) are part of the
+same local capture surface.
 
 @dev/procedures/engineeringPractices.md
 @dev/procedures/agenticBestPractices.md
+@dev/procedures/general/git-and-github.md
+@dev/procedures/general/working-discipline.md
 
 ## Shared portable rules (the Claudinite submodule)
 
