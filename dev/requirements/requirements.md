@@ -1309,7 +1309,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Validated against [left-handed-girl](extractor/expected/telavivcinematheque-left-handed-girl.json), [poetry-bookstores](extractor/expected/telavivcinematheque-poetry-bookstores.json), [sentimental-value](extractor/expected/telavivcinematheque-sentimental-value.json), [taiwan-week](extractor/expected/telavivcinematheque-taiwan-week.json)._ <!-- req-gallery:11.4 -->
+🧩 _Validated against [506](extractor/expected/telavivcinematheque-506.json), [left-handed-girl](extractor/expected/telavivcinematheque-left-handed-girl.json), [poetry-bookstores](extractor/expected/telavivcinematheque-poetry-bookstores.json), [sentimental-value](extractor/expected/telavivcinematheque-sentimental-value.json), [taiwan-week](extractor/expected/telavivcinematheque-taiwan-week.json)._ <!-- req-gallery:11.4 -->
 
 </td>
 <td valign="top">
