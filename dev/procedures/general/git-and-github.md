@@ -25,6 +25,20 @@ nothing for these classes — is the faster path to a working, reviewable result
 Each CI iteration costs a full round-trip, so get the first one running as early as
 possible.
 
+## `commit.gpgsign` does not sign merge commits — pass `-S` to `git merge`
+
+**`commit.gpgsign=true` signs `git commit`, but `git merge` ignores it**, so a
+sync-merge of the default branch produces an *unsigned* merge commit even with
+signing configured. In a repo that enforces commit verification (e.g. a stop-hook
+that rejects unverified commits), that unsigned merge then has to be fixed after
+the fact — `git commit --amend --no-edit --reset-author` re-stamps it through the
+signing path — costing an extra round-trip every time you sync. Sign it up front
+instead: `git merge -S origin/<default>` (or set `merge.gpgsign` so merges are
+covered like commits). Note local `git log %G?` can't verify an SSH signature
+without `gpg.ssh.allowedSignersFile`, so confirm the signature landed by checking
+the raw object (`git cat-file commit HEAD` shows a `gpgsig` header) rather than
+trusting the `N`/`E` flag.
+
 ## Renaming a directory that houses a submodule
 
 **`git mv` on a directory containing a submodule updates `.gitmodules` and the
