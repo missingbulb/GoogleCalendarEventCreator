@@ -125,7 +125,7 @@ Claudinite. Route by scope:
   issue here — just write the best local doc.
 
 You never hand a lesson to Claudinite at capture time. The daily
-**optimize-procedures** routine ([auto-optimize-procedures.md](auto-optimize-procedures.md))
+**optimize-procedures** routine ([auto-optimize-procedures.md](../general/auto-optimize-procedures.md))
 is the *only* thing that bridges to Claudinite: it later promotes generalizable
 local items up (via a `claudinite-lesson` issue) and prunes the local copy once
 the canon absorbs it. So a portable insight captured locally isn't "stuck" here —
@@ -137,5 +137,5 @@ practice docs so optimize-procedures can carry them upstream.
 
 A scheduled workflow runs this same pass automatically once a day over the last
 24h of commits and issue/PR activity, opening a PR for review
-(`dev/procedures/claude/auto-lessons.md`); saying "learned lessons" is the on-demand
+(`dev/procedures/general/auto-lessons.md`); saying "learned lessons" is the on-demand
 version of it.

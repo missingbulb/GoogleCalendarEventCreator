@@ -83,5 +83,5 @@ so it accumulates a scrollable history of every run over time; also reference th
 issue from the PR (`Refs #366`). The issue is long-lived: if it was **closed**,
 **reopen it** when a run needs logging (a closure while the routine is still
 producing PRs is stale), matching the open-branch report's behavior
-([auto-branch-report.md](../claude/auto-branch-report.md)). Each daily routine keeps its own
-such issue — the lessons digest's is #365 (see [auto-lessons.md](../claude/auto-lessons.md)).
+([auto-branch-report.md](../general/auto-branch-report.md)). Each daily routine keeps its own
+such issue — the lessons digest's is #365 (see [auto-lessons.md](../general/auto-lessons.md)).

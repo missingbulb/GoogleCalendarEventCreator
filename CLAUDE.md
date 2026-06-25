@@ -9,11 +9,11 @@ own file under `dev/procedures/` and is imported here:
 @dev/procedures/this_project/adding-a-source.md
 @dev/procedures/claude/testing.md
 @dev/procedures/this_project/auto-extractor.md
-@dev/procedures/claude/auto-lessons.md
+@dev/procedures/general/auto-lessons.md
 @dev/procedures/this_project/auto-fallback-coverage.md
-@dev/procedures/claude/auto-branch-report.md
-@dev/procedures/claude/claudinite-handoff.md
-@dev/procedures/claude/auto-optimize-procedures.md
+@dev/procedures/general/auto-branch-report.md
+@dev/procedures/general/claudinite-handoff.md
+@dev/procedures/general/auto-optimize-procedures.md
 @dev/procedures/general/textAndFileManipulation.md
 
 The project's top-level architectural rules of the road live in the "Architecture
@@ -56,7 +56,7 @@ It is consumed **read-only**: a rule change happens in Claudinite and arrives he
 as a Dependabot submodule-bump PR. Lessons are *captured locally* (above) and only
 the daily `optimize-procedures` routine bridges them up to Claudinite (see
 [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
-and `dev/procedures/claude/auto-optimize-procedures.md`). A fresh clone needs
+and `dev/procedures/general/auto-optimize-procedures.md`). A fresh clone needs
 `git submodule update --init` (`.claude/cloud-setup.sh` runs it) or
 `dev/procedures/claude/shared/` is an empty folder and these imports resolve to nothing.
 
