@@ -1,14 +1,14 @@
 # Automated nightly open-branch status report
 
-A nightly Claude **Opus** Claude Code routine that reports every open branch's
-status against `main` and which are safe to delete — the scheduled version of the
-manual branch analysis. It is **read-only on the repo**: it never pushes, deletes,
-or merges anything; its only writes are a comment on its standing tracking issue
-(#399) when the branch picture has changed, and **opening or closing** that issue
-to mirror whether the latest report lists any branch that's safe to delete (open
-when there's cleanup pending, closed when there isn't). Like the lessons/fallback
-digests it stays **silent when nothing moved** — an unchanged night posts no
-comment.
+A scheduled, unattended agent routine that reports every open branch's status
+against `main` and which are safe to delete — the scheduled version of the manual
+branch analysis. Read-only on the repo: it never pushes, deletes, or merges
+anything; its only writes are a comment on a standing tracking issue (e.g. titled
+"Open Branches Cleanup Tracker", found **by title**, not by a hard-coded number)
+when the branch picture has changed, and **opening or closing** that issue to
+mirror whether the latest report lists any branch that's safe to delete (open when
+cleanup is pending, closed when it isn't). Like the other unattended digests it
+stays **silent when nothing moved** — an unchanged night posts no comment.
 
 ## What it reports
 
@@ -16,9 +16,10 @@ For every remote branch except `main`:
 
 - **commits ahead** of `main` (`git rev-list --count origin/main..origin/<b>`);
 - **real status**, squash-aware (the crux — see below);
-- **open PR**, if any — from the **GitHub MCP tools** (`list_pull_requests` /
-  `search_pull_requests`), never `gh`/`curl`: the shell here reaches a git-only
-  proxy with no GitHub API (see [github.md](github.md));
+- **open PR**, if any — read it through whatever GitHub API access the environment
+  provides. In some environments the shell can't reach the GitHub API directly
+  (e.g. a git-only remote proxy), so use the platform's API tooling rather than
+  shelling out to `gh`/`curl`;
 - **safe to delete?** — yes only when the branch's content is already in `main`.
 
 And for every branch with commits ahead that is **not** already merged, a 1–3
@@ -28,15 +29,14 @@ each branch.
 
 ## The crux: raw "commits ahead" is misleading — be squash-aware
 
-`main` is **squash-merged** — one commit per PR (see [github.md](github.md)) — so a
-branch whose work has already landed *still* shows its original commits as "ahead"
-of `main`: the squash created a new commit the branch's own commits are
-unreachable from. **"Ahead by N" never, by itself, means "unmerged."** Decide the
-real status by what the branch's *content* does against `main`:
+When `main` is **squash-merged** (one commit per PR), a branch whose work has
+already landed *still* shows its original commits as "ahead" of `main`: the squash
+created a new commit the branch's own commits are unreachable from. **"Ahead by N"
+never, by itself, means "unmerged."** Decide the real status by what the branch's
+*content* does against `main`:
 
-1. **PR state — authoritative for merged.** Via the GitHub MCP tools, find the
-   branch's PR. A **merged** PR ⇒ the work is in `main` ⇒ *safe to delete*, however
-   many commits show ahead.
+1. **PR state — authoritative for merged.** Find the branch's PR; a **merged** PR ⇒
+   the work is in `main` ⇒ *safe to delete*, however many commits show ahead.
 2. **Content vs. `main` — catches a squash with no PR, and stale branches.**
    Two-dot `git diff --stat origin/main..origin/<b>`: if everything the branch
    adds is already present in `main` (its new files/lines don't show up as
@@ -57,10 +57,9 @@ real status by what the branch's *content* does against `main`:
    branch is **superseded** ⇒ *safe to delete* — note in Details where the content
    now lives. This is a content/judgment read, not a mechanical diff; all of it is
    **nondestructive** — reads against `origin/main` only, never a pull/merge into
-   the working tree. (Worked example: a branch adding a standalone
-   `dev/procedures/devEnvironmentSetup.md` whose guidance had been distilled into
-   `dev/procedures/agenticBestPractices.md` on `main`, with its hook already shipped — invisible
-   to step 2, caught here.)
+   the working tree. (Worked example: a branch adding a standalone doc whose
+   guidance had already been distilled into another doc on `main`, with the hook it
+   documents already shipped — invisible to step 2, caught here.)
 4. **No common ancestor ⇒ orphaned.** If `git merge-base origin/main origin/<b>`
    fails, `main`'s history was rewritten out from under the branch (a force-push).
    Flag it **orphaned (pre-rewrite)**: its commits can't be mechanically proven in
@@ -86,14 +85,13 @@ recommendation of which branches are safe to delete.
 
 ## Where it posts
 
-The report lands on the standing issue titled
-**`Open Branches Cleanup Tracker`** (find it **by title** — currently
-**#399**, not a hard-coded number; if it doesn't exist, open it). The issue is a
-**cleanup tracker, and its open/closed state mirrors whether there is cleanup
-pending** — i.e. whether the latest report lists **any** branch that's safe to
-delete. So each run makes two independent decisions: whether to **post a comment**
-(by what changed), and what the issue's **open/closed state** should be (by
-whether anything is safe to delete on the report it just produced).
+The report lands on a standing tracking issue (e.g. titled "Open Branches Cleanup
+Tracker", found **by title**, not a hard-coded number; open it if it doesn't
+exist). The issue is a **cleanup tracker, and its open/closed state mirrors whether
+there is cleanup pending** — i.e. whether the latest report lists **any** branch
+that's safe to delete. So each run makes two independent decisions: whether to
+**post a comment** (by what changed), and what the issue's **open/closed state**
+should be (by whether anything is safe to delete on the report it just produced).
 
 First the comment, so the issue stays a signal rather than a daily wall of
 identical tables — read the most recent comment on the issue to compare against:
@@ -118,21 +116,16 @@ the most recent existing one when this run didn't comment):
   it. (A branch flagged **orphaned (pre-rewrite)** *needs a human eye* and is not
   "safe to delete", so it alone does not keep the issue open.)
 
-## The launcher (Claude Code Routine)
+## The launcher
 
-Keep the routine's config a **thin pointer** to this doc, not an inlined spec (per
-[shared/agenticBestPractices.md](shared/agenticBestPractices.md) — inlined instructions
-drift against renamed paths and miss conventions the repo later adds). Paste this
-into the nightly routine:
+Keep the routine's config a **thin pointer** to this doc, not an inlined spec
+(inlined instructions drift against renamed paths and miss conventions the project
+later adds). The launcher prompt should say: run the nightly open-branch status
+report exactly as specified in this doc — analyze every open branch's status
+against `main` (squash-aware, per above), post to the routine's standing tracking
+issue only per the comment/silence rules above, and set the issue's open/closed
+state to mirror the latest report. Read-only on the repo — never push, delete, or
+merge.
 
-> Run the nightly open-branch status report for this repository exactly as
-> specified in `dev/procedures/claude/auto-branch-report.md`: analyze every open branch's
-> status against `main` (squash-aware, per that doc), then post to the routine's
-> standing tracking issue (#399) only per that doc's rules — comment when the
-> branch picture changed and stay silent when it didn't, and set the issue's
-> open/closed state to mirror the latest report: open it when the report lists any
-> branch that's safe to delete, close it when none is (including when no branches
-> but `main` exist). You are read-only on the repo — never push, delete, or merge.
-
-Schedule it nightly in the Claude Code Routines UI; the repo can't schedule
+Schedule it nightly in the agent's routine scheduler; the repo can't schedule
 itself, so the doc is the spec and the routine is the trigger.
