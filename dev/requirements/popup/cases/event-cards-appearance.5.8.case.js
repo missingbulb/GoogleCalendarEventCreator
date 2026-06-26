@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 5.8: a long title clamps to two lines and the location line ellipsizes.
 // The filename (event-cards-appearance.5.8) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.8 in dev/requirements/requirements.md.
+// image inline beneath 5.8 in requirements.md.
 "use strict";
 
 module.exports = {

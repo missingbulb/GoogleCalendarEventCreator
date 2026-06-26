@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 8.5: a shown prefix reads "N out of M events showing" with a "show all" link.
 // The filename (count-label.8.5) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.5 in dev/requirements/requirements.md.
+// image inline beneath 8.5 in requirements.md.
 //
 // Shrunken per issue #439: a tiny maxCardsShown cap + short viewport reaches the
 // "N out of M showing" + "show all" state with a handful of events instead of 40.

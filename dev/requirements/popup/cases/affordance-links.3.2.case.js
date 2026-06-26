@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 3.2: "Disagree?" is shown in the nothing-found state.
 // The filename (affordance-links.3.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 3.2 in dev/requirements/requirements.md.
+// image inline beneath 3.2 in requirements.md.
 "use strict";
 
 module.exports = {

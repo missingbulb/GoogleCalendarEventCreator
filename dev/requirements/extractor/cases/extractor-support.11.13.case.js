@@ -1,6 +1,6 @@
 // Extractor-support leaf 11.13: tabitisrael.co.il has a dedicated extractor
-// (extension/event-extractors/custom/tabitisrael.js), validated against the real cached page
-// dev/requirements/extractor/data/server-fetched/tabitisrael.html by extractor-support.test.js — the
+// (tabitisrael.js), validated against the real cached page
+// tabitisrael.html by extractor-support.test.js — the
 // page is recognized as supported and yields a complete event.
 "use strict";
 

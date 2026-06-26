@@ -2,7 +2,7 @@
 // the INNER instance buttons of a grouped card, each decided independently by its
 // own time. The filename (event-cards-appearance.5.6.6) is the link;
 // build-requirements-gallery.js embeds this image inline beneath 5.6.6 in
-// dev/requirements/requirements.md.
+// requirements.md.
 //
 // Two showings on the SAME day (2026-06-01) at different times, against the
 // reference "now" 2026-06-01 12:00 (reference-time.js): the 09:00 showing has

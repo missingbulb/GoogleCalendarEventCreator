@@ -1,5 +1,5 @@
 // Logic leaf 15.4 (wired): A date with NO time becomes an all-day event.
-// Verified by dev/requirements/logic/product-requirements.test.js, which runs verify().
+// Verified by product-requirements.test.js, which runs verify().
 "use strict";
 
 const path = require("node:path");

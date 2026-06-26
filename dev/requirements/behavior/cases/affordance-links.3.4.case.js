@@ -1,5 +1,5 @@
 // Behavior leaf 3.4 — `kind: "behavior"`, so it is verified by a click test
-// (dev/requirements/behavior/events-view-actions.test.js), not a snapshot image: a static PNG has
+// (events-view-actions.test.js), not a snapshot image: a static PNG has
 // no pixels for "a tab opened". The render-snapshot dispatcher skips a behavior
 // case, and the coverage gate requires it carry NO <slug>.<id>.png snapshot.
 "use strict";

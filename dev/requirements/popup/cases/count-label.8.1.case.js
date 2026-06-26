@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 8.1: the count label is the list's last item, in view at the bottom.
 // The filename (count-label.8.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.1 in dev/requirements/requirements.md.
+// image inline beneath 8.1 in requirements.md.
 //
 // Shrunken per issue #439: a tiny cardsVisibleBeforeScroll + short viewport puts
 // the count label at the bottom of an overflowing list with a few events not 12.

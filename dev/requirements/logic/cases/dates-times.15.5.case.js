@@ -1,5 +1,5 @@
 // Logic leaf 15.5 (wired): When the page gives a start but no end, the event is `defaultEventDurationMs` long (2 hours by default); all-day events stay all-day.
-// Verified by dev/requirements/logic/product-requirements.test.js, which runs verify().
+// Verified by product-requirements.test.js, which runs verify().
 "use strict";
 
 const path = require("node:path");

@@ -1,6 +1,6 @@
 // Extractor-support leaf 11.12: secrettelaviv.com has a dedicated extractor
-// (extension/event-extractors/custom/secrettelaviv.js), validated against the real cached page
-// dev/requirements/extractor/data/server-fetched/secrettelaviv-world-cup-eve.html by extractor-support.test.js — the
+// (secrettelaviv.js), validated against the real cached page
+// secrettelaviv-world-cup-eve.html by extractor-support.test.js — the
 // page is recognized as supported and yields a complete event.
 "use strict";
 

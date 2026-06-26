@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 8.7: the "show all" link's presence keys off the card cap, not the event count.
 // The filename (count-label.8.7) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.7 in dev/requirements/requirements.md.
+// image inline beneath 8.7 in requirements.md.
 //
 // Shrunken per issue #439: a tiny maxCardsShown cap + short viewport shows the
 // "show all" link off the card cap with a handful of events instead of 40.

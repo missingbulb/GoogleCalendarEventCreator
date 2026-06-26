@@ -3,7 +3,7 @@
 // shared 1:55 PM header), the busy Aug 5 on its own card (its two showings shown by
 // time), then the run after (Aug 6). Showings grouped in a card differ only by date.
 // The filename (event-cards-grouping.4.11) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.11 in dev/requirements/requirements.md.
+// image inline beneath 4.11 in requirements.md.
 "use strict";
 
 module.exports = {

@@ -2,7 +2,7 @@
 // for a TIMED event — an event earlier TODAY whose start time has already passed
 // shows the gray "past" pill, not only an event on a prior day (#507). The filename
 // (event-cards-appearance.5.6.5) is the link; build-requirements-gallery.js embeds
-// this image inline beneath 5.6.5 in dev/requirements/requirements.md.
+// this image inline beneath 5.6.5 in requirements.md.
 //
 // Dated 2026-06-01 at 09:00 — the SAME day as the reference "now" (2026-06-01
 // 12:00, reference-time.js) but earlier, so its start instant has passed → gray

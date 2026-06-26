@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 6.2.2: an end not after the start is dropped to a single time.
 // The filename (date-time-display.6.2.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 6.2.2 in dev/requirements/requirements.md.
+// image inline beneath 6.2.2 in requirements.md.
 "use strict";
 
 module.exports = {

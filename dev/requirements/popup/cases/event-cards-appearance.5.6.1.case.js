@@ -1,7 +1,7 @@
 // Per-leaf snapshot case for requirement 5.6.1 — "a PAST event shows a gray
 // 'past' pill". The filename (`event-cards-appearance.5.6.1`) IS the link to the
 // requirement; the coverage gate reads it, and build-requirements-gallery.js embeds
-// this image inline under 5.6.1 in dev/requirements/requirements.md. This is the
+// this image inline under 5.6.1 in requirements.md. This is the
 // worked EXAMPLE of the per-leaf migration target (issue #435) — one minimal popup
 // that isolates exactly one requirement.
 //

@@ -1,6 +1,6 @@
 // Per-leaf snapshot for requirement 5.3.1: a single-time showing's button shows just the time.
 // The filename (event-cards-appearance.5.3.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.3.1 in dev/requirements/requirements.md.
+// image inline beneath 5.3.1 in requirements.md.
 "use strict";
 
 module.exports = {

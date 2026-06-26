@@ -5,7 +5,7 @@
 // render must sort the cards (Earliest Jun 8 · Series earliest Jun 10 · Latest
 // Jun 25) and sort the buttons inside the Series card (10 · 15 · 20).
 // The filename (event-cards-grouping.4.9) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.9 in dev/requirements/requirements.md.
+// image inline beneath 4.9 in requirements.md.
 "use strict";
 
 module.exports = {

@@ -2,7 +2,7 @@
 // with a timed one renders each as a time chip so they visually differ — the timed
 // chip shows its start time, the all-day chip reads "All day".
 // The filename (event-cards-appearance.5.7.4) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.7.4 in dev/requirements/requirements.md.
+// image inline beneath 5.7.4 in requirements.md.
 "use strict";
 
 module.exports = {
