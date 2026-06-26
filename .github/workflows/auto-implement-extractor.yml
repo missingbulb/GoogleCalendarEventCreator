@@ -90,7 +90,11 @@ jobs:
           ISSUE_BODY:   ${{ github.event.issue.body }}
           ISSUE_TITLE:  ${{ github.event.issue.title }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: node dev/tools/new-extractors-creation/triage-extractor-request.js
+        # Tee into a shared log the failure step reads, so a genuine break can report
+        # WHY it failed on the issue (GitHub gives a later step no access to an earlier
+        # step's output otherwise). pipefail is on by the default shell, so the pipe
+        # doesn't mask a non-zero exit.
+        run: node dev/tools/new-extractors-creation/triage-extractor-request.js 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # A same-host request in flight isn't discarded: its event page is folded
       # into the LEADER issue as an extra sample, so that extractor can pick up a
@@ -142,7 +146,7 @@ jobs:
 
       - name: Install npm dependencies
         if: success() && steps.triage.outputs.skipAgent != 'true'
-        run: npm ci
+        run: npm ci 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       - name: Configure git
         if: success() && steps.triage.outputs.skipAgent != 'true'
@@ -169,7 +173,7 @@ jobs:
           HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: bash dev/tools/new-extractors-creation/phase1-prepare.sh
+        run: bash dev/tools/new-extractors-creation/phase1-prepare.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # Hand off to the agent: the branch is scaffolded + pushed, so swap the
       # label — remove `extractor-request`, add `extractor-agent-ready`. Adding
@@ -182,7 +186,7 @@ jobs:
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: bash dev/tools/new-extractors-creation/handoff-to-agent.sh
+        run: bash dev/tools/new-extractors-creation/handoff-to-agent.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # One comment for a GENUINE failure only. An expected stop (triaged close,
       # agent bail) is handled green elsewhere, so reaching here means something
@@ -200,14 +204,33 @@ jobs:
       - name: Comment on failure and hand off to a human
         if: failure()
         env:
-          GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER:  ${{ github.event.issue.number }}
-          RUN_URL:       ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER:    ${{ github.event.issue.number }}
+          RUN_URL:         ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
         run: |
           gh label create "extractor-blocked-needs-human" --color B60205 \
             --description "Automation could not proceed; a maintainer needs to take this over by hand" \
             2>/dev/null || true
-          gh issue comment "$ISSUE_NUMBER" --body "⚠️ The auto-implement workflow failed before it could hand off to the agent. [View run]($RUN_URL). Flagging \`extractor-blocked-needs-human\` — manual implementation may be needed, see dev/procedures/this_project/adding-a-source.md."
+          # Put the REASON it failed on the issue, not just a run link — the tail of the
+          # captured step output (a push-protection secret block, a 403 page download, a
+          # red baseline, …). Redact the job's secrets first: the Actions log masks them,
+          # but this captured file is raw and gets posted to a (public) issue. Bash glob
+          # substitution avoids sed delimiter clashes; the keys have no glob metachars.
+          REASON=""
+          LOG="$RUNNER_TEMP/prepare.log"
+          if [ -s "$LOG" ]; then
+            REASON="$(tail -n 40 "$LOG")"
+            [ -n "${SCRAPER_API_KEY:-}" ] && REASON="${REASON//${SCRAPER_API_KEY}/***}"
+            [ -n "${GH_TOKEN:-}" ]        && REASON="${REASON//${GH_TOKEN}/***}"
+          fi
+          {
+            echo "⚠️ The auto-implement workflow failed before it could hand off to the agent. [View run]($RUN_URL). Flagging \`extractor-blocked-needs-human\` — manual implementation may be needed, see dev/procedures/this_project/adding-a-source.md."
+            if [ -n "$REASON" ]; then
+              printf '\n<details><summary>Why it failed (last lines of the run log)</summary>\n\n```\n%s\n```\n\n</details>\n' "$REASON"
+            fi
+          } > "$RUNNER_TEMP/fail-comment.md"
+          gh issue comment "$ISSUE_NUMBER" --body-file "$RUNNER_TEMP/fail-comment.md"
           gh issue edit "$ISSUE_NUMBER" \
             --add-label "extractor-blocked-needs-human" \
             --remove-label "extractor-request" \
