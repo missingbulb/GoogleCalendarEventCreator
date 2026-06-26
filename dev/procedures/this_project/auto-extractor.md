@@ -72,9 +72,13 @@ Almost everything for this pipeline is one self-contained folder,
   `matches()`) and `plan-names.js` (the one place that turns a URL + issue number
   into every mode-aware name) are the shared spine that lets triage, the agent, and
   finalize all agree on the mode and file names without passing state around.
-- `phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh` — the bash the
-  workflows call, so the YAML reads as a **thin orchestrator**: triggers,
-  permissions, per-step `env:` wiring, one script invocation per step.
+- `record-page.sh`, `phase1-prepare.sh`, `handoff-to-agent.sh`,
+  `phase2-finalize.sh` — the bash the workflows call, so the YAML reads as a **thin
+  orchestrator**: triggers, permissions, per-step `env:` wiring, one script
+  invocation per step. `record-page.sh` holds the project's single page fetch
+  (`record_page`: the ScraperAPI escalation ladder, `.il` geo-targeting, and the
+  #279 non-HTML guard); `phase1-prepare.sh` sources it. It's split out so the fetch
+  logic is unit-tested in isolation (`dev/tools/test/record-page.test.js`).
 
 Three files **must** live under `.github/` because GitHub pins them there. They
 stay put and refer back to the folder:
@@ -253,7 +257,7 @@ The same `GITHUB_TOKEN` rule is exactly what makes the three-stage relay work:
 | Secret | Purpose |
 |--------|---------|
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
-| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `record_page` (the inline `curl` in `phase1-prepare.sh`) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. A hard site can still defeat the standard proxy pool (ScraperAPI returns 500 / times out), so `record_page` **escalates the proxy tier on failure** — standard → `premium=true` → `ultra_premium=true`, each more capable and more credits than the last — and only fails the job red once the top tier is exhausted (this was added after seatgeek.com #281 failed on a timeout + three 500s at the standard tier). `record_page` also **geo-targets `.il` hosts** (`.co.il`/`.gov.il`, etc.) with `country_code=il`, so an Israeli site that geo-gates by IP records from an Israeli residential exit rather than a US one (a foreign IP can be blocked or served wrong-language/region-restricted content — a misleading fixture, worse than a hard failure); other hosts use the default pool. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. The account's usage/request analytics — handy when investigating a failed or unexpected fetch — are at <https://dashboard.scraperapi.com/analytics>. |
+| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `record_page` (in `record-page.sh`, sourced by `phase1-prepare.sh`) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. A hard site can still defeat the standard proxy pool (ScraperAPI returns 500 / times out), so `record_page` **escalates the proxy tier on failure** — standard → `premium=true` → `ultra_premium=true`, each more capable and more credits than the last — and only fails the job red once the top tier is exhausted (this was added after seatgeek.com #281 failed on a timeout + three 500s at the standard tier). The same ladder also escalates on a **non-HTML body** — a 2xx fetch whose content carries no markup, i.e. ScraperAPI returned the SPA's *rendered text* with nothing to extract (#279 stubhub: 4018 bytes, not one `<`) — climbing to a more browser-faithful tier and, if even `ultra_premium` comes back plaintext, failing the job red as undownloadable. `record_page` also **geo-targets `.il` hosts** (`.co.il`/`.gov.il`, etc.) with `country_code=il`, so an Israeli site that geo-gates by IP records from an Israeli residential exit rather than a US one (a foreign IP can be blocked or served wrong-language/region-restricted content — a misleading fixture, worse than a hard failure); other hosts use the default pool. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. The account's usage/request analytics — handy when investigating a failed or unexpected fetch — are at <https://dashboard.scraperapi.com/analytics>. |
 
 No Anthropic API key is needed in this repo any more: the agent runs in the Claude
 Code on the web routine, which carries its own credentials/limits. (The old
