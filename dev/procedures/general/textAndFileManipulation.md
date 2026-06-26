@@ -4,10 +4,8 @@ Nuances of bulk textual editing — the non-obvious ways a mechanical
 find-and-replace or path rewrite across the repo corrupts content it looks like
 it should leave alone. Recorded so they bite only once.
 
-This doc is about *rewriting* references when a path moves; the complementary
-concern — not writing **brittle, redundant references into comments** in the first
-place, so a move costs less churn — is in
-[code-comments.md](code-comments.md) (read it when writing or reviewing comments).
+Not writing brittle, redundant references into comments in the first place (so a
+move costs less churn) is the complementary concern: [code-comments.md](code-comments.md).
 
 - **A global string-replace of a path prefix corrupts in two non-obvious ways:
   double-prefix on files already under the target namespace, and mangled external
