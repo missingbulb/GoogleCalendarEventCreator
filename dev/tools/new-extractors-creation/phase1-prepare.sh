@@ -43,16 +43,27 @@ MODE="${MODE:-new}"
 # transient-error retries before we climb; only when the top tier is exhausted does
 # the page count as undownloadable and the job fail red. Cheapest tier first keeps
 # credit cost down on the common case while still cracking the hard ones.
+#
+# Geo targeting: ScraperAPI's default pool routes from a non-Israeli (typically US)
+# IP, but a large share of our targets are Israeli sites that geo-gate by IP — they
+# can block a foreign IP or silently serve different content (wrong language/listings,
+# region-restricted event data), which records a misleading fixture (worse than a
+# hard failure). So for an `.il` host we pin country_code=il (residential exit in
+# Israel), auto-derived from the host's TLD. Other hosts use the default pool.
 record_page() {
   local url="$1" out="$2"
   if [ -n "${SCRAPER_API_KEY:-}" ]; then
     local encoded; encoded="$(jq -rn --arg u "$url" '$u|@uri')"
+    # Auto-default: an `.il` host (e.g. .co.il/.gov.il) records from an Israeli IP.
+    local host="${url#*://}"; host="${host%%/*}"; host="${host%%:*}"
+    local geo=""
+    case "$host" in *.il) geo="country_code=il&"; echo "record_page: geo-targeting $host via country_code=il." >&2;; esac
     local tier label
     # "" = standard; then premium; then ultra_premium. The label is for the log only.
     for tier in "" "premium=true&" "ultra_premium=true&"; do
       label="${tier%%=*}"; label="${label:-standard}"
       if curl -fsS --max-time 90 --retry 2 --retry-delay 2 --retry-all-errors \
-        "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}render=true&url=${encoded}" -o "$out"; then
+        "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
         echo "record_page: fetched via ScraperAPI ($label tier)." >&2
         return 0
       fi
