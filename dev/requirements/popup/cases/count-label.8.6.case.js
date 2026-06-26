@@ -1,10 +1,4 @@
-// Per-leaf snapshot for requirement 8.6: past the expanded cap it reads "N out of M events shown" with no link.
-// The filename (count-label.8.6) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.6 in dev/requirements/requirements.md.
-//
-// Shrunken per issue #439: tiny maxCardsShown/maxCardsExpanded caps + a short
-// viewport reach the capped "shown" (no-link) state with a handful of events
-// instead of 100 — the slowest render in the suite at the old size.
+// Shrunken (#439): tiny maxCardsShown/maxCardsExpanded caps + short viewport reach the capped "shown" (no-link) state with a handful of events, not 100 — the slowest render in the suite at the old size.
 "use strict";
 
 const { scrollToBottom } = require("../../shared/render/actions");

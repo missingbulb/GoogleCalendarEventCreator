@@ -9,15 +9,15 @@
 //               live.test.js pins it to the case's `expected`).
 //   - fallback: the SAME pipeline with GCal.sources emptied, which forces the
 //               unsupported-host path (assemble-events.js -> fallbackEvents),
-//               exactly as dev/procedures/this_project/testing.md describes for inspecting the
+//               exactly as testing.md describes for inspecting the
 //               generic extractor on a supported page.
 //
 // We then grade, field by field, how close the fallback's PRIMARY event
 // (events[0] after the pipeline's own chronological sort) comes to the custom
 // primary event, and separately track how many events each found (the fallback
 // can't enumerate a listing page the way a dedicated source can). The result
-// feeds two consumers: dev/requirements/extractor/fallback/fallback-coverage.test.js (the
-// high-watermark gate) and the human-readable dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md report.
+// feeds two consumers: fallback-coverage.test.js (the high-watermark gate) and
+// the human-readable fallback-coverage.GENERATED.md report.
 //
 // This file owns the comparison logic only; it reads the same generated
 // load-order the popup injects and the harness uses, so it exercises the real,
@@ -85,7 +85,7 @@ function flattenPrimary(event) {
 // --- Date equivalence -------------------------------------------------------
 // A dedicated source localizes a known-timezone event to a FLOATING wall-clock
 // plus a ctz; the fallback (no ctz) keeps the absolute instant. These are the
-// same moment in different clothes, and dev/procedures/this_project/testing.md says not to
+// same moment in different clothes, and testing.md says not to
 // treat that representation gap as a miss. So start/end count as a match when
 // EITHER the raw strings are equal (the dedicated source only added a ctz, e.g.
 // bandsintown) OR both values resolve to the same absolute instant (e.g.
@@ -275,7 +275,7 @@ function pct(hits, gradeable) {
 // were computed over. The gate compares the current run to the watermark over
 // the cases they SHARE, so a newly added case (absent from the watermark's list)
 // is excluded and can't drag the aggregate below the bar — adding an extractor
-// never fails the gate. See dev/procedures/this_project/testing.md for the accepted masking
+// never fails the gate. See testing.md for the accepted masking
 // caveat (a regression bundled with a case-set change can be re-anchored over).
 
 // Aggregate critical/all coverage over a named subset of the run's cases.

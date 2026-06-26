@@ -1,13 +1,7 @@
-// Per-leaf snapshot for requirement 5.6.9: the "ongoing" pill is decided per chip,
-// like "past" (5.6.6) and the future-year pill (5.6.7) — within a grouped card each
-// instance button reflects its OWN start/end. The filename
-// (event-cards-appearance.5.6.9) is the link; build-requirements-gallery.js embeds
-// this image inline beneath 5.6.9 in dev/requirements/requirements.md.
-//
-// Two showings on the SAME day (2026-06-01) against the reference "now" 2026-06-01
-// 12:00 (reference-time.js): the 06:00–08:00 showing has ended → gray "past" pill;
-// the 10:00–16:00 showing has started and not yet ended → red "ongoing" pill. So a
-// card can carry both at once, one per instance.
+// Two showings on the same day (2026-06-01) vs the reference now 2026-06-01 12:00
+// (reference-time.js): the 06:00–08:00 showing has ended → gray "past" pill; the
+// 10:00–16:00 showing is in progress → red "ongoing" pill. So a card can carry both
+// at once, one per instance (per-chip "ongoing", like 5.6.6/5.6.7).
 "use strict";
 
 module.exports = {

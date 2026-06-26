@@ -1,8 +1,5 @@
-// Per-leaf snapshot for requirement 12.6.1: a fallback event missing its TITLE is
-// incomplete, so the popup shows the empty "nothing found" state — chooseContent
-// filters it out via isPresentableFallbackEvent (title + location + start). The
-// three 12.6.* snapshots render the same empty state from three different
-// inputs; each pins that a fallback event missing THAT one field is rejected.
+// isPresentableFallbackEvent (title + location + start) filters a fallback event
+// missing its TITLE → empty "nothing found" state.
 "use strict";
 
 module.exports = {

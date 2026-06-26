@@ -1,6 +1,5 @@
-// Per-leaf snapshot for requirement 12.6.2: a fallback event missing its LOCATION
-// is incomplete, so the popup shows the empty "nothing found" state (chooseContent
-// filters it out via isPresentableFallbackEvent).
+// isPresentableFallbackEvent (title + location + start) filters a fallback event
+// missing its LOCATION → empty "nothing found" state.
 "use strict";
 
 module.exports = {

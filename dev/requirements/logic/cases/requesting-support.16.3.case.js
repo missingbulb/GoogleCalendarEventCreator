@@ -1,6 +1,3 @@
-// Logic leaf 16.3 (tracked, untested in the executable runner): A request whose host is already on the allow- or denylist is closed automatically, without a run.
-// Currently covered by dev/create-extractor/test/triage-extractor-request.test.js. Marked tbd until a faithful executable
-// validation is wired here (see dev/procedures/this_project/testing.md on the kind:"logic" path).
 "use strict";
 
 module.exports = {

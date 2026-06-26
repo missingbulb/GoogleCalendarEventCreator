@@ -1,10 +1,4 @@
-// Per-leaf snapshot for requirement 7.2: only a prefix of many cards renders at first (the card cap).
-// The filename (list-overflow.7.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 7.2 in dev/requirements/requirements.md.
-//
-// Shrunken per issue #439: a tiny maxCardsShown cap + short viewport exercises
-// the card cap with a handful of events instead of 40 — same requirement, far
-// fewer pixels and render time.
+// Shrunken (#439): tiny maxCardsShown cap + short viewport exercise the card cap with a handful of events, not 40.
 "use strict";
 
 const { restAtTop } = require("../../shared/render/actions");

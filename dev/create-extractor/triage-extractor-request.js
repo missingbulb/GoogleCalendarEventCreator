@@ -113,8 +113,8 @@ function skipMessage(reason, { host, duplicateOf }) {
   }
 }
 
-// Decide how a request should be handled, and why. `lists` defaults (via
-// extension/fallback-policy.js) to the shipped config; tests pass their own.
+// Decide how a request should be handled, and why. `lists` defaults (via the
+// fallback policy) to the shipped config; tests pass their own.
 // `openRequests` is the array of OTHER open extractor-request issues (for the
 // duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {

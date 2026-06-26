@@ -82,3 +82,12 @@ the line so the line still *starts* as Markdown. The sanitizer strips `style`/CS
 (a flexbox `<div>` two-column won't render) but keeps `<table>` +
 `align`/`valign`/`width`; a GFM pipe-table cell can't hold multi-line prose, so use
 the raw `<table>` form when a cell needs it.
+
+## After a remote/API merge, `git fetch` before branching off `origin/main`
+
+- A GitHub API/UI (or any remote-side) merge does **not** advance your local
+  `origin/main` — it stays at the pre-merge commit until you `git fetch`.
+- So `git checkout -b <new> origin/main` forks the **pre-merge** state, silently
+  missing the just-merged work.
+- Symptom: a missing file / failed `git mv` on the new branch, far from the cause.
+- Fix: `git fetch origin main` **first**, then branch.

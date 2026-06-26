@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 5.2: a day chip: a month banner over the day-of-month.
-// The filename (event-cards-appearance.5.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.2 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

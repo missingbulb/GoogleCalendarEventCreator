@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 5.4: a single card is elevated/tinted with a trailing ‹ chevron.
-// The filename (event-cards-appearance.5.4) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.4 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

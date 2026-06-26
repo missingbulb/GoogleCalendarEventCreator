@@ -2,17 +2,17 @@
 // lookup the auto-implement-extractor pipeline needs for its "supported" mode
 // (a request whose host already has a dedicated extractor: instead of closing it,
 // the pipeline adds a fresh integration case for the submitted page, hardening the
-// existing source). See dev/create-extractor/auto-extractor.md.
+// existing source). See auto-extractor.md.
 //
 // The crux: a source's file name is NOT derivable from the host (cinema.co.il is
-// handled by event-extractors/custom/telavivcinematheque.js, slug "cinema" ≠ basename
+// handled by telavivcinematheque.js, slug "cinema" ≠ basename
 // "telavivcinematheque"). The only authority on "which source owns this host" is
 // the sources' own matches() — exactly what the orchestrator uses to pick the
 // extractor. So we LOAD each source and ask it, attributing each matcher to the
 // file that pushed it.
 //
-// DOM-free, pure Node vm — the same boot as extension-test/integration/supported-domains.test.js
-// and extension-test/integration/extension-loads.test.js: registry.js sets globalThis.GCal,
+// DOM-free, pure Node vm — the same boot as the supported-domains and
+// extension-loads integration tests: registry.js sets globalThis.GCal,
 // each source pushes its matcher onto GCal.sources, and only matches() (a pure
 // host regex) runs here. We load sources ONE AT A TIME so a newly-pushed matcher
 // can be attributed to the file that added it.

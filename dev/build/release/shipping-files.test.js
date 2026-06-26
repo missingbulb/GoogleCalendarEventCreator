@@ -1,4 +1,4 @@
-// Guards the release zip's contents (dev/build/release/shipping-files.js) against drift:
+// Guards the release zip's contents (shipping-files.js) against drift:
 // every file the extension actually loads at runtime must be in the shipping
 // set, and dev/test-only files must stay out. If this fails, the built zip is
 // either missing a runtime file or carrying dead weight into the Web Store.

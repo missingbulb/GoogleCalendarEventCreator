@@ -35,11 +35,11 @@
 //   }
 //
 // The scenario's source URL lives alongside the cached HTML, in
-// dev/requirements/extractor/data/<provenance>/<name>.url, where <provenance> is
-// server-fetched/ (pipeline-recorded) or user-submitted/ — the single source of truth —
+// data/<provenance>/<name>.url, where <provenance> is server-fetched/
+// (pipeline-recorded) or user-submitted/ — the single source of truth —
 // record_page fetches it, and the suite loads the HTML into a DOM at that URL so
-// hostname-based site
-// detection behaves as in Chrome). It is NOT repeated in the case file.
+// hostname-based site detection behaves as in Chrome). It is NOT repeated in the
+// case file.
 //
 // `expected.events` must be the *complete*, exact array the extractor
 // produces. Each event is deep-equal compared against:

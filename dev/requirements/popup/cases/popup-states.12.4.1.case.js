@@ -1,7 +1,5 @@
-// Per-leaf snapshot for requirement 12.4.1: a SUPPORTED host whose dedicated
-// extractor returned the events shows them WITHOUT the "Suggest Correction" label
-// (chooseContent State 1 — data.supported true, no data.fallback). The snapshot
-// pins the ABSENCE of the heading-line link: the dedicated source did its job.
+// chooseContent State 1: data.supported true, no data.fallback — a dedicated
+// extractor's events, shown WITHOUT the "Suggest Correction" label.
 "use strict";
 
 module.exports = {
