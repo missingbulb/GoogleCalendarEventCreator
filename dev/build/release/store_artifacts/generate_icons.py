@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate every PNG icon the extension and its Web Store listing use (stdlib only).
 
-Two deliberately different looks, one generator. See dev/deployment/README.md;
+Two deliberately different looks, one generator. See dev/build/release/store_artifacts/README.md;
 store image guidelines: https://developer.chrome.com/docs/webstore/images#icons
 
   Small toolbar glyphs — extension/icon/images/icon{16,32}*.png

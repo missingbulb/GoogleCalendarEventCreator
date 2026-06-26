@@ -11,7 +11,7 @@ async function init() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   // The files to inject (and their order) come from the generated load list,
-  // the single source of truth shared with the tests — see dev/tools/gen-load-order.js.
+  // the single source of truth shared with the tests — see dev/build/gen-load-order.js.
   const loadOrder = await fetch(chrome.runtime.getURL("event-extractors/load-order.generated.json"));
   const files = await loadOrder.json();
 

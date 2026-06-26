@@ -8,7 +8,7 @@
 // Adding a source is a single-new-file change: drop
 // event-extractors/custom/<site>.js and rerun this; the list is regenerated
 // mechanically rather than kept in sync by hand. A CI test
-// (dev/tools/test/load-order-generated.test.js) asserts the committed file
+// (dev/build/test/load-order-generated.test.js) asserts the committed file
 // matches what this generator would produce, so it can never silently drift.
 //
 // Ordering rule (the only ordering that matters): the registry and shared

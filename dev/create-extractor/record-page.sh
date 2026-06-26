@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # record_page — the ONE place this project fetches a target event page. Split out of
 # phase1-prepare.sh so it can be reused and unit-tested in isolation
-# (dev/tools/test/record-page.test.js). Sourcing this file only DEFINES the function;
+# (dev/create-extractor/test/record-page.test.js). Sourcing this file only DEFINES the function;
 # running it directly (record-page.sh <url> <out>) invokes it. See
 # dev/create-extractor/auto-extractor.md.
 #

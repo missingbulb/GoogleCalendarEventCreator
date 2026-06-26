@@ -78,7 +78,7 @@ Almost everything for this pipeline is one self-contained folder,
   invocation per step. `record-page.sh` holds the project's single page fetch
   (`record_page`: the ScraperAPI escalation ladder, `.il` geo-targeting, and the
   #279 non-HTML guard); `phase1-prepare.sh` sources it. It's split out so the fetch
-  logic is unit-tested in isolation (`dev/tools/test/record-page.test.js`).
+  logic is unit-tested in isolation (`dev/create-extractor/test/record-page.test.js`).
 
 Three files **must** live under `.github/` because GitHub pins them there. They
 stay put and refer back to the folder:
@@ -91,7 +91,7 @@ stay put and refer back to the folder:
 
 Shared infrastructure the scripts lean on stays where it's shared, **not** in the
 folder: `extension/config.js` / `extension/fallback-policy.js` (the popup's host
-classifier), and `dev/tools/gen-load-order.js` (`npm run index`, run by every
+classifier), and `dev/build/gen-load-order.js` (`npm run index`, run by every
 source addition). The pipeline *consumes* these; it doesn't own them. (Target-page
 fetching is no longer a shared module — it's the inline `record_page` curl →
 ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)

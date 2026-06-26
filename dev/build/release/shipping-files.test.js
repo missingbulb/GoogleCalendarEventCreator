@@ -1,4 +1,4 @@
-// Guards the release zip's contents (dev/release/shipping-files.js) against drift:
+// Guards the release zip's contents (dev/build/release/shipping-files.js) against drift:
 // every file the extension actually loads at runtime must be in the shipping
 // set, and dev/test-only files must stay out. If this fails, the built zip is
 // either missing a runtime file or carrying dead weight into the Web Store.
@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("./shipping-files");
 
-const ROOT = path.join(__dirname, "..", "..");
+const ROOT = path.join(__dirname, "..", "..", "..");
 // Shipping paths and everything the runtime references are relative to the
 // extension root (the folder Chrome loads), so resolve them under EXT.
 const EXT = path.join(ROOT, EXTENSION_DIR);
@@ -80,7 +80,7 @@ test("the service worker's runtime resources ship", () => {
 });
 
 test("dev/test-only paths do not ship", () => {
-  for (const p of ["extension-test", "dev/requirements", "dev/tools", "package.json", "package-lock.json", "README.md", "PRIVACY.md", "dev/procedures", "dev/release", ".github"]) {
+  for (const p of ["extension-test", "dev/requirements", "dev/build", "package.json", "package-lock.json", "README.md", "PRIVACY.md", "dev/procedures", ".github"]) {
     assert.ok(!isShipped(p), `${p} should not be in the shipping set`);
   }
 });
