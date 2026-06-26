@@ -3,7 +3,7 @@
 // page, relative to that page's dedicated per-site source (the ground truth).
 //
 // For every dev/requirements/extractor/expected/*.json page we run GCal.extract() twice
-// against the same cached HTML (dev/requirements/extractor/data/<name>.html):
+// against the same cached HTML (dev/requirements/extractor/data/server-fetched/<name>.html):
 //   - custom:   the normal pipeline, with the matching site source registered.
 //               This is the reviewed-correct extraction (dev/requirements/extractor/
 //               live.test.js pins it to the case's `expected`).
@@ -31,7 +31,8 @@ const { JSDOM } = require("jsdom");
 const ROOT = path.join(__dirname, "../../../..");
 const EXT = path.join(ROOT, "extension"); // the extension root; load-order entries are relative to it
 const CASES_DIR = path.join(ROOT, "dev/requirements/extractor/expected");
-const DATA_DIR = path.join(ROOT, "dev/requirements/extractor/data");
+// Resolves a case's <name>.{html,url} across data/server-fetched/ + data/user-submitted/.
+const { dataFile } = require("../data-files");
 
 // The seven normalized event fields GCal.extract() returns (see
 // event-extractors/assemble-events.js's norm()). CRITICAL is the subset the popup
@@ -157,8 +158,8 @@ function computeCoverage() {
   const cases = [];
   for (const file of caseFiles) {
     const name = path.basename(file, ".json");
-    const urlPath = path.join(DATA_DIR, `${name}.url`);
-    const htmlPath = path.join(DATA_DIR, `${name}.html`);
+    const urlPath = dataFile(`${name}.url`);
+    const htmlPath = dataFile(`${name}.html`);
     if (!existsSync(urlPath) || !existsSync(htmlPath)) continue;
     const url = readFileSync(urlPath, "utf8").trim();
     const html = readFileSync(htmlPath, "utf8");

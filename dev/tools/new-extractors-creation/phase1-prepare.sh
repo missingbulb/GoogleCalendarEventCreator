@@ -76,9 +76,12 @@ git checkout -b "$BRANCH"
 
 # The .url file is the single source of truth for the page's URL (live.test.js reads
 # it to set the DOM origin); the .html is the recorded page the tests assert against.
-printf '%s' "$EVENT_URL" > "dev/requirements/extractor/data/$CASE_NAME.url"
-record_page "$EVENT_URL" "dev/requirements/extractor/data/$CASE_NAME.html"
-test -s "dev/requirements/extractor/data/$CASE_NAME.html"        # the page must have actually been recorded
+# Pipeline-recorded pages go under server-fetched/ (provenance is structural — see
+# dev/requirements/extractor/data-files.js / .github/secret_scanning.yml).
+mkdir -p "dev/requirements/extractor/data/server-fetched"
+printf '%s' "$EVENT_URL" > "dev/requirements/extractor/data/server-fetched/$CASE_NAME.url"
+record_page "$EVENT_URL" "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html"
+test -s "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html"        # the page must have actually been recorded
 
 if [ "$MODE" = "supported" ]; then
   # Add a case only — the source already exists and is registered.

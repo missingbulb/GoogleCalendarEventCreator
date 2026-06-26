@@ -1253,7 +1253,7 @@ own markup (not the generic fallback). This section is the **executable
 catalogue** of that support: each leaf is one supported host, validated by a
 `kind: "extractor"` case (`dev/requirements/<kind>/cases/extractor-support.<id>.case.js`)
 that runs the real extractor against a **real cached page**
-(`dev/requirements/extractor/data/<page>.html`) and asserts the host is recognized as
+(`dev/requirements/extractor/data/server-fetched/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
 `dev/requirements/extractor/extractor-support.test.js`. Adding a new source
 (see `dev/procedures/this_project/adding-a-source.md`) adds a row here. A bot-blocked host with no

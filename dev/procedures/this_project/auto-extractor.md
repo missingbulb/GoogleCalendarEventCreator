@@ -136,7 +136,7 @@ ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)
    previously #334, barby #325, visit.tel-aviv #277.)
 4. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
    branches `<branch>` off `main`; records the event page
-   (`dev/requirements/extractor/data/<caseName>.url` → `record_page`, a `curl -f`
+   (`dev/requirements/extractor/data/server-fetched/<caseName>.url` → `record_page`, a `curl -f`
    through ScraperAPI with `render=true` so a JS single-page-app records real data,
    asserted non-empty — an **undownloadable page fails the job here**, and the
    "Comment on failure and hand off to a human" step then drops `extractor-request`
