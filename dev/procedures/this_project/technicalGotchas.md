@@ -133,17 +133,3 @@ trap spanning files. See the full locality rule in
   `dev/requirements/extractor/data/**/*.html` fixtures (`.gitattributes`, #78) and the
   two-column gallery in `dev/requirements/requirements.md`
   (`dev/requirements/shared/build-requirements-gallery.js`).
-- **Secret-scanning / push protection can only be scoped by PATH, and the config
-  must live on the default branch — so make secret-trust structural by folder
-  (#286).** A recorded fixture page can embed the SITE's own token (a Mapbox key in
-  the markup) and trip GitHub push protection, wedging the auto-extractor pipeline's
-  `git push`. `.github/secret_scanning.yml`'s only knob is `paths-ignore` (globs —
-  no per-secret-type or per-source option), and GitHub reads it from `main`, not a
-  feature branch (so the exclusion does nothing until merged). The fix is structural:
-  fixtures split by provenance into `dev/requirements/extractor/data/server-fetched/`
-  (pipeline-recorded third-party pages — never our/a user's secret, so excluded) vs
-  `data/user-submitted/` (hand-supplied HTML — push protection STAYS ON, since it
-  could carry a real secret). `data-files.js` resolves a case's `<name>.{html,url}`
-  across both, so the trust boundary is *which folder*, not a flag. (Same
-  collapse-to-a-structural-classifier idea as
-  [general/engineeringPractices.md](../general/engineeringPractices.md).)
