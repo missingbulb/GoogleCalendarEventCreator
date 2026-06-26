@@ -32,6 +32,14 @@ prunes them once the canon absorbs them (capture is always local — see
   `main` is trivial — `git checkout -b <new> origin/main` — so just do that for the
   next unit of work instead of continuing on a branch whose PR already landed.
 
+- **In a multi-stage agent pipeline, every failure exit — including infrastructure
+  failures in pre-agent stages — must converge to the same human-triage state.**
+  A setup-phase failure (page download, authentication, scaffolding) that posts a
+  comment but leaves the original trigger label in place makes the item look
+  unprocessed rather than blocked, defeating the escalation mechanism. Treat each
+  failure mode — pre-agent setup, agent bail, post-agent quality check — as
+  equivalent from the triage perspective.
+
 - **When a change regenerates a reviewable artifact, link it into the chat the same
   turn you commit it.** A regenerated gallery, snapshot set, or report is only
   useful to the owner if they can see it without going to fetch it — surface the
