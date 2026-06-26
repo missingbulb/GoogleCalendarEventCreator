@@ -4,8 +4,8 @@
   "counts": {
     ".github/workflows/auto-implement-extractor.yml": 2,
     ".github/workflows/finalize-extractor.yml": 2,
-    "dev/tools/new-extractors-creation/handoff-to-agent.sh": 1,
-    "dev/tools/new-extractors-creation/phase2-finalize.sh": 5,
-    "dev/tools/new-extractors-creation/agent-prompt-extractor.md": 3
+    "dev/create-extractor/handoff-to-agent.sh": 1,
+    "dev/create-extractor/phase2-finalize.sh": 5,
+    "dev/create-extractor/agent-prompt-extractor.md": 3
   }
 }

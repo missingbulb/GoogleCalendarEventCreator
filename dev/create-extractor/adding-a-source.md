@@ -38,4 +38,4 @@ source's DOM values win and JSON-LD fills the gaps they leave. The flow:
    `extractor/` folder is its kind) naming `{ host, source, page }`, so the new host
    is validated against a real cached page by
    `dev/requirements/extractor/extractor-support.test.js`. See
-   [../../requirements/README.md](../../requirements/README.md).
+   [../requirements/README.md](../requirements/README.md).

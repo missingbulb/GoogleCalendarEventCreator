@@ -1,4 +1,4 @@
-// Tests for record_page's non-HTML guard (dev/tools/new-extractors-creation/record-page.sh).
+// Tests for record_page's non-HTML guard (dev/create-extractor/record-page.sh).
 // #279 (stubhub): ScraperAPI's render=true returned the SPA's rendered TEXT with zero
 // markup (4018 bytes, not one '<') — a 2xx fetch with nothing to extract. record_page
 // must treat a non-HTML body like a tier failure: escalate the proxy quality and retry,
@@ -17,7 +17,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
-const SCRIPT = path.join(__dirname, "..", "new-extractors-creation", "record-page.sh");
+const SCRIPT = path.join(__dirname, "..", "record-page.sh");
 
 // A curl stand-in: finds the -o target and the ScraperAPI URL, derives the tier from
 // the URL, appends it to $FAKE_CURL_LOG, then emits html / plaintext / a 22 failure

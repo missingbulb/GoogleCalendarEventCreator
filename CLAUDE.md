@@ -6,11 +6,8 @@ own file under `dev/procedures/` and is imported here:
 
 @dev/procedures/this_project/workflow.md
 @dev/procedures/this_project/github.md
-@dev/procedures/this_project/adding-a-source.md
 @dev/procedures/this_project/testing.md
-@dev/procedures/this_project/auto-extractor.md
 @dev/procedures/general/auto-lessons.md
-@dev/procedures/this_project/auto-fallback-coverage.md
 @dev/procedures/general/auto-branch-report.md
 @dev/procedures/general/claudinite-handoff.md
 @dev/procedures/general/auto-optimize-procedures.md

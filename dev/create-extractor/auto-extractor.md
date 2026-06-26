@@ -36,7 +36,7 @@ concerns now live with that routine, not in this repo. Everything deterministic 
 before the agent (triage, scaffold) and after it (blast-radius, re-verify,
 PR) — stays in the two workflows; the agent owns only the judgment step. This
 covers the mechanics; what a *correct* extractor looks like lives in
-`dev/procedures/this_project/adding-a-source.md`.
+`dev/create-extractor/adding-a-source.md`.
 
 ## How to trigger it
 
@@ -57,7 +57,7 @@ label by hand, as long as the issue body contains an event page URL.
 ## Where the pieces live
 
 Almost everything for this pipeline is one self-contained folder,
-`dev/tools/new-extractors-creation/`:
+`dev/create-extractor/`:
 
 - `agent-prompt-extractor.md` — the agent's prompt, **self-contained** (no
   build-time interpolation): the web routine points the agent at it, and it tells
@@ -330,7 +330,7 @@ issue.
   undownloadable-page case above.
 
 In any of these, fall back to the manual process in
-`dev/procedures/this_project/adding-a-source.md`.
+`dev/create-extractor/adding-a-source.md`.
 
 ## Review gate
 
@@ -349,7 +349,7 @@ integration case (not an e2e/heavy-browser test), so one green run suffices.
 
 ## Updating the agent prompt
 
-The prompt is `dev/tools/new-extractors-creation/agent-prompt-extractor.md`. It is
+The prompt is `dev/create-extractor/agent-prompt-extractor.md`. It is
 **self-contained** — no placeholders, no build step: the web routine points the
 agent at it, and the agent derives the per-issue specifics (mode, branch, source
 path, case path, host) from the issue's event URL via `resolve-source.js` +

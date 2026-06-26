@@ -1,4 +1,4 @@
-// Offline unit tests for dev/tools/new-extractors-creation/attach-sample-url.js:
+// Offline unit tests for dev/create-extractor/attach-sample-url.js:
 // folding a deferred extractor request's event URL into the leader issue body as
 // an extra sample. The edit must be idempotent (re-runs and ticked boxes don't
 // double a URL) so the workflow can apply it blindly.
@@ -6,7 +6,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { addSample } = require("../new-extractors-creation/attach-sample-url");
+const { addSample } = require("../attach-sample-url");
 
 const START = "<!-- additional-samples:start -->";
 const END = "<!-- additional-samples:end -->";
