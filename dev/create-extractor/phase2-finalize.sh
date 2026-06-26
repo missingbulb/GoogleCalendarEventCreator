@@ -2,7 +2,7 @@
 # Phase 2 of the auto-implement-extractor pipeline — deterministic wrap-up, run by
 # the finalize workflow (.github/workflows/finalize-extractor.yml) when the agent
 # adds the `extractor-agent-done` label, NOT by the agent. See
-# dev/procedures/this_project/auto-extractor.md.
+# dev/create-extractor/auto-extractor.md.
 #
 # Since the agent now runs in a separate environment (Claude Code on the web,
 # triggered by the `extractor-agent-ready` label) it commits and pushes its two
@@ -18,7 +18,7 @@
 # repo root, so it runs from anywhere.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$HERE/../../.."
+cd "$HERE/../.."
 
 MODE="${MODE:-new}"
 # The agent's two-file write surface. In supported mode SRC is an EXISTING,
@@ -77,7 +77,7 @@ if [ "$REVERTED" = "1" ]; then
   git commit -m "chore: revert out-of-bounds agent edits to the two-file write surface (Refs #$ISSUE_NUMBER)" || true
 fi
 
-# Quality floor before a PR (dev/tools/new-extractors-creation/case-quality.js). The
+# Quality floor before a PR (dev/create-extractor/case-quality.js). The
 # agent signals success by filling the case AND adding `extractor-agent-done`; a
 # bail goes the other way (it comments + labels `extractor-blocked-needs-human`
 # itself and never reaches here). So two non-PR verdicts are anomalies we still
@@ -85,17 +85,17 @@ fi
 #   empty      — the agent marked the work done but left the case empty.
 #   degenerate — a filled case whose event has no location: the signature of a
 #                listing/index/tour page that yielded only a bare title (#283).
-VERDICT=$(CASE_FILE="$CASE_FILE" node dev/tools/new-extractors-creation/case-quality.js)
+VERDICT=$(CASE_FILE="$CASE_FILE" node dev/create-extractor/case-quality.js)
 
 if [ "$VERDICT" = "empty" ]; then
   echo "Case is empty but the agent marked it done — handing to a human. No PR."
-  hand_off_to_human "🛑 The implementation agent marked this done, but the integration case came back empty — there's no extraction to ship. The page likely wasn't a single usable event (a bot/login wall or a JavaScript single-page-app shell). No dedicated extractor was added; the site can be added by hand — see dev/procedures/this_project/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
+  hand_off_to_human "🛑 The implementation agent marked this done, but the integration case came back empty — there's no extraction to ship. The page likely wasn't a single usable event (a bot/login wall or a JavaScript single-page-app shell). No dedicated extractor was added; the site can be added by hand — see dev/create-extractor/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
   exit 0
 fi
 
 if [ "$VERDICT" = "degenerate" ]; then
   echo "Extraction is degenerate (an event has no location) — likely a listing page. No PR."
-  hand_off_to_human "🛑 Didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue. Point the request at one specific event page on this site, or add it by hand — see dev/procedures/this_project/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
+  hand_off_to_human "🛑 Didn't open a PR: the extraction came out degenerate — an event with no venue/location, which is the signature of a tour/artist/listing page (several dates, no single event) rather than one specific event page. A clean extractor needs a single event with a real date and venue. Point the request at one specific event page on this site, or add it by hand — see dev/create-extractor/adding-a-source.md. (Scaffolding is on branch \`$BRANCH\`.)"
   exit 0
 fi
 

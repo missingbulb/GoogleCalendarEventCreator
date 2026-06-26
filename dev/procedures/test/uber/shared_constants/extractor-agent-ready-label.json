@@ -3,8 +3,8 @@
   "value": "extractor-agent-ready",
   "counts": {
     ".github/workflows/auto-implement-extractor.yml": 3,
-    "dev/tools/new-extractors-creation/handoff-to-agent.sh": 4,
-    "dev/tools/new-extractors-creation/phase2-finalize.sh": 1,
-    "dev/tools/new-extractors-creation/agent-prompt-extractor.md": 4
+    "dev/create-extractor/handoff-to-agent.sh": 4,
+    "dev/create-extractor/phase2-finalize.sh": 1,
+    "dev/create-extractor/agent-prompt-extractor.md": 4
   }
 }

@@ -1,5 +1,5 @@
 // Unit tests for the auto-implement-extractor's case quality floor
-// (dev/tools/new-extractors-creation/case-quality.js's caseVerdict). phase2-finalize.sh
+// (dev/create-extractor/case-quality.js's caseVerdict). phase2-finalize.sh
 // runs this before opening a PR: an empty case is the agent's bail, and an event
 // with no location is a degenerate extraction off a listing/index page (#283
 // livenation: title "Muse", location "") that should NOT become a PR. Every real
@@ -10,7 +10,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { caseVerdict } = require("../new-extractors-creation/case-quality");
+const { caseVerdict } = require("../case-quality");
 
 test("empty events is the bail signal", () => {
   assert.equal(caseVerdict({ expected: { events: [] } }).code, "empty");

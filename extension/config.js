@@ -77,7 +77,7 @@ export const GCalConfig = {
   // Hosts that already have a dedicated per-site source (event-extractors/custom/
   // <site>.js). This is NOT a fallback list — it's a static mirror of the
   // sources' own matches(), used ONLY by the auto-extractor triage
-  // (dev/tools/new-extractors-creation/triage-extractor-request.js) to close a "please support <host>"
+  // (dev/create-extractor/triage-extractor-request.js) to close a "please support <host>"
   // request for a site we already cover, before spending an agent run. The
   // runtime never reads it: the extension derives "is this supported?" straight
   // from the sources via GCal.isSupportedHost (event-extractors/registry.js). The list

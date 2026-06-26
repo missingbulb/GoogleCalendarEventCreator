@@ -5,7 +5,7 @@
 //
 // Shared (single source of truth) by:
 //   - the popup (events-popup/popup.js's chooseContent) — to decide what to render;
-//   - the auto-extractor triage (dev/tools/new-extractors-creation/triage-extractor-request.js) — to
+//   - the auto-extractor triage (dev/create-extractor/triage-extractor-request.js) — to
 //     auto-close a request whose host is already on a list, before spending an
 //     agent run.
 // So the popup and the workflow can never disagree about a host's listing.

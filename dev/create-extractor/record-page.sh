@@ -3,7 +3,7 @@
 # phase1-prepare.sh so it can be reused and unit-tested in isolation
 # (dev/tools/test/record-page.test.js). Sourcing this file only DEFINES the function;
 # running it directly (record-page.sh <url> <out>) invokes it. See
-# dev/procedures/this_project/auto-extractor.md.
+# dev/create-extractor/auto-extractor.md.
 #
 # Fetching is delegated wholesale to ScraperAPI (residential proxy + bot/CAPTCHA
 # bypass + render=true JS rendering) when SCRAPER_API_KEY is set: the datacenter

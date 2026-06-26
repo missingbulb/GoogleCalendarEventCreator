@@ -28,11 +28,11 @@ default branch (before you check anything out):**
 2. **Decide the mode** by asking whether an existing source already handles the
    host — using the sources' own `matches()`, run against the default branch:
    ```bash
-   BASE=$(node dev/tools/new-extractors-creation/resolve-source.js "<event-url>" 2>/dev/null || true)
+   BASE=$(node dev/create-extractor/resolve-source.js "<event-url>" 2>/dev/null || true)
    ```
    - **`BASE` is empty → new-source mode.** Derive the slug:
      ```bash
-     SLUG=$(node -e "process.stdout.write(require('./dev/tools/new-extractors-creation/extractor-naming').namesFor(process.argv[1]).slug)" "<event-url>")
+     SLUG=$(node -e "process.stdout.write(require('./dev/create-extractor/extractor-naming').namesFor(process.argv[1]).slug)" "<event-url>")
      ```
      - **branch**: `claude/extractor/$SLUG`
      - **source**: `extension/event-extractors/custom/$SLUG.js` (scaffolded, `matches()` filled)
