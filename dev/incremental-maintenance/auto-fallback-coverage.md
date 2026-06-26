@@ -27,7 +27,7 @@ The fallback-coverage gate lives in `dev/requirements/extractor/fallback/` and r
 `test:live`: `fallback-coverage.test.js` (the high-watermark gate; logic in
 `fallback-coverage.js`), the scorecard `fallback-coverage.GENERATED.md`, and the
 watermark `fallback-coverage.baseline.GENERATED.json`. Gate mechanics are
-documented in [testing.md](testing.md)'s "fallback-coverage gate" — read it, don't
+documented in [testing.md](../procedures/this_project/testing.md)'s "fallback-coverage gate" — read it, don't
 restate it here. Baseline first (`npm install` then `npm run test:live`), reading
 the "fallback value differences (informational)" console block and the
 per-exemplar matrix (✓ match · ~ different value · ✗ missing · — n/a): a `~`
@@ -43,7 +43,7 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
   `grep -n "<value>" data/<case>.html` and reject it if it lives inside a
   `<script>` or hidden markup. A real win comes from visible text or a
   Chrome-read DOM attribute (meta / JSON-LD / microdata / `<time datetime>`).
-  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](technicalGotchas.md).)
+  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../procedures/this_project/technicalGotchas.md).)
 - **(b) deliberate decisions.** Some misses are intentional and pinned by a unit
   test (e.g. a date with intervening non-separator text before its time is
   all-day, in `extension-test/event-extractors/extraction.test.js`). Never "fix" what a test
@@ -70,7 +70,7 @@ On a clean, generic, Chrome-real, test-covered win: branch
 body states the hypothesis, **why** it's generic (which unseen sites it helps),
 **how** the jsdom trap was ruled out, the before→after numbers, and the covering
 test. It never merges — from there it merges through the usual flow (see
-[github.md](github.md)) and CI must go green **twice** (it touches `test:live`).
+[github.md](../procedures/this_project/github.md)) and CI must go green **twice** (it touches `test:live`).
 No win → no branch, no PR; print "No generic fallback-coverage improvement found."
 
 ## Tracking: log each run under the routine's own issue
@@ -83,5 +83,5 @@ so it accumulates a scrollable history of every run over time; also reference th
 issue from the PR (`Refs #366`). The issue is long-lived: if it was **closed**,
 **reopen it** when a run needs logging (a closure while the routine is still
 producing PRs is stale), matching the open-branch report's behavior
-([auto-branch-report.md](../general/auto-branch-report.md)). Each daily routine keeps its own
-such issue — the lessons digest's is #365 (see [auto-lessons.md](../general/auto-lessons.md)).
+([auto-branch-report.md](../procedures/general/auto-branch-report.md)). Each daily routine keeps its own
+such issue — the lessons digest's is #365 (see [auto-lessons.md](../procedures/general/auto-lessons.md)).

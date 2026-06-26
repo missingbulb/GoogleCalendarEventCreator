@@ -4,7 +4,7 @@
 // `events` means "not filled yet": Phase 2 treats a still-empty case as the
 // agent having bailed (the page wasn't a real event page).
 //
-//   node dev/tools/new-extractors-creation/scaffold-case.js <case-name> <host>
+//   node dev/create-extractor/scaffold-case.js <case-name> <host>
 "use strict";
 
 const fs = require("node:fs");
@@ -27,7 +27,7 @@ if (require.main === module) {
     console.error("scaffold-case: no case name given");
     process.exit(1);
   }
-  const dest = path.join(__dirname, "..", "..", "requirements", "extractor", "expected", `${caseName}.json`);
+  const dest = path.join(__dirname, "..", "requirements", "extractor", "expected", `${caseName}.json`);
   if (fs.existsSync(dest)) {
     console.error(`scaffold-case: ${dest} already exists — refusing to overwrite`);
     process.exit(1);

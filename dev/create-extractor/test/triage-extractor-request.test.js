@@ -7,7 +7,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { firstUrl, runTriage } = require("../new-extractors-creation/triage-extractor-request");
+const { firstUrl, runTriage } = require("../triage-extractor-request");
 
 // A GitHub issue-form body renders each field under a "### <label>" heading.
 const bodyWith = (url) => `### URL\n\n${url}\n\n### Name\n\n_No response_\n`;

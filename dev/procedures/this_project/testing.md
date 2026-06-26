@@ -205,7 +205,7 @@ keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
 - Cached HTML is recorded by the **auto-extractor pipeline**: the `record_page`
-  bash function in `dev/tools/new-extractors-creation/phase1-prepare.sh` fetches
+  bash function in `dev/create-extractor/phase1-prepare.sh` fetches
   the event page via an inline curl→ScraperAPI (`render=true`, so a single-page-app
   records with real data) when Phase 1 runs.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
@@ -432,10 +432,10 @@ commission-while-editing trap goes in the file's header comment rather than
   `CHROME_PATH`, so verify changes to it via CI).
 - **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
   the inline curl→ScraperAPI in `record_page`
-  (`dev/tools/new-extractors-creation/phase1-prepare.sh`), which uses
+  (`dev/create-extractor/phase1-prepare.sh`), which uses
   `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
   so a single-page-app records with real data. The repo carries no SPA-shell
   detector or headless-Chrome render of its own (`spa-shell.js` /
   `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
   fetching moved to ScraperAPI). The recorder (`record_page` in
-  `dev/tools/new-extractors-creation/phase1-prepare.sh`) is now just fetch → write.
+  `dev/create-extractor/phase1-prepare.sh`) is now just fetch → write.

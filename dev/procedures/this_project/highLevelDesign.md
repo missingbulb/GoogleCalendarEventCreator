@@ -25,7 +25,7 @@ unattended-agent judgment boundary, the bounded-and-enforced write surface) live
 in the shared rules:
 [claude/shared/agent-architecture.md](../claude/shared/agent-architecture.md). The
 worked examples for both are this repo's auto-extractor pipeline
-([auto-extractor.md](auto-extractor.md)).
+([auto-extractor.md](../../create-extractor/auto-extractor.md)).
 
 ## How extraction works
 

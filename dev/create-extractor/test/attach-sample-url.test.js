@@ -6,7 +6,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { addSample } = require("../new-extractors-creation/attach-sample-url");
+const { addSample } = require("../attach-sample-url");
 
 const START = "<!-- additional-samples:start -->";
 const END = "<!-- additional-samples:end -->";

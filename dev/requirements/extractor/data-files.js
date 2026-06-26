@@ -7,7 +7,7 @@
 // or per-source option (issue #286). So provenance is encoded structurally, as the
 // folder a page lives in:
 //   data/server-fetched/ — recorded by the auto-extractor pipeline via ScraperAPI
-//                          (dev/tools/new-extractors-creation/phase1-prepare.sh).
+//                          (dev/create-extractor/phase1-prepare.sh).
 //                          These are third-party pages — they can embed the SITE's
 //                          own tokens (e.g. a Mapbox key in the markup), never our
 //                          or a user's secret — so .github/secret_scanning.yml

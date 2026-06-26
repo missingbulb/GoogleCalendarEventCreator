@@ -7,7 +7,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { hostOf, resolveSourceBaseName } = require("../new-extractors-creation/resolve-source");
+const { hostOf, resolveSourceBaseName } = require("../resolve-source");
 
 test("hostOf strips scheme/www and accepts a bare host", () => {
   assert.equal(hostOf("https://www.cinema.co.il/x/"), "cinema.co.il");

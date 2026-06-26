@@ -19,7 +19,7 @@
 //
 // As a module (tests + derive-names/triage): exports resolveSourceBaseName().
 // As a script (the workflows):
-//   node dev/tools/new-extractors-creation/resolve-source.js <event-url-or-host>
+//   node dev/create-extractor/resolve-source.js <event-url-or-host>
 //   prints the basename (e.g. "telavivcinematheque") to stdout, or exits 1 when
 //   no source matches.
 "use strict";
@@ -28,7 +28,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const ROOT = path.join(__dirname, "..", "..", "..");
+const ROOT = path.join(__dirname, "..", "..");
 
 // The www-stripped, lowercased host of a URL — or the input itself when it's
 // already a bare host (no scheme). "" when it can't be parsed.

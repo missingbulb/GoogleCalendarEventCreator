@@ -10,7 +10,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { caseVerdict } = require("../new-extractors-creation/case-quality");
+const { caseVerdict } = require("../case-quality");
 
 test("empty events is the bail signal", () => {
   assert.equal(caseVerdict({ expected: { events: [] } }).code, "empty");

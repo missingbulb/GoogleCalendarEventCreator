@@ -50,7 +50,7 @@ needs a branch pushed to GitHub to view at all.
 workflow, an automated job needs a unique branch per run, and a workflow adding a
 brand-new label must create it first — are in
 [shared/git-and-github.md](../claude/shared/git-and-github.md). This repo's auto-extractor
-pipeline relies on all three; see [auto-extractor.md](auto-extractor.md).)
+pipeline relies on all three; see [auto-extractor.md](../../create-extractor/auto-extractor.md).)
 
 ## Driving a merge cheaply (wall time + tokens)
 

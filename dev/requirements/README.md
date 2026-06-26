@@ -158,7 +158,7 @@ dev/requirements/
 ## How to add a new supported site
 
 Adding a per-site extractor is its own documented flow — see
-[`dev/procedures/this_project/adding-a-source.md`](../procedures/this_project/adding-a-source.md).
+[`dev/create-extractor/adding-a-source.md`](../create-extractor/adding-a-source.md).
 It adds an `extractor` leaf to `requirements.md` §11 plus a reviewed live case under
 `extractor/expected/`.
 

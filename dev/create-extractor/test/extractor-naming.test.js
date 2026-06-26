@@ -6,7 +6,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { hostname, slugFor, matchesRegexFor, namesFor } = require("../new-extractors-creation/extractor-naming");
+const { hostname, slugFor, matchesRegexFor, namesFor } = require("../extractor-naming");
 
 test("slugFor strips www + a single TLD", () => {
   assert.equal(slugFor("https://www.axs.com/event/123"), "axs");
