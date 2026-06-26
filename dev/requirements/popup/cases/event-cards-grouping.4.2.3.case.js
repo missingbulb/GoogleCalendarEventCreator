@@ -1,9 +1,6 @@
-// Per-leaf snapshot for requirement 4.2.3: the cross-month-instance grouping edge
-// case. One event with three instances — Jun 15, a multi-day instance spanning
-// Jun 28 → Jul 3, and Jul 10. The spanning instance groups by its START month
-// (June), so it renders as a date-range chip (JUN–JUL / 28–3) in the June grouped
-// card beside Jun 15; July holds the Jul 10 single card. It never duplicates under
-// July.
+// A multi-day instance (Jun 28 → Jul 3) among single instances (Jun 15, Jul 10)
+// exercises that a span groups by its START month: it lands in the June grouped
+// card as a range chip beside Jun 15, never duplicating under July.
 "use strict";
 
 module.exports = {

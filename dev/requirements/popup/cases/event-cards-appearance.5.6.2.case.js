@@ -1,6 +1,5 @@
-// Per-leaf snapshot for requirement 5.6.2: a future year shows a green (upcoming) pill.
-// The filename (event-cards-appearance.5.6.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.6.2 in requirements.md.
+// Dated 2027 vs the reference now 2026-06-01 (reference-time.js) so it's a future
+// year → green (upcoming) pill.
 "use strict";
 
 module.exports = {

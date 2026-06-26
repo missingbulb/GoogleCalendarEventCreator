@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 5.7.1: a month card whose days share one time leads the header with it over day chips.
-// The filename (event-cards-appearance.5.7.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.7.1 in requirements.md.
 "use strict";
 
 module.exports = {

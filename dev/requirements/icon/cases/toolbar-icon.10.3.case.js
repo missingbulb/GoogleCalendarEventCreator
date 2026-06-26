@@ -1,8 +1,3 @@
-// Per-leaf snapshot for requirement 10.3: any other page — neither supported nor
-// denylisted, including an allowlisted host — keeps the default BLUE toolbar icon.
-// `kind: "icon"` routes this case to the toolbar-icon renderer (see
-// render-snapshot.js) from a faked tab URL + host lists. The filename (toolbar-icon.10.3) is
-// the link; its image is toolbar-icon.10.3.png.
 "use strict";
 
 module.exports = {

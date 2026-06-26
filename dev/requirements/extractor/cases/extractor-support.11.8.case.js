@@ -1,7 +1,3 @@
-// Extractor-support leaf 11.8: dash.datadoghq.com has a dedicated extractor
-// (dash-datadoghq.js), validated against the real cached page
-// dash-datadoghq.html by extractor-support.test.js — the
-// page is recognized as supported and yields a complete event.
 "use strict";
 
 module.exports = {

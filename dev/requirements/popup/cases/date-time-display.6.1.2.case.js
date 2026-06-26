@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 6.1.2: a non-round time keeps its minutes ("6:30 PM").
-// The filename (date-time-display.6.1.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 6.1.2 in requirements.md.
 "use strict";
 
 module.exports = {

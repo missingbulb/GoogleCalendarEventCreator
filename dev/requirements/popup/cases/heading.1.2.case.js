@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 1.2: with events shown, the heading reads "Add to Google Calendar".
-// The filename (heading.1.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 1.2 in requirements.md.
 "use strict";
 
 module.exports = {

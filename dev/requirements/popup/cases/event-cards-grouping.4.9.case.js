@@ -1,11 +1,6 @@
-// Per-leaf snapshot for requirement 4.9, BOTH parts: (1) cards are ordered by
-// their earliest showing's start, and (2) an event's showings are ordered WITHIN
-// its card. Fed shuffled on both axes — the single cards out of order, and the
-// grouped "Series" card's three June showings listed 20th/10th/15th — so the
-// render must sort the cards (Earliest Jun 8 · Series earliest Jun 10 · Latest
-// Jun 25) and sort the buttons inside the Series card (10 · 15 · 20).
-// The filename (event-cards-grouping.4.9) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.9 in requirements.md.
+// Fed shuffled on both axes — single cards out of order, and the grouped "Series"
+// card's showings listed 20th/10th/15th — so the render must sort the cards by
+// earliest start AND sort the buttons within the Series card.
 "use strict";
 
 module.exports = {

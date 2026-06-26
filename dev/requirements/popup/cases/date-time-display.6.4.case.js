@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 6.4: a start that can't be parsed reads "No date found".
-// The filename (date-time-display.6.4) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 6.4 in requirements.md.
 "use strict";
 
 module.exports = {

@@ -1,5 +1,3 @@
-// Logic leaf 14.2 (wired): Title falls back to the page/tab title, and then to a configured default (`fallbackEventTitle`) when the page gives none.
-// Verified by product-requirements.test.js, which runs verify().
 "use strict";
 
 const path = require("node:path");

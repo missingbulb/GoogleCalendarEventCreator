@@ -1,7 +1,5 @@
-// Per-leaf snapshot for requirement 4.10: a single instance spanning MULTIPLE
-// MONTHS (Jun 28 → Jul 3) renders as a date-RANGE chip — the month range as the
-// banner ("JUN–JUL") over the day range as the body ("28–3") — with its time (or
-// "All day") on the line as usual.
+// A single instance spanning multiple months (Jun 28 → Jul 3) exercises the
+// date-RANGE chip: month range as banner ("JUN–JUL") over day range as body ("28–3").
 "use strict";
 
 module.exports = {

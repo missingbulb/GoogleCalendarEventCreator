@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 5.3.2: a showing with start AND end shows the en-dash time range in the button.
-// The filename (event-cards-appearance.5.3.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.3.2 in requirements.md.
 "use strict";
 
 module.exports = {

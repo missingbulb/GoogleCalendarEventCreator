@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 5.7.2: differing times drop to a location-only header with time chips.
-// The filename (event-cards-appearance.5.7.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.7.2 in requirements.md.
 "use strict";
 
 module.exports = {

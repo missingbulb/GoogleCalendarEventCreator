@@ -1,8 +1,6 @@
-// Per-leaf snapshot for requirement 12.4.2: a SUPPORTED host whose dedicated
-// extractor found nothing but the generic fallback did shows the events WITH the
-// "Suggest Correction" label (chooseContent State 1b). `data.fallback: true` is
-// the existing flag the orchestrator sets when it falls back to the generic
-// extractor — the "from the fallback" signal — so the case sets it directly.
+// chooseContent State 1b: `data.fallback: true` is the flag the orchestrator sets
+// when it falls back to the generic extractor, so the case sets it directly —
+// events shown WITH the "Suggest Correction" label.
 "use strict";
 
 module.exports = {

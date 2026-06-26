@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 5.5: a grouped card is flat, not itself clickable, with no chevron.
-// The filename (event-cards-appearance.5.5) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 5.5 in requirements.md.
 "use strict";
 
 module.exports = {
