@@ -24,14 +24,6 @@ prunes them once the canon absorbs them (capture is always local — see
 
 - **When the user asks to *show* or *see* a visual artifact, deliver the image into the chat — not a path or a link.** Surface the file itself so it renders inline; a link or a bare path makes the user go fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
 
-- **After merging a PR back to main, start follow-up work on a NEW branch — don't
-  reuse the just-merged branch.** When the repo auto-deletes the head branch on
-  merge, the remote branch vanishes while a stale local tracking ref lingers; a
-  later `git push --force-with-lease` then fails with "stale info" and the rebase
-  dance to re-home commits is needless friction. Branching fresh off the updated
-  `main` is trivial — `git checkout -b <new> origin/main` — so just do that for the
-  next unit of work instead of continuing on a branch whose PR already landed.
-
 - **When a change regenerates a reviewable artifact, link it into the chat the same
   turn you commit it.** A regenerated gallery, snapshot set, or report is only
   useful to the owner if they can see it without going to fetch it — surface the

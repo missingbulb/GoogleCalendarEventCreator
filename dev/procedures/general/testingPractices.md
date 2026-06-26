@@ -2,8 +2,9 @@
 
 Portable test-discipline practices captured here, not yet in the shared canon
 ([claude/shared/testingPractices.md](../claude/shared/testingPractices.md)).
-`optimize-procedures` promotes these up and prunes them once the canon absorbs
-them (capture is always local — see [this_project/workflow.md](../this_project/workflow.md)).
+`optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
+prunes them once the canon absorbs them (capture is always local — see
+[this_project/workflow.md](../this_project/workflow.md)).
 
 ## jsdom traps that don't match a real browser
 
@@ -33,16 +34,6 @@ highlighted **diff**) and get explicit owner approval before re-baselining. Whil
 waiting, keep the *reverted* (expected) baseline committed so the branch honestly
 shows the test red-pending — never commit the new baseline first. On approval,
 regenerate and confirm green; on rejection, leave the change in place and discuss.
-
-## Render time-dependent tests against a pinned reference "now", not the wall clock
-
-Any test whose output depends on the current date/time (a "past"/"upcoming" badge, a
-relative date) rots as the wall clock advances if it reads the real clock — a
-snapshot authored today silently changes meaning next month. Thread a single pinned
-reference instant into every test entry point and render against that, so
-date-bearing snapshots stay deterministic forever. Author neutral cases on or after
-the pinned day so they don't accidentally trip a date-dependent branch; reach for a
-past or future date only when a case is deliberately pinning that branch.
 
 ## Mirror the test tree to the source tree, one test per source file
 
