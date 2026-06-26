@@ -283,7 +283,16 @@ lives in the web routine, not here.
 Every run that touches an issue leaves a comment. Most expected stops **finish
 green**; the one exception is an undownloadable page, which now fails Phase 1
 **red** (ScraperAPI owns the bot/CAPTCHA walls a probe used to flag green, so a
-download that still fails is a genuine break):
+download that still fails is a genuine break).
+
+Both workflows' `failure()` comments carry the **reason** the run broke, not just a
+run link: each work step tees its output to `$RUNNER_TEMP/{prepare,finalize}.log`,
+and the failure step appends the tail of that log (in a collapsed `<details>`) to
+the comment — so the issue itself says, e.g., "push declined: push-protection
+secret block" or the failing test, instead of forcing a click into the run. The
+captured tail is redacted of the job's secrets (`SCRAPER_API_KEY`, the token)
+before posting: the Actions log masks them, but this raw file is posted to a public
+issue.
 
 - **Already supported → adds a case** (green, prepare → PR) — the host has a
   dedicated source, so instead of closing, the pipeline runs in **add-a-case mode**:
