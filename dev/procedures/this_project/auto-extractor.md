@@ -136,7 +136,7 @@ ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)
    previously #334, barby #325, visit.tel-aviv #277.)
 4. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
    branches `<branch>` off `main`; records the event page
-   (`dev/requirements/extractor/data/<caseName>.url` → `record_page`, a `curl -f`
+   (`dev/requirements/extractor/data/server-fetched/<caseName>.url` → `record_page`, a `curl -f`
    through ScraperAPI with `render=true` so a JS single-page-app records real data,
    asserted non-empty — an **undownloadable page fails the job here**, and the
    "Comment on failure and hand off to a human" step then drops `extractor-request`
@@ -283,7 +283,16 @@ lives in the web routine, not here.
 Every run that touches an issue leaves a comment. Most expected stops **finish
 green**; the one exception is an undownloadable page, which now fails Phase 1
 **red** (ScraperAPI owns the bot/CAPTCHA walls a probe used to flag green, so a
-download that still fails is a genuine break):
+download that still fails is a genuine break).
+
+Both workflows' `failure()` comments carry the **reason** the run broke, not just a
+run link: each work step tees its output to `$RUNNER_TEMP/{prepare,finalize}.log`,
+and the failure step appends the tail of that log (in a collapsed `<details>`) to
+the comment — so the issue itself says, e.g., "push declined: push-protection
+secret block" or the failing test, instead of forcing a click into the run. The
+captured tail is redacted of the job's secrets (`SCRAPER_API_KEY`, the token)
+before posting: the Actions log masks them, but this raw file is posted to a public
+issue.
 
 - **Already supported → adds a case** (green, prepare → PR) — the host has a
   dedicated source, so instead of closing, the pipeline runs in **add-a-case mode**:

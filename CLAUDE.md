@@ -54,6 +54,7 @@ same local capture surface.
 @dev/procedures/general/git-and-github.md
 @dev/procedures/general/working-discipline.md
 @dev/procedures/general/testingPractices.md
+@dev/procedures/general/filePlacement.md
 
 ## Shared portable rules (the Claudinite submodule)
 

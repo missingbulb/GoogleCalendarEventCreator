@@ -130,6 +130,6 @@ trap spanning files. See the full locality rule in
   blank-lines rule (with this repo's `<!-- … -->`-marker-last-token nuance, not yet
   upstreamed) is in the local working set
   [general/git-and-github.md](../general/git-and-github.md). Here they apply to the
-  `dev/requirements/extractor/data/*.html` fixtures (`.gitattributes`, #78) and the
+  `dev/requirements/extractor/data/**/*.html` fixtures (`.gitattributes`, #78) and the
   two-column gallery in `dev/requirements/requirements.md`
   (`dev/requirements/shared/build-requirements-gallery.js`).

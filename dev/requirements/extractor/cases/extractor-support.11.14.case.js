@@ -1,6 +1,6 @@
 // Extractor-support leaf 11.14: thinkdrink.co.il has a dedicated extractor
 // (extension/event-extractors/custom/thinkdrink.js), validated against the real cached page
-// dev/requirements/extractor/data/thinkdrink-quantum-lecture.html by extractor-support.test.js — the
+// dev/requirements/extractor/data/server-fetched/thinkdrink-quantum-lecture.html by extractor-support.test.js — the
 // page is recognized as supported and yields a complete event.
 "use strict";
 

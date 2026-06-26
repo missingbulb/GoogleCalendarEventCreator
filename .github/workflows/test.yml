@@ -78,7 +78,7 @@ jobs:
         id: cft-key
         run: echo "key=cft-${{ runner.os }}-$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
       - name: Cache Chrome for Testing
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/cft
           key: ${{ steps.cft-key.outputs.key }}

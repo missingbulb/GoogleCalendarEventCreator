@@ -1,6 +1,6 @@
 // Extractor-support leaf 11.5: ticketmaster.co.il has a dedicated extractor
 // (extension/event-extractors/custom/ticketmaster.js), validated against the real cached page
-// dev/requirements/extractor/data/ticketmaster-ravid-plotnik.html by extractor-support.test.js — the
+// dev/requirements/extractor/data/server-fetched/ticketmaster-ravid-plotnik.html by extractor-support.test.js — the
 // page is recognized as supported and yields a complete event.
 "use strict";
 

@@ -113,7 +113,7 @@ if [ "$MODE" = "supported" ]; then
   cat > /tmp/pr-body.md <<EOF
 Adds a fresh integration case for \`$HOST\`, which is already handled by \`$SRC\`.
 
-This request came in for an already-supported host, so instead of a new source the pipeline recorded the submitted page (\`dev/requirements/extractor/data/$CASE_NAME.html\`) and the agent added \`$CASE_FILE\` asserting the real extraction — a second real page hardening the existing extractor. Any change to \`$SRC\` itself (if the new page needed one to pass) is in the diff for review; all pre-existing cases still pass (re-verified).
+This request came in for an already-supported host, so instead of a new source the pipeline recorded the submitted page (\`dev/requirements/extractor/data/server-fetched/$CASE_NAME.html\`) and the agent added \`$CASE_FILE\` asserting the real extraction — a second real page hardening the existing extractor. Any change to \`$SRC\` itself (if the new page needed one to pass) is in the diff for review; all pre-existing cases still pass (re-verified).
 
 Closes #$ISSUE_NUMBER
 EOF
@@ -122,7 +122,7 @@ else
   cat > /tmp/pr-body.md <<EOF
 Implements the extractor for \`$HOST\`.
 
-The workflow scaffolded the branch — the \`matches()\` gate, the \`supportedDomains\` entry, the regenerated load lists, and the real cached event page (\`dev/requirements/extractor/data/$CASE_NAME.html\`). The agent wrote \`extract()\` and the integration case asserting the real extraction.
+The workflow scaffolded the branch — the \`matches()\` gate, the \`supportedDomains\` entry, the regenerated load lists, and the real cached event page (\`dev/requirements/extractor/data/server-fetched/$CASE_NAME.html\`). The agent wrote \`extract()\` and the integration case asserting the real extraction.
 
 Closes #$ISSUE_NUMBER
 EOF

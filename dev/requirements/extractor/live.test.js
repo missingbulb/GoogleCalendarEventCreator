@@ -35,7 +35,8 @@
 //   }
 //
 // The scenario's source URL lives alongside the cached HTML, in
-// dev/requirements/extractor/data/<name>.url (the single source of truth —
+// dev/requirements/extractor/data/<provenance>/<name>.url, where <provenance> is
+// server-fetched/ (pipeline-recorded) or user-submitted/ — the single source of truth —
 // record_page fetches it, and the suite loads the HTML into a DOM at that URL so
 // hostname-based site
 // detection behaves as in Chrome). It is NOT repeated in the case file.
@@ -59,8 +60,8 @@
 // pinned the event to
 // (e.g. "GB" for edfringe.com), or null.
 //
-// To cover a new website or platform: add a dev/requirements/extractor/data/<name>.url with the event
-// page URL and a case file (dev/requirements/extractor/expected/<name>.json) with its
+// To cover a new website or platform: add a dev/requirements/extractor/data/server-fetched/<name>.url
+// with the event page URL and a case file (dev/requirements/extractor/expected/<name>.json) with its
 // `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
 // `extractor-request` issue with the page URL — Phase 1 fetches it via ScraperAPI);
 // to record one by hand, fetch the .url through ScraperAPI with a key (see
@@ -77,7 +78,8 @@ const { pathToFileURL } = require("node:url");
 const { extractFromHtml } = require("../../../extension-test/harness");
 
 const CASES_DIR = path.join(__dirname, "expected");
-const DATA_DIR = path.join(__dirname, "data");
+// Resolves a case's <name>.{html,url} across data/server-fetched/ + data/user-submitted/.
+const { dataFile } = require("./data-files");
 
 // build-calendar-url.js is an ES module; import it before the tests run.
 let buildCalendarUrl;
@@ -97,17 +99,17 @@ assert.ok(caseFiles.length > 0, `No test cases found in ${CASES_DIR}`);
 for (const file of caseFiles) {
   const name = path.basename(file, ".json");
   const testCase = JSON.parse(fs.readFileSync(path.join(CASES_DIR, file), "utf8"));
-  const urlPath = path.join(DATA_DIR, `${name}.url`);
+  const urlPath = dataFile(`${name}.url`);
   const url = fs.existsSync(urlPath) ? fs.readFileSync(urlPath, "utf8").trim() : "";
 
   test(`${testCase.description || file} — ${url}`, () => {
-    assert.ok(url, `Missing source URL for "${name}". Add it to data/${name}.url`);
+    assert.ok(url, `Missing source URL for "${name}". Add it to data/server-fetched/${name}.url (or data/user-submitted/${name}.url)`);
     assert.ok(
       testCase.expected && Array.isArray(testCase.expected.events) && testCase.expected.events.length,
       `${file}: "expected.events" must be a non-empty array`
     );
 
-    const cachedHtmlPath = path.join(DATA_DIR, `${name}.html`);
+    const cachedHtmlPath = dataFile(`${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
       `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see dev/tools/new-extractors-creation/phase1-prepare.sh`

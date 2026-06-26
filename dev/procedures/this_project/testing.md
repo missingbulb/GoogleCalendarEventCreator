@@ -101,7 +101,7 @@ change.
     and the gate rejects it.
   - **extractor** — a non-image leaf (§11, "Required explicit support for
     Extractors"): one per supported host, validated by running the real per-site
-    extractor against a real cached page (`dev/requirements/extractor/data/<page>.html`)
+    extractor against a real cached page (`dev/requirements/extractor/data/server-fetched/<page>.html`)
     and asserting the host is recognized as supported and yields a complete event.
     Verified by `dev/requirements/extractor/extractor-support.test.js`; the
     case names `{ host, source, page }`. A bot-blocked host with no cacheable page
@@ -191,7 +191,7 @@ an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The case's **source URL is not in the case file** — it lives next to the cached
-HTML, in `dev/requirements/extractor/data/<name>.url` (a plain-text file holding just the URL). That one
+HTML, in `dev/requirements/extractor/data/server-fetched/<name>.url` (a plain-text file holding just the URL). That one
 file is the single source of truth for the page's URL: the auto-extractor
 pipeline fetches it (see below), and the live test loads the cached HTML into a
 DOM at that URL. Keeping it out of the reviewed case file means a test
@@ -231,15 +231,15 @@ New cached HTML can't be fetched here (the sandbox is bot-blocked — see
 and read its exact `expected` off the committed file instead of guessing:
 
 1. Commit two new files — but **not** the case file yet:
-   - `dev/requirements/extractor/data/<name>.html` — an empty (zero-byte) file; the empty file is the
+   - `dev/requirements/extractor/data/server-fetched/<name>.html` — an empty (zero-byte) file; the empty file is the
      "fetch me" signal for the refresh script.
-   - `dev/requirements/extractor/data/<name>.url` — a plain-text file containing just the event page URL
+   - `dev/requirements/extractor/data/server-fetched/<name>.url` — a plain-text file containing just the event page URL
      (e.g. `https://www.meetup.com/.../`). This file stays for good: it's the
      single source of truth for the page's URL (used by the refresh script and
      by `live.test.js`), so the URL is **not** repeated in the case file.
 2. Push the branch. The **Refresh cached HTML files** workflow runs
    automatically (the push adds a `data/` file), fills in the empty
-   `dev/requirements/extractor/data/<name>.html`, and commits it back to the branch; `test:live` stays
+   `dev/requirements/extractor/data/server-fetched/<name>.html`, and commits it back to the branch; `test:live` stays
    green because no case asserts it yet.
 3. Pull, then add `dev/requirements/extractor/expected/<name>.json` (same `<name>`, just
    `description` + `expected`, no `url`) and run `npm run test:live` — it now
@@ -247,7 +247,7 @@ and read its exact `expected` off the committed file instead of guessing:
    `expected` to paste in. Commit and push.
 
 Cases also need occasional gardening: when an event page is eventually taken down,
-point `dev/requirements/extractor/data/<name>.url` at a newer event (and refresh its cached HTML the
+point `dev/requirements/extractor/data/server-fetched/<name>.url` at a newer event (and refresh its cached HTML the
 same way). Until a cached HTML file exists for a new case, `test:live` (and so the
 Tests workflow) fails with `Missing cached HTML for "<name>"`.
 

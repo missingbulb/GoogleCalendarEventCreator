@@ -37,14 +37,14 @@ default branch (before you check anything out):**
      - **branch**: `claude/extractor/$SLUG`
      - **source**: `extension/event-extractors/custom/$SLUG.js` (scaffolded, `matches()` filled)
      - **case**: `dev/requirements/extractor/expected/$SLUG.json` (placeholder, `events: []`)
-     - **cached page**: `data/$SLUG.html` (URL in `data/$SLUG.url`)
+     - **cached page**: `data/server-fetched/$SLUG.html` (URL in `data/server-fetched/$SLUG.url`)
    - **`BASE` is non-empty → add-a-case mode.** `$BASE` is the existing source's
      file name (e.g. `telavivcinematheque`). The names carry the issue number so
      each request for a supported host gets its own case + branch:
      - **branch**: `claude/extractor/$BASE-<issue>`
      - **source**: `extension/event-extractors/custom/$BASE.js` — **already shipped and working**
      - **case**: `dev/requirements/extractor/expected/$BASE-<issue>.json` (placeholder, `events: []`)
-     - **cached page**: `data/$BASE-<issue>.html` (URL in `data/$BASE-<issue>.url`)
+     - **cached page**: `data/server-fetched/$BASE-<issue>.html` (URL in `data/server-fetched/$BASE-<issue>.url`)
 3. Check the branch out and install deps:
    ```bash
    git fetch origin "<branch>" && git checkout "<branch>"
@@ -172,7 +172,7 @@ The placeholder case fails but prints the **actual extracted values**:
 ```bash
 npm run test:live 2>&1
 ```
-There is **no `url` field** in the case JSON — the URL lives in the `data/…​.url`
+There is **no `url` field** in the case JSON — the URL lives in the `data/server-fetched/…​.url`
 file.
 
 ## Step 4 — Fill the case and verify
@@ -238,6 +238,6 @@ complete event:
 - **Never fabricate input or output.** Don't hand-write HTML, and don't invent
   `expected` values — copy them from the real `npm run test:live`. If the page isn't
   usable, bail via Step 5b.
-- **No `url` field** inside the case JSON — it lives in the `data/…​.url` file.
+- **No `url` field** inside the case JSON — it lives in the `data/server-fetched/…​.url` file.
 - **Re-label, don't open the PR.** Success → `extractor-agent-done`; bail →
   `extractor-blocked-needs-human`. The finalize workflow opens the PR.

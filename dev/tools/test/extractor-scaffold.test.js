@@ -19,7 +19,7 @@ test("sourceStub fills name, the matches() regex, host and cache path", () => {
   assert.match(stub, /name: "axs"/);
   assert.match(stub, /matches: \(host\) => \/\(\^\|\\\.\)axs\\\.com\$\/\.test\(host\)/);
   assert.match(stub, /axs\.com event pages: https:\/\/www\.axs\.com/);
-  assert.match(stub, /data\/axs\.html/); // points the agent at the cached page
+  assert.match(stub, /data\/server-fetched\/axs\.html/); // points the agent at the cached page
 });
 
 test("the scaffolded stub is loadable and registers a working matcher", () => {
