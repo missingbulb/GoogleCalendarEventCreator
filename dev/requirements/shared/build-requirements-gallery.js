@@ -1,4 +1,4 @@
-// Maintains the two-column gallery embedded in dev/requirements/requirements.md: each leaf
+// Maintains the two-column gallery embedded in requirements.md: each leaf
 // requirement is laid out as a small HTML <table> row — LEFT cell the generated
 // snapshot image (for a render leaf) or a behavior-test note (for a behavior
 // leaf), RIGHT cell the hand-authored requirement text. GitHub renders the

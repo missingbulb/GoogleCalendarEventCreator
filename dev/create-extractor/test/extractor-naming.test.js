@@ -1,4 +1,4 @@
-// Unit tests for dev/create-extractor/extractor-naming.js — the deterministic slug/caseName
+// Unit tests for extractor-naming.js — the deterministic slug/caseName
 // the auto-implement-extractor workflow derives from an event URL (so the
 // branch + cache files can be created before the agent runs). Pure host logic,
 // no I/O.

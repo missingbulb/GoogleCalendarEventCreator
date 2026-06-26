@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 8.3: when the whole list fits unscrolled, there is no count label.
-// The filename (count-label.8.3) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 8.3 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

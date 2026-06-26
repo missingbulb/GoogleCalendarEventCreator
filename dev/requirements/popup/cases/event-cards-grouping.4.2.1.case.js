@@ -1,7 +1,4 @@
-// Per-leaf snapshot for requirement 4.2.1: two showings in the same month group
-// into one grouped card.
-// The filename (event-cards-grouping.4.2.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.2.1 in dev/requirements/requirements.md.
+// Two showings in the same month exercise the same-month grouping rule: one grouped card.
 "use strict";
 
 module.exports = {

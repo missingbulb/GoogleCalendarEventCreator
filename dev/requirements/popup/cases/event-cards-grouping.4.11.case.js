@@ -1,9 +1,6 @@
-// Per-leaf snapshot for requirement 4.11 (#509): a once-per-date run with ONE busy
-// date splits into three cards — the run before (Aug 3/4 as day chips under their
-// shared 1:55 PM header), the busy Aug 5 on its own card (its two showings shown by
-// time), then the run after (Aug 6). Showings grouped in a card differ only by date.
-// The filename (event-cards-grouping.4.11) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.11 in dev/requirements/requirements.md.
+// A once-per-date run with ONE busy date (Aug 5 has a second showing) splits into
+// three cards — run before (Aug 3/4), the busy Aug 5 alone, run after (Aug 6):
+// showings grouped in a card differ only by date.
 "use strict";
 
 module.exports = {

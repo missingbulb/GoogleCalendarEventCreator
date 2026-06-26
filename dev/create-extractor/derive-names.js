@@ -1,6 +1,6 @@
-// Re-derive the deterministic names for the finalize workflow
-// (.github/workflows/finalize-extractor.yml). That workflow fires on the
-// `extractor-agent-done` label and gets only the issue in its event payload — not
+// Re-derive the deterministic names for the finalize workflow. That workflow
+// fires on the `extractor-agent-done` label and gets only the issue in its
+// event payload — not
 // the branch — so it recomputes the same names Phase 1 used, from the same event
 // URL + issue number, with the same code (planNames). Pure + offline.
 //

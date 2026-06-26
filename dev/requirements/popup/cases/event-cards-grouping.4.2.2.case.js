@@ -1,7 +1,4 @@
-// Per-leaf snapshot for requirement 4.2.2: two showings in different months split
-// into one card per month.
-// The filename (event-cards-grouping.4.2.2) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.2.2 in dev/requirements/requirements.md.
+// Two showings in different months exercise the cross-month split rule: one card per month.
 "use strict";
 
 module.exports = {

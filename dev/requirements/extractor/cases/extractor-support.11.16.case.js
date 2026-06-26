@@ -1,7 +1,5 @@
-// Extractor-support leaf 11.16: facebook.com has a dedicated extractor
-// (extension/event-extractors/custom/facebook.js). No cached live case — facebook.com is bot-blocked from the
-// recorder/CI (see dev/procedures/this_project/technicalGotchas.md), so its extractor is covered by unit
-// tests only. Marked `tbd` (untested here): no cached page validation.
+// facebook.com is bot-blocked from the recorder/CI (see technicalGotchas.md), so
+// there's no cached page — its extractor is covered by unit tests only (tbd).
 "use strict";
 
 module.exports = {

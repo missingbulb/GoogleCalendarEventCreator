@@ -1,6 +1,6 @@
 // Unit tests for the auto-implement-extractor's case quality floor
-// (dev/create-extractor/case-quality.js's caseVerdict). phase2-finalize.sh
-// runs this before opening a PR: an empty case is the agent's bail, and an event
+// (case-quality.js's caseVerdict). The finalize workflow runs this before
+// opening a PR: an empty case is the agent's bail, and an event
 // with no location is a degenerate extraction off a listing/index page (#283
 // livenation: title "Muse", location "") that should NOT become a PR. Every real
 // committed case has a non-empty location, asserted here against the corpus too.

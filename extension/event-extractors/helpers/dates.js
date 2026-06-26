@@ -5,7 +5,7 @@
 //   "YYYY-MM-DDTHH:MM[:SS]"       -> floating local time
 //   full ISO with offset or "Z"   -> exact instant
 //
-// Uses GCal.clean (helpers/dom.js) at call time. Augments globalThis.GCal
+// Uses GCal.clean (the dom helper) at call time. Augments globalThis.GCal
 // (never replaces it) so load order can't clobber another file's contributions.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   const MONTH =

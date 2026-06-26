@@ -10,7 +10,7 @@
 // read tab.url for every tab, which is exactly what required "tabs".)
 //
 // The host lists come from fallback-lists.json — the same single
-// source of truth the popup's classifier (config.js / fallback-policy.js) reads.
+// source of truth the popup's classifier reads.
 // `supportedDomains` is the static mirror of the sources' own matches() (kept
 // honest by a drift-guard test); the icon decides at host
 // granularity, exactly as the old GCal.isSupportedHost/isDeniedHost did, so the
@@ -21,7 +21,7 @@
 // icon"); imageData is the robust route. And an MV3 service worker has no DOM —
 // no <img>/<canvas> — so we decode the packaged PNGs into ImageData via
 // fetch -> createImageBitmap -> OffscreenCanvas. (Same DOM-less-worker trap as
-// the old chrome.action.setIcon path, #204; see dev/procedures/this_project/technicalGotchas.md.)
+// the old chrome.action.setIcon path, #204; see technicalGotchas.md.)
 async function loadImageData(iconPath, size) {
   const blob = await fetch(chrome.runtime.getURL(iconPath)).then((r) => r.blob());
   const bitmap = await createImageBitmap(blob);

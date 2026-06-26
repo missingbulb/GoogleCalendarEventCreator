@@ -2,7 +2,7 @@
 // (event-extractors/extract-unsupported.js): a high-watermark gate on how much it
 // recovers, per page, relative to each page's dedicated per-site source.
 //
-// The comparison itself lives in dev/requirements/extractor/fallback/fallback-coverage.js (run GCal.extract()
+// The comparison itself lives in fallback-coverage.js (run GCal.extract()
 // twice on every cached case page — once normally, once with the site registry
 // emptied — and grade the fallback's primary event field-by-field against the
 // custom one). This file turns that into a regression gate plus a refreshed
@@ -10,12 +10,12 @@
 //
 //   - One GATE test asserts the current critical-field and all-field coverage
 //     have not dropped below the stored watermark in
-//     dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json — compared over the cases the run and the
+//     fallback-coverage.baseline.GENERATED.json — compared over the cases the run and the
 //     watermark SHARE. A newly added case isn't in the watermark's `cases` list,
 //     so it's excluded: adding an extractor never fails the gate (#240). Existing
 //     cases are still held to the bar, so a regression bundled with an addition
 //     is still caught.
-//   - A REFRESH test (skipped in CI) rewrites dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md and the
+//   - A REFRESH test (skipped in CI) rewrites fallback-coverage.GENERATED.md and the
 //     baseline: it ratchets the watermark UP on an unchanged case set, and
 //     re-anchors it to the current full-set aggregate when the set changed (a
 //     new/removed case). It writes the working tree only; committing is the
