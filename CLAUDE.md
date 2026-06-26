@@ -32,6 +32,14 @@ assets / icon generator — everything is self-contained in
 Look there **only** when you're actually cutting or publishing a release; it's not
 needed for day-to-day development.
 
+The auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
+site support) is likewise self-contained in
+[`dev/create-extractor/`](dev/create-extractor/) (start at
+[`dev/create-extractor/auto-extractor.md`](dev/create-extractor/auto-extractor.md));
+the daily routines that incrementally improve the shipped extractor live in
+[`dev/incremental-maintenance/`](dev/incremental-maintenance/). Read either **only**
+when working on that pipeline/routine — neither is needed for day-to-day development.
+
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `dev/procedures/this_project/technicalGotchas.md` (imported below).
 
