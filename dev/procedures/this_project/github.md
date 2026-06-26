@@ -107,7 +107,7 @@ The committed `.gitattributes` maps each generated file to the `ours` merge
 driver, so git keeps one side automatically and `npm run regen` reproduces the
 correct merged result from the (normally-merged) source files. A stale artifact
 can't slip through — its own test fails: the load-order drift guard
-(`dev/tools/test/load-order-generated.test.js`), the UI snapshot pixel diff, or
+(`dev/build/test/load-order-generated.test.js`), the UI snapshot pixel diff, or
 the fallback-coverage gate.
 
 Files under this rule (kept in sync with `.gitattributes`):

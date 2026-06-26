@@ -64,9 +64,9 @@ Target-page fetching is no longer a shared module: it's the inline
 `curl → ScraperAPI` call in the `record_page` bash function in
 `phase1-prepare.sh`. The remaining shared infrastructure stays where it's shared —
 this pipeline consumes it, it doesn't own it: `extension/config.js` /
-`extension/fallback-policy.js` (the popup's host classifier), and `dev/tools/gen-load-order.js`
+`extension/fallback-policy.js` (the popup's host classifier), and `dev/build/gen-load-order.js`
 (`npm run index`).
 
-The pure functions here are unit-tested from `dev/tools/test/` (`extractor-naming`,
+The pure functions here are unit-tested from `dev/create-extractor/test/` (`extractor-naming`,
 `resolve-source`, `extractor-scaffold`, `triage-extractor-request`,
 `attach-sample-url`).

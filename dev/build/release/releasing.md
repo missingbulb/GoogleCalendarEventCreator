@@ -5,11 +5,11 @@
 `npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
 files the extension ships (manifest, `extension/event-extractors/`, `extension/events-popup/`, `extension/icon/`, and the shared root modules), and
 nothing else (no tests, cached HTML, dev tooling, or docs). The file list lives
-in **`dev/release/shipping-files.js`** as the single source of truth, and
-`dev/release/shipping-files.test.js` asserts it stays in sync with what the
+in **`dev/build/release/shipping-files.js`** as the single source of truth, and
+`dev/build/release/shipping-files.test.js` asserts it stays in sync with what the
 manifest and popup actually load — so the zip can't silently drop a runtime
 file or smuggle in dead weight. This same zip is what testers load unpacked
-(see [Install](../README.md#install-developer-mode)) and what you upload to the Web Store.
+(see [Install](../../../README.md#install-developer-mode)) and what you upload to the Web Store.
 
 ## Versioning
 
@@ -18,7 +18,7 @@ that; `package.json` is kept in sync). **It is bumped deliberately, by a human,
 not automatically** — and bumping is a separate step from releasing. Ask Claude
 to **"bump version"** (it edits both files on a branch and lands on `main`
 through a normal PR; default is the next minor — see
-[`dev/procedures/this_project/workflow.md`](../procedures/this_project/workflow.md)). The release workflow never
+[`dev/procedures/this_project/workflow.md`](../../procedures/this_project/workflow.md)). The release workflow never
 changes the version itself. The store rejects an upload whose version isn't
 strictly higher than the live one, so each release must increment it first.
 
@@ -121,7 +121,7 @@ If minting fails, the symptoms map to fixes like this:
 3. Complete the store listing: the store icon (`extension/icon/images/chromeStoreIcon.png`),
    description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
    tab — justify each requested permission (`activeTab`, `scripting`,
-   `declarativeContent`; see [Permissions](../README.md#permissions)) and declare
+   `declarativeContent`; see [Permissions](../../../README.md#permissions)) and declare
    data usage (this extension sends nothing anywhere).
 4. Submit for review. Approval typically takes a few hours to a few days.
 

@@ -25,7 +25,7 @@ MODE="${MODE:-new}"
 
 # record_page — the project's single page-fetch (ScraperAPI escalation ladder, .il
 # geo-targeting, and the #279 non-HTML guard) lives in record-page.sh so it can be
-# unit-tested in isolation (dev/tools/test/record-page.test.js). Sourcing only
+# unit-tested in isolation (dev/create-extractor/test/record-page.test.js). Sourcing only
 # defines the function.
 source "$HERE/record-page.sh"
 

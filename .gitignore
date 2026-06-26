@@ -1,6 +1,6 @@
 node_modules/
 
-# Python bytecode cache (e.g. from compiling dev/tools/**/*.py)
+# Python bytecode cache (e.g. from compiling dev/build/**/*.py)
 __pycache__/
 
 # Built extension package (produced by `npm run build` / the Release workflow)

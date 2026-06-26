@@ -1731,7 +1731,7 @@ The "Suggest Correction" flow that turns a missed page into first-class support.
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/tools/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `dev/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.2 -->
 
 </td>
 <td valign="top">
@@ -1746,7 +1746,7 @@ The "Suggest Correction" flow that turns a missed page into first-class support.
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/tools/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `dev/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.3 -->
 
 </td>
 <td valign="top">
