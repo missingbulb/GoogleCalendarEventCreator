@@ -3,19 +3,19 @@
 // a grouped instance button, or an affordance link OPENS the right URL in an
 // ADJACENT new tab and CLOSES the popup. A PNG has no pixels for "a tab opened",
 // so these leaves declare `kind: "behavior"` in their case and are routed here
-// instead of onto a snapshot image (dev/procedures/engineeringPractices.md, issue #429).
+// instead of onto a snapshot image (see the engineering practices doc, issue #429).
 //
 // =====================================================================
 // !!!  INCOMPLETE VERIFICATION — READ BEFORE TRUSTING THIS TEST  !!!
 // ---------------------------------------------------------------------
 // This test STUBS the exact boundary the behavior crosses: it replaces
 // `chrome.tabs.create` and `window.close` with spies and asserts they were
-// called with the right arguments. Per dev/procedures/engineeringPractices.md ("a test
+// called with the right arguments. Per the engineering practices doc ("a test
 // that stubs the exact boundary where the bug lives can't catch that bug"), this
 // CANNOT confirm that a REAL Chrome actually opens the tab, places it adjacent,
 // or tears the popup down — only that our code asked it to. A faithful (non-stub)
 // verification of these leaves is still owed; the approach is TBD by the repo
-// owner — see the UI-testing tracking issue referenced in dev/procedures/this_project/testing.md.
+// owner — see the UI-testing tracking issue referenced in testing.md.
 // Until then, 3.4/9.1/9.2/9.3 are only PARTIALLY verified.
 // =====================================================================
 "use strict";

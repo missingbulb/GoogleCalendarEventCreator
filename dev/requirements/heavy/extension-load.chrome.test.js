@@ -1,7 +1,7 @@
 // Real-Chrome smoke test: load the unpacked extension and confirm its MV3
 // service worker actually registers and runs — the one layer that exercises
 // Chrome's *real* extension loader (the layer that broke in #146). The
-// deterministic Node-level equivalent is extension-test/integration/extension-loads.test.js.
+// deterministic Node-level equivalent is the extension-loads integration test.
 //
 // Zero dependencies: it drives Chrome straight over the DevTools Protocol using
 // Node's built-in WebSocket + child_process (no puppeteer). It needs a Chrome
@@ -144,7 +144,7 @@ test(
 
       // The probe always settles (the await is bounded by a timeout) and returns a
       // diagnostic string, so a CI-only failure reports the observed state instead
-      // of hanging the job — see dev/procedures/claude/shared/engineeringPractices.md.
+      // of hanging the job — see the engineering practices canon.
       const probe = `(async () => {
         const withTimeout = (p, ms, tag) =>
           Promise.race([Promise.resolve(p), new Promise((r) => setTimeout(() => r(tag), ms))]);

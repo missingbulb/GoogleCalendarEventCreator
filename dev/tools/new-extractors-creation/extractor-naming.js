@@ -2,8 +2,8 @@
 // workflow, derived purely from the event URL's host. The workflow does Phase 1
 // (branch + cache the page) before the agent runs, so these names can't be the
 // agent's judgement call any more — they have to be reproducible from the URL
-// alone. Pure (no I/O), so it's unit-tested (dev/tools/test/extractor-naming.test.js)
-// and the workflow and triage agree on the names.
+// alone. Pure (no I/O), so it's unit-tested, and the workflow and triage agree
+// on the names.
 //
 //   slug      — host, www-stripped, a common public suffix removed, dots → "-":
 //                 axs.com               -> axs

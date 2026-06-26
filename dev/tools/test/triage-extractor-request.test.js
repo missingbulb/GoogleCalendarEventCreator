@@ -1,5 +1,5 @@
 // Offline unit tests for the auto-extractor pre-flight triage
-// (dev/tools/new-extractors-creation/triage-extractor-request.js): the workflow step that closes a request
+// (triage-extractor-request.js): the workflow step that closes a request
 // whose host is already on config.js's fallback allow/denylist, before spending
 // an agent run. Lists are injected so the cases don't depend on the shipped
 // (empty) config; the host-matching itself is covered in fallback-policy.test.js.

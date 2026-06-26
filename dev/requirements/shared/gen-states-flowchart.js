@@ -11,7 +11,7 @@
 //
 // Authors an SVG by hand and rasterizes it with @resvg/resvg-js (already a dev
 // dependency) — no browser, no graphviz, deterministic. Fonts come from the
-// bundled Liberation Sans in dev/requirements/shared/render/fonts so text renders without system fonts.
+// bundled Liberation Sans so text renders without depending on system fonts.
 "use strict";
 
 const fs = require("node:fs");

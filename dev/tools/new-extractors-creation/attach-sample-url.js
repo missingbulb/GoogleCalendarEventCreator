@@ -1,6 +1,6 @@
 // Fold a deferred extractor request's event URL into the LEADER issue's body as
 // an extra "sample page" (see triage-extractor-request.js's "sample" disposition
-// and dev/procedures/this_project/auto-extractor.md). Two same-host requests can't run the agent
+// and auto-extractor.md). Two same-host requests can't run the agent
 // concurrently, but the newer one's URL is a second real event page — useful raw
 // material for a more robust extractor. So instead of discarding it, the prepare
 // workflow records it on the leader issue as a checklist item a maintainer (the

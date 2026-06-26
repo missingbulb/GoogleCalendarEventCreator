@@ -1,4 +1,4 @@
-// Offline unit tests for dev/tools/new-extractors-creation/resolve-source.js: the
+// Offline unit tests for resolve-source.js: the
 // host → existing-source-file lookup the auto-implement-extractor "supported"
 // mode uses to add a fresh integration case to a host's already-shipped source.
 // The point of the resolver is that the file name is NOT the slug, so these

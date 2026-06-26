@@ -1,5 +1,5 @@
 // Guards event-extractors/load-order.generated.json against drift: it must match what
-// `npm run index` (dev/tools/gen-load-order.js) would produce from the current extractor
+// `npm run index` (gen-load-order.js) would produce from the current extractor
 // files. If this fails, an extractor was added/removed/renamed without
 // regenerating the list — run `npm run index` and commit the result.
 
