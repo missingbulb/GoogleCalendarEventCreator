@@ -16,11 +16,11 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const path = require("node:path");
 const { extractFromHtml } = require("../../../extension-test/harness");
 const { loadCases, leafIdOf } = require("../shared/cases");
 
-const DATA_DIR = path.join(__dirname, "data");
+// Resolves a case's <page>.{html,url} across data/server-fetched/ + data/user-submitted/.
+const { dataFile } = require("./data-files");
 const extractorCases = loadCases().filter((c) => c.kind === "extractor");
 
 test("there is at least one extractor-support case", () => {
@@ -38,8 +38,8 @@ for (const testCase of extractorCases) {
   }
 
   test(`${id}: ${testCase.host} is recognized as supported and yields a complete event (${testCase.page})`, () => {
-    const htmlPath = path.join(DATA_DIR, `${testCase.page}.html`);
-    const urlPath = path.join(DATA_DIR, `${testCase.page}.url`);
+    const htmlPath = dataFile(`${testCase.page}.html`);
+    const urlPath = dataFile(`${testCase.page}.url`);
     assert.ok(
       fs.existsSync(htmlPath) && fs.statSync(htmlPath).size > 0,
       `missing/empty cached page for ${testCase.host}: ${htmlPath} (recorded by the auto-extractor pipeline / by hand via ScraperAPI — see dev/tools/new-extractors-creation/phase1-prepare.sh)`

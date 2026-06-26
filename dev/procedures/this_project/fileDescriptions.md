@@ -23,7 +23,7 @@ extension does.
 | `extension/event-extractors/assemble-events.js` | Orchestrator `GCal.extract()`: runs the matched self-contained source, else the unsupported-site fallback; normalizes/sorts events and reports `supported` |
 | `extension/event-extractors/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `dev/requirements/extractor/expected/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
-| `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
+| `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`); split by provenance into `server-fetched/` (pipeline-recorded, secret-scan-excluded) and `user-submitted/` (hand-supplied, push-protected), resolved by `data-files.js` |
 | `dev/tools/new-extractors-creation/phase1-prepare.sh` | Records the event page via an inline curl→ScraperAPI (`record_page`) during the auto-extractor Phase-1 pipeline |
 | `dev/requirements/extractor/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |

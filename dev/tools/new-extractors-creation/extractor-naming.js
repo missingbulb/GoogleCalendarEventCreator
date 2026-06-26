@@ -13,7 +13,7 @@
 //               Used for the branch (claude/extractor/<slug>) and the source
 //               file (event-extractors/custom/<slug>.js).
 //   caseName  — the fixture / integration-case identifier
-//               (dev/requirements/extractor/data/<caseName>.{url,html}, dev/requirements/extractor/expected/<caseName>.json).
+//               (dev/requirements/extractor/data/server-fetched/<caseName>.{url,html}, dev/requirements/extractor/expected/<caseName>.json).
 //               Equal to the slug for the first, auto-recorded case; additional
 //               cases for the same host are added by hand later with their own
 //               descriptive names.

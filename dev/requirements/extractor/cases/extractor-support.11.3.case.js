@@ -1,6 +1,6 @@
 // Extractor-support leaf 11.3: edfringe.com has a dedicated extractor
 // (extension/event-extractors/custom/edinburghfringe.js), validated against the real cached page
-// dev/requirements/extractor/data/edinburghfringe-daniel-sloss.html by extractor-support.test.js — the
+// dev/requirements/extractor/data/server-fetched/edinburghfringe-daniel-sloss.html by extractor-support.test.js — the
 // page is recognized as supported and yields a complete event.
 "use strict";
 
