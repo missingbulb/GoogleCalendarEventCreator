@@ -70,6 +70,21 @@
       // A start scraped from text often sits next to its end as a time range
       // ("6:30 pm - 10:00 pm"); recover the end when nothing structured gave one.
       if (out.start && !out.end) out.end = endFromTimeRange(body, out.start);
+    } else if (!out.start.includes("T") || /T00:00(?::00)?/.test(out.start)) {
+      // <time datetime> (or microdata) gave date-only or midnight-UTC — a common
+      // placeholder pattern. Try metadata descriptions first (curated, one focused
+      // sentence vs the whole page), then body text, for a timed start on the same
+      // date; if found, prefer it over the midnight placeholder.
+      const datePrefix = out.start.slice(0, 10);
+      const body = bodyText().slice(0, 8000);
+      for (const src of [meta("og:description"), meta("description"), body]) {
+        const refined = parseDateFromText(src);
+        if (refined && refined.includes("T") && refined.startsWith(datePrefix)) {
+          out.start = refined;
+          if (!out.end) out.end = endFromTimeRange(src, out.start);
+          break;
+        }
+      }
     }
 
     out.location =

@@ -12,8 +12,8 @@ Headline coverage over all 29 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **52.9%** | 46 / 87 |
-| **All fields** | **35.5%** | 61 / 172 |
+| **Critical fields** (title + start + location) | **54%** | 47 / 87 |
+| **All fields** | **36%** | 62 / 172 |
 | Event coverage *(informational)* | 35.7% | 66 / 185 |
 
 ### Gate
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 52.9% | 52.9% | ✓ |
-| All fields | 35.5% | 35.5% | ✓ |
+| Critical fields | 54% | 54% | ✓ |
+| All fields | 36% | 36% | ✓ |
 
 Gated over **29** shared case(s).
 
@@ -34,7 +34,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
 | `title` **(critical)** | 29 | 21 | 2 | 6 | 72.4% |
-| `start` **(critical)** | 29 | 13 | 10 | 6 | 44.8% |
+| `start` **(critical)** | 29 | 14 | 9 | 6 | 48.3% |
 | `end` | 19 | 11 | 0 | 8 | 57.9% |
 | `location` **(critical)** | 29 | 12 | 4 | 13 | 41.4% |
 | `ctz` | 27 | 0 | 0 | 27 | 0% |
@@ -52,7 +52,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
 | `eventbrite.com` | 2 | 2/2 | 100% | 57.1% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 66.7% |
-| `events.datadoghq.com` | 1 | 1/1 | 0% | 0% |
+| `events.datadoghq.com` | 1 | 1/1 | 33.3% | 20% |
 | `livenation.de` | 1 | 32/32 | 66.7% | 66.7% |
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
@@ -80,7 +80,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `eventbrite-1989775742810` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ~ |
 | `eventbrite-games-for-change` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ~ |
 | `eventim-co-il-the90sshow` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
-| `events-datadoghq` | 1/1 | ~ | ~ | — | ✗ | ✗ | — | ~ |
+| `events-datadoghq` | 1/1 | ~ | ✓ | — | ✗ | ✗ | — | ~ |
 | `livenation` | 39/32 | ✓ | ✓ | — | ~ | — | — | — |
 | `luma-event` | 1/1 | ✓ | ✓ | ✓ | ~ | ✗ | — | ✓ |
 | `meetup-fusion-la-israel` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
