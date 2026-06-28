@@ -248,24 +248,12 @@ function makeGroupCard(card, tab, chipFor) {
   list.className = "e-instances";
   for (const it of instances) {
     const chip = chipFor(it);
-    if (varied && chip) chip.location = clampVenue(instanceLocation(event, it.t));
+    if (varied && chip) chip.location = instanceLocation(event, it.t);
     list.appendChild(chipButton(event, it, chip, tab));
   }
   cardEl.appendChild(list);
 
   return cardEl;
-}
-
-// Cap an in-chip venue so it wraps to at most ~2 lines within the chip's bounded
-// width. CSS `-webkit-line-clamp: 2` handles this in the real Chrome popup, but
-// the satori snapshot renderer ignores it (it only honors single-line
-// `text-overflow: ellipsis`), so without a hard cap a long venue would render as
-// an unbounded tall chip in the snapshot. This deterministic character cap keeps
-// the snapshot honest and matches what Chrome clamps to; full text still reaches
-// the Calendar URL.
-function clampVenue(text) {
-  const MAX = 34; // ~the two-line capacity of the chip's venue column (see popup.css)
-  return text.length > MAX ? text.slice(0, MAX - 1).replace(/[\s,]+$/, "") + "…" : text;
 }
 
 // One instance rendered AS a clickable calendar chip — a grouped card's button.
@@ -364,9 +352,9 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
 
   // A per-instance location (a touring show's varying venues) rides inside the
   // chip: the colored banner stays FULL-WIDTH on top, and only the white lower
-  // strip splits — the day/time on the left, a pin glyph + the venue on the right.
-  // The chip widens to a bounded band (see .e-chip.has-loc in popup.css) and the
-  // venue clamps to two lines.
+  // strip splits — the day/time on the left, the venue on the right. The venue is
+  // a single line that ellipsizes (see .e-chip-loc in popup.css), so the chip
+  // width tracks the text; the full venue still reaches the Calendar URL.
   if (location) {
     el.appendChild(bannerEl);
 
@@ -376,15 +364,7 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
 
     const locEl = document.createElement("span");
     locEl.className = "e-chip-loc";
-    const pin = document.createElement("span");
-    pin.className = "e-pin";
-    pin.setAttribute("aria-hidden", "true");
-    pin.appendChild(document.createElement("span")).className = "e-pin-hole";
-    locEl.appendChild(pin);
-    const txt = document.createElement("span");
-    txt.className = "e-loc-text";
-    txt.textContent = location;
-    locEl.appendChild(txt);
+    locEl.textContent = location;
     lower.appendChild(locEl);
 
     el.appendChild(lower);

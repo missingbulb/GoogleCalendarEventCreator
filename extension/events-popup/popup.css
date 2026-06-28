@@ -322,55 +322,22 @@ body {
 .event-group .e-chip.has-loc .e-chip-body {
   flex-shrink: 0;
 }
-/* The venue, to the RIGHT of the date/time in the lower strip: a pin glyph then
-   the venue text, centered vertically, no separator. The cell sizes to its text
-   (so a short venue stays narrow), and the text caps at a max-width so a long one
-   wraps to two lines instead of stretching the chip. */
+/* The venue, to the RIGHT of the date/time in the lower strip: a single line that
+   ellipsizes. It sizes to its text up to a max-width — so a short venue makes a
+   narrow chip and a long one fills the cap and ellipsizes (no dead space, unlike a
+   wrapped box that reserves the full width). No separator. */
 .event-btn .e-chip-loc,
 .event-group .e-chip-loc {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 4px;
   box-sizing: border-box;
-  padding: 0 8px 0 2px;
-}
-.event-btn .e-loc-text,
-.event-group .e-loc-text {
-  min-width: 0;
-  max-width: 96px; /* bounds a long venue so satori wraps it to ~2 lines (clampVenue caps the text) */
-  overflow: hidden;
-  max-height: 23px; /* ~2 lines at 9px/1.25 */
+  max-width: 116px;
+  padding: 0 8px 0 3px;
   font-size: 9px;
   line-height: 1.25;
   color: #5f6368;
   text-align: left;
-}
-/* A small CSS map-pin: a teardrop (a rounded square with one square corner,
-   rotated so the point faces down) in the chip's blue, with a white center hole so
-   it reads as a pin, not a blob. Drawn in CSS so it renders in both Chrome and the
-   satori snapshot (which has no emoji font). */
-.event-btn .e-pin,
-.event-group .e-pin {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 9px;
-  height: 9px;
-  background-color: #1a73e8;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 0;
-  transform: rotate(-45deg);
-}
-.event-btn .e-pin-hole,
-.event-group .e-pin-hole {
-  width: 3px;
-  height: 3px;
-  background-color: #fff;
-  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
