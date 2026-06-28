@@ -240,6 +240,32 @@ test("Generic site: location falls back to 'Event @ Venue' in the page title", (
   assert.equal(e.location, "Peace Forest, Jerusalem");
 });
 
+test("Generic site: midnight-UTC <time datetime> is refined using the start time from og:description", () => {
+  // Sites sometimes set <time datetime="YYYY-MM-DDT00:00:00.000Z"> as a date
+  // placeholder while the actual start time is only in the visible text or
+  // og:description ("Join us on June 23, 2026 at 10:00 AM!"). The fallback
+  // should prefer the timed value over the midnight placeholder.
+  const html = `
+    <meta property="og:description" content="Join us on June 23, 2026 at 10:00 AM!">
+    <h1>Datadog Live</h1>
+    <time datetime="2026-06-23T00:00:00.000Z">Tuesday, June 23, 2026</time>`;
+
+  const e = firstEvent(html, "https://events.example.com/datadog-live");
+  assert.equal(e.times[0].start, "2026-06-23T10:00:00");
+});
+
+test("Generic site: midnight-UTC <time datetime> keeps its date when body text has no timed match on that date", () => {
+  // If body text / metadata can't provide a timed refinement, the midnight
+  // placeholder date is preserved — a date-only all-day hint is better than nothing.
+  const html = `
+    <meta property="og:description" content="A great event about technology.">
+    <h1>Tech Conf</h1>
+    <time datetime="2026-09-01T00:00:00.000Z">September 2026</time>`;
+
+  const e = firstEvent(html, "https://events.example.com/tech-conf");
+  assert.equal(e.times[0].start, "2026-09-01T00:00:00.000Z");
+});
+
 test("Generic site: '(Virtual)' or '(Online)' parenthetical in the title signals Online location", () => {
   // Many virtual-event pages mark the event mode as "(Virtual)" or "(Online)"
   // in the og:title — a convention used across event platforms (EventBrite,
