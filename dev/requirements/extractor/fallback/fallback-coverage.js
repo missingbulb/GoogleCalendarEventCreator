@@ -48,16 +48,23 @@ const SOURCES = (() => {
   return files.map((file) => readFileSync(path.join(EXT, file), "utf8"));
 })();
 
-// Run the real pipeline against `html` loaded at `url`. With clearSources the
-// site registry is emptied after load so GCal.extract() takes the unsupported
-// (fallback) path. Serializes inside the jsdom realm so the caller gets a plain
-// object (no cross-realm array surprises).
-function runExtract(html, url, clearSources) {
+// Run the real pipeline against `html` loaded at `url` and return BOTH gradings
+// from a SINGLE jsdom parse: the supported run, then the fallback run with the
+// site registry emptied so GCal.extract() takes the unsupported path. Parsing
+// the page is the dominant cost here, and GCal.extract() is read-only on the DOM
+// (the only documented mutation, each source's GCal.sources.push at load, isn't
+// re-triggered — we only clear sources between the two extracts), so the second
+// run reuses the first run's realm instead of reparsing. Verified to produce
+// byte-identical output to two separate parses. Serializes inside the jsdom realm
+// so the caller gets plain objects (no cross-realm array surprises).
+function runBothExtracts(html, url) {
   const dom = new JSDOM(html, { url, runScripts: "outside-only" });
   try {
     for (const src of SOURCES) dom.window.eval(src);
-    if (clearSources) dom.window.eval("GCal.sources = [];");
-    return JSON.parse(dom.window.eval("JSON.stringify(GCal.extract())"));
+    const custom = JSON.parse(dom.window.eval("JSON.stringify(GCal.extract())"));
+    dom.window.eval("GCal.sources = [];");
+    const fallback = JSON.parse(dom.window.eval("JSON.stringify(GCal.extract())"));
+    return { custom, fallback };
   } finally {
     dom.window.close();
   }
@@ -164,8 +171,7 @@ function computeCoverage() {
     const url = readFileSync(urlPath, "utf8").trim();
     const html = readFileSync(htmlPath, "utf8");
 
-    const custom = runExtract(html, url, false);
-    const fallback = runExtract(html, url, true);
+    const { custom, fallback } = runBothExtracts(html, url);
     // Grade the PRIMARY instance: events carry their timing in times[] (the
     // multi-instance model), so flatten the first instance's start/end/duration
     // onto the event before comparing the start/end/len fields field-by-field.
