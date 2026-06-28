@@ -78,6 +78,12 @@
       shortText('[class*="venue" i], [class*="location" i], [id*="location" i]') ||
       metaLocation() ||
       venueFromTitle(out.title);
+    // A "(Virtual)", "(Online)", or "(Webinar)" parenthetical in the event title
+    // signals a virtual event with no physical venue — a convention used by many
+    // event platforms (EventBrite, Meetup, Luma, …).
+    if (!out.location && /\((virtual|online|webinar)\)/i.test(out.title || "")) {
+      out.location = "Online";
+    }
 
     // Preserve the description's line breaks rather than flattening it.
     out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
