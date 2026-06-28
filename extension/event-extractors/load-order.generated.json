@@ -19,6 +19,7 @@
   "event-extractors/custom/livenation.js",
   "event-extractors/custom/luma.js",
   "event-extractors/custom/meetup.js",
+  "event-extractors/custom/seatgeek.js",
   "event-extractors/custom/secrettelaviv.js",
   "event-extractors/custom/seetickets.js",
   "event-extractors/custom/tabitisrael.js",
