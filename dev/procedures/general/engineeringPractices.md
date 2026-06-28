@@ -1,7 +1,7 @@
 # Engineering practices (local working set)
 
 General engineering-practice lessons captured here, not yet in the shared canon
-([claude/shared/engineeringPractices.md](../claude/shared/engineeringPractices.md)).
+([claude/shared/tasks/engineeringPractices.md](../claude/shared/tasks/engineeringPractices.md)).
 `optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
 prunes them once the canon absorbs them (capture is always local — see
 [this_project/workflow.md](../this_project/workflow.md)).

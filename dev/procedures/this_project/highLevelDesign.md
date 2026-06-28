@@ -23,7 +23,7 @@ top-level architectural guideline, update this section as part of the same chang
 Portable agent-architecture principles that aren't specific to this project (the
 unattended-agent judgment boundary, the bounded-and-enforced write surface) live
 in the shared rules:
-[claude/shared/agent-architecture.md](../claude/shared/agent-architecture.md). The
+[claude/shared/tasks/agent-architecture.md](../claude/shared/tasks/agent-architecture.md). The
 worked examples for both are this repo's auto-extractor pipeline
 ([auto-extractor.md](../../create-extractor/auto-extractor.md)).
 

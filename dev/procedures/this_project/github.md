@@ -7,7 +7,7 @@ tokens, and how we keep merge-conflict churn cheap across parallel branches. The
 issue → branch → PR lifecycle, commit-in-layers and the squash-merge resync rules,
 the `GITHUB_TOKEN`-doesn't-trigger-a-workflow rule, unique-branch-per-run,
 new-label creation, and the generic cross-branch merge gotchas — live in the
-shared rules: [shared/git-and-github.md](../claude/shared/git-and-github.md). The two
+shared rules: [shared/git-and-github.md](../claude/shared/tasks/git-and-github.md). The two
 owner-triggered defined instructions that also land through this PR flow — "bump
 version" and "learned lessons" — keep their definitions in
 [workflow.md](workflow.md) (they reference the flow here). Portable git/GitHub
@@ -20,7 +20,7 @@ When the repo owner asks to merge a change to `main`, merge that branch's pull
 request via **squash**, appending the PR number to the title as `(#N)` — matching
 `main`'s linear, one-commit-per-PR history. CI must be green first; the
 test-flakiness gate in
-[shared/engineeringPractices.md](../claude/shared/engineeringPractices.md) (twice-green)
+[shared/engineeringPractices.md](../claude/shared/tasks/engineeringPractices.md) (twice-green)
 applies only when the change adds or touches an e2e/heavy-browser test.
 
 A merge approval, like any approval, applies **only backward** — a later
@@ -31,7 +31,7 @@ doubt, open the PR, get CI green, and wait for a fresh approval.
 
 (The branch/commit-history rules — commit-in-layers, and the squash-merge branch
 resync gotchas — are portable and live in
-[shared/git-and-github.md](../claude/shared/git-and-github.md).)
+[shared/git-and-github.md](../claude/shared/tasks/git-and-github.md).)
 
 ## Open the PR early when a change touches e2e / heavy / UI tests
 
@@ -49,7 +49,7 @@ needs a branch pushed to GitHub to view at all.
 (Three portable CI/automation rules — `GITHUB_TOKEN` doesn't trigger another
 workflow, an automated job needs a unique branch per run, and a workflow adding a
 brand-new label must create it first — are in
-[shared/git-and-github.md](../claude/shared/git-and-github.md). This repo's auto-extractor
+[shared/git-and-github.md](../claude/shared/tasks/git-and-github.md). This repo's auto-extractor
 pipeline relies on all three; see [auto-extractor.md](../../create-extractor/auto-extractor.md).)
 
 ## Driving a merge cheaply (wall time + tokens)
@@ -148,6 +148,6 @@ just the latest sources.
 The generic cross-branch merge gotchas — merging across a file relocation,
 merging in content that predates a branch-wide invariant, and porting old work
 forward across a changed invariant — are in
-[shared/git-and-github.md](../claude/shared/git-and-github.md); two more git-mv gotchas
+[shared/git-and-github.md](../claude/shared/tasks/git-and-github.md); two more git-mv gotchas
 (renaming a directory that houses a submodule; re-reading a moved file before
 rewriting it) are in [../general/git-and-github.md](../general/git-and-github.md).

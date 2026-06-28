@@ -1,7 +1,7 @@
 # Testing practices (local working set)
 
 Portable test-discipline practices captured here, not yet in the shared canon
-([claude/shared/testingPractices.md](../claude/shared/testingPractices.md)).
+([claude/shared/tasks/testingPractices.md](../claude/shared/tasks/testingPractices.md)).
 `optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
 prunes them once the canon absorbs them (capture is always local — see
 [this_project/workflow.md](../this_project/workflow.md)).
