@@ -47,3 +47,12 @@ prunes them once the canon absorbs them (capture is always local — see
   the commit, so review is one click away rather than a hunt. (Complements the
   "deliver the image into the chat" rule above: that's for an artifact the owner
   asked to *see*; this is for one a routine *regenerates*.)
+
+- **In a CLAUDE.md, `@import` only docs whose guidance applies to every session;
+  reference specialized pipeline docs with non-@import pointer links.** An `@import`
+  expands the doc inline at launch in *every* session, taxing the always-loaded
+  context budget even when the session has nothing to do with that pipeline.
+  Self-contained pipelines (release, auto-extractor, maintenance routines) belong
+  in their own folders, discoverable via plain links in CLAUDE.md. `@import` only
+  docs (workflow, testing, gotchas, coding practices) whose rules apply to every
+  commit.
