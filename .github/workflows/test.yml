@@ -24,12 +24,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-        # Check out the Claudinite shared-rules submodule (dev/procedures/claude/shared) so
-        # docs-reachable validates the real shared content — this is what makes a
-        # Dependabot submodule-bump PR's CI a genuine gate rather than a no-op.
-        # Claudinite is public, so the workflow token clones it without extra creds.
-        with:
-          submodules: recursive
+
+      # Vendor the Claudinite shared-rules canon (dev/procedures/claude/shared) the
+      # same way every environment does now — an HTTPS fetch of the commit pinned in
+      # dev/procedures/claude/shared.ref, not a git submodule (issue #364 / the
+      # remote-fetch successor). Running it here exercises the real bootstrap path on
+      # every CI run, so a bad pin or a broken fetch fails the build. Claudinite is
+      # public, so no extra creds.
+      - name: Fetch Claudinite shared rules
+        run: dev/procedures/claude/fetch-shared.sh
 
       - uses: actions/setup-node@v5
         with:

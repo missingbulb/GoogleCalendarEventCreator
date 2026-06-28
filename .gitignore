@@ -13,3 +13,9 @@ dev/requirements/shared/.artifacts/
 # Stray clone of the Claudinite shared submodule that some environments check
 # out at the wrong path (canonical location is dev/procedures/claude/shared/).
 docs/
+
+# Claudinite shared-rules canon: fetched over HTTPS by
+# dev/procedures/claude/fetch-shared.sh (pinned in dev/procedures/claude/shared.ref),
+# not a git submodule -- a vendored artifact, never committed (see issue #364 / the
+# remote-fetch successor). Keep gitignored so it can never show as gitlink drift.
+dev/procedures/claude/shared/
