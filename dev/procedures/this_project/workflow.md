@@ -1,10 +1,7 @@
 # Workflow
 
 The GitHub issue → branch → PR → merge lifecycle, the **merge-to-main command**,
-and the CI-interaction practices live in [github.md](github.md). The general,
-project-agnostic working discipline (confirm-before-building, the warnings
-policy) now lives in the shared rules:
-[shared/working-discipline.md](../claude/shared/always/working-discipline.md). This file holds the
+and the CI-interaction practices live in [github.md](github.md). This file holds the
 project-specific working rules, plus the two owner-triggered defined instructions
 ("bump version", "learned lessons").
 

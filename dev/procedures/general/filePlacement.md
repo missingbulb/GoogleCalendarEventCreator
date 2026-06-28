@@ -1,8 +1,7 @@
 # File placement (local working set)
 
 Portable "where a file lives / how it's located" lessons captured here, not yet in
-the shared canon
-([claude/shared/tasks/filePlacement.md](../claude/shared/tasks/filePlacement.md)).
+the shared canon.
 `optimize-procedures` promotes these up and prunes them once the canon absorbs them
 (capture is always local — see [this_project/workflow.md](../this_project/workflow.md)).
 

@@ -141,8 +141,7 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   // to the real clock, so production is unchanged: the injected popup world never
   // sets the override. Tests inject a fixed instant via globalThis.__REFERENCE_NOW__
   // (threaded by extension-test/harness.js from a case's "referenceNow"), so a no-year case
-  // asserts a stable date instead of silently rotting as wall-clock time passes
-  // (dev/procedures/claude/shared/tasks/engineeringPractices.md).
+  // asserts a stable date instead of silently rotting as wall-clock time passes.
   function now() {
     return globalThis.__REFERENCE_NOW__ ? new Date(globalThis.__REFERENCE_NOW__) : new Date();
   }
