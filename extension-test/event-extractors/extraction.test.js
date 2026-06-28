@@ -266,6 +266,20 @@ test("Generic site: midnight-UTC <time datetime> keeps its date when body text h
   assert.equal(e.times[0].start, "2026-09-01T00:00:00.000Z");
 });
 
+test("Generic site: '(Virtual)' or '(Online)' parenthetical in the title signals Online location", () => {
+  // Many virtual-event pages mark the event mode as "(Virtual)" or "(Online)"
+  // in the og:title — a convention used across event platforms (EventBrite,
+  // Meetup, Luma, datadoghq.com/events, …). When no venue/address/place element
+  // is found via any other heuristic, infer location = "Online" from the parenthetical.
+  for (const label of ["(Virtual)", "(Online)", "(Webinar)"]) {
+    const html = `
+      <meta property="og:title" content="Tech Summit ${label}">
+      <p>July 8, 2026 at 2 PM</p>`;
+    const e = firstEvent(html, "https://www.example.com/summit");
+    assert.equal(e.location, "Online", `title with ${label} should yield Online location`);
+  }
+});
+
 test("Listing page with several events: every JSON-LD event is returned, in order", () => {
   const html = `
     <script type="application/ld+json">
