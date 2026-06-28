@@ -101,7 +101,7 @@ change.
     and the gate rejects it.
   - **extractor** — a non-image leaf (§11, "Required explicit support for
     Extractors"): one per supported host, validated by running the real per-site
-    extractor against a real cached page (`dev/requirements/extractor/data/<page>.html`)
+    extractor against a real cached page (`dev/requirements/extractor/data/server-fetched/<page>.html`)
     and asserting the host is recognized as supported and yields a complete event.
     Verified by `dev/requirements/extractor/extractor-support.test.js`; the
     case names `{ host, source, page }`. A bot-blocked host with no cacheable page
@@ -191,7 +191,7 @@ an ordinary page, several for a listing/series page. See the header comment in
 `live.test.js` for how each field is derived.
 
 The case's **source URL is not in the case file** — it lives next to the cached
-HTML, in `dev/requirements/extractor/data/<name>.url` (a plain-text file holding just the URL). That one
+HTML, in `dev/requirements/extractor/data/server-fetched/<name>.url` (a plain-text file holding just the URL). That one
 file is the single source of truth for the page's URL: the auto-extractor
 pipeline fetches it (see below), and the live test loads the cached HTML into a
 DOM at that URL. Keeping it out of the reviewed case file means a test
@@ -205,7 +205,7 @@ keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
 - Cached HTML is recorded by the **auto-extractor pipeline**: the `record_page`
-  bash function in `dev/tools/new-extractors-creation/phase1-prepare.sh` fetches
+  bash function in `dev/create-extractor/phase1-prepare.sh` fetches
   the event page via an inline curl→ScraperAPI (`render=true`, so a single-page-app
   records with real data) when Phase 1 runs.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
@@ -231,15 +231,15 @@ New cached HTML can't be fetched here (the sandbox is bot-blocked — see
 and read its exact `expected` off the committed file instead of guessing:
 
 1. Commit two new files — but **not** the case file yet:
-   - `dev/requirements/extractor/data/<name>.html` — an empty (zero-byte) file; the empty file is the
+   - `dev/requirements/extractor/data/server-fetched/<name>.html` — an empty (zero-byte) file; the empty file is the
      "fetch me" signal for the refresh script.
-   - `dev/requirements/extractor/data/<name>.url` — a plain-text file containing just the event page URL
+   - `dev/requirements/extractor/data/server-fetched/<name>.url` — a plain-text file containing just the event page URL
      (e.g. `https://www.meetup.com/.../`). This file stays for good: it's the
      single source of truth for the page's URL (used by the refresh script and
      by `live.test.js`), so the URL is **not** repeated in the case file.
 2. Push the branch. The **Refresh cached HTML files** workflow runs
    automatically (the push adds a `data/` file), fills in the empty
-   `dev/requirements/extractor/data/<name>.html`, and commits it back to the branch; `test:live` stays
+   `dev/requirements/extractor/data/server-fetched/<name>.html`, and commits it back to the branch; `test:live` stays
    green because no case asserts it yet.
 3. Pull, then add `dev/requirements/extractor/expected/<name>.json` (same `<name>`, just
    `description` + `expected`, no `url`) and run `npm run test:live` — it now
@@ -247,7 +247,7 @@ and read its exact `expected` off the committed file instead of guessing:
    `expected` to paste in. Commit and push.
 
 Cases also need occasional gardening: when an event page is eventually taken down,
-point `dev/requirements/extractor/data/<name>.url` at a newer event (and refresh its cached HTML the
+point `dev/requirements/extractor/data/server-fetched/<name>.url` at a newer event (and refresh its cached HTML the
 same way). Until a cached HTML file exists for a new case, `test:live` (and so the
 Tests workflow) fails with `Missing cached HTML for "<name>"`.
 
@@ -432,10 +432,10 @@ commission-while-editing trap goes in the file's header comment rather than
   `CHROME_PATH`, so verify changes to it via CI).
 - **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
   the inline curl→ScraperAPI in `record_page`
-  (`dev/tools/new-extractors-creation/phase1-prepare.sh`), which uses
+  (`dev/create-extractor/phase1-prepare.sh`), which uses
   `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
   so a single-page-app records with real data. The repo carries no SPA-shell
   detector or headless-Chrome render of its own (`spa-shell.js` /
   `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
   fetching moved to ScraperAPI). The recorder (`record_page` in
-  `dev/tools/new-extractors-creation/phase1-prepare.sh`) is now just fetch → write.
+  `dev/create-extractor/phase1-prepare.sh`) is now just fetch → write.

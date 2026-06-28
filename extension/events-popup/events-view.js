@@ -1,8 +1,7 @@
 // Events view: turns the extracted events into the popup's cards. An event keeps
-// its showings in times[] (the multi-instance model in
-// event-extractors/assemble-events.js); this module decides how those instances become
-// cards and renders them. Loaded on demand by the popup controller (popup.js)
-// via dynamic import().
+// its showings in times[] (the multi-instance model defined by the assembler);
+// this module decides how those instances become cards and renders them. Loaded
+// on demand by the popup controller (popup.js) via dynamic import().
 //
 // Aggregation (toCards): an event's instances are grouped BY MONTH (same
 // calendar month and year). Instances are NEVER merged — a card built from X

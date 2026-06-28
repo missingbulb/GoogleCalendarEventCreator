@@ -24,6 +24,14 @@ prunes them once the canon absorbs them (capture is always local — see
 
 - **When the user asks to *show* or *see* a visual artifact, deliver the image into the chat — not a path or a link.** Surface the file itself so it renders inline; a link or a bare path makes the user go fetch it. For a tiny artifact (e.g. a 16/32px icon) also send an exact nearest-neighbor upscale, labelled as enlarged, so the detail is legible.
 
+- **In a multi-stage agent pipeline, every failure exit — including infrastructure
+  failures in pre-agent stages — must converge to the same human-triage state.**
+  A setup-phase failure (page download, authentication, scaffolding) that posts a
+  comment but leaves the original trigger label in place makes the item look
+  unprocessed rather than blocked, defeating the escalation mechanism. Treat each
+  failure mode — pre-agent setup, agent bail, post-agent quality check — as
+  equivalent from the triage perspective.
+
 - **When a change regenerates a reviewable artifact, link it into the chat the same
   turn you commit it.** A regenerated gallery, snapshot set, or report is only
   useful to the owner if they can see it without going to fetch it — surface the
@@ -31,3 +39,12 @@ prunes them once the canon absorbs them (capture is always local — see
   the commit, so review is one click away rather than a hunt. (Complements the
   "deliver the image into the chat" rule above: that's for an artifact the owner
   asked to *see*; this is for one a routine *regenerates*.)
+
+- **In a CLAUDE.md, `@import` only docs whose guidance applies to every session;
+  reference specialized pipeline docs with non-@import pointer links.** An `@import`
+  expands the doc inline at launch in *every* session, taxing the always-loaded
+  context budget even when the session has nothing to do with that pipeline.
+  Self-contained pipelines (release, auto-extractor, maintenance routines) belong
+  in their own folders, discoverable via plain links in CLAUDE.md. `@import` only
+  docs (workflow, testing, gotchas, coding practices) whose rules apply to every
+  commit.

@@ -23,8 +23,8 @@ extension does.
 | `extension/event-extractors/assemble-events.js` | Orchestrator `GCal.extract()`: runs the matched self-contained source, else the unsupported-site fallback; normalizes/sorts events and reports `supported` |
 | `extension/event-extractors/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `dev/requirements/extractor/expected/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
-| `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`) |
-| `dev/tools/new-extractors-creation/phase1-prepare.sh` | Records the event page via an inline curl→ScraperAPI (`record_page`) during the auto-extractor Phase-1 pipeline |
+| `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`); split by provenance into `server-fetched/` (pipeline-recorded, secret-scan-excluded) and `user-submitted/` (hand-supplied, push-protected), resolved by `data-files.js` |
+| `dev/create-extractor/phase1-prepare.sh` | Records the event page via an inline curl→ScraperAPI (`record_page`) during the auto-extractor Phase-1 pipeline |
 | `dev/requirements/extractor/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |
 | `extension-test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
@@ -43,10 +43,11 @@ extension does.
 | `dev/requirements/shared/render/fonts/` | Bundled Liberation Sans font files used by the renderer (OFL-licensed) |
 | `dev/requirements/shared/render/visual-snapshots.test.js` | The single visual-comparison engine: renders each `dev/requirements/<kind>/cases/*.case.js` (popup or toolbar icon) and compares it to its stored snapshot |
 | `dev/requirements/shared/render/refresh-snapshots.js` | Regenerates the `dev/requirements/<kind>/cases/*.png` snapshots (popup and icon) + the inline gallery |
-| `dev/release/generate_icons.py` | Regenerates every icon into `extension/icon/images/` (Python stdlib only): the small flat toolbar glyphs `icon{16,32}*.png` (base + supported/denied state variants) and the polished calendar art at the larger sizes — `chromeStoreIcon.png` (manifest 128px icon, also uploaded by hand as the Web Store listing icon) and `chromeExtensionManagementIcon.png` (48px management page). See `dev/release/README.md` |
-| `dev/release/shipping-files.js` | Single source of truth for the files that ship in the release zip |
-| `dev/release/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
-| `dev/tools/new-extractors-creation/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `dev/procedures/this_project/auto-extractor.md` |
-| `dev/tools/new-extractors-creation/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
+| `dev/build/release/store_artifacts/generate_icons.py` | Regenerates every icon into `extension/icon/images/` (Python stdlib only): the small flat toolbar glyphs `icon{16,32}*.png` (base + supported/denied state variants) and the polished calendar art at the larger sizes — `chromeStoreIcon.png` (manifest 128px icon, also uploaded by hand as the Web Store listing icon) and `chromeExtensionManagementIcon.png` (48px management page). See `dev/build/release/store_artifacts/README.md` |
+| `dev/build/release/shipping-files.js` | Single source of truth for the files that ship in the release zip |
+| `dev/build/release/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
+| `dev/create-extractor/` | The auto-implement-extractor pipeline in one folder: the self-contained agent prompt, the deterministic Node steps (triage, probe, naming, derive-names, scaffold-source/case, add-supported-domain, case-quality), and the workflows' phase scripts (`phase1-prepare.sh`, `handoff-to-agent.sh`, `phase2-finalize.sh`). A three-stage label relay: prepare workflow → Claude Code web routine → finalize workflow. See `dev/create-extractor/auto-extractor.md` |
+| `dev/create-extractor/triage-extractor-request.js` | Auto-extractor pre-flight: detects a request whose host is already allow/denylisted so the workflow can close it before the agent runs |
+| `dev/incremental-maintenance/` | Specs for the unattended daily routines that incrementally improve the shipped extractor over time. Currently `auto-fallback-coverage.md` — the routine that tries to widen the generic fallback extractor's field coverage (the gate itself lives under `dev/requirements/extractor/fallback/`) |
 | `dev/requirements/shared/gen-states-flowchart.js` | Regenerates `dev/requirements/shared/popup-states-flowchart.png` (the five-states diagram) via an SVG + resvg |
-| `dev/release/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |
+| `dev/build/release/shipping-files.test.js` | Asserts the shipping list covers every runtime file and excludes dev/test files |

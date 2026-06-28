@@ -4,6 +4,9 @@ Nuances of bulk textual editing — the non-obvious ways a mechanical
 find-and-replace or path rewrite across the repo corrupts content it looks like
 it should leave alone. Recorded so they bite only once.
 
+Not writing brittle, redundant references into comments in the first place (so a
+move costs less churn) is the complementary concern: [code-comments.md](code-comments.md).
+
 - **An ordered specific→catch-all path rewrite half-converts a bare-directory
   reference the specific rule's trailing slash missed.** Renaming `old/sub/` →
   `new/leaf/` with sed, the specific rule is anchored on a trailing slash

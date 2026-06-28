@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 4.1: one card per distinct event on the page.
-// The filename (event-cards-grouping.4.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.1 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

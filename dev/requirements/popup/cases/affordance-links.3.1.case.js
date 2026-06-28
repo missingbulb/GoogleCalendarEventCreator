@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 3.1: "Suggest Correction" sits on the heading line, right-aligned (unlisted + event).
-// The filename (affordance-links.3.1) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 3.1 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

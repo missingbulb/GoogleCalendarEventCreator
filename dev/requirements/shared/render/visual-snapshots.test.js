@@ -1,8 +1,8 @@
 // UI snapshot tests — the single visual-comparison engine for every pixel-asserted
-// requirement. Each case (dev/requirements/<kind>/cases/<name>.case.js) supplies fake data;
-// render-snapshot.js turns it into a PNG with the RIGHT renderer, chosen by the
-// case's own `kind` (the popup's REAL render() by default; the real
-// extension/icon/toolbar-icon.js in a fake browser for a `kind: "icon"` case — §10), and the
+// requirement. Each per-leaf case supplies fake data; render-snapshot.js turns it
+// into a PNG with the RIGHT renderer, chosen by the case's own `kind` (the popup's
+// REAL render() by default; the real toolbar-icon worker in a fake browser for a
+// `kind: "icon"` case — §10), and the
 // result is compared pixel-by-pixel (via pixelmatch) against the committed
 // reference PNG (dev/requirements/<kind>/cases/<name>.png). So the
 // snapshots track the shipped code directly; there is no hand-maintained copy of

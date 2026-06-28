@@ -4,15 +4,15 @@
 // (not something buried in a refactor).
 //
 // An ES module imported by the popup-document scripts that need these values
-// (events-popup/build-calendar-url.js, events-popup/popup.js, events-popup/events-view.js) and,
-// in Node, by the tests via dynamic import(). It is never injected into pages
+// (build-calendar-url, popup, events-view) and, in Node, by the tests via
+// dynamic import(). It is never injected into pages
 // — the extractors don't read product config — so it stays a plain module
 // rather than the GCal-global classic scripts the page injection uses.
 
 // The fallback allow/denylists live in their own JSON file so both this ES
 // module and the service worker's classic-script context (which can't import
-// ES modules, so it fetches the JSON at runtime — see icon/toolbar-icon.js) can
-// read from the same source.
+// ES modules, so it fetches the JSON at runtime — see the toolbar service
+// worker) can read from the same source.
 import fallbackLists from "./fallback-lists.json" with { type: "json" };
 
 export const GCalConfig = {
@@ -37,7 +37,7 @@ export const GCalConfig = {
   maxCardsExpanded: 99,
 
   // How many card rows fit in the popup before the list starts scrolling —
-  // mirrors the height cap on #events in events-popup/popup.css. Used only to decide
+  // mirrors the height cap on #events in popup.css. Used only to decide
   // whether to show the bottom count cue: when every card is shown but the list
   // is taller than this, the label reads "N events showing" (a scroll hint)
   // rather than nothing.
@@ -51,7 +51,7 @@ export const GCalConfig = {
   fallbackEventTitle: "New event",
 
   // Host classifier for the generic FALLBACK extractor — the events scraped on
-  // a host that has no per-site source (event-extractors/custom/<site>.js). The
+  // a host that has no per-site source. The
   // fallback only ever surfaces an event with a title, a location AND a start
   // time; these two lists then decide what the popup does with it. A host on
   // NEITHER list is "unknown": its fallback events are shown AND the popup
@@ -74,13 +74,12 @@ export const GCalConfig = {
   sourceFallbackAllowlist: fallbackLists.allowlist,
   sourceFallbackDenylist: fallbackLists.denylist,
 
-  // Hosts that already have a dedicated per-site source (event-extractors/custom/
-  // <site>.js). This is NOT a fallback list — it's a static mirror of the
-  // sources' own matches(), used ONLY by the auto-extractor triage
-  // (dev/tools/new-extractors-creation/triage-extractor-request.js) to close a "please support <host>"
-  // request for a site we already cover, before spending an agent run. The
-  // runtime never reads it: the extension derives "is this supported?" straight
-  // from the sources via GCal.isSupportedHost (event-extractors/registry.js). The list
+  // Hosts that already have a dedicated per-site source. This is NOT a fallback
+  // list — it's a static mirror of the sources' own matches(), used ONLY by the
+  // auto-extractor triage to close a "please support <host>" request for a site
+  // we already cover, before spending an agent run. The runtime never reads it:
+  // the extension derives "is this supported?" straight from the sources via
+  // GCal.isSupportedHost (in registry.js). The list
   // can't silently drift from the sources — a drift-guard test loads the real
   // sources and asserts each entry is matched by a source and each source is
   // matched by an entry.

@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 4.7: a grouped card has no single left calendar icon.
-// The filename (event-cards-grouping.4.7) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 4.7 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

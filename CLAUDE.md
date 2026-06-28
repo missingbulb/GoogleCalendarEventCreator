@@ -6,11 +6,8 @@ own file under `dev/procedures/` and is imported here:
 
 @dev/procedures/this_project/workflow.md
 @dev/procedures/this_project/github.md
-@dev/procedures/this_project/adding-a-source.md
 @dev/procedures/this_project/testing.md
-@dev/procedures/this_project/auto-extractor.md
 @dev/procedures/general/auto-lessons.md
-@dev/procedures/this_project/auto-fallback-coverage.md
 @dev/procedures/general/auto-branch-report.md
 @dev/procedures/general/claudinite-handoff.md
 @dev/procedures/general/auto-optimize-procedures.md
@@ -31,9 +28,17 @@ documented in [dev/requirements/README.md](dev/requirements/README.md).
 For all release-related actions — building the shippable zip, the
 version-bump → release flow, publishing to the Chrome Web Store, and the listing
 assets / icon generator — everything is self-contained in
-[`dev/release/`](dev/release/) (start at [`dev/release/releasing.md`](dev/release/releasing.md)).
+[`dev/build/release/`](dev/build/release/) (start at [`dev/build/release/releasing.md`](dev/build/release/releasing.md)).
 Look there **only** when you're actually cutting or publishing a release; it's not
 needed for day-to-day development.
+
+The auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
+site support) is likewise self-contained in
+[`dev/create-extractor/`](dev/create-extractor/) (start at
+[`dev/create-extractor/auto-extractor.md`](dev/create-extractor/auto-extractor.md));
+the daily routines that incrementally improve the shipped extractor live in
+[`dev/incremental-maintenance/`](dev/incremental-maintenance/). Read either **only**
+when working on that pipeline/routine — neither is needed for day-to-day development.
 
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `dev/procedures/this_project/technicalGotchas.md` (imported below).
@@ -54,6 +59,7 @@ same local capture surface.
 @dev/procedures/general/git-and-github.md
 @dev/procedures/general/working-discipline.md
 @dev/procedures/general/testingPractices.md
+@dev/procedures/general/filePlacement.md
 
 ## Shared portable rules (the Claudinite submodule)
 

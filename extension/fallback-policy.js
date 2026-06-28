@@ -1,13 +1,11 @@
 // The top-level classifier for the generic FALLBACK extractor — the events
-// scraped on a host that has no per-site source (event-extractors/custom/<site>.js).
-// It answers two questions: is a scraped event complete enough to present, and
-// how should we treat a given host?
+// scraped on a host that has no per-site source. It answers two questions: is a
+// scraped event complete enough to present, and how should we treat a given host?
 //
 // Shared (single source of truth) by:
-//   - the popup (events-popup/popup.js's chooseContent) — to decide what to render;
-//   - the auto-extractor triage (dev/tools/new-extractors-creation/triage-extractor-request.js) — to
-//     auto-close a request whose host is already on a list, before spending an
-//     agent run.
+//   - the popup (popup.js's chooseContent) — to decide what to render;
+//   - the auto-extractor triage — to auto-close a request whose host is already
+//     on a list, before spending an agent run.
 // So the popup and the workflow can never disagree about a host's listing.
 //
 // An ES module (imported by the popup and, in Node, by the tool and the tests).

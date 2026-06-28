@@ -1,6 +1,3 @@
-// Per-leaf snapshot for requirement 6.3: a date with no time reads "All day".
-// The filename (date-time-display.6.3) is the link; build-requirements-gallery.js embeds this
-// image inline beneath 6.3 in dev/requirements/requirements.md.
 "use strict";
 
 module.exports = {

@@ -238,7 +238,7 @@ async function renderCasePng(testCase) {
     // "Reading page…" state render() never produces); everything else runs the
     // real render() and any DOM action on top of it.
     if (!testCase.skipRender) {
-      await render({ data: testCase.data, tab, listing: testCase.listing || "none", now: REFERENCE_NOW, configurationOverrides: testCase.configurationOverrides });
+      await render({ data: testCase.data, tab, listing: testCase.listing, now: REFERENCE_NOW, configurationOverrides: testCase.configurationOverrides });
       if (testCase.action) testCase.action(doc);
     }
 

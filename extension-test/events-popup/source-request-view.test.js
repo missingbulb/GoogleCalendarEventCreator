@@ -156,7 +156,7 @@ test("defaults the timezone to the user's current zone when the fallback found n
 
 // The "Disagree?" policy link (makePolicyLink) opens the public policy doc.
 // (Hostname/path asserted without repeating the repo slug literal — that string
-// is single-sourced; see dev/tools/test/uber/shared_constants/repo-slug.json.)
+// is single-sourced; see dev/procedures/test/uber/shared_constants/repo-slug.json.)
 test("the policy-doc link points at a markdown doc in this repo on github.com", () => {
   const u = new URL(buildPolicyDocUrl());
   assert.equal(u.hostname, "github.com");

@@ -1,12 +1,12 @@
 // Builds a pre-filled Google Calendar event-template URL from an extracted
 // event object — the page → events → calendar-URL pipeline's final step.
 //
-// An ES module imported by events-popup/events-view.js (popup-document only, so it
-// can be a module — it is never injected into the page). `buildCalendarUrl` and
+// An ES module imported by events-view.js (popup-document only, so it can be a
+// module — it is never injected into the page). `buildCalendarUrl` and
 // `formatDatesParam` are exported; the rest are module-private helpers.
 //
-// GOTCHAS — read before editing (file-local footguns; see dev/procedures/this_project/workflow.md
-// for why these live here and not in dev/procedures/this_project/technicalGotchas.md):
+// GOTCHAS — read before editing (file-local footguns; see workflow.md's locality
+// rule for why these live here, not in technicalGotchas.md):
 //   * Google Calendar renders the `details` param as HTML, not Markdown. A bare
 //     `**bold**` shows literal asterisks; a bare URL is auto-linked (so it needs
 //     no `<a>`). `markdownToHtml` below translates the Markdown that survives
