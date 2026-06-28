@@ -509,10 +509,11 @@ test("A touring show at several venues groups into one multi-instance event, eac
   );
 });
 
-test("Same title at one shared venue still groups with the venue on the event AND each instance", () => {
+test("Same title at one shared venue groups with the venue on the EVENT, not duplicated on each instance", () => {
   // When the grouped showings all share a venue, the event-level location is that
   // shared venue (so the existing single-location header path is unchanged), and
-  // every instance also carries it.
+  // the redundant per-instance copy is dropped — an instance names a venue ONLY
+  // when it has its own (a touring stop).
   const html = `
     <script type="application/ld+json">
     [ { "@type": "Event", "name": "Yoga in the Park", "description": "Morning flow.",
@@ -527,7 +528,7 @@ test("Same title at one shared venue still groups with the venue on the event AN
   const e = ev.events[0];
   assert.equal(e.location, "Riverside Lawn");
   assert.equal(e.times.length, 2);
-  assert.deepEqual([...e.times].map((t) => t.location), ["Riverside Lawn", "Riverside Lawn"]);
+  assert.deepEqual([...e.times].map((t) => t.location ?? null), [null, null], "no redundant per-instance venue");
 });
 
 test("Same time, different venues are distinct instances (not deduplicated)", () => {

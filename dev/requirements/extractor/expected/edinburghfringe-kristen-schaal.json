@@ -12,31 +12,31 @@
             "start": "2026-08-12T19:00:00",
             "end": "2026-08-12T20:00:00",
             "eventLengthInMinutes": 60,
-            "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ"
+            "location": null
           },
           {
             "start": "2026-08-13T19:00:00",
             "end": "2026-08-13T20:00:00",
             "eventLengthInMinutes": 60,
-            "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ"
+            "location": null
           },
           {
             "start": "2026-08-14T19:00:00",
             "end": "2026-08-14T20:00:00",
             "eventLengthInMinutes": 60,
-            "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ"
+            "location": null
           },
           {
             "start": "2026-08-15T19:00:00",
             "end": "2026-08-15T20:00:00",
             "eventLengthInMinutes": 60,
-            "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ"
+            "location": null
           },
           {
             "start": "2026-08-16T19:00:00",
             "end": "2026-08-16T20:00:00",
             "eventLengthInMinutes": 60,
-            "location": "Forth at Pleasance Courtyard, 60 Pleasance, EH8 9TJ"
+            "location": null
           }
         ]
       }

@@ -248,18 +248,6 @@ body {
 .event-group .e-year.ongoing {
   background-color: #d93025;
 }
-/* A chip that also carries a per-instance LOCATION (a touring show's varying
-   venues): the calendar tile (date/time) on the LEFT, a pin + the venue to its
-   RIGHT, in a bounded-width band so a short venue fits and a long one clamps to
-   two lines — never unbounded, so the wrapping chip row stays compact. Declared
-   BEFORE the base .e-chip rule below because the snapshot CSS inliner prepends
-   each rule, so the EARLIER-declared rule wins a conflict (flex-direction here). */
-.event-btn .e-chip.has-loc,
-.event-group .e-chip.has-loc {
-  flex-direction: row;
-  align-items: stretch;
-  min-width: 0;
-}
 /* THE calendar chip — the popup's single "addable event" motif: a colored banner
    (the shared context — a month, or a full date) over a prominent body (the pick
    — a day or a time) on a white "page". It's a single card's left
@@ -320,18 +308,23 @@ body {
   font-size: 14px;
   white-space: nowrap;
 }
-/* The date/time tile inside a has-loc chip — the original banner-over-body block,
-   here just the left column of the wider chip. */
-.event-btn .e-chip-cal,
-.event-group .e-chip-cal {
+/* The white LOWER strip of a has-loc chip: the day/time on the left, the venue on
+   the right. The colored banner above it stays full-width; only this strip splits. */
+.event-btn .e-chip-lower,
+.event-group .e-chip-lower {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex-shrink: 0;
-  min-width: 44px;
+  flex-direction: row;
+  align-items: center;
 }
-/* The venue, to the RIGHT of the tile: a pin glyph then the venue text, centered
-   vertically, no separator. */
+/* The date/time on the left of the lower strip — its own column, not stretched by
+   the taller venue beside it. */
+.event-btn .e-chip.has-loc .e-chip-body,
+.event-group .e-chip.has-loc .e-chip-body {
+  flex-shrink: 0;
+  min-width: 40px;
+}
+/* The venue, to the RIGHT of the date/time in the lower strip: a pin glyph then
+   the venue text, centered vertically, no separator. */
 .event-btn .e-chip-loc,
 .event-group .e-chip-loc {
   display: flex;
@@ -339,8 +332,8 @@ body {
   align-items: center;
   gap: 4px;
   box-sizing: border-box;
-  width: 108px; /* fixed venue column so the chip width is uniform and satori can wrap the venue */
-  padding: 0 8px;
+  width: 104px; /* fixed venue column so the chip width is uniform and satori can wrap the venue */
+  padding: 0 8px 0 4px;
 }
 .event-btn .e-loc-text,
 .event-group .e-loc-text {

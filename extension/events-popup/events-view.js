@@ -362,16 +362,17 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
   bodyEl.className = `e-chip-body ${kind}`;
   bodyEl.textContent = body;
 
-  // A per-instance location (a touring show's varying venues) rides to the RIGHT
-  // of the date/time block: the calendar tile (banner over day/time) on the left,
-  // a pin glyph + the venue on the right. The chip widens to a bounded band (see
-  // .e-chip.has-loc in popup.css) and the venue clamps to two lines.
+  // A per-instance location (a touring show's varying venues) rides inside the
+  // chip: the colored banner stays FULL-WIDTH on top, and only the white lower
+  // strip splits — the day/time on the left, a pin glyph + the venue on the right.
+  // The chip widens to a bounded band (see .e-chip.has-loc in popup.css) and the
+  // venue clamps to two lines.
   if (location) {
-    const cal = document.createElement("span");
-    cal.className = "e-chip-cal";
-    cal.appendChild(bannerEl);
-    cal.appendChild(bodyEl);
-    el.appendChild(cal);
+    el.appendChild(bannerEl);
+
+    const lower = document.createElement("span");
+    lower.className = "e-chip-lower";
+    lower.appendChild(bodyEl);
 
     const locEl = document.createElement("span");
     locEl.className = "e-chip-loc";
@@ -383,7 +384,9 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
     txt.className = "e-loc-text";
     txt.textContent = location;
     locEl.appendChild(txt);
-    el.appendChild(locEl);
+    lower.appendChild(locEl);
+
+    el.appendChild(lower);
   } else {
     el.appendChild(bannerEl);
     el.appendChild(bodyEl);

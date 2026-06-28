@@ -23,9 +23,11 @@
 // multi-night concert run, or a TOURING show at several venues is one event with
 // several instances. `eventLengthInMinutes` is only present on an instance when a
 // site extractor found an explicit duration (not derived from start/end);
-// `location` is the instance's venue (its own, or the event's, filled in by
-// norm). The event-level `location` is the shared venue when every instance
-// agrees, else "" (the per-instance venues differ). start/end follow the same
+// `location` is present on an instance ONLY when its venue DIFFERS from the
+// event-level one (a touring show's per-stop venue) — when every showing shares a
+// venue it lives on the event and is dropped from the instances. The event-level
+// `location` is that shared venue when every instance agrees, else "" (the venues
+// differ, and each instance then carries its own). start/end follow the same
 // string contract as before ("YYYY-MM-DD" all-day, "YYYY-MM-DDTHH:MM[:SS]"
 // floating, or an exact instant with offset/Z).
 //
@@ -180,6 +182,13 @@
     for (const e of out) {
       e.times = dedupeInstances(e.times);
       e.location = sharedLocation(e.times);
+      // An instance carries `location` ONLY when it differs from the event-level
+      // venue — a touring show's per-stop venue. When every showing shares one
+      // venue, that venue lives on the event and the redundant per-instance copy
+      // is dropped (so an instance names a venue iff it has its own).
+      for (const t of e.times) {
+        if ((t.location || "") === e.location) delete t.location;
+      }
     }
     return out;
   }
