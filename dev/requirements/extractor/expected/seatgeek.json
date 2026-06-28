@@ -1,6 +1,113 @@
 {
-  "description": "seatgeek.com: TODO(agent) — one line on what this case tests",
+  "description": "seatgeek.com concerts listing page: extracts 7 distinct events from the page's popularEvents.events Next.js JSON, grouping same-title/venue runs into multi-instance events",
   "expected": {
-    "events": []
+    "events": [
+      {
+        "title": "Ariana Grande - The Eternal Sunshine Tour",
+        "location": "Amerant Bank Arena, 1 Panther Way, Sunrise, FL, 33323",
+        "ctz": "America/New_York",
+        "details": "https://seatgeek.com/concert-tickets",
+        "times": [
+          {
+            "start": "2026-06-30T20:00:00",
+            "end": "2026-06-30T22:00:00",
+            "eventLengthInMinutes": null
+          },
+          {
+            "start": "2026-07-02T20:00:00",
+            "end": "2026-07-02T22:00:00",
+            "eventLengthInMinutes": null
+          },
+          {
+            "start": "2026-07-03T20:00:00",
+            "end": "2026-07-03T22:00:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Ed Sheeran",
+        "location": "Empower Field at Mile High, 1701 Bryant Street, Denver, CO, 80204",
+        "ctz": "America/Denver",
+        "details": "https://seatgeek.com/concert-tickets",
+        "times": [
+          {
+            "start": "2026-07-04T17:30:00",
+            "end": "2026-07-04T19:00:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Stadium of Fire with Brad Paisley",
+        "location": "LaVell Edwards Stadium, 1700 North Canyon Rd, Provo, UT, 84604",
+        "ctz": "America/Denver",
+        "details": "https://seatgeek.com/concert-tickets",
+        "times": [
+          {
+            "start": "2026-07-04T20:00:00",
+            "end": "2026-07-04T21:30:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Ariana Grande",
+        "location": "State Farm Arena, 1 Philips Drive, Atlanta, GA, 30303",
+        "ctz": "America/New_York",
+        "details": "https://seatgeek.com/concert-tickets",
+        "times": [
+          {
+            "start": "2026-07-06T20:00:00",
+            "end": "2026-07-06T21:30:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "The R&B Tour - Starring Usher Raymond & Chris Brown",
+        "location": "Northwest Stadium, 1600 Ring Rd, Landover, MD, 20785",
+        "ctz": "America/New_York",
+        "details": "https://seatgeek.com/concert-tickets",
+        "times": [
+          {
+            "start": "2026-07-11T19:00:00",
+            "end": "2026-07-11T23:59:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Morgan Wallen: Still the Problem Tour",
+        "location": "M&T Bank Stadium, 1101 Russell Street, Baltimore, MD, 21230",
+        "ctz": "America/New_York",
+        "details": "https://seatgeek.com/concert-tickets",
+        "times": [
+          {
+            "start": "2026-07-17T17:30:00",
+            "end": "2026-07-17T23:00:00",
+            "eventLengthInMinutes": null
+          },
+          {
+            "start": "2026-07-18T17:30:00",
+            "end": "2026-07-18T23:00:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "KAROL G - VIAJANDO POR EL MUNDO TROPITOUR",
+        "location": "AT&T Stadium, 1 AT&T Way, Arlington, TX, 76011",
+        "ctz": "America/Chicago",
+        "details": "https://seatgeek.com/concert-tickets\n\nAges 2 and up need a ticket Ticket Limit = 6",
+        "times": [
+          {
+            "start": "2026-10-15T19:00:00",
+            "end": "2026-10-15T23:00:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
   }
 }
