@@ -321,6 +321,24 @@ export function locationsVary(event, instances) {
   return !locs.every((l) => l === locs[0]);
 }
 
+// Pre-wrap an in-chip venue into AT MOST two lines, the second ellipsized if the
+// text overruns. Done in JS (not CSS wrapping) so the chip width tracks the widest
+// actual line — satori reserves a wrapping box's full max-width even when its lines
+// are shorter, which reads as a too-wide chip; rendering explicit, content-sized
+// lines keeps the width minimal in both Chrome and the snapshot. ~PER_LINE chars
+// per line approximates the chip's comfortable width; the full venue still reaches
+// the Calendar URL.
+export function venueLines(text) {
+  const PER_LINE = 17;
+  if (text.length <= PER_LINE) return [text];
+  let brk = text.lastIndexOf(" ", PER_LINE);
+  if (brk < PER_LINE / 2) brk = PER_LINE; // no decent space to break on — hard break
+  const line1 = text.slice(0, brk).replace(/\s+$/, "");
+  let line2 = text.slice(brk).replace(/^\s+/, "");
+  if (line2.length > PER_LINE) line2 = line2.slice(0, PER_LINE - 1).replace(/\s+$/, "") + "…";
+  return [line1, line2];
+}
+
 // The title span shared by every card.
 function titleEl(event, tab) {
   const el = document.createElement("span");
@@ -353,8 +371,10 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
   // A per-instance location (a touring show's varying venues) rides inside the
   // chip: the colored banner stays FULL-WIDTH on top, and only the white lower
   // strip splits — the day/time on the left, the venue on the right. The venue is
-  // a single line that ellipsizes (see .e-chip-loc in popup.css), so the chip
-  // width tracks the text; the full venue still reaches the Calendar URL.
+  // pre-wrapped to at most two lines (venueLines), each rendered as its own line,
+  // so the chip width tracks the WIDEST line (minimal — no reserved max-width dead
+  // space) while still showing two lines. The full venue still reaches the
+  // Calendar URL.
   if (location) {
     el.appendChild(bannerEl);
 
@@ -364,7 +384,12 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
 
     const locEl = document.createElement("span");
     locEl.className = "e-chip-loc";
-    locEl.textContent = location;
+    for (const line of venueLines(location)) {
+      const ln = document.createElement("span");
+      ln.className = "e-loc-line";
+      ln.textContent = line;
+      locEl.appendChild(ln);
+    }
     lower.appendChild(locEl);
 
     el.appendChild(lower);

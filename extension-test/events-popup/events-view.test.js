@@ -16,7 +16,7 @@ const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
 let commonTime, showPerDayTimes, groupHeaderTime;
-let instanceLocation, locationsVary;
+let instanceLocation, locationsVary, venueLines;
 before(async () => {
   ({
     formatWhen,
@@ -29,6 +29,7 @@ before(async () => {
     groupHeaderTime,
     instanceLocation,
     locationsVary,
+    venueLines,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "events-view.js"))));
 });
 
@@ -306,6 +307,24 @@ test("locationsVary: different venues -> true (each chip carries its own venue)"
 test("locationsVary: instances fall back to the event venue, so a shared event location is not 'varying'", () => {
   // Neither instance names its own venue; both resolve to the event's location.
   assert.equal(locationsVary({ location: "Hall" }, [{ t: {} }, { t: {} }]), false);
+});
+
+// --- venueLines: pre-wrap an in-chip venue to at most two lines, the 2nd
+// ellipsized if it overruns, so the chip width tracks the widest actual line.
+
+test("venueLines: a short venue stays one line", () => {
+  assert.deepEqual(venueLines("Comedy Bar"), ["Comedy Bar"]);
+});
+
+test("venueLines: a longer venue breaks into two lines at a space", () => {
+  assert.deepEqual(venueLines("Felicja Blumental Center, Tel Aviv"), ["Felicja Blumental", "Center, Tel Aviv"]);
+});
+
+test("venueLines: a very long second line is ellipsized", () => {
+  const [l1, l2] = venueLines("The Steinhardt Museum of Natural History Auditorium");
+  assert.equal(l1, "The Steinhardt");
+  assert.ok(l2.endsWith("…"), "the overrun second line ends with an ellipsis");
+  assert.ok(l2.length <= 17, "the second line is bounded to the per-line budget");
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
