@@ -1,0 +1,20 @@
+{
+  "description": "dice.fm event page is parseable (Daniele Tinti - Pesche Dure - Live a Napoli, Dec 7 2026, Naples)",
+  "expected": {
+    "events": [
+      {
+        "title": "Daniele Tinti - Pesche Dure - Live a Napoli",
+        "location": "Teatro Bellini, Via Conte di Ruvo 14, 80135 Napoli città metropolitana di Napoli, Italia",
+        "ctz": "Europe/Rome",
+        "details": "https://dice.fm/event/8elnrw-daniele-tinti-pesche-dure-live-a-napoli-7th-dec-teatro-bellini-napoli-tickets\n\n<b>PESCHE DURE</b> \n*Stand-Up Comedy Show*\n\nDopo il successo del precedente spettacolo sulla morte, Daniele Tinti torna con un nuovo spettacolo sulla vita.\n\nPESCHE DURE cattura il senso di precarietà e di vertigine della nostra età, proiettati verso il futuro ma intrappolati nell’infinita post-adolescenza che la società ci ha costruito intorno.\n\nTra errori di gioventù, escamotage per diventare adulti e persino un accenno di satira politica, PESCHE DURE manda a casa il pubblico con nuove domande, alcune risposte e un’ora di risate ininterrotte.\n\n\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n\n<b>DANIELE TINTI</b> è uno stand-up comedian, autore e podcaster.\n\nNasce a Roma nel 1990 ma si trasferisce presto a L’Aquila, dove rimane per 18 anni, per poi tornare nella capitale.\n\nHa partecipato a diversi programmi comici come \"Natural Born Comedians\" e \"Stand-Up Comedy\" su Comedy Central, \"Battute?\" su Rai2, \"Italian Stand-Up\" su Prime Video e \"IN&OUT\" su TV8.\n\nCon Stefano Rapone è co-host di Tintoria, il primo podcast comico italiano condotto da 2 stand-up comedian, con più di 100 milioni di visualizzazioni e ascolti in oltre 300 puntate.\n\nDopo il suo primo spettacolo UGOS, è stato in tour con DILEMMA. Tra il 2023 e il 2024 ha registrato SOLD OUT in tutta Italia ed Europa con CROSSOVER, il suo terzo LIVE di stand-up. Lo show prodotto da THE COMEDY CLUB ora è su YouTube e ha totalizzato più di mezzo milione di visualizzazioni.\n\nDal 2026 torna in tour con il suo nuovo spettacolo di stand-up comedy <b>PESCHE DURE</b>.",
+        "times": [
+          {
+            "start": "2026-12-07T21:00:00",
+            "end": "2026-12-07T23:00:00",
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
+  }
+}
