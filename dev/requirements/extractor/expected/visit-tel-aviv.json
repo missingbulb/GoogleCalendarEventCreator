@@ -11,7 +11,8 @@
           {
             "start": "2026-07-14",
             "end": "2026-08-25",
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "City Museum Tel Aviv-Yafo, Bialik Street 27"
           }
         ]
       }

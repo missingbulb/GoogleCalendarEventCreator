@@ -29,6 +29,33 @@ test("an event with no location is degenerate (the #283 livenation shape)", () =
   assert.equal(caseVerdict(livenation).code, "degenerate");
 });
 
+test("a touring show with an empty event location but per-instance venues passes", () => {
+  // The multi-venue tour shape: shared location "" because the venues vary, each
+  // showing carrying its own. This is a real event, NOT the #283 degenerate shape.
+  const tour = {
+    expected: {
+      events: [
+        {
+          title: "On Tour",
+          location: "",
+          times: [
+            { start: "2026-09-04T20:00:00", location: "Paradiso, Amsterdam" },
+            { start: "2026-09-11T20:00:00", location: "La Cigale, Paris" },
+          ],
+        },
+      ],
+    },
+  };
+  assert.equal(caseVerdict(tour).code, "ok");
+});
+
+test("an empty event location with a showing that also lacks a venue is still degenerate", () => {
+  const bad = {
+    expected: { events: [{ title: "Muse", location: "", times: [{ start: "2026-11-18T00:00:00.000Z" }] }] },
+  };
+  assert.equal(caseVerdict(bad).code, "degenerate");
+});
+
 test("a complete event with a venue passes", () => {
   const good = {
     expected: {

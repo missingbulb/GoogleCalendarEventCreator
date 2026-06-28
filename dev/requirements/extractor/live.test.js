@@ -141,6 +141,11 @@ for (const file of caseFiles) {
           start: t.start,
           end: t.end || null,
           eventLengthInMinutes: t.eventLengthInMinutes ?? null,
+          // Each showing carries its own venue in the multi-instance model (a
+          // touring show at several venues groups into one event whose instances
+          // differ only by date + location); pin it so the reviewed contract
+          // shows where each showing is.
+          location: t.location || null,
         })),
       };
     });

@@ -11,7 +11,8 @@
           {
             "start": "2026-06-17T20:00:00",
             "end": "2026-06-17T21:48:00",
-            "eventLengthInMinutes": 108
+            "eventLengthInMinutes": 108,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       },
@@ -24,7 +25,8 @@
           {
             "start": "2026-06-18T18:30:00",
             "end": "2026-06-18T19:50:00",
-            "eventLengthInMinutes": 80
+            "eventLengthInMinutes": 80,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       },
@@ -37,7 +39,8 @@
           {
             "start": "2026-06-19T21:00:00",
             "end": "2026-06-19T23:07:00",
-            "eventLengthInMinutes": 127
+            "eventLengthInMinutes": 127,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       },
@@ -50,7 +53,8 @@
           {
             "start": "2026-06-20T14:30:00",
             "end": "2026-06-20T15:48:00",
-            "eventLengthInMinutes": 78
+            "eventLengthInMinutes": 78,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       },
@@ -63,7 +67,8 @@
           {
             "start": "2026-06-20T19:45:00",
             "end": "2026-06-20T23:05:00",
-            "eventLengthInMinutes": 200
+            "eventLengthInMinutes": 200,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       },
@@ -76,7 +81,8 @@
           {
             "start": "2026-06-21T18:30:00",
             "end": "2026-06-21T20:00:00",
-            "eventLengthInMinutes": 90
+            "eventLengthInMinutes": 90,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       }

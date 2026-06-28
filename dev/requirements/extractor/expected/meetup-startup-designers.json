@@ -11,7 +11,8 @@
           {
             "start": "2026-06-17T19:00:00",
             "end": "2026-06-17T21:00:00",
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Imperva office, 27th floor, Menachem Begin Road 125, Tel Aviv, il"
           }
         ]
       }

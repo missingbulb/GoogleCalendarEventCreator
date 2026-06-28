@@ -12,29 +12,36 @@
 // (#456) — the one signal the popup reads to add a "Suggest Correction" link for
 // events the dedicated source missed. Each event is fully self-described —
 // { title, location, description, ctz, times: [ { start, end,
-// eventLengthInMinutes? }, ... ] } — so a caller (the popup) can build a Google
-// Calendar URL for any of its instances without consulting page-level state.
+// eventLengthInMinutes?, location? }, ... ] } — so a caller (the popup) can build
+// a Google Calendar URL for any of its instances without consulting page-level
+// state.
 //
 // THE MULTI-INSTANCE MODEL: an event's timing lives in `times`, an array of one
 // or more instances (showings), each carrying its own { start, end,
-// eventLengthInMinutes? }. A plain single-occurrence event is just `times` of
-// length 1; a film with several screenings, a nightly show, or a multi-night
-// concert run is one event with several instances. `eventLengthInMinutes` is
-// only present on an instance when a site extractor found an explicit duration
-// (not derived from start/end). start/end follow the same string contract as
-// before ("YYYY-MM-DD" all-day, "YYYY-MM-DDTHH:MM[:SS]" floating, or an exact
-// instant with offset/Z).
+// eventLengthInMinutes?, location? }. A plain single-occurrence event is just
+// `times` of length 1; a film with several screenings, a nightly show, a
+// multi-night concert run, or a TOURING show at several venues is one event with
+// several instances. `eventLengthInMinutes` is only present on an instance when a
+// site extractor found an explicit duration (not derived from start/end);
+// `location` is the instance's venue (its own, or the event's, filled in by
+// norm). The event-level `location` is the shared venue when every instance
+// agrees, else "" (the per-instance venues differ). start/end follow the same
+// string contract as before ("YYYY-MM-DD" all-day, "YYYY-MM-DDTHH:MM[:SS]"
+// floating, or an exact instant with offset/Z).
 //
-// Sources still emit the FLAT shape per occurrence ({ title, start, end, ... },
-// or an `events` array of them) — keeping "add a source" a single self-contained
-// file (dev/procedures/this_project/highLevelDesign.md). norm() wraps each into a one-instance
-// event, and group() then folds together any events that share every non-time
-// field (title + location + description + ctz), concatenating their instances.
-// So a listing/series page's per-showing emissions (Edinburgh Fringe
-// performances, Ticketmaster nights, a film's screening dates) collapse into one
-// multi-instance event, while genuinely distinct events (a film week's different
-// films) stay separate. A source that wants to may also return `times[]` on an
-// event directly — norm() takes it as-is.
+// Sources still emit the FLAT shape per occurrence ({ title, start, end,
+// location, ... }, or an `events` array of them) — keeping "add a source" a
+// single self-contained file (dev/procedures/this_project/highLevelDesign.md).
+// norm() wraps each into a one-instance event (the instance inheriting the
+// event's location), and group() then folds together any events that share the
+// non-time, non-location identity (title + description + ctz), concatenating their
+// instances. So a listing/series page's per-showing emissions (Edinburgh Fringe
+// performances, Ticketmaster nights, a film's screening dates, a tour's
+// city-by-city dates) collapse into one multi-instance event — each instance
+// keeping its own venue — while genuinely distinct events (a film week's
+// different films) stay separate. A source that wants to may also return `times[]`
+// on an event directly, each instance optionally carrying its own `location` —
+// norm() takes it as-is.
 //
 // The popup reads `supported` (with the events) to decide what to render: a
 // supported host shows its events; an unsupported host shows the generic
@@ -80,25 +87,32 @@
     // URL's `ctz` then places them, and the times read as the event's city shows.
     // Each occurrence is normalized into one `times` instance; a source that
     // already returns `times[]` has its instances normalized in place.
-    const normInstance = (t, ctz) => {
+    const normInstance = (t, ctz, fallbackLocation) => {
       const out = {
         start: GCal.localizeToZone(t.start || "", ctz),
         end: t.end ? GCal.localizeToZone(t.end, ctz) : null,
       };
       if (t.eventLengthInMinutes != null) out.eventLengthInMinutes = t.eventLengthInMinutes;
+      // Location is per-instance (the multi-instance model lets each showing carry
+      // its own venue — a touring show, a film at several cinemas); fall back to
+      // the event-level location when an instance doesn't name its own.
+      const location = t.location != null ? t.location : fallbackLocation;
+      if (location) out.location = location;
       return out;
     };
     const norm = (e) => {
       const ctz = e.ctz || "";
+      const eventLocation = e.location || "";
       const instances = Array.isArray(e.times) && e.times.length
         ? e.times
-        : [{ start: e.start, end: e.end, eventLengthInMinutes: e.eventLengthInMinutes }];
+        : [{ start: e.start, end: e.end, eventLengthInMinutes: e.eventLengthInMinutes, location: e.location }];
+      const times = instances.map((t) => normInstance(t, ctz, eventLocation));
       return {
         title: e.title || "",
-        location: e.location || "",
+        location: sharedLocation(times),
         description: e.description || "",
         ctz,
-        times: instances.map((t) => normInstance(t, ctz)),
+        times,
       };
     };
 
@@ -138,18 +152,22 @@
     return a < b ? -1 : a > b ? 1 : 0;
   }
 
-  // Fold events that describe the same thing at different times into one
-  // multi-instance event. The grouping key is every NON-time field
-  // (title + location + description + ctz): two events that match on all of them
-  // are the same event's separate showings, so their `times` are concatenated
-  // (exact-duplicate instances dropped). Events that differ in any of those —
-  // e.g. the different films on a series page — stay separate. Encounter order
-  // is preserved (the later chronological sort orders them anyway).
+  // Fold events that describe the same thing at different times — or different
+  // LOCATIONS — into one multi-instance event. The grouping key is the non-time,
+  // non-location identity (title + description + ctz): two events matching on all
+  // of them are the same event's separate showings, so their `times` are
+  // concatenated (each instance keeping its own location, so a touring show's
+  // venues stream in one card; exact-duplicate instances dropped). Events that
+  // differ in title/description/ctz — e.g. the different films on a series page —
+  // stay separate. After concatenating, the event-level `location` is recomputed:
+  // the shared venue when every instance agrees, else "" (the popup then shows the
+  // per-instance venues). Encounter order is preserved (the later chronological
+  // sort orders them anyway).
   function group(events) {
     const byKey = new Map();
     const out = [];
     for (const e of events) {
-      const key = JSON.stringify([e.title, e.location, e.description, e.ctz]);
+      const key = JSON.stringify([e.title, e.description, e.ctz]);
       const existing = byKey.get(key);
       if (existing) {
         existing.times.push(...e.times);
@@ -159,17 +177,29 @@
         out.push(copy);
       }
     }
-    for (const e of out) e.times = dedupeInstances(e.times);
+    for (const e of out) {
+      e.times = dedupeInstances(e.times);
+      e.location = sharedLocation(e.times);
+    }
     return out;
   }
 
+  // The event-level location for a set of instances: the common venue when every
+  // instance shares one, else "" — the signal the popup uses to fall back to
+  // per-instance venues instead of a single shared-location header.
+  function sharedLocation(times) {
+    const locs = times.map((t) => t.location || "");
+    return locs.every((l) => l === locs[0]) ? locs[0] : "";
+  }
+
   // Drop instances that are byte-identical to one already kept (same start, end,
-  // and duration) — a page listing the same showing twice shouldn't yield two
-  // buttons for it. Distinct showings (any field differs) are all kept.
+  // duration, and location) — a page listing the same showing twice shouldn't
+  // yield two buttons for it. Distinct showings (any field differs, including a
+  // different venue at the same time) are all kept.
   function dedupeInstances(times) {
     const seen = new Set();
     return times.filter((t) => {
-      const k = JSON.stringify([t.start, t.end, t.eventLengthInMinutes ?? null]);
+      const k = JSON.stringify([t.start, t.end, t.eventLengthInMinutes ?? null, t.location || ""]);
       if (seen.has(k)) return false;
       seen.add(k);
       return true;

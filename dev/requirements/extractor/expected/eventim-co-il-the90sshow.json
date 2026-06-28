@@ -11,7 +11,8 @@
           {
             "start": "2026-07-02T21:30:00",
             "end": "2026-07-02T23:29:00",
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "זאפה תל אביב - מתחם מידטאון, דרך מנחם בגין 144, 6492102, IL"
           }
         ]
       }

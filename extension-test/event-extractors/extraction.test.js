@@ -477,6 +477,77 @@ test("Edinburgh Fringe: a multi-performance show groups into one multi-instance 
   assert.equal(e.ctz, "GB");
 });
 
+test("A touring show at several venues groups into one multi-instance event, each instance keeping its own location", () => {
+  // The same title/description at different venues+dates is a touring show: the
+  // grouping key is title+description+ctz (NOT location), so the dates fold into
+  // ONE event whose instances differ by date AND venue. The event-level location
+  // is "" because the venues vary; each instance carries its own.
+  const html = `
+    <script type="application/ld+json">
+    [ { "@type": "MusicEvent", "name": "The Wallflowers — On Tour", "description": "Live across the country.",
+        "startDate": "2026-09-04T20:00:00", "location": { "@type": "Place", "name": "Paradiso, Amsterdam" } },
+      { "@type": "MusicEvent", "name": "The Wallflowers — On Tour", "description": "Live across the country.",
+        "startDate": "2026-09-11T20:00:00", "location": { "@type": "Place", "name": "Ancienne Belgique, Brussels" } },
+      { "@type": "MusicEvent", "name": "The Wallflowers — On Tour", "description": "Live across the country.",
+        "startDate": "2026-09-18T20:00:00", "location": { "@type": "Place", "name": "La Cigale, Paris" } } ]
+    </script>
+    <h1>Tour dates</h1>`;
+
+  const ev = extractFromHtml(html, "https://www.example-tickets.com/the-wallflowers");
+  assert.equal(ev.events.length, 1);
+  const e = ev.events[0];
+  assert.equal(e.title, "The Wallflowers — On Tour");
+  assert.equal(e.location, ""); // venues vary -> no shared event-level location
+  assert.equal(e.times.length, 3);
+  assert.deepEqual(
+    [...e.times].map((t) => [t.start, t.location]),
+    [
+      ["2026-09-04T20:00:00", "Paradiso, Amsterdam"],
+      ["2026-09-11T20:00:00", "Ancienne Belgique, Brussels"],
+      ["2026-09-18T20:00:00", "La Cigale, Paris"],
+    ]
+  );
+});
+
+test("Same title at one shared venue still groups with the venue on the event AND each instance", () => {
+  // When the grouped showings all share a venue, the event-level location is that
+  // shared venue (so the existing single-location header path is unchanged), and
+  // every instance also carries it.
+  const html = `
+    <script type="application/ld+json">
+    [ { "@type": "Event", "name": "Yoga in the Park", "description": "Morning flow.",
+        "startDate": "2026-07-04T08:00:00", "location": { "@type": "Place", "name": "Riverside Lawn" } },
+      { "@type": "Event", "name": "Yoga in the Park", "description": "Morning flow.",
+        "startDate": "2026-07-11T08:00:00", "location": { "@type": "Place", "name": "Riverside Lawn" } } ]
+    </script>
+    <h1>Weekly yoga</h1>`;
+
+  const ev = extractFromHtml(html, "https://www.example.org/yoga");
+  assert.equal(ev.events.length, 1);
+  const e = ev.events[0];
+  assert.equal(e.location, "Riverside Lawn");
+  assert.equal(e.times.length, 2);
+  assert.deepEqual([...e.times].map((t) => t.location), ["Riverside Lawn", "Riverside Lawn"]);
+});
+
+test("Same time, different venues are distinct instances (not deduplicated)", () => {
+  // dedupeInstances keys on start+end+duration+LOCATION, so two showings at the
+  // same instant but different venues are kept as two instances.
+  const html = `
+    <script type="application/ld+json">
+    [ { "@type": "Event", "name": "Simulcast Premiere", "description": "Two screens, one start.",
+        "startDate": "2026-08-01T19:00:00", "location": { "@type": "Place", "name": "Hall A" } },
+      { "@type": "Event", "name": "Simulcast Premiere", "description": "Two screens, one start.",
+        "startDate": "2026-08-01T19:00:00", "location": { "@type": "Place", "name": "Hall B" } } ]
+    </script>
+    <h1>Premiere</h1>`;
+
+  const ev = extractFromHtml(html, "https://www.example.org/premiere");
+  assert.equal(ev.events.length, 1);
+  assert.equal(ev.events[0].times.length, 2);
+  assert.deepEqual([...ev.events[0].times].map((t) => t.location), ["Hall A", "Hall B"]);
+});
+
 test("Edinburgh Fringe: a page with no event JSON yields no event", () => {
   // A supported host alone is not an event signal: an edfringe.com page that
   // carries no performance JSON (and no parseable date) describes no event, so

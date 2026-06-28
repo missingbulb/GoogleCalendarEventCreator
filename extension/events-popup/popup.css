@@ -248,6 +248,18 @@ body {
 .event-group .e-year.ongoing {
   background-color: #d93025;
 }
+/* A chip that also carries a per-instance LOCATION (a touring show's varying
+   venues): the calendar tile (date/time) on the LEFT, a pin + the venue to its
+   RIGHT, in a bounded-width band so a short venue fits and a long one clamps to
+   two lines — never unbounded, so the wrapping chip row stays compact. Declared
+   BEFORE the base .e-chip rule below because the snapshot CSS inliner prepends
+   each rule, so the EARLIER-declared rule wins a conflict (flex-direction here). */
+.event-btn .e-chip.has-loc,
+.event-group .e-chip.has-loc {
+  flex-direction: row;
+  align-items: stretch;
+  min-width: 0;
+}
 /* THE calendar chip — the popup's single "addable event" motif: a colored banner
    (the shared context — a month, or a full date) over a prominent body (the pick
    — a day or a time) on a white "page". It's a single card's left
@@ -307,6 +319,54 @@ body {
 .e-chip-body.range {
   font-size: 14px;
   white-space: nowrap;
+}
+/* The date/time tile inside a has-loc chip — the original banner-over-body block,
+   here just the left column of the wider chip. */
+.event-btn .e-chip-cal,
+.event-group .e-chip-cal {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex-shrink: 0;
+  min-width: 44px;
+}
+/* The venue, to the RIGHT of the tile: a pin glyph then the venue text, centered
+   vertically, no separator. */
+.event-btn .e-chip-loc,
+.event-group .e-chip-loc {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 108px; /* fixed venue column so the chip width is uniform and satori can wrap the venue */
+  padding: 0 8px;
+}
+.event-btn .e-loc-text,
+.event-group .e-loc-text {
+  flex: 1;
+  min-width: 0; /* mirrors .e-title/.e-body — lets satori wrap the text to 2 lines */
+  overflow: hidden;
+  max-height: 23px; /* ~2 lines at 9px/1.25; clampVenue keeps text within this */
+  font-size: 9px;
+  line-height: 1.25;
+  color: #5f6368;
+  text-align: left;
+}
+/* A small CSS map-pin (teardrop): a rounded square with one square corner,
+   rotated so the point faces down. Drawn in CSS so it renders in both Chrome and
+   the satori snapshot (which has no emoji font). */
+.event-btn .e-pin,
+.event-group .e-pin {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #80868b;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 0;
+  transform: rotate(-45deg);
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */

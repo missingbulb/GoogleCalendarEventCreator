@@ -207,8 +207,17 @@ function makeSingleCard(event, it, tab, now) {
 // month card, a time chip per showing on a same-day card), so the same chip
 // motif marks the addable events whether the card is one whole-card button or a
 // row of several.
+//
+// PER-INSTANCE LOCATIONS: when the showings sit at DIFFERENT locations (a touring
+// show, a film at several venues) there's no single place to name in the header,
+// so the card switches to a vertical STREAM — each showing is its own full-width
+// row of [chip · its own location], and the header drops the location (keeping
+// just the shared time, if any). When every showing shares one location the card
+// is unchanged: the location leads the header and the chips stay a compact
+// centered row.
 function makeGroupCard(card, tab, chipFor) {
   const { event, instances } = card;
+  const varied = locationsVary(event, instances);
 
   const cardEl = document.createElement("div");
   cardEl.className = "event-group";
@@ -216,11 +225,12 @@ function makeGroupCard(card, tab, chipFor) {
   // Header: the title over the "when · where" line, full width. A leading time
   // label (groupHeaderTime) precedes the location when one fits — the shared time
   // when every session starts (and ends) alike, or "All day" when every session
-  // is all-day; otherwise just the location.
+  // is all-day; otherwise just the location. When the showings differ in
+  // location, none is named here — each row carries its own place instead.
   const head = document.createElement("span");
   head.className = "e-group-head";
   head.appendChild(titleEl(event, tab));
-  const detail = [groupHeaderTime(instances), event.location].filter(Boolean).join(" · ");
+  const detail = [groupHeaderTime(instances), varied ? "" : event.location].filter(Boolean).join(" · ");
   if (detail) {
     const loc = document.createElement("span");
     loc.className = "e-when";
@@ -229,20 +239,40 @@ function makeGroupCard(card, tab, chipFor) {
   }
   cardEl.appendChild(head);
 
-  // The instance chip-buttons: a wrapping, centered, full-width row.
+  // The instance chip-buttons: a compact wrapping, centered row — the same in-card
+  // layout whether the showings share a location or not. When they DIFFER, the
+  // location rides INSIDE each chip (a wider chip carrying its date/time over its
+  // own venue), so the per-instance places sit on the calendar visuals themselves
+  // rather than splitting the card into rows.
   const list = document.createElement("span");
   list.className = "e-instances";
   for (const it of instances) {
-    list.appendChild(chipButton(event, it, chipFor(it), tab));
+    const chip = chipFor(it);
+    if (varied && chip) chip.location = clampVenue(instanceLocation(event, it.t));
+    list.appendChild(chipButton(event, it, chip, tab));
   }
   cardEl.appendChild(list);
 
   return cardEl;
 }
 
+// Cap an in-chip venue so it wraps to at most ~2 lines within the chip's bounded
+// width. CSS `-webkit-line-clamp: 2` handles this in the real Chrome popup, but
+// the satori snapshot renderer ignores it (it only honors single-line
+// `text-overflow: ellipsis`), so without a hard cap a long venue would render as
+// an unbounded tall chip in the snapshot. This deterministic character cap keeps
+// the snapshot honest and matches what Chrome clamps to; full text still reaches
+// the Calendar URL.
+function clampVenue(text) {
+  const MAX = 34; // ~the two-line capacity of the chip's venue column (see popup.css)
+  return text.length > MAX ? text.slice(0, MAX - 1).replace(/[\s,]+$/, "") + "…" : text;
+}
+
 // One instance rendered AS a clickable calendar chip — a grouped card's button.
 // Same chip motif as a single card's date indicator, so "an event you can add"
-// looks the same whether it's a whole card or one of several buttons.
+// looks the same whether it's a whole card or one of several buttons. The chip
+// descriptor may carry a `location` (the per-instance-locations case), which
+// chipEl folds into a wider, two-tier chip.
 function chipButton(event, it, chip, tab) {
   const url = buildCalendarUrl({ ...event, title: event.title || tab.title }, tab, it.i);
   const btn = document.createElement("button");
@@ -282,8 +312,25 @@ export function summarize(event) {
 
 function summarizeInstance(event, instance) {
   const when = formatWhen(instance.start, effectiveEnd(instance));
-  if (event.location) return `${when} · ${event.location}`;
+  const loc = instanceLocation(event, instance);
+  if (loc) return `${when} · ${loc}`;
   return when;
+}
+
+// The location to show for one showing: its OWN location (the multi-instance
+// model lets each instance carry one) overrides the event's shared location, so a
+// touring show's instance names its venue while a single-venue event falls back
+// to the event-level location. "" when neither is set.
+export function instanceLocation(event, instance) {
+  return instance.location || event.location || "";
+}
+
+// True when an event's showings don't all resolve to one location — the signal a
+// grouped card streams them as per-instance rows (each chip beside its own place)
+// rather than the compact chip row under a single shared-location header.
+export function locationsVary(event, instances) {
+  const locs = instances.map((it) => instanceLocation(event, it.t));
+  return !locs.every((l) => l === locs[0]);
 }
 
 // The title span shared by every card.
@@ -303,19 +350,44 @@ function titleEl(event, tab) {
 // `past` is set, a red "ongoing" pill when `ongoing` is set (the event is happening
 // now), else a green pill showing `year` for a future-year chip. A chip that is
 // none of these (not yet started, this year) returns bare, with no pill.
-function chipEl({ banner, body, kind = "day", past, ongoing, year }) {
+function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
   const el = document.createElement("span");
-  el.className = "e-chip";
+  el.className = location ? "e-chip has-loc" : "e-chip";
 
   const bannerEl = document.createElement("span");
   bannerEl.className = "e-chip-banner";
   bannerEl.textContent = banner;
-  el.appendChild(bannerEl);
 
   const bodyEl = document.createElement("span");
   bodyEl.className = `e-chip-body ${kind}`;
   bodyEl.textContent = body;
-  el.appendChild(bodyEl);
+
+  // A per-instance location (a touring show's varying venues) rides to the RIGHT
+  // of the date/time block: the calendar tile (banner over day/time) on the left,
+  // a pin glyph + the venue on the right. The chip widens to a bounded band (see
+  // .e-chip.has-loc in popup.css) and the venue clamps to two lines.
+  if (location) {
+    const cal = document.createElement("span");
+    cal.className = "e-chip-cal";
+    cal.appendChild(bannerEl);
+    cal.appendChild(bodyEl);
+    el.appendChild(cal);
+
+    const locEl = document.createElement("span");
+    locEl.className = "e-chip-loc";
+    const pin = document.createElement("span");
+    pin.className = "e-pin";
+    pin.setAttribute("aria-hidden", "true");
+    locEl.appendChild(pin);
+    const txt = document.createElement("span");
+    txt.className = "e-loc-text";
+    txt.textContent = location;
+    locEl.appendChild(txt);
+    el.appendChild(locEl);
+  } else {
+    el.appendChild(bannerEl);
+    el.appendChild(bodyEl);
+  }
 
   if (!past && !ongoing && !year) return el;
 

@@ -1,457 +1,272 @@
 {
-  "description": "livenation.de tour page yields all concert dates across venues",
+  "description": "Muse “The Wow! Signal” tour: dates across many venues group BY TITLE into multi-instance events (the US tour; the Europa tour, split by the page's inconsistent en-dash/hyphen titling), each instance carrying its own venue; a differently-titled one-off (101X Concert Series) stays its own single-venue event.",
   "expected": {
     "events": [
       {
+        "title": "Muse - The Wow! Signal Tour",
+        "location": "",
         "ctz": null,
         "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Hollywood Casino Amphitheater, 14141 Riverport Dr, Maryland Heights, 63043",
         "times": [
           {
+            "start": "2026-07-06T00:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-06T00:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Ruoff Music Center, 12880 E. 146th St., Noblesville, 46060",
-        "times": [
+            "location": "Hollywood Casino Amphitheater, 14141 Riverport Dr, Maryland Heights, 63043"
+          },
           {
+            "start": "2026-07-07T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-07T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Credit Union 1 Amphitheatre, 19100 S Ridgeland, Tinley Park, 60477",
-        "times": [
+            "location": "Ruoff Music Center, 12880 E. 146th St., Noblesville, 46060"
+          },
           {
+            "start": "2026-07-11T00:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-11T00:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Riverbend Music Center, 6295 Kellogg Avenue, Cincinnati, 45230",
-        "times": [
+            "location": "Credit Union 1 Amphitheatre, 19100 S Ridgeland, Tinley Park, 60477"
+          },
           {
+            "start": "2026-07-11T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-11T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Pine Knob Music Theatre, 33 Bob Seger Drive, Clarkston, 48348",
-        "times": [
+            "location": "Riverbend Music Center, 6295 Kellogg Avenue, Cincinnati, 45230"
+          },
           {
+            "start": "2026-07-13T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-13T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "RBC Amphitheatre, 909 Lakeshore Blvd. W., Toronto, M6K3L3, Canada",
-        "times": [
+            "location": "Pine Knob Music Theatre, 33 Bob Seger Drive, Clarkston, 48348"
+          },
           {
+            "start": "2026-07-15T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-15T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Xfinity Center, 885 S Main St, Mansfield, 02048",
-        "times": [
+            "location": "RBC Amphitheatre, 909 Lakeshore Blvd. W., Toronto, M6K3L3, Canada"
+          },
           {
+            "start": "2026-07-18T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-18T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "PNC Bank Arts Center, Exit 116, Garden State Pkwy, Holmdel, 07733",
-        "times": [
+            "location": "Xfinity Center, 885 S Main St, Mansfield, 02048"
+          },
           {
+            "start": "2026-07-22T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-22T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Albany Med Health System at SPAC, 108 Avenue of the Pines, Saratoga Springs, 12866",
-        "times": [
+            "location": "PNC Bank Arts Center, Exit 116, Garden State Pkwy, Holmdel, 07733"
+          },
           {
+            "start": "2026-07-24T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-24T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Northwell at Jones Beach Theater, 895 Bay Parkway, Wantagh, 11793",
-        "times": [
+            "location": "Albany Med Health System at SPAC, 108 Avenue of the Pines, Saratoga Springs, 12866"
+          },
           {
+            "start": "2026-07-25T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-25T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Merriweather Post Pavilion, 10475 Little Patuxent Parkway, Columbia, 21044",
-        "times": [
+            "location": "Northwell at Jones Beach Theater, 895 Bay Parkway, Wantagh, 11793"
+          },
           {
+            "start": "2026-07-28T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-28T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Freedom Mortgage Pavilion, 1 Harbour Blvd, Camden, 08103",
-        "times": [
+            "location": "Merriweather Post Pavilion, 10475 Little Patuxent Parkway, Columbia, 21044"
+          },
           {
+            "start": "2026-07-29T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-07-29T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Truliant Amphitheater, 707 Pavilion Boulevard, Charlotte, 28262",
-        "times": [
+            "location": "Freedom Mortgage Pavilion, 1 Harbour Blvd, Camden, 08103"
+          },
           {
+            "start": "2026-08-10T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-08-10T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Lakewood Amphitheatre, 2002 Lakewood Way, Atlanta, 30315",
-        "times": [
+            "location": "Truliant Amphitheater, 707 Pavilion Boulevard, Charlotte, 28262"
+          },
           {
+            "start": "2026-08-12T23:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-08-12T23:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Dos Equis Pavilion, 3839 S Fitzhugh, Dallas, 75210",
-        "times": [
+            "location": "Lakewood Amphitheatre, 2002 Lakewood Way, Atlanta, 30315"
+          },
           {
+            "start": "2026-08-15T00:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-08-15T00:00:00Z"
+            "location": "Dos Equis Pavilion, 3839 S Fitzhugh, Dallas, 75210"
+          },
+          {
+            "start": "2026-08-21T01:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "Utah First Credit Union Amphitheatre, 5150 South 6055 West, West Valley City, 84118"
+          },
+          {
+            "start": "2026-08-23T02:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "Cascades Amphitheater, 17200 NE Delfel Road, Ridgefield, 98642"
+          },
+          {
+            "start": "2026-08-24T02:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "White River Amphitheatre, 40601 Auburn Enumclaw Road, 98092"
+          },
+          {
+            "start": "2026-08-27T02:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "Toyota Amphitheatre, 2677 Forty Mile Road, Wheatland, 95692"
+          },
+          {
+            "start": "2026-08-28T02:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "Shoreline Amphitheatre, One Amphitheatre Parkway, Mountain View, 94043"
+          },
+          {
+            "start": "2026-08-30T02:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "North Island Credit Union Amphitheatre, 2050 Entertainment Circle, Chula Vista, 91911"
+          },
+          {
+            "start": "2026-09-01T02:00:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "Hollywood Bowl, 2301 N Highland Ave, 90068"
           }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
+        ]
       },
       {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
+        "title": "101X Concert Series Presents Muse - The Wow! Signal Tour",
         "location": "Germania Insurance Amphitheater, 9201 Circuit of the Americas Blvd., Austin, 78617",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-08-16T00:00:00Z"
-          }
-        ],
-        "title": "101X Concert Series Presents Muse - The Wow! Signal Tour"
-      },
-      {
         "ctz": null,
         "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Utah First Credit Union Amphitheatre, 5150 South 6055 West, West Valley City, 84118",
         "times": [
           {
+            "start": "2026-08-16T00:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-08-21T01:00:00Z"
+            "location": "Germania Insurance Amphitheater, 9201 Circuit of the Americas Blvd., Austin, 78617"
           }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
+        ]
       },
       {
+        "title": "Muse – The Wow! Signal Europa Tour",
+        "location": "",
         "ctz": null,
         "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Cascades Amphitheater, 17200 NE Delfel Road, Ridgefield, 98642",
         "times": [
           {
+            "start": "2026-11-12T19:30:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-08-23T02:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "White River Amphitheatre, 40601 Auburn Enumclaw Road, 98092",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-08-24T02:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Toyota Amphitheatre, 2677 Forty Mile Road, Wheatland, 95692",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-08-27T02:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Shoreline Amphitheatre, One Amphitheatre Parkway, Mountain View, 94043",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-08-28T02:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "North Island Credit Union Amphitheatre, 2050 Entertainment Circle, Chula Vista, 91911",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-08-30T02:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Hollywood Bowl, 2301 N Highland Ave, 90068",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-09-01T02:00:00Z"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Co-op Live, FRP2+G2, Manchester M11 3DU, United Kingdom",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-11-12T19:30:00Z"
+            "location": "Co-op Live, FRP2+G2, Manchester M11 3DU, United Kingdom"
           },
           {
+            "start": "2026-11-13T19:30:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-11-13T19:30:00Z"
-          }
-        ],
-        "title": "Muse – The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "The O2, The O2 Peninsula Square London. SE10 0DX, SE10 0BB, United Kingdom",
-        "times": [
+            "location": "Co-op Live, FRP2+G2, Manchester M11 3DU, United Kingdom"
+          },
           {
+            "start": "2026-11-15T19:00:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-11-15T19:00:00Z"
+            "location": "The O2, The O2 Peninsula Square London. SE10 0DX, SE10 0BB, United Kingdom"
           },
           {
+            "start": "2026-11-16T19:30:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-11-16T19:30:00Z"
-          }
-        ],
-        "title": "Muse – The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Uber Arena, Mercedes-Platz 1, Berlin, 10243, Germany",
-        "times": [
-          {
-            "end": "2026-11-18T22:59:00Z",
-            "eventLengthInMinutes": null,
-            "start": "2026-11-18"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Unipol Dome, Via Romualdo Bonfadini 148, 20138 Milano (MI), Italy",
-        "times": [
-          {
-            "end": "2026-11-20T22:59:00Z",
-            "eventLengthInMinutes": null,
-            "start": "2026-11-20"
+            "location": "The O2, The O2 Peninsula Square London. SE10 0DX, SE10 0BB, United Kingdom"
           },
           {
-            "end": "2026-11-21T22:59:00Z",
-            "eventLengthInMinutes": null,
-            "start": "2026-11-21"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "PSD Bank Dome, Theodorstraße 281, Düsseldorf, 40472, Germany",
-        "times": [
-          {
-            "end": "2026-11-24T22:59:00Z",
-            "eventLengthInMinutes": null,
-            "start": "2026-11-24"
-          },
-          {
-            "end": "2026-11-25T22:59:00Z",
-            "eventLengthInMinutes": null,
-            "start": "2026-11-25"
-          }
-        ],
-        "title": "Muse - The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Paris La Défense Arena, 99 Jardins de l'Arche, 92000 Nanterre, France",
-        "times": [
-          {
+            "start": "2026-11-27",
             "end": "2026-11-27T22:59:00Z",
             "eventLengthInMinutes": null,
-            "start": "2026-11-27"
-          }
-        ],
-        "title": "Muse – The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Ziggo Dome, De Passage 100, Amsterdam, 1101 AZ, Netherlands",
-        "times": [
-          {
-            "end": null,
-            "eventLengthInMinutes": null,
-            "start": "2026-11-29T18:30:00Z"
+            "location": "Paris La Défense Arena, 99 Jardins de l'Arche, 92000 Nanterre, France"
           },
           {
+            "start": "2026-11-29T18:30:00Z",
             "end": null,
             "eventLengthInMinutes": null,
-            "start": "2026-11-30T18:30:00Z"
-          }
-        ],
-        "title": "Muse – The Wow! Signal Europa Tour"
-      },
-      {
-        "ctz": null,
-        "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Sud de France Arena, route de la Foire, Montpellier, 34470",
-        "times": [
+            "location": "Ziggo Dome, De Passage 100, Amsterdam, 1101 AZ, Netherlands"
+          },
           {
+            "start": "2026-11-30T18:30:00Z",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "Ziggo Dome, De Passage 100, Amsterdam, 1101 AZ, Netherlands"
+          },
+          {
+            "start": "2026-12-03",
             "end": "2026-12-03T22:59:00Z",
             "eventLengthInMinutes": null,
-            "start": "2026-12-03"
+            "location": "Sud de France Arena, route de la Foire, Montpellier, 34470"
           },
           {
+            "start": "2026-12-04",
             "end": "2026-12-04T22:59:00Z",
             "eventLengthInMinutes": null,
-            "start": "2026-12-04"
+            "location": "Sud de France Arena, route de la Foire, Montpellier, 34470"
           }
-        ],
-        "title": "Muse – The Wow! Signal Europa Tour"
+        ]
       },
       {
+        "title": "Muse - The Wow! Signal Europa Tour",
+        "location": "",
         "ctz": null,
         "details": "https://www.livenation.de/muse-tickets-adp647#international",
-        "location": "Hallenstadion, Wallisellenstrasse 45, Zürich, 8050, Switzerland",
         "times": [
           {
-            "end": "2026-12-07T22:59:00Z",
+            "start": "2026-11-18",
+            "end": "2026-11-18T22:59:00Z",
             "eventLengthInMinutes": null,
-            "start": "2026-12-07"
+            "location": "Uber Arena, Mercedes-Platz 1, Berlin, 10243, Germany"
           },
           {
+            "start": "2026-11-20",
+            "end": "2026-11-20T22:59:00Z",
+            "eventLengthInMinutes": null,
+            "location": "Unipol Dome, Via Romualdo Bonfadini 148, 20138 Milano (MI), Italy"
+          },
+          {
+            "start": "2026-11-21",
+            "end": "2026-11-21T22:59:00Z",
+            "eventLengthInMinutes": null,
+            "location": "Unipol Dome, Via Romualdo Bonfadini 148, 20138 Milano (MI), Italy"
+          },
+          {
+            "start": "2026-11-24",
+            "end": "2026-11-24T22:59:00Z",
+            "eventLengthInMinutes": null,
+            "location": "PSD Bank Dome, Theodorstraße 281, Düsseldorf, 40472, Germany"
+          },
+          {
+            "start": "2026-11-25",
+            "end": "2026-11-25T22:59:00Z",
+            "eventLengthInMinutes": null,
+            "location": "PSD Bank Dome, Theodorstraße 281, Düsseldorf, 40472, Germany"
+          },
+          {
+            "start": "2026-12-07",
+            "end": "2026-12-07T22:59:00Z",
+            "eventLengthInMinutes": null,
+            "location": "Hallenstadion, Wallisellenstrasse 45, Zürich, 8050, Switzerland"
+          },
+          {
+            "start": "2026-12-08",
             "end": "2026-12-08T22:59:00Z",
             "eventLengthInMinutes": null,
-            "start": "2026-12-08"
+            "location": "Hallenstadion, Wallisellenstrasse 45, Zürich, 8050, Switzerland"
           }
-        ],
-        "title": "Muse - The Wow! Signal Europa Tour"
+        ]
       }
     ]
   }

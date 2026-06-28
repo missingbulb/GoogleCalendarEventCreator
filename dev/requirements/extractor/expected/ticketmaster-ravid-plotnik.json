@@ -11,17 +11,20 @@
           {
             "start": "2026-07-04T21:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "רדינג 3, תל אביב - יפו"
           },
           {
             "start": "2026-07-08T21:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "רדינג 3, תל אביב - יפו"
           },
           {
             "start": "2026-07-11T21:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "רדינג 3, תל אביב - יפו"
           }
         ]
       }

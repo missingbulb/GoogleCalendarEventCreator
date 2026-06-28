@@ -11,7 +11,8 @@
           {
             "start": "2026-06-21",
             "end": null,
-            "eventLengthInMinutes": 90
+            "eventLengthInMinutes": 90,
+            "location": "סינמטק תל אביב, רחוב הארבעה 5, תל אביב"
           }
         ]
       }

@@ -11,7 +11,8 @@
           {
             "start": "2026-07-04T20:30:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Heichal Hatarbut - Charles Bronfman Auditorium, Habima Square, Tel Aviv, 61999, Israel"
           }
         ]
       },
@@ -24,7 +25,8 @@
           {
             "start": "2026-07-09T20:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Caesarea Amphitheater, 0, Israel"
           }
         ]
       },
@@ -37,7 +39,8 @@
           {
             "start": "2026-08-01T20:30:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Menora Mivtachim Arena, 51 Yigal Alon St., Tel Aviv, 63504, Israel"
           }
         ]
       },
@@ -50,7 +53,8 @@
           {
             "start": "2026-08-06T20:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Barby Tel Aviv, Derech Kibuts Galuyot, 52, Israel"
           }
         ]
       },
@@ -63,7 +67,8 @@
           {
             "start": "2026-08-20T20:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Romema Arena, x, Haifa, 0111, Israel"
           }
         ]
       },
@@ -76,7 +81,8 @@
           {
             "start": "2026-08-27T20:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "Sultans Pool, Jerusalem, 0000, Israel"
           }
         ]
       }

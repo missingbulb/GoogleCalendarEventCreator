@@ -35,9 +35,10 @@ const CALENDAR_RENDER_URL = "https://calendar.google.com/calendar/render";
 
 // Build the Calendar template URL for one event INSTANCE. An event carries its
 // timing in `times[]` (the multi-instance model); `instanceIndex` selects which
-// showing to schedule — the only field that varies between an event's instances
-// is the date/time, so title/location/description/ctz come from the event and
-// only the `dates` param changes per instance. A flat event ({ start, end,
+// showing to schedule — an instance varies by date/time AND optionally its own
+// `location` (a touring show's venue), so the `dates` param and the `location`
+// param are taken from the chosen instance (location falling back to the event
+// level), while title/description/ctz come from the event. A flat event ({ start, end,
 // eventLengthInMinutes } on the object itself) is still accepted — it's treated
 // as its own single instance — so existing single-occurrence callers and tests
 // need no change.
@@ -53,7 +54,10 @@ export function buildCalendarUrl(data, tab, instanceIndex = 0) {
   const dates = formatDatesParam(instance.start, instance.end, instance.eventLengthInMinutes);
   if (dates) params.set("dates", dates);
   if (data.ctz) params.set("ctz", data.ctz);
-  if (data.location) params.set("location", data.location);
+  // Location is per-instance in the multi-instance model (a showing at its own
+  // venue overrides the event's shared location); fall back to the event level.
+  const location = instance.location || data.location;
+  if (location) params.set("location", location);
 
   // The details field always starts with a link back to the original event
   // page, followed by the full extracted description. It is added LAST so that

@@ -16,6 +16,7 @@ const { pathToFileURL } = require("node:url");
 
 let formatWhen, summarize, dateChip, sameDayLabel, toCards;
 let commonTime, showPerDayTimes, groupHeaderTime;
+let instanceLocation, locationsVary;
 before(async () => {
   ({
     formatWhen,
@@ -26,6 +27,8 @@ before(async () => {
     commonTime,
     showPerDayTimes,
     groupHeaderTime,
+    instanceLocation,
+    locationsVary,
   } = await import(pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "events-view.js"))));
 });
 
@@ -274,6 +277,35 @@ test("showPerDayTimes: a mix of timed and all-day showings -> true (each chip sh
 
 test("showPerDayTimes: all all-day showings -> false (plain day chips, 'All day' header)", () => {
   assert.equal(showPerDayTimes([inst("2026-08-05"), inst("2026-08-25")]), false);
+});
+
+// --- instanceLocation / locationsVary: per-instance venues (a touring show).
+
+test("instanceLocation: an instance's own venue overrides the event-level location", () => {
+  assert.equal(instanceLocation({ location: "Usual Hall" }, { location: "Annex" }), "Annex");
+});
+
+test("instanceLocation: falls back to the event-level location when the instance has none", () => {
+  assert.equal(instanceLocation({ location: "Usual Hall" }, { start: "2026-07-04T20:00:00" }), "Usual Hall");
+});
+
+test("instanceLocation: empty when neither instance nor event names a venue", () => {
+  assert.equal(instanceLocation({}, {}), "");
+});
+
+const instAt = (location) => ({ t: { location } });
+
+test("locationsVary: same venue across showings -> false (compact shared-location card)", () => {
+  assert.equal(locationsVary({}, [instAt("Hall"), instAt("Hall")]), false);
+});
+
+test("locationsVary: different venues -> true (each chip carries its own venue)", () => {
+  assert.equal(locationsVary({}, [instAt("Paradiso"), instAt("La Cigale")]), true);
+});
+
+test("locationsVary: instances fall back to the event venue, so a shared event location is not 'varying'", () => {
+  // Neither instance names its own venue; both resolve to the event's location.
+  assert.equal(locationsVary({ location: "Hall" }, [{ t: {} }, { t: {} }]), false);
 });
 
 // --- toCards: instances grouped BY MONTH (see events-view.js's header). A month
