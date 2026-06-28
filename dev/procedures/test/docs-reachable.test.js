@@ -17,19 +17,20 @@ const ROOT = path.join(__dirname, "..", "..", "..");
 // roots rather than required targets.
 const ROOTS = ["CLAUDE.md", "README.md"];
 
-// The vendored Claudinite submodule is consumed read-only and owns its own
-// internal navigation — we import only its top-level CLAUDE.md and let it
-// traverse from there. So this orphan check polices OUR docs, not the canon's
-// internals: some canon files are reached by mechanisms our link-following BFS
-// can't see (e.g. preferences/<email>.md is loaded by a session-start hook, not
-// linked from any doc), which would otherwise read as false orphans here.
-const SUBMODULE = "dev/procedures/claude/shared";
+// The vendored Claudinite canon (fetched over HTTPS into this gitignored dir, not
+// a git submodule) is consumed read-only and owns its own internal navigation — we
+// import only its top-level CLAUDE.md and let it traverse from there. So this orphan
+// check polices OUR docs, not the canon's internals: some canon files are reached by
+// mechanisms our link-following BFS can't see (e.g. preferences/<email>.md is loaded
+// by a session-start hook, not linked from any doc), which would otherwise read as
+// false orphans here.
+const VENDORED_CANON = "dev/procedures/claude/shared";
 
 // Every doc that must be reachable, repo-root-relative and POSIX-separated.
 function allDocs() {
   const out = [];
   (function walk(dir) {
-    if (dir === SUBMODULE) return; // skip the read-only canon submodule (see above)
+    if (dir === VENDORED_CANON) return; // skip the read-only vendored canon (see above)
     for (const e of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
       const rel = `${dir}/${e.name}`;
       if (e.isDirectory()) walk(rel);

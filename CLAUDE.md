@@ -48,7 +48,7 @@ time — live in `dev/procedures/this_project/technicalGotchas.md` (imported bel
 General engineering and agentic practices learned **in this repo** are captured
 locally in the working-set docs below (capture is always local — see
 `dev/procedures/this_project/workflow.md`). They start near-empty; the curated canon lives in the
-shared submodule (next section), and the `optimize-procedures` routine moves
+shared Claudinite canon (next section), and the `optimize-procedures` routine moves
 generalizable items up and prunes them here once the canon absorbs them. The
 portable-by-topic working-set docs under `dev/procedures/general/` (git/GitHub and
 working-discipline gotchas already generalized, awaiting promotion) are part of the
@@ -61,25 +61,34 @@ same local capture surface.
 @dev/procedures/general/testingPractices.md
 @dev/procedures/general/filePlacement.md
 
-## Shared portable rules (the Claudinite submodule)
+## Shared portable rules (the Claudinite canon, remote-fetched)
 
 The project-agnostic **canon** — general software-engineering practices, agentic
 best practices, portable git/GitHub procedures, general working discipline,
 unattended-agent architecture principles, and the repo owner's personal
 interaction preferences — is **not** maintained in this repo. It lives in the
-shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo, mounted
-here as a git submodule at `dev/procedures/claude/shared/` (see its
-[README](dev/procedures/claude/shared/README.md)) and imported below.
+shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo and is
+**vendored over HTTPS** into `dev/procedures/claude/shared/` (see its
+[README](dev/procedures/claude/shared/README.md)) and imported below. It is **not**
+a git submodule: `dev/procedures/claude/shared/` is gitignored, and
+[`dev/procedures/claude/fetch-shared.sh`](dev/procedures/claude/fetch-shared.sh)
+downloads the commit pinned in
+[`dev/procedures/claude/shared.ref`](dev/procedures/claude/shared.ref) as a tarball.
+(Why not a submodule: in a Claude Code web session the in-session git remote is a
+git-only proxy scoped to this repo, so `git submodule update --init` 403s on the
+separate Claudinite repo and the clone-time gitlink drifts the working tree — the
+HTTPS fetch sidesteps both. See [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364).)
 
-It is consumed **read-only**: a rule change happens in Claudinite and arrives here
-as a Dependabot submodule-bump PR. Lessons are *captured locally* (above) and only
-the daily `optimize-procedures` routine bridges them up to Claudinite (see
-[issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364)
-and `dev/procedures/general/auto-optimize-procedures.md`). A fresh clone needs
-`git submodule update --init` (`.claude/cloud-setup.sh` runs it) or
-`dev/procedures/claude/shared/` is an empty folder and this import resolves to nothing.
+It is consumed **read-only**: a rule change happens in Claudinite, then arrives
+here as a one-line bump of `dev/procedures/claude/shared.ref` (reviewable in a PR,
+the plain-file successor to the old submodule-pin bump). Lessons are *captured
+locally* (above) and only the daily `optimize-procedures` routine bridges them up
+to Claudinite (see `dev/procedures/general/auto-optimize-procedures.md`). A fresh
+clone needs `dev/procedures/claude/fetch-shared.sh` (`.claude/cloud-setup.sh` runs
+it) or `dev/procedures/claude/shared/` is an empty folder and this import resolves
+to nothing.
 
-We import only the submodule's own top-level `CLAUDE.md` — the single entry point
+We import only the canon's own top-level `CLAUDE.md` — the single entry point
 Claudinite maintains — and let it traverse to the individual canon docs from there,
 so the list of shared files lives upstream and never has to be mirrored here.
 

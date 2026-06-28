@@ -1,7 +1,7 @@
 # Handing portable lessons off to Claudinite
 
-The shared rules a project consumes (vendored read-only as a submodule) live in a
-separate **canon** repo, **Claudinite**. A session in the consuming repo can't push
+The shared rules a project consumes (vendored read-only over HTTPS, pinned in
+`dev/procedures/claude/shared.ref`) live in a separate **canon** repo, **Claudinite**. A session in the consuming repo can't push
 to Claudinite, so a *portable* lesson — one that generalizes beyond this project —
 can't be written into the shared docs directly. This is the **up-path**: how such a
 lesson travels from the consuming repo into Claudinite.
@@ -23,7 +23,7 @@ handoff issue in Claudinite
         │  curation routine (an agent, in Claudinite)
         ▼
 docs PR in Claudinite  → review → merge
-        │  a dependency bump updates the submodule pin here
+        │  a shared.ref bump updates the pinned canon commit here
         ▼
 the canon absorbs it → optimize-procedures prunes the local copy
 ```
