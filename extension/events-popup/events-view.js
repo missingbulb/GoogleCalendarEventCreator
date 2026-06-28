@@ -379,6 +379,7 @@ function chipEl({ banner, body, kind = "day", past, ongoing, year, location }) {
     const pin = document.createElement("span");
     pin.className = "e-pin";
     pin.setAttribute("aria-hidden", "true");
+    pin.appendChild(document.createElement("span")).className = "e-pin-hole";
     locEl.appendChild(pin);
     const txt = document.createElement("span");
     txt.className = "e-loc-text";

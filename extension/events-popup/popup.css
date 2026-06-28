@@ -316,15 +316,16 @@ body {
   flex-direction: row;
   align-items: center;
 }
-/* The date/time on the left of the lower strip — its own column, not stretched by
-   the taller venue beside it. */
+/* The date/time on the left of the lower strip — its own column, not shrunk by
+   the venue beside it. No fixed/min width: a short venue makes a narrow chip. */
 .event-btn .e-chip.has-loc .e-chip-body,
 .event-group .e-chip.has-loc .e-chip-body {
   flex-shrink: 0;
-  min-width: 40px;
 }
 /* The venue, to the RIGHT of the date/time in the lower strip: a pin glyph then
-   the venue text, centered vertically, no separator. */
+   the venue text, centered vertically, no separator. The cell sizes to its text
+   (so a short venue stays narrow), and the text caps at a max-width so a long one
+   wraps to two lines instead of stretching the chip. */
 .event-btn .e-chip-loc,
 .event-group .e-chip-loc {
   display: flex;
@@ -332,34 +333,44 @@ body {
   align-items: center;
   gap: 4px;
   box-sizing: border-box;
-  width: 104px; /* fixed venue column so the chip width is uniform and satori can wrap the venue */
-  padding: 0 8px 0 4px;
+  padding: 0 8px 0 2px;
 }
 .event-btn .e-loc-text,
 .event-group .e-loc-text {
-  flex: 1;
-  min-width: 0; /* mirrors .e-title/.e-body — lets satori wrap the text to 2 lines */
+  min-width: 0;
+  max-width: 96px; /* bounds a long venue so satori wraps it to ~2 lines (clampVenue caps the text) */
   overflow: hidden;
-  max-height: 23px; /* ~2 lines at 9px/1.25; clampVenue keeps text within this */
+  max-height: 23px; /* ~2 lines at 9px/1.25 */
   font-size: 9px;
   line-height: 1.25;
   color: #5f6368;
   text-align: left;
 }
-/* A small CSS map-pin (teardrop): a rounded square with one square corner,
-   rotated so the point faces down. Drawn in CSS so it renders in both Chrome and
-   the satori snapshot (which has no emoji font). */
+/* A small CSS map-pin: a teardrop (a rounded square with one square corner,
+   rotated so the point faces down) in the chip's blue, with a white center hole so
+   it reads as a pin, not a blob. Drawn in CSS so it renders in both Chrome and the
+   satori snapshot (which has no emoji font). */
 .event-btn .e-pin,
 .event-group .e-pin {
   flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  background-color: #80868b;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 9px;
+  height: 9px;
+  background-color: #1a73e8;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   border-bottom-left-radius: 0;
   transform: rotate(-45deg);
+}
+.event-btn .e-pin-hole,
+.event-group .e-pin-hole {
+  width: 3px;
+  height: 3px;
+  background-color: #fff;
+  border-radius: 2px;
 }
 /* Right column: title over the muted date/time line. min-width:0 lets
    the children ellipsize inside the flex row. */
