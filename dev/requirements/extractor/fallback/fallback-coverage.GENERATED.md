@@ -8,13 +8,13 @@ What the generic **fallback** extractor (`extension/event-extractors/extract-uns
 
 ## Score
 
-Headline coverage over all 29 cases in the corpus:
+Headline coverage over all 32 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **55.2%** | 48 / 87 |
-| **All fields** | **36.6%** | 63 / 172 |
-| Event coverage *(informational)* | 35.7% | 66 / 185 |
+| **Critical fields** (title + start + location) | **56.3%** | 54 / 96 |
+| **All fields** | **39%** | 73 / 187 |
+| Event coverage *(informational)* | 36.7% | 73 / 199 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 55.2% | 55.2% | ✓ |
-| All fields | 36.6% | 36.6% | ✓ |
+| Critical fields | 56.3% | 56.3% | ✓ |
+| All fields | 39% | 39% | ✓ |
 
-Gated over **29** shared case(s).
+Gated over **32** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 29 | 21 | 2 | 6 | 72.4% |
-| `start` **(critical)** | 29 | 14 | 9 | 6 | 48.3% |
-| `end` | 19 | 11 | 0 | 8 | 57.9% |
-| `location` **(critical)** | 29 | 13 | 4 | 12 | 44.8% |
-| `ctz` | 27 | 0 | 0 | 27 | 0% |
+| `title` **(critical)** | 32 | 23 | 2 | 7 | 71.9% |
+| `start` **(critical)** | 32 | 16 | 9 | 7 | 50% |
+| `end` | 21 | 12 | 0 | 9 | 57.1% |
+| `location` **(critical)** | 32 | 15 | 4 | 13 | 46.9% |
+| `ctz` | 29 | 0 | 0 | 29 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 28 | 4 | 13 | 11 | 14.3% |
+| `description` | 30 | 7 | 12 | 11 | 23.3% |
 
 ## By host
 
@@ -49,6 +49,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `barby.co.il` | 1 | 1/1 | 33.3% | 20% |
 | `cinema.co.il` | 5 | 0/118 | 0% | 0% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 83.3% |
+| `dice.fm` | 1 | 1/1 | 100% | 83.3% |
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
 | `eventbrite.com` | 2 | 2/2 | 100% | 57.1% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 66.7% |
@@ -56,11 +57,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `livenation.de` | 1 | 32/32 | 66.7% | 66.7% |
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
+| `seatgeek.com` | 1 | 0/7 | 0% | 0% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `seetickets.com` | 1 | 13/13 | 100% | 100% |
+| `stubhub.com` | 1 | 6/6 | 100% | 100% |
 | `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
 | `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
-| `ticketmaster.co.il` | 1 | 1/1 | 100% | 60% |
+| `ticketmaster.co.il` | 1 | 1/1 | 100% | 80% |
 | `visit.tel-aviv.gov.il` | 2 | 2/2 | 33.3% | 16.7% |
 
 ## By exemplar
@@ -72,6 +75,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `bandsintown-berry-sakharof` | 1/1 | ~ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `barby` | 1/1 | ✓ | ~ | — | ✗ | ✗ | — | ~ |
 | `dash-datadoghq` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
+| `dice` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-kristen-schaal` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-mr-chonkers` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
@@ -86,8 +90,10 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `meetup-fusion-la-israel` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-nyc-tech-mixer` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-startup-designers` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
+| `seatgeek` | 0/7 | ✗ | ✗ | ✗ | ✗ | ✗ | — | — |
 | `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `seetickets` | 13/13 | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
+| `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `telavivcinematheque-506` | 0/109 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `telavivcinematheque-left-handed-girl` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
@@ -95,6 +101,6 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `telavivcinematheque-sentimental-value` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-taiwan-week` | 0/6 | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `thinkdrink-quantum-lecture` | 1/1 | ✓ | ~ | — | ✓ | ✗ | — | ~ |
-| `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ~ |
+| `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ✓ |
 | `visit-tel-aviv-timed` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | — | ~ |
 | `visit-tel-aviv` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | — | ~ |

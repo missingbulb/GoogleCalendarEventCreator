@@ -586,3 +586,15 @@ test("Page with a parseable date but no site/JSON-LD: still yields the event", (
   assert.equal(ev.events[0].title, "Block Party");
   assert.equal(ev.events[0].times[0].start, "2026-07-11T14:00:00");
 });
+
+test("Generic (unsupported) site: HTML markup in og:description is converted to plain text", () => {
+  // Sites like ticketmaster.co.il embed literal HTML (e.g. "<br />") in their
+  // og:description attribute value. The fallback should convert it to newlines
+  // rather than returning the raw markup string.
+  const html = `
+    <meta property="og:description" content="Line one<br />Line two<br /><br />Line three">
+    <h1>Rock Concert</h1>
+    <time datetime="2026-07-04T21:00:00">July 4, 2026</time>`;
+  const e = firstEvent(html, "https://www.example.com/concert");
+  assert.equal(e.description, "Line one\nLine two\n\nLine three");
+});
