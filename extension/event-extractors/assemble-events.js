@@ -11,31 +11,28 @@
 // host's dedicated source found nothing so we ran the generic extractor instead
 // (#456) — the one signal the popup reads to add a "Suggest Correction" link for
 // events the dedicated source missed. Each event is fully self-described —
-// { title, location, description, ctz, times: [ { start, end,
-// eventLengthInMinutes?, location? }, ... ] } — so a caller (the popup) can build
-// a Google Calendar URL for any of its instances without consulting page-level
-// state.
+// { title, description, ctz, times: [ { start, end, eventLengthInMinutes?,
+// location? }, ... ] } — so a caller (the popup) can build a Google Calendar URL
+// for any of its instances without consulting page-level state.
 //
-// THE MULTI-INSTANCE MODEL: an event's timing lives in `times`, an array of one
-// or more instances (showings), each carrying its own { start, end,
-// eventLengthInMinutes?, location? }. A plain single-occurrence event is just
-// `times` of length 1; a film with several screenings, a nightly show, a
-// multi-night concert run, or a TOURING show at several venues is one event with
-// several instances. `eventLengthInMinutes` is only present on an instance when a
-// site extractor found an explicit duration (not derived from start/end);
-// `location` is present on an instance ONLY when its venue DIFFERS from the
-// event-level one (a touring show's per-stop venue) — when every showing shares a
-// venue it lives on the event and is dropped from the instances. The event-level
-// `location` is that shared venue when every instance agrees, else "" (the venues
-// differ, and each instance then carries its own). start/end follow the same
-// string contract as before ("YYYY-MM-DD" all-day, "YYYY-MM-DDTHH:MM[:SS]"
-// floating, or an exact instant with offset/Z).
+// THE MULTI-INSTANCE MODEL: an event's timing AND place live in `times`, an array
+// of one or more instances (showings), each carrying its own { start, end,
+// eventLengthInMinutes?, location? }. There is NO top-level `location` — a venue
+// is a per-showing field like start/end, so a single-venue event simply repeats
+// its venue across its instances, and a TOURING show at several venues carries a
+// different one per instance. A plain single-occurrence event is just `times` of
+// length 1; a film with several screenings, a nightly show, or a multi-night
+// concert run is one event with several instances. `eventLengthInMinutes` is only
+// present on an instance when a site extractor found an explicit duration (not
+// derived from start/end); `location` is present when the showing has a venue.
+// start/end follow the same string contract as before ("YYYY-MM-DD" all-day,
+// "YYYY-MM-DDTHH:MM[:SS]" floating, or an exact instant with offset/Z).
 //
 // Sources still emit the FLAT shape per occurrence ({ title, start, end,
 // location, ... }, or an `events` array of them) — keeping "add a source" a
 // single self-contained file (dev/procedures/this_project/highLevelDesign.md).
-// norm() wraps each into a one-instance event (the instance inheriting the
-// event's location), and group() then folds together any events that share the
+// norm() wraps each into a one-instance event, moving the occurrence's `location`
+// ONTO the instance, and group() then folds together any events that share the
 // non-time, non-location identity (title + description + ctz), concatenating their
 // instances. So a listing/series page's per-showing emissions (Edinburgh Fringe
 // performances, Ticketmaster nights, a film's screening dates, a tour's
@@ -108,13 +105,11 @@
       const instances = Array.isArray(e.times) && e.times.length
         ? e.times
         : [{ start: e.start, end: e.end, eventLengthInMinutes: e.eventLengthInMinutes, location: e.location }];
-      const times = instances.map((t) => normInstance(t, ctz, eventLocation));
       return {
         title: e.title || "",
-        location: sharedLocation(times),
         description: e.description || "",
         ctz,
-        times,
+        times: instances.map((t) => normInstance(t, ctz, eventLocation)),
       };
     };
 
@@ -161,10 +156,10 @@
   // concatenated (each instance keeping its own location, so a touring show's
   // venues stream in one card; exact-duplicate instances dropped). Events that
   // differ in title/description/ctz — e.g. the different films on a series page —
-  // stay separate. After concatenating, the event-level `location` is recomputed:
-  // the shared venue when every instance agrees, else "" (the popup then shows the
-  // per-instance venues). Encounter order is preserved (the later chronological
-  // sort orders them anyway).
+  // stay separate. Location is NOT a top-level field: it lives on each instance
+  // (every showing carries its own venue), so a single-venue event simply repeats
+  // its venue across its instances. Encounter order is preserved (the later
+  // chronological sort orders them anyway).
   function group(events) {
     const byKey = new Map();
     const out = [];
@@ -179,26 +174,8 @@
         out.push(copy);
       }
     }
-    for (const e of out) {
-      e.times = dedupeInstances(e.times);
-      e.location = sharedLocation(e.times);
-      // An instance carries `location` ONLY when it differs from the event-level
-      // venue — a touring show's per-stop venue. When every showing shares one
-      // venue, that venue lives on the event and the redundant per-instance copy
-      // is dropped (so an instance names a venue iff it has its own).
-      for (const t of e.times) {
-        if ((t.location || "") === e.location) delete t.location;
-      }
-    }
+    for (const e of out) e.times = dedupeInstances(e.times);
     return out;
-  }
-
-  // The event-level location for a set of instances: the common venue when every
-  // instance shares one, else "" — the signal the popup uses to fall back to
-  // per-instance venues instead of a single shared-location header.
-  function sharedLocation(times) {
-    const locs = times.map((t) => t.location || "");
-    return locs.every((l) => l === locs[0]) ? locs[0] : "";
   }
 
   // Drop instances that are byte-identical to one already kept (same start, end,

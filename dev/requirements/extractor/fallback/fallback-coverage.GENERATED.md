@@ -12,8 +12,8 @@ Headline coverage over all 32 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **56.4%** | 53 / 94 |
-| **All fields** | **38.9%** | 72 / 185 |
+| **Critical fields** (title + start + location) | **56.3%** | 54 / 96 |
+| **All fields** | **39%** | 73 / 187 |
 | Event coverage *(informational)* | 20.8% | 33 / 159 |
 
 ### Gate
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 56.4% | 56.4% | ✓ |
-| All fields | 38.9% | 38.9% | ✓ |
+| Critical fields | 56.3% | 56.3% | ✓ |
+| All fields | 39% | 39% | ✓ |
 
 Gated over **32** shared case(s).
 
@@ -36,7 +36,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `title` **(critical)** | 32 | 23 | 2 | 7 | 71.9% |
 | `start` **(critical)** | 32 | 16 | 9 | 7 | 50% |
 | `end` | 21 | 12 | 0 | 9 | 57.1% |
-| `location` **(critical)** | 30 | 14 | 3 | 13 | 46.7% |
+| `location` **(critical)** | 32 | 15 | 4 | 13 | 46.9% |
 | `ctz` | 29 | 0 | 0 | 29 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
 | `description` | 30 | 7 | 12 | 11 | 23.3% |
@@ -54,7 +54,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `eventbrite.com` | 2 | 2/2 | 100% | 57.1% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 66.7% |
 | `events.datadoghq.com` | 1 | 1/1 | 66.7% | 40% |
-| `livenation.de` | 1 | 4/4 | 100% | 100% |
+| `livenation.de` | 1 | 4/4 | 66.7% | 66.7% |
 | `luma.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `meetup.com` | 3 | 3/3 | 100% | 66.7% |
 | `seatgeek.com` | 1 | 0/7 | 0% | 0% |
@@ -85,14 +85,14 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `eventbrite-games-for-change` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ~ |
 | `eventim-co-il-the90sshow` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `events-datadoghq` | 1/1 | ~ | ✓ | — | ✓ | ✗ | — | ~ |
-| `livenation` | 39/4 | ✓ | ✓ | — | — | — | — | — |
+| `livenation` | 39/4 | ✓ | ✓ | — | ~ | — | — | — |
 | `luma-event` | 1/1 | ✓ | ✓ | ✓ | ~ | ✗ | — | ✓ |
 | `meetup-fusion-la-israel` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-nyc-tech-mixer` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `meetup-startup-designers` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `seatgeek` | 0/7 | ✗ | ✗ | ✗ | ✗ | ✗ | — | — |
 | `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
-| `seetickets` | 1/1 | ✓ | ✓ | ✓ | — | — | — | ✓ |
+| `seetickets` | 1/1 | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
 | `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `telavivcinematheque-506` | 0/109 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |

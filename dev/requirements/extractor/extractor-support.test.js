@@ -53,12 +53,12 @@ for (const testCase of extractorCases) {
     assert.equal(result.supported, true, `${testCase.host}: a dedicated source should claim this page (supported=true)`);
     assert.ok(Array.isArray(result.events) && result.events.length > 0, `${testCase.host}: extractor produced no events`);
     const [ev] = result.events;
-    // A normalized event carries its start under times[0].start (single or grouped
-    // showings); title/location are top-level.
-    const start = (ev.times && ev.times[0] && ev.times[0].start) || ev.start;
+    // A normalized event carries its start AND location per showing under
+    // times[0] (single or grouped showings); only title stays top-level.
+    const primary = (ev.times && ev.times[0]) || ev;
     assert.ok(ev.title, `${testCase.host}: extracted event is missing a title`);
-    assert.ok(ev.location, `${testCase.host}: extracted event is missing a location`);
-    assert.ok(start, `${testCase.host}: extracted event is missing a start`);
+    assert.ok(primary.location, `${testCase.host}: extracted event is missing a location`);
+    assert.ok(primary.start, `${testCase.host}: extracted event is missing a start`);
   });
 }
 

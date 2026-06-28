@@ -4,7 +4,6 @@
     "events": [
       {
         "title": "הכנס השנתי של ארגון היועמ\"ש | כניסה בתשלום ליועמ\"ש שאינם חברים",
-        "location": "אוניברסיטת תל אביב אודיטוריום סמולרש, ד\"ר ג'ורג' וייז, תל אביב יפו, מחוז תל אביב",
         "ctz": "Asia/Jerusalem",
         "details": "https://www.eventbrite.com/e/1989775742810\n\nתשלום מתבצע בלינק הבא-  https://smartbee.co.il/public-pages/?redirect-path=pay/6a045009574609580dd4e26f",
         "times": [
@@ -12,7 +11,7 @@
             "start": "2026-07-07T08:00:00",
             "end": "2026-07-07T16:00:00",
             "eventLengthInMinutes": 480,
-            "location": null
+            "location": "אוניברסיטת תל אביב אודיטוריום סמולרש, ד\"ר ג'ורג' וייז, תל אביב יפו, מחוז תל אביב"
           }
         ]
       }

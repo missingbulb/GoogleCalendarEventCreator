@@ -230,7 +230,10 @@ function makeGroupCard(card, tab, chipFor) {
   const head = document.createElement("span");
   head.className = "e-group-head";
   head.appendChild(titleEl(event, tab));
-  const detail = [groupHeaderTime(instances), varied ? "" : event.location].filter(Boolean).join(" · ");
+  // When the venue is shared (not varied), every instance resolves to the same
+  // location, so the first instance is representative for the header.
+  const sharedLoc = varied ? "" : instanceLocation(event, instances[0].t);
+  const detail = [groupHeaderTime(instances), sharedLoc].filter(Boolean).join(" · ");
   if (detail) {
     const loc = document.createElement("span");
     loc.className = "e-when";

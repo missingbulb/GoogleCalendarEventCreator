@@ -4,7 +4,6 @@
     "events": [
       {
         "title": "Monet X Manet",
-        "location": "Florentin, Tel Aviv-Yafo, Israel",
         "ctz": "Asia/Jerusalem",
         "details": "https://luma.com/7e302q5v\n\nTicket confirmation and location details will be shared once payment has been completed via the link below\n🎟 Reserve your seat → https://mrng.to/SsB2WIM0a5\nWine, cheese, and vibes included ✨",
         "times": [
@@ -12,7 +11,7 @@
             "start": "2026-06-17T20:30:00",
             "end": "2026-06-17T23:30:00",
             "eventLengthInMinutes": null,
-            "location": null
+            "location": "Florentin, Tel Aviv-Yafo, Israel"
           }
         ]
       }

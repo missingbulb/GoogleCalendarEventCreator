@@ -4,7 +4,6 @@
     "events": [
       {
         "title": "Savta Stories - An Intergenerational Activity at the City Museum",
-        "location": "City Museum Tel Aviv-Yafo, Bialik Street 27",
         "ctz": "Asia/Jerusalem",
         "details": "https://visit.tel-aviv.gov.il/Pages/EventLocation.aspx?ListType=Events&ItemId=2173\n\nWhat happens when Tel Aviv memories meet a young imagination?\n\nJoin us for a special intergenerational activity – a journey of stories, memories, and creativity through the story of Tel Aviv-Yafo.\n\nAt the center of it all are unique postcards that bring the city’s stories to life through our annual art exhibition.\n\nWe start with a guided tour of the museum, where participants come face to face with moments, places, and people from the city’s history.\n\nThen the older generation tells their story and writes it down on one side of the postcard, while the younger generation listens, asks questions, and illustrates it in their own way on the other side. A family memory becomes a shared creation – and the city gets one more small, singular story to call its own.\n\nEveryone goes home with the postcard they made together – a personal keepsake that’s part family story and part piece of the city’s mosaic.\n\n• Ages 6–12 + grandparent(s)\n\n• Children must be accompanied by a paying adult",
         "times": [
@@ -12,7 +11,7 @@
             "start": "2026-07-14",
             "end": "2026-08-25",
             "eventLengthInMinutes": null,
-            "location": null
+            "location": "City Museum Tel Aviv-Yafo, Bialik Street 27"
           }
         ]
       }

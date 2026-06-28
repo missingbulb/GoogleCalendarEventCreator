@@ -81,12 +81,13 @@ function hostOf(url) {
 const str = (v) => (v == null ? "" : String(v));
 
 // Flatten an event's first instance (times[0]) onto the event so the per-field
-// grading below can read start/end/eventLengthInMinutes alongside the non-time
-// fields. Returns {} for a missing event.
+// grading below can read start/end/eventLengthInMinutes/location alongside the
+// non-time fields. Location is per-instance (no top-level field), so it comes from
+// the primary showing too. Returns {} for a missing event.
 function flattenPrimary(event) {
   if (!event) return {};
   const t0 = (Array.isArray(event.times) && event.times[0]) || {};
-  return { ...event, start: t0.start, end: t0.end, eventLengthInMinutes: t0.eventLengthInMinutes };
+  return { ...event, start: t0.start, end: t0.end, eventLengthInMinutes: t0.eventLengthInMinutes, location: t0.location };
 }
 
 // --- Date equivalence -------------------------------------------------------

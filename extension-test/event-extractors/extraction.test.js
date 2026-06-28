@@ -4,9 +4,10 @@
 // is the suite that checks the real sites still serve parseable markup.
 //
 // extractFromHtml returns { events: [...] }, where each event carries its timing
-// in times[] (the multi-instance model). `firstEvent` grabs the suggested first
-// event; its start/end/duration live on its first instance (`firstEvent(...).
-// times[0]`), while title/location/description/ctz stay on the event itself.
+// AND place in times[] (the multi-instance model). `firstEvent` grabs the
+// suggested first event; its start/end/duration/location live on its first
+// instance (`firstEvent(...).times[0]`), while title/description/ctz stay on the
+// event itself (there is no top-level location).
 "use strict";
 
 const test = require("node:test");
@@ -32,7 +33,7 @@ test("Meetup: hardcoded selectors (title, time, venue, details)", () => {
   assert.equal(e.times.length, 1); // with a single instance
   assert.equal(e.title, "Intro to Rust Workshop");
   assert.equal(e.times[0].start, "2026-07-08T18:30:00-04:00");
-  assert.equal(e.location, "Brooklyn Public Library");
+  assert.equal(e.times[0].location, "Brooklyn Public Library");
   assert.ok(e.description.includes("ownership and borrowing"));
 });
 
@@ -51,7 +52,7 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
   assert.equal(e.title, "Coffee Festival");
   assert.equal(e.times[0].start, "2026-09-12T10:00:00-07:00");
   assert.equal(e.times[0].end, "2026-09-12T16:00:00-07:00"); // only present in JSON-LD
-  assert.equal(e.location, "Oregon Convention Center, Portland, OR");
+  assert.equal(e.times[0].location, "Oregon Convention Center, Portland, OR");
 });
 
 test("Facebook: title from <h1>, date parsed from visible text", () => {
@@ -85,7 +86,7 @@ test("Generic site: JSON-LD inside @graph, location flattened, HTML stripped", (
   const e = firstEvent(html, "https://www.bluedoorhall.example/shows/jazz-night");
   assert.equal(e.title, "Late Night Jazz");
   assert.equal(e.times[0].start, "2026-07-01T20:00:00+02:00");
-  assert.equal(e.location, "Blue Door Hall, Hauptstr. 12, Berlin");
+  assert.equal(e.times[0].location, "Blue Door Hall, Hauptstr. 12, Berlin");
   assert.equal(e.description, "An intimate evening of jazz.");
 });
 
@@ -100,7 +101,7 @@ test("JSON-LD location: city/state repeated inside streetAddress is not duplicat
     </script>`;
 
   const e = firstEvent(html, "https://www.someevents.example/mixer");
-  assert.equal(e.location, "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY");
+  assert.equal(e.times[0].location, "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY");
 });
 
 test("Generic site with no structured data: heuristics only", () => {
@@ -113,7 +114,7 @@ test("Generic site with no structured data: heuristics only", () => {
   const e = firstEvent(html, "https://www.riversideneighbors.example/news/spring-cleanup");
   assert.equal(e.title, "Annual Neighborhood Cleanup");
   assert.equal(e.times[0].start, "2026-04-19T09:00:00");
-  assert.equal(e.location, "Riverside Park boathouse, 120 River Rd");
+  assert.equal(e.times[0].location, "Riverside Park boathouse, 120 River Rd");
   assert.equal(e.description, "Gloves and trash grabbers provided.");
 });
 
@@ -223,7 +224,7 @@ test("Generic site: location falls back to Open Graph place meta tags", () => {
 
   const e = firstEvent(html, "https://www.example.com/market");
   assert.equal(e.title, "Harvest Market");
-  assert.equal(e.location, "500 Main St, Springfield, IL");
+  assert.equal(e.times[0].location, "500 Main St, Springfield, IL");
 });
 
 test("Generic site: location falls back to 'Event @ Venue' in the page title", () => {
@@ -237,7 +238,7 @@ test("Generic site: location falls back to 'Event @ Venue' in the page title", (
 
   const e = firstEvent(html, "https://www.example.com/show");
   assert.equal(e.title, "Berry Sakharof @ Peace Forest, Jerusalem");
-  assert.equal(e.location, "Peace Forest, Jerusalem");
+  assert.equal(e.times[0].location, "Peace Forest, Jerusalem");
 });
 
 test("Generic site: midnight-UTC <time datetime> is refined using the start time from og:description", () => {
@@ -276,7 +277,7 @@ test("Generic site: '(Virtual)' or '(Online)' parenthetical in the title signals
       <meta property="og:title" content="Tech Summit ${label}">
       <p>July 8, 2026 at 2 PM</p>`;
     const e = firstEvent(html, "https://www.example.com/summit");
-    assert.equal(e.location, "Online", `title with ${label} should yield Online location`);
+    assert.equal(e.times[0].location, "Online", `title with ${label} should yield Online location`);
   }
 });
 
@@ -297,7 +298,7 @@ test("Listing page with several events: every JSON-LD event is returned, in orde
     ["Sculpture Fair", "Poetry Slam", "Chamber Music"]
   );
   assert.equal(ev.events[0].times[0].start, "2026-10-03"); // date-only -> all-day event
-  assert.equal(ev.events[0].location, "Market Square");
+  assert.equal(ev.events[0].times[0].location, "Market Square");
   assert.equal(ev.events[1].times[0].start, "2026-10-10T19:00:00");
 });
 
@@ -363,7 +364,7 @@ test("Tel Aviv Cinematheque series page: one event per film card", () => {
     "First Film\n18-06-2026 , חמישי / 20:00 / אולם 1\n\nIsrael / 2026 / אורך: 90"
   );
   assert.equal(ev.events[0].times[0].eventLengthInMinutes, 90);
-  assert.ok(ev.events[0].location.includes("סינמטק תל אביב"));
+  assert.ok(ev.events[0].times[0].location.includes("סינמטק תל אביב"));
 });
 
 test("Tel Aviv Cinematheque: location is the address text only, not <img>/<noscript> markup", () => {
@@ -379,7 +380,7 @@ test("Tel Aviv Cinematheque: location is the address text only, not <img>/<noscr
     <a href="#"><img data-src="https://www.cinema.co.il/x/location.png" alt="img"><noscript><img src="https://www.cinema.co.il/x/location.png" alt="img"></noscript>רחוב הארבעה 5, תל אביב</a>`;
 
   const ev = extractFromHtml(html, "https://www.cinema.co.il/event/some-film/", { runScripts: "dangerously" });
-  assert.equal(ev.events[0].location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
+  assert.equal(ev.events[0].times[0].location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
 });
 
 test("Tel Aviv Cinematheque: a film's screenings group into one multi-instance event", () => {
@@ -437,7 +438,7 @@ test("Edinburgh Fringe: __NEXT_DATA__ event JSON, ctz always GB", () => {
   // past midnight.
   assert.equal(e.times[0].start, "2026-08-10T23:55:00");
   assert.equal(e.times[0].end, "2026-08-11T00:55:00");
-  assert.equal(e.location, "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR");
+  assert.equal(e.times[0].location, "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR");
   assert.ok(e.description.includes("vague energy"));
   assert.equal(e.ctz, "GB");
 });
@@ -480,8 +481,8 @@ test("Edinburgh Fringe: a multi-performance show groups into one multi-instance 
 test("A touring show at several venues groups into one multi-instance event, each instance keeping its own location", () => {
   // The same title/description at different venues+dates is a touring show: the
   // grouping key is title+description+ctz (NOT location), so the dates fold into
-  // ONE event whose instances differ by date AND venue. The event-level location
-  // is "" because the venues vary; each instance carries its own.
+  // ONE event whose instances differ by date AND venue. There is no top-level
+  // location; each instance carries its own.
   const html = `
     <script type="application/ld+json">
     [ { "@type": "MusicEvent", "name": "The Wallflowers — On Tour", "description": "Live across the country.",
@@ -497,7 +498,7 @@ test("A touring show at several venues groups into one multi-instance event, eac
   assert.equal(ev.events.length, 1);
   const e = ev.events[0];
   assert.equal(e.title, "The Wallflowers — On Tour");
-  assert.equal(e.location, ""); // venues vary -> no shared event-level location
+  assert.equal("location" in e, false, "no top-level location — it lives on each showing");
   assert.equal(e.times.length, 3);
   assert.deepEqual(
     [...e.times].map((t) => [t.start, t.location]),
@@ -509,11 +510,9 @@ test("A touring show at several venues groups into one multi-instance event, eac
   );
 });
 
-test("Same title at one shared venue groups with the venue on the EVENT, not duplicated on each instance", () => {
-  // When the grouped showings all share a venue, the event-level location is that
-  // shared venue (so the existing single-location header path is unchanged), and
-  // the redundant per-instance copy is dropped — an instance names a venue ONLY
-  // when it has its own (a touring stop).
+test("Same title at one shared venue groups into one event; the venue repeats on each showing (no top-level location)", () => {
+  // The showings share a venue, but location is per-showing (no top-level field),
+  // so each instance carries the venue — a single-venue event simply repeats it.
   const html = `
     <script type="application/ld+json">
     [ { "@type": "Event", "name": "Yoga in the Park", "description": "Morning flow.",
@@ -526,9 +525,9 @@ test("Same title at one shared venue groups with the venue on the EVENT, not dup
   const ev = extractFromHtml(html, "https://www.example.org/yoga");
   assert.equal(ev.events.length, 1);
   const e = ev.events[0];
-  assert.equal(e.location, "Riverside Lawn");
+  assert.equal("location" in e, false, "no top-level location");
   assert.equal(e.times.length, 2);
-  assert.deepEqual([...e.times].map((t) => t.location ?? null), [null, null], "no redundant per-instance venue");
+  assert.deepEqual([...e.times].map((t) => t.location), ["Riverside Lawn", "Riverside Lawn"]);
 });
 
 test("Same time, different venues are distinct instances (not deduplicated)", () => {
@@ -636,7 +635,7 @@ test("Supported host, dedicated extractor finds nothing but the page has a gener
   assert.equal(ev.fallback, true);  // the events came from the generic fallback
   assert.equal(ev.events.length, 1);
   assert.equal(ev.events[0].title, "Indie Rock Night");
-  assert.equal(ev.events[0].location, "The Echo, Los Angeles");
+  assert.equal(ev.events[0].times[0].location, "The Echo, Los Angeles");
   assert.equal(ev.events[0].times[0].start, "2026-09-12T20:00:00");
 });
 

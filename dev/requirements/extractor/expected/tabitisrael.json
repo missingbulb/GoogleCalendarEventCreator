@@ -5,7 +5,6 @@
     "events": [
       {
         "title": "Meatbar TLV",
-        "location": "Meatbar TLV, שדרות חן 52, תל אביב",
         "ctz": "Asia/Jerusalem",
         "details": "https://tabitisrael.co.il/%D7%94%D7%96%D7%9E%D7%A0%D7%AA-%D7%9E%D7%A7%D7%95%D7%9D/create-reservation?step=summary&reservationId=6a33bcc52be576d72af18276&orgId=599ac32e5eb82a2200ba84e9&type=future_reservation&source=tabit&saved=1\n\nהיי חבר,\nההזמנה שלכם נשמרה אצלנו בהצלחה.\nשולחנכם ישמר למשך 15 דקות ממועד ההזמנה.\nנשמח לראותכם!\nשימו לב, תחויבו בסכום הפקדון במידה ותבטלו פחות מ 6 שעות משעת ההזמנה.",
         "times": [
@@ -13,7 +12,7 @@
             "start": "2026-06-21T12:00:00",
             "end": null,
             "eventLengthInMinutes": null,
-            "location": null
+            "location": "Meatbar TLV, שדרות חן 52, תל אביב"
           }
         ]
       }
