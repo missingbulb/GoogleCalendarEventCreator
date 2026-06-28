@@ -21,10 +21,9 @@ top-level architectural guideline, update this section as part of the same chang
   touching nothing else and assuming nothing about other extractors.
 
 Portable agent-architecture principles that aren't specific to this project (the
-unattended-agent judgment boundary, the bounded-and-enforced write surface) live
-in the shared rules:
-[claude/shared/agent-architecture.md](../claude/shared/agent-architecture.md). The
-worked examples for both are this repo's auto-extractor pipeline
+unattended-agent judgment boundary, the bounded-and-enforced write surface) are
+maintained as portable, project-agnostic rules outside this repo. The worked
+examples for both are this repo's auto-extractor pipeline
 ([auto-extractor.md](../../create-extractor/auto-extractor.md)).
 
 ## How extraction works

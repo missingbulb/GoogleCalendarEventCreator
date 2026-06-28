@@ -2,8 +2,7 @@
 
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
-live in [this_project/highLevelDesign.md](highLevelDesign.md); project-agnostic
-engineering practices in [engineeringPractices.md](../claude/shared/engineeringPractices.md).
+live in [this_project/highLevelDesign.md](highLevelDesign.md).
 
 **Scope — project-wide footguns only.** A trap you'd only trip over *while
 editing one specific file or function* (a mistake of **commission**, made with
@@ -69,11 +68,10 @@ trap spanning files. See the full locality rule in
   tab/event listeners a test can trigger, attaching to the target is what starts
   it, and the first read still races startup — so **poll** until the global
   appears. (Bound every probe and add a test-level timeout regardless, per the
-  hang-proofing rule in [engineeringPractices.md](../claude/shared/engineeringPractices.md).)
+  hang-proofing rule.)
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
-  workflow** — this GitHub-CI rule and its `workflow_dispatch` exception live
-  with the rest of the portable GitHub procedures in
-  [claude/shared/git-and-github.md](../claude/shared/git-and-github.md).
+  workflow** — this GitHub-CI rule and its `workflow_dispatch` exception are
+  portable GitHub procedures maintained outside this repo.
 - **Bot-blocking from CI is by datacenter IP (the general rule is in
   [general/engineeringPractices.md](../general/engineeringPractices.md)); here the
   escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
@@ -125,11 +123,10 @@ trap spanning files. See the full locality rule in
   actual data — JSON-LD or a parsed date — not merely a host match.
 - **Two portable GitHub gotchas this repo relies on — large fixtures need
   `linguist-vendored`, and Markdown inside a raw `<td>` needs surrounding blank
-  lines.** The `linguist-vendored` rule now lives in the shared canon
-  [claude/shared/git-and-github.md](../claude/shared/git-and-github.md); the `<td>`
-  blank-lines rule (with this repo's `<!-- … -->`-marker-last-token nuance, not yet
-  upstreamed) is in the local working set
-  [general/git-and-github.md](../general/git-and-github.md). Here they apply to the
+  lines.** The `linguist-vendored` rule is a portable, project-agnostic rule
+  maintained outside this repo; the `<td>` blank-lines rule (with this repo's
+  `<!-- … -->`-marker-last-token nuance, not yet upstreamed) is in the local
+  working set [general/git-and-github.md](../general/git-and-github.md). Here they apply to the
   `dev/requirements/extractor/data/**/*.html` fixtures (`.gitattributes`, #78) and the
   two-column gallery in `dev/requirements/requirements.md`
   (`dev/requirements/shared/build-requirements-gallery.js`).
