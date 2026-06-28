@@ -1,28 +1,39 @@
-// dice.fm event pages: https://dice.fm/event/8elnrw-daniele-tinti-pesche-dure-live-a-napoli-7th-dec-teatro-bellini-napoli-tickets
+// dice.fm event pages: https://dice.fm/event/<slug>
 //
-// TODO(agent): document the page's structure and where each field is read from,
-// mirroring event-extractors/custom/meetup.js. The real page is cached at
-// dev/requirements/extractor/data/server-fetched/dice.html.
+// Expected HTML input (the schema.org JSON-LD block dice.fm publishes):
 //
-// A matched host runs THIS source only — it must produce every field itself; the
-// generic fallback extractor does not run for a supported host. Lean on the
-// page's own schema.org JSON-LD for the fields your DOM selectors miss via the
-// merge() call below (your DOM values win where present).
+//   <script type="application/ld+json">
+//   { "@type": "ComedyEvent",
+//     "name": "Daniele Tinti - Pesche Dure - Live a Napoli",
+//     "startDate": "2026-12-07T21:00:00+01:00",
+//     "endDate":   "2026-12-07T23:00:00+01:00",
+//     "location": { "name": "Teatro Bellini",
+//                   "address": "Via Conte di Ruvo 14, 80135 Napoli..." },
+//     "description": "**PESCHE DURE** ..." }
+//   </script>
+//
+//   Inline JSON state blob containing:  "timezone":"Europe/Rome"
+//
+// Where each field comes from:
+//   title       JSON-LD "name" (via embeddedEvents)
+//   start       JSON-LD "startDate" ISO datetime with UTC offset (via embeddedEvents)
+//   end         JSON-LD "endDate" (via embeddedEvents)
+//   location    JSON-LD location.name + location.address, comma-joined (via embeddedEvents)
+//   description JSON-LD "description" markdown rendered to text (via embeddedEvents)
+//   ctz         inline JSON state "timezone" field (IANA timezone name)
+//
+// The JSON-LD is comprehensive; no DOM selectors are needed beyond the ctz read.
 (() => {
-  const { text, firstText, blockText, normalizeDateValue, merge, embeddedEvents } = GCal;
+  const { findTimezone, scriptsText, merge, embeddedEvents } = GCal;
 
   GCal.sources.push({
     name: "dice",
     matches: (host) => /(^|\.)dice\.fm$/.test(host),
     extract() {
-      // TODO(agent): refine these selectors against dev/requirements/extractor/data/server-fetched/dice.html, and
-      // add location / description / ctz as the page needs them.
       const dom = {
-        title: text("h1"),
-        start: (() => {
-          const el = document.querySelector("time[datetime]");
-          return el ? normalizeDateValue(el.getAttribute("datetime")) : "";
-        })(),
+        // The timezone lives inside a doubly-encoded JSON string in the Next.js
+        // __NEXT_DATA__ blob, so the inner quotes appear as \" in textContent.
+        ctz: findTimezone(scriptsText(), /\\"timezone\\"\s*:\s*\\"([^"\\]+)\\"/),
       };
       return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
