@@ -24,7 +24,7 @@
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
 (() => {
-  const { clean, text, meta, blockText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts } = GCal;
+  const { clean, text, meta, blockText, htmlToText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts } = GCal;
 
   function extract() {
     const embedded = embeddedEvents.find();
@@ -100,8 +100,11 @@
       out.location = "Online";
     }
 
-    // Preserve the description's line breaks rather than flattening it.
-    out.description = meta("og:description") || meta("description") || blockText('[itemprop="description"]');
+    // Preserve the description's line breaks. Meta descriptions often contain
+    // literal HTML markup (e.g. "<br />") rather than real newlines — parse
+    // them through htmlToText so markup becomes text structure.
+    const rawDesc = meta("og:description") || meta("description");
+    out.description = rawDesc ? htmlToText(rawDesc) : blockText('[itemprop="description"]');
 
     return out;
   }
