@@ -1,30 +1,32 @@
-// stubhub.com event pages: https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500
+// StubHub event and performer listing pages.
 //
-// TODO(agent): document the page's structure and where each field is read from,
-// mirroring event-extractors/custom/meetup.js. The real page is cached at
-// dev/requirements/extractor/data/server-fetched/stubhub.html.
+// Two page types share this source:
 //
-// A matched host runs THIS source only — it must produce every field itself; the
-// generic fallback extractor does not run for a supported host. Lean on the
-// page's own schema.org JSON-LD for the fields your DOM selectors miss via the
-// merge() call below (your DOM values win where present).
+//   /performer/<id>  — a listing page for an artist showing all upcoming shows.
+//                      Carries a @graph JSON-LD block with one MusicEvent per show.
+//   /event/<id>/     — a single-event page with one MusicEvent in JSON-LD.
+//
+// All fields come from JSON-LD; no <h1> or <time datetime> elements are present.
+// startDate is a floating local datetime (no UTC offset, no timezone name), so
+// ctz is not set — StubHub is a global platform and timezone can't be inferred.
+//
+// Where each field comes from (via embeddedEvents.toEvent()):
+//   title       MusicEvent "name"
+//   start       MusicEvent "startDate"
+//   location    MusicEvent "location.name" + PostalAddress parts (flattened)
+//   description MusicEvent "description" (StubHub ticket-sale boilerplate)
 (() => {
-  const { text, firstText, blockText, normalizeDateValue, merge, embeddedEvents } = GCal;
+  const { embeddedEvents } = GCal;
 
   GCal.sources.push({
     name: "stubhub",
     matches: (host) => /(^|\.)stubhub\.com$/.test(host),
     extract() {
-      // TODO(agent): refine these selectors against dev/requirements/extractor/data/server-fetched/stubhub.html, and
-      // add location / description / ctz as the page needs them.
-      const dom = {
-        title: text("h1"),
-        start: (() => {
-          const el = document.querySelector("time[datetime]");
-          return el ? normalizeDateValue(el.getAttribute("datetime")) : "";
-        })(),
-      };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
+      const found = embeddedEvents.find();
+      if (found.length > 1) {
+        return { events: found.map((e) => embeddedEvents.toEvent(e)) };
+      }
+      return embeddedEvents.toEvent(found[0]);
     },
   });
 })();

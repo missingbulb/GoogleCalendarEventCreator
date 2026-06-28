@@ -1,6 +1,85 @@
 {
-  "description": "stubhub.com: TODO(agent) — one line on what this case tests",
+  "description": "stubhub.com performer listing page yields 6 upcoming Shlomo Artzi shows, each with venue and datetime from JSON-LD",
   "expected": {
-    "events": []
+    "events": [
+      {
+        "title": "Shlomo Artzi",
+        "location": "Heichal Hatarbut - Charles Bronfman Auditorium, Habima Square, Tel Aviv, 61999, Israel",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for July 04 at Heichal Hatarbut - Charles Bronfman Auditorium in Tel Aviv at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-07-04T20:30:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Shlomo Artzi",
+        "location": "Caesarea Amphitheater, 0, Israel",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for July 09 at Caesarea Amphitheater in Caesarea at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-07-09T20:00:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Shlomo Artzi",
+        "location": "Menora Mivtachim Arena, 51 Yigal Alon St., Tel Aviv, 63504, Israel",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for August 01 at Menora Mivtachim Arena in Tel Aviv at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-08-01T20:30:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Shlomo Artzi",
+        "location": "Barby Tel Aviv, Derech Kibuts Galuyot, 52, Israel",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for August 06 at Barby Tel Aviv in Tel Aviv at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-08-06T20:00:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Shlomo Artzi",
+        "location": "Romema Arena, x, Haifa, 0111, Israel",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for August 20 at Romema Arena in Haifa at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-08-20T20:00:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      },
+      {
+        "title": "Shlomo Artzi",
+        "location": "Sultans Pool, Jerusalem, 0000, Israel",
+        "ctz": null,
+        "details": "https://www.stubhub.com/shlomo-artzi-tickets/performer/1512500\n\nBuy and sell Shlomo Artzi Tickets for August 27 at Sultans Pool in Jerusalem at StubHub! Tickets are 100% guaranteed by FanProtect",
+        "times": [
+          {
+            "start": "2026-08-27T20:00:00",
+            "end": null,
+            "eventLengthInMinutes": null
+          }
+        ]
+      }
+    ]
   }
 }
