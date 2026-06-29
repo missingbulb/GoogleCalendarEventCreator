@@ -35,17 +35,32 @@ rendering) makes the snapshot tests **fail** (the pixels moved):
    suite is green, and push. On **Reject**: **do not** roll back automatically —
    leave the change in place and discuss how to proceed.
 
-When the repo owner says **"bump version"**, treat it as a defined instruction:
-raise the extension's version by editing the `version` field in
-**both** `extension/manifest.json` and `package.json` (they must stay in sync), update the `value` in `dev/procedures/test/uber/shared_constants/version-sync.json` to match, on a
-branch, to be merged into `main` through the normal PR flow. Default to a
-**minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an explicit target ("bump version
-to 1.4.0") or level ("bump patch" / "bump major") when given. Bumping the
-version is the *only* prerequisite to releasing: merging the bump PR to `main`
-triggers the **Release: Create Package** workflow, which builds and publishes
-whatever version is committed in `extension/manifest.json` (and no-ops if that version is
-already the latest release). The release workflow never changes the version
-itself.
+When the repo owner says **"bump version"**, treat it as a defined instruction
+to cut a release **end to end** — bump, merge, and wait for the published
+artifact — not just to open the bump PR:
+
+1. Raise the extension's version by editing the `version` field in **both**
+   `extension/manifest.json` and `package.json` (they must stay in sync), and
+   update the `value` in
+   `dev/procedures/test/uber/shared_constants/version-sync.json` to match, on a
+   branch. Default to a **minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an
+   explicit target ("bump version to 1.4.0") or level ("bump patch" / "bump
+   major") when given.
+2. Open the PR and get CI green, then merge it to `main` via **squash**,
+   appending `(#N)` to the title. Saying "bump version" is itself the
+   authorization to merge **this** bump PR — a deterministic, version-only
+   change — overriding the merge-needs-its-own-approval default for this case
+   only.
+3. The merge triggers the **Release: Create Package** workflow, which builds the
+   new release and publishes a `vX.Y.Z` GitHub Release with a refreshed
+   `google-calendar-event-creator.zip` asset (it no-ops if that version is
+   already the latest release; it never changes the version itself). **Do not
+   report the release done until that workflow has completed and the new
+   `vX.Y.Z` Release with its updated zip asset is published** — poll for it
+   (the shell can't observe GitHub state here; use the GitHub MCP tools, on the
+   short-interval back-off in [github.md](github.md)). Reporting at merge time
+   races the async build: a follow-up "deploy to Chrome store" would then ship
+   the *previous* version's artifact.
 
 When the repo owner says **"learned lessons"**, treat it as a defined
 instruction: review the current conversation — on Opus, since the reflection
