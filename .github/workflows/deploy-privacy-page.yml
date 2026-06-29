@@ -75,3 +75,17 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # A standalone (workflow_dispatch) Pages deploy is unattended — a failure just
+  # turns the run red. Surface it as a tracking issue. When this workflow is
+  # invoked via workflow_call (from publish-chrome-store), the caller grants the
+  # issues:write this job needs. The job-level permission below is what the token
+  # actually carries (the top-level block above omits issues on purpose).
+  report-failure:
+    needs: [build, deploy]
+    if: failure()
+    permissions:
+      issues: write
+    uses: ./.github/workflows/report-failure.yml
+    with:
+      workflow: "Deploy privacy policy to GitHub Pages"
