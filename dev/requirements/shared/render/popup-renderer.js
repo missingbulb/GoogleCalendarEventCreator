@@ -22,6 +22,15 @@
 // requirement — an element with >1 child needs an explicit flex/none/contents
 // display — plus swapping in the bundled font. Interaction rules (:hover/:active)
 // match nothing in a static tree, so they're skipped.
+//
+// Two satori layout quirks that bite multi-line text (and have no CSS fix here):
+// (a) it does NOT honor `-webkit-line-clamp`, so a wrapping box won't truncate to
+// N lines — only single-line `white-space:nowrap; text-overflow:ellipsis` works;
+// (b) a wrapping box reserves its FULL `max-width` even when the wrapped lines are
+// shorter, so a `max-width` cell reads as too wide (dead space). To get a
+// content-sized, line-bounded box, pre-wrap/ellipsize in JS and render explicit
+// per-line elements (see events-view.js venueLines), rather than leaning on CSS
+// wrapping + clamp.
 "use strict";
 
 const fs = require("node:fs");
@@ -93,6 +102,15 @@ const BODY_RULE = RULES.find((r) => r.selector === "body");
 // Fold popup.css onto the popup's <body> subtree as inline styles. The element's
 // own inline style is appended last so it wins (so a case's action that sets an
 // inline style — e.g. scroll-to-bottom — overrides the stylesheet).
+//
+// ORDERING GOTCHA: this PREPENDS each rule's declarations (`${body};${existing}`)
+// and ignores selector specificity, so on a property a later rule also sets, the
+// one declared EARLIER in popup.css wins — it lands last in the inline string,
+// and CSS resolves duplicates last-wins. This is the OPPOSITE of the real cascade
+// (and of specificity). So to make an override beat a base rule in the SNAPSHOT,
+// declare it BEFORE the base rule in popup.css, not after (e.g. a `.e-chip.has-loc`
+// flex-direction override must precede the base `.e-chip` rule). A change that
+// only looks right in Chrome but not the snapshot is usually this.
 function inlinePopupCss(bodyEl) {
   for (const { selector, body } of RULES) {
     if (selector === "body") continue;
