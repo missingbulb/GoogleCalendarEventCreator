@@ -10,6 +10,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 
@@ -17,27 +18,15 @@ const ROOT = path.join(__dirname, "..", "..", "..");
 // roots rather than required targets.
 const ROOTS = ["CLAUDE.md", "README.md"];
 
-// The vendored Claudinite canon (fetched over HTTPS into this gitignored dir, not
-// a git submodule) is consumed read-only and owns its own internal navigation — we
-// import only its top-level CLAUDE.md and let it traverse from there. So this orphan
-// check polices OUR docs, not the canon's internals: some canon files are reached by
-// mechanisms our link-following BFS can't see (e.g. preferences/<email>.md is loaded
-// by a session-start hook, not linked from any doc), which would otherwise read as
-// false orphans here.
-const VENDORED_CANON = "dev/procedures/claude/shared";
-
-// Every doc that must be reachable, repo-root-relative and POSIX-separated.
+// Every doc that must be reachable, repo-root-relative and POSIX-separated. We list
+// only SOURCE-CONTROLLED docs (git's tracked-file list, not a filesystem walk), so
+// anything gitignored — e.g. a read-only vendored canon synced in as an artifact —
+// is never policed as an orphan, with no path to hardcode. (We own only what we
+// commit; a synced corpus owns its own internal navigation.)
 function allDocs() {
-  const out = [];
-  (function walk(dir) {
-    if (dir === VENDORED_CANON) return; // skip the read-only vendored canon (see above)
-    for (const e of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
-      const rel = `${dir}/${e.name}`;
-      if (e.isDirectory()) walk(rel);
-      else if (e.name.endsWith(".md")) out.push(rel);
-    }
-  })("dev/procedures");
-  return out;
+  return execSync("git ls-files -z -- dev/procedures", { cwd: ROOT, encoding: "utf8" })
+    .split("\0")
+    .filter((f) => f.endsWith(".md"));
 }
 
 // References out of one file, resolved to repo-root-relative .md targets:

@@ -89,7 +89,7 @@ Flag specifically any process that **returns its result but then wastes time on
 shutdown** — one that could be safely killed once its output is in hand rather
 than waited out. Close with a **terse verdict**: either one concrete speed-up
 recommendation (route it like any other lesson — a project mechanic to the
-matching `dev/procedures/claude/*`, a portable practice to `dev/procedures/general/agenticBestPractices.md`),
+matching `dev/procedures/this_project/*`, a portable practice to `dev/procedures/general/agenticBestPractices.md`),
 or an explicit **"no changes recommended"**. The bar is high — most
 conversations won't yield a new process note, so "no changes recommended" is the
 common, expected outcome; don't manufacture one.
@@ -98,8 +98,8 @@ common, expected outcome; don't manufacture one.
 Claudinite. Route by scope:
 
 - **Project-specific** lessons: project mechanics to the matching file under
-  `dev/procedures/claude/` (workflow, github, testing) or
-  `dev/procedures/this_project/` (adding-a-source, auto-extractor);
+  `dev/procedures/this_project/` (workflow, github, testing, adding-a-source,
+  auto-extractor);
   top-level project architecture rules to the "Architecture rules of the road"
   section of `dev/procedures/this_project/highLevelDesign.md`;
   non-obvious **project-wide** codebase footguns to `dev/procedures/this_project/technicalGotchas.md`
@@ -127,8 +127,8 @@ Claudinite. Route by scope:
 - **Portable** lessons (general engineering practices, agentic best practices):
   to the local working-set docs `dev/procedures/general/engineeringPractices.md` and
   `dev/procedures/general/agenticBestPractices.md`. These are local capture surfaces; the curated,
-  project-agnostic canon lives read-only in the vendored Claudinite canon
-  (`dev/procedures/claude/shared/`, fetched over HTTPS). Don't try to edit the shared docs or file a Claudinite
+  project-agnostic canon lives read-only in the Claudinite canon synced into this
+  repo over HTTPS. Don't try to edit the shared docs or file a Claudinite
   issue here — just write the best local doc.
 
 You never hand a lesson to Claudinite at capture time. The daily
