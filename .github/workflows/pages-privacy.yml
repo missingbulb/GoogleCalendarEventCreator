@@ -1,0 +1,78 @@
+# Publishes the privacy policy to GitHub Pages at a fixed, path-independent URL.
+#
+# Why this exists: the Chrome Web Store listing needs a public Privacy Policy
+# URL. A raw GitHub blob link (.../blob/main/PRIVACY.md) bakes the file's repo
+# path into that external contract, so moving/renaming the file breaks it. This
+# workflow serves the SAME PRIVACY.md (the single source of truth, still at the
+# repo root) through Pages with a Jekyll `permalink: /privacy/`, which decouples
+# the public URL from the source path. The public URL —
+#   https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/
+# is stable even if PRIVACY.md later moves; only the `cat PRIVACY.md` path below
+# would change, never the URL.
+#
+# One-time owner setup: enable Pages with source = "GitHub Actions"
+# (repo Settings -> Pages). Until then this workflow's deploy step fails.
+name: Deploy privacy policy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - PRIVACY.md
+      - .github/workflows/pages-privacy.yml
+  workflow_dispatch:
+
+# Least privilege for a Pages deploy: read the repo, write Pages, mint the OIDC
+# token deploy-pages exchanges.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two Pages deploys at once; let an in-flight deploy finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble the Pages site from PRIVACY.md
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          # The policy page: a permalink pins the public path, the body is
+          # PRIVACY.md verbatim (single source of truth — no duplicated copy).
+          {
+            printf -- '---\npermalink: /privacy/\ntitle: "Privacy Policy"\n---\n\n'
+            cat PRIVACY.md
+          } > site/privacy.md
+          # Landing page redirects the site root to the policy.
+          {
+            printf -- '---\npermalink: /\nsitemap: false\nredirect_to: /GoogleCalendarEventCreator/privacy/\n---\n'
+          } > site/index.md
+          # Minimal Jekyll config (the redirect uses jekyll-redirect-from, which
+          # GitHub Pages bundles).
+          printf -- 'plugins:\n  - jekyll-redirect-from\n' > site/_config.yml
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./site
+          destination: ./_site
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
