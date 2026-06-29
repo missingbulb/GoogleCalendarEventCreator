@@ -1,7 +1,8 @@
 // Behavior contract for the popup's CLICK actions — the leaf requirements that a
-// UI snapshot structurally cannot verify (3.4, 9.1, 9.2, 9.3): clicking a card,
-// a grouped instance button, or an affordance link OPENS the right URL in an
-// ADJACENT new tab and CLOSES the popup. A PNG has no pixels for "a tab opened",
+// UI snapshot structurally cannot verify (3.4, 9.1, 9.2, 9.3, 9.4): clicking a
+// card, a grouped instance button (and, for a multi-venue event, getting that
+// showing's own venue), or an affordance link OPENS the right URL in an ADJACENT
+// new tab and CLOSES the popup. A PNG has no pixels for "a tab opened",
 // so these leaves declare `kind: "behavior"` in their case and are routed here
 // instead of onto a snapshot image (see the engineering practices doc, issue #429).
 //
@@ -114,6 +115,30 @@ test("9.2/9.3: clicking a grouped card's instance button opens that showing's te
   assert.equal(closed, 1, "popup closes");
 });
 
+// 9.4: when the showings sit at different venues, clicking an instance chip opens
+// the template with THAT showing's own venue (the per-instance location), not the
+// event-level one.
+test("9.4: clicking an instance chip at a differing venue opens the template with that showing's venue", async () => {
+  const [card] = toCards([
+    {
+      title: "On Tour",
+      times: [
+        { start: "2026-07-04T20:00:00", location: "Paradiso, Amsterdam" },
+        { start: "2026-07-11T20:00:00", location: "La Cigale, Paris" },
+      ],
+    },
+  ]);
+  assert.equal(card.kind, "month", "two showings in one month form a grouped card");
+  const el = renderCard(card, TAB, REFERENCE_NOW);
+  const buttons = el.querySelectorAll("button.chip-btn");
+  assert.equal(buttons.length, 2, "one button per showing");
+
+  await click(buttons[1]);
+  assert.equal(created.length, 1, "exactly one tab opened for the clicked showing");
+  const loc = new URL(created[0].url).searchParams.get("location");
+  assert.equal(loc, "La Cigale, Paris", "the clicked showing's own venue fills the Calendar location");
+});
+
 // 3.4: each affordance link (Suggest Correction / Disagree?) opens its target in
 // an adjacent new tab and closes the popup — and suppresses the default <a> nav.
 for (const [label, build] of [
@@ -144,7 +169,7 @@ test("covers exactly the leaves whose case declares kind:\"behavior\"", () => {
     .sort();
   assert.deepEqual(
     behaviorLeaves,
-    ["3.4", "9.1", "9.2", "9.3"],
+    ["3.4", "9.1", "9.2", "9.3", "9.4"],
     "the kind:\"behavior\" cases drifted from what this test actually verifies"
   );
 });

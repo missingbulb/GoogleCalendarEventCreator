@@ -192,8 +192,9 @@ test("buildCalendarUrl: passes eventLengthInMinutes through to dates param", () 
 
 // --- Per-instance URL creation (the multi-instance times[] model) -----------
 // A multi-instance event keeps its timing in times[]; buildCalendarUrl(event,
-// tab, i) schedules the i-th instance. Only the `dates` param varies between
-// instances — title/location/ctz/details come from the event and are identical.
+// tab, i) schedules the i-th instance. The `dates` param varies between instances,
+// and so does `location` when an instance carries its own venue (a touring show);
+// title/ctz/details come from the event and are identical.
 
 // A film screened on three dates: an all-day showing, then two timed shows on a
 // later day (the kind of set the Tel Aviv Cinematheque source produces).
@@ -252,4 +253,34 @@ test("offset-bearing instances are each pinned to their own UTC instant", () => 
   };
   assert.equal(paramsOf(buildCalendarUrl(event, TAB, 0)).get("dates"), "20260614T230000Z/20260615T010000Z");
   assert.equal(paramsOf(buildCalendarUrl(event, TAB, 1)).get("dates"), "20260615T230000Z/20260616T010000Z");
+});
+
+// A touring show: each instance carries its OWN venue, so the location param is
+// taken from the chosen instance (not the event level).
+const TOUR = {
+  title: "On Tour",
+  location: "", // venues vary, so no event-level location
+  times: [
+    { start: "2026-09-04T20:00:00", location: "Paradiso, Amsterdam" },
+    { start: "2026-09-11T20:00:00", location: "La Cigale, Paris" },
+  ],
+};
+
+test("instance location: each instance's own venue fills the Calendar location param", () => {
+  assert.equal(paramsOf(buildCalendarUrl(TOUR, TAB, 0)).get("location"), "Paradiso, Amsterdam");
+  assert.equal(paramsOf(buildCalendarUrl(TOUR, TAB, 1)).get("location"), "La Cigale, Paris");
+});
+
+test("instance location: falls back to the event-level location when the instance has none", () => {
+  const event = { title: "Series", location: "Town Hall", times: [{ start: "2026-09-04T20:00:00" }] };
+  assert.equal(paramsOf(buildCalendarUrl(event, TAB, 0)).get("location"), "Town Hall");
+});
+
+test("instance location: an instance venue overrides the event-level location", () => {
+  const event = {
+    title: "Series",
+    location: "Usual Hall",
+    times: [{ start: "2026-09-04T20:00:00", location: "Special Annex" }],
+  };
+  assert.equal(paramsOf(buildCalendarUrl(event, TAB, 0)).get("location"), "Special Annex");
 });

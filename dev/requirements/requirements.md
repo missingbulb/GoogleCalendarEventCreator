@@ -831,6 +831,112 @@ time/location line is a single line that ellipsizes; the popup's width is fixed.
 </tr>
 </table>
 
+- `5.9` **Per-instance locations (varying venues).** A single event's showings can
+  sit at **different venues** (a touring show, a film at several cinemas). They are
+  one event (grouped by title/description/timezone, not venue), so they stream in
+  **one card** — and because there's no single place to name in the header, each
+  showing's venue rides **inside its calendar chip, to the right of the date/time,
+  behind a location pin**. When every showing shares one venue the card is
+  unchanged (the venue leads the header — see `4.6`/`5.7`).
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.9.1](popup/cases/event-cards-appearance.5.9.1.png) <!-- req-gallery:5.9.1 -->
+
+</td>
+<td valign="top">
+
+`5.9.1` When the showings differ in venue, each calendar chip carries its **own
+venue** to the right of the date (behind a pin), and the header keeps the **shared
+time** (here every showing is 7 PM) but **no location**.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.9.2](popup/cases/event-cards-appearance.5.9.2.png) <!-- req-gallery:5.9.2 -->
+
+</td>
+<td valign="top">
+
+`5.9.2` When the showings differ in **both** time and venue, each chip is a **time
+chip** carrying its own venue, and the header is **title-only** (no shared time,
+no shared location).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.9.3](popup/cases/event-cards-appearance.5.9.3.png) <!-- req-gallery:5.9.3 -->
+
+</td>
+<td valign="top">
+
+`5.9.3` Two showings on the **same day** at different venues read as **time chips**
+(the date is shared), each carrying its own venue.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.9.4](popup/cases/event-cards-appearance.5.9.4.png) <!-- req-gallery:5.9.4 -->
+
+</td>
+<td valign="top">
+
+`5.9.4` A **long venue** clamps to two lines inside the bounded chip; the popup's
+width never grows (the per-instance-location form of `5.8`).
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.9.5](popup/cases/event-cards-appearance.5.9.5.png) <!-- req-gallery:5.9.5 -->
+
+</td>
+<td valign="top">
+
+`5.9.5` **All-day** showings at different venues keep plain **day chips**, each
+carrying its own venue, under an **"All day"** header.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![event-cards-appearance.5.9.6](popup/cases/event-cards-appearance.5.9.6.png) <!-- req-gallery:5.9.6 -->
+
+</td>
+<td valign="top">
+
+`5.9.6` A **single** showing carrying its own per-instance venue surfaces that
+venue on the single card's date/time line, exactly like an event-level location.
+
+</td>
+</tr>
+</table>
+
 
 ## 6. Date & time display
 
@@ -1178,6 +1284,23 @@ Calendar template in a new browser tab.
 
 `9.3` A template opens in a tab **adjacent** to the current one,
 and the popup then closes.
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+🚩 _Behavior leaf — verified by `dev/requirements/behavior/events-view-actions.test.js` (a click a snapshot can't show), not an image._ <!-- req-gallery:9.4 -->
+
+</td>
+<td valign="top">
+
+`9.4` When an event's showings sit at **different venues**, clicking an instance
+chip opens the Calendar template with **that showing's own venue** (not the
+event-level location).
 
 </td>
 </tr>

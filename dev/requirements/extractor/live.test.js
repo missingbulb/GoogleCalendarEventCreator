@@ -19,14 +19,14 @@
 //       "events": [
 //         {
 //           "title":      "Exact Title",
-//           "location":   "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY",
 //           "ctz":        "America/New_York",   <- the Calendar URL's ctz= param, or null
 //           "details":    "[https://...](https://.../)\n\n...full description...",
 //           "times": [
 //             {
 //               "start":                "2026-06-25T18:00:00-04:00",
 //               "end":                  "2026-06-25T21:00:00-04:00",
-//               "eventLengthInMinutes": null   <- explicit page duration, or null
+//               "eventLengthInMinutes": null,  <- explicit page duration, or null
+//               "location":             "Brooklyn Public Library, 10 Grand Army Plaza, Brooklyn, NY"
 //             }
 //           ]
 //         }
@@ -43,7 +43,9 @@
 //
 // `expected.events` must be the *complete*, exact array the extractor
 // produces. Each event is deep-equal compared against:
-//   { title, location, ctz, details, times: [{ start, end, eventLengthInMinutes }] }
+//   { title, ctz, details, times: [{ start, end, eventLengthInMinutes, location }] }
+// Location is per-showing (no top-level field): a single-venue event repeats it
+// across its showings, a touring show varies it.
 // There are no substring/regex/prefix matchers: every field must be present
 // and match exactly, including the full text of `details`. `details` is the
 // same for every instance (only the date differs between them), so it's
@@ -134,13 +136,16 @@ for (const file of caseFiles) {
       const calendarUrl = buildCalendarUrl(e, tab, 0);
       return {
         title: e.title,
-        location: e.location,
         ctz: e.ctz || null,
         details: new URL(calendarUrl).searchParams.get("details"),
         times: [...e.times].map((t) => ({
           start: t.start,
           end: t.end || null,
           eventLengthInMinutes: t.eventLengthInMinutes ?? null,
+          // Location is per-showing in the multi-instance model — there is no
+          // top-level event location. A single-venue event repeats its venue
+          // across its showings; a touring show varies it.
+          location: t.location || null,
         })),
       };
     });
