@@ -65,7 +65,9 @@ and save.
 
 The extension collects, stores, and transmits **nothing** — all processing
 happens locally in your browser and it makes no network requests of its own.
-See [PRIVACY.md](PRIVACY.md) for the full policy.
+See [the privacy policy](dev/build/release/store_artifacts/PRIVACY.md) for the full
+policy (also published at
+<https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/>).
 
 ## Permissions
 
