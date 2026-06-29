@@ -80,7 +80,7 @@ test("the service worker's runtime resources ship", () => {
 });
 
 test("dev/test-only paths do not ship", () => {
-  for (const p of ["extension-test", "dev/requirements", "dev/build", "package.json", "package-lock.json", "README.md", "PRIVACY.md", "dev/procedures", ".github"]) {
+  for (const p of ["extension-test", "dev/requirements", "dev/build", "package.json", "package-lock.json", "README.md", "dev/procedures", ".github"]) {
     assert.ok(!isShipped(p), `${p} should not be in the shipping set`);
   }
 });

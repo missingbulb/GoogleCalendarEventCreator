@@ -79,3 +79,29 @@ jobs:
           npx --yes chrome-webstore-upload-cli@3 upload \
             --source dist/google-calendar-event-creator.zip \
             $flags
+
+  # Refresh the Pages-hosted privacy policy alongside the store upload, from the
+  # same PRIVACY.md the listing points at. The deploy lives in its own reusable
+  # workflow so it can ALSO be run on its own (workflow_dispatch) to make the URL
+  # live without uploading to the store — see deploy-privacy-page.yml. It reports
+  # its OWN failures, so the issues:write below lets that nested reporter run.
+  deploy-privacy-page:
+    uses: ./.github/workflows/deploy-privacy-page.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      issues: write
+
+  # This workflow is run by hand and then left alone, so a failed upload (e.g. the
+  # Chrome Web Store 400 in #581) otherwise just turns the run red with nobody
+  # alerted. Open/append a tracking issue instead. Covers only `publish`; the
+  # deploy-privacy-page reusable workflow reports its own failures.
+  report-failure:
+    needs: publish
+    if: failure()
+    permissions:
+      issues: write
+    uses: ./.github/workflows/report-failure.yml
+    with:
+      workflow: "Release: Publish to Chrome Web Store"
