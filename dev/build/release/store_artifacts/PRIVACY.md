@@ -1,6 +1,6 @@
 # Privacy Policy — Google Calendar Event Creator
 
-_Last updated: 2026-06-14_
+_Last updated: 2026-06-29_
 
 Google Calendar Event Creator ("the extension") is a browser extension that
 extracts event details (name, date/time, location, description) from the page
