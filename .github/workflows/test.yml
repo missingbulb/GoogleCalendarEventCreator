@@ -25,16 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Mount the Claudinite shared-rules canon at .claudinite/ the same way every
-      # environment does now — Method B's session-start tarball sync, not a git
-      # submodule (issue #364 / the remote-fetch successor). Running the hook here
-      # exercises the real bootstrap path on every CI run; the hook fails soft, so we
-      # then assert the canon landed to fail the build on a broken fetch. Claudinite
-      # is public, so no extra creds.
-      - name: Mount Claudinite shared rules
-        run: |
-          .claude/hooks/sync-claudinite.sh
-          test -f .claudinite/CLAUDE.md || { echo "Claudinite mount failed: .claudinite/CLAUDE.md missing"; exit 1; }
+      # Note: the test suite does NOT need the Claudinite canon present — the
+      # orphan check (docs-reachable.test.js) polices only source-controlled docs
+      # and the import to the canon is guarded — so CI does not mount it. The
+      # bootstrap path is exercised every real session by the SessionStart hook.
 
       - uses: actions/setup-node@v5
         with:

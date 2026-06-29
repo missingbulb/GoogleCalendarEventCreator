@@ -1,6 +1,6 @@
 # Handing portable lessons off to Claudinite
 
-The shared rules a project consumes (mounted read-only over HTTPS at `.claudinite/`,
+The shared rules a project consumes (synced into the repo read-only over HTTPS,
 auto-synced to Claudinite `main` each session) live in a separate **canon** repo, **Claudinite**. A session in the consuming repo can't push
 to Claudinite, so a *portable* lesson — one that generalizes beyond this project —
 can't be written into the shared docs directly. This is the **up-path**: how such a
@@ -23,7 +23,7 @@ handoff issue in Claudinite
         │  curation routine (an agent, in Claudinite)
         ▼
 docs PR in Claudinite  → review → merge
-        │  the next session's sync pulls the merged main into .claudinite/ here
+        │  the next session's sync pulls the merged main into the local canon here
         ▼
 the canon absorbs it → optimize-procedures prunes the local copy
 ```

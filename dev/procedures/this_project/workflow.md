@@ -127,8 +127,8 @@ Claudinite. Route by scope:
 - **Portable** lessons (general engineering practices, agentic best practices):
   to the local working-set docs `dev/procedures/general/engineeringPractices.md` and
   `dev/procedures/general/agenticBestPractices.md`. These are local capture surfaces; the curated,
-  project-agnostic canon lives read-only in the Claudinite canon mounted at
-  `.claudinite/` (synced over HTTPS). Don't try to edit the shared docs or file a Claudinite
+  project-agnostic canon lives read-only in the Claudinite canon synced into this
+  repo over HTTPS. Don't try to edit the shared docs or file a Claudinite
   issue here — just write the best local doc.
 
 You never hand a lesson to Claudinite at capture time. The daily

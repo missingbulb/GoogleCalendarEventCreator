@@ -21,7 +21,7 @@
 # environment can silently drift to a stale (or absent) copy. ENV_VERSION below
 # is the drift signal: bump it whenever this script's body changes in a way that
 # matters, and the script stamps it into a persistent flag file. A lightweight
-# SessionStart validator (.claude/hooks/session-start.sh) compares the committed
+# SessionStart validator (.claude/hooks/check-environment-version.sh) compares the committed
 # ENV_VERSION against that flag every session and tells the user to re-paste this
 # file when it's missing or older. The flag literal is read back by the hook via
 # grep, so this `ENV_VERSION=` line is the single source of truth -- keep it on
@@ -41,12 +41,12 @@ set -euo pipefail
 # this, `npm ci` finds no package.json and silently installs nothing.
 cd /home/user/GoogleCalendarEventCreator
 
-# Pull in the Claudinite shared-rules canon (.claudinite/) over HTTPS, so a fresh
-# environment has it before the first session even runs. Day to day the SessionStart
-# hook (.claude/hooks/sync-claudinite.sh) keeps .claudinite/ current each session;
-# running it here too just primes the cache. Method B (codeload tarball, not a git
-# submodule -- a submodule clone 403s on the in-session git-only proxy). Fails soft,
-# and the synced dir is gitignored (only .claudinite/.gitkeep is tracked). (issue #364)
+# Pull in the Claudinite shared-rules canon over HTTPS, so a fresh environment has
+# it before the first session even runs. Day to day the SessionStart sync hook
+# (.claude/hooks/sync-claudinite.sh) keeps it current each session; running it here
+# too just primes the cache. Method B (codeload tarball, not a git submodule -- a
+# submodule clone 403s on the in-session git-only proxy). Fails soft, and the synced
+# canon is gitignored (only its committed marker is tracked). (issue #364)
 .claude/hooks/sync-claudinite.sh || true
 
 # `|| true` so a transient registry hiccup doesn't block the whole session from

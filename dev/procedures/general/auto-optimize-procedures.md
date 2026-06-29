@@ -2,7 +2,7 @@
 
 A daily, unattended agent routine that is the **only** bridge between a project's
 local documentation and the shared **canon** of portable rules it consumes (a
-separate, read-only repo, mounted here at `.claudinite/` over HTTPS — see CLAUDE.md's
+separate, read-only repo, synced into this repo over HTTPS — see CLAUDE.md's
 "Shared portable rules" section). Everything else — the
 on-demand "learned lessons" command, the daily lessons digest — writes **only to
 local docs**; this routine is what reconciles those local docs against the canon in
@@ -14,7 +14,7 @@ It does two independent things each run; either can be a no-op.
 
 ## 1. Pull **down**: prune / rephrase local docs the canon now covers (→ a PR)
 
-The shared canon is mounted read-only over HTTPS at `.claudinite/`, kept current
+The shared canon is synced into this repo read-only over HTTPS, kept current
 automatically — the session-start sync hook pulls the latest Claudinite `main`
 each session. When the canon has **absorbed** a practice that a local doc still
 carries — most often an item this routine promoted on an earlier run (see
@@ -64,11 +64,11 @@ needs the label pre-created and never errors on a re-run.
   a wrongful prune deletes a real lesson. Most days, few or no items qualify.
 - Keep the suite green: if a PR edits a doc a test reads, run the project's offline
   test suite before pushing.
-- Compare local docs against the **currently synced** canon (the `.claudinite/`
-  contents the session-start hook just pulled from Claudinite `main`) — that is
-  what the project actually consumes.
-- Never edit the read-only canon (`.claudinite/`, a synced artifact), and never
-  merge anything itself.
+- Compare local docs against the **currently synced** canon (what the
+  session-start hook just pulled from Claudinite `main`) — that is what the project
+  actually consumes.
+- Never edit the read-only synced canon (a vendored artifact), and never merge
+  anything itself.
 
 ## Output & tracking
 
