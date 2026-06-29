@@ -126,8 +126,11 @@ If minting fails, the symptoms map to fixes like this:
    Policy URL** to the GitHub Pages copy —
    `https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/` — never a
    `…/blob/main/PRIVACY.md` link, so the listing's URL doesn't break if the file
-   moves (the page is published by `.github/workflows/pages-privacy.yml` from the
-   root `PRIVACY.md`; enable Pages with source = "GitHub Actions" once).
+   moves. That page is (re)published by the **Release: Publish to Chrome Web
+   Store** workflow from `dev/build/release/store_artifacts/PRIVACY.md`; a Jekyll
+   `permalink: /privacy/` keeps the URL stable wherever the file lives. One-time:
+   enable Pages with source = "GitHub Actions" (repo Settings → Pages) so the
+   first publish can deploy it.
 4. Submit for review. Approval typically takes a few hours to a few days.
 
 ## Minor update
