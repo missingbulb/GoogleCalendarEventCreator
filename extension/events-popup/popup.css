@@ -219,8 +219,10 @@ body {
    red one for an event in progress — red reads as an error on a fine next-year
    event, which is why future stays green, but it's apt for "live now"), never on
    the base class: the UI snapshot renderer inlines CSS without selector
-   specificity (last-declared wins), so a base-class background would override the
-   variant's in the snapshot. */
+   specificity, and because its inliner PREPENDS each rule the EARLIER-declared
+   rule wins a conflict (see inlinePopupCss in popup-renderer.js) — so a base-class
+   (.e-year, declared first) background would override the variant's in the
+   snapshot. */
 .event-btn .e-year,
 .event-group .e-year {
   position: absolute;
