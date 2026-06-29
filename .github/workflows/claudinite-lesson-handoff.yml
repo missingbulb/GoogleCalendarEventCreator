@@ -1,6 +1,6 @@
 # Hand a portable lesson off to the shared Claudinite repo. Portable lessons
-# can't be edited in this repo — the shared rules live in a read-only submodule
-# (dev/procedures/claude/shared) — so the "learned lessons" pass files a labelled issue
+# can't be edited in this repo — the shared rules live in a read-only canon mounted
+# at .claudinite/ — so the "learned lessons" pass files a labelled issue
 # here and this workflow copies it to Claudinite, where a curation routine
 # dedupes/routes it into a docs PR. See dev/procedures/general/claudinite-handoff.md and #364.
 #

@@ -26,7 +26,7 @@
 # file when it's missing or older. The flag literal is read back by the hook via
 # grep, so this `ENV_VERSION=` line is the single source of truth -- keep it on
 # one line. (issue #403)
-ENV_VERSION=3
+ENV_VERSION=4
 
 # Where the stamped version lives. Outside the checkout (cloned fresh per
 # container) but inside the environment's cached filesystem, so it persists
@@ -41,15 +41,13 @@ set -euo pipefail
 # this, `npm ci` finds no package.json and silently installs nothing.
 cd /home/user/GoogleCalendarEventCreator
 
-# Pull in the Claudinite shared-rules canon (dev/procedures/claude/shared) over HTTPS.
-# This is the remote-fetch successor to the old git submodule: in a Claude Code web
-# session the in-session git remote is a git-only proxy scoped to THIS repo, so
-# `git submodule update --init` got HTTP 403 reaching the separate Claudinite repo
-# and the folder never populated -- while the clone-time gitlink checkout drifted and
-# left a permanent dirty tree. fetch-shared.sh downloads the pinned commit's tarball
-# (pin lives in dev/procedures/claude/shared.ref) through the HTTPS proxy instead.
-# Idempotent (a stamp skips the re-download); the dir is gitignored. (issue #364)
-dev/procedures/claude/fetch-shared.sh || true
+# Pull in the Claudinite shared-rules canon (.claudinite/) over HTTPS, so a fresh
+# environment has it before the first session even runs. Day to day the SessionStart
+# hook (.claude/hooks/sync-claudinite.sh) keeps .claudinite/ current each session;
+# running it here too just primes the cache. Method B (codeload tarball, not a git
+# submodule -- a submodule clone 403s on the in-session git-only proxy). Fails soft,
+# and the synced dir is gitignored (only .claudinite/.gitkeep is tracked). (issue #364)
+.claude/hooks/sync-claudinite.sh || true
 
 # `|| true` so a transient registry hiccup doesn't block the whole session from
 # starting (per the platform's setup-script guidance). A session that never runs

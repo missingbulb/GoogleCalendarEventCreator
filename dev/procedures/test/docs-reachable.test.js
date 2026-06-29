@@ -17,14 +17,16 @@ const ROOT = path.join(__dirname, "..", "..", "..");
 // roots rather than required targets.
 const ROOTS = ["CLAUDE.md", "README.md"];
 
-// The vendored Claudinite canon (fetched over HTTPS into this gitignored dir, not
-// a git submodule) is consumed read-only and owns its own internal navigation — we
-// import only its top-level CLAUDE.md and let it traverse from there. So this orphan
-// check polices OUR docs, not the canon's internals: some canon files are reached by
-// mechanisms our link-following BFS can't see (e.g. preferences/<email>.md is loaded
-// by a session-start hook, not linked from any doc), which would otherwise read as
-// false orphans here.
-const VENDORED_CANON = "dev/procedures/claude/shared";
+// The vendored Claudinite canon (synced over HTTPS into the gitignored repo-root
+// .claudinite/ by .claude/hooks/sync-claudinite.sh, not a git submodule) is consumed
+// read-only and owns its own internal navigation — we import only its top-level
+// CLAUDE.md and let it traverse from there. So this orphan check polices OUR docs,
+// not the canon's internals. The canon lives OUTSIDE the dev/procedures tree this
+// walk covers, so it is never an allDocs() target; the BFS does follow
+// @.claudinite/CLAUDE.md into it, but its internal links (e.g. preferences/<email>.md,
+// loaded by a session-start hook) just resolve to paths existsSync() skips — never a
+// false orphan. The constant stays as the canonical mount path for reference.
+const VENDORED_CANON = ".claudinite";
 
 // Every doc that must be reachable, repo-root-relative and POSIX-separated.
 function allDocs() {

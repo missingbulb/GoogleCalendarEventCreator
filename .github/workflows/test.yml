@@ -25,14 +25,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Vendor the Claudinite shared-rules canon (dev/procedures/claude/shared) the
-      # same way every environment does now — an HTTPS fetch of the commit pinned in
-      # dev/procedures/claude/shared.ref, not a git submodule (issue #364 / the
-      # remote-fetch successor). Running it here exercises the real bootstrap path on
-      # every CI run, so a bad pin or a broken fetch fails the build. Claudinite is
-      # public, so no extra creds.
-      - name: Fetch Claudinite shared rules
-        run: dev/procedures/claude/fetch-shared.sh
+      # Mount the Claudinite shared-rules canon at .claudinite/ the same way every
+      # environment does now — Method B's session-start tarball sync, not a git
+      # submodule (issue #364 / the remote-fetch successor). Running the hook here
+      # exercises the real bootstrap path on every CI run; the hook fails soft, so we
+      # then assert the canon landed to fail the build on a broken fetch. Claudinite
+      # is public, so no extra creds.
+      - name: Mount Claudinite shared rules
+        run: |
+          .claude/hooks/sync-claudinite.sh
+          test -f .claudinite/CLAUDE.md || { echo "Claudinite mount failed: .claudinite/CLAUDE.md missing"; exit 1; }
 
       - uses: actions/setup-node@v5
         with:

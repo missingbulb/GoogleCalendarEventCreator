@@ -11,11 +11,18 @@ dist/
 dev/requirements/shared/.artifacts/
 
 # Stray clone of the Claudinite shared submodule that some environments check
-# out at the wrong path (canonical location is dev/procedures/claude/shared/).
+# out at the wrong path (canonical mount is .claudinite/).
 docs/
 
-# Claudinite shared-rules canon: fetched over HTTPS by
-# dev/procedures/claude/fetch-shared.sh (pinned in dev/procedures/claude/shared.ref),
-# not a git submodule -- a vendored artifact, never committed (see issue #364 / the
-# remote-fetch successor). Keep gitignored so it can never show as gitlink drift.
-dev/procedures/claude/shared/
+# Claudinite shared-rules canon: fetched over HTTPS into .claudinite/ by
+# .claude/hooks/sync-claudinite.sh at session start (Method B; codeload tarball,
+# not a git submodule). The synced contents are a vendored artifact, never
+# committed -- so ignore everything under .claudinite/ EXCEPT the committed
+# .gitkeep marker, which keeps the dir tracked as a one-glance signal that this
+# repo mounts Claudinite (see .claudinite/bootstrap.md). The
+# /.claudinite/* + !/.claudinite/.gitkeep pair must come in that order so git
+# still descends into the dir to re-include the marker; /.claudinite.new/ is the
+# hook's swap staging dir.
+/.claudinite/*
+!/.claudinite/.gitkeep
+/.claudinite.new/
