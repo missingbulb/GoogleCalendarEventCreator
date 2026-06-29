@@ -25,11 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Note: the test suite does NOT need the Claudinite canon present — the
-      # orphan check (docs-reachable.test.js) polices only source-controlled docs
-      # and the import to the canon is guarded — so CI does not mount it. The
-      # bootstrap path is exercised every real session by the SessionStart hook.
-
       - uses: actions/setup-node@v5
         with:
           node-version: 22
