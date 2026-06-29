@@ -48,6 +48,42 @@ workflow, an automated job needs a unique branch per run, and a workflow adding 
 brand-new label must create it first — are relied on by this repo's auto-extractor
 pipeline; see [auto-extractor.md](../../create-extractor/auto-extractor.md).)
 
+## Alert on silent workflow failures
+
+An **unattended** workflow — one with no human watching the run, so a red entry in
+the Actions list reaches nobody — must converge a failure to a human-visible state
+on failure, never just exit red. Add a failure job that calls the reusable
+reporter, which opens (or appends to a standing per-workflow) tracking issue:
+
+```yaml
+report-failure:
+  needs: <the-job(s)-that-can-fail>
+  if: failure()
+  permissions:
+    issues: write
+  uses: ./.github/workflows/report-failure.yml
+  with:
+    workflow: "<this workflow's name>"
+```
+
+A workflow is unattended (needs the reporter) when it runs on a schedule, on a
+push/merge, or by a fire-and-forget manual dispatch, and has no other path that
+reaches a human. It is **not** unattended (skip the reporter) when its failure is
+already loud: a `pull_request`/branch-push CI run shows a red required check on the
+PR and blocks merge with the author watching (`test.yml`), or the workflow already
+flags a triggering issue on failure (`auto-implement-extractor.yml`,
+`finalize-extractor.yml` comment + label the issue). Carried `report-failure`
+today: `publish-chrome-store.yml`, `release.yml`, `deploy-privacy-page.yml` (issue
+#581).
+
+Two wiring constraints: the calling job needs `permissions: issues: write` (the
+called workflow's token is capped by it); and when this workflow is itself invoked
+via `workflow_call`, the parent must grant `issues: write` to the call so the
+nested reporter can run (publish-chrome-store grants it to deploy-privacy-page).
+The reporter keys one standing issue per workflow by its `workflow:` name (labelled
+`workflow-failure`) and reopens a closed one on recurrence — close it once the
+cause is fixed.
+
 ## Driving a merge cheaply (wall time + tokens)
 
 Getting from a merge-to-main request to a merged PR wastes both if CI is treated
