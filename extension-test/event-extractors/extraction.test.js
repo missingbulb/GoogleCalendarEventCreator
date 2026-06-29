@@ -117,14 +117,35 @@ test("Generic site with no structured data: heuristics only", () => {
   assert.equal(e.description, "Gloves and trash grabbers provided.");
 });
 
-test("Generic site: a day-first dotted date (D.M.YYYY) yields an all-day event", () => {
-  // The everyday non-US format. With no time directly after it (Hebrew text
-  // intervenes here), it's an all-day event — read day-first, not month-first.
-  const html = `<h1>Standup Night</h1><p>הופעה בתאריך 15.6.2026 פתיחת דלתות 18:30</p>`;
+test("Generic site: a day-first dotted date (D.M.YYYY) with no following time yields an all-day event", () => {
+  // The everyday non-US format. When no HH:MM time appears in the window after
+  // the date (even with Hebrew prose around it), the result is an all-day event.
+  const html = `<h1>Standup Night</h1><p>הופעה בתאריך 15.6.2026 ללא שעה מוגדרת</p>`;
 
   const e = firstEvent(html, "https://www.example.com/standup");
   assert.equal(e.title, "Standup Night");
   assert.equal(e.times[0].start, "2026-06-15");
+});
+
+test("Generic site: a day-first date with a time separated by a Hebrew label is extracted as timed", () => {
+  // "15.6.2026 פתיחת דלתות 18:30" — the Hebrew label ("doors open") intervenes
+  // between the date and the time, so the inline SEP-based capture misses it.
+  // The look-ahead finds the first HH:MM within 150 chars after the date.
+  const html = `<h1>Standup Night</h1><p>הופעה בתאריך 15.6.2026 פתיחת דלתות 18:30</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/standup");
+  assert.equal(e.title, "Standup Night");
+  assert.equal(e.times[0].start, "2026-06-15T18:30:00");
+});
+
+test("Generic site: a slash date with a time separated by a Hebrew label is extracted as timed", () => {
+  // "16/06/2026 | שעת פתיחת דלתות: 21:00" — pipe + Hebrew label before the
+  // time; the inline SEP sees only the pipe, not the time (which follows the
+  // Hebrew). The look-ahead recovers the time.
+  const html = `<h1>Show Night</h1><p>16/06/2026 | שעת פתיחת דלתות: 21:00</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.times[0].start, "2026-06-16T21:00:00");
 });
 
 test("Generic site: a dotted date with an adjacent time becomes a timed event", () => {
