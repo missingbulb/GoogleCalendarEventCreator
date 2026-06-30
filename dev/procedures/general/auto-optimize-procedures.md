@@ -12,7 +12,7 @@ move is worse than none.
 
 It does two independent things each run; either can be a no-op.
 
-## 1. Pull **down**: prune / rephrase local docs the canon now covers (→ a PR)
+## 1. Pull **down**: prune / rephrase local docs the canon now covers (→ pushed to main)
 
 The shared canon is synced into this repo read-only over HTTPS, kept current
 automatically — the session-start sync hook pulls the latest Claudinite `main`
@@ -27,10 +27,12 @@ the local copy is redundant. The routine:
 - **Rephrases / reframes** a local procedure when the canon's wording of the same
   idea has changed, so the local docs stay consistent with the canon they point at.
 
-These edits go out as a single **PR for review** (never an auto-merge). Only remove
-a local item you can show is genuinely covered by the *current pinned* canon —
-quote the canon line. When in doubt, leave it; a wrongful prune loses a real local
-lesson.
+These edits are **pushed straight to `main`** (no PR, no approval wait) once the
+offline suite is green — direction 1 is a self-gating routine, not a reviewed
+change. Be correspondingly conservative: only remove a local item you can show is
+genuinely covered by the *current pinned* canon — quote the canon line. When in
+doubt, leave it; a wrongful prune loses a real local lesson and there is no PR
+review to catch it.
 
 ## 2. Push **up**: promote generalizable local items (→ an issue, not a removal)
 
@@ -62,20 +64,23 @@ needs the label pre-created and never errors on a re-run.
 
 - Be conservative in **both** directions: a forced promotion spams the canon repo,
   a wrongful prune deletes a real lesson. Most days, few or no items qualify.
-- Keep the suite green: if a PR edits a doc a test reads, run the project's offline
-  test suite before pushing.
+- Keep the suite green: direction 1 pushes to `main` with no PR/CI gate, so run the
+  project's offline test suite locally and push **only if it is green** (a doc a
+  test reads can turn `main` red otherwise). If it fails, don't push — open a PR
+  with the edits instead so the failure is reviewable.
 - Compare local docs against the **currently synced** canon (what the
   session-start hook just pulled from Claudinite `main`) — that is what the project
   actually consumes.
-- Never edit the read-only synced canon (a vendored artifact), and never merge
-  anything itself.
+- Never edit the read-only synced canon (a vendored artifact). Direction 1 pushes
+  its own doc edits to `main` directly; it never merges a *PR* (the handoff issue in
+  direction 2 is never self-merged).
 
 ## Output & tracking
 
-- Direction 1 produces a **PR** on a dated branch with a random suffix (the suffix
-  keeps two same-day runs from colliding); direction 2 produces **one bundled
-  issue**. Never a merge.
-- Log each run that produced a PR or an issue as a **dated comment** on this
+- Direction 1 **pushes its doc edits straight to `main`** (no PR, no approval) once
+  the offline suite is green; direction 2 produces **one bundled issue**. It never
+  merges a PR.
+- Log each run that pushed to `main` or opened an issue as a **dated comment** on this
   routine's own standing tracking issue (found **by title**, not a hard-coded
   number; open it if missing, reopen it if it was closed while the routine is still
   producing output). A quiet day logs nothing.
@@ -85,11 +90,12 @@ needs the label pre-created and never errors on a re-run.
 Keep the routine's config a **thin pointer** to this doc, not an inlined spec. The
 launcher prompt should say: run the daily "optimize procedures" routine exactly as
 specified in this doc — reconcile the local docs against the pinned shared canon in
-both directions (open a PR that prunes/rephrases local docs the canon now covers,
-and open **one** bundled handoff-labelled issue listing every generalizable local
-item not yet in the canon, **without** removing them locally), follow the discipline
-above, keep the offline test suite green, log the run on the routine's standing
-tracking issue, and never merge anything.
+both directions (push directly to `main` the doc prunes/rephrases the canon now
+covers — gated on the offline suite being green, no PR — and open **one** bundled
+handoff-labelled issue listing every generalizable local item not yet in the canon,
+**without** removing them locally), follow the discipline above, keep the offline
+test suite green, log the run on the routine's standing tracking issue, and never
+merge a PR.
 
 Schedule it daily in the agent's routine scheduler; the repo can't schedule itself,
 so the doc is the spec and the routine is the trigger.
