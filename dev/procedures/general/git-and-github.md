@@ -13,16 +13,6 @@ environment/setup drift rather than your work — a submodule pointer moved by
 `git submodule update` at clone time, a lockfile a setup script regenerated,
 generated artifacts — **revert it, don't commit it** onto your branch. Committing
 drift slips an unintended dependency/generated-file bump into an unrelated change.
-Only commit the diff you actually authored.
-
-## Sync early to keep merge conflicts small
-
-Conflict size scales with how long a branch lives and how far it drifts from the
-default branch. Sync early rather than at the end: when starting work on a branch,
-merge (or rebase onto) the latest default branch first, so the branch carries the
-latest sources instead of discovering the gap at merge time. A one-commit-per-PR
-squash history keeps each branch a single reviewable unit, so shorter-lived
-branches are the norm.
 
 ## Open the PR early when the reviewable artifact only exists on CI
 
@@ -34,53 +24,6 @@ failures, so doing it up front — rather than after local-only iteration that p
 nothing for these classes — is the faster path to a working, reviewable result.
 Each CI iteration costs a full round-trip, so get the first one running as early as
 possible.
-
-## `commit.gpgsign` does not sign merge commits — pass `-S` to `git merge`
-
-**`commit.gpgsign=true` signs `git commit`, but `git merge` ignores it**, so a
-sync-merge of the default branch produces an *unsigned* merge commit even with
-signing configured. In a repo that enforces commit verification (e.g. a stop-hook
-that rejects unverified commits), that unsigned merge then has to be fixed after
-the fact — `git commit --amend --no-edit --reset-author` re-stamps it through the
-signing path — costing an extra round-trip every time you sync. Sign it up front
-instead: `git merge -S origin/<default>` (or set `merge.gpgsign` so merges are
-covered like commits). Note local `git log %G?` can't verify an SSH signature
-without `gpg.ssh.allowedSignersFile`, so confirm the signature landed by checking
-the raw object (`git cat-file commit HEAD` shows a `gpgsig` header) rather than
-trusting the `N`/`E` flag.
-
-## Renaming a directory that houses a submodule
-
-**`git mv` on a directory containing a submodule updates `.gitmodules` and the
-index but leaves `.git/config` stale — run `git submodule sync && git submodule
-update --init` after.** git rewrites `.gitmodules` and the index correctly, but the
-local `.git/config` keeps the old `[submodule "<old/path>"]` entry, so any
-operation that consults `.git/config` (submodule status, checkout) sees the stale
-path until `git submodule sync` propagates the new path and `git submodule update
---init` re-registers it. Always run both after renaming a directory that houses a
-submodule.
-
-## Re-read a file after `git mv` before rewriting it
-
-**`git mv` leaves the moved file looking unread to the editing tool — a write in
-the same batch silently refuses, leaving the file stale.** The common reorg move is
-`git mv old new` then rewrite `new`; an editing tool that tracks reads by path sees
-the moved path as never-seen and rejects the write. Re-read the file at its **new**
-path before editing it. And check each result in a batched set of tool calls: a
-single refused write buried in a batch is easy to miss, and the stale
-(moved-but-not-rewritten) file surfaces much later as a confusing error far from its
-cause.
-
-## GitHub renders Markdown inside a `<td>` only with surrounding blank lines
-
-GitHub's cmark-gfm re-enters Markdown mode inside a raw `<td>` only when blank
-lines surround the cell's content — without them the cell is treated as a raw HTML
-block and shown verbatim (no `![img]()`, no `**bold**`, no links). A leading inline
-`<!-- … -->` also starts an HTML block, so keep any marker as the **last** token on
-the line so the line still *starts* as Markdown. The sanitizer strips `style`/CSS
-(a flexbox `<div>` two-column won't render) but keeps `<table>` +
-`align`/`valign`/`width`; a GFM pipe-table cell can't hold multi-line prose, so use
-the raw `<table>` form when a cell needs it.
 
 ## After a remote/API merge, `git fetch` before branching off `origin/main`
 
