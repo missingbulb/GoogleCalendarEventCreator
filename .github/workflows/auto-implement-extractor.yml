@@ -42,6 +42,15 @@ jobs:
     if: github.event.label.name == 'extractor-request'
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    # GitHub's implicit default run-shell is `bash -e {0}` — WITHOUT pipefail — so a
+    # `cmd 2>&1 | tee log` step takes tee's exit (0) and masks cmd's failure (#587: a
+    # failed record_page was hidden, falsely handing the agent a stale branch instead of
+    # flagging the issue for a human). `shell: bash` is `bash --noprofile --norc -eo
+    # pipefail {0}`, so every piped `run` step below (triage, npm ci, phase1-prepare,
+    # handoff) fails the step when the left side of the pipe fails.
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v5
@@ -92,8 +101,8 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         # Tee into a shared log the failure step reads, so a genuine break can report
         # WHY it failed on the issue (GitHub gives a later step no access to an earlier
-        # step's output otherwise). pipefail is on by the default shell, so the pipe
-        # doesn't mask a non-zero exit.
+        # step's output otherwise). pipefail is on via the job's `defaults.run.shell:
+        # bash` above, so the pipe doesn't mask a non-zero exit.
         run: node dev/create-extractor/triage-extractor-request.js 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # A same-host request in flight isn't discarded: its event page is folded

@@ -25,14 +25,15 @@
 # the page count as undownloadable and the job fail red. Cheapest tier first keeps
 # credit cost down on the common case while still cracking the hard ones.
 #
-# SPA render-wait (#587 eventer): render=true loads the page in a headless browser,
-# but it can snapshot BEFORE a single-page-app has fetched its data and replaced the
-# framework template placeholders — eventer.co.il recorded as a bare AngularJS shell
-# (`og:title` still `ng-attr-content="{{getMetaDataTitle()}}"`, no real fields). We
-# pass ScraperAPI's render instruction set (the `x-sapi-instruction_set` header) with a
-# fixed `wait` so the browser idles long enough for the XHR data to populate and render
-# before capture. It's a generic, per-site-agnostic delay (no selector to maintain);
-# bump RENDER_WAIT_SECONDS if a slower SPA still records a shell.
+# Render note (#587 eventer): plain `render=true` uses ScraperAPI's ADAPTIVE default
+# wait (page load / network-idle), and that is what lets a JS single-page-app finish
+# fetching its data before capture — eventer.co.il (an AngularJS app) renders correctly
+# this way. Do NOT add a render instruction set with a fixed `wait` to "help it along":
+# supplying `x-sapi-instruction_set` REPLACES the adaptive default with only the listed
+# steps, so a `[{"type":"wait","value":N}]` snapshots after a dumb fixed delay instead of
+# when the page is actually ready — which captured eventer's bare shell (every field
+# still a `{{…}}` binding) even though the plain call renders it. A shell that slips
+# through anyway (a render timing race) is caught by the unrendered-shell guard below.
 #
 # Non-HTML guard (#279 stubhub): a 2xx fetch isn't enough — ScraperAPI's render=true
 # can return the SPA's *rendered text* with ZERO markup (stubhub: 4018 bytes, not a
@@ -42,8 +43,9 @@
 # retry. If even ultra_premium comes back plaintext, the page counts as
 # undownloadable and the job fails red — same terminal state as an exhausted ladder.
 #
-# Unrendered-shell guard (#587 eventer): the wait above is best-effort, so apply the
-# same belt-and-suspenders the #279 guard does — a body that still carries Angular's
+# Unrendered-shell guard (#587 eventer): render can still occasionally snapshot a page
+# early (a timing race), so apply the same belt-and-suspenders the #279 guard does — a
+# body that still carries Angular's
 # unresolved-binding artifact (`ng-attr-…="{{…}}"`, which Angular REMOVES once it
 # interpolates, so its presence reliably means "never rendered") is a shell with no
 # extractable fields. Treat it exactly like a non-HTML body: escalate the tier, and if
@@ -51,9 +53,6 @@
 # a useless fixture (the silent shell that blocked #587). (Angular-specific by design —
 # other frameworks leave different shells; extend this signature when one bites.)
 set -euo pipefail
-
-# Seconds to let a JS single-page-app settle after load before ScraperAPI snapshots.
-RENDER_WAIT_SECONDS="${RENDER_WAIT_SECONDS:-8}"
 
 # A recorded body counts as HTML only if it carries at least one real tag-open
 # (<tag, </tag, or <!doctype). The #279 plaintext render had none.
@@ -71,15 +70,11 @@ record_page() {
     local host="${url#*://}"; host="${host%%/*}"; host="${host%%:*}"
     local geo=""
     case "$host" in *.il) geo="country_code=il&"; echo "record_page: geo-targeting $host via country_code=il." >&2;; esac
-    # Render instruction set: load, then wait for the SPA's data to populate before
-    # snapshotting (see header). Passed as the x-sapi-instruction_set header.
-    local instr="[{\"type\":\"wait\",\"value\":${RENDER_WAIT_SECONDS}}]"
     local tier label
     # "" = standard; then premium; then ultra_premium. The label is for the log only.
     for tier in "" "premium=true&" "ultra_premium=true&"; do
       label="${tier%%=*}"; label="${label:-standard}"
       if curl -fsS --max-time 90 --retry 2 --retry-delay 2 --retry-all-errors \
-        -H "x-sapi-instruction_set: ${instr}" \
         "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
         if looks_like_shell "$out"; then
           echo "record_page: ScraperAPI $label tier returned an unrendered SPA shell (ng-attr bindings) for $url — escalating." >&2
