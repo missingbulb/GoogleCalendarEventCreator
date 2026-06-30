@@ -1,13 +1,21 @@
-// Tests for record_page's non-HTML guard (dev/create-extractor/record-page.sh).
+// Tests for record_page's body guards + SPA re-fetch (dev/create-extractor/record-page.sh).
 // #279 (stubhub): ScraperAPI's render=true returned the SPA's rendered TEXT with zero
 // markup (4018 bytes, not one '<') — a 2xx fetch with nothing to extract. record_page
 // must treat a non-HTML body like a tier failure: escalate the proxy quality and retry,
 // and if even ultra_premium comes back plaintext, FAIL (no usable fixture).
+// #587 (eventer): ScraperAPI's render is flaky — the standard tier can return an
+// un-hydrated SPA shell on one call and a full render on the next. record_page re-fetches
+// the STANDARD tier up to 5× on an unexpanded SPA, keeps the first expansion, and if none
+// expands keeps the last 200 anyway (never fails, never escalates for a shell). A rendered
+// AngularJS page keeps its `ng-attr` source attrs, so the detector strips those before
+// checking for leftover `{{…}}` — it must not mistake a good render for a shell.
 //
-// record_page is bash, so we drive record-page.sh directly with a FAKE curl on PATH
-// (real jq stays available — PATH is prepended, not replaced). The fake reads the tier
-// off the ScraperAPI URL it's handed, logs each call, and returns html / plaintext / a
-// non-2xx failure per FAKE_CURL_SPEC, exactly as the real ladder would observe them.
+// record_page is bash, so we drive record-page.sh directly with a FAKE curl on PATH (real
+// jq stays available — PATH is prepended, not replaced). The fake reads the tier off the
+// ScraperAPI URL, logs each call, and per FAKE_CURL_SPEC returns one of: html (plain page),
+// rendered (Angular page WITH resolved data + persistent ng-attr attrs), shell (unexpanded
+// Angular, `{{…}}` still in the body), text (plaintext), or a 22 failure. A tier's outcome
+// may be a `|`-separated SEQUENCE applied per attempt (e.g. "standard:shell|shell|rendered").
 "use strict";
 
 const { test } = require("node:test");
@@ -19,9 +27,11 @@ const { spawnSync } = require("node:child_process");
 
 const SCRIPT = path.join(__dirname, "..", "record-page.sh");
 
-// A curl stand-in: finds the -o target and the ScraperAPI URL, derives the tier from
-// the URL, appends it to $FAKE_CURL_LOG, then emits html / plaintext / a 22 failure
-// per the tier's entry in $FAKE_CURL_SPEC ("standard:text,premium:text,ultra:html").
+// A curl stand-in: finds the -o target and the ScraperAPI URL, derives the tier, appends
+// it to $FAKE_CURL_LOG, then emits a body per the tier's entry in $FAKE_CURL_SPEC. An entry
+// may be a single outcome ("standard:html") or a `|`-separated per-attempt sequence
+// ("standard:shell|shell|rendered"); the attempt index is how many times this tier has been
+// called so far (clamped to the last element), so a repeated standard fetch advances it.
 const FAKE_CURL = `#!/usr/bin/env bash
 out=""; url=""
 while [ $# -gt 0 ]; do
@@ -37,15 +47,22 @@ case "$url" in
   *premium=true*) tier=premium;;
 esac
 echo "$tier" >> "$FAKE_CURL_LOG"
-outcome=fail
+attempt=$(grep -cx "$tier" "$FAKE_CURL_LOG")
+seq=fail
 IFS=',' read -ra pairs <<< "$FAKE_CURL_SPEC"
 for p in "\${pairs[@]}"; do
-  [ "\${p%%:*}" = "$tier" ] && outcome="\${p##*:}"
+  [ "\${p%%:*}" = "$tier" ] && seq="\${p#*:}"
 done
+IFS='|' read -ra outs <<< "$seq"
+idx=$((attempt - 1))
+[ "$idx" -ge "\${#outs[@]}" ] && idx=$((\${#outs[@]} - 1))
+outcome="\${outs[$idx]}"
 case "$outcome" in
-  html) printf '<!doctype html><html><body><h1>Event</h1></body></html>' > "$out"; exit 0;;
-  text) printf 'Buy tickets\\nShlomo Artzi\\n8:30 PM Tel Aviv, Israel' > "$out"; exit 0;;
-  *)    exit 22;;
+  html)     printf '<!doctype html><html><body><h1>Event</h1></body></html>' > "$out"; exit 0;;
+  rendered) printf '<!doctype html><html><head><meta property="og:title" ng-attr-content="{{getMetaDataTitle()}}" content="Real Title"></head><body><h1>Real Title</h1></body></html>' > "$out"; exit 0;;
+  shell)    printf '<!doctype html><html><head><meta property="og:title" ng-attr-content="{{getMetaDataTitle()}}"></head><body><h1>{{event.title}}</h1></body></html>' > "$out"; exit 0;;
+  text)     printf 'Buy tickets\\nShlomo Artzi\\n8:30 PM Tel Aviv, Israel' > "$out"; exit 0;;
+  *)        exit 22;;
 esac
 `;
 
@@ -96,4 +113,33 @@ test("a non-2xx still escalates (the original ladder is preserved)", () => {
   assert.equal(r.status, 0, r.stderr);
   assert.deepEqual(r.tiers, ["standard", "premium"]);
   assert.match(r.body, /<html/i);
+});
+
+// #587 (eventer): standard-tier SPA re-fetch on a flaky render.
+test("an unexpanded SPA is re-fetched at standard and the expansion is kept", () => {
+  const r = runRecordPage("standard:shell|shell|rendered");
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(r.tiers, ["standard", "standard", "standard"]); // re-fetched, no escalation
+  assert.match(r.body, /content="Real Title"/); // the expanded render (resolved data) was kept
+});
+
+test("a persistently unexpanded SPA keeps the last 200 after 5 standard attempts", () => {
+  const r = runRecordPage("standard:shell");
+  assert.equal(r.status, 0, r.stderr);   // never fails — the last 200 is kept for downstream
+  assert.deepEqual(r.tiers, ["standard", "standard", "standard", "standard", "standard"]);
+  assert.match(r.body, /\{\{event\.title\}\}/); // the (still-shell) last response was kept
+});
+
+test("a rendered AngularJS page (ng-attr present) is not mistaken for a shell", () => {
+  const r = runRecordPage("standard:rendered");
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(r.tiers, ["standard"]); // recognized as expanded — fetched once, no re-fetch
+  assert.match(r.body, /Real Title/);
+});
+
+test("premium does NOT re-fetch a shell (SPA retry is standard-only)", () => {
+  const r = runRecordPage("standard:fail,premium:shell");
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(r.tiers, ["standard", "premium"]); // escalated on the standard error, then kept
+  assert.match(r.body, /\{\{event\.title\}\}/); // premium's 200 is kept as-is, not retried
 });

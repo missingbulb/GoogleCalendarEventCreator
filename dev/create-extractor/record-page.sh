@@ -42,11 +42,31 @@
 # a tier failure: we climb the ladder to a stronger (more browser-faithful) tier and
 # retry. If even ultra_premium comes back plaintext, the page counts as
 # undownloadable and the job fails red — same terminal state as an exhausted ladder.
+#
+# Unexpanded-SPA re-fetch (#587 eventer): ScraperAPI's render is FLAKY — the same URL can
+# come back fully rendered on one call and as an un-hydrated SPA shell (event fields still
+# `{{…}}` bindings) on the next, regardless of geo. A shell is NOT a proxy-quality problem,
+# so escalating tiers won't fix it; instead, at the STANDARD tier only, just re-fetch the
+# same request up to 5 times hoping a later render expands the page. If one does, keep it.
+# If all 5 stay shells, KEEP THE LAST 200 anyway (let downstream extraction / the agent
+# judge it) rather than failing — the shell detector is a heuristic and must never fail a
+# page it misread. Premium/ultra are reserved for proxy/WAF problems (transient errors),
+# NOT rendering, so they keep whatever 200 they return without a shell check. A 200 shell
+# is billed (unlike a retried 5xx), but standard-tier credits are cheap and worth it.
 set -euo pipefail
 
 # A recorded body counts as HTML only if it carries at least one real tag-open
 # (<tag, </tag, or <!doctype). The #279 plaintext render had none.
 looks_like_html() { grep -qiE '<[a-z!/]' "$1"; }
+
+# Heuristic: a 200 whose SPA never hydrated. A rendered AngularJS page KEEPS its
+# `ng-attr-X="{{…}}"` SOURCE attributes (so a bare `{{` grep false-positives), but it
+# resolves the `{{…}}` in its actual content — so strip the ng-attr source attrs first,
+# then a `{{…}}` STILL remaining means un-rendered body. Heuristic-only, used to decide
+# whether to re-fetch (#587); a misread is harmless — the last 200 is kept either way.
+looks_like_unexpanded_spa() {
+  sed 's/ng-attr-[a-zA-Z-]*="[^"]*"//g' "$1" | grep -q '{{'
+}
 
 record_page() {
   local url="$1" out="$2"
@@ -56,20 +76,32 @@ record_page() {
     local host="${url#*://}"; host="${host%%/*}"; host="${host%%:*}"
     local geo=""
     case "$host" in *.il) geo="country_code=il&"; echo "record_page: geo-targeting $host via country_code=il." >&2;; esac
-    local tier label
+    local tier label attempts spa
     # "" = standard; then premium; then ultra_premium. The label is for the log only.
     for tier in "" "premium=true&" "ultra_premium=true&"; do
       label="${tier%%=*}"; label="${label:-standard}"
-      if curl -fsS --max-time 90 --retry 5 --retry-max-time 240 \
-        "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
-        if looks_like_html "$out"; then
+      # The standard tier re-fetches an unexpanded SPA up to 5×; the others fetch once.
+      attempts=1; [ -z "$tier" ] && attempts=5
+      for ((spa = 1; spa <= attempts; spa++)); do
+        if curl -fsS --max-time 90 --retry 5 --retry-max-time 240 \
+          "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
+          if ! looks_like_html "$out"; then
+            echo "record_page: ScraperAPI $label tier returned non-HTML (plaintext, no markup) for $url — escalating." >&2
+            break   # proxy/garbage problem — escalate the tier
+          fi
+          if [ -z "$tier" ] && looks_like_unexpanded_spa "$out"; then
+            if [ "$spa" -lt "$attempts" ]; then
+              echo "record_page: standard tier returned an unexpanded SPA (attempt $spa/$attempts) — re-fetching." >&2
+              continue   # flaky render — try the standard tier again
+            fi
+            echo "record_page: standard tier never expanded the SPA after $attempts attempts — keeping the last 200 for downstream extraction." >&2
+          fi
           echo "record_page: fetched via ScraperAPI ($label tier)." >&2
           return 0
         fi
-        echo "record_page: ScraperAPI $label tier returned non-HTML (plaintext, no markup) for $url — escalating." >&2
-      else
         echo "record_page: ScraperAPI $label tier failed for $url — escalating." >&2
-      fi
+        break   # transient errors already retried by curl — escalate the tier
+      done
     done
     echo "record_page: all ScraperAPI tiers (standard → premium → ultra_premium) failed for $url (non-2xx or non-HTML)" >&2
     return 1
