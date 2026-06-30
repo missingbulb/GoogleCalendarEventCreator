@@ -25,20 +25,6 @@
 # the page count as undownloadable and the job fail red. Cheapest tier first keeps
 # credit cost down on the common case while still cracking the hard ones.
 #
-# Render note (#587 eventer): plain `render=true` uses ScraperAPI's ADAPTIVE default
-# wait (page load / network-idle), and that is what lets a JS single-page-app finish
-# fetching its data before capture — eventer.co.il (an AngularJS app) renders correctly
-# this way. Do NOT add a render instruction set with a fixed `wait` to "help it along":
-# supplying `x-sapi-instruction_set` REPLACES the adaptive default with only the listed
-# steps, so a `[{"type":"wait","value":N}]` snapshots after a dumb fixed delay instead of
-# when the page is actually ready — which captured eventer's bare shell (every field
-# still a `{{…}}` binding) even though the plain call renders it. We deliberately do NOT
-# second-guess a rendered body with an "is this an un-interpolated shell?" heuristic:
-# AngularJS can leave its `ng-attr-…="{{…}}"` SOURCE attributes in the DOM even after it
-# fills the resolved ones (so the check false-positives on good renders), and a genuine
-# shell is a render-timing problem the proxy-tier ladder (IP quality) can't fix anyway
-# — escalating on it just burns renders and 403s at the top tier (#587).
-#
 # Non-HTML guard (#279 stubhub): a 2xx fetch isn't enough — ScraperAPI's render=true
 # can return the SPA's *rendered text* with ZERO markup (stubhub: 4018 bytes, not a
 # single '<'), which yields no DOM / CSS selectors / JSON-LD to extract from and is

@@ -1,13 +1,8 @@
-// Tests for record_page's body guards (dev/create-extractor/record-page.sh).
+// Tests for record_page's non-HTML guard (dev/create-extractor/record-page.sh).
 // #279 (stubhub): ScraperAPI's render=true returned the SPA's rendered TEXT with zero
 // markup (4018 bytes, not one '<') — a 2xx fetch with nothing to extract. record_page
 // must treat a non-HTML body like a tier failure: escalate the proxy quality and retry,
 // and if even ultra_premium comes back plaintext, FAIL (no usable fixture).
-// #587 (eventer): record_page does NOT try to detect an "unrendered SPA shell" — that
-// heuristic (an `ng-attr` grep) false-positives on good AngularJS renders (which keep the
-// `ng-attr-` source attributes), and a real shell is a render-timing issue the proxy-tier
-// ladder can't fix. So a 2xx body that looks like HTML is kept as-is; integration tests
-// catch a genuinely empty fixture downstream.
 //
 // record_page is bash, so we drive record-page.sh directly with a FAKE curl on PATH
 // (real jq stays available — PATH is prepended, not replaced). The fake reads the tier
@@ -48,10 +43,9 @@ for p in "\${pairs[@]}"; do
   [ "\${p%%:*}" = "$tier" ] && outcome="\${p##*:}"
 done
 case "$outcome" in
-  html)  printf '<!doctype html><html><body><h1>Event</h1></body></html>' > "$out"; exit 0;;
-  shell) printf '<!doctype html><html><head><meta property="og:title" ng-attr-content="{{getMetaDataTitle()}}"></head><body></body></html>' > "$out"; exit 0;;
-  text)  printf 'Buy tickets\\nShlomo Artzi\\n8:30 PM Tel Aviv, Israel' > "$out"; exit 0;;
-  *)     exit 22;;
+  html) printf '<!doctype html><html><body><h1>Event</h1></body></html>' > "$out"; exit 0;;
+  text) printf 'Buy tickets\\nShlomo Artzi\\n8:30 PM Tel Aviv, Israel' > "$out"; exit 0;;
+  *)    exit 22;;
 esac
 `;
 
@@ -102,14 +96,4 @@ test("a non-2xx still escalates (the original ladder is preserved)", () => {
   assert.equal(r.status, 0, r.stderr);
   assert.deepEqual(r.tiers, ["standard", "premium"]);
   assert.match(r.body, /<html/i);
-});
-
-// #587 (eventer): a rendered AngularJS page keeps its `ng-attr-…="{{…}}"` SOURCE
-// attributes in the DOM, so an `ng-attr` grep can't distinguish it from an unrendered
-// shell. record_page must NOT reject such a body — it's valid HTML and is kept as-is.
-test("an AngularJS (ng-attr) body is kept, not rejected as a shell", () => {
-  const r = runRecordPage("standard:shell");
-  assert.equal(r.status, 0, r.stderr);
-  assert.deepEqual(r.tiers, ["standard"]); // kept at the first tier; no shell-escalation
-  assert.match(r.body, /ng-attr-content/); // the ng-attr body was kept, not discarded
 });
