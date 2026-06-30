@@ -13,6 +13,7 @@ environment/setup drift rather than your work — a submodule pointer moved by
 `git submodule update` at clone time, a lockfile a setup script regenerated,
 generated artifacts — **revert it, don't commit it** onto your branch. Committing
 drift slips an unintended dependency/generated-file bump into an unrelated change.
+Only commit the diff you actually authored.
 
 ## Open the PR early when the reviewable artifact only exists on CI
 
