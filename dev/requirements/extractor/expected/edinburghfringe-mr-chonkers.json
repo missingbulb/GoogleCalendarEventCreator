@@ -4,14 +4,14 @@
     "events": [
       {
         "title": "Mr Chonkers: Work in Chonkers",
-        "location": "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR",
         "ctz": "GB",
         "details": "https://www.edfringe.com/tickets/whats-on/mr-chonkers-work-in-chonkers\n\nJohn Norris (Mr Chonkers, allegedly) is trying out 1-3 hours of new stuff. Goofs, gags, musings, bits and vague energy. Nonsense. If you're the type of person that needs more information before coming to a show, well, this is not for you. Stay far away, my friend. Save yourself. No press allowed. No awards judges allowed.",
         "times": [
           {
             "start": "2026-08-10T23:55:00",
             "end": "2026-08-11T00:55:00",
-            "eventLengthInMinutes": 60
+            "eventLengthInMinutes": 60,
+            "location": "Monkey Barrel 4 at Monkey Barrel Comedy, 9-12 Blair Street, EH1 1QR"
           }
         ]
       }

@@ -165,7 +165,9 @@ export function sourceRequestPrefill(tab, event, eventCount = 1) {
     // user's current zone — a sensible guess they can correct in the form
     // (the event page they're on is usually in their own zone), better than blank.
     timezone: event.ctz || currentTimezone(),
-    location: event.location || "",
+    // Location is per-instance (a flat event-level `location` is tolerated via the
+    // `instance` fallback above).
+    location: instance.location || "",
     description: event.description || "",
     // At least 1 — the link only shows once a complete event was found.
     "event-count": String(Math.max(1, eventCount || 1)),

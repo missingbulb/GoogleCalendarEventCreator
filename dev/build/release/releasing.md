@@ -121,8 +121,16 @@ If minting fails, the symptoms map to fixes like this:
 3. Complete the store listing: the store icon (`extension/icon/images/chromeStoreIcon.png`),
    description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
    tab — justify each requested permission (`activeTab`, `scripting`,
-   `declarativeContent`; see [Permissions](../../../README.md#permissions)) and declare
-   data usage (this extension sends nothing anywhere).
+   `declarativeContent`; see [Permissions](../../../README.md#permissions)), declare
+   data usage (this extension sends nothing anywhere), and set the **Privacy
+   Policy URL** to the GitHub Pages copy —
+   `https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/` — never a
+   `…/blob/main/PRIVACY.md` link, so the listing's URL doesn't break if the file
+   moves. That page is (re)published by the **Release: Publish to Chrome Web
+   Store** workflow from `dev/build/release/store_artifacts/PRIVACY.md`; a Jekyll
+   `permalink: /privacy/` keeps the URL stable wherever the file lives. One-time:
+   enable Pages with source = "GitHub Actions" (repo Settings → Pages) so the
+   first publish can deploy it.
 4. Submit for review. Approval typically takes a few hours to a few days.
 
 ## Minor update

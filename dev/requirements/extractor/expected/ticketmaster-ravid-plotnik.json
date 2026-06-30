@@ -4,24 +4,26 @@
     "events": [
       {
         "title": "רביד פלוטניק",
-        "location": "רדינג 3, תל אביב - יפו",
         "ctz": "Asia/Jerusalem",
         "details": "https://www.ticketmaster.co.il/event/MR330/ALL/iw\n\nרביד פלוטניק - ערבי חארבו דארב\nשירים של פעם + שירי שוליים + עמייאת\n\nעם רביד על הבמה \nישי סוויסה - קלידים והפקה מוזיקלית\nאור כהן - גיטרה חשמלית והיי-טק\nאילן אדירי - סקסופון, חליל ושרירי ליבה\nליהי אשל - בס, קולות ותמיכה רוחנית\nאלעד נדב - תופים וצרחות",
         "times": [
           {
             "start": "2026-07-04T21:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "רדינג 3, תל אביב - יפו"
           },
           {
             "start": "2026-07-08T21:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "רדינג 3, תל אביב - יפו"
           },
           {
             "start": "2026-07-11T21:00:00",
             "end": null,
-            "eventLengthInMinutes": null
+            "eventLengthInMinutes": null,
+            "location": "רדינג 3, תל אביב - יפו"
           }
         ]
       }

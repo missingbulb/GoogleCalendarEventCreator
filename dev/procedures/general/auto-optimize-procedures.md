@@ -2,8 +2,8 @@
 
 A daily, unattended agent routine that is the **only** bridge between a project's
 local documentation and the shared **canon** of portable rules it consumes (a
-separate, read-only repo, vendored here over HTTPS — see CLAUDE.md's "Shared
-portable rules" section; pinned in `dev/procedures/claude/shared.ref`). Everything else — the
+separate, read-only repo, synced into this repo over HTTPS — see CLAUDE.md's
+"Shared portable rules" section). Everything else — the
 on-demand "learned lessons" command, the daily lessons digest — writes **only to
 local docs**; this routine is what reconciles those local docs against the canon in
 both directions. Like the other daily routines it runs unattended and **most days
@@ -14,11 +14,12 @@ It does two independent things each run; either can be a no-op.
 
 ## 1. Pull **down**: prune / rephrase local docs the canon now covers (→ a PR)
 
-The shared canon is vendored read-only over HTTPS, kept current by bumping the
-pinned commit in `dev/procedures/claude/shared.ref`. When the canon has
-**absorbed** a practice that a local doc still carries — most often an item this
-routine promoted on an earlier run (see direction 2), now merged into the canon and
-pulled in by a `shared.ref` bump — the local copy is redundant. The routine:
+The shared canon is synced into this repo read-only over HTTPS, kept current
+automatically — the session-start sync hook pulls the latest Claudinite `main`
+each session. When the canon has **absorbed** a practice that a local doc still
+carries — most often an item this routine promoted on an earlier run (see
+direction 2), now merged into the canon and pulled in by the next session's sync —
+the local copy is redundant. The routine:
 
 - **Removes** the now-duplicated local item (typically from the local working-set
   practice docs, but any local doc qualifies), since the canon is the single source
@@ -50,7 +51,7 @@ here.
 **Do not remove the promoted item from the local docs now.** Promotion is a
 *proposal*; the canon may reject or reword it. Removal happens **later**, on the day
 direction 1 sees the item actually land in the canon (after the canon PR merges and
-a `shared.ref` bump pulls it in). So a promoted-but-not-yet-accepted item keeps working
+the next session's sync pulls it in). So a promoted-but-not-yet-accepted item keeps working
 locally in the meantime, and a rejected one simply stays local.
 
 **Ensuring the label won't explode:** before applying the handoff label, ensure it
@@ -63,11 +64,11 @@ needs the label pre-created and never errors on a re-run.
   a wrongful prune deletes a real lesson. Most days, few or no items qualify.
 - Keep the suite green: if a PR edits a doc a test reads, run the project's offline
   test suite before pushing.
-- Compare local docs against the **currently pinned** canon (the commit in
-  `dev/procedures/claude/shared.ref`), not a live fetch — the pin is what the
-  project actually consumes, and the `shared.ref` bumps keep it current.
-- Never edit the read-only vendored canon (`dev/procedures/claude/shared/`, a
-  fetched artifact), and never merge anything itself.
+- Compare local docs against the **currently synced** canon (what the
+  session-start hook just pulled from Claudinite `main`) — that is what the project
+  actually consumes.
+- Never edit the read-only synced canon (a vendored artifact), and never merge
+  anything itself.
 
 ## Output & tracking
 

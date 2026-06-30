@@ -61,35 +61,44 @@ same local capture surface.
 @dev/procedures/general/testingPractices.md
 @dev/procedures/general/filePlacement.md
 
-## Shared portable rules (the Claudinite canon, remote-fetched)
+## Shared portable rules (the Claudinite canon)
 
 The project-agnostic **canon** — general software-engineering practices, agentic
 best practices, portable git/GitHub procedures, general working discipline,
 unattended-agent architecture principles, and the repo owner's personal
 interaction preferences — is **not** maintained in this repo. It lives in the
 shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo and is
-**vendored over HTTPS** into `dev/procedures/claude/shared/` (see its
-[README](dev/procedures/claude/shared/README.md)) and imported below. It is **not**
-a git submodule: `dev/procedures/claude/shared/` is gitignored, and
-[`dev/procedures/claude/fetch-shared.sh`](dev/procedures/claude/fetch-shared.sh)
-downloads the commit pinned in
-[`dev/procedures/claude/shared.ref`](dev/procedures/claude/shared.ref) as a tarball.
-(Why not a submodule: in a Claude Code web session the in-session git remote is a
-git-only proxy scoped to this repo, so `git submodule update --init` 403s on the
-separate Claudinite repo and the clone-time gitlink drifts the working tree — the
-HTTPS fetch sidesteps both. See [issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364).)
+**mounted read-only** via Claudinite's **Method B**: the
+[`.claude/hooks/sync-claudinite.sh`](.claude/hooks/sync-claudinite.sh) SessionStart
+hook downloads the latest `main` as a codeload tarball over plain HTTPS at the
+start of every session, so the canon stays current with no pin to bump. (Why
+Method B and not a submodule: in a Claude Code web session the in-session git
+remote is a git-only proxy scoped to this repo, so `git submodule update --init`
+403s on the separate Claudinite repo and the clone-time gitlink drifts the working
+tree — the HTTPS tarball sidesteps both. See
+[issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364).)
 
-It is consumed **read-only**: a rule change happens in Claudinite, then arrives
-here as a one-line bump of `dev/procedures/claude/shared.ref` (reviewable in a PR,
-the plain-file successor to the old submodule-pin bump). Lessons are *captured
-locally* (above) and only the daily `optimize-procedures` routine bridges them up
-to Claudinite (see `dev/procedures/general/auto-optimize-procedures.md`). A fresh
-clone needs `dev/procedures/claude/fetch-shared.sh` (`.claude/cloud-setup.sh` runs
-it) or `dev/procedures/claude/shared/` is an empty folder and this import resolves
-to nothing.
+The synced canon is **gitignored**; only a tracked marker file is committed, as a
+one-glance signal that this repo mounts Claudinite (the sync hook preserves it
+across each refresh). A fresh checkout that hasn't run the hook yet has nothing to
+import until the next session start (or running the hook by hand) populates it;
+`.claude/cloud-setup.sh` primes it once per environment. Pin to a specific commit
+instead of tracking `main` by setting `CLAUDINITE_REF`.
 
-We import only the canon's own top-level `CLAUDE.md` — the single entry point
-Claudinite maintains — and let it traverse to the individual canon docs from there,
-so the list of shared files lives upstream and never has to be mirrored here.
+It is consumed **read-only**. Lessons are *captured locally* (above) and only the
+daily `optimize-procedures` routine bridges them up to Claudinite (see
+`dev/procedures/general/auto-optimize-procedures.md`); an accepted lesson then
+arrives here automatically the next time the sync hook pulls the merged `main`.
 
-@dev/procedures/claude/shared/CLAUDE.md
+The owner's personal preferences are **not** read by an instruction here — a
+SessionStart hook (registered after the sync hook, in
+[`.claude/settings.json`](.claude/settings.json)) injects the current user's
+preferences into context automatically.
+
+The single import line below is the **one place** that records where the canon is
+mounted — every other reference reaches it only through this line. We pull in just
+the canon's own top-level entry point and let it traverse to the individual canon
+docs from there, so the list of shared files lives upstream and never has to be
+mirrored here.
+
+@.claudinite/CLAUDE.md

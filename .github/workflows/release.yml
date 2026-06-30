@@ -97,3 +97,16 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           files: dist/google-calendar-event-creator.zip
           generate_release_notes: true
+
+  # Auto-runs on a bump-merge to main with no human watching, so a silent failure
+  # here means the release never gets cut and the "bump version" flow stalls
+  # unnoticed. Surface it as a tracking issue. (A clean no-op release=false run is
+  # success, not failure, so it never reaches here.)
+  report-failure:
+    needs: release
+    if: failure()
+    permissions:
+      issues: write
+    uses: ./.github/workflows/report-failure.yml
+    with:
+      workflow: "Release: Create Package"
