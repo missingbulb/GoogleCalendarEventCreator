@@ -39,6 +39,11 @@
 # shell is a render-timing problem the proxy-tier ladder (IP quality) can't fix anyway
 # — escalating on it just burns renders and 403s at the top tier (#587).
 #
+# Inverted case — some hosts SERVER-RENDER the data and serve the JS shell only to a
+# JS-capable client, so render=true gets the EMPTY shell while a plain proxy fetch gets
+# the data. For those, render=true is harmful: drop it (the per-host opt-out in
+# record_page; #587 eventer.co.il, confirmed by a no-render fetch returning real fields).
+#
 # Non-HTML guard (#279 stubhub): a 2xx fetch isn't enough — ScraperAPI's render=true
 # can return the SPA's *rendered text* with ZERO markup (stubhub: 4018 bytes, not a
 # single '<'), which yields no DOM / CSS selectors / JSON-LD to extract from and is
@@ -60,12 +65,21 @@ record_page() {
     local host="${url#*://}"; host="${host%%/*}"; host="${host%%:*}"
     local geo=""
     case "$host" in *.il) geo="country_code=il&"; echo "record_page: geo-targeting $host via country_code=il." >&2;; esac
+    # render=true (headless JS execution) by default — most event pages are SPAs. But a
+    # few hosts SERVER-RENDER their event data and serve the JS shell ONLY to a
+    # JS-capable client, so render=true gets an empty `{{…}}` shell while a plain proxy
+    # fetch gets the baked-in data — fetch those WITHOUT render (#587 eventer.co.il).
+    local render="render=true&"
+    case "$host" in
+      eventer.co.il|*.eventer.co.il)
+        render=""; echo "record_page: $host server-renders; fetching WITHOUT render (render=true returns an empty SPA shell here)." >&2;;
+    esac
     local tier label
     # "" = standard; then premium; then ultra_premium. The label is for the log only.
     for tier in "" "premium=true&" "ultra_premium=true&"; do
       label="${tier%%=*}"; label="${label:-standard}"
       if curl -fsS --max-time 90 --retry 2 --retry-delay 2 --retry-all-errors \
-        "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
+        "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}${render}url=${encoded}" -o "$out"; then
         if looks_like_html "$out"; then
           echo "record_page: fetched via ScraperAPI ($label tier)." >&2
           return 0
