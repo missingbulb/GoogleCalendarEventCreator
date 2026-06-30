@@ -12,8 +12,8 @@ Headline coverage over all 32 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **56.3%** | 54 / 96 |
-| **All fields** | **39%** | 73 / 187 |
+| **Critical fields** (title + start + location) | **58.3%** | 56 / 96 |
+| **All fields** | **40.1%** | 75 / 187 |
 | Event coverage *(informational)* | 20.8% | 33 / 159 |
 
 ### Gate
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 56.3% | 56.3% | ✓ |
-| All fields | 39% | 39% | ✓ |
+| Critical fields | 58.3% | 58.3% | ✓ |
+| All fields | 40.1% | 40.1% | ✓ |
 
 Gated over **32** shared case(s).
 
@@ -34,7 +34,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
 | `title` **(critical)** | 32 | 23 | 2 | 7 | 71.9% |
-| `start` **(critical)** | 32 | 16 | 9 | 7 | 50% |
+| `start` **(critical)** | 32 | 18 | 7 | 7 | 56.3% |
 | `end` | 21 | 12 | 0 | 9 | 57.1% |
 | `location` **(critical)** | 32 | 15 | 4 | 13 | 46.9% |
 | `ctz` | 29 | 0 | 0 | 29 | 0% |
@@ -46,7 +46,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | Host | Cases | Events found (fb/custom) | Critical % | All % |
 | --- | --: | --: | --: | --: |
 | `bandsintown.com` | 1 | 1/1 | 66.7% | 66.7% |
-| `barby.co.il` | 1 | 1/1 | 33.3% | 20% |
+| `barby.co.il` | 1 | 1/1 | 66.7% | 40% |
 | `cinema.co.il` | 5 | 0/118 | 0% | 0% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 83.3% |
 | `dice.fm` | 1 | 1/1 | 100% | 83.3% |
@@ -62,7 +62,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `seetickets.com` | 1 | 1/1 | 100% | 100% |
 | `stubhub.com` | 1 | 6/6 | 100% | 100% |
 | `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
-| `thinkdrink.co.il` | 1 | 1/1 | 66.7% | 40% |
+| `thinkdrink.co.il` | 1 | 1/1 | 100% | 60% |
 | `ticketmaster.co.il` | 1 | 1/1 | 100% | 80% |
 | `visit.tel-aviv.gov.il` | 2 | 2/2 | 33.3% | 16.7% |
 
@@ -73,7 +73,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | Case | Events fb/custom | title | start | end | loc | ctz | len | desc |
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | `bandsintown-berry-sakharof` | 1/1 | ~ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
-| `barby` | 1/1 | ✓ | ~ | — | ✗ | ✗ | — | ~ |
+| `barby` | 1/1 | ✓ | ✓ | — | ✗ | ✗ | — | ~ |
 | `dash-datadoghq` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `dice` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
@@ -100,7 +100,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `telavivcinematheque-poetry-bookstores` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-sentimental-value` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
 | `telavivcinematheque-taiwan-week` | 0/6 | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `thinkdrink-quantum-lecture` | 1/1 | ✓ | ~ | — | ✓ | ✗ | — | ~ |
+| `thinkdrink-quantum-lecture` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ~ |
 | `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ✓ |
 | `visit-tel-aviv-timed` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | — | ~ |
 | `visit-tel-aviv` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | — | ~ |

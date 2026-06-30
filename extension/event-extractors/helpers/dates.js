@@ -77,7 +77,18 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       // Ambiguous slash date (e.g. 06/07/2026): leave to US-style V8 parsing below.
       if (sep === "/" && dd <= 12) continue;
       const day = `${m[4]}-${pad(mm)}-${pad(dd)}`;
-      return m[5] != null ? `${day}T${pad(+m[5])}:${m[6]}:00` : day;
+      if (m[5] != null) return `${day}T${pad(+m[5])}:${m[6]}:00`;
+      // The inline time group missed (e.g. "16/06/2026 | שעת פתיחת דלתות: 21:00"):
+      // a separator word or non-ASCII text sits between the date and the time.
+      // Look ahead up to 150 chars for the first HH:MM pattern on the same
+      // logical line as the date.
+      const after = s.slice(m.index + m[0].length, m.index + m[0].length + 150);
+      const tm = after.match(/(\d{1,2}):(\d{2})(?!\d)/);
+      if (tm) {
+        const h = +tm[1], min = +tm[2];
+        if (h <= 23 && min <= 59) return `${day}T${pad(h)}:${pad(min)}:00`;
+      }
+      return day;
     }
 
     // Hebrew month names, day-first: "4 ביולי 2026" / "4 ביולי 2026•21:00"
