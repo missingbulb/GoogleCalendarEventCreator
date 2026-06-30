@@ -14,7 +14,8 @@ prunes them once the canon absorbs them (capture is always local — see
   failure mode — pre-agent setup, agent bail, post-agent quality check — as
   equivalent from the triage perspective.
 
-- **In a CLAUDE.md, `@import` only docs whose guidance applies to every session; reference specialized pipeline docs with non-@import pointer links.** An `@import`
+- **In a CLAUDE.md, `@import` only docs whose guidance applies to every session;
+  reference specialized pipeline docs with non-@import pointer links.** An `@import`
   expands the doc inline at launch in *every* session, taxing the always-loaded
   context budget even when the session has nothing to do with that pipeline.
   Self-contained pipelines (release, auto-extractor, maintenance routines) belong
