@@ -1,8 +1,12 @@
-// Tests for record_page's non-HTML guard (dev/create-extractor/record-page.sh).
+// Tests for record_page's render-wait + body guards (dev/create-extractor/record-page.sh).
 // #279 (stubhub): ScraperAPI's render=true returned the SPA's rendered TEXT with zero
 // markup (4018 bytes, not one '<') — a 2xx fetch with nothing to extract. record_page
 // must treat a non-HTML body like a tier failure: escalate the proxy quality and retry,
 // and if even ultra_premium comes back plaintext, FAIL (no usable fixture).
+// #587 (eventer): render=true can snapshot an SPA before it fetches its data, recording a
+// bare Angular shell. record_page sends a render-wait instruction set so the page settles,
+// and treats a still-unrendered shell (ng-attr bindings) exactly like the #279 non-HTML
+// body — escalate, then FAIL at the top tier rather than keep a useless fixture.
 //
 // record_page is bash, so we drive record-page.sh directly with a FAKE curl on PATH
 // (real jq stays available — PATH is prepended, not replaced). The fake reads the tier
@@ -23,14 +27,16 @@ const SCRIPT = path.join(__dirname, "..", "record-page.sh");
 // the URL, appends it to $FAKE_CURL_LOG, then emits html / plaintext / a 22 failure
 // per the tier's entry in $FAKE_CURL_SPEC ("standard:text,premium:text,ultra:html").
 const FAKE_CURL = `#!/usr/bin/env bash
-out=""; url=""
+out=""; url=""; hdr=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -o) out="$2"; shift 2;;
+    -H) hdr="$2"; shift 2;;
     https://api.scraperapi.com/*) url="$1"; shift;;
     *) shift;;
   esac
 done
+[ -n "\${FAKE_CURL_HDR_LOG:-}" ] && echo "$hdr" >> "$FAKE_CURL_HDR_LOG"
 tier=standard
 case "$url" in
   *ultra_premium=true*) tier=ultra_premium;;
@@ -43,9 +49,10 @@ for p in "\${pairs[@]}"; do
   [ "\${p%%:*}" = "$tier" ] && outcome="\${p##*:}"
 done
 case "$outcome" in
-  html) printf '<!doctype html><html><body><h1>Event</h1></body></html>' > "$out"; exit 0;;
-  text) printf 'Buy tickets\\nShlomo Artzi\\n8:30 PM Tel Aviv, Israel' > "$out"; exit 0;;
-  *)    exit 22;;
+  html)  printf '<!doctype html><html><body><h1>Event</h1></body></html>' > "$out"; exit 0;;
+  shell) printf '<!doctype html><html><head><meta property="og:title" ng-attr-content="{{getMetaDataTitle()}}"></head><body></body></html>' > "$out"; exit 0;;
+  text)  printf 'Buy tickets\\nShlomo Artzi\\n8:30 PM Tel Aviv, Israel' > "$out"; exit 0;;
+  *)     exit 22;;
 esac
 `;
 
@@ -55,6 +62,7 @@ function runRecordPage(spec) {
   fs.mkdirSync(bin);
   fs.writeFileSync(path.join(bin, "curl"), FAKE_CURL, { mode: 0o755 });
   const log = path.join(dir, "curl.log");
+  const hdrLog = path.join(dir, "curl-hdr.log");
   const out = path.join(dir, "page.html");
   const res = spawnSync("bash", [SCRIPT, "https://www.stubhub.com/shlomo-artzi/event/1", out], {
     env: {
@@ -63,12 +71,14 @@ function runRecordPage(spec) {
       SCRAPER_API_KEY: "test-key",
       FAKE_CURL_SPEC: spec,
       FAKE_CURL_LOG: log,
+      FAKE_CURL_HDR_LOG: hdrLog,
     },
     encoding: "utf8",
   });
   const tiers = fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\n").filter(Boolean) : [];
+  const headers = fs.existsSync(hdrLog) ? fs.readFileSync(hdrLog, "utf8").trim().split("\n").filter(Boolean) : [];
   const body = fs.existsSync(out) ? fs.readFileSync(out, "utf8") : "";
-  return { status: res.status, stderr: res.stderr, tiers, body };
+  return { status: res.status, stderr: res.stderr, tiers, headers, body };
 }
 
 test("a plaintext body escalates the proxy tier and retries", () => {
@@ -96,4 +106,26 @@ test("a non-2xx still escalates (the original ladder is preserved)", () => {
   assert.equal(r.status, 0, r.stderr);
   assert.deepEqual(r.tiers, ["standard", "premium"]);
   assert.match(r.body, /<html/i);
+});
+
+// #587 (eventer): give an SPA time to render before snapshotting, and never silently
+// keep an unrendered shell.
+test("each fetch sends the render-wait instruction set header", () => {
+  const r = runRecordPage("standard:html");
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.headers.length, 1);
+  assert.match(r.headers[0], /^x-sapi-instruction_set:\s*\[\{"type":"wait","value":\d+\}\]$/);
+});
+
+test("an unrendered SPA shell escalates the proxy tier and retries", () => {
+  const r = runRecordPage("standard:shell,premium:html");
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(r.tiers, ["standard", "premium"]);
+  assert.match(r.body, /<h1>Event<\/h1>/); // the premium real render was kept, not the shell
+});
+
+test("an unrendered shell at every tier is a hard failure", () => {
+  const r = runRecordPage("standard:shell,premium:shell,ultra_premium:shell");
+  assert.notEqual(r.status, 0); // no usable fixture — fail into human triage
+  assert.deepEqual(r.tiers, ["standard", "premium", "ultra_premium"]);
 });
