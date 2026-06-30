@@ -60,6 +60,14 @@ record_page() {
     local host="${url#*://}"; host="${host%%/*}"; host="${host%%:*}"
     local geo=""
     case "$host" in *.il) geo="country_code=il&"; echo "record_page: geo-targeting $host via country_code=il." >&2;; esac
+    # …but a few `.il` hosts return an un-hydrated SPA shell from ScraperAPI's Israeli
+    # proxy pool while rendering fully from the default pool — so drop the geo for those
+    # (#587 eventer.co.il, confirmed: render + country_code=il = a 16 KB shell, render
+    # alone = the full 170 KB rendered page). Apex or any subdomain.
+    case "$host" in
+      eventer.co.il|*.eventer.co.il)
+        geo=""; echo "record_page: $host renders only without IL geo-targeting — dropping country_code." >&2;;
+    esac
     local tier label
     # "" = standard; then premium; then ultra_premium. The label is for the log only.
     for tier in "" "premium=true&" "ultra_premium=true&"; do

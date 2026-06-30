@@ -36,6 +36,7 @@ while [ $# -gt 0 ]; do
     *) shift;;
   esac
 done
+[ -n "\${FAKE_CURL_URL_LOG:-}" ] && echo "$url" >> "$FAKE_CURL_URL_LOG"
 tier=standard
 case "$url" in
   *ultra_premium=true*) tier=ultra_premium;;
@@ -55,26 +56,29 @@ case "$outcome" in
 esac
 `;
 
-function runRecordPage(spec) {
+function runRecordPage(spec, targetUrl = "https://www.stubhub.com/shlomo-artzi/event/1") {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "record-page-"));
   const bin = path.join(dir, "bin");
   fs.mkdirSync(bin);
   fs.writeFileSync(path.join(bin, "curl"), FAKE_CURL, { mode: 0o755 });
   const log = path.join(dir, "curl.log");
+  const urlLog = path.join(dir, "curl-url.log");
   const out = path.join(dir, "page.html");
-  const res = spawnSync("bash", [SCRIPT, "https://www.stubhub.com/shlomo-artzi/event/1", out], {
+  const res = spawnSync("bash", [SCRIPT, targetUrl, out], {
     env: {
       ...process.env,
       PATH: `${bin}:${process.env.PATH}`,
       SCRAPER_API_KEY: "test-key",
       FAKE_CURL_SPEC: spec,
       FAKE_CURL_LOG: log,
+      FAKE_CURL_URL_LOG: urlLog,
     },
     encoding: "utf8",
   });
   const tiers = fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\n").filter(Boolean) : [];
+  const urls = fs.existsSync(urlLog) ? fs.readFileSync(urlLog, "utf8").trim().split("\n").filter(Boolean) : [];
   const body = fs.existsSync(out) ? fs.readFileSync(out, "utf8") : "";
-  return { status: res.status, stderr: res.stderr, tiers, body };
+  return { status: res.status, stderr: res.stderr, tiers, urls, body };
 }
 
 test("a plaintext body escalates the proxy tier and retries", () => {
@@ -112,4 +116,21 @@ test("an AngularJS (ng-attr) body is kept, not rejected as a shell", () => {
   assert.equal(r.status, 0, r.stderr);
   assert.deepEqual(r.tiers, ["standard"]); // kept at the first tier; no shell-escalation
   assert.match(r.body, /ng-attr-content/); // the ng-attr body was kept, not discarded
+});
+
+// #587 (eventer): an `.il` host is geo-targeted to an Israeli IP by default, but
+// eventer.co.il's IL proxy pool returns an un-hydrated shell — it renders only without
+// geo, so country_code is dropped for it (render=true still applies).
+test("an ordinary .il host is geo-targeted (country_code=il)", () => {
+  const r = runRecordPage("standard:html", "https://www.barby.co.il/event/1");
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.urls[0], /country_code=il&/);
+  assert.match(r.urls[0], /render=true&/);
+});
+
+test("eventer.co.il drops the IL geo-targeting (but keeps render=true)", () => {
+  const r = runRecordPage("standard:html", "https://www.eventer.co.il/8lfff");
+  assert.equal(r.status, 0, r.stderr);
+  assert.doesNotMatch(r.urls[0], /country_code=il/); // geo would return the empty shell
+  assert.match(r.urls[0], /render=true&/);           // render is still needed and kept
 });
