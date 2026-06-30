@@ -34,6 +34,23 @@ genuinely covered by the *current pinned* canon — quote the canon line. When i
 doubt, leave it; a wrongful prune loses a real local lesson and there is no PR
 review to catch it.
 
+**Track every removal — it's the audit trail for an unreviewed push.** Because the
+prune lands on `main` with no PR to read, the removal must be logged to a standing
+**superseded-instructions tracking issue** (found **by title**, e.g.
+`Superseded local instructions (optimize-procedures)`, not a hard-coded number;
+open it if missing, reopen it if it was closed). Each prune adds a **dated comment**
+recording, for **every** instruction removed this run:
+
+1. the **full text** of the removed local instruction, and which local doc it came
+   from;
+2. the **full text** of the canon instruction that superseded it — the one whose
+   coverage justified the removal — and which canon doc (path) it now lives in.
+
+So the ledger answers, for any dropped local guidance, exactly what in the canon
+replaced it. This issue is the durable home for the "quote the canon line"
+justification; never remove a local instruction without writing its paired entry
+here. (A run that prunes nothing writes no comment.)
+
 ## 2. Push **up**: promote generalizable local items (→ an issue, not a removal)
 
 Scan the local docs for insights that are **portable** — they'd help unseen
@@ -84,6 +101,12 @@ needs the label pre-created and never errors on a re-run.
   routine's own standing tracking issue (found **by title**, not a hard-coded
   number; open it if missing, reopen it if it was closed while the routine is still
   producing output). A quiet day logs nothing.
+- When a run **removed** any local instruction (direction 1), additionally log each
+  removed instruction — paired with the full text of the canon instruction that
+  superseded it — to the standing **superseded-instructions tracking issue** (see
+  direction 1). The two issues are separate concerns: the run-log issue is the
+  routine's activity history; the superseded-instructions issue is the durable
+  ledger of what local guidance was dropped and what replaced it.
 
 ## The launcher
 
@@ -93,9 +116,10 @@ specified in this doc — reconcile the local docs against the pinned shared can
 both directions (push directly to `main` the doc prunes/rephrases the canon now
 covers — gated on the offline suite being green, no PR — and open **one** bundled
 handoff-labelled issue listing every generalizable local item not yet in the canon,
-**without** removing them locally), follow the discipline above, keep the offline
-test suite green, log the run on the routine's standing tracking issue, and never
-merge a PR.
+**without** removing them locally), log every direction-1 removal — paired with the
+canon text that superseded it — to the standing superseded-instructions tracking
+issue, follow the discipline above, keep the offline test suite green, log the run
+on the routine's standing tracking issue, and never merge a PR.
 
 Schedule it daily in the agent's routine scheduler; the repo can't schedule itself,
 so the doc is the spec and the routine is the trigger.
