@@ -15,15 +15,25 @@
 # function. (jq is preinstalled on the runner; it percent-encodes the target URL so
 # its own query can't leak up as sibling ScraperAPI params.)
 #
-# QoS escalation: a hard site (Cloudflare/WAF, JS-heavy) can defeat the standard
-# proxy pool — ScraperAPI then returns 500 / times out even after its own internal
-# retries (this is what failed seatgeek.com #281: a timeout + three 500s). Rather
-# than retry the SAME tier, escalate the proxy quality on failure: standard →
-# premium (premium=true) → ultra_premium (ultra_premium=true), each tier far more
-# capable (and more credits) than the last. Each tier still gets a couple of
-# transient-error retries before we climb; only when the top tier is exhausted does
-# the page count as undownloadable and the job fail red. Cheapest tier first keeps
-# credit cost down on the common case while still cracking the hard ones.
+# Transient-error resilience: ScraperAPI is finicky under load — it returns 500 / times
+# out / drops the connection intermittently for a page that fetches fine moments later
+# (this is what failed seatgeek.com #281: a timeout + three 500s). This is an unattended
+# pipeline auto-resolving a ticket, so absorb that flakiness with generous per-tier
+# retries rather than failing the run: each tier retries up to 5 times with curl's
+# exponential backoff (~1,2,4,8,16s), bounded by --retry-max-time. A request that never
+# returns a usable response isn't billed, so the retries are ~free on exactly the errors
+# we're papering over. We retry curl's default *transient* set (timeouts, dropped
+# connections, 5xx/408/429) — NOT every error: a deterministic 4xx like a plan-limit 403
+# won't change on retry, so retrying it just burns time (this is why the old
+# --retry-all-errors is gone).
+#
+# QoS escalation: if a tier is STILL exhausted after its retries (a genuinely hard
+# Cloudflare/WAF/JS-heavy site, not a blip), escalate the proxy quality: standard →
+# premium (premium=true) → ultra_premium (ultra_premium=true), each more capable (and more
+# credits) than the last. Only when the top tier is exhausted does the page count as
+# undownloadable and the job fail red. Cheapest tier first keeps credit cost down on the
+# common case. (ultra_premium currently 403s on this plan — effectively a dead top rung,
+# left in so it activates automatically if the plan changes.)
 #
 # Non-HTML guard (#279 stubhub): a 2xx fetch isn't enough — ScraperAPI's render=true
 # can return the SPA's *rendered text* with ZERO markup (stubhub: 4018 bytes, not a
@@ -50,7 +60,7 @@ record_page() {
     # "" = standard; then premium; then ultra_premium. The label is for the log only.
     for tier in "" "premium=true&" "ultra_premium=true&"; do
       label="${tier%%=*}"; label="${label:-standard}"
-      if curl -fsS --max-time 90 --retry 2 --retry-delay 2 --retry-all-errors \
+      if curl -fsS --max-time 90 --retry 5 --retry-max-time 240 \
         "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
         if looks_like_html "$out"; then
           echo "record_page: fetched via ScraperAPI ($label tier)." >&2
