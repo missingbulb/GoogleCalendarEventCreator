@@ -13,6 +13,7 @@
   "event-extractors/custom/dice.js",
   "event-extractors/custom/edinburghfringe.js",
   "event-extractors/custom/eventbrite.js",
+  "event-extractors/custom/eventer.js",
   "event-extractors/custom/eventim-co-il.js",
   "event-extractors/custom/events-datadoghq.js",
   "event-extractors/custom/facebook.js",

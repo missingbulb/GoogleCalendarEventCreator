@@ -1623,6 +1623,21 @@ is covered by unit tests only.
 </tr>
 </table>
 
+<table>
+<tr>
+<td valign="top" width="320">
+
+🧩 _Validated against [eventer](extractor/expected/eventer.json)._ <!-- req-gallery:11.17 -->
+
+</td>
+<td valign="top">
+
+`11.17` Support `eventer.co.il`.
+
+</td>
+</tr>
+</table>
+
 ## 12. Popup states (what the popup shows)
 
 When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found (`chooseContent` + the host classifier); *how* each state renders is §1–§3, and those renderings are already pinned there by snapshots: the denylisted empty state (`2.3`), the nothing-found "Disagree?" state (`2.2`/`3.2`), and an unlisted host's event with "Suggest Correction" (`3.1`). This section pins only the two slices §1–§3 don't — each a **real popup snapshot** driven through the production `chooseContent`: whether a **supported** host shows the "Suggest Correction" label (`12.4`), and the completeness rule that decides whether a fallback event is shown at all (`12.6`).
