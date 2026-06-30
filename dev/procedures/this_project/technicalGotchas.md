@@ -16,15 +16,23 @@ trap spanning files. See the full locality rule in
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
   us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in
-  `dev/create-extractor/phase1-prepare.sh` / the bot-block gotcha
-  below), and `render=true` makes it execute the page's JS and return the
-  post-render HTML — so a JS app records with real data instead of an empty shell.
-  The repo no longer carries any SPA-shell detection or headless-Chrome render of
-  its own (the former `spa-shell.js` / `render-page.js` and their
-  `RENDER_NO_SANDBOX` CI plumbing were removed). One consequence survives: rendered
-  output isn't deterministic, so a re-record can legitimately shift a live case's
-  `expected` — treat such drift like a site-markup change, and prefer extracting
-  JSON-LD/`og:` (which apps often still inject) over brittle DOM positions.
+  `dev/create-extractor/record-page.sh` / the bot-block gotcha
+  below), and `render=true` makes it execute the page's JS — but **`render=true`
+  does not guarantee a populated page**: ScraperAPI can snapshot before a SPA's
+  async XHR data fetch has resolved, returning a bare framework shell with
+  unresolved template bindings (eventer.co.il / #587 recorded AngularJS with every
+  field still `ng-attr-content="{{getMetaDataTitle()}}"` — no real data). The fix is
+  ScraperAPI's render instruction set (`x-sapi-instruction_set` header with a
+  `wait` step) so the browser idles long enough for data to populate before
+  capture; `record-page.sh` also detects unrendered Angular shells (any remaining
+  `ng-attr-…="{{…}}"` attribute) and escalates / fails red rather than committing
+  a useless fixture. The repo no longer carries any SPA-shell detection or
+  headless-Chrome render of its own (the former `spa-shell.js` / `render-page.js`
+  and their `RENDER_NO_SANDBOX` CI plumbing were removed). One consequence
+  survives: rendered output isn't deterministic, so a re-record can legitimately
+  shift a live case's `expected` — treat such drift like a site-markup change, and
+  prefer extracting JSON-LD/`og:` (which apps often still inject) over brittle DOM
+  positions.
 - **Service-worker paths must be extension-root absolute.** The background service
   worker runs from `icon/toolbar-icon.js` (relative to the extension root,
   `extension/`), so any path it hands a Chrome API
@@ -76,7 +84,7 @@ trap spanning files. See the full locality rule in
   [general/engineeringPractices.md](../general/engineeringPractices.md)); here the
   escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
   only page fetch (`record_page` in
-  `dev/create-extractor/phase1-prepare.sh`) routes through ScraperAPI's
+  `dev/create-extractor/record-page.sh`) routes through ScraperAPI's
   residential proxy (with `render=true`, so a single-page-app records real data).
   Unset (a fresh clone, the cloud sandbox), it fetches directly and stays
   bot-blocked — so a target page can only be recorded by the auto-extractor
