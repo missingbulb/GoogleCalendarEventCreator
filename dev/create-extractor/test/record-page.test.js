@@ -3,11 +3,11 @@
 // markup (4018 bytes, not one '<') — a 2xx fetch with nothing to extract. record_page
 // must treat a non-HTML body like a tier failure: escalate the proxy quality and retry,
 // and if even ultra_premium comes back plaintext, FAIL (no usable fixture).
-// #587 (eventer): render=true can occasionally snapshot an SPA before it fetches its data,
-// recording a bare Angular shell. record_page treats a still-unrendered shell (ng-attr
-// bindings) exactly like the #279 non-HTML body — escalate, then FAIL at the top tier
-// rather than keep a useless fixture. (A fixed-`wait` render instruction set is NOT used:
-// it replaces ScraperAPI's adaptive default wait and made the shell more likely, not less.)
+// #587 (eventer): record_page does NOT try to detect an "unrendered SPA shell" — that
+// heuristic (an `ng-attr` grep) false-positives on good AngularJS renders (which keep the
+// `ng-attr-` source attributes), and a real shell is a render-timing issue the proxy-tier
+// ladder can't fix. So a 2xx body that looks like HTML is kept as-is; integration tests
+// catch a genuinely empty fixture downstream.
 //
 // record_page is bash, so we drive record-page.sh directly with a FAKE curl on PATH
 // (real jq stays available — PATH is prepended, not replaced). The fake reads the tier
@@ -104,16 +104,12 @@ test("a non-2xx still escalates (the original ladder is preserved)", () => {
   assert.match(r.body, /<html/i);
 });
 
-// #587 (eventer): never silently keep an unrendered shell.
-test("an unrendered SPA shell escalates the proxy tier and retries", () => {
-  const r = runRecordPage("standard:shell,premium:html");
+// #587 (eventer): a rendered AngularJS page keeps its `ng-attr-…="{{…}}"` SOURCE
+// attributes in the DOM, so an `ng-attr` grep can't distinguish it from an unrendered
+// shell. record_page must NOT reject such a body — it's valid HTML and is kept as-is.
+test("an AngularJS (ng-attr) body is kept, not rejected as a shell", () => {
+  const r = runRecordPage("standard:shell");
   assert.equal(r.status, 0, r.stderr);
-  assert.deepEqual(r.tiers, ["standard", "premium"]);
-  assert.match(r.body, /<h1>Event<\/h1>/); // the premium real render was kept, not the shell
-});
-
-test("an unrendered shell at every tier is a hard failure", () => {
-  const r = runRecordPage("standard:shell,premium:shell,ultra_premium:shell");
-  assert.notEqual(r.status, 0); // no usable fixture — fail into human triage
-  assert.deepEqual(r.tiers, ["standard", "premium", "ultra_premium"]);
+  assert.deepEqual(r.tiers, ["standard"]); // kept at the first tier; no shell-escalation
+  assert.match(r.body, /ng-attr-content/); // the ng-attr body was kept, not discarded
 });

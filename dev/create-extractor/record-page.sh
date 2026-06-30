@@ -32,8 +32,12 @@
 # supplying `x-sapi-instruction_set` REPLACES the adaptive default with only the listed
 # steps, so a `[{"type":"wait","value":N}]` snapshots after a dumb fixed delay instead of
 # when the page is actually ready — which captured eventer's bare shell (every field
-# still a `{{…}}` binding) even though the plain call renders it. A shell that slips
-# through anyway (a render timing race) is caught by the unrendered-shell guard below.
+# still a `{{…}}` binding) even though the plain call renders it. We deliberately do NOT
+# second-guess a rendered body with an "is this an un-interpolated shell?" heuristic:
+# AngularJS can leave its `ng-attr-…="{{…}}"` SOURCE attributes in the DOM even after it
+# fills the resolved ones (so the check false-positives on good renders), and a genuine
+# shell is a render-timing problem the proxy-tier ladder (IP quality) can't fix anyway
+# — escalating on it just burns renders and 403s at the top tier (#587).
 #
 # Non-HTML guard (#279 stubhub): a 2xx fetch isn't enough — ScraperAPI's render=true
 # can return the SPA's *rendered text* with ZERO markup (stubhub: 4018 bytes, not a
@@ -42,25 +46,11 @@
 # a tier failure: we climb the ladder to a stronger (more browser-faithful) tier and
 # retry. If even ultra_premium comes back plaintext, the page counts as
 # undownloadable and the job fails red — same terminal state as an exhausted ladder.
-#
-# Unrendered-shell guard (#587 eventer): render can still occasionally snapshot a page
-# early (a timing race), so apply the same belt-and-suspenders the #279 guard does — a
-# body that still carries Angular's
-# unresolved-binding artifact (`ng-attr-…="{{…}}"`, which Angular REMOVES once it
-# interpolates, so its presence reliably means "never rendered") is a shell with no
-# extractable fields. Treat it exactly like a non-HTML body: escalate the tier, and if
-# even ultra_premium comes back a shell, FAIL red into human triage rather than commit
-# a useless fixture (the silent shell that blocked #587). (Angular-specific by design —
-# other frameworks leave different shells; extend this signature when one bites.)
 set -euo pipefail
 
 # A recorded body counts as HTML only if it carries at least one real tag-open
 # (<tag, </tag, or <!doctype). The #279 plaintext render had none.
 looks_like_html() { grep -qiE '<[a-z!/]' "$1"; }
-
-# An unrendered Angular SPA shell still has `ng-attr-` attributes (removed once
-# rendered) — a body carrying one never resolved its `{{…}}` bindings (#587).
-looks_like_shell() { grep -qiE 'ng-attr-[a-z-]+="\{\{' "$1"; }
 
 record_page() {
   local url="$1" out="$2"
@@ -76,19 +66,16 @@ record_page() {
       label="${tier%%=*}"; label="${label:-standard}"
       if curl -fsS --max-time 90 --retry 2 --retry-delay 2 --retry-all-errors \
         "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
-        if looks_like_shell "$out"; then
-          echo "record_page: ScraperAPI $label tier returned an unrendered SPA shell (ng-attr bindings) for $url — escalating." >&2
-        elif looks_like_html "$out"; then
+        if looks_like_html "$out"; then
           echo "record_page: fetched via ScraperAPI ($label tier)." >&2
           return 0
-        else
-          echo "record_page: ScraperAPI $label tier returned non-HTML (plaintext, no markup) for $url — escalating." >&2
         fi
+        echo "record_page: ScraperAPI $label tier returned non-HTML (plaintext, no markup) for $url — escalating." >&2
       else
         echo "record_page: ScraperAPI $label tier failed for $url — escalating." >&2
       fi
     done
-    echo "record_page: all ScraperAPI tiers (standard → premium → ultra_premium) failed for $url (non-2xx, non-HTML, or unrendered shell)" >&2
+    echo "record_page: all ScraperAPI tiers (standard → premium → ultra_premium) failed for $url (non-2xx or non-HTML)" >&2
     return 1
   else
     curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors \
