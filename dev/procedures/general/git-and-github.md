@@ -34,3 +34,13 @@ possible.
   missing the just-merged work.
 - Symptom: a missing file / failed `git mv` on the new branch, far from the cause.
 - Fix: `git fetch origin main` **first**, then branch.
+
+## A GitHub Actions `run:` step's default shell has no `pipefail` — a piped command's failure is silently swallowed
+
+GitHub's implicit default run-shell is `bash -e {0}` — **without** `pipefail` — so
+a step like `cmd 2>&1 | tee log` takes `tee`'s exit code (0), not `cmd`'s: a
+failing command reports the step as green. Set `defaults.run.shell: bash`
+(job- or step-level), which GitHub runs as `bash --noprofile --norc -eo pipefail
+{0}`, so the step fails when the left side of any pipe fails. Bit an unattended
+pipeline: a failed fetch step piped through `tee` for logging reported success
+and handed off a stale branch instead of flagging a human.
