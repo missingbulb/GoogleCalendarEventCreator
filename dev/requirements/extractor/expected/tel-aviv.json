@@ -1,6 +1,56 @@
 {
-  "description": "tel-aviv.gov.il: TODO(agent) — one line on what this case tests",
+  "description": "tel-aviv.gov.il municipal listing: a dance performance with 7 showings over 3 days, folded into one multi-instance event",
   "expected": {
-    "events": []
+    "events": [
+      {
+        "title": "מופע המחול ״תפר התפשטות״",
+        "ctz": "Asia/Jerusalem",
+        "details": "https://www.tel-aviv.gov.il/Pages/MainItemPage.aspx?ItemId=14073&ListID=9dd2da03-5c43-462a-b5b2-d087c179b16c&WebID=3af57d92-807c-43c5-8d5f-6fd455eb2776\n\n65 ₪ (במקום 90 ₪)\n\nתערוכת \"אבטיפוס: האדריכלות של רם כרמי\" מאת מוזיאון תל אביב לאמנות מארחת את יוצרי תוכנית 3|2|1, מרכז סוזן דלל. מופע מחול שנוצר בהשראת האדריכל רם כרמי – מהאדריכלים המשפיעים שפעלו בארץ. המופע מתקיים בתוך התערוכה והופך את חלל התערוכה לחלק בלתי נפרד מהיצירה. קטעי המחול נעים בין הדגמים, המסמכים והרישומים, ומשתלבים בטקסטים המבוססים על רעיונותיו של כרמי על אדריכלות, חומר, זיכרון, מרחב והאופן שבו אנחנו חווים מקום\n\nחשוב לדעת\nהכניסה מותנית ברכישת כרטיסים מראש ובהצגתם בכניסה.\nמספר המקומות מוגבל.\nמימוש ההטבה בהזנת מספר תעודת זהות של מחזיק דיגיתל.\nלבירורים, ביטולים או שינויים בכרטיסים שנרכשו בהטבה (ע\"פ מדיניות מוסד התרבות), למידע על המרחב המוגן ולבקשות ושאלות בנושא נגישות, יש לפנות למוזיאון תל אביב לאמנות",
+        "times": [
+          {
+            "start": "2026-07-05T19:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          },
+          {
+            "start": "2026-07-06T17:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          },
+          {
+            "start": "2026-07-06T19:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          },
+          {
+            "start": "2026-07-06T21:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          },
+          {
+            "start": "2026-07-07T17:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          },
+          {
+            "start": "2026-07-07T19:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          },
+          {
+            "start": "2026-07-07T21:00:00",
+            "end": null,
+            "eventLengthInMinutes": null,
+            "location": "ביתן איל עופר, תרס\"ט[שדרות] 6"
+          }
+        ]
+      }
+    ]
   }
 }
