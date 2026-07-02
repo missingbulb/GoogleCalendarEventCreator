@@ -1,8 +1,8 @@
 # Engineering practices (local working set)
 
 General engineering-practice lessons captured here, not yet in the shared canon.
-`optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
-prunes them once the canon absorbs them (capture is always local — see
+`optimize-procedures` prunes or rephrases them once the shared canon comes to cover
+them (capture is always local — see
 [this_project/workflow.md](../this_project/workflow.md)).
 
 - **Collapse parallel classifiers to one, and prefer a structural classifier the code can't desync from over a hand-set field.** When the same property is tagged in more than one place (a spec tag, a side manifest, a per-item field), the copies drift — fold them into a single source of truth. Best of all is a *structural* classifier that derives the category from where something lives (its folder or path), so there's no field to forget to update and no way for the classifier to desync from the item it classifies.

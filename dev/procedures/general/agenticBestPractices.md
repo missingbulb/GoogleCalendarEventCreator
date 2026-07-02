@@ -2,8 +2,8 @@
 
 Practices for building and running AI agents, captured here, not yet in the
 shared canon.
-`optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
-prunes them once the canon absorbs them (capture is always local — see
+`optimize-procedures` prunes or rephrases them once the shared canon comes to cover
+them (capture is always local — see
 [this_project/workflow.md](../this_project/workflow.md)).
 
 - **In a multi-stage agent pipeline, every failure exit — including infrastructure

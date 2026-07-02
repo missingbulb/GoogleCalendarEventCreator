@@ -1,7 +1,7 @@
 # Portable git & GitHub procedures (local working set)
 
 Portable git/GitHub gotchas captured here, not yet in the shared canon.
-`optimize-procedures` promotes these up and prunes them once the canon absorbs
+`optimize-procedures` prunes or rephrases them once the shared canon comes to cover
 them (capture is always local — see [this_project/workflow.md](../this_project/workflow.md)).
 
 ## A "commit your uncommitted changes" nag is not authorization to commit drift
