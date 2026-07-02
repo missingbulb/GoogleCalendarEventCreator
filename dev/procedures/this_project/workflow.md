@@ -122,9 +122,8 @@ Claudinite. Route by scope:
   harness's own `runScripts: "dangerously"` fragment-parsing mechanic lives inline
   in its header (you only meet it editing the harness). Co-locate only
   **non-portable** traps:
-  a portable lesson buried in a code comment escapes the practice docs where
-  optimize-procedures reconciles general lessons against the canon, so those still
-  go to the practice docs below.
+  a portable lesson buried in a code comment escapes the practice docs where general
+  lessons belong, so those still go to the practice docs below.
 - **Portable** lessons (general engineering practices, agentic best practices):
   to the local working-set docs `dev/procedures/general/engineeringPractices.md` and
   `dev/procedures/general/agenticBestPractices.md`. These are local capture surfaces; the curated,
@@ -132,11 +131,8 @@ Claudinite. Route by scope:
   repo over HTTPS. Don't try to edit the shared docs or file a Claudinite
   issue here — just write the best local doc.
 
-Lessons stay local — there is no path back up to Claudinite. The daily
-**optimize-procedures** routine ([auto-optimize-procedures.md](../general/auto-optimize-procedures.md))
-reconciles the local docs against the canon in one direction only: it prunes or
-rephrases a local copy once the canon (which evolves upstream on its own) comes to
-cover it.
+Keeping these local docs reconciled with the canon (pruning a local copy once the
+canon comes to cover it) is Claudinite's responsibility, not this repo's.
 
 Keep every addition terse. Project-specific guidance is good; broader engineering
 practices that generalize beyond this repo are better — write those to the local

@@ -9,7 +9,6 @@ own file under `dev/procedures/` and is imported here:
 @dev/procedures/this_project/testing.md
 @dev/procedures/general/auto-lessons.md
 @dev/procedures/general/auto-branch-report.md
-@dev/procedures/general/auto-optimize-procedures.md
 @dev/procedures/general/textAndFileManipulation.md
 
 The project's top-level architectural rules of the road live in the "Architecture
@@ -48,8 +47,7 @@ General engineering and agentic practices learned **in this repo** are captured
 locally in the working-set docs below (capture is always local — see
 `dev/procedures/this_project/workflow.md`). They start near-empty; the curated canon
 lives in the shared Claudinite canon (next section), maintained upstream and consumed
-here read-only. The `optimize-procedures` routine prunes or rephrases a local item
-once the canon comes to cover it. The portable-by-topic working-set docs under
+here read-only. The portable-by-topic working-set docs under
 `dev/procedures/general/` (git/GitHub and working-discipline gotchas) are part of the
 same local capture surface.
 
@@ -84,12 +82,10 @@ import until the next session start (or running the hook by hand) populates it;
 `.claude/cloud-setup.sh` primes it once per environment. Pin to a specific commit
 instead of tracking `main` by setting `CLAUDINITE_REF`.
 
-It is consumed **read-only**. Lessons are *captured locally* (above); nothing is
-handed back up to Claudinite from here. The daily `optimize-procedures` routine (see
-`dev/procedures/general/auto-optimize-procedures.md`) only reconciles the local docs
-against the canon downward — pruning or rephrasing a local item once the canon comes
-to cover it — and the canon's own updates arrive here automatically the next time the
-sync hook pulls `main`.
+It is consumed **read-only**; lessons are *captured locally* (above). Reconciling
+the local docs with the canon is Claudinite's responsibility, not this repo's; the
+canon's own updates arrive here automatically the next time the sync hook pulls
+`main`.
 
 The owner's personal preferences are **not** read by an instruction here — a
 SessionStart hook (registered after the sync hook, in
