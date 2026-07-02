@@ -69,3 +69,18 @@ body:
       label: Description
       description: The event's description or summary, as shown on the page.
       placeholder: Paste or summarize the event details here.
+  # Keep this an `input` (text) field for the same prefill reason as event-count
+  # above. The extension derives it from the live page and fills it in; the
+  # pipeline machine-reads it (triage's waitSelectorOf) and hands it to ScraperAPI
+  # as wait_for_selector when it re-records the page, so a flaky JS single-page-app
+  # waits for real content to render instead of snapshotting an empty shell (#603).
+  # Safe to leave blank — the pipeline just fetches without the hint then.
+  - type: input
+    id: wait-selector
+    attributes:
+      label: Wait-for selector
+      description: >-
+        A CSS selector the recorder should wait for before capturing the page
+        (auto-filled by the extension from the page you're viewing). Only needed
+        for JavaScript-heavy sites whose content loads after the initial HTML;
+        leave blank otherwise.

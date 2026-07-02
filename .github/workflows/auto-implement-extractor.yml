@@ -7,7 +7,7 @@ run-name: "Prepare extractor · #${{ github.event.issue.number }} — ${{ github
 
 # Triggered when the 'extractor-request' label is added to an issue.
 # Triages the request, then prepares a branch with the event page downloaded
-# (record_page → ScraperAPI) AND the extractor scaffolded (matches(),
+# (scraperapi_fetch → ScraperAPI) AND the extractor scaffolded (matches(),
 # supportedDomains, load lists). If the page can't be downloaded (or anything else
 # breaks before the hand-off), Phase 1 fails and the "Comment on failure and hand
 # off to a human" step drops `extractor-request` and adds
@@ -33,9 +33,9 @@ permissions:
 
 jobs:
   implement:
-    # Route Phase 1's page download (record_page in phase1-prepare.sh) through
+    # Route Phase 1's page download (scraperapi_fetch in phase1-prepare.sh) through
     # ScraperAPI's residential proxy so this datacenter runner isn't bot-blocked.
-    # Optional: with the secret unset, record_page fetches directly. Job-level so
+    # Optional: with the secret unset, scraperapi_fetch fetches directly. Job-level so
     # the Prepare step inherits it.
     env:
       SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
@@ -44,7 +44,7 @@ jobs:
     timeout-minutes: 90
     # GitHub's implicit default run-shell is `bash -e {0}` — WITHOUT pipefail — so a
     # `cmd 2>&1 | tee log` step takes tee's exit (0) and masks cmd's failure (#587: a
-    # failed record_page was hidden, falsely handing the agent a stale branch instead of
+    # failed scraperapi_fetch was hidden, falsely handing the agent a stale branch instead of
     # flagging the issue for a human). `shell: bash` is `bash --noprofile --norc -eo
     # pipefail {0}`, so every piped `run` step below (triage, npm ci, phase1-prepare,
     # handoff) fails the step when the left side of the pipe fails.
@@ -133,7 +133,7 @@ jobs:
 
       # No pre-flight probe any more: ScraperAPI owns getting past proxies, bot
       # walls, and CAPTCHAs, so there's nothing cheap left to judge before the
-      # agent. The page is downloaded in Phase 1 (record_page in phase1-prepare.sh,
+      # agent. The page is downloaded in Phase 1 (scraperapi_fetch in phase1-prepare.sh,
       # `curl -f` through ScraperAPI). If it can't be downloaded, Phase 1 fails and
       # the "Comment on failure and hand off to a human" step flags the issue. (A page that
       # downloads but isn't one event — a listing/login page — is still the agent's
@@ -164,7 +164,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       # Phase 1 — everything deterministic, done in the workflow (not the agent):
-      # branch off main, download the event page (record_page → curl through
+      # branch off main, download the event page (scraperapi_fetch → curl through
       # ScraperAPI, which proxies + renders JS itself, so a JS single-page-app
       # records with real data without a local headless browser), scaffold the
       # source with its matches() filled, register the host in supportedDomains, and
@@ -181,6 +181,7 @@ jobs:
           CASE_NAME:    ${{ steps.triage.outputs.caseName }}
           HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
+          WAIT_SELECTOR: ${{ steps.triage.outputs.waitSelector }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: bash dev/create-extractor/phase1-prepare.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
@@ -200,7 +201,7 @@ jobs:
       # One comment for a GENUINE failure only. An expected stop (triaged close,
       # agent bail) is handled green elsewhere, so reaching here means something
       # actually broke before the hand-off — most often the page couldn't be
-      # downloaded (record_page → 403), or npm ci / scaffolding / git failed.
+      # downloaded (scraperapi_fetch → 403), or npm ci / scaffolding / git failed.
       # Hand the issue to a human the SAME way the agent (Stage 2) and finalize
       # (Stage 3) stops do: drop the `extractor-request` trigger and flag
       # `extractor-blocked-needs-human`, so the "needs a human" state is consistent

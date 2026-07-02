@@ -7,16 +7,37 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { firstUrl, runTriage } = require("../triage-extractor-request");
+const { firstUrl, waitSelectorOf, runTriage } = require("../triage-extractor-request");
 
 // A GitHub issue-form body renders each field under a "### <label>" heading.
 const bodyWith = (url) => `### URL\n\n${url}\n\n### Name\n\n_No response_\n`;
+// …with a "Wait-for selector" field (#603) carrying `sel` (or empty).
+const bodyWithSelector = (url, sel) =>
+  `### URL\n\n${url}\n\n### Wait-for selector\n\n${sel || "_No response_"}\n`;
 
 test("firstUrl extracts the first http(s) URL from issue-form body text", () => {
   assert.equal(firstUrl(bodyWith("https://example.com/e/1")), "https://example.com/e/1");
   assert.equal(firstUrl("no url here"), "");
   assert.equal(firstUrl(""), "");
   assert.equal(firstUrl(undefined), "");
+});
+
+test("waitSelectorOf reads the Wait-for selector field, or '' when blank/absent", () => {
+  assert.equal(waitSelectorOf(bodyWithSelector("https://x.example/1", "#eventDescription")), "#eventDescription");
+  assert.equal(waitSelectorOf(bodyWithSelector("https://x.example/1", "")), ""); // _No response_
+  assert.equal(waitSelectorOf(bodyWith("https://x.example/1")), ""); // field not present
+  // Strips an accidental code span and keeps only the first line.
+  assert.equal(waitSelectorOf(bodyWithSelector("https://x.example/1", "`.details`")), ".details");
+  assert.equal(waitSelectorOf(bodyWithSelector("https://x.example/1", ".a\nsecond line")), ".a");
+});
+
+test("runTriage surfaces the wait selector for the workflow to pass through", async () => {
+  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [] };
+  const res = await runTriage(
+    { body: bodyWithSelector("https://unknown.example/e/1", "#eventDescription") },
+    lists
+  );
+  assert.equal(res.waitSelector, "#eventDescription");
 });
 
 test("a denylisted host is closed (agent skipped), with a denylist message", async () => {
