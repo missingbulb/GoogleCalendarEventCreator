@@ -41,8 +41,14 @@ const POLICY_DOC_PATH = "extraction-policy.md";
 // param matching its id. GitHub prefills only TEXT fields (`input`/`textarea`)
 // this way — NOT `dropdown` or `checkboxes` — so "event-count" is a plain text
 // input we seed with the number of events the popup detected.
+// "wait-selector" is the CSS selector the popup derived from this live,
+// hydrated page (assemble-events.js → derive-wait-selector.js, #603); the
+// pipeline feeds it to ScraperAPI as wait_for_selector when it re-records the
+// page, so a flaky SPA render waits for real content instead of snapshotting a
+// shell. Empty when none could be derived.
 const SOURCE_REQUEST_FIELDS = [
   "url", "name", "start", "end", "timezone", "location", "description", "event-count",
+  "wait-selector",
 ];
 
 // Generic registry labels that, sitting directly under a two-letter
@@ -125,10 +131,10 @@ function headingLink(text, url, tab) {
 // State 5: a complete fallback event on an unlisted host. A "Suggest Correction"
 // link that opens the prefilled GitHub "Event source request" issue, seeded with
 // the scraped event — a logged-in user just submits the already-filled form.
-export function makeSourceRequestLink(tab, event, eventCount = 1) {
+export function makeSourceRequestLink(tab, event, eventCount = 1, waitSelector = "") {
   return headingLink(
     "Suggest Correction",
-    buildSourceRequestUrl(sourceRequestPrefill(tab, event, eventCount)),
+    buildSourceRequestUrl(sourceRequestPrefill(tab, event, eventCount, waitSelector)),
     tab
   );
 }
@@ -149,9 +155,12 @@ export function makePolicyLink(tab) {
 // count >1 tells the agent the page is a multi-event listing to extract whole,
 // not to bail on. The hint fields below still describe just the first event.
 //
+// `waitSelector` is the CSS selector the popup derived from the live page (or
+// "") — passed straight through to the form's "wait-selector" field.
+//
 // Exported for the unit tests (the make* link builders that call it touch
 // chrome.tabs/document, so the tests exercise the prefill directly).
-export function sourceRequestPrefill(tab, event, eventCount = 1) {
+export function sourceRequestPrefill(tab, event, eventCount = 1, waitSelector = "") {
   event = event || {};
   // The event carries its timing in times[] (the multi-instance model); seed the
   // form from the first instance. A flat { start, end } event is tolerated too.
@@ -171,6 +180,9 @@ export function sourceRequestPrefill(tab, event, eventCount = 1) {
     description: event.description || "",
     // At least 1 — the link only shows once a complete event was found.
     "event-count": String(Math.max(1, eventCount || 1)),
+    // The ScraperAPI wait_for_selector hint for the pipeline's re-record (#603);
+    // "" when the popup couldn't derive one (then the form field stays blank).
+    "wait-selector": waitSelector || "",
   };
 }
 

@@ -2,7 +2,9 @@
 # record_page — the ONE place this project fetches a target event page. Split out of
 # phase1-prepare.sh so it can be reused and unit-tested in isolation
 # (dev/create-extractor/test/record-page.test.js). Sourcing this file only DEFINES the function;
-# running it directly (record-page.sh <url> <out>) invokes it. See
+# running it directly (record-page.sh <url> <out> [wait_selector]) invokes it. The
+# optional third arg is a CSS selector passed to ScraperAPI as wait_for_selector
+# (#603 — wait for the page's real content to render before snapshotting). See
 # dev/create-extractor/auto-extractor.md.
 #
 # Fetching is delegated wholesale to ScraperAPI (residential proxy + bot/CAPTCHA
@@ -69,9 +71,20 @@ looks_like_unexpanded_spa() {
 }
 
 record_page() {
-  local url="$1" out="$2"
+  local url="$1" out="$2" wait_selector="${3:-}"
   if [ -n "${SCRAPER_API_KEY:-}" ]; then
     local encoded; encoded="$(jq -rn --arg u "$url" '$u|@uri')"
+    # wait_for_selector (#603): wait for a real content element to render before
+    # snapshotting — the render's actual readiness signal, unlike a blind fixed
+    # `wait` (reverted in #595 for firing before the SPA's data loaded). The
+    # selector is url-encoded (jq @uri) so its `#`/`[`/`"` can't leak as sibling
+    # ScraperAPI params. Empty -> the param is omitted (unchanged behavior).
+    local wait_param=""
+    if [ -n "$wait_selector" ]; then
+      local ws_encoded; ws_encoded="$(jq -rn --arg s "$wait_selector" '$s|@uri')"
+      wait_param="wait_for_selector=${ws_encoded}&"
+      echo "record_page: waiting for selector '$wait_selector' before snapshot." >&2
+    fi
     # Auto-default: an `.il` host (e.g. .co.il/.gov.il) records from an Israeli IP.
     local host="${url#*://}"; host="${host%%/*}"; host="${host%%:*}"
     local geo=""
@@ -84,7 +97,7 @@ record_page() {
       attempts=1; [ -z "$tier" ] && attempts=5
       for ((spa = 1; spa <= attempts; spa++)); do
         if curl -fsS --max-time 90 --retry 5 --retry-max-time 240 \
-          "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}render=true&url=${encoded}" -o "$out"; then
+          "https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&${tier}${geo}${wait_param}render=true&url=${encoded}" -o "$out"; then
           if ! looks_like_html "$out"; then
             echo "record_page: ScraperAPI $label tier returned non-HTML (plaintext, no markup) for $url — escalating." >&2
             break   # proxy/garbage problem — escalate the tier

@@ -114,8 +114,22 @@ test("the prefilled field ids match the template's prefillable field ids", () =>
     .sort();
   const PARAM_KEYS = [
     "url", "name", "start", "end", "timezone", "location", "description", "event-count",
+    "wait-selector",
   ].sort();
   assert.deepEqual(prefillableIds, PARAM_KEYS);
+});
+
+test("prefills the wait-selector, and omits it from the URL when empty", () => {
+  // Seeded with the selector the popup derived from the live page (#603).
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 1, "#eventDescription")["wait-selector"], "#eventDescription");
+  // Absent/empty -> "" in the prefill, and buildSourceRequestUrl drops empty keys.
+  assert.equal(sourceRequestPrefill(PREFILL, {}, 1)["wait-selector"], "");
+  const params = new URL(buildSourceRequestUrl(sourceRequestPrefill(PREFILL, {}, 1))).searchParams;
+  assert.equal(params.has("wait-selector"), false);
+  const seeded = new URL(
+    buildSourceRequestUrl(sourceRequestPrefill(PREFILL, {}, 1, "#eventDescription"))
+  ).searchParams;
+  assert.equal(seeded.get("wait-selector"), "#eventDescription");
 });
 
 test("the event-count field is a prefillable text input defaulting to 1", () => {

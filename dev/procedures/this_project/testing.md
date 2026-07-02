@@ -438,4 +438,11 @@ commission-while-editing trap goes in the file's header comment rather than
   detector or headless-Chrome render of its own (`spa-shell.js` /
   `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
   fetching moved to ScraperAPI). The recorder (`record_page` in
-  `dev/create-extractor/phase1-prepare.sh`) is now just fetch → write.
+  `dev/create-extractor/phase1-prepare.sh`) is now just fetch → write. One aid for
+  a flaky SPA render: a source request can carry a **`Wait-for selector`** the
+  extension derived from the user's live, hydrated page
+  (`extension/event-extractors/derive-wait-selector.js`, #603), which the pipeline
+  passes to ScraperAPI as `wait_for_selector` so it waits for real content before
+  snapshotting — a real readiness signal, unlike the fixed `wait` reverted in #595.
+  The standard-tier unexpanded-SPA re-fetch (#599) stays as the net when no
+  selector was supplied or it didn't fire.

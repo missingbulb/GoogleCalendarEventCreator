@@ -181,6 +181,7 @@ jobs:
           CASE_NAME:    ${{ steps.triage.outputs.caseName }}
           HOST:         ${{ steps.triage.outputs.host }}
           EVENT_URL:    ${{ steps.triage.outputs.url }}
+          WAIT_SELECTOR: ${{ steps.triage.outputs.waitSelector }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: bash dev/create-extractor/phase1-prepare.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 

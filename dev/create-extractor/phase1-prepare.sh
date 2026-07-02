@@ -42,7 +42,10 @@ git checkout -b "$BRANCH"
 # dev/requirements/extractor/data-files.js / .github/secret_scanning.yml).
 mkdir -p "dev/requirements/extractor/data/server-fetched"
 printf '%s' "$EVENT_URL" > "dev/requirements/extractor/data/server-fetched/$CASE_NAME.url"
-record_page "$EVENT_URL" "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html"
+# WAIT_SELECTOR (optional, #603): a CSS selector the extension derived from the
+# live page, handed to ScraperAPI as wait_for_selector so a flaky SPA render waits
+# for real content instead of snapshotting an empty shell. Empty -> plain fetch.
+record_page "$EVENT_URL" "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html" "${WAIT_SELECTOR:-}"
 test -s "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html"        # the page must have actually been recorded
 
 if [ "$MODE" = "supported" ]; then

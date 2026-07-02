@@ -51,6 +51,34 @@ function firstUrl(text) {
   return m ? m[0] : "";
 }
 
+// The value of a GitHub issue-form field from the rendered issue body. A form
+// renders each answer as "### <label>\n\n<value>" up to the next "### " heading;
+// an empty field renders the literal "_No response_". Returns the trimmed value,
+// or "" when the section is missing or empty.
+function fieldValue(body, label) {
+  const lines = String(body || "").split(/\r?\n/);
+  const i = lines.findIndex((l) => l.trim() === `### ${label}`);
+  if (i < 0) return "";
+  const out = [];
+  for (let j = i + 1; j < lines.length; j++) {
+    if (/^### /.test(lines[j])) break;
+    out.push(lines[j]);
+  }
+  const val = out.join("\n").trim();
+  return val === "_No response_" ? "" : val;
+}
+
+// The CSS selector the extension derived from the live page (the form's
+// "Wait-for selector" field, #603), handed to ScraperAPI as wait_for_selector when
+// the pipeline re-records the page. A selector is one line; take only the first,
+// strip an accidental surrounding code span, and bound the length so a pasted
+// paragraph or a hostile issue body can't feed a giant value into the fetch URL
+// (record_page url-encodes it regardless).
+function waitSelectorOf(body) {
+  const first = fieldValue(body, "Wait-for selector").split(/\r?\n/)[0].trim();
+  return first.replace(/^`+|`+$/g, "").trim().slice(0, 200);
+}
+
 // The www-stripped host of the first URL in an issue's body (or title), or ""
 // when there's no parseable URL.
 function hostOf({ body = "", title = "" } = {}) {
@@ -124,6 +152,7 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
 
   const url = firstUrl(body) || firstUrl(title);
   const host = hostOf({ body, title });
+  const waitSelector = waitSelectorOf(body);
   const currentNumber = Number.isInteger(Number(number)) ? Number(number) : undefined;
 
   // All the mode-aware names in one place. `mode === "supported"` means an
@@ -146,6 +175,7 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
   return {
     url,
     host,
+    waitSelector,
     slug: names.slug,
     mode: names.mode,
     sourceBase: names.sourceBase,
@@ -161,7 +191,7 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
   };
 }
 
-module.exports = { firstUrl, runTriage };
+module.exports = { firstUrl, waitSelectorOf, runTriage };
 
 // CLI: read the issue + the gathered open requests, emit the decision for the
 // workflow. Fails OPEN — any error proceeds to the agent rather than silently
@@ -201,6 +231,7 @@ if (require.main === module) {
       mode: res.mode,
       url: res.url,
       host: res.host,
+      waitSelector: res.waitSelector,
       slug: res.slug,
       sourceBase: res.sourceBase,
       caseName: res.caseName,

@@ -5,12 +5,14 @@
 // (event-extractors/load-order.generated.json) — its completion value is what
 // chrome.scripting.executeScript returns to the popup.
 //
-// The result is always { events: [...], supported, fallback } — `events` holds
-// the extracted events (possibly empty), `supported` is true when a registered
-// source matched this page's host, and `fallback` is true only when a SUPPORTED
-// host's dedicated source found nothing so we ran the generic extractor instead
-// (#456) — the one signal the popup reads to add a "Suggest Correction" link for
-// events the dedicated source missed. Each event is fully self-described —
+// The result is always { events: [...], supported, fallback, waitSelector } —
+// `events` holds the extracted events (possibly empty), `supported` is true when
+// a registered source matched this page's host, `fallback` is true only when a
+// SUPPORTED host's dedicated source found nothing so we ran the generic extractor
+// instead (#456) — the one signal the popup reads to add a "Suggest Correction"
+// link for events the dedicated source missed — and `waitSelector` is a CSS
+// selector for ScraperAPI's wait_for_selector when a source request re-records
+// this page (derive-wait-selector.js, #603; "" when none could be derived). Each event is fully self-described —
 // { title, description, ctz, times: [ { start, end, eventLengthInMinutes?,
 // location? }, ... ] } — so a caller (the popup) can build a Google Calendar URL
 // for any of its instances without consulting page-level state.
@@ -139,7 +141,21 @@
     for (const e of events) e.times.sort((a, b) => cmpStart(a.start, b.start));
     events.sort((a, b) => cmpStart(a.times[0].start, b.times[0].start));
 
-    return { events, supported: Boolean(site), fallback };
+    // A CSS selector for ScraperAPI to wait_for_selector on when the pipeline
+    // re-records this page (derive-wait-selector.js) — derived from the primary
+    // event's content in this live, hydrated DOM, so a source request seeds a
+    // real hydration signal for the flaky SPA render (#603). Best-effort: any
+    // failure just leaves it empty (the pipeline's re-fetch net still covers it).
+    let waitSelector = "";
+    try {
+      if (events.length && typeof GCal.deriveWaitSelector === "function") {
+        waitSelector = GCal.deriveWaitSelector(events[0], document) || "";
+      }
+    } catch (e) {
+      waitSelector = "";
+    }
+
+    return { events, supported: Boolean(site), fallback, waitSelector };
   }
 
   // Lexicographic start compare with empty/absent sorting last.

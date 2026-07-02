@@ -47,6 +47,7 @@ case "$url" in
   *premium=true*) tier=premium;;
 esac
 echo "$tier" >> "$FAKE_CURL_LOG"
+[ -n "\${FAKE_CURL_URLLOG:-}" ] && echo "$url" >> "$FAKE_CURL_URLLOG"
 attempt=$(grep -cx "$tier" "$FAKE_CURL_LOG")
 seq=fail
 IFS=',' read -ra pairs <<< "$FAKE_CURL_SPEC"
@@ -66,26 +67,31 @@ case "$outcome" in
 esac
 `;
 
-function runRecordPage(spec) {
+function runRecordPage(spec, waitSelector) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "record-page-"));
   const bin = path.join(dir, "bin");
   fs.mkdirSync(bin);
   fs.writeFileSync(path.join(bin, "curl"), FAKE_CURL, { mode: 0o755 });
   const log = path.join(dir, "curl.log");
+  const urlLog = path.join(dir, "curl-urls.log");
   const out = path.join(dir, "page.html");
-  const res = spawnSync("bash", [SCRIPT, "https://www.stubhub.com/shlomo-artzi/event/1", out], {
+  const args = [SCRIPT, "https://www.stubhub.com/shlomo-artzi/event/1", out];
+  if (waitSelector !== undefined) args.push(waitSelector);
+  const res = spawnSync("bash", args, {
     env: {
       ...process.env,
       PATH: `${bin}:${process.env.PATH}`,
       SCRAPER_API_KEY: "test-key",
       FAKE_CURL_SPEC: spec,
       FAKE_CURL_LOG: log,
+      FAKE_CURL_URLLOG: urlLog,
     },
     encoding: "utf8",
   });
   const tiers = fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\n").filter(Boolean) : [];
+  const urls = fs.existsSync(urlLog) ? fs.readFileSync(urlLog, "utf8").trim().split("\n").filter(Boolean) : [];
   const body = fs.existsSync(out) ? fs.readFileSync(out, "utf8") : "";
-  return { status: res.status, stderr: res.stderr, tiers, body };
+  return { status: res.status, stderr: res.stderr, tiers, urls, body };
 }
 
 test("a plaintext body escalates the proxy tier and retries", () => {
@@ -142,4 +148,24 @@ test("premium does NOT re-fetch a shell (SPA retry is standard-only)", () => {
   assert.equal(r.status, 0, r.stderr);
   assert.deepEqual(r.tiers, ["standard", "premium"]); // escalated on the standard error, then kept
   assert.match(r.body, /\{\{event\.title\}\}/); // premium's 200 is kept as-is, not retried
+});
+
+// #603: an optional wait_for_selector arg is url-encoded into the ScraperAPI query.
+test("a wait selector is url-encoded into the ScraperAPI request", () => {
+  const r = runRecordPage("standard:html", "#eventDescription");
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.urls[0], /wait_for_selector=%23eventDescription/); // '#' -> %23
+  assert.match(r.urls[0], /render=true/); // still rendering
+});
+
+test("no wait selector omits the param entirely", () => {
+  const r = runRecordPage("standard:html");
+  assert.equal(r.status, 0, r.stderr);
+  assert.doesNotMatch(r.urls[0], /wait_for_selector/);
+});
+
+test("an empty wait selector omits the param (blank form field)", () => {
+  const r = runRecordPage("standard:html", "");
+  assert.equal(r.status, 0, r.stderr);
+  assert.doesNotMatch(r.urls[0], /wait_for_selector/);
 });

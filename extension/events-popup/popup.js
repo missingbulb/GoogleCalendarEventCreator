@@ -113,7 +113,9 @@ export async function render({ data, tab, listing, now = new Date(), configurati
       headingEl.classList.add("with-link");
       // allEvents here is the fallback's presentable events; its length tells the
       // form whether the page carries multiple events (pre-selects the dropdown).
-      headingEl.appendChild(view.makeSourceRequestLink(tab, request, allEvents.length));
+      // data.waitSelector is the ScraperAPI wait_for_selector hint derived from
+      // this live page (assemble-events.js, #603) — seeded into the request form.
+      headingEl.appendChild(view.makeSourceRequestLink(tab, request, allEvents.length, data.waitSelector));
     }
   } else {
     headingEl.textContent = "No events found on this page";
