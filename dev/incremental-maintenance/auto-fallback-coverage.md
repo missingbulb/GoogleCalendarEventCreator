@@ -82,6 +82,4 @@ open it). Log the run as a **dated comment** on that issue — **not** a sub-iss
 so it accumulates a scrollable history of every run over time; also reference the
 issue from the PR (`Refs #366`). The issue is long-lived: if it was **closed**,
 **reopen it** when a run needs logging (a closure while the routine is still
-producing PRs is stale), matching the open-branch report's behavior
-([auto-branch-report.md](../procedures/general/auto-branch-report.md)). Each daily routine keeps its own
-such issue — the lessons digest's is #365 (see [auto-lessons.md](../procedures/general/auto-lessons.md)).
+producing PRs is stale). Each daily routine keeps its own such issue.

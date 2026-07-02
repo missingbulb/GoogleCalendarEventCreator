@@ -1,9 +1,7 @@
 # File placement (local working set)
 
-Portable "where a file lives / how it's located" lessons captured here, not yet in
-the shared canon.
-`optimize-procedures` promotes these up and prunes them once the canon absorbs them
-(capture is always local — see [this_project/workflow.md](../this_project/workflow.md)).
+Portable "where a file lives / how it's located" lessons captured here (capture is
+always local — see [this_project/workflow.md](../this_project/workflow.md)).
 
 ## Encode act-on-able distinctions in the folder layout, not in per-file metadata
 

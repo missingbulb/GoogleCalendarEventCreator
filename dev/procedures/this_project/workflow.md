@@ -122,8 +122,8 @@ Claudinite. Route by scope:
   harness's own `runScripts: "dangerously"` fragment-parsing mechanic lives inline
   in its header (you only meet it editing the harness). Co-locate only
   **non-portable** traps:
-  a portable lesson buried in a code comment escapes the optimize-procedures
-  promotion path, so those still go to the practice docs below.
+  a portable lesson buried in a code comment escapes the practice docs where general
+  lessons belong, so those still go to the practice docs below.
 - **Portable** lessons (general engineering practices, agentic best practices):
   to the local working-set docs `dev/procedures/general/engineeringPractices.md` and
   `dev/procedures/general/agenticBestPractices.md`. These are local capture surfaces; the curated,
@@ -131,16 +131,12 @@ Claudinite. Route by scope:
   repo over HTTPS. Don't try to edit the shared docs or file a Claudinite
   issue here — just write the best local doc.
 
-You never hand a lesson to Claudinite at capture time. The daily
-**optimize-procedures** routine ([auto-optimize-procedures.md](../general/auto-optimize-procedures.md))
-is the *only* thing that bridges to Claudinite: it later promotes generalizable
-local items up (via a `claudinite-lesson` issue) and prunes the local copy once
-the canon absorbs it. So a portable insight captured locally isn't "stuck" here —
-it travels up on its own.
+Keeping these local docs reconciled with the canon (pruning a local copy once the
+canon comes to cover it) is Claudinite's responsibility, not this repo's.
 
 Keep every addition terse. Project-specific guidance is good; broader engineering
 practices that generalize beyond this repo are better — write those to the local
-practice docs so optimize-procedures can carry them upstream.
+practice docs rather than burying them in project-specific files.
 
 When you author an instruction, optimize the instruction paragraph for Claude
 reading it into context: state the rule and its constraints, and cut motivation,
@@ -152,8 +148,3 @@ nearly free to write and is what prevents a wrong guess, so spend words on
 constraints and examples, not justification; and a rule's rationale helps a human
 reviewer but is noise to the agent once the rule is settled, so it belongs outside
 the instruction it explains.)
-
-A scheduled workflow runs this same pass automatically once a day over the last
-24h of commits and issue/PR activity, opening a PR for review
-(`dev/procedures/general/auto-lessons.md`); saying "learned lessons" is the on-demand
-version of it.

@@ -1,10 +1,7 @@
 # Agentic best practices (local working set)
 
-Practices for building and running AI agents, captured here, not yet in the
-shared canon.
-`optimize-procedures` promotes these up (via a `claudinite-lesson` issue) and
-prunes them once the canon absorbs them (capture is always local — see
-[this_project/workflow.md](../this_project/workflow.md)).
+Practices for building and running AI agents, captured here (capture is always
+local — see [this_project/workflow.md](../this_project/workflow.md)).
 
 - **In a multi-stage agent pipeline, every failure exit — including infrastructure
   failures in pre-agent stages — must converge to the same human-triage state.**
