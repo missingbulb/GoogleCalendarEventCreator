@@ -14,7 +14,6 @@ code can't say — not a restatement of what it already says.
 - **Keep one canonical path mention** and have other comments/docs refer to the
   concept, not re-spell it.
 
-(Rewriting references when a path *does* move is
-[textAndFileManipulation.md](textAndFileManipulation.md); where a file should live
-is the canon's `general/filePlacement.md`. This doc is only about what a comment
-should say.)
+(Rewriting references when a path *does* move is a separate text-manipulation
+concern; where a file should live is [filePlacement.md](filePlacement.md). This doc
+is only about what a comment should say.)

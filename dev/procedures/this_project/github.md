@@ -23,9 +23,8 @@ e2e/heavy-browser test.
 
 A merge approval, like any approval, applies **only backward** — a later
 follow-up, even a fix to the just-merged change, needs its own explicit approval
-before it may be merged (the general principle is in
-[../general/working-discipline.md](../general/working-discipline.md)). When in
-doubt, open the PR, get CI green, and wait for a fresh approval.
+before it may be merged. When in doubt, open the PR, get CI green, and wait for a
+fresh approval.
 
 (The branch/commit-history rules — commit-in-layers, and the squash-merge branch
 resync gotchas — are portable and maintained outside this repo.)

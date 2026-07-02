@@ -7,7 +7,6 @@ own file under `dev/procedures/` and is imported here:
 @dev/procedures/this_project/workflow.md
 @dev/procedures/this_project/github.md
 @dev/procedures/this_project/testing.md
-@dev/procedures/general/textAndFileManipulation.md
 
 The project's top-level architectural rules of the road live in the "Architecture
 rules of the road" section of
@@ -46,15 +45,15 @@ locally in the working-set docs below (capture is always local — see
 `dev/procedures/this_project/workflow.md`). They start near-empty; the curated canon
 lives in the shared Claudinite canon (next section), maintained upstream and consumed
 here read-only. The portable-by-topic working-set docs under
-`dev/procedures/general/` (git/GitHub and working-discipline gotchas) are part of the
-same local capture surface.
+`dev/procedures/general/` (git/GitHub, code-comment, and file-placement gotchas) are
+part of the same local capture surface.
 
 @dev/procedures/general/engineeringPractices.md
 @dev/procedures/general/agenticBestPractices.md
 @dev/procedures/general/git-and-github.md
-@dev/procedures/general/working-discipline.md
 @dev/procedures/general/testingPractices.md
 @dev/procedures/general/filePlacement.md
+@dev/procedures/general/code-comments.md
 
 ## Shared portable rules (the Claudinite canon)
 
