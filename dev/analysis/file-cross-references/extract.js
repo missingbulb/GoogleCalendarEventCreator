@@ -39,7 +39,21 @@ const EXCLUDE = new Set([
 // This analysis's own output is meta (report.md catalogs every reference) — never
 // scan it or point edges at it, or it swamps the real repo signal.
 const EXCLUDE_PREFIX = ['dev/analysis/'];
-const isExcluded = f => EXCLUDE.has(f) || EXCLUDE_PREFIX.some(p => f.startsWith(p));
+
+// Whole categories dropped from the graph (never a node, either direction):
+//  - data/config/markup/image files (json, html, images),
+//  - anything inside a testing folder (a path segment named `test`/`tests` or
+//    ending in `-test`/`-tests`, e.g. extension-test/, dev/procedures/test/),
+//  - per-requirement case files (*.case.js).
+const IGNORE_EXT = new Set(['json','html','htm','png','jpg','jpeg','gif','svg','webp','ico','bmp']);
+const inTestFolder = f => f.split('/').slice(0, -1).some(seg => seg === 'test' || seg === 'tests' || /-tests?$/.test(seg));
+const isCaseFile = f => /\.case\.js$/.test(f);
+const isExcluded = f =>
+  EXCLUDE.has(f) ||
+  EXCLUDE_PREFIX.some(p => f.startsWith(p)) ||
+  IGNORE_EXT.has(f.split('.').pop().toLowerCase()) ||
+  inTestFolder(f) ||
+  isCaseFile(f);
 
 // ---- comment / reference region extraction per file type ----
 function commentRegions(file, content) {

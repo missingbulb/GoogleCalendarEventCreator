@@ -24,6 +24,14 @@ Two hub files are **excluded** as noise (see `EXCLUDE` in `extract.js`):
 This analysis's own folder (`dev/analysis/`) is excluded too, so it never scans its
 own generated report.
 
+Whole categories are dropped from the graph entirely — never a node in either
+direction (see `IGNORE_EXT` / `inTestFolder` / `isCaseFile` in `extract.js`):
+**json, html, and image files**; anything inside a **testing folder** (a path
+segment named `test`/`tests` or ending `-test`/`-tests`, e.g. `extension-test/`,
+`dev/procedures/test/`); and **`*.case.js`** requirement-case files. (Note: a
+`*.test.js` file that lives *outside* a test folder is still included — only
+folder-based test exclusion is applied.)
+
 **Immediate parent↔subfolder edges are omitted** (`isImmediateParentChild`): a file
 directly in folder `P` and a file directly in an *immediate* subfolder of `P` never
 link, in either direction — one level only. Same-folder, sibling, and
