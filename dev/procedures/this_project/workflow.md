@@ -148,8 +148,3 @@ nearly free to write and is what prevents a wrong guess, so spend words on
 constraints and examples, not justification; and a rule's rationale helps a human
 reviewer but is noise to the agent once the rule is settled, so it belongs outside
 the instruction it explains.)
-
-A scheduled workflow runs this same pass automatically once a day over the last
-24h of commits and issue/PR activity, opening a PR for review
-(`dev/procedures/general/auto-lessons.md`); saying "learned lessons" is the on-demand
-version of it.

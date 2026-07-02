@@ -7,8 +7,6 @@ own file under `dev/procedures/` and is imported here:
 @dev/procedures/this_project/workflow.md
 @dev/procedures/this_project/github.md
 @dev/procedures/this_project/testing.md
-@dev/procedures/general/auto-lessons.md
-@dev/procedures/general/auto-branch-report.md
 @dev/procedures/general/textAndFileManipulation.md
 
 The project's top-level architectural rules of the road live in the "Architecture
