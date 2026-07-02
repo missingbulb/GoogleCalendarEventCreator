@@ -56,13 +56,15 @@ fs.writeFileSync(path.join(DIR,'graph.json'), JSON.stringify({nodes,edges,folder
 
 // inject data into the template -> standalone graph.html
 const tpl = fs.readFileSync(path.join(DIR,'graph.template.html'),'utf8');
-const injected = tpl.replace('__DATA__', JSON.stringify({nodes,edges,folderEdges}).replace(/<\/script>/g,'<\\/script>'));
+const injected = tpl
+  .replace('__DATA__', JSON.stringify({nodes,edges,folderEdges}).replace(/<\/script>/g,'<\\/script>'))
+  .replace('__SCANNED__', String(d.scanned));
 fs.writeFileSync(path.join(DIR,'graph.html'), injected);
 
 // ---- markdown report ----
-const scanned = 299; // text files scanned (see extract.js output)
 let md = '# File cross-reference report\n\n';
-md += `Extracted from **comment regions and doc prose** across all tracked text files. An edge *A → B* means a comment (or doc link / \`@import\` / HTML asset ref) in file **A** names file **B**, and **B** is a real tracked file in the repo. External URLs, issue numbers (\`#146\`), and npm packages are dropped because they don't resolve to a repo file. \`dev/requirements/requirements.md\` is excluded (its ~120 gallery links to case snapshots swamp the real signal — see \`EXCLUDE\` in \`extract.js\`).\n\n`;
+md += `Extracted from **comment regions and doc prose** across all tracked text files. An edge *A → B* means a comment (or doc link / \`@import\` / HTML asset ref) in file **A** names file **B**, and **B** is a real tracked file in the repo. External URLs, issue numbers (\`#146\`), and npm packages are dropped because they don't resolve to a repo file. \`dev/requirements/requirements.md\` and \`dev/procedures/this_project/fileDescriptions.md\` are excluded (their galleries/catalogs swamp the real signal — see \`EXCLUDE\` in \`extract.js\`). **Immediate parent↔subfolder edges are omitted**: a file directly in folder P and a file directly in an immediate subfolder of P never link (either direction) — same-folder, sibling, and grandchild-or-deeper references are kept.\n\n`;
+md += `Text files scanned: **${d.scanned}**.\n\n`;
 md += `## Totals\n\n`;
 md += `- Files that reference others: **${Object.keys(d.perFile).length}**\n- Distinct referenced files: **${new Set(edges.map(e=>e.to)).size}**\n- Total reference edges: **${edges.length}** (${d.edges.length} incl. duplicate mentions)\n- Ambiguous basename mentions (unresolved): **${d.ambiguous.length}**\n\n`;
 

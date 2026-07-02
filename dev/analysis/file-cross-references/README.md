@@ -21,6 +21,14 @@ basenames that match >1 file are reported separately, not drawn.
 Two hub files are **excluded** as noise (see `EXCLUDE` in `extract.js`):
 `dev/requirements/requirements.md` (links every case snapshot) and
 `dev/procedures/this_project/fileDescriptions.md` (a catalog that names every file).
+This analysis's own folder (`dev/analysis/`) is excluded too, so it never scans its
+own generated report.
+
+**Immediate parent↔subfolder edges are omitted** (`isImmediateParentChild`): a file
+directly in folder `P` and a file directly in an *immediate* subfolder of `P` never
+link, in either direction — one level only. Same-folder, sibling, and
+grandchild-or-deeper references are kept. (Example: `a/c ↔ a/b/d` is dropped;
+`a/c ↔ a/b/e/d` is kept.)
 
 ## Files
 

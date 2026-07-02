@@ -36,6 +36,10 @@ const EXCLUDE = new Set([
   'dev/requirements/requirements.md',        // links to all ~120 case snapshots
   'dev/procedures/this_project/fileDescriptions.md', // a catalog that names every file
 ]);
+// This analysis's own output is meta (report.md catalogs every reference) — never
+// scan it or point edges at it, or it swamps the real repo signal.
+const EXCLUDE_PREFIX = ['dev/analysis/'];
+const isExcluded = f => EXCLUDE.has(f) || EXCLUDE_PREFIX.some(p => f.startsWith(p));
 
 // ---- comment / reference region extraction per file type ----
 function commentRegions(file, content) {
@@ -126,6 +130,17 @@ function resolveToken(raw, referrer) {
   return null;
 }
 
+// Drop an edge when the two files sit in an immediate parent/child folder pair —
+// one file directly in folder P, the other directly in an immediate subfolder of
+// P (in either direction). Only ONE level: same-folder, sibling, and
+// grandchild-or-deeper references are kept. (A file's folder is dirname(file);
+// a root file's folder is ".".)
+function isImmediateParentChild(from, to) {
+  const df = path.dirname(from), dt = path.dirname(to);
+  if (df === dt) return false;                 // same folder — keep
+  return path.dirname(df) === dt || path.dirname(dt) === df;
+}
+
 const TOKEN_RE = /@?[\w][\w./-]*\.\w{1,6}\*?|@?[\w][\w./-]*\/\*+/g;
 
 const edges = [];        // {from,to,kind,token}
@@ -135,7 +150,7 @@ const ambiguous = [];    // {from,token,cands}
 for (const file of tracked) {
   const ext = file.split('.').pop().toLowerCase();
   if (!TEXT_EXT.has(ext)) continue;
-  if (EXCLUDE.has(file)) continue;
+  if (isExcluded(file)) continue;
   let content;
   try { content = fs.readFileSync(path.join(ROOT, file), 'utf8'); } catch { continue; }
   const regions = commentRegions(file, content);
@@ -149,7 +164,8 @@ for (const file of tracked) {
       const res = resolveToken(raw, file);
       if (!res) continue;
       if (res.kind === 'ambiguous') { ambiguous.push({ from: file, token: raw, cands: res.cands }); continue; }
-      if (!res.target || res.target === file || EXCLUDE.has(res.target)) continue;
+      if (!res.target || res.target === file || isExcluded(res.target)) continue;
+      if (isImmediateParentChild(file, res.target)) continue;
       const key = res.target + '|' + res.kind;
       if (seen.has(key)) continue;
       seen.add(key);
@@ -160,12 +176,13 @@ for (const file of tracked) {
   if (refs.length) perFile[file] = refs;
 }
 
-const out = { edges, perFile, ambiguous };
+const scanned = tracked.filter(f => TEXT_EXT.has(f.split('.').pop().toLowerCase()) && !isExcluded(f)).length;
+const out = { scanned, edges, perFile, ambiguous };
 const outPath = process.argv[2] || path.join(__dirname, 'refs.json');
 fs.writeFileSync(outPath, JSON.stringify(out, null, 2));
 
 // ---- summary ----
-const textCount = tracked.filter(f => TEXT_EXT.has(f.split('.').pop().toLowerCase())).length;
+const textCount = scanned;
 const inDeg = {};
 for (const e of edges) inDeg[e.to] = (inDeg[e.to] || 0) + 1;
 console.log(`Text files scanned: ${textCount}`);

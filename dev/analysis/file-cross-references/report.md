@@ -1,12 +1,14 @@
 # File cross-reference report
 
-Extracted from **comment regions and doc prose** across all tracked text files. An edge *A → B* means a comment (or doc link / `@import` / HTML asset ref) in file **A** names file **B**, and **B** is a real tracked file in the repo. External URLs, issue numbers (`#146`), and npm packages are dropped because they don't resolve to a repo file. `dev/requirements/requirements.md` is excluded (its ~120 gallery links to case snapshots swamp the real signal — see `EXCLUDE` in `extract.js`).
+Extracted from **comment regions and doc prose** across all tracked text files. An edge *A → B* means a comment (or doc link / `@import` / HTML asset ref) in file **A** names file **B**, and **B** is a real tracked file in the repo. External URLs, issue numbers (`#146`), and npm packages are dropped because they don't resolve to a repo file. `dev/requirements/requirements.md` and `dev/procedures/this_project/fileDescriptions.md` are excluded (their galleries/catalogs swamp the real signal — see `EXCLUDE` in `extract.js`). **Immediate parent↔subfolder edges are omitted**: a file directly in folder P and a file directly in an immediate subfolder of P never link (either direction) — same-folder, sibling, and grandchild-or-deeper references are kept.
+
+Text files scanned: **297**.
 
 ## Totals
 
-- Files that reference others: **131**
-- Distinct referenced files: **120**
-- Total reference edges: **493** (544 incl. duplicate mentions)
+- Files that reference others: **124**
+- Distinct referenced files: **116**
+- Total reference edges: **441** (485 incl. duplicate mentions)
 - Ambiguous basename mentions (unresolved): **19**
 
 ## Most reference-heavy files (out-degree)
@@ -14,50 +16,50 @@ Extracted from **comment regions and doc prose** across all tracked text files. 
 | Out | File |
 |----:|------|
 | 57 | `dev/procedures/this_project/testing.md` |
-| 36 | `dev/requirements/README.md` |
-| 30 | `dev/create-extractor/auto-extractor.md` |
+| 29 | `dev/create-extractor/auto-extractor.md` |
 | 20 | `dev/create-extractor/README.md` |
 | 19 | `CLAUDE.md` |
 | 18 | `dev/incremental-maintenance/auto-fallback-coverage.md` |
+| 18 | `dev/requirements/README.md` |
 | 17 | `dev/procedures/this_project/technicalGotchas.md` |
-| 17 | `dev/procedures/this_project/workflow.md` |
 | 16 | `dev/procedures/this_project/github.md` |
+| 16 | `dev/procedures/this_project/workflow.md` |
 | 13 | `dev/procedures/this_project/highLevelDesign.md` |
 | 11 | `dev/create-extractor/adding-a-source.md` |
-| 11 | `dev/requirements/extractor/fallback/fallback-coverage.js` |
-| 9 | `dev/requirements/shared/render/popup-renderer.js` |
-| 8 | `README.md` |
-| 8 | `dev/build/release/releasing.md` |
-| 8 | `dev/build/release/store_artifacts/README.md` |
-| 7 | `extension/events-popup/popup.js` |
+| 9 | `dev/requirements/extractor/fallback/fallback-coverage.js` |
+| 8 | `dev/requirements/shared/render/popup-renderer.js` |
+| 7 | `README.md` |
+| 7 | `dev/build/release/releasing.md` |
 | 6 | `.github/workflows/auto-implement-extractor.yml` |
-| 6 | `dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md` |
+| 6 | `dev/build/release/store_artifacts/README.md` |
+| 6 | `extension/events-popup/popup.js` |
 | 5 | `.github/workflows/finalize-extractor.yml` |
+| 5 | `dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md` |
 
 ## Most referenced files (in-degree)
 
 | In | File |
 |----:|------|
-| 20 | `extension/events-popup/popup.js` |
+| 19 | `extension/events-popup/popup.js` |
 | 17 | `dev/procedures/this_project/workflow.md` |
 | 14 | `dev/create-extractor/auto-extractor.md` |
 | 13 | `dev/procedures/this_project/testing.md` |
-| 12 | `extension/event-extractors/assemble-events.js` |
 | 11 | `extension/config.js` |
 | 11 | `dev/procedures/this_project/technicalGotchas.md` |
-| 11 | `dev/requirements/extractor/live.test.js` |
-| 11 | `dev/requirements/shared/reference-time.js` |
+| 11 | `extension/event-extractors/assemble-events.js` |
 | 10 | `dev/procedures/this_project/github.md` |
 | 10 | `dev/create-extractor/phase1-prepare.sh` |
-| 10 | `extension/manifest.json` |
 | 10 | `extension/event-extractors/load-order.generated.json` |
-| 10 | `extension/event-extractors/registry.js` |
-| 9 | `extension/fallback-lists.json` |
+| 10 | `dev/requirements/shared/reference-time.js` |
+| 9 | `extension/manifest.json` |
 | 9 | `extension/events-popup/events-view.js` |
-| 9 | `extension/events-popup/popup.css` |
-| 8 | `package.json` |
 | 8 | `dev/procedures/this_project/highLevelDesign.md` |
 | 8 | `extension/icon/toolbar-icon.js` |
+| 8 | `extension/event-extractors/registry.js` |
+| 8 | `dev/requirements/extractor/live.test.js` |
+| 8 | `extension/events-popup/popup.css` |
+| 7 | `package.json` |
+| 7 | `extension/fallback-lists.json` |
 
 ## Folder-to-folder reference flow
 
@@ -100,7 +102,6 @@ Every file that names another file in its comments / prose, with each reference 
 
 ### `.claude/cloud-setup.sh`
 
-- `package.json` → `package.json` _(by name)_
 - `dev/procedures/this_project/github.md` → `dev/procedures/this_project/github.md`
 
 ### `.claude/hooks/check-environment-version.sh`
@@ -183,7 +184,6 @@ Every file that names another file in its comments / prose, with each reference 
 
 - `dev/procedures/this_project/highLevelDesign.md` → `dev/procedures/this_project/highLevelDesign.md`
 - `dev/build/release/releasing.md` → `dev/build/release/releasing.md`
-- `manifest.json` → `extension/manifest.json` _(by name)_
 - `dev/build/release/store_artifacts/PRIVACY.md` → `dev/build/release/store_artifacts/PRIVACY.md`
 - `extension/icon/toolbar-icon.js` → `extension/icon/toolbar-icon.js`
 - `dev/requirements/README.md` → `dev/requirements/README.md`
@@ -209,7 +209,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `dev/procedures/this_project/workflow.md` → `dev/procedures/this_project/workflow.md`
 - `procedures/this_project/workflow.md` → `dev/procedures/this_project/workflow.md` _(by name)_
 - `extension/icon/images/chromeStoreIcon.png` → `extension/icon/images/chromeStoreIcon.png`
-- `dev/build/release/store_artifacts/PRIVACY.md` → `dev/build/release/store_artifacts/PRIVACY.md`
 
 ### `dev/build/release/shipping-files.js`
 
@@ -227,8 +226,6 @@ Every file that names another file in its comments / prose, with each reference 
 
 ### `dev/build/release/store_artifacts/README.md`
 
-- `dev/build/release/shipping-files.js` → `dev/build/release/shipping-files.js`
-- `releasing.md` → `dev/build/release/releasing.md` _(by name)_
 - `chrome-store-screenshot-1280x800.png` → `dev/build/release/store_artifacts/chrome-store-screenshot-1280x800.png` _(by name)_
 - `generate_icons.py` → `dev/build/release/store_artifacts/generate_icons.py` _(by name)_
 - `PRIVACY.md` → `dev/build/release/store_artifacts/PRIVACY.md` _(by name)_
@@ -239,7 +236,6 @@ Every file that names another file in its comments / prose, with each reference 
 ### `dev/build/test/load-order-generated.test.js`
 
 - `event-extractors/load-order.generated.json` → `extension/event-extractors/load-order.generated.json` _(by name)_
-- `gen-load-order.js` → `dev/build/gen-load-order.js` _(by name)_
 
 ### `dev/create-extractor/README.md`
 
@@ -316,7 +312,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `phase1-prepare.sh` → `dev/create-extractor/phase1-prepare.sh` _(by name)_
 - `handoff-to-agent.sh` → `dev/create-extractor/handoff-to-agent.sh` _(by name)_
 - `phase2-finalize.sh` → `dev/create-extractor/phase2-finalize.sh` _(by name)_
-- `dev/create-extractor/test/scraperapi-fetch.test.js` → `dev/create-extractor/test/scraperapi-fetch.test.js`
 - `extension/config.js` → `extension/config.js`
 - `extension/fallback-policy.js` → `extension/fallback-policy.js`
 - `dev/build/gen-load-order.js` → `dev/build/gen-load-order.js`
@@ -344,7 +339,6 @@ Every file that names another file in its comments / prose, with each reference 
 
 - `dev/create-extractor/auto-extractor.md` → `dev/create-extractor/auto-extractor.md`
 - `scraperapi-fetch.sh` → `dev/create-extractor/scraperapi-fetch.sh` _(by name)_
-- `dev/create-extractor/test/scraperapi-fetch.test.js` → `dev/create-extractor/test/scraperapi-fetch.test.js`
 - `live.test.js` → `dev/requirements/extractor/live.test.js` _(by name)_
 - `dev/requirements/extractor/data-files.js` → `dev/requirements/extractor/data-files.js`
 
@@ -372,40 +366,18 @@ Every file that names another file in its comments / prose, with each reference 
 ### `dev/create-extractor/scraperapi-fetch.sh`
 
 - `phase1-prepare.sh` → `dev/create-extractor/phase1-prepare.sh` _(by name)_
-- `dev/create-extractor/test/scraperapi-fetch.test.js` → `dev/create-extractor/test/scraperapi-fetch.test.js`
 - `auto-extractor.md` → `dev/create-extractor/auto-extractor.md` _(by name)_
-
-### `dev/create-extractor/test/attach-sample-url.test.js`
-
-- `attach-sample-url.js` → `dev/create-extractor/attach-sample-url.js` _(by name)_
-
-### `dev/create-extractor/test/case-quality.test.js`
-
-- `case-quality.js` → `dev/create-extractor/case-quality.js` _(by name)_
-
-### `dev/create-extractor/test/extractor-naming.test.js`
-
-- `extractor-naming.js` → `dev/create-extractor/extractor-naming.js` _(by name)_
 
 ### `dev/create-extractor/test/extractor-scaffold.test.js`
 
-- `scaffold-source.js` → `dev/create-extractor/scaffold-source.js` _(by name)_
-- `add-supported-domain.js` → `dev/create-extractor/add-supported-domain.js` _(by name)_
 - `registry.js` → `extension/event-extractors/registry.js` _(by name)_
 
 ### `dev/create-extractor/test/resolve-source.test.js`
 
-- `resolve-source.js` → `dev/create-extractor/resolve-source.js` _(by name)_
 - `telavivcinematheque.js` → `extension/event-extractors/custom/telavivcinematheque.js` _(by name)_
-
-### `dev/create-extractor/test/scraperapi-fetch.test.js`
-
-- `dev/create-extractor/scraperapi-fetch.sh` → `dev/create-extractor/scraperapi-fetch.sh`
-- `scraperapi-fetch.sh` → `dev/create-extractor/scraperapi-fetch.sh` _(by name)_
 
 ### `dev/create-extractor/test/triage-extractor-request.test.js`
 
-- `triage-extractor-request.js` → `dev/create-extractor/triage-extractor-request.js` _(by name)_
 - `config.js` → `extension/config.js` _(by name)_
 - `fallback-policy.test.js` → `extension-test/fallback-policy.test.js` _(by name)_
 - `telavivcinematheque.js` → `extension/event-extractors/custom/telavivcinematheque.js` _(by name)_
@@ -605,7 +577,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `extension/manifest.json` → `extension/manifest.json`
 - `package.json` → `package.json` _(by name)_
 - `dev/procedures/test/uber/shared_constants/version-sync.json` → `dev/procedures/test/uber/shared_constants/version-sync.json`
-- `dev/procedures/this_project/*` → `dev/procedures/this_project`
 - `dev/procedures/general/agenticBestPractices.md` → `dev/procedures/general/agenticBestPractices.md`
 - `dev/procedures/this_project/highLevelDesign.md` → `dev/procedures/this_project/highLevelDesign.md`
 - `dev/procedures/this_project/technicalGotchas.md` → `dev/procedures/this_project/technicalGotchas.md`
@@ -621,27 +592,12 @@ Every file that names another file in its comments / prose, with each reference 
 ### `dev/requirements/README.md`
 
 - `requirements-coverage.test.js` → `dev/requirements/requirements-coverage.test.js` _(by name)_
-- `shared/kinds.js` → `dev/requirements/shared/kinds.js`
-- `shared/cases.js` → `dev/requirements/shared/cases.js`
 - `shared/render/visual-snapshots.test.js` → `dev/requirements/shared/render/visual-snapshots.test.js`
-- `behavior/events-view-actions.test.js` → `dev/requirements/behavior/events-view-actions.test.js`
-- `extractor/extractor-support.test.js` → `dev/requirements/extractor/extractor-support.test.js`
-- `live.test.js` → `dev/requirements/extractor/live.test.js` _(by name)_
-- `extractor/live.test.js` → `dev/requirements/extractor/live.test.js`
-- `logic/product-requirements.test.js` → `dev/requirements/logic/product-requirements.test.js`
 - `shared/render/render-snapshot.js` → `dev/requirements/shared/render/render-snapshot.js`
 - `event-cards-appearance.5.6.1.case.js` → `dev/requirements/popup/cases/event-cards-appearance.5.6.1.case.js` _(by name)_
 - `package.json` → `package.json` _(by name)_
 - `dev/procedures/this_project/workflow.md` → `dev/procedures/this_project/workflow.md`
 - `procedures/this_project/workflow.md` → `dev/procedures/this_project/workflow.md` _(by name)_
-- `kinds.js` → `dev/requirements/shared/kinds.js` _(by name)_
-- `cases.js` → `dev/requirements/shared/cases.js` _(by name)_
-- `ui-requirements.js` → `dev/requirements/shared/ui-requirements.js` _(by name)_
-- `build-requirements-gallery.js` → `dev/requirements/shared/build-requirements-gallery.js` _(by name)_
-- `requirements-gallery.test.js` → `dev/requirements/shared/requirements-gallery.test.js` _(by name)_
-- `snapshot-artifacts-dir.js` → `dev/requirements/shared/snapshot-artifacts-dir.js` _(by name)_
-- `gen-states-flowchart.js` → `dev/requirements/shared/gen-states-flowchart.js` _(by name)_
-- `popup-states-flowchart.png` → `dev/requirements/shared/popup-states-flowchart.png` _(by name)_
 - `render-snapshot.js` → `dev/requirements/shared/render/render-snapshot.js` _(by name)_
 - `popup-renderer.js` → `dev/requirements/shared/render/popup-renderer.js` _(by name)_
 - `icon-renderer.js` → `dev/requirements/shared/render/icon-renderer.js` _(by name)_
@@ -649,9 +605,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `actions.js` → `dev/requirements/shared/render/actions.js` _(by name)_
 - `refresh-snapshots.js` → `dev/requirements/shared/render/refresh-snapshots.js` _(by name)_
 - `visual-snapshots.test.js` → `dev/requirements/shared/render/visual-snapshots.test.js` _(by name)_
-- `events-view-actions.test.js` → `dev/requirements/behavior/events-view-actions.test.js` _(by name)_
-- `product-requirements.test.js` → `dev/requirements/logic/product-requirements.test.js` _(by name)_
-- `extractor-support.test.js` → `dev/requirements/extractor/extractor-support.test.js` _(by name)_
 - `dev/create-extractor/adding-a-source.md` → `dev/create-extractor/adding-a-source.md`
 - `create-extractor/adding-a-source.md` → `dev/create-extractor/adding-a-source.md` _(by name)_
 - `dev/procedures/this_project/testing.md` → `dev/procedures/this_project/testing.md`
@@ -699,12 +652,10 @@ Every file that names another file in its comments / prose, with each reference 
 - `dev/requirements/extractor/fallback/fallback-coverage.js` → `dev/requirements/extractor/fallback/fallback-coverage.js`
 - `dev/procedures/this_project/testing.md` → `dev/procedures/this_project/testing.md`
 - `extension/event-extractors/extract-unsupported.js` → `extension/event-extractors/extract-unsupported.js`
-- `dev/requirements/extractor/expected/*` → `dev/requirements/extractor/expected`
 - `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json` → `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json`
 
 ### `dev/requirements/extractor/fallback/fallback-coverage.js`
 
-- `live.test.js` → `dev/requirements/extractor/live.test.js` _(by name)_
 - `assemble-events.js` → `extension/event-extractors/assemble-events.js` _(by name)_
 - `testing.md` → `dev/procedures/this_project/testing.md` _(by name)_
 - `fallback-coverage.test.js` → `dev/requirements/extractor/fallback/fallback-coverage.test.js` _(by name)_
@@ -714,7 +665,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `config.js` → `extension/config.js` _(by name)_
 - `event-extractors/load-order.generated.json` → `extension/event-extractors/load-order.generated.json` _(by name)_
 - `event-extractors/extract-unsupported.js` → `extension/event-extractors/extract-unsupported.js` _(by name)_
-- `dev/requirements/extractor/expected/*` → `dev/requirements/extractor/expected`
 
 ### `dev/requirements/extractor/fallback/fallback-coverage.test.js`
 
@@ -745,10 +695,6 @@ Every file that names another file in its comments / prose, with each reference 
 ### `dev/requirements/logic/kind.js`
 
 - `logic/product-requirements.test.js` → `dev/requirements/logic/product-requirements.test.js` _(by name)_
-
-### `dev/requirements/logic/product-requirements.test.js`
-
-- `requirements-coverage.test.js` → `dev/requirements/requirements-coverage.test.js` _(by name)_
 
 ### `dev/requirements/popup/cases/event-cards-appearance.5.6.1.case.js`
 
@@ -793,8 +739,6 @@ Every file that names another file in its comments / prose, with each reference 
 ### `dev/requirements/requirements-coverage.test.js`
 
 - `render-snapshot.js` → `dev/requirements/shared/render/render-snapshot.js` _(by name)_
-- `dev/requirements/behavior/events-view-actions.test.js` → `dev/requirements/behavior/events-view-actions.test.js`
-- `shared/kinds.js` → `dev/requirements/shared/kinds.js`
 
 ### `dev/requirements/shared/build-requirements-gallery.js`
 
@@ -839,7 +783,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `events-popup/popup.css` → `extension/events-popup/popup.css` _(by name)_
 - `popup.css` → `extension/events-popup/popup.css` _(by name)_
 - `events-view.js` → `extension/events-popup/events-view.js` _(by name)_
-- `reference-time.js` → `dev/requirements/shared/reference-time.js` _(by name)_
 - `popup.js` → `extension/events-popup/popup.js` _(by name)_
 - `config.js` → `extension/config.js` _(by name)_
 - `popup.html` → `extension/events-popup/popup.html` _(by name)_
@@ -847,7 +790,6 @@ Every file that names another file in its comments / prose, with each reference 
 ### `dev/requirements/shared/render/refresh-snapshots.js`
 
 - `render-snapshot.js` → `dev/requirements/shared/render/render-snapshot.js` _(by name)_
-- `build-requirements-gallery.js` → `dev/requirements/shared/build-requirements-gallery.js` _(by name)_
 - `events-popup/popup.css` → `extension/events-popup/popup.css` _(by name)_
 
 ### `dev/requirements/shared/render/render-snapshot.js`
@@ -864,9 +806,7 @@ Every file that names another file in its comments / prose, with each reference 
 
 ### `dev/requirements/shared/ui-requirements.js`
 
-- `dev/requirements/requirements-coverage.test.js` → `dev/requirements/requirements-coverage.test.js`
 - `build-requirements-gallery.js` → `dev/requirements/shared/build-requirements-gallery.js` _(by name)_
-- `dev/requirements/shared/render/render-snapshot.js` → `dev/requirements/shared/render/render-snapshot.js`
 
 ### `extension-test/event-extractors/extraction.test.js`
 
@@ -892,7 +832,6 @@ Every file that names another file in its comments / prose, with each reference 
 
 - `popup.js` → `extension/events-popup/popup.js` _(by name)_
 - `fallback-policy.js` → `extension/fallback-policy.js` _(by name)_
-- `extension-test/fallback-policy.test.js` → `extension-test/fallback-policy.test.js`
 - `config.js` → `extension/config.js` _(by name)_
 - `assemble-events.js` → `extension/event-extractors/assemble-events.js` _(by name)_
 
@@ -938,22 +877,11 @@ Every file that names another file in its comments / prose, with each reference 
 - `event-extractors/registry.js` → `extension/event-extractors/registry.js` _(by name)_
 - `registry.js` → `extension/event-extractors/registry.js` _(by name)_
 
-### `extension/config.js`
-
-- `popup.css` → `extension/events-popup/popup.css` _(by name)_
-- `registry.js` → `extension/event-extractors/registry.js` _(by name)_
-
 ### `extension/event-extractors/assemble-events.js`
 
 - `event-extractors/load-order.generated.json` → `extension/event-extractors/load-order.generated.json` _(by name)_
 - `dev/procedures/this_project/highLevelDesign.md` → `dev/procedures/this_project/highLevelDesign.md`
 - `events-popup/popup.js` → `extension/events-popup/popup.js` _(by name)_
-- `custom/telavivcinematheque.js` → `extension/event-extractors/custom/telavivcinematheque.js`
-- `custom/meetup.js` → `extension/event-extractors/custom/meetup.js`
-
-### `extension/event-extractors/custom/livenation.js`
-
-- `assemble-events.js` → `extension/event-extractors/assemble-events.js` _(by name)_
 
 ### `extension/event-extractors/custom/tabitisrael.js`
 
@@ -979,8 +907,6 @@ Every file that names another file in its comments / prose, with each reference 
 ### `extension/event-extractors/registry.js`
 
 - `assemble-events.js` → `extension/event-extractors/assemble-events.js` _(by name)_
-- `helpers/timezones.js` → `extension/event-extractors/helpers/timezones.js`
-- `fallback-lists.json` → `extension/fallback-lists.json` _(by name)_
 
 ### `extension/events-popup/build-calendar-url.js`
 
@@ -1016,7 +942,6 @@ Every file that names another file in its comments / prose, with each reference 
 - `gen-load-order.js` → `dev/build/gen-load-order.js` _(by name)_
 - `dev/requirements/shared/render/actions.js` → `dev/requirements/shared/render/actions.js`
 - `assemble-events.js` → `extension/event-extractors/assemble-events.js` _(by name)_
-- `fallback-policy.js` → `extension/fallback-policy.js` _(by name)_
 - `dev/requirements/shared/popup-states-flowchart.png` → `dev/requirements/shared/popup-states-flowchart.png`
 
 ### `extension/events-popup/source-request-view.js`
@@ -1026,21 +951,18 @@ Every file that names another file in its comments / prose, with each reference 
 
 ### `extension/fallback-policy.js`
 
-- `popup.js` → `extension/events-popup/popup.js` _(by name)_
 - `config.js` → `extension/config.js` _(by name)_
-- `event-extractors/registry.js` → `extension/event-extractors/registry.js`
 
 ### `extension/icon/toolbar-icon.js`
 
-- `fallback-lists.json` → `extension/fallback-lists.json` _(by name)_
 - `technicalGotchas.md` → `dev/procedures/this_project/technicalGotchas.md` _(by name)_
 
 ## Ambiguous references (basename matches >1 file)
 
-- `dev/build/release/releasing.md` names `README.md` → could be: `README.md`, `dev/build/release/store_artifacts/README.md`, `dev/create-extractor/README.md`, `dev/requirements/README.md`, `dev/requirements/extractor/data/user-submitted/README.md`
-- `dev/procedures/test/docs-reachable.test.js` names `README.md` → could be: `README.md`, `dev/build/release/store_artifacts/README.md`, `dev/create-extractor/README.md`, `dev/requirements/README.md`, `dev/requirements/extractor/data/user-submitted/README.md`
+- `dev/build/release/releasing.md` names `README.md` → could be: `README.md`, `dev/analysis/file-cross-references/README.md`, `dev/build/release/store_artifacts/README.md`, `dev/create-extractor/README.md`, `dev/requirements/README.md`, `dev/requirements/extractor/data/user-submitted/README.md`
+- `dev/procedures/test/docs-reachable.test.js` names `README.md` → could be: `README.md`, `dev/analysis/file-cross-references/README.md`, `dev/build/release/store_artifacts/README.md`, `dev/create-extractor/README.md`, `dev/requirements/README.md`, `dev/requirements/extractor/data/user-submitted/README.md`
 - `dev/procedures/this_project/testing.md` names `kind.js` → could be: `dev/requirements/behavior/kind.js`, `dev/requirements/extractor/kind.js`, `dev/requirements/icon/kind.js`, `dev/requirements/logic/kind.js`, `dev/requirements/popup/kind.js`
 - `dev/requirements/README.md` names `kind.js` → could be: `dev/requirements/behavior/kind.js`, `dev/requirements/extractor/kind.js`, `dev/requirements/icon/kind.js`, `dev/requirements/logic/kind.js`, `dev/requirements/popup/kind.js`
 - `dev/requirements/requirements-coverage.test.js` names `kind.js` → could be: `dev/requirements/behavior/kind.js`, `dev/requirements/extractor/kind.js`, `dev/requirements/icon/kind.js`, `dev/requirements/logic/kind.js`, `dev/requirements/popup/kind.js`
 - `dev/requirements/shared/kinds.js` names `kind.js` → could be: `dev/requirements/behavior/kind.js`, `dev/requirements/extractor/kind.js`, `dev/requirements/icon/kind.js`, `dev/requirements/logic/kind.js`, `dev/requirements/popup/kind.js`
-- `dev/requirements/shared/kinds.js` names `README.md` → could be: `README.md`, `dev/build/release/store_artifacts/README.md`, `dev/create-extractor/README.md`, `dev/requirements/README.md`, `dev/requirements/extractor/data/user-submitted/README.md`
+- `dev/requirements/shared/kinds.js` names `README.md` → could be: `README.md`, `dev/analysis/file-cross-references/README.md`, `dev/build/release/store_artifacts/README.md`, `dev/create-extractor/README.md`, `dev/requirements/README.md`, `dev/requirements/extractor/data/user-submitted/README.md`

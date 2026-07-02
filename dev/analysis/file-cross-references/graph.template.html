@@ -111,7 +111,7 @@
 <header>
   <div class="brand">
     <h1>file&nbsp;<span class="arrow">&rarr;</span>&nbsp;file references in comments</h1>
-    <p>Every edge is a file naming another real repo file in its comments, doc prose, <code style="font-family:var(--mono)">@import</code>, or markup.</p>
+    <p>Every edge is a file naming another real repo file in its comments, doc prose, <code style="font-family:var(--mono)">@import</code>, or markup. Immediate parent&harr;subfolder references are omitted.</p>
   </div>
   <div class="stats" id="stats"></div>
   <div class="toggle" id="viewToggle">
@@ -140,6 +140,7 @@
 (function(){
 "use strict";
 const DATA = JSON.parse(document.getElementById('data').textContent);
+const SCANNED = __SCANNED__;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---- group + palette ----
@@ -183,7 +184,7 @@ FD.nodes.forEach(n=>n.deg=n.inDeg+n.outDeg);
 const referrers = new Set(F.edges.map(e=>e.from)).size;
 const targets = new Set(F.edges.map(e=>e.to)).size;
 const statDefs = [
-  ['299','files scanned'],[String(referrers),'reference others'],
+  [String(SCANNED),'files scanned'],[String(referrers),'reference others'],
   [String(targets),'referenced'],[String(F.edges.length),'edges'],
   [String(new Set([...F.nodes.values()].map(n=>n.cluster)).size),'folders'],
 ];
