@@ -179,6 +179,7 @@ for (const file of tracked) {
       if (!res) continue;
       if (res.kind === 'ambiguous') { ambiguous.push({ from: file, token: raw, cands: res.cands }); continue; }
       if (!res.target || res.target === file || isExcluded(res.target)) continue;
+      if (path.dirname(file) === path.dirname(res.target)) continue; // same folder
       if (isImmediateParentChild(file, res.target)) continue;
       const key = res.target + '|' + res.kind;
       if (seen.has(key)) continue;

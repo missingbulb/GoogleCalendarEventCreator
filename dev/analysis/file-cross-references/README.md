@@ -32,11 +32,11 @@ segment named `test`/`tests` or ending `-test`/`-tests`, e.g. `extension-test/`,
 `*.test.js` file that lives *outside* a test folder is still included — only
 folder-based test exclusion is applied.)
 
-**Immediate parent↔subfolder edges are omitted** (`isImmediateParentChild`): a file
-directly in folder `P` and a file directly in an *immediate* subfolder of `P` never
-link, in either direction — one level only. Same-folder, sibling, and
-grandchild-or-deeper references are kept. (Example: `a/c ↔ a/b/d` is dropped;
-`a/c ↔ a/b/e/d` is kept.)
+**Same-folder and immediate parent↔subfolder edges are omitted**: two files in the
+same folder never link, and (`isImmediateParentChild`) a file directly in folder `P`
+never links to a file directly in an *immediate* subfolder of `P`, in either
+direction — one level only. Sibling-folder and grandchild-or-deeper references are
+kept. (Example: `a/x ↔ a/y` dropped; `a/c ↔ a/b/d` dropped; `a/c ↔ a/b/e/d` kept.)
 
 ## Files
 
