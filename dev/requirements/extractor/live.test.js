@@ -3,7 +3,7 @@
 //
 // These run OFFLINE against committed cached HTML files in
 // data/, recorded from each site by the auto-extractor pipeline
-// (dev/create-extractor/phase1-prepare.sh's record_page, which
+// (dev/create-extractor/phase1-prepare.sh's scraperapi_fetch, which
 // fetches through ScraperAPI). Asserting against a cached copy of the real page
 // makes the suite deterministic and runnable anywhere (no network), while still
 // reflecting each site's current markup.
@@ -37,7 +37,7 @@
 // The scenario's source URL lives alongside the cached HTML, in
 // data/<provenance>/<name>.url, where <provenance> is server-fetched/
 // (pipeline-recorded) or user-submitted/ — the single source of truth —
-// record_page fetches it, and the suite loads the HTML into a DOM at that URL so
+// scraperapi_fetch fetches it, and the suite loads the HTML into a DOM at that URL so
 // hostname-based site detection behaves as in Chrome). It is NOT repeated in the
 // case file.
 //
@@ -67,7 +67,7 @@
 // `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
 // `extractor-request` issue with the page URL — Phase 1 fetches it via ScraperAPI);
 // to record one by hand, fetch the .url through ScraperAPI with a key (see
-// dev/create-extractor/phase1-prepare.sh's record_page). Run the suite
+// dev/create-extractor/phase1-prepare.sh's scraperapi_fetch). Run the suite
 // once to see the actual extracted values in the failure output, then copy them
 // into `expected`.
 "use strict";

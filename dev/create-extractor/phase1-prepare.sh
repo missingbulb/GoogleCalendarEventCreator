@@ -23,11 +23,12 @@ cd "$HERE/../.."
 
 MODE="${MODE:-new}"
 
-# record_page — the project's single page-fetch (ScraperAPI escalation ladder, .il
-# geo-targeting, and the #279 non-HTML guard) lives in record-page.sh so it can be
-# unit-tested in isolation (dev/create-extractor/test/record-page.test.js). Sourcing only
-# defines the function.
-source "$HERE/record-page.sh"
+# scraperapi_fetch — the project's single page-fetch, and the home of all our
+# ScraperAPI-specific handling (tier escalation on failure, .il geo-targeting, the
+# #279 non-HTML→fail guard, and the #603 wait_for_selector). Lives in
+# scraperapi-fetch.sh so it can be unit-tested in isolation
+# (dev/create-extractor/test/scraperapi-fetch.test.js). Sourcing only defines the function.
+source "$HERE/scraperapi-fetch.sh"
 
 if [ -z "${EVENT_URL:-}" ]; then
   echo "phase1-prepare: no event URL provided — cannot record a page" >&2
@@ -45,7 +46,7 @@ printf '%s' "$EVENT_URL" > "dev/requirements/extractor/data/server-fetched/$CASE
 # WAIT_SELECTOR (optional, #603): a CSS selector the extension derived from the
 # live page, handed to ScraperAPI as wait_for_selector so a flaky SPA render waits
 # for real content instead of snapshotting an empty shell. Empty -> plain fetch.
-record_page "$EVENT_URL" "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html" "${WAIT_SELECTOR:-}"
+scraperapi_fetch "$EVENT_URL" "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html" "${WAIT_SELECTOR:-}"
 test -s "dev/requirements/extractor/data/server-fetched/$CASE_NAME.html"        # the page must have actually been recorded
 
 if [ "$MODE" = "supported" ]; then

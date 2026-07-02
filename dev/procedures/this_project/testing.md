@@ -204,7 +204,7 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- Cached HTML is recorded by the **auto-extractor pipeline**: the `record_page`
+- Cached HTML is recorded by the **auto-extractor pipeline**: the `scraperapi_fetch`
   bash function in `dev/create-extractor/phase1-prepare.sh` fetches
   the event page via an inline curl→ScraperAPI (`render=true`, so a single-page-app
   records with real data) when Phase 1 runs.
@@ -216,7 +216,7 @@ site's markup at the time it was recorded:
   (re)recorded only by the auto-extractor pipeline — file (or re-file) an
   `extractor-request` issue for the page and it's fetched via ScraperAPI in
   Phase 1 — or by hand by fetching the `.url` through ScraperAPI with a key (see
-  `record_page` in `phase1-prepare.sh`). There's no one-step push path to refresh
+  `scraperapi_fetch` in `phase1-prepare.sh`). There's no one-step push path to refresh
   a drifted fixture now.
 
 The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
@@ -431,18 +431,20 @@ commission-while-editing trap goes in the file's header comment rather than
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
 - **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
-  the inline curl→ScraperAPI in `record_page`
+  the inline curl→ScraperAPI in `scraperapi_fetch`
   (`dev/create-extractor/phase1-prepare.sh`), which uses
   `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
   so a single-page-app records with real data. The repo carries no SPA-shell
   detector or headless-Chrome render of its own (`spa-shell.js` /
   `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
-  fetching moved to ScraperAPI). The recorder (`record_page` in
-  `dev/create-extractor/phase1-prepare.sh`) is now just fetch → write. One aid for
-  a flaky SPA render: a source request can carry a **`Wait-for selector`** the
-  extension derived from the user's live, hydrated page
-  (`extension/event-extractors/derive-wait-selector.js`, #603), which the pipeline
-  passes to ScraperAPI as `wait_for_selector` so it waits for real content before
-  snapshotting — a real readiness signal, unlike the fixed `wait` reverted in #595.
-  The standard-tier unexpanded-SPA re-fetch (#599) stays as the net when no
-  selector was supplied or it didn't fire.
+  fetching moved to ScraperAPI). The recorder (`scraperapi_fetch` in
+  `scraperapi-fetch.sh`, sourced by `phase1-prepare.sh`) is now just fetch → write.
+  The aid for a flaky SPA render is a **`Wait-for selector`** a source request can
+  carry — the extension derives it from the user's live, hydrated page
+  (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
+  event extractor, #603) and the pipeline passes it to ScraperAPI as
+  `wait_for_selector` so it waits for real content before snapshotting — a real
+  readiness signal, unlike the fixed `wait` reverted in #595. The old standard-tier
+  unexpanded-SPA re-fetch loop (#599) was **removed**: `scraperapi_fetch` never
+  retries a 200 now (a bad/non-HTML render fails for a human instead), so
+  `wait_for_selector` is the mechanism for getting a hydrated page, not a retry.

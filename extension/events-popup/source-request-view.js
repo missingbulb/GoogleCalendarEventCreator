@@ -42,10 +42,10 @@ const POLICY_DOC_PATH = "extraction-policy.md";
 // this way — NOT `dropdown` or `checkboxes` — so "event-count" is a plain text
 // input we seed with the number of events the popup detected.
 // "wait-selector" is the CSS selector the popup derived from this live,
-// hydrated page (assemble-events.js → derive-wait-selector.js, #603); the
-// pipeline feeds it to ScraperAPI as wait_for_selector when it re-records the
-// page, so a flaky SPA render waits for real content instead of snapshotting a
-// shell. Empty when none could be derived.
+// hydrated page (popup.js injects derive-wait-selector.js, #603); the pipeline
+// feeds it to ScraperAPI as wait_for_selector when it re-records the page, so a
+// flaky SPA render waits for real content instead of snapshotting a shell. Empty
+// when none could be derived.
 const SOURCE_REQUEST_FIELDS = [
   "url", "name", "start", "end", "timezone", "location", "description", "event-count",
   "wait-selector",

@@ -1,4 +1,4 @@
-// Unit tests for GCal.deriveWaitSelector (extension/event-extractors/derive-wait-selector.js):
+// Unit tests for deriveWaitSelector (extension/events-popup/derive-wait-selector.js):
 // from a hydrated DOM + the extracted event, pick a robust CSS selector for
 // ScraperAPI's wait_for_selector (#603). The rules under test:
 //   - anchor to the element the event's content lives in, richest field first
@@ -9,12 +9,13 @@
 //     classes) and any non-unique selector; never emit a bare structural tag;
 //   - fall back to a schema.org Event JSON-LD <script>; else "".
 //
-// deriveWaitSelector is self-contained (no other GCal helper), so each case evals
-// just registry.js (which creates GCal) + derive-wait-selector.js into a jsdom and
-// calls it directly. The eventer end-to-end check goes through the real harness.
+// deriveWaitSelector is a self-contained ES-module function (so popup.js can inject
+// it whole via chrome.scripting.executeScript). Each case calls it directly with a
+// jsdom document; the eventer end-to-end check runs the real extractor (via the
+// harness) to get the event, then derives against the same fixture DOM.
 "use strict";
 
-const { test } = require("node:test");
+const { test, before } = require("node:test");
 const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
@@ -22,19 +23,20 @@ const { JSDOM } = require("jsdom");
 const { extractFromHtml } = require("../harness.js");
 
 const EXT = path.join(__dirname, "..", "..", "extension");
-const REGISTRY = readFileSync(path.join(EXT, "event-extractors/registry.js"), "utf8");
-const DERIVE = readFileSync(path.join(EXT, "event-extractors/derive-wait-selector.js"), "utf8");
+const DATA = path.join(EXT, "..", "dev/requirements/extractor/data/server-fetched");
+
+let deriveWaitSelector;
+before(async () => {
+  ({ deriveWaitSelector } = await import(
+    path.join(EXT, "events-popup/derive-wait-selector.js")
+  ));
+});
 
 // Run deriveWaitSelector against a body-HTML snippet with a given event.
 function derive(bodyHtml, event) {
-  const dom = new JSDOM(`<!doctype html><html><body>${bodyHtml}</body></html>`, {
-    runScripts: "outside-only",
-  });
+  const dom = new JSDOM(`<!doctype html><html><body>${bodyHtml}</body></html>`);
   try {
-    dom.window.eval(REGISTRY);
-    dom.window.eval(DERIVE);
-    dom.window.__event = event;
-    return dom.window.eval("GCal.deriveWaitSelector(window.__event, document)");
+    return deriveWaitSelector(event, dom.window.document);
   } finally {
     dom.window.close();
   }
@@ -55,7 +57,6 @@ test("skips a hash-like id and falls to a unique class", () => {
     `<section class="details"><p id="C6AG5T8N3BRG7LOIR9N0">A long enough event description here</p></section>`,
     ev({ description: "A long enough event description here" })
   );
-  // The id is junk (many digits); the content is pinned by a class instead.
   assert.ok(sel && sel !== "#C6AG5T8N3BRG7LOIR9N0", sel);
   assert.match(sel, /details|wrap|section/);
 });
@@ -74,13 +75,10 @@ test("rejects framework classes (ng-binding) and a non-unique tag, using a uniqu
      <h1 class="ng-binding descriptionHeader">My Event Title</h1>`,
     ev({ title: "My Event Title" })
   );
-  // Two <h1>s => bare h1 is ambiguous; ng-binding is framework noise and repeated.
   assert.equal(sel, ".descriptionHeader");
 });
 
 test("never emits a bare structural tag for a bare content element", () => {
-  // The content sits in a class-less <div>; no id, no class => no clean content
-  // selector, so it falls back to the JSON-LD Event block.
   const sel = derive(
     `<div>A long enough event description here</div>
      <script type="application/ld+json">{"@type":"Event","name":"x"}</script>`,
@@ -116,26 +114,20 @@ test("a non-Event JSON-LD block is not used as a fallback", () => {
 // this). The exact class is intentionally NOT pinned (it can move with the
 // fixture); we assert the contract: a unique selector anchored on real content.
 test("eventer fixture: yields a unique selector anchored on the event's content", () => {
-  const html = readFileSync(
-    path.join(EXT, "..", "dev/requirements/extractor/data/server-fetched/eventer.html"),
-    "utf8"
-  );
-  const url = readFileSync(
-    path.join(EXT, "..", "dev/requirements/extractor/data/server-fetched/eventer.url"),
-    "utf8"
-  ).trim();
+  const html = readFileSync(path.join(DATA, "eventer.html"), "utf8");
+  const url = readFileSync(path.join(DATA, "eventer.url"), "utf8").trim();
   const res = extractFromHtml(html, url);
-  assert.ok(res.waitSelector, "expected a non-empty wait selector for eventer");
+  assert.ok(res.events.length, "expected the eventer extractor to find an event");
 
-  // The selector must uniquely resolve, and its element must actually carry the
-  // extracted description — i.e. it's a real content anchor, not a stray match.
   const dom = new JSDOM(html, { url });
   try {
-    const matched = dom.window.document.querySelectorAll(res.waitSelector);
-    assert.equal(matched.length, 1, `selector ${res.waitSelector} must match exactly one element`);
+    const sel = deriveWaitSelector(res.events[0], dom.window.document);
+    assert.ok(sel, "expected a non-empty wait selector for eventer");
+    const matched = dom.window.document.querySelectorAll(sel);
+    assert.equal(matched.length, 1, `selector ${sel} must match exactly one element`);
     const descStart = res.events[0].description.replace(/\s+/g, " ").trim().slice(0, 40).toLowerCase();
     const elText = matched[0].textContent.replace(/\s+/g, " ").trim().toLowerCase();
-    assert.ok(elText.includes(descStart), `selector ${res.waitSelector} must wrap the event content`);
+    assert.ok(elText.includes(descStart), `selector ${sel} must wrap the event content`);
   } finally {
     dom.window.close();
   }

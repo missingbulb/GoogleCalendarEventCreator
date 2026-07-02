@@ -72,13 +72,14 @@ Almost everything for this pipeline is one self-contained folder,
   `matches()`) and `plan-names.js` (the one place that turns a URL + issue number
   into every mode-aware name) are the shared spine that lets triage, the agent, and
   finalize all agree on the mode and file names without passing state around.
-- `record-page.sh`, `phase1-prepare.sh`, `handoff-to-agent.sh`,
+- `scraperapi-fetch.sh`, `phase1-prepare.sh`, `handoff-to-agent.sh`,
   `phase2-finalize.sh` — the bash the workflows call, so the YAML reads as a **thin
   orchestrator**: triggers, permissions, per-step `env:` wiring, one script
-  invocation per step. `record-page.sh` holds the project's single page fetch
-  (`record_page`: the ScraperAPI escalation ladder, `.il` geo-targeting, and the
-  #279 non-HTML guard); `phase1-prepare.sh` sources it. It's split out so the fetch
-  logic is unit-tested in isolation (`dev/create-extractor/test/record-page.test.js`).
+  invocation per step. `scraperapi-fetch.sh` holds the project's single page fetch
+  and all our ScraperAPI-specific handling (`scraperapi_fetch`: tier escalation on
+  failure, `.il` geo-targeting, the #279 non-HTML→fail guard, and the #603
+  `wait_for_selector`); `phase1-prepare.sh` sources it. It's split out so the fetch
+  logic is unit-tested in isolation (`dev/create-extractor/test/scraperapi-fetch.test.js`).
 
 Three files **must** live under `.github/` because GitHub pins them there. They
 stay put and refer back to the folder:
@@ -93,7 +94,7 @@ Shared infrastructure the scripts lean on stays where it's shared, **not** in th
 folder: `extension/config.js` / `extension/fallback-policy.js` (the popup's host
 classifier), and `dev/build/gen-load-order.js` (`npm run index`, run by every
 source addition). The pipeline *consumes* these; it doesn't own them. (Target-page
-fetching is no longer a shared module — it's the inline `record_page` curl →
+fetching is no longer a shared module — it's the inline `scraperapi_fetch` curl →
 ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)
 
 ## Stage 1 — the prepare workflow
@@ -140,7 +141,7 @@ ScraperAPI in `phase1-prepare.sh`, the one place this project fetches a page.)
    previously #334, barby #325, visit.tel-aviv #277.)
 4. **Prepares the branch — Phase 1, all deterministic (`phase1-prepare.sh`):**
    branches `<branch>` off `main`; records the event page
-   (`dev/requirements/extractor/data/server-fetched/<caseName>.url` → `record_page`, a `curl -f`
+   (`dev/requirements/extractor/data/server-fetched/<caseName>.url` → `scraperapi_fetch`, a `curl -f`
    through ScraperAPI with `render=true` so a JS single-page-app records real data —
    and, when the request carries a **`Wait-for selector`** the extension derived from
    the live page, `wait_for_selector=<that selector>` so ScraperAPI waits for real
@@ -261,7 +262,7 @@ The same `GITHUB_TOKEN` rule is exactly what makes the three-stage relay work:
 | Secret | Purpose |
 |--------|---------|
 | `GITHUB_TOKEN` | Standard Actions token — automatically available, no setup needed |
-| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `record_page` (in `record-page.sh`, sourced by `phase1-prepare.sh`) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. A hard site can still defeat the standard proxy pool (ScraperAPI returns 500 / times out), so `record_page` **escalates the proxy tier on failure** — standard → `premium=true` → `ultra_premium=true`, each more capable and more credits than the last — and only fails the job red once the top tier is exhausted (this was added after seatgeek.com #281 failed on a timeout + three 500s at the standard tier). The same ladder also escalates on a **non-HTML body** — a 2xx fetch whose content carries no markup, i.e. ScraperAPI returned the SPA's *rendered text* with nothing to extract (#279 stubhub: 4018 bytes, not one `<`) — climbing to a more browser-faithful tier and, if even `ultra_premium` comes back plaintext, failing the job red as undownloadable. `record_page` also **geo-targets `.il` hosts** (`.co.il`/`.gov.il`, etc.) with `country_code=il`, so an Israeli site that geo-gates by IP records from an Israeli residential exit rather than a US one (a foreign IP can be blocked or served wrong-language/region-restricted content — a misleading fixture, worse than a hard failure); other hosts use the default pool. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. The account's usage/request analytics — handy when investigating a failed or unexpected fetch — are at <https://dashboard.scraperapi.com/analytics>. |
+| `SCRAPER_API_KEY` | **Optional but recommended.** A [ScraperAPI](https://www.scraperapi.com) key. When set, Phase 1's `scraperapi_fetch` (in `scraperapi-fetch.sh`, sourced by `phase1-prepare.sh` — the single home of our ScraperAPI-specific handling) routes the page download through ScraperAPI's residential proxy with `render=true`, so the datacenter runner isn't bot-blocked (403 / Cloudflare / WAF) and a JS single-page-app records with real data — the IP, not the User-Agent, is what gets blocked. **Retry policy: retry on failure, never on a 200.** A hard site can still defeat the standard proxy pool (ScraperAPI returns 500 / times out), so `scraperapi_fetch` **escalates the proxy tier on a transport failure** — standard → `premium=true` → `ultra_premium=true`, each more capable and more credits than the last — and only fails the job red once the top tier is exhausted (added after seatgeek.com #281 failed on a timeout + three 500s at standard). A **200 is final**: real HTML is kept; a **non-HTML body** (a 2xx whose content carries no markup, i.e. ScraperAPI returned the SPA's *rendered text* with nothing to extract — #279 stubhub, 4018 bytes, not one `<`) is a bad render we **fail on immediately** (no re-fetch, no tier bump — a rendering problem isn't a proxy-quality problem), handing the issue to a human. To get a hydrated SPA in the first place, a request can carry a **`wait_for_selector`** (#603) the extension derived from the user's live page, which `scraperapi_fetch` passes to ScraperAPI so it waits for real content before snapshotting — this replaced the old standard-tier SPA re-fetch loop (#599). `scraperapi_fetch` also **geo-targets `.il` hosts** (`.co.il`/`.gov.il`, etc.) with `country_code=il`, so an Israeli site that geo-gates by IP records from an Israeli residential exit rather than a US one (a foreign IP can be blocked or served wrong-language/region-restricted content — a misleading fixture, worse than a hard failure); other hosts use the default pool. Unset, it fetches directly (the unchanged path) and most non-trivial sites will fail to record from CI. The free tier (1,000 fetches/month, recurring) covers this pipeline's volume. The account's usage/request analytics — handy when investigating a failed or unexpected fetch — are at <https://dashboard.scraperapi.com/analytics>. |
 
 No Anthropic API key is needed in this repo any more: the agent runs in the Claude
 Code on the web routine, which carries its own credentials/limits. (The old
@@ -309,7 +310,7 @@ issue.
   turns into a PR like any other. (A page that turns out not to be one usable event
   still bails via Stage 2 / the quality floor, same as new-source mode.)
 - **Page can't be downloaded → red build, handed to a human** (failure, prepare) —
-  Phase 1's `record_page` couldn't fetch the page (a missing URL, or ScraperAPI
+  Phase 1's `scraperapi_fetch` couldn't fetch the page (a missing URL, or ScraperAPI
   couldn't deliver it — non-2xx / network error / timeout), so `curl -f` fails the
   job. No agent involved. Unlike the other stops this one is **red**, but it still
   flags the issue for a person: the "Comment on failure and hand off to a human"

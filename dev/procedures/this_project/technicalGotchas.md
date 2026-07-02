@@ -15,7 +15,7 @@ trap spanning files. See the full locality rule in
 [this_project/workflow.md](workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
-  us.** Page fetching is delegated wholesale to ScraperAPI (see `record_page` in
+  us.** Page fetching is delegated wholesale to ScraperAPI (see `scraperapi_fetch` in
   `dev/create-extractor/phase1-prepare.sh` / the bot-block gotcha
   below), and `render=true` makes it execute the page's JS and return the
   post-render HTML — so a JS app records with real data instead of an empty shell.
@@ -75,7 +75,7 @@ trap spanning files. See the full locality rule in
 - **Bot-blocking from CI is by datacenter IP (the general rule is in
   [general/engineeringPractices.md](../general/engineeringPractices.md)); here the
   escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
-  only page fetch (`record_page` in
+  only page fetch (`scraperapi_fetch` in
   `dev/create-extractor/phase1-prepare.sh`) routes through ScraperAPI's
   residential proxy (with `render=true`, so a single-page-app records real data).
   Unset (a fresh clone, the cloud sandbox), it fetches directly and stays

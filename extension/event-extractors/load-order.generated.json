@@ -29,7 +29,6 @@
   "event-extractors/custom/thinkdrink.js",
   "event-extractors/custom/ticketmaster.js",
   "event-extractors/custom/visit-tel-aviv.js",
-  "event-extractors/derive-wait-selector.js",
   "event-extractors/extract-unsupported.js",
   "event-extractors/assemble-events.js"
 ]

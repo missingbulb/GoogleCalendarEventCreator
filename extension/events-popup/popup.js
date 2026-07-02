@@ -6,6 +6,7 @@
 // needs.
 import { GCalConfig } from "../config.js";
 import { classifyHost, isPresentableFallbackEvent } from "../fallback-policy.js";
+import { deriveWaitSelector } from "./derive-wait-selector.js";
 
 async function init() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -27,7 +28,33 @@ async function init() {
     console.warn("Could not extract from page:", e);
   }
 
+  // If we found an event, derive the ScraperAPI wait_for_selector for a possible
+  // source request (#603) — a SECOND, separate injection, because this is a
+  // source-request concern, not part of the extraction pipeline. It runs the
+  // standalone deriveWaitSelector against the live DOM and returns just the
+  // selector string; render() reads it off `data` so it stays pure for the tests.
+  if (data.events && data.events.length) {
+    data.waitSelector = await deriveWaitSelectorInPage(tab.id, data.events[0]);
+  }
+
   await render({ data, tab, listing: classifyHost(tab.url) });
+}
+
+// Run the standalone deriveWaitSelector inside the page (where the live, hydrated
+// DOM is) by injecting the function itself — chrome.scripting serializes it whole
+// (it's self-contained by design) and calls it with the extracted event; `doc`
+// defaults to the page's document. Best-effort: any failure yields "".
+async function deriveWaitSelectorInPage(tabId, event) {
+  try {
+    const [injection] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: deriveWaitSelector,
+      args: [event],
+    });
+    return (injection && injection.result) || "";
+  } catch (e) {
+    return "";
+  }
 }
 
 // Render the popup's content from the one chooseContent() decision: the heading
