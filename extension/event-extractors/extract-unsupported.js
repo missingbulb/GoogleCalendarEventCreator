@@ -26,6 +26,12 @@
 (() => {
   const { clean, text, meta, blockText, htmlToText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts } = GCal;
 
+  // How much of the page's body text the date/time scan below considers. Large
+  // enough to reach past a long nav/menu block (e.g. a WordPress mega-menu)
+  // that sits before the real content on some sites, small enough to stay a
+  // deliberate "near the top of the page" heuristic rather than a full-page scan.
+  const BODY_TEXT_SCAN_LIMIT = 16000;
+
   function extract() {
     const embedded = embeddedEvents.find();
     // Several embedded events => a listing page; surface each.
@@ -65,7 +71,7 @@
       if (timeEl) out.start = normalizeDateValue(timeEl.getAttribute("datetime"));
     }
     if (!out.start) {
-      const body = bodyText().slice(0, 8000);
+      const body = bodyText().slice(0, BODY_TEXT_SCAN_LIMIT);
       out.start = parseDateFromText(body);
       // A start scraped from text often sits next to its end as a time range
       // ("6:30 pm - 10:00 pm"); recover the end when nothing structured gave one.
@@ -76,7 +82,7 @@
       // sentence vs the whole page), then body text, for a timed start on the same
       // date; if found, prefer it over the midnight placeholder.
       const datePrefix = out.start.slice(0, 10);
-      const body = bodyText().slice(0, 8000);
+      const body = bodyText().slice(0, BODY_TEXT_SCAN_LIMIT);
       for (const src of [meta("og:description"), meta("description"), body]) {
         const refined = parseDateFromText(src);
         if (refined && refined.includes("T") && refined.startsWith(datePrefix)) {

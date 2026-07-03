@@ -302,6 +302,17 @@ test("Generic site: '(Virtual)' or '(Online)' parenthetical in the title signals
   }
 });
 
+test("Generic site: the date/time body-text scan reaches past a long nav block before the real content", () => {
+  // A heavy nav/menu (a WordPress mega-menu, category list, …) can push a page's
+  // real content well past a short prefix of the body text; the scan window
+  // must be generous enough to still reach the date. Padding sized so the date
+  // sits past 8000 chars of body text but within the scan limit.
+  const nav = "Menu Item ".repeat(850); // ~8500 chars
+  const html = `<nav>${nav}</nav><h1>Sentimental Value</h1><p>18-06-2026 Thursday, 19:00</p>`;
+  const e = firstEvent(html, "https://www.example.com/event/sentimental-value");
+  assert.equal(e.times[0].start, "2026-06-18T19:00:00");
+});
+
 test("Listing page with several events: every JSON-LD event is returned, in order", () => {
   const html = `
     <script type="application/ld+json">
