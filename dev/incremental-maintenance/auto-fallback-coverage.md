@@ -44,6 +44,15 @@ usually points at a concrete generic gap, a `✗` means it found nothing.
   `<script>` or hidden markup. A real win comes from visible text or a
   Chrome-read DOM attribute (meta / JSON-LD / microdata / `<time datetime>`).
   (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../procedures/this_project/technicalGotchas.md).)
+  **Widening a body-text scan window (raising a `slice`/scan cap) is trap (a) at
+  corpus scale — grepping the target case is not enough.** A larger window can make
+  a *different* case that currently finds nothing start matching a `<script>` blob
+  it previously never reached (a jsdom-only false positive Chrome's `innerText`
+  wouldn't hit), silently corrupting that case's future test behavior. Before
+  raising any cap, re-run the **whole** corpus at the new size — ideally also with
+  `<script>/<style>/<noscript>` stripped first (approximating `innerText`) — and
+  confirm no *other* case gains a wrong value; pick a bound comfortably above the
+  real win but below the nearest offending blob.
 - **(b) deliberate decisions.** Some misses are intentional and pinned by a unit
   test (e.g. a date with intervening non-separator text before its time is
   all-day, in `extension-test/event-extractors/extraction.test.js`). Never "fix" what a test
