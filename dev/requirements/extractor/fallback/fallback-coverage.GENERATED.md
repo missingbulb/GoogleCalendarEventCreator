@@ -12,9 +12,9 @@ Headline coverage over all 33 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **58.6%** | 58 / 99 |
-| **All fields** | **40.4%** | 78 / 193 |
-| Event coverage *(informational)* | 21.3% | 34 / 160 |
+| **Critical fields** (title + start + location) | **66.7%** | 66 / 99 |
+| **All fields** | **44.6%** | 86 / 193 |
+| Event coverage *(informational)* | 24.4% | 39 / 160 |
 
 ### Gate
 
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 58.6% | 58.6% | ✓ |
-| All fields | 40.4% | 40.4% | ✓ |
+| Critical fields | 66.7% | 66.7% | ✓ |
+| All fields | 44.6% | 44.6% | ✓ |
 
 Gated over **33** shared case(s).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 33 | 24 | 2 | 7 | 72.7% |
-| `start` **(critical)** | 33 | 19 | 7 | 7 | 57.6% |
+| `title` **(critical)** | 33 | 27 | 4 | 2 | 81.8% |
+| `start` **(critical)** | 33 | 24 | 7 | 2 | 72.7% |
 | `end` | 22 | 13 | 0 | 9 | 59.1% |
 | `location` **(critical)** | 33 | 15 | 5 | 13 | 45.5% |
 | `ctz` | 30 | 0 | 0 | 30 | 0% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 31 | 7 | 13 | 11 | 22.6% |
+| `description` | 31 | 7 | 17 | 7 | 22.6% |
 
 ## By host
 
@@ -47,7 +47,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | --- | --: | --: | --: | --: |
 | `bandsintown.com` | 1 | 1/1 | 66.7% | 66.7% |
 | `barby.co.il` | 1 | 1/1 | 66.7% | 40% |
-| `cinema.co.il` | 5 | 0/118 | 0% | 0% |
+| `cinema.co.il` | 5 | 5/118 | 53.3% | 26.7% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 83.3% |
 | `dice.fm` | 1 | 1/1 | 100% | 83.3% |
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
@@ -97,11 +97,11 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `seetickets` | 1/1 | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
 | `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
-| `telavivcinematheque-506` | 0/109 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
-| `telavivcinematheque-left-handed-girl` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
-| `telavivcinematheque-poetry-bookstores` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
-| `telavivcinematheque-sentimental-value` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | ✗ | ✗ |
-| `telavivcinematheque-taiwan-week` | 0/6 | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `telavivcinematheque-506` | 1/109 | ~ | ✓ | — | ✗ | ✗ | — | ✗ |
+| `telavivcinematheque-left-handed-girl` | 1/1 | ✓ | ✓ | — | ✗ | ✗ | ✗ | ~ |
+| `telavivcinematheque-poetry-bookstores` | 1/1 | ✓ | ✓ | — | ✗ | ✗ | ✗ | ~ |
+| `telavivcinematheque-sentimental-value` | 1/1 | ✓ | ✓ | — | ✗ | ✗ | ✗ | ~ |
+| `telavivcinematheque-taiwan-week` | 1/6 | ~ | ✓ | ✗ | ✗ | ✗ | ✗ | ~ |
 | `thinkdrink-quantum-lecture` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ~ |
 | `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ✓ |
 | `visit-tel-aviv-timed` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | — | ~ |
