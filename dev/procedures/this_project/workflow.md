@@ -12,8 +12,8 @@ inline gallery
 requirement with its snapshot beside it — for one-page review.
 
 The general principle — a moved snapshot/golden baseline needs owner approval, not
-silent regeneration — is in
-[../general/testingPractices.md](../general/testingPractices.md). The project
+silent regeneration — is a portable testing practice maintained outside this repo.
+The project
 process when a change to a `dev/requirements/<kind>/cases/*` case (its spec or its
 rendering) makes the snapshot tests **fail** (the pixels moved):
 

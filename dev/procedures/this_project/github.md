@@ -170,8 +170,8 @@ Without them nothing breaks — the generated files just fall back to a normal
 
 ### Keep divergence small
 
-The general "sync early to keep conflicts small" rule is in
-[../general/git-and-github.md](../general/git-and-github.md). The project-specific
+The general "sync early to keep conflicts small" rule is a portable git/GitHub
+practice maintained outside this repo. The project-specific
 addition: when starting work on a branch, `git merge origin/main` (or rebase) **and
 run `npm run regen`** first, so the branch carries freshly-generated artifacts, not
 just the latest sources.
@@ -180,5 +180,4 @@ The generic cross-branch merge gotchas — merging across a file relocation,
 merging in content that predates a branch-wide invariant, and porting old work
 forward across a changed invariant — are portable, project-agnostic rules; two
 more git-mv gotchas (renaming a directory that houses a submodule; re-reading a
-moved file before rewriting it) are in
-[../general/git-and-github.md](../general/git-and-github.md).
+moved file before rewriting it) are likewise maintained outside this repo.

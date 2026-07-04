@@ -72,8 +72,8 @@ trap spanning files. See the full locality rule in
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception are
   portable GitHub procedures maintained outside this repo.
-- **Bot-blocking from CI is by datacenter IP (the general rule is in
-  [general/engineeringPractices.md](../general/engineeringPractices.md)); here the
+- **Bot-blocking from CI is by datacenter IP (the general rule is a portable
+  engineering practice maintained outside this repo); here the
   escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
   only page fetch (`scraperapi_fetch` in
   `dev/create-extractor/phase1-prepare.sh`) routes through ScraperAPI's
@@ -88,10 +88,9 @@ trap spanning files. See the full locality rule in
   `innerText || textContent` returns `textContent`, including `<select>`/hidden
   text), and the default `runScripts: "outside-only"` parses `<noscript>` into live
   DOM (the opposite of a real browser). Both let a green test hide a broken live
-  extraction; they're portable test-harness gotchas, documented in
-  [general/testingPractices.md](../general/testingPractices.md). In this repo they bit
-  the body-text scan, `extension-test/harness.js`, and `custom/telavivcinematheque.js`
-  (#130 / #137).
+  extraction; they're portable Node/jsdom gotchas maintained outside this repo. In
+  this repo they bit the body-text scan, `extension-test/harness.js`, and
+  `custom/telavivcinematheque.js` (#130 / #137).
 - **Injected block markup inside a `<p>` silently empties it — read the sibling,
   not the tag.** A page that fills a `<p>` via raw HTML (Angular `ng-bind-html`,
   React `dangerouslySetInnerHTML`, Vue `v-html`) can inject a block element like a
@@ -112,10 +111,9 @@ trap spanning files. See the full locality rule in
   and is pinned first in the load order (#189). Anything that runs at injection
   time must be safe to run again.
 - **The cloud Setup script runs as root starting in the repo's parent dir
-  (`/home/user`), not the checkout** — a project instance of the general
-  "setup script may start above the checkout" rule in
-  [general/engineeringPractices.md](../general/engineeringPractices.md). A bare
-  `npm ci` there finds no `package.json` and silently installs nothing (the tests
+  (`/home/user`), not the checkout** — a project instance of the portable
+  "setup script may start above the checkout" rule maintained outside this repo.
+  A bare `npm ci` there finds no `package.json` and silently installs nothing (the tests
   then trigger a confusing mid-session install); `.claude/cloud-setup.sh` must `cd`
   into the checkout first. (#186 / #196)
 - **`clean()` collapses all whitespace including newlines — use it only for
@@ -132,10 +130,9 @@ trap spanning files. See the full locality rule in
   actual data — JSON-LD or a parsed date — not merely a host match.
 - **Two portable GitHub gotchas this repo relies on — large fixtures need
   `linguist-vendored`, and Markdown inside a raw `<td>` needs surrounding blank
-  lines.** The `linguist-vendored` rule is a portable, project-agnostic rule
-  maintained outside this repo; the `<td>` blank-lines rule (with this repo's
-  `<!-- … -->`-marker-last-token nuance, not yet upstreamed) is in the local
-  working set [general/git-and-github.md](../general/git-and-github.md). Here they apply to the
+  lines.** Both — including this repo's `<!-- … -->`-marker-last-token nuance for
+  the `<td>` rule — are portable, project-agnostic rules maintained outside this
+  repo. Here they apply to the
   `dev/requirements/extractor/data/**/*.html` fixtures (`.gitattributes`, #78) and the
   two-column gallery in `dev/requirements/requirements.md`
   (`dev/requirements/shared/build-requirements-gallery.js`).
