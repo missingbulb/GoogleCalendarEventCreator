@@ -92,6 +92,15 @@ trap spanning files. See the full locality rule in
   [general/testingPractices.md](../general/testingPractices.md). In this repo they bit
   the body-text scan, `extension-test/harness.js`, and `custom/telavivcinematheque.js`
   (#130 / #137).
+- **Injected block markup inside a `<p>` silently empties it — read the sibling,
+  not the tag.** A page that fills a `<p>` via raw HTML (Angular `ng-bind-html`,
+  React `dangerouslySetInnerHTML`, Vue `v-html`) can inject a block element like a
+  `<div>` — disallowed inside `<p>` by the HTML content model, so the parser
+  (browser or jsdom, same rule) auto-closes the `<p>` right before it; the
+  injected content lands as the `<p>`'s **next sibling**, leaving the original tag
+  permanently empty. A selector reading `.some-class p` gets `""` with no error.
+  Read `element.nextElementSibling` instead. (Hit building `custom/tel-aviv.js`'s
+  `.benefitRemarks`/`.BenefitInstructions` description blocks, #602.)
 - **The shared `GCal` global is assembled by many files and re-injected on every
   popup open — augment it, and reset per-load state.** Two traps from one fact
   (`GCal` is a mutable global, loaded repeatedly into a page world that persists
