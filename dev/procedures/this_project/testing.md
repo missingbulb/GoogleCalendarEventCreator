@@ -17,9 +17,8 @@ npm test               # everything above (offline + live + UI)
 
 General test discipline — see a test fail before trusting it,
 green-twice-before-merge, snapshot-through-the-real-code-path, high-watermark
-gating, self-diagnosing remote tests — lives in
-[`../general/engineeringPractices.md`](../general/engineeringPractices.md) and
-[`../general/testingPractices.md`](../general/testingPractices.md); jsdom-vs-Chrome
+gating, self-diagnosing remote tests — is a portable practice maintained outside
+this repo; jsdom-vs-Chrome
 traps live in [`technicalGotchas.md`](technicalGotchas.md). This file is the
 project-specific testing decisions plus how to run and extend the suites. The
 detailed mechanics of each test harness live as comments **in that harness**
@@ -145,7 +144,7 @@ change.
   classifiers, prefer a structural one the code can't desync from — is in
   [../general/engineeringPractices.md](../general/engineeringPractices.md).)
 - **Requirement tests render against a pinned reference "now", not the real clock**
-  (the general rationale is in [../general/testingPractices.md](../general/testingPractices.md)).
+  (the general rationale is a portable testing practice maintained outside this repo).
   The popup's only date-dependent output is the card corner-pill (`events-view.js`
   `cornerPill` — a gray "past" pill for an event before today, a green year pill for
   a future year, none for a current/upcoming date), so a single pinned instant
