@@ -14,13 +14,14 @@ file or smuggle in dead weight. This same zip is what testers load unpacked
 ## Versioning
 
 The version users see is `extension/manifest.json`'s `version` (the store reads only
-that; `package.json` is kept in sync). **It is bumped deliberately, by a human,
-not automatically** — and bumping is a separate step from releasing. Ask Claude
-to **"bump version"** (it edits both files on a branch and lands on `main`
-through a normal PR; default is the next minor — see
-[`dev/procedures/this_project/workflow.md`](../../procedures/this_project/workflow.md)). The release workflow never
-changes the version itself. The store rejects an upload whose version isn't
-strictly higher than the live one, so each release must increment it first.
+that; `package.json` is kept in sync). **Minor and major bumps are deliberate,
+by a human** — ask Claude to **"bump version"** (it edits both files on a branch
+and lands on `main` through a normal PR; default is the next minor — see
+[`dev/procedures/this_project/workflow.md`](../../procedures/this_project/workflow.md)). **Patch bumps are also made
+automatically** by the [daily auto-release](#daily-auto-release) when it has
+deployable changes to ship (the store rejects an upload whose version isn't
+strictly higher than the live one, so each release must increment it first).
+The Create-Package release workflow itself never changes the version.
 
 ## Creating a release package
 
@@ -48,10 +49,12 @@ The **Release: Publish to Chrome Web Store** workflow
 (`.github/workflows/publish-chrome-store.yml`) takes the zip from a GitHub
 Release and uploads it to the store (publishing to users by default), via the
 [Chrome Web Store API](https://developer.chrome.com/docs/webstore/using-api)
-(`chrome-webstore-upload-cli`). It's **manual** — run it from the Actions tab
-once a release package exists and you're ready to ship: leave the tag blank to
-publish the **latest** release, or name a tag; uncheck **auto_publish** to
-upload as a draft and publish manually from the dashboard.
+(`chrome-webstore-upload-cli`). Run it **manually** from the Actions tab once a
+release package exists and you're ready to ship: leave the tag blank to publish
+the **latest** release, or name a tag; uncheck **auto_publish** to upload as a
+draft and publish manually from the dashboard. The
+[daily auto-release](#daily-auto-release) also calls it automatically with the
+tag it just cut.
 
 It needs four repository secrets (Settings → Secrets and variables → Actions);
 the workflow fails fast with a clear message if any are missing:
@@ -111,6 +114,23 @@ If minting fails, the symptoms map to fixes like this:
 | `invalid_request` / "OOB flow blocked" | Use a Desktop client (`http://localhost` redirect), not `urn:ietf:wg:oauth:2.0:oob`. |
 | `500` on the consent page | Retry in an incognito window signed into a single account. |
 | `invalid_grant` at token exchange | The authorization code is stale/used — restart the flow for a fresh one. |
+
+## Daily auto-release
+
+The **Release: Daily Auto-Release** workflow
+(`.github/workflows/daily-release.yml`) runs on a daily schedule (and by manual
+dispatch) and ships to the store **only when a deployable file changed** since
+the last release — the whole design (the shipping-set change filter, the
+tag-not-24h baseline, the automated patch bump, and how it reuses the two
+workflows above via `workflow_call`) is documented in that workflow's header
+comment. In short: no shipped-file change → clean no-op; otherwise it bumps a
+patch version on `main` (`dev/build/release/bump-patch-version.js`), cuts the GitHub
+Release, and publishes it to users. Docs/tests/dev-tooling-only days never
+release: "deployable" is membership in `dev/build/release/shipping-files.js`'s shipping
+set (filtered by `dev/build/release/filter-shipped-paths.js`), the same source of truth
+the zip is built from. Failures land on the `workflow-failure` tracking issue
+per the unattended-workflow rule in
+[`dev/procedures/this_project/github.md`](../../procedures/this_project/github.md).
 
 ## First publish to the Chrome Web Store
 

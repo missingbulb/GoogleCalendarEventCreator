@@ -73,7 +73,9 @@ PR and blocks merge with the author watching (`test.yml`), or the workflow alrea
 flags a triggering issue on failure (`auto-implement-extractor.yml`,
 `finalize-extractor.yml` comment + label the issue). Carried `report-failure`
 today: `publish-chrome-store.yml`, `release.yml`, `deploy-privacy-page.yml` (issue
-#581).
+#581), `daily-release.yml` (issue #620 — its reporter also covers its
+`workflow_call`s of the release/publish workflows, deliberately accepting a
+double report over a silent one).
 
 Two wiring constraints: the calling job needs `permissions: issues: write` (the
 called workflow's token is capped by it); and when this workflow is itself invoked
