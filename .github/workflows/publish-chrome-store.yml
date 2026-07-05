@@ -5,7 +5,10 @@ name: "Release: Publish to Chrome Web Store"
 # Store API using chrome-webstore-upload-cli.
 #
 # Run it manually from the Actions tab ("Run workflow") once you've created the
-# release package and are ready to ship it to users.
+# release package and are ready to ship it to users. The daily auto-release
+# (daily-release.yml) also calls it (workflow_call) with the tag it just
+# released; a workflow_call caller must pass `secrets: inherit` so the four
+# store secrets below resolve.
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   CHROME_EXTENSION_ID     the item/app ID from the Web Store dashboard URL
@@ -21,6 +24,16 @@ on:
         type: string
       auto_publish:
         description: "Publish to users after upload (uncheck to leave it as a draft in the dashboard)"
+        type: boolean
+        default: true
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag to publish (blank = latest release)"
+        required: false
+        type: string
+      auto_publish:
+        description: "Publish to users after upload (false = leave it as a draft in the dashboard)"
         type: boolean
         default: true
 

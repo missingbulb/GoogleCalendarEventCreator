@@ -12,10 +12,21 @@ name: "Release: Create Package"
 # no-op — so extension/manifest.json edits that aren't version bumps don't cut a release.
 # It's also runnable from the Actions tab.
 #
-# Pushing to the Chrome Web Store is the one remaining manual step (the
-# "Release: Publish to Chrome Web Store" workflow).
+# Pushing to the Chrome Web Store is a manual step (the "Release: Publish to
+# Chrome Web Store" workflow) — except for the daily auto-release
+# (daily-release.yml), which calls this workflow (workflow_call) after pushing
+# its patch-bump commit, because a GITHUB_TOKEN push can't fire the push
+# trigger below. The `ref` input exists for that caller: the run was triggered
+# before the bump commit existed, so the default checkout (github.sha) would
+# build the pre-bump tree and no-op on the old version.
 on:
   workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      ref:
+        description: "Commit to release (blank = the commit that triggered the run)"
+        required: false
+        type: string
   push:
     branches:
       - main
@@ -30,6 +41,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Empty (every trigger but the daily-release call) = the default
+          # github.sha checkout.
+          ref: ${{ inputs.ref }}
 
       - uses: actions/setup-node@v5
         with:
@@ -87,14 +102,17 @@ jobs:
         if: steps.version.outputs.release == 'true'
         run: npm run build
 
-      # Publish the Release. action-gh-release creates the tag (vX.Y.Z) at this
-      # commit when it doesn't exist — that's a tag, not a push to main, so
+      # Publish the Release. action-gh-release creates the tag (vX.Y.Z) at the
+      # released commit when it doesn't exist — pinned explicitly to the commit
+      # we checked out and built, so a workflow_call `ref` is tagged rather than
+      # whatever main's HEAD is by then. That's a tag, not a push to main, so
       # branch protection on main doesn't apply.
       - name: Publish GitHub Release
         if: steps.version.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ inputs.ref || github.sha }}
           files: dist/google-calendar-event-creator.zip
           generate_release_notes: true
 
