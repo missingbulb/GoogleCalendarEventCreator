@@ -104,6 +104,39 @@ test("JSON-LD location: city/state repeated inside streetAddress is not duplicat
   assert.equal(e.times[0].location, "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY");
 });
 
+test("JSON-LD location: an addressCountry Country object (not a plain string) contributes its name, not '[object Object]'", () => {
+  // schema.org allows addressCountry to be a Country object ({ "@type":
+  // "Country", "name": "..." }) rather than a plain string — seen on
+  // livenation.de. A full name is kept, same as a plain-string country would be.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "MusicEvent", "name": "Border City Blues", "startDate": "2026-08-01T20:00:00Z",
+      "location": { "@type": "Place", "name": "RBC Amphitheatre",
+                    "address": { "streetAddress": "909 Lakeshore Blvd. W.", "addressLocality": "Toronto",
+                                 "addressCountry": { "@type": "Country", "name": "Canada" } } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.example.com/border-city-blues");
+  assert.equal(e.times[0].location, "RBC Amphitheatre, 909 Lakeshore Blvd. W., Toronto, Canada");
+});
+
+test("JSON-LD location: an addressCountry Country object holding a short code is dropped as noise", () => {
+  // A Country object's name is meant to be the country's proper name; a short
+  // code parked there (as livenation.de does, { "name": "US" }) adds little
+  // value once the locality/postal code are already present — dropped, same
+  // as custom/livenation.js's own established convention for this shape.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "MusicEvent", "name": "Amphitheater Night", "startDate": "2026-08-02T19:00:00Z",
+      "location": { "@type": "Place", "name": "Hollywood Casino Amphitheater",
+                    "address": { "streetAddress": "14141 Riverport Dr", "addressLocality": "Maryland Heights",
+                                 "postalCode": "63043", "addressCountry": { "@type": "Country", "name": "US" } } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.example.com/amphitheater-night");
+  assert.equal(e.times[0].location, "Hollywood Casino Amphitheater, 14141 Riverport Dr, Maryland Heights, 63043");
+});
+
 test("Generic site with no structured data: heuristics only", () => {
   const html = `
     <meta name="description" content="Gloves and trash grabbers provided.">
