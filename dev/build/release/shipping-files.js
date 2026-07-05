@@ -30,4 +30,13 @@ const SHIPPING_PATHS = [
 // the UI-snapshot inputs live under dev/requirements/, not under events-popup/.
 const SHIPPING_EXCLUDES = [];
 
-module.exports = { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES };
+// True when `file` (a path relative to EXTENSION_DIR) ships: under a listed
+// path, and not specifically excluded. The one membership predicate for the
+// shipping set — the zip guard test and the daily-release change filter
+// (filter-shipped-paths.js) both decide through it.
+function isShipped(file) {
+  if (SHIPPING_EXCLUDES.includes(file)) return false;
+  return SHIPPING_PATHS.some((p) => file === p || file.startsWith(p + "/"));
+}
+
+module.exports = { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES, isShipped };

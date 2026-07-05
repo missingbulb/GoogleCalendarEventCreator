@@ -7,19 +7,13 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
-const { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES } = require("./shipping-files");
+const { EXTENSION_DIR, SHIPPING_PATHS, SHIPPING_EXCLUDES, isShipped } = require("./shipping-files");
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 // Shipping paths and everything the runtime references are relative to the
 // extension root (the folder Chrome loads), so resolve them under EXT.
 const EXT = path.join(ROOT, EXTENSION_DIR);
 const read = (p) => fs.readFileSync(path.join(EXT, p), "utf8");
-
-// True when `file` ships: under a listed path, and not specifically excluded.
-function isShipped(file) {
-  if (SHIPPING_EXCLUDES.includes(file)) return false;
-  return SHIPPING_PATHS.some((p) => file === p || file.startsWith(p + "/"));
-}
 
 test("every shipping path exists", () => {
   for (const p of SHIPPING_PATHS) {
