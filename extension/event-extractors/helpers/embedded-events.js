@@ -89,9 +89,22 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       p.add(addr.streetAddress).add(addr.addressLocality).add(addr.addressRegion).add(addr.postalCode);
       // A country code after a region is noise ("..., NY, us"); keep the
       // country only when it's the most specific thing we have.
-      if (!addr.addressRegion) p.add(addr.addressCountry);
+      if (!addr.addressRegion) p.add(countryName(addr.addressCountry));
     }
     return p.join();
+  }
+
+  // schema.org allows addressCountry to be a plain string OR a Country object
+  // ({ "@type": "Country", "name": "..." }, seen on livenation.de) — read the
+  // name out of either shape so an object doesn't stringify to "[object
+  // Object]". A short code held in the object form ("US") is dropped as
+  // noise, the same convention custom/livenation.js already applies locally
+  // for this exact shape; a plain-string code is passed through unchanged
+  // (sites publish those directly, and existing sources rely on seeing it).
+  function countryName(v) {
+    if (typeof v === "string") return v;
+    if (v && typeof v.name === "string") return v.name.length > 2 ? v.name : "";
+    return "";
   }
 
   return { embeddedEvents: { find, toEvent } };
