@@ -17,9 +17,9 @@ reference the flow here). Portable git/GitHub gotchas captured locally are in
 
 When the repo owner asks to merge a change to `main`, merge that branch's pull
 request via **squash**, appending the PR number to the title as `(#N)` — matching
-`main`'s linear, one-commit-per-PR history. CI must be green first; the
-test-flakiness gate (twice-green) applies only when the change adds or touches an
-e2e/heavy-browser test.
+`main`'s linear, one-commit-per-PR history. CI must be green first (the
+e2e/heavy-browser twice-green flakiness gate is a portable testing practice
+maintained outside this repo).
 
 A merge approval, like any approval, applies **only backward** — a later
 follow-up, even a fix to the just-merged change, needs its own explicit approval
