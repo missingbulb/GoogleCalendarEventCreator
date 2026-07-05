@@ -84,12 +84,11 @@ trap spanning files. See the full locality rule in
   whole fetching surface — swap the vendor in that one function if it underperforms.
   Facebook returns a hard 400 even through the proxy, so it stays unit-tests-only —
   it can't be a cached live case.
-- **jsdom-vs-Chrome DOM traps** — `body.innerText` is null (so `GCal.bodyText()`'s
-  `innerText || textContent` returns `textContent`, including `<select>`/hidden
-  text), and the default `runScripts: "outside-only"` parses `<noscript>` into live
-  DOM (the opposite of a real browser). Both let a green test hide a broken live
-  extraction; they're portable Node/jsdom gotchas maintained outside this repo. In
-  this repo they bit the body-text scan, `extension-test/harness.js`, and
+- **jsdom-vs-Chrome DOM traps bit this repo directly.** `GCal.bodyText()`'s
+  `innerText || textContent` fallback hits the jsdom `body.innerText`-is-null
+  gotcha, and the default `runScripts: "outside-only"` parsing of `<noscript>`
+  is the other one — both are portable Node/jsdom gotchas maintained outside
+  this repo. They bit the body-text scan, `extension-test/harness.js`, and
   `custom/telavivcinematheque.js` (#130 / #137).
 - **Injected block markup inside a `<p>` silently empties it — read the sibling,
   not the tag.** A page that fills a `<p>` via raw HTML (Angular `ng-bind-html`,

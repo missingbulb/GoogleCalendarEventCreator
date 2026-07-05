@@ -63,36 +63,20 @@ artifact — not just to open the bump PR:
    the *previous* version's artifact.
 
 When the repo owner says **"learned lessons"**, treat it as a defined
-instruction: review the current conversation — on Opus, since the reflection
-needs the stronger model — and extract only the *important*, durable guidelines
-worth keeping, then add them to the doc that owns each one. Be selective: the bar
-is a genuinely new, reusable insight (a gotcha, practice, architecture rule, or
-project mechanic), not a routine detail or a restatement of something already
-documented — dedupe against the existing docs. **"No new lessons" is a valid,
-common outcome**: if nothing clears the bar, say so and make no edits rather than
-padding the docs to look productive. Run this same pass after a merge to main,
-too — the merge-to-main command in [github.md](github.md) hands off to it:
-reflect on the just-merged conversation before closing out. Otherwise it runs
-only when the repo owner asks for it — never extract from a conversation
-unprompted; the owner decides when to do it.
+instruction to run the lessons-learned pass — the method, the friction signals,
+and the "no new lessons is valid" bar are a portable practice maintained outside
+this repo (dedupe ruthlessly, route each lesson to the doc that owns it, most
+runs add nothing) — over the current conversation, on **Opus**, since the
+reflection needs the stronger model. Otherwise it runs only when the repo owner
+asks for it — never extract from a conversation unprompted.
 
-As part of the same pass, also run an **efficiency analysis** of the
-conversation's tool/process usage — separate from the durable-lessons extraction
-above, with its own equally high bar. Look at what ran after each user command:
-which dev/tools/processes fired, how many of each, and how long each took. Then ask
-whether the work could have been done with **fewer operations** (redundant or
-repeated calls, work that could have been batched into one call, polling that
-could have been a single wait) and whether it could have finished in **less wall
-time without harming quality** (serial calls that had no dependency and could
-have run in parallel, padded `sleep`s, an unnecessarily long path to the result).
-Flag specifically any process that **returns its result but then wastes time on
-shutdown** — one that could be safely killed once its output is in hand rather
-than waited out. Close with a **terse verdict**: either one concrete speed-up
-recommendation (route it like any other lesson — a project mechanic to the
-matching `dev/procedures/this_project/*`, a portable practice to `dev/procedures/general/agenticBestPractices.md`),
-or an explicit **"no changes recommended"**. The bar is high — most
-conversations won't yield a new process note, so "no changes recommended" is the
-common, expected outcome; don't manufacture one.
+As part of the same pass, also run the standing **efficiency analysis** of the
+conversation's tool/process usage — the general rule (fewer operations, less
+wall time without harming quality, killing a process once its output is in
+hand, a terse verdict) is a portable agentic practice maintained outside this
+repo. Route any resulting speed-up like any other lesson: a project mechanic to
+the matching `dev/procedures/this_project/*`, a portable practice to
+`dev/procedures/general/agenticBestPractices.md`.
 
 **Always write to the local repository docs** — capture never reaches across to
 Claudinite. Route by scope:
