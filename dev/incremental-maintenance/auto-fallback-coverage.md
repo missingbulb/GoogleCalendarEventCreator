@@ -33,6 +33,14 @@ the "fallback value differences (informational)" console block and the
 per-exemplar matrix (✓ match · ~ different value · ✗ missing · — n/a): a `~`
 usually points at a concrete generic gap, a `✗` means it found nothing.
 
+That baseline run **is** the unmodified-code reference — it fixes the pre-change
+numbers and case set. Attribute any post-change delta by comparing against it;
+don't re-derive the pre-change numbers with a `git stash`/rerun round trip (it also
+conflicts on the `ours`-driver GENERATED artifacts). A committed baseline listing
+**fewer** `cases` than the live run (a case an earlier merge added without
+`npm run regen`) is pre-existing drift the baseline run already proves isn't yours —
+not something your change introduced.
+
 ## The two traps that disqualify a "win" — the crux
 
 - **(a) jsdom artifacts.** In tests the body-text scan reads
