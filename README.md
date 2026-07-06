@@ -21,37 +21,32 @@ An event is created with whatever subset of these is available; missing fields
 are simply left for you to fill in on the Google Calendar screen. For how the
 details are scraped from a page, see [dev/procedures/this_project/highLevelDesign.md](dev/procedures/this_project/highLevelDesign.md).
 
-## Install (developer mode)
+## Install
 
-Grab the packaged extension — just the files that ship, not the whole repo:
+**[Install from the Chrome Web Store →](https://chromewebstore.google.com/detail/google-calendar-event-cre/illegojjeehdmfpgnhnehjjhlghapacc)**
 
-1. Download
-   [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
-   (`google-calendar-event-creator.zip`, built by the
-   [Release: Create Package workflow](dev/build/release/releasing.md#creating-a-release-package)) and extract
-   it. It unpacks into a folder containing `manifest.json` — that folder is the
-   one to load. As a secondary
-   option, download
-   [the repo as a zip](https://github.com/missingbulb/GoogleCalendarEventCreator/archive/refs/heads/main.zip)
-   and extract it — here the deployable extension lives in the **`extension/`**
-   subfolder (that's the one with `manifest.json` at its top), so load that
-   subfolder, not the repo root.
-2. Open `chrome://extensions` in Chrome.
-3. Enable **Developer mode** (top right).
-4. Click **Load unpacked** and select the extracted folder (the one
-   containing `manifest.json`).
-5. Optionally pin the extension's calendar icon to the toolbar.
+Or load the latest development build:
+
+1. Download [the latest release zip](https://github.com/missingbulb/GoogleCalendarEventCreator/releases/latest/download/google-calendar-event-creator.zip)
+   and extract it — it unpacks to a folder with `manifest.json` at its top.
+2. Open `chrome://extensions`, enable **Developer mode** (top right), click
+   **Load unpacked**, and select that folder.
 
 To pick up a later release, download the new zip, extract it over the same
 folder, and click the refresh icon on the extension's card in
-`chrome://extensions`.
-
-If you're **working on the extension**, clone the repo instead
-(`git clone https://github.com/missingbulb/GoogleCalendarEventCreator.git`) and
-**Load unpacked** the **`extension/`** subfolder of the working tree (that's the
-extension root — everything else in the repo is tests, fixtures, and tooling) —
-or run `npm run build` to produce the very same
+`chrome://extensions`. If you're **working on the extension**, clone the repo
+instead and **Load unpacked** the **`extension/`** subfolder of the working tree
+(that's the extension root — everything else in the repo is tests, fixtures, and
+tooling) — or run `npm run build` to produce the very same
 `dist/google-calendar-event-creator.zip` the release serves.
+
+## Releasing
+
+The version users see is [`extension/manifest.json`](extension/manifest.json)'s
+`version`. Merging a version bump to `main` cuts GitHub Release `vX.Y.Z` with
+`google-calendar-event-creator.zip` attached, and the daily auto-release ships
+shipped-file changes to the Chrome Web Store on its own (patch-bumping as
+needed). Full procedure: [dev/build/release/releasing.md](dev/build/release/releasing.md).
 
 ## Use
 
