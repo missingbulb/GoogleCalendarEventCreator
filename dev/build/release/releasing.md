@@ -100,18 +100,15 @@ per the unattended-workflow rule in
 
 The dashboard walkthrough (developer account, first item upload, listing,
 privacy tab, review) is the standard procedure — "First publication" in the
-canon release guide. This repo's values for it:
-
-- Store icon: `extension/icon/images/chromeStoreIcon.png`; screenshot:
-  `dev/build/release/store_artifacts/chrome-store-screenshot-1280x800.png`.
-- Permissions to justify: `activeTab`, `scripting`, `declarativeContent` — see
-  [Permissions](../../../README.md#permissions); data usage: this extension
-  sends nothing anywhere.
-- Privacy Policy URL:
-  `https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/` — the
-  GitHub Pages copy of `dev/build/release/store_artifacts/PRIVACY.md`, never a
-  `…/blob/main/…` link (the Jekyll `permalink: /privacy/` keeps the URL stable
-  wherever the file lives).
+canon release guide. Every dashboard answer for this repo — listing fields,
+per-permission justifications, data-usage declarations, the privacy-policy URL
+— is pre-written in the submission kit,
+[`store_artifacts/STORE-LISTING.md`](store_artifacts/STORE-LISTING.md) (asset
+map and icon generator: [`store_artifacts/README.md`](store_artifacts/README.md)).
+The kit is also the resubmission source: a PR that changes the manifest's
+permissions updates its justification table in the same PR and opens an issue
+for the manual dashboard step (canon release guide, "When a change touches the
+extension's permissions").
 
 ## Minor update
 
