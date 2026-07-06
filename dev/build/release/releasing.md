@@ -85,8 +85,7 @@ The **Release: Daily Auto-Release** workflow
 dispatch) and ships to the store **only when a deployable file changed** since
 the last release — the whole design (the shipping-set change filter, the
 tag-not-24h baseline, the automated patch bump, and how it reuses the two
-workflows above via `workflow_call`) is documented in that workflow's header
-comment. In short: no shipped-file change → clean no-op; otherwise it bumps a
+workflows above) is documented in the canon reusable workflow the stub calls. In short: no shipped-file change → clean no-op; otherwise it bumps a
 patch version on `main` (`dev/build/release/bump-patch-version.js`), cuts the GitHub
 Release, and publishes it to users. Docs/tests/dev-tooling-only days never
 release: "deployable" is membership in `dev/build/release/shipping-files.js`'s shipping

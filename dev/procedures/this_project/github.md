@@ -51,39 +51,26 @@ pipeline; see [auto-extractor.md](../../create-extractor/auto-extractor.md).)
 
 An **unattended** workflow — one with no human watching the run, so a red entry in
 the Actions list reaches nobody — must converge a failure to a human-visible state
-on failure, never just exit red. Add a failure job that calls the reusable
-reporter, which opens (or appends to a standing per-workflow) tracking issue:
-
-```yaml
-report-failure:
-  needs: <the-job(s)-that-can-fail>
-  if: failure()
-  permissions:
-    issues: write
-  uses: ./.github/workflows/report-failure.yml
-  with:
-    workflow: "<this workflow's name>"
-```
-
-A workflow is unattended (needs the reporter) when it runs on a schedule, on a
-push/merge, or by a fire-and-forget manual dispatch, and has no other path that
-reaches a human. It is **not** unattended (skip the reporter) when its failure is
-already loud: a `pull_request`/branch-push CI run shows a red required check on the
-PR and blocks merge with the author watching (`test.yml`), or the workflow already
-flags a triggering issue on failure (`auto-implement-extractor.yml`,
-`finalize-extractor.yml` comment + label the issue). Carried `report-failure`
-today: `publish-chrome-store.yml`, `release.yml`, `deploy-privacy-page.yml` (issue
-#581), `daily-release.yml` (issue #620 — its reporter also covers its
-`workflow_call`s of the release/publish workflows, deliberately accepting a
-double report over a silent one).
-
-Two wiring constraints: the calling job needs `permissions: issues: write` (the
-called workflow's token is capped by it); and when this workflow is itself invoked
-via `workflow_call`, the parent must grant `issues: write` to the call so the
-nested reporter can run (publish-chrome-store grants it to deploy-privacy-page).
-The reporter keys one standing issue per workflow by its `workflow:` name (labelled
+on failure, never just exit red. The rule and the reporter both live in the
+Claudinite canon (the rule: `tasks/git-and-github.md`; the reporter: the
+`report-failure` composite action,
+`missingbulb/Claudinite/.github/actions/report-failure@main`, whose header owns
+the caller recipe and wiring constraints) — follow them there; a copy here would
+drift. The reporter keys one standing issue per workflow by name (labelled
 `workflow-failure`) and reopens a closed one on recurrence — close it once the
 cause is fixed.
+
+What this file owns is this repo's classification:
+
+- The four standard release stubs (`release.yml`, `publish-chrome-store.yml`,
+  `daily-release.yml`, `deploy-privacy-page.yml`) are unattended and already
+  covered — their reporters fire inside the canon reusable workflows the stubs
+  call.
+- `test.yml` is attended PR CI: a red required check blocks merge with the author
+  watching — no reporter.
+- `auto-implement-extractor.yml` / `finalize-extractor.yml` already flag the
+  triggering issue on failure (comment + label) — no reporter.
+- A **new** unattended workflow adds a failure job per the action header's recipe.
 
 ## Driving a merge cheaply (wall time + tokens)
 
