@@ -8,6 +8,7 @@ ship). For the end-to-end publish steps see [`releasing.md`](../releasing.md).
 
 | File | What it is | Where it goes |
 |------|------------|---------------|
+| `STORE-LISTING.md` | The submission kit — every dashboard answer (listing fields, permission justifications, data-usage declarations), for the initial submission and every resubmission. | Pasted into the Dashboard by hand. |
 | `chrome-store-screenshot-1280x800.png` | Listing screenshot (≥ 1280×800). | Uploaded by hand in the [Developer Dashboard](https://chrome.google.com/webstore/devconsole). |
 | `generate_icons.py` | Generator (stdlib only) for **every** icon — both looks. | See below. |
 | `PRIVACY.md` | The privacy policy (single source of truth; also linked from the root README). | Published to GitHub Pages at `https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/` by the **Release: Publish to Chrome Web Store** workflow; that URL is the listing's Privacy Policy URL. Lives here (not the repo root) so its path isn't an external contract — the public URL is pinned by a Jekyll `permalink`, not the file location. |

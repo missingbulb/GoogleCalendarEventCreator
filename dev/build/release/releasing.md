@@ -1,5 +1,12 @@
 # Releasing / publishing to the Chrome Web Store
 
+This repo is the **reference implementation** of the shared Chrome-extension
+release standard — the canon guide
+(`.claudinite/technologies/chrome-extension-release.md`, "the canon release
+guide" below) owns the cross-repo contract, the canonical workflow files, and
+the manual store procedures; this file holds this repo's concrete names, paths,
+and listing facts.
+
 ## The package
 
 `npm run build` produces `dist/google-calendar-event-creator.zip` — exactly the
@@ -9,7 +16,7 @@ in **`dev/build/release/shipping-files.js`** as the single source of truth, and
 `dev/build/release/shipping-files.test.js` asserts it stays in sync with what the
 manifest and popup actually load — so the zip can't silently drop a runtime
 file or smuggle in dead weight. This same zip is what testers load unpacked
-(see [Install](../../../README.md#install-developer-mode)) and what you upload to the Web Store.
+(see [Install](../../../README.md#install)) and what you upload to the Web Store.
 
 ## Versioning
 
@@ -66,54 +73,11 @@ the workflow fails fast with a clear message if any are missing:
 | `CHROME_CLIENT_SECRET` | …same OAuth client |
 | `CHROME_REFRESH_TOKEN` | generated once for that client |
 
-To mint the OAuth credentials, in a Google Cloud project: enable the **Chrome Web
-Store API**, **publish** the OAuth consent screen (External is fine — see the
-gotcha below about leaving it in "Testing"), and create a **Desktop app** OAuth
-client. That gives you `CHROME_CLIENT_ID` and `CHROME_CLIENT_SECRET`. Then do the
-OAuth exchange by hand (this is the flow used for the first publish):
-
-```sh
-export CHROME_CLIENT_ID="…"
-export CHROME_CLIENT_SECRET="…"
-
-# 1. Open this URL (incognito, signed into only the developer account), approve.
-echo "https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&access_type=offline&prompt=consent&redirect_uri=http://localhost&client_id=${CHROME_CLIENT_ID}"
-
-# 2. The browser redirects to http://localhost/?code=… and FAILS TO LOAD (expected).
-#    Copy the code= value out of the address bar.
-export CHROME_AUTH_CODE="…"
-
-# 3. Exchange it for the refresh token (the code is single-use).
-curl -s "https://accounts.google.com/o/oauth2/token" \
-  -d "client_id=${CHROME_CLIENT_ID}" \
-  -d "client_secret=${CHROME_CLIENT_SECRET}" \
-  -d "code=${CHROME_AUTH_CODE}" \
-  -d "grant_type=authorization_code" \
-  -d "redirect_uri=http://localhost" | jq -r .refresh_token
-```
-
-The printed string is `CHROME_REFRESH_TOKEN`. Add those three plus
-`CHROME_EXTENSION_ID` (from the dashboard URL) as the four secrets.
-
-Two gotchas that will bite you (learned the hard way during the first publish):
-
-- **The out-of-band (`urn:ietf:wg:oauth:2.0:oob`) flow is blocked by Google.**
-  That's why a Desktop client with the `http://localhost` redirect is required,
-  and why step 2 reads the `code=` out of the failing redirect URL instead of a
-  copy/paste screen.
-- **Publish the OAuth consent screen** (don't leave it in "Testing"). A consent
-  screen still in Testing only issues refresh tokens that **expire after 7 days**,
-  which silently breaks the publish workflow a week later; a published consent
-  screen issues a non-expiring token.
-
-If minting fails, the symptoms map to fixes like this:
-
-| Symptom | Fix |
-| --- | --- |
-| `access_denied` / "app is being tested" | Add yourself as a test user, or **publish** the consent screen. |
-| `invalid_request` / "OOB flow blocked" | Use a Desktop client (`http://localhost` redirect), not `urn:ietf:wg:oauth:2.0:oob`. |
-| `500` on the consent page | Retry in an incognito window signed into a single account. |
-| `invalid_grant` at token exchange | The authorization code is stale/used — restart the flow for a fresh one. |
+Minting them (the Google Cloud project, the published consent screen, the
+Desktop-app OAuth client, and the by-hand refresh-token exchange with its
+gotchas) is the standard cross-repo procedure — follow "Minting the API
+credentials" in the canon release guide. These four names are the same in every
+extension repo.
 
 ## Daily auto-release
 
@@ -134,24 +98,17 @@ per the unattended-workflow rule in
 
 ## First publish to the Chrome Web Store
 
-1. Register a developer account at the
-   [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-   (one-time \$5 fee).
-2. **Add new item** and upload the release zip.
-3. Complete the store listing: the store icon (`extension/icon/images/chromeStoreIcon.png`),
-   description, category, a screenshot (≥ 1280×800 or 640×400), and the privacy
-   tab — justify each requested permission (`activeTab`, `scripting`,
-   `declarativeContent`; see [Permissions](../../../README.md#permissions)), declare
-   data usage (this extension sends nothing anywhere), and set the **Privacy
-   Policy URL** to the GitHub Pages copy —
-   `https://missingbulb.github.io/GoogleCalendarEventCreator/privacy/` — never a
-   `…/blob/main/PRIVACY.md` link, so the listing's URL doesn't break if the file
-   moves. That page is (re)published by the **Release: Publish to Chrome Web
-   Store** workflow from `dev/build/release/store_artifacts/PRIVACY.md`; a Jekyll
-   `permalink: /privacy/` keeps the URL stable wherever the file lives. One-time:
-   enable Pages with source = "GitHub Actions" (repo Settings → Pages) so the
-   first publish can deploy it.
-4. Submit for review. Approval typically takes a few hours to a few days.
+The dashboard walkthrough (developer account, first item upload, listing,
+privacy tab, review) is the standard procedure — "First publication" in the
+canon release guide. Every dashboard answer for this repo — listing fields,
+per-permission justifications, data-usage declarations, the privacy-policy URL
+— is pre-written in the submission kit,
+[`store_artifacts/STORE-LISTING.md`](store_artifacts/STORE-LISTING.md) (asset
+map and icon generator: [`store_artifacts/README.md`](store_artifacts/README.md)).
+The kit is also the resubmission source: a PR that changes the manifest's
+permissions updates its justification table in the same PR and opens an issue
+for the manual dashboard step (canon release guide, "When a change touches the
+extension's permissions").
 
 ## Minor update
 
