@@ -73,11 +73,10 @@ the workflow fails fast with a clear message if any are missing:
 | `CHROME_CLIENT_SECRET` | …same OAuth client |
 | `CHROME_REFRESH_TOKEN` | generated once for that client |
 
-Minting them (the Google Cloud project, the published consent screen, the
-Desktop-app OAuth client, and the by-hand refresh-token exchange with its
-gotchas) is the standard cross-repo procedure — follow "Minting the API
-credentials" in the canon release guide. These four names are the same in every
-extension repo.
+Minting them is the standard cross-repo procedure — follow "Minting the API
+credentials" in the canon release guide (which owns every step and its
+gotchas; don't restate them here, they drift). These four names are the same
+in every extension repo.
 
 ## Daily auto-release
 
