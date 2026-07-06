@@ -121,14 +121,3 @@ canon comes to cover it) is Claudinite's responsibility, not this repo's.
 Keep every addition terse. Project-specific guidance is good; broader engineering
 practices that generalize beyond this repo are better — write those to the local
 practice docs rather than burying them in project-specific files.
-
-When you author an instruction, optimize the instruction paragraph for Claude
-reading it into context: state the rule and its constraints, and cut motivation,
-hedging, and explanation from the paragraph itself. If the *why* is worth keeping,
-put it in a separate follow-up sentence or parenthetical after the instruction,
-never woven into it. (Why: the instruction loads into context every session that
-touches the doc, so prose padding dilutes the signal for no gain; explicitness is
-nearly free to write and is what prevents a wrong guess, so spend words on
-constraints and examples, not justification; and a rule's rationale helps a human
-reviewer but is noise to the agent once the rule is settled, so it belongs outside
-the instruction it explains.)
