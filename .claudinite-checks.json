@@ -1,0 +1,9 @@
+{
+  "packs": [
+    "chrome-extension",
+    "github-actions",
+    "node"
+  ],
+  "rules": {},
+  "accept": []
+}
