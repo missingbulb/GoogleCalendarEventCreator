@@ -46,7 +46,7 @@ The version users see is [`extension/manifest.json`](extension/manifest.json)'s
 `version`. Merging a version bump to `main` cuts GitHub Release `vX.Y.Z` with
 `google-calendar-event-creator.zip` attached, and the daily auto-release ships
 shipped-file changes to the Chrome Web Store on its own (patch-bumping as
-needed). Full procedure: [dev/build/release/releasing.md](dev/build/release/releasing.md).
+needed).
 
 ## Use
 
@@ -83,5 +83,4 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [High-level design](dev/procedures/this_project/highLevelDesign.md) — how extraction works, plus the top-level architecture rules of the road.
 - [File descriptions](dev/procedures/this_project/fileDescriptions.md) — the per-file map.
 - [Testing](dev/procedures/this_project/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
-- [Releasing](dev/build/release/releasing.md) — building the zip and publishing to the Chrome Web Store.
 - Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/this_project/`).
