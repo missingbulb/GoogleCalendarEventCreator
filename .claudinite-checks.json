@@ -5,5 +5,83 @@
     "node"
   ],
   "rules": {},
-  "accept": []
+  "accept": [],
+  "sharedConstants": [
+    {
+      "what": "extractor-agent-done label — the agent's success signal that fires the finalize workflow. The agent ADDS it (agent-prompt-extractor.md), the finalize workflow's trigger guard CONSUMES it (finalize-extractor.yml), and phase2-finalize.sh CLEARS it (and the anomaly hand-offs reference it). Counts include comments.",
+      "value": "extractor-agent-done",
+      "counts": {
+        ".github/workflows/auto-implement-extractor.yml": 2,
+        ".github/workflows/finalize-extractor.yml": 2,
+        "dev/create-extractor/handoff-to-agent.sh": 1,
+        "dev/create-extractor/phase2-finalize.sh": 5,
+        "dev/create-extractor/agent-prompt-extractor.md": 3
+      }
+    },
+    {
+      "what": "extractor-agent-ready label — the hand-off trigger for the Claude Code web routine. The prepare workflow's hand-off script ADDS it (handoff-to-agent.sh) and the agent REMOVES it (agent-prompt-extractor.md); the web-routine trigger that consumes it is configured outside this repo. Counts include comments.",
+      "value": "extractor-agent-ready",
+      "counts": {
+        ".github/workflows/auto-implement-extractor.yml": 3,
+        "dev/create-extractor/handoff-to-agent.sh": 4,
+        "dev/create-extractor/phase2-finalize.sh": 1,
+        "dev/create-extractor/agent-prompt-extractor.md": 4
+      }
+    },
+    {
+      "what": "extractor-blocked-needs-human label — the human-triage signal added when the automation can't proceed and hands the issue to a person: the agent's bail path (agent-prompt-extractor.md), the finalize anomaly hand-off (phase2-finalize.sh), and the prepare workflow's failure step (auto-implement-extractor.yml) when Phase 1 breaks before the hand-off (e.g. an undownloadable page). Created idempotently before use. Counts include comments.",
+      "value": "extractor-blocked-needs-human",
+      "counts": {
+        "dev/create-extractor/phase2-finalize.sh": 3,
+        "dev/create-extractor/agent-prompt-extractor.md": 4,
+        ".github/workflows/auto-implement-extractor.yml": 6
+      }
+    },
+    {
+      "what": "extractor-request trigger label. Counts include comments AND the substring inside the filename dev/create-extractor/triage-extractor-request.js (the guard counts substrings). Spans: the prepare workflow (header comments, trigger guard, gh issue list filter, the triage-script filename, and the failure step that drops it when handing off to a human), the hand-off script's swap, the popup's request button, and its test.",
+      "value": "extractor-request",
+      "counts": {
+        ".github/ISSUE_TEMPLATE/extractor-request.yml": 1,
+        ".github/workflows/auto-implement-extractor.yml": 11,
+        "dev/create-extractor/handoff-to-agent.sh": 2,
+        "extension/events-popup/source-request-view.js": 5,
+        "extension-test/events-popup/source-request-view.test.js": 4
+      }
+    },
+    {
+      "what": "extractor-request.yml template filename",
+      "value": "extractor-request.yml",
+      "counts": {
+        "extension/events-popup/source-request-view.js": 2,
+        "extension-test/events-popup/source-request-view.test.js": 2
+      }
+    },
+    {
+      "what": "release zip filename — must match between the build script and the thin workflow stubs that pass it to the Claudinite canon workflows (zip_path in release/daily, zip_name in publish/daily)",
+      "value": "google-calendar-event-creator.zip",
+      "counts": {
+        "dev/build/release/build-zip.js": 3,
+        ".github/workflows/release.yml": 1,
+        ".github/workflows/publish-chrome-store.yml": 1,
+        ".github/workflows/daily-release.yml": 2
+      }
+    },
+    {
+      "what": "GitHub repo slug",
+      "value": "missingbulb/GoogleCalendarEventCreator",
+      "counts": {
+        "extension/events-popup/source-request-view.js": 1,
+        "extension-test/events-popup/source-request-view.test.js": 1
+      }
+    },
+    {
+      "what": "extension version — one X.Y.Z token per manifest, kept identical across both files (bumped by the daily-release patcher and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
+      "value": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
+      "regex": true,
+      "counts": {
+        "extension/manifest.json": 1,
+        "package.json": 1
+      }
+    }
+  ]
 }
