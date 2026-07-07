@@ -25,50 +25,29 @@ trap spanning files. See the full locality rule in
   output isn't deterministic, so a re-record can legitimately shift a live case's
   `expected` — treat such drift like a site-markup change, and prefer extracting
   JSON-LD/`og:` (which apps often still inject) over brittle DOM positions.
-- **Service-worker paths must be extension-root absolute.** The background service
-  worker runs from `icon/toolbar-icon.js` (relative to the extension root,
-  `extension/`), so any path it hands a Chrome API
-  (`importScripts`, `action.setIcon`) or `fetch` must be extension-root absolute —
-  a leading slash or `chrome.runtime.getURL(...)`. A bare relative path
-  (`images/...`, `event-extractors/...`) resolves against `icon/` (the worker's
-  own folder) and silently fails: the
-  import aborts the worker (#146), or `setIcon` rejects with "Failed to fetch" and
-  the icon never changes (#204). Don't be fooled by stale web guides (Chromium
-  #1262029) that say `setIcon({path})` is a silent no-op in a worker needing an
-  `OffscreenCanvas`/`ImageData` workaround — here it *throws* "Failed to fetch",
-  and the fix is the extension-root URL, not decoding the PNG to ImageData.
-  (The toolbar worker no longer calls `setIcon` at all — it registers
-  `chrome.declarativeContent` rules instead, see the next gotcha — but the
-  extension-root-path rule still governs its `fetch(getURL(...))` calls.)
-- **`chrome.declarativeContent.SetIcon` reliably needs `imageData`, not `path` —
-  and a DOM-less MV3 worker must decode the PNG via `OffscreenCanvas`.** The API
-  *documents* a `path` option, but in practice it's unreliable (silently leaves
-  the icon unset / "Could not load icon"); the robust route is `imageData`. The
-  reason is structural: `declarativeContent` rules are evaluated by the browser
-  process, so the icon must be reduced to raw pixels and baked into the rule at
-  registration time. Building that `imageData` in the service worker can't use a
-  DOM `<canvas>`/`<img>` (there's no DOM) — decode the packaged PNG with
-  `fetch(getURL(icon)) → blob → createImageBitmap → OffscreenCanvas.drawImage →
-  getImageData`. (Used by `icon/toolbar-icon.js` to color the icon without the
-  `tabs` permission. Also: a bare `hostSuffix: "example.com"` matcher also matches
-  `evilexample.com` — pair `hostEquals: "example.com"` with
-  `hostSuffix: ".example.com"` to mean "apex or any subdomain".) The real
+- **Service-worker relative paths resolving against the worker's own folder, not
+  the extension root** — a portable Chrome-extension rule maintained outside this
+  repo (`technologies/chrome-extension.md`). It bit `icon/toolbar-icon.js`: a bare
+  relative path (`images/...`, `event-extractors/...`) aborted the worker on
+  import (#146) or made `setIcon` reject with "Failed to fetch" (#204), before the
+  worker moved to `chrome.declarativeContent` rules (see the next gotcha) — which
+  still needs the extension-root-absolute form for its `fetch(getURL(...))` calls.
+- **`chrome.declarativeContent.SetIcon` needing `imageData` (not `path`), built
+  via `OffscreenCanvas`, is a portable Chrome-extension rule maintained outside
+  this repo** (`technologies/chrome-extension.md`) — used here by
+  `icon/toolbar-icon.js` to color the icon without the `tabs` permission. Also
+  (not covered by that rule): a bare `hostSuffix: "example.com"` matcher also
+  matches `evilexample.com` — pair `hostEquals: "example.com"` with
+  `hostSuffix: ".example.com"` to mean "apex or any subdomain". The real
   URL→icon match runs inside Chrome, so it's verified only by the CI-only
   real-Chrome test (`dev/requirements/heavy/extension-load.chrome.test.js`).
-- **Introspecting an MV3 service worker over CDP (the real-Chrome test) has three
-  traps that each cost a CI round-trip.** When `Runtime.evaluate`-ing inside the
-  worker to verify its startup: (a) **`chrome.*` callback APIs don't reliably
-  settle when awaited under `awaitPromise: true`** — `declarativeContent…getRules`
-  hung forever (no internal timeout) until the whole job timed out; build the
-  awaited signal from plain promises (`fetch`/`OffscreenCanvas`), not chrome.*
-  callbacks. (b) **A bare top-level `function`/`const` name isn't reachable** from
-  an injected evaluate — expose what the test reads as an explicit
-  `globalThis.x = …` (the worker publishes an `iconRulesReady` promise this way).
-  (c) **A dormant worker has no globals** until it re-runs its top level; with no
-  tab/event listeners a test can trigger, attaching to the target is what starts
-  it, and the first read still races startup — so **poll** until the global
-  appears. (Bound every probe and add a test-level timeout regardless, per the
-  hang-proofing rule.)
+- **Introspecting an MV3 service worker over CDP has traps that each cost a CI
+  round-trip** — the `chrome.*`-callback-hang, unreachable-bare-identifier, and
+  dormant-worker-needs-polling traps are a portable Chrome-extension rule
+  maintained outside this repo (`technologies/chrome-extension.md`). Here
+  `declarativeContent…getRules` was the API that hung; the worker exposes
+  `globalThis.iconRulesReady` as the pollable signal. Bound every probe and add a
+  test-level timeout regardless, per the hang-proofing testing rule.
 - **A push or PR made with the Actions `GITHUB_TOKEN` does not start another
   workflow** — this GitHub-CI rule and its `workflow_dispatch` exception are
   portable GitHub procedures maintained outside this repo.
@@ -91,24 +70,17 @@ trap spanning files. See the full locality rule in
   this repo. They bit the body-text scan, `extension-test/harness.js`, and
   `custom/telavivcinematheque.js` (#130 / #137).
 - **Injected block markup inside a `<p>` silently empties it — read the sibling,
-  not the tag.** A page that fills a `<p>` via raw HTML (Angular `ng-bind-html`,
-  React `dangerouslySetInnerHTML`, Vue `v-html`) can inject a block element like a
-  `<div>` — disallowed inside `<p>` by the HTML content model, so the parser
-  (browser or jsdom, same rule) auto-closes the `<p>` right before it; the
-  injected content lands as the `<p>`'s **next sibling**, leaving the original tag
-  permanently empty. A selector reading `.some-class p` gets `""` with no error.
-  Read `element.nextElementSibling` instead. (Hit building `custom/tel-aviv.js`'s
-  `.benefitRemarks`/`.BenefitInstructions` description blocks, #602.)
-- **The shared `GCal` global is assembled by many files and re-injected on every
-  popup open — augment it, and reset per-load state.** Two traps from one fact
-  (`GCal` is a mutable global, loaded repeatedly into a page world that persists
-  between opens): (a) a file that does `globalThis.GCal = {…}` wholesale-replaces
-  it and wipes what other files already attached — an order-dependent `TypeError`
-  (#48); always augment via `Object.assign`. (b) Each source's
-  `GCal.sources.push(...)` stacks duplicate matchers on every reopen
+  not the tag** (portable HTML-parsing rule maintained outside this repo,
+  `technologies/html.md`). Hit building `custom/tel-aviv.js`'s
+  `.benefitRemarks`/`.BenefitInstructions` description blocks (#602).
+- **The shared `GCal` global must be augmented, never replaced, and reset
+  per-load** — a portable Chrome-extension rule (`technologies/chrome-extension.md`)
+  about any global assembled by multiple injected files and re-injected on
+  activation. Here: (a) `globalThis.GCal = {…}` wholesale-replacing it caused an
+  order-dependent `TypeError` (#48), fixed via `Object.assign`; (b)
+  `GCal.sources.push(...)` stacked duplicate matchers on every reopen
   (8 → 16 → 24…), so `registry.js` resets `GCal.sources` to a fresh array on load
-  and is pinned first in the load order (#189). Anything that runs at injection
-  time must be safe to run again.
+  and is pinned first in the load order (#189).
 - **The cloud Setup script runs as root starting in the repo's parent dir
   (`/home/user`), not the checkout** — a project instance of the portable
   "setup script may start above the checkout" rule maintained outside this repo.
