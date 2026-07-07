@@ -141,8 +141,8 @@ change.
   `<kind>/cases/`, so the **folder is the single classifier** and adding a kind is a
   self-contained folder drop (`<kind>/kind.js`, auto-discovered by
   `dev/requirements/shared/kinds.js`). (The general lesson — collapse parallel
-  classifiers, prefer a structural one the code can't desync from — is in
-  [../general/engineeringPractices.md](../general/engineeringPractices.md).)
+  classifiers, prefer a structural one the code can't desync from — is a portable
+  engineering practice maintained outside this repo.)
 - **Requirement tests render against a pinned reference "now", not the real clock**
   (the general rationale is a portable testing practice maintained outside this repo).
   The popup's only date-dependent output is the card corner-pill (`events-view.js`

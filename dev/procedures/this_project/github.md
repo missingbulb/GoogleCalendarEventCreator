@@ -10,8 +10,9 @@ new-label creation, and the generic cross-branch merge gotchas — are maintaine
 as portable, project-agnostic rules outside this repo. The two owner-triggered
 defined instructions that also land through this PR flow — "bump version" and
 "learned lessons" — keep their definitions in [workflow.md](workflow.md) (they
-reference the flow here). Portable git/GitHub gotchas captured locally are in
-[../general/git-and-github.md](../general/git-and-github.md).
+reference the flow here). Portable git/GitHub gotchas we capture locally live here
+too, alongside the project-specific procedures — there is no separate portable
+git/GitHub doc.
 
 ## Merge to main command
 
@@ -32,9 +33,8 @@ resync gotchas — are portable and maintained outside this repo.)
 ## Open the PR early when a change touches e2e / heavy / UI tests
 
 The general rule — open the PR early when a change's only reviewable output is
-produced by CI — is in
-[../general/git-and-github.md](../general/git-and-github.md). In this repo that
-means a change that adds or modifies an e2e/heavy-browser (`dev/requirements/heavy/`)
+produced by CI — is a portable git/GitHub practice maintained outside this repo. In
+this repo that means a change that adds or modifies an e2e/heavy-browser (`dev/requirements/heavy/`)
 or UI-snapshot (`dev/requirements/{popup,icon}/`) test: those can't be exercised
 locally (the sandbox has no Chrome; see [technicalGotchas.md](technicalGotchas.md)),
 and their reviewable artifacts only exist on a PR — CI runs the heavy/e2e suites
