@@ -40,10 +40,8 @@ to cut a release **end to end** — bump, merge, and wait for the published
 artifact — not just to open the bump PR:
 
 1. Raise the extension's version by editing the `version` field in **both**
-   `extension/manifest.json` and `package.json` (they must stay in sync), and
-   update the `value` in
-   `dev/procedures/test/uber/shared_constants/version-sync.json` to match, on a
-   branch. Default to a **minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an
+   `extension/manifest.json` and `package.json` (they must stay in sync — the
+   `shared-constants` check enforces it), on a branch. Default to a **minor** bump (`x.Y.z` → `x.(Y+1).0`); honor an
    explicit target ("bump version to 1.4.0") or level ("bump patch" / "bump
    major") when given.
 2. Open the PR and get CI green, then merge it to `main` via **squash**,
