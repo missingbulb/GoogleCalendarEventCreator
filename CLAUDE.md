@@ -40,20 +40,14 @@ time — live in `dev/procedures/this_project/technicalGotchas.md` (imported bel
 
 @dev/procedures/this_project/technicalGotchas.md
 
-General engineering and agentic practices learned **in this repo** are captured
-locally in the working-set docs below (capture is always local — see
-`dev/procedures/this_project/workflow.md`). They start near-empty; the curated canon
-lives in the shared Claudinite canon (next section), maintained upstream and consumed
-here read-only. The portable-by-topic working-set docs under
-`dev/procedures/general/` (git/GitHub, code-comment, and file-placement gotchas) are
-part of the same local capture surface.
-
-@dev/procedures/general/engineeringPractices.md
-@dev/procedures/general/agenticBestPractices.md
-@dev/procedures/general/git-and-github.md
-@dev/procedures/general/testingPractices.md
-@dev/procedures/general/filePlacement.md
-@dev/procedures/general/code-comments.md
+General engineering, agentic, and other practices learned **in this repo** are
+captured locally in the `dev/procedures/this_project/` docs imported above, routed
+by topic to the doc that owns it (see `workflow.md`) — capture is always local, and
+`this_project/` is the whole local capture surface. A lesson's *portability* is the
+Claudinite canon's concern (its growth routine generalizes local docs into the
+shared canon), not a reason to capture it anywhere else; the curated,
+project-agnostic canon lives in the shared Claudinite canon (next section),
+maintained upstream and consumed here read-only.
 
 ## Shared portable rules (the Claudinite canon)
 
