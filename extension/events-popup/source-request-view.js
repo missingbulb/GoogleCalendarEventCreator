@@ -12,9 +12,9 @@
 //     it without losing their page, and continues via an "open an issue" link.
 //
 // An ES module, loaded on demand by popup.js via dynamic import(). The two
-// `make*` functions are the controller's entry points; `buildSourceRequestUrl`,
-// `buildIssueUrl`, and `POLICY_EXPLANATION` are also exported for the unit tests.
-// This is the source-request half of the former background.js.
+// `make*` functions are the controller's entry points; `buildSourceRequestUrl`
+// and `buildIssueUrl` are also exported for the unit tests. This is the
+// source-request half of the former background.js.
 //
 // The "Suggest Correction" link targets the "Event source request" issue form
 // (.github/ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands
@@ -33,12 +33,10 @@ const SOURCE_REQUEST_LABEL = "extractor-request";
 
 // The "how this extension finds events" explanation the "Disagree?" link expands
 // inline (buildPolicyPanel) — a short, user-facing account of how the extension
-// decides what's an event, ending in an "open an issue" affordance. This is the
-// single source the popup renders from; the public `extraction-policy.md` doc
-// mirrors it, and a drift-guard unit test asserts the two stay in sync (so the
-// popup copy and the doc can't diverge). Straight quotes/em dashes match the doc
-// verbatim for that guard.
-export const POLICY_EXPLANATION = {
+// decides what's an event, ending in an "open an issue" affordance. The single
+// source of this copy; the snapshot of the expanded panel (requirement 3.5) is
+// what reviews it.
+const POLICY_EXPLANATION = {
   heading: "How this extension finds events",
   paragraphs: [
     'This extension turns event pages into Google Calendar events. On supported ' +
@@ -179,7 +177,7 @@ export function makePolicyLink(tab) {
 // paragraphs from POLICY_EXPLANATION as stacked text blocks, then an "open an
 // issue" link that (like the other affordances) opens an adjacent tab and closes
 // the popup — the user's way to continue from here. Built entirely from the single
-// POLICY_EXPLANATION source, so the copy can't drift from the doc.
+// POLICY_EXPLANATION source.
 function buildPolicyPanel(tab) {
   const panel = document.createElement("div");
   panel.className = "policy-panel";
