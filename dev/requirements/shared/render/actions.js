@@ -66,4 +66,15 @@ function scrollToMiddle(doc) {
   setFades(doc, { top: true, bottom: true });
 }
 
-module.exports = { setFades, restAtTop, scrollToBottom, scrollToMiddle };
+// Expand the inline "Disagree?" explanation, as if the user clicked it: dispatch a
+// real click on the empty-state's "Disagree?" link so the SHIPPED handler
+// (source-request-view.js makePolicyLink) replaces the link with the policy panel
+// in place. A real click through the production code path — no faked panel — so the
+// snapshot pins what the extension actually renders. (Before the click the empty
+// state carries exactly one .heading-link, the "Disagree?" link.)
+function expandPolicy(doc) {
+  const link = doc.querySelector(".heading-link");
+  if (link) link.dispatchEvent(new doc.defaultView.MouseEvent("click", { bubbles: true, cancelable: true }));
+}
+
+module.exports = { setFades, restAtTop, scrollToBottom, scrollToMiddle, expandPolicy };

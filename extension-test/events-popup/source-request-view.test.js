@@ -10,9 +10,9 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 // source-request-view.js is an ES module; import it before the tests run.
-let buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill;
+let buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill, POLICY_EXPLANATION;
 before(async () => {
-  ({ buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill } = await import(
+  ({ buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill, POLICY_EXPLANATION } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "source-request-view.js"))
   ));
 });
@@ -168,19 +168,40 @@ test("defaults the timezone to the user's current zone when the fallback found n
   assert.equal(sourceRequestPrefill({ url: "https://example.com/e" }, null).timezone, here);
 });
 
-// The "Disagree?" policy link (makePolicyLink) opens the public policy doc.
-// (Hostname/path asserted without repeating the repo slug literal — that string
-// is single-sourced; see dev/procedures/test/uber/shared_constants/repo-slug.json.)
-test("the policy-doc link points at a markdown doc in this repo on github.com", () => {
-  const u = new URL(buildPolicyDocUrl());
+// The inline explanation's "open an issue" link opens a blank issue on this repo.
+// (Hostname/path asserted without repeating the repo slug literal — that string is
+// single-sourced; see dev/procedures/test/uber/shared_constants/repo-slug.json.)
+test("the \"open an issue\" link points at a blank new-issue form in this repo on github.com", () => {
+  const u = new URL(buildIssueUrl());
   assert.equal(u.hostname, "github.com");
-  assert.ok(u.pathname.endsWith("/extraction-policy.md"), `unexpected policy path: ${u.pathname}`);
+  assert.ok(u.pathname.endsWith("/issues/new"), `unexpected issue path: ${u.pathname}`);
+  assert.equal(u.search, "", "a blank issue — no template/labels, unlike the source-request form");
 });
 
-test("the policy doc the link points at actually exists on disk (the link can't rot)", () => {
-  // .../blob/<branch>/<repo-relative-path>
-  const m = new URL(buildPolicyDocUrl()).pathname.match(/\/blob\/[^/]+\/(.+)$/);
-  assert.ok(m, "policy URL must be a /blob/<branch>/<path> link");
-  const docPath = path.join(__dirname, "..", "..", m[1]);
-  assert.ok(fs.existsSync(docPath), `policy doc missing on disk: ${m[1]}`);
+// Drift guard: the popup renders POLICY_EXPLANATION inline (buildPolicyPanel), and
+// the public extraction-policy.md doc must say the same thing. Assert the doc still
+// carries the heading, every paragraph the popup shows, and the same issue link —
+// so the popup copy and the doc can't diverge (and, implicitly, that the doc still
+// exists). extraction-policy.md is the single reviewed source of these words.
+test("extraction-policy.md stays in sync with the popup's inline explanation", () => {
+  const md = fs.readFileSync(path.join(__dirname, "..", "..", "extraction-policy.md"), "utf8");
+  const heading = md.match(/^#\s+(.+)$/m);
+  assert.ok(heading, "extraction-policy.md must have an H1 heading");
+  assert.equal(heading[1].trim(), POLICY_EXPLANATION.heading, "the doc H1 drifted from the popup heading");
+
+  const link = md.match(/\[([^\]]+)\]\(([^)]+)\)/);
+  assert.ok(link, "extraction-policy.md must carry a markdown link");
+  assert.equal(link[1], POLICY_EXPLANATION.issueLinkText, "the doc link text drifted from the popup CTA");
+  assert.equal(link[2], buildIssueUrl(), "the doc link URL drifted from the popup's issue URL");
+
+  // The doc as plain text (heading line dropped, links reduced to their text,
+  // whitespace collapsed) must contain every paragraph the popup shows.
+  const plain = md
+    .replace(/^#\s+.+$/m, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  for (const para of POLICY_EXPLANATION.paragraphs) {
+    assert.ok(plain.includes(para), `extraction-policy.md is missing the popup paragraph:\n  "${para}"`);
+  }
 });

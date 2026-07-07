@@ -1,19 +1,20 @@
-// The two heading-line affordances the popup controller (popup.js) renders for a
-// host with no per-site source — both small, right-aligned links that sit on the
-// popup's heading line:
+// The two unsupported-host affordances the popup controller (popup.js) renders
+// for a host with no per-site source:
 //
 //   makeSourceRequestLink — shown when the generic fallback found a complete
-//     event on an unlisted host (State 5): a "Suggest Correction" link that opens
-//     a prefilled GitHub "Event source request" issue, seeded with the scraped
-//     event.
+//     event on an unlisted host (State 5): a small right-aligned "Suggest
+//     Correction" link on the heading line that opens a prefilled GitHub "Event
+//     source request" issue, seeded with the scraped event.
 //   makePolicyLink — shown when there's nothing to show on a non-denylisted host
-//     (State 3): a "Disagree?" link to the public "how this extension finds
-//     events" doc.
+//     (State 3): a quiet "Disagree?" link beneath the empty-state glyph. Clicking
+//     it does NOT navigate away — it EXPANDS the "how this extension finds events"
+//     explanation inline into the popup body (buildPolicyPanel), so the user reads
+//     it without losing their page, and continues via an "open an issue" link.
 //
 // An ES module, loaded on demand by popup.js via dynamic import(). The two
-// `make*` functions are the controller's entry points; `buildSourceRequestUrl`
-// and `buildPolicyDocUrl` are also exported for the unit tests. This is the
-// source-request half of the former background.js.
+// `make*` functions are the controller's entry points; `buildSourceRequestUrl`,
+// `buildIssueUrl`, and `POLICY_EXPLANATION` are also exported for the unit tests.
+// This is the source-request half of the former background.js.
 //
 // The "Suggest Correction" link targets the "Event source request" issue form
 // (.github/ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands
@@ -30,11 +31,27 @@ const SOURCE_REQUEST_REPO = "missingbulb/GoogleCalendarEventCreator";
 const SOURCE_REQUEST_TEMPLATE = "extractor-request.yml";
 const SOURCE_REQUEST_LABEL = "extractor-request";
 
-// The public doc the "Disagree?" link opens — a short, user-facing explanation
-// of how the extension decides what's an event. Path is relative to the repo
-// root on the default branch; an existence test fails if the file is moved
-// without updating this, so the link can't rot.
-const POLICY_DOC_PATH = "extraction-policy.md";
+// The "how this extension finds events" explanation the "Disagree?" link expands
+// inline (buildPolicyPanel) — a short, user-facing account of how the extension
+// decides what's an event, ending in an "open an issue" affordance. This is the
+// single source the popup renders from; the public `extraction-policy.md` doc
+// mirrors it, and a drift-guard unit test asserts the two stay in sync (so the
+// popup copy and the doc can't diverge). Straight quotes/em dashes match the doc
+// verbatim for that guard.
+export const POLICY_EXPLANATION = {
+  heading: "How this extension finds events",
+  paragraphs: [
+    'This extension turns event pages into Google Calendar events. On supported ' +
+      'sites it reads the event directly; elsewhere it makes a best-effort guess. ' +
+      '"No events found" means nothing on the page looked reliable enough to add.',
+    "Think we got a page wrong — missed an event, or showed nothing where there's " +
+      "clearly one? We'll take a look —",
+  ],
+  // The trailing call to action; its href is buildIssueUrl(). Kept lower-case so it
+  // reads as an inline continuation of the sentence above ("… We'll take a look —
+  // open an issue").
+  issueLinkText: "open an issue",
+};
 
 // The prefill keys, which double as the issue form's field ids (the `id:` of
 // each field in the template) — GitHub prefills a form field from the query
@@ -105,11 +122,12 @@ export function buildSourceRequestUrl(prefill) {
   return `https://github.com/${SOURCE_REQUEST_REPO}/issues/new?${params.toString()}`;
 }
 
-// The URL the "Disagree?" link opens: the policy doc rendered on the repo's
-// default branch. Built from the same repo constant as the issue form, so the
-// slug stays single-sourced.
-export function buildPolicyDocUrl() {
-  return `https://github.com/${SOURCE_REQUEST_REPO}/blob/main/${POLICY_DOC_PATH}`;
+// The URL the inline explanation's "open an issue" link opens: a blank GitHub
+// issue on this repo (no template — a free-form "you got this page wrong" report,
+// distinct from the structured "Suggest Correction" source-request form). Built
+// from the same repo constant as that form, so the slug stays single-sourced.
+export function buildIssueUrl() {
+  return `https://github.com/${SOURCE_REQUEST_REPO}/issues/new`;
 }
 
 // A small link that sits on the popup's heading line (right-aligned via
@@ -139,10 +157,47 @@ export function makeSourceRequestLink(tab, event, eventCount = 1, waitSelector =
   );
 }
 
-// State 3: nothing to show on a non-denylisted host. A quiet "Disagree?" link to
-// the public "how this extension finds events" doc.
+// State 3: nothing to show on a non-denylisted host. A quiet "Disagree?" link
+// that, instead of navigating away, EXPANDS the "how this extension finds events"
+// explanation inline into the popup body — the link replaces itself in place with
+// the panel (buildPolicyPanel), so the popup just grows to fit and the user never
+// loses their page. Pure DOM: no chrome.tabs / window.close, so the same click
+// path drives the UI snapshot (the snapshot renderer has no `chrome`).
 export function makePolicyLink(tab) {
-  return headingLink("Disagree?", buildPolicyDocUrl(), tab);
+  const link = document.createElement("a");
+  link.className = "heading-link";
+  link.textContent = "Disagree?";
+  link.href = "#";
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    link.replaceWith(buildPolicyPanel(tab));
+  });
+  return link;
+}
+
+// The inline explanation panel the "Disagree?" link expands to: the heading and
+// paragraphs from POLICY_EXPLANATION as stacked text blocks, then an "open an
+// issue" link that (like the other affordances) opens an adjacent tab and closes
+// the popup — the user's way to continue from here. Built entirely from the single
+// POLICY_EXPLANATION source, so the copy can't drift from the doc.
+function buildPolicyPanel(tab) {
+  const panel = document.createElement("div");
+  panel.className = "policy-panel";
+
+  const heading = document.createElement("p");
+  heading.className = "policy-heading";
+  heading.textContent = POLICY_EXPLANATION.heading;
+  panel.appendChild(heading);
+
+  for (const para of POLICY_EXPLANATION.paragraphs) {
+    const p = document.createElement("p");
+    p.className = "policy-text";
+    p.textContent = para;
+    panel.appendChild(p);
+  }
+
+  panel.appendChild(headingLink(POLICY_EXPLANATION.issueLinkText, buildIssueUrl(), tab));
+  return panel;
 }
 
 // The fields that seed the source-request form: the page URL and title, plus

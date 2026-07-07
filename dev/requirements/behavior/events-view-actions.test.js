@@ -1,10 +1,12 @@
 // Behavior contract for the popup's CLICK actions — the leaf requirements that a
 // UI snapshot structurally cannot verify (3.4, 9.1, 9.2, 9.3, 9.4): clicking a
 // card, a grouped instance button (and, for a multi-venue event, getting that
-// showing's own venue), or an affordance link OPENS the right URL in an ADJACENT
-// new tab and CLOSES the popup. A PNG has no pixels for "a tab opened",
+// showing's own venue), or a NAVIGATING affordance link OPENS the right URL in an
+// ADJACENT new tab and CLOSES the popup. A PNG has no pixels for "a tab opened",
 // so these leaves declare `kind: "behavior"` in their case and are routed here
 // instead of onto a snapshot image (see the engineering practices doc, issue #429).
+// Also here (supporting the image leaf 3.5): the "Disagree?" link's NON-navigating
+// behavior — it expands the explanation inline rather than opening a tab.
 //
 // =====================================================================
 // !!!  INCOMPLETE VERIFICATION — READ BEFORE TRUSTING THIS TEST  !!!
@@ -139,11 +141,37 @@ test("9.4: clicking an instance chip at a differing venue opens the template wit
   assert.equal(loc, "La Cigale, Paris", "the clicked showing's own venue fills the Calendar location");
 });
 
-// 3.4: each affordance link (Suggest Correction / Disagree?) opens its target in
-// an adjacent new tab and closes the popup — and suppresses the default <a> nav.
+// Reveal the inline explanation panel the way the extension does — append the
+// "Disagree?" link, then click it so its handler replaces it in place — and return
+// that panel (replaceWith is a no-op on a parentless node, so it must be attached
+// first). Used both to check the expand itself and to reach the panel's "open an
+// issue" continuation link.
+function revealPolicyPanel() {
+  document.body.replaceChildren();
+  const link = makePolicyLink(TAB);
+  document.body.appendChild(link);
+  link.dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
+  return { link, panel: document.querySelector(".policy-panel") };
+}
+
+// 3.5: clicking "Disagree?" expands the explanation INLINE (replacing the link in
+// place) — it does NOT open a tab or close the popup. The negative half of 3.4.
+test('3.5: clicking "Disagree?" expands the explanation inline, opening no tab and leaving the popup open', () => {
+  const { link, panel } = revealPolicyPanel();
+  assert.ok(panel, "the inline explanation panel is revealed");
+  assert.equal(created.length, 0, "no tab is opened");
+  assert.equal(closed, 0, "the popup stays open");
+  assert.ok(!document.body.contains(link), "the Disagree? link is replaced in place by the panel");
+  assert.ok(panel.querySelector(".heading-link"), "the panel carries an \"open an issue\" continuation link");
+});
+
+// 3.4: each NAVIGATING affordance link — "Suggest Correction" and the inline
+// panel's "open an issue" — opens its target in an adjacent new tab and closes the
+// popup, suppressing the default <a> nav. ("Disagree?" is NOT here: it expands
+// inline, verified above.)
 for (const [label, build] of [
   ["Suggest Correction", () => makeSourceRequestLink(TAB, { title: "X", start: "2026-06-19T19:00:00" }, 1)],
-  ["Disagree?", () => makePolicyLink(TAB)],
+  ["open an issue", () => revealPolicyPanel().panel.querySelector(".heading-link")],
 ]) {
   test(`3.4: the "${label}" link opens an adjacent new tab, closes the popup, and suppresses navigation`, async () => {
     const link = build();

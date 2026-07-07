@@ -201,8 +201,8 @@ issue form itself is out of scope — see §12).
 <td valign="top">
 
 `3.2` **Disagree?** — shown only in the nothing-found state (state 3), beneath
-the empty-state glyph (→ `2.2`). Clicking it opens the public extraction-policy
-doc.
+the empty-state glyph (→ `2.2`). Clicking it **expands the explanation inline** in
+the popup body (→ `3.5`) rather than navigating away.
 
 </td>
 </tr>
@@ -233,8 +233,28 @@ underline at rest, underline on hover) so neither reads as a primary action.
 </td>
 <td valign="top">
 
-`3.4` Each link opens its target in a **new tab** (adjacent to the
-current one) and closes the popup.
+`3.4` The **navigating** links — **Suggest Correction** (→ `3.1`) and the inline
+explanation's **open an issue** link (→ `3.5`) — open their target in a **new tab**
+(adjacent to the current one) and close the popup. (**Disagree?** does not navigate;
+it expands inline — see `3.5`.)
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" width="320">
+
+![affordance-links.3.5](popup/cases/affordance-links.3.5.png) <!-- req-gallery:3.5 -->
+
+</td>
+<td valign="top">
+
+`3.5` Clicking **Disagree?** (→ `3.2`) **expands the "how this extension finds
+events" explanation inline** beneath the glyph, in place of the link — the popup
+grows to fit — so the user reads it without leaving their page. The panel ends with
+an **open an issue** link to continue from there (its navigation is `3.4`).
 
 </td>
 </tr>
