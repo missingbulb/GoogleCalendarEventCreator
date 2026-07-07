@@ -5,7 +5,7 @@ must render, and how it must look and read, down to exact strings, colors,
 placement, and structure.
 
 The **rough, feature-level description** of what the extension does and why lives
-in the top-level [README.md](../README.md); the testable product behavior is §12–§16
+in the top-level [README.md](../../README.md); the testable product behavior is §12–§16
 below. The split: "the popup turns the page's event into a one-click calendar
 link" is a feature description and lives in the README; "an off-current-year chip
 shows a gray pill for a past year" is a specific UI requirement and lives here.
@@ -1642,7 +1642,7 @@ is covered by unit tests only.
 
 When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found (`chooseContent` + the host classifier); *how* each state renders is §1–§3, and those renderings are already pinned there by snapshots: the denylisted empty state (`2.3`), the nothing-found "Disagree?" state (`2.2`/`3.2`), and an unlisted host's event with "Suggest Correction" (`3.1`). This section pins only the two slices §1–§3 don't — each a **real popup snapshot** driven through the production `chooseContent`: whether a **supported** host shows the "Suggest Correction" label (`12.4`), and the completeness rule that decides whether a fallback event is shown at all (`12.6`).
 
-![Flowchart of the popup's five states](popup-states-flowchart.png)
+![Flowchart of the popup's five states](shared/popup-states-flowchart.png)
 
 - `12.4` **Supported host — the "Suggest Correction" label.** A supported host always shows its dedicated extractor's events (icon stays green); whether it *also* offers "Suggest Correction" depends on where the shown events came from:
 
