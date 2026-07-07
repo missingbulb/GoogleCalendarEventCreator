@@ -19,7 +19,7 @@ or OAuth needed. You review the pre-filled event and hit Save.
 
 An event is created with whatever subset of these is available; missing fields
 are simply left for you to fill in on the Google Calendar screen. For how the
-details are scraped from a page, see [dev/procedures/this_project/highLevelDesign.md](dev/procedures/this_project/highLevelDesign.md).
+details are scraped from a page, see [dev/procedures/highLevelDesign.md](dev/procedures/highLevelDesign.md).
 
 ## Install
 
@@ -80,7 +80,7 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 
 - [Executable requirements](dev/requirements/README.md) — how requirements are modeled (a numbered breakdown where every leaf has a validating case) and how to add one.
 - [Requirements](dev/requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
-- [High-level design](dev/procedures/this_project/highLevelDesign.md) — how extraction works, plus the top-level architecture rules of the road.
-- [File descriptions](dev/procedures/this_project/fileDescriptions.md) — the per-file map.
-- [Testing](dev/procedures/this_project/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
-- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/this_project/`).
+- [High-level design](dev/procedures/highLevelDesign.md) — how extraction works, plus the top-level architecture rules of the road.
+- [File descriptions](dev/procedures/fileDescriptions.md) — the per-file map.
+- [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
+- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/`).

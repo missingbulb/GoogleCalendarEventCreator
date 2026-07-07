@@ -30,7 +30,7 @@
 //
 // Sources still emit the FLAT shape per occurrence ({ title, start, end,
 // location, ... }, or an `events` array of them) — keeping "add a source" a
-// single self-contained file (dev/procedures/this_project/highLevelDesign.md).
+// single self-contained file (dev/procedures/highLevelDesign.md).
 // norm() wraps each into a one-instance event, moving the occurrence's `location`
 // ONTO the instance, and group() then folds together any events that share the
 // non-time, non-location identity (title + description + ctz), concatenating their

@@ -16,9 +16,9 @@ run-name: "Finalize extractor · #${{ github.event.issue.number }} — ${{ githu
 # enforcement of the agent's containment — the blast-radius guard reverts whatever
 # the agent committed outside its two files. Running it here, in a runner the agent
 # doesn't control, keeps that a guarantee rather than a request (see
-# dev/procedures/this_project/highLevelDesign.md). The label fires this workflow because the agent
+# dev/procedures/highLevelDesign.md). The label fires this workflow because the agent
 # adds it with the Claude GitHub App's token, not the Actions GITHUB_TOKEN whose
-# events are suppressed (dev/procedures/this_project/github.md).
+# events are suppressed (dev/procedures/github.md).
 on:
   issues:
     types: [labeled]

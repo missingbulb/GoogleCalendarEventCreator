@@ -1,7 +1,7 @@
 # High-level design
 
 How the extension is built. What it shows and when — the product behavior — is
-in [requirements.md §12–§16](../../requirements/requirements.md); the per-file map is in
+in [requirements.md §12–§16](../requirements/requirements.md); the per-file map is in
 [fileDescriptions.md](fileDescriptions.md); tunable product decisions live in
 `extension/config.js`.
 
@@ -24,7 +24,7 @@ Portable agent-architecture principles that aren't specific to this project (the
 unattended-agent judgment boundary, the bounded-and-enforced write surface) are
 maintained as portable, project-agnostic rules outside this repo. The worked
 examples for both are this repo's auto-extractor pipeline
-([auto-extractor.md](../../create-extractor/auto-extractor.md)).
+([auto-extractor.md](../create-extractor/auto-extractor.md)).
 
 ## How extraction works
 
@@ -57,7 +57,7 @@ keys off `supported`, the host's classification against `extension/config.js`'s
 `sourceFallbackDenylist` / `sourceFallbackAllowlist` (via `extension/fallback-policy.js`),
 and whether the fallback event is complete (title + location + start). The five
 resulting states — and what the toolbar icon means alongside them — are specified
-in [requirements.md §12–§16](../../requirements/requirements.md).
+in [requirements.md §12–§16](../requirements/requirements.md).
 
 ## Where decisions live
 
@@ -67,11 +67,11 @@ make output decisions — rendering, whitespace collapse, de-dup, sorting, and
 timezone normalization all live in helpers, applied uniformly — except where it
 must encode its own host's constraints (which elements to read, a fixed `ctz`, a
 yearless date format). So the product rules in
-[requirements.md §12–§16](../../requirements/requirements.md) — line-break-preserving
+[requirements.md §12–§16](../requirements/requirements.md) — line-break-preserving
 descriptions, chronological one-card-per-event, multi-instance grouping (an
 event's showings carried in `times[]` and folded into one card), floating vs.
 absolute times, the default duration and the card cap — are implemented once, in
 helpers, `extension/event-extractors/assemble-events.js`, and `extension/config.js`, never per source.
 The timezone rules in particular — floating local vs. exact instant vs. a
 fixed-city `ctz` — are specified in
-[requirements.md §15](../../requirements/requirements.md).
+[requirements.md §15](../requirements/requirements.md).

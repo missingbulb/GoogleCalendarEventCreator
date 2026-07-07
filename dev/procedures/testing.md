@@ -73,7 +73,7 @@ change.
 - **All requirements live in `dev/requirements/`.** The spec docs and
   every validating test are in that one top-level folder; the document model and
   the how-to-add-one rules are in
-  [dev/requirements/README.md](../../requirements/README.md).
+  [dev/requirements/README.md](../requirements/README.md).
   The notes below are the project decisions behind that model.
 - **Every leaf is verified by exactly one CASE, and its KIND is the folder it lives
   in (issue #429, #435).** The spec (`dev/requirements/requirements.md`) is just
@@ -326,10 +326,10 @@ the data, render builds the DOM from it.)
 
 Each case is a self-contained tuple in **`dev/requirements/<kind>/cases/`**, one per leaf
 requirement: a `<slug>.<id>.case.js` whose filename names the single
-[`requirements.md`](../../requirements/requirements.md) leaf it pins, minimal data isolating that
+[`requirements.md`](../requirements/requirements.md) leaf it pins, minimal data isolating that
 one requirement. For the current set with every reference image shown in a
 two-column table beside its requirement (image left, spec right), see the
-generated gallery in **[`requirements.md`](../../requirements/requirements.md)** — it's derived
+generated gallery in **[`requirements.md`](../requirements/requirements.md)** — it's derived
 from the cases (so it can't drift) and is the one-page review surface.
 
 A popup `<slug>.<id>.case.js` exports `{ description, data, listing?, tab?, action? }`.

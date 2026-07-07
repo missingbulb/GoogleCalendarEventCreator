@@ -57,7 +57,7 @@ npm ci || true
 # Conflict-resolution hygiene for the generated/derived artifacts that every
 # parallel branch regenerates (the load lists, UI snapshots, coverage baseline).
 # Two per-clone git settings the committed .gitattributes relies on (see
-# dev/procedures/this_project/github.md). Both are idempotent, so re-running is safe.
+# dev/procedures/github.md). Both are idempotent, so re-running is safe.
 #   - rerere: record how a conflict was resolved and replay it automatically when
 #     the same conflict recurs — and these recur in the same shape across branches.
 #   - the `ours` merge driver .gitattributes maps the generated files to, so a

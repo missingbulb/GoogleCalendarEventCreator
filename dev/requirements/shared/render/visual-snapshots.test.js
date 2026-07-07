@@ -12,7 +12,7 @@
 // the toolbar icon.
 //
 // A case is a self-contained scenario: its data lives only in the case file
-// (never in production code, never in a shared gallery). See dev/procedures/this_project/testing.md.
+// (never in production code, never in a shared gallery). See dev/procedures/testing.md.
 "use strict";
 
 const { test } = require("node:test");

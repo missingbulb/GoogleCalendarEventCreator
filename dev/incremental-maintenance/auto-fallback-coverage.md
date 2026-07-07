@@ -27,7 +27,7 @@ The fallback-coverage gate lives in `dev/requirements/extractor/fallback/` and r
 `test:live`: `fallback-coverage.test.js` (the high-watermark gate; logic in
 `fallback-coverage.js`), the scorecard `fallback-coverage.GENERATED.md`, and the
 watermark `fallback-coverage.baseline.GENERATED.json`. Gate mechanics are
-documented in [testing.md](../procedures/this_project/testing.md)'s "fallback-coverage gate" — read it, don't
+documented in [testing.md](../procedures/testing.md)'s "fallback-coverage gate" — read it, don't
 restate it here. Baseline first (`npm install` then `npm run test:live`), reading
 the "fallback value differences (informational)" console block and the
 per-exemplar matrix (✓ match · ~ different value · ✗ missing · — n/a): a `~`
@@ -51,7 +51,7 @@ not something your change introduced.
   `grep -n "<value>" data/<case>.html` and reject it if it lives inside a
   `<script>` or hidden markup. A real win comes from visible text or a
   Chrome-read DOM attribute (meta / JSON-LD / microdata / `<time datetime>`).
-  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../procedures/this_project/technicalGotchas.md).)
+  (Same jsdom-vs-Chrome class as the notes in [technicalGotchas.md](../procedures/technicalGotchas.md).)
   **Widening a body-text scan window (raising a `slice`/scan cap) is trap (a) at
   corpus scale — grepping the target case is not enough.** A larger window can make
   a *different* case that currently finds nothing start matching a `<script>` blob
@@ -87,7 +87,7 @@ On a clean, generic, Chrome-real, test-covered win: branch
 body states the hypothesis, **why** it's generic (which unseen sites it helps),
 **how** the jsdom trap was ruled out, the before→after numbers, and the covering
 test. It never merges — from there it merges through the usual flow (see
-[github.md](../procedures/this_project/github.md)) and CI must go green **twice** (it touches `test:live`).
+[github.md](../procedures/github.md)) and CI must go green **twice** (it touches `test:live`).
 No win → no branch, no PR; print "No generic fallback-coverage improvement found."
 
 ## Tracking: log each run under the routine's own issue

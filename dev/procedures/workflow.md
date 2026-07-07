@@ -73,20 +73,20 @@ conversation's tool/process usage — the general rule (fewer operations, less
 wall time without harming quality, killing a process once its output is in
 hand, a terse verdict) is a portable agentic practice maintained outside this
 repo. Route any resulting speed-up like any other captured lesson — to the matching
-`dev/procedures/this_project/*` doc (agentic/working-process practices land here in
+`dev/procedures/*` doc (agentic/working-process practices land here in
 this file).
 
 **Always write to the local repository docs** — capture never reaches across to
 Claudinite. Route by scope:
 
 - **Project-specific** lessons: project mechanics to the matching file under
-  `dev/procedures/this_project/` (workflow, github, testing, adding-a-source,
+  `dev/procedures/` (workflow, github, testing, adding-a-source,
   auto-extractor);
   top-level project architecture rules to the "Architecture rules of the road"
-  section of `dev/procedures/this_project/highLevelDesign.md`;
-  non-obvious **project-wide** codebase footguns to `dev/procedures/this_project/technicalGotchas.md`
+  section of `dev/procedures/highLevelDesign.md`;
+  non-obvious **project-wide** codebase footguns to `dev/procedures/technicalGotchas.md`
   (file-local footguns go in the file instead — see the next bullet).
-- **File-local** footguns go in the file, not `dev/procedures/this_project/technicalGotchas.md`. A trap
+- **File-local** footguns go in the file, not `dev/procedures/technicalGotchas.md`. A trap
   you'd only trip over *while editing one specific file or function* — a mistake
   of **commission** you make with that file open in front of you — belongs in
   that file's **top-of-file header comment** (the self-documenting convention
@@ -104,24 +104,24 @@ Claudinite. Route by scope:
   harness's own `runScripts: "dangerously"` fragment-parsing mechanic lives inline
   in its header (you only meet it editing the harness). Co-locate only
   **non-portable** traps:
-  a portable lesson buried in a code comment escapes the `this_project/` docs where
+  a portable lesson buried in a code comment escapes the `dev/procedures/` docs where
   general lessons belong, so those still go to the matching doc below.
 - **Portable** lessons (general engineering, agentic, testing, git/GitHub
-  practices): captured into the same `dev/procedures/this_project/` doc that owns the
+  practices): captured into the same `dev/procedures/` doc that owns the
   topic, exactly like a project-specific one — git/GitHub to [github.md](github.md),
   testing to [testing.md](testing.md), engineering/agentic working-process practices
   here in [workflow.md](workflow.md). There is **no** separate portable folder: a
   lesson's portability is Claudinite's concern (its growth routine generalizes local
   docs into the shared canon and prunes what the canon comes to cover), not a reason
-  to capture it anywhere but the matching `this_project/` doc. The curated,
+  to capture it anywhere but the matching `dev/procedures/` doc. The curated,
   project-agnostic canon lives read-only in the Claudinite canon synced into this
   repo over HTTPS — don't edit it or file a Claudinite issue here; just write the
-  best local `this_project/` doc.
+  best local `dev/procedures/` doc.
 
 Keeping these local docs reconciled with the canon (pruning a local copy once the
 canon comes to cover it) is Claudinite's responsibility, not this repo's.
 
 Keep every addition terse. Project-specific guidance is good; broader engineering
 practices that generalize beyond this repo are better — write those to the
-`this_project/` doc that owns the topic too, and let Claudinite's growth routine
+`dev/procedures/` doc that owns the topic too, and let Claudinite's growth routine
 lift the portable ones into shared canon.
