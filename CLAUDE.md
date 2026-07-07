@@ -23,7 +23,7 @@ documented in [dev/requirements/README.md](dev/requirements/README.md).
 For all release-related actions — building the shippable zip, the
 version-bump → release flow, publishing to the Chrome Web Store, and the listing
 assets / icon generator — everything is self-contained in
-[`dev/build/release/`](dev/build/release/) (start at [`dev/build/release/releasing.md`](dev/build/release/releasing.md)).
+[`dev/build/release/`](dev/build/release/); the shared release procedure lives in the Claudinite chrome-extension-release standard.
 Look there **only** when you're actually cutting or publishing a release; it's not
 needed for day-to-day development.
 
