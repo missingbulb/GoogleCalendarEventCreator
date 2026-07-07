@@ -25,7 +25,7 @@ test("docs, tests, dev tooling, and workflows are dropped", () => {
     filterShippedPaths([
       "README.md",
       "CLAUDE.md",
-      "dev/procedures/this_project/workflow.md",
+      "dev/procedures/workflow.md",
       "dev/requirements/extractor/expected/meetup.json",
       "dev/requirements/extractor/data/server-fetched/meetup.html",
       "extension-test/events-popup/popup.test.js",
@@ -52,7 +52,7 @@ test("mixed input keeps only the shipped subset, order preserved", () => {
 
 test("CLI reads paths on stdin and prints the shipped subset", () => {
   const out = execFileSync("node", [path.join(__dirname, "filter-shipped-paths.js")], {
-    input: "README.md\nextension/events-popup/popup.js\n\ndev/procedures/this_project/github.md\n",
+    input: "README.md\nextension/events-popup/popup.js\n\ndev/procedures/github.md\n",
     encoding: "utf8",
   });
   assert.equal(out, "extension/events-popup/popup.js\n");

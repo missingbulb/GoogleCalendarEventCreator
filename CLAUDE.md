@@ -4,13 +4,13 @@ Project conventions and how-tos, split by topic so unrelated changes touch
 different files instead of colliding in one monolith. Each section lives in its
 own file under `dev/procedures/` and is imported here:
 
-@dev/procedures/this_project/workflow.md
-@dev/procedures/this_project/github.md
-@dev/procedures/this_project/testing.md
+@dev/procedures/workflow.md
+@dev/procedures/github.md
+@dev/procedures/testing.md
 
 The project's top-level architectural rules of the road live in the "Architecture
 rules of the road" section of
-[`dev/procedures/this_project/highLevelDesign.md`](dev/procedures/this_project/highLevelDesign.md).
+[`dev/procedures/highLevelDesign.md`](dev/procedures/highLevelDesign.md).
 Whenever we agree on a new or changed top-level architectural guideline, update
 that section as part of the same change.
 
@@ -36,14 +36,14 @@ the daily routines that incrementally improve the shipped extractor live in
 when working on that pipeline/routine — neither is needed for day-to-day development.
 
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
-time — live in `dev/procedures/this_project/technicalGotchas.md` (imported below).
+time — live in `dev/procedures/technicalGotchas.md` (imported below).
 
-@dev/procedures/this_project/technicalGotchas.md
+@dev/procedures/technicalGotchas.md
 
 General engineering, agentic, and other practices learned **in this repo** are
-captured locally in the `dev/procedures/this_project/` docs imported above, routed
+captured locally in the `dev/procedures/` docs imported above, routed
 by topic to the doc that owns it (see `workflow.md`) — capture is always local, and
-`this_project/` is the whole local capture surface. A lesson's *portability* is the
+`dev/procedures/` is the whole local capture surface. A lesson's *portability* is the
 Claudinite canon's concern (its growth routine generalizes local docs into the
 shared canon), not a reason to capture it anywhere else; the curated,
 project-agnostic canon lives in the shared Claudinite canon (next section),

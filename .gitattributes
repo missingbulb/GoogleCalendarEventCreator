@@ -8,10 +8,10 @@ dev/requirements/extractor/data/**/*.html linguist-vendored
 # rerun the generator and commit the result, so there's nothing to resolve by
 # hand (and the PNGs are binary — they can't be 3-way merged at all). The driver
 # is per-clone git config set by .claude/cloud-setup.sh (and the one-time local
-# setup in dev/procedures/this_project/github.md); a clone without it just falls back to
+# setup in dev/procedures/github.md); a clone without it just falls back to
 # a normal conflicting merge — still resolvable, only manual. A stale artifact
 # can't slip through: its own test fails (the load-order drift guard, the UI
-# snapshot pixel diff, the coverage gate). See dev/procedures/this_project/github.md.
+# snapshot pixel diff, the coverage gate). See dev/procedures/github.md.
 extension/event-extractors/load-order.generated.json                merge=ours
 dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json   merge=ours
 dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md              merge=ours

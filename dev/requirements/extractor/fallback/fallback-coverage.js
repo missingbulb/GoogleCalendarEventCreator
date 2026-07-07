@@ -360,7 +360,7 @@ function renderMarkdown(cov, watermark) {
   L.push(
     "> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` " +
       "(logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten " +
-      "whenever the tests run locally. See `dev/procedures/this_project/testing.md`."
+      "whenever the tests run locally. See `dev/procedures/testing.md`."
   );
   L.push("");
   L.push(
@@ -378,7 +378,7 @@ function renderMarkdown(cov, watermark) {
     "`start`/`end` count as a match when the values are byte-identical **or** resolve " +
       "to the same absolute instant — a dedicated source localizing to a floating " +
       "time via its `ctz` is the same moment as the fallback's offset-bearing time, " +
-      "not a miss (see `dev/procedures/this_project/testing.md`). A floating time read an hour off, " +
+      "not a miss (see `dev/procedures/testing.md`). A floating time read an hour off, " +
       "or a date that dropped its time, is a real miss."
   );
   L.push("");

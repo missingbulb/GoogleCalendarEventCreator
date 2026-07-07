@@ -203,7 +203,7 @@ IIFE, as `meetup.js` does, rather than touch `extension/event-extractors/helpers
 `.github/workflows/finalize-extractor.yml`, on `extractor-agent-done`. This is the
 **external enforcement** of the agent's containment — it runs in a runner the agent
 doesn't control, so the blast-radius guard is a guarantee rather than a request
-(`dev/procedures/this_project/highLevelDesign.md`). It:
+(`dev/procedures/highLevelDesign.md`). It:
 
 1. **Re-derives the names** (`derive-names.js` → `plan-names.js`) from the issue's
    event URL — the same `mode`/`sourceBase`/`caseName`/`branch`/`host` Phase 1 used,
@@ -348,7 +348,7 @@ The agent never merges the PR. A human must review:
   existing source — that the diff is a minimal, correct change (no refactor, no
   regression to the other cases the source already covers).
 
-"LGTM" from the repo owner is the merge signal (see `dev/procedures/this_project/github.md`). CI
+"LGTM" from the repo owner is the merge signal (see `dev/procedures/github.md`). CI
 must go green before merging; the extractor branch adds a deterministic offline
 integration case (not an e2e/heavy-browser test), so one green run suffices.
 

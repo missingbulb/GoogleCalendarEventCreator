@@ -21,7 +21,7 @@ set -euo pipefail
 
 # Only meaningful in the web/cloud environment, where the Setup script is pasted
 # into settings by hand and can drift. A local clone has no such flag (it follows
-# the manual git-config steps in dev/procedures/this_project/github.md), so skip to avoid a false
+# the manual git-config steps in dev/procedures/github.md), so skip to avoid a false
 # warning.
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0

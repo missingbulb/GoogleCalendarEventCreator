@@ -21,7 +21,7 @@
 set -euo pipefail
 
 # Create the trigger label idempotently — GitHub won't make it on demand the
-# first time the workflow runs (see dev/procedures/this_project/github.md).
+# first time the workflow runs (see dev/procedures/github.md).
 gh label create "extractor-agent-ready" --color 1D76DB \
   --description "Branch scaffolded; the implementation agent should write extract() + the case" \
   2>/dev/null || true
