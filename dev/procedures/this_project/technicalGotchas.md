@@ -2,7 +2,7 @@
 
 Non-obvious footguns specific to this codebase — traps that have cost real
 debugging time, recorded so they bite only once. Overarching architecture rules
-live in [this_project/highLevelDesign.md](highLevelDesign.md).
+live in [highLevelDesign.md](highLevelDesign.md).
 
 **Scope — project-wide footguns only.** A trap you'd only trip over *while
 editing one specific file or function* (a mistake of **commission**, made with
@@ -12,7 +12,7 @@ stays off the always-loaded `CLAUDE.md` budget. Keep an entry here only when
 Claude could hit it *without* reading the locus file — a mistake of **omission**
 (you must know it to decide whether to open/avoid the file) or a cross-cutting
 trap spanning files. See the full locality rule in
-[this_project/workflow.md](workflow.md).
+[workflow.md](workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
   us.** Page fetching is delegated wholesale to ScraperAPI (see `scraperapi_fetch` in

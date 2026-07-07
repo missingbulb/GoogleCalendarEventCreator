@@ -23,6 +23,12 @@ on:
   issues:
     types: [labeled]
 
+# GitHub's implicit run shell is bash -e without pipefail, so a failing piped
+# command still shows the step green. Force pipefail for every run: step.
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: write       # push the blast-radius revert commit
   pull-requests: write  # open the PR
