@@ -117,7 +117,7 @@ function skipMessage(reason, { host, duplicateOf }) {
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
         `fallback **denylist** — we deliberately don't extract events there, so a custom source ` +
         `won't be added.\n\n` +
-        `See the host classifier in \`extension/config.js\` and the policy in \`extraction-policy.md\`. ` +
+        `See the host classifier in \`extension/config.js\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
       );
     case "allow":
@@ -125,7 +125,7 @@ function skipMessage(reason, { host, duplicateOf }) {
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
         `fallback **allowlist** — the generic extractor already handles it, so a custom source ` +
         `isn't needed.\n\n` +
-        `See the host classifier in \`extension/config.js\` and the policy in \`extraction-policy.md\`. ` +
+        `See the host classifier in \`extension/config.js\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
       );
     case "sample":

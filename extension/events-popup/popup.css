@@ -439,3 +439,28 @@ body {
   height: 13px;
   background-color: #dadce0;
 }
+/* The inline "how this extension finds events" explanation the "Disagree?" link
+   expands to, in place of that link, inside the empty state (source-request-view.js
+   buildPolicyPanel). A full-width, left-aligned text block — the empty state centers
+   its children, so width:100% + left alignment reads as a paragraph, not a centered
+   caption — that grows the popup to fit. Stacked vertically like the rest of the
+   popup so the snapshot renderer lays it out (its one >1-child display rule). */
+.policy-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+}
+.policy-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #202124;
+  margin: 0;
+}
+.policy-text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5f6368;
+  margin: 0;
+}

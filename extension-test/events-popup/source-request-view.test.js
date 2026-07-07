@@ -10,9 +10,9 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 // source-request-view.js is an ES module; import it before the tests run.
-let buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill;
+let buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill;
 before(async () => {
-  ({ buildSourceRequestUrl, buildPolicyDocUrl, sourceRequestPrefill } = await import(
+  ({ buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "source-request-view.js"))
   ));
 });
@@ -168,19 +168,12 @@ test("defaults the timezone to the user's current zone when the fallback found n
   assert.equal(sourceRequestPrefill({ url: "https://example.com/e" }, null).timezone, here);
 });
 
-// The "Disagree?" policy link (makePolicyLink) opens the public policy doc.
-// (Hostname/path asserted without repeating the repo slug literal — that string
-// is single-sourced and guarded by the shared-constants check in .claudinite-checks.json.)
-test("the policy-doc link points at a markdown doc in this repo on github.com", () => {
-  const u = new URL(buildPolicyDocUrl());
+// The inline explanation's "open an issue" link opens a blank issue on this repo.
+// (Hostname/path asserted without repeating the repo slug literal — that string is
+// single-sourced and guarded by the shared-constants check in .claudinite-checks.json.)
+test("the \"open an issue\" link points at a blank new-issue form in this repo on github.com", () => {
+  const u = new URL(buildIssueUrl());
   assert.equal(u.hostname, "github.com");
-  assert.ok(u.pathname.endsWith("/extraction-policy.md"), `unexpected policy path: ${u.pathname}`);
-});
-
-test("the policy doc the link points at actually exists on disk (the link can't rot)", () => {
-  // .../blob/<branch>/<repo-relative-path>
-  const m = new URL(buildPolicyDocUrl()).pathname.match(/\/blob\/[^/]+\/(.+)$/);
-  assert.ok(m, "policy URL must be a /blob/<branch>/<path> link");
-  const docPath = path.join(__dirname, "..", "..", m[1]);
-  assert.ok(fs.existsSync(docPath), `policy doc missing on disk: ${m[1]}`);
+  assert.ok(u.pathname.endsWith("/issues/new"), `unexpected issue path: ${u.pathname}`);
+  assert.equal(u.search, "", "a blank issue — no template/labels, unlike the source-request form");
 });
