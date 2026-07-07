@@ -170,7 +170,7 @@ test("defaults the timezone to the user's current zone when the fallback found n
 
 // The inline explanation's "open an issue" link opens a blank issue on this repo.
 // (Hostname/path asserted without repeating the repo slug literal — that string is
-// single-sourced; see dev/procedures/test/uber/shared_constants/repo-slug.json.)
+// single-sourced and guarded by the shared-constants check in .claudinite-checks.json.)
 test("the \"open an issue\" link points at a blank new-issue form in this repo on github.com", () => {
   const u = new URL(buildIssueUrl());
   assert.equal(u.hostname, "github.com");
