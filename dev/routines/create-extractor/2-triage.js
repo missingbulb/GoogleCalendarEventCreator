@@ -1,12 +1,11 @@
-// Pre-flight triage for the Auto-implement-extractor workflow
-// (.github/workflows/auto-implement-extractor.yml). Before spending an agent
-// run, decide how to handle the request. The host's situation sorts it into one
-// of these:
+// Triage for the create-extractor routine (routine.md): before the agent does any
+// work, decide how to handle an extractor-request issue. The host's situation
+// sorts it into one of these:
 //   "supported" — the host already has a dedicated source. We DON'T close it any
 //                 more: the pipeline runs in **supported mode** and adds a fresh
 //                 integration case to that existing source (hardening it against a
-//                 second real page) instead of scaffolding a new one. plan-names.js
-//                 resolves which existing source via the sources' own matches().
+//                 second real page) instead of scaffolding a new one; resolve-
+//                 source.js resolves which existing source via the sources' matches().
 //   "deny"      — the host is on the fallback denylist.            } these three
 //   "allow"     — the host is on the fallback allowlist (generic   } still CLOSE
 //                 extractor already handles it).                    } the request
@@ -22,27 +21,49 @@
 // resolve-source.js (the sources' matches()) for supported, so the workflow and
 // the popup can never disagree about a host.
 //
-// As a script (run by the workflow):
+// CLI (run by the routine's agent):
 //   in  (env):  ISSUE_BODY, ISSUE_TITLE, ISSUE_NUMBER — the issue's raw fields
-//   in  (file): $OPEN_REQUESTS_FILE (default /tmp/open-requests.json) — the
-//               `gh issue list --json number,title,body` array of OTHER open
-//               extractor-request issues (the workflow gathers it; this script
-//               never touches the network, so the unit tests stay offline)
-//   out (GITHUB_OUTPUT): skipAgent, reason, mode, url, host, slug, sourceBase,
-//                        caseName, branch, sourcePath, casePath; plus leader=<#>
-//                        when reason="sample" (the URL to fold into that leader
-//                        issue is the emitted `url`)
-//   out (file, when skipping): /tmp/triage-message.md — the closing comment
-// As a module (the tests): exports firstUrl() and runTriage().
+//   in  (file): $OPEN_REQUESTS_FILE (default /tmp/open-requests.json) — the array
+//               of OTHER open extractor-request issues ([{number,title,body}]),
+//               which the agent gathers via the GitHub tools and writes here (the
+//               shell has no GitHub API); this script never touches the network, so
+//               the unit tests stay offline. Missing -> the sample check is skipped.
+//   out (stdout): one JSON object — { skipAgent, reason, mode, url, host,
+//                 waitSelector, slug, sourceBase, caseName, branch, sourcePath,
+//                 casePath, duplicateOf, message }
+// As a module (the tests): exports firstUrl(), waitSelectorOf(), runTriage().
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
-const { planNames } = require("./plan-names");
+const { namesFor } = require("./extractor-naming");
+const { resolveSourceBaseName } = require("./resolve-source");
 
-const MESSAGE_PATH = "/tmp/triage-message.md";
 const OPEN_REQUESTS_PATH = process.env.OPEN_REQUESTS_FILE || "/tmp/open-requests.json";
+
+// Turn an issue's event URL (+ number) into every mode-aware name the routine
+// uses, for BOTH modes. The authority on "is this host already supported" is an
+// existing source's matches() (resolve-source, run against the committed tree):
+//   "new"       — no source matches yet. Scaffold a brand-new source; the slug
+//                 names the source file, the branch, AND the (single) case.
+//   "supported" — a source already matches. Don't add a source; add a fresh
+//                 integration case to it, keyed by the EXISTING source's file name
+//                 + the issue number (NOT the slug — cinema.co.il is served by
+//                 telavivcinematheque.js), so repeated requests each get a unique
+//                 case + branch. (Run against `main`: a new-mode source exists only
+//                 on the feature branch, so resolve-source returns "" for it there.)
+function planNames(url, issueNumber) {
+  const { host, slug, caseName: newCase, matchesRegex } = namesFor(url);
+  const existingBase = slug ? resolveSourceBaseName(url) : "";
+  const mode = existingBase ? "supported" : "new";
+  const sourceBase = existingBase || slug;
+  const caseName = mode === "supported" ? `${sourceBase}-${issueNumber}` : newCase;
+  const branch = sourceBase ? `claude/extractor/${caseName}` : "";
+  const sourcePath = sourceBase ? `extension/event-extractors/custom/${sourceBase}.js` : "";
+  const casePath = caseName ? `dev/requirements/extractor/expected/${caseName}.json` : "";
+  return { host, slug, mode, sourceBase, caseName, branch, sourcePath, casePath, matchesRegex };
+}
 
 // The first http(s) URL in some text. The request form makes the URL field
 // required and lists it first, so the first URL in the body is the event page.
@@ -193,12 +214,12 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
 
 module.exports = { firstUrl, waitSelectorOf, runTriage };
 
-// CLI: read the issue + the gathered open requests, emit the decision for the
-// workflow. Fails OPEN — any error proceeds to the agent rather than silently
-// dropping a real request.
+// CLI (run by the routine's agent): read the issue fields + the gathered open
+// peers, print the whole decision as one JSON object to stdout for the agent to
+// read. A short human line goes to stderr. Fails OPEN — any error prints a
+// proceed decision rather than silently dropping a real request.
 if (require.main === module) {
   (async () => {
-    const openRequests = readOpenRequests();
     const res = await runTriage(
       {
         body: process.env.ISSUE_BODY,
@@ -206,47 +227,28 @@ if (require.main === module) {
         number: process.env.ISSUE_NUMBER,
       },
       undefined,
-      openRequests
+      readOpenRequests()
     );
     if (res.skipAgent) {
-      fs.writeFileSync(MESSAGE_PATH, res.message);
       const detail =
         res.reason === "sample" ? `extra sample for #${res.duplicateOf}` : `on the ${res.reason}list`;
-      console.log(`Auto-triaged: ${res.host || res.url} (${detail}) — closing, no agent run.`);
+      console.error(`Auto-triaged: ${res.host || res.url} (${detail}) — close, no extractor.`);
     } else {
-      console.log(
+      console.error(
         res.url
-          ? `Proceeding for ${res.host || res.url} in ${res.mode} mode (case ${res.caseName}).`
-          : "No URL found in the issue — proceeding to the agent."
+          ? `Proceed for ${res.host || res.url} in ${res.mode} mode (case ${res.caseName}).`
+          : "No URL found in the issue."
       );
     }
-    // When it proceeds (skipAgent=false), the mode-aware names feed the probe +
-    // Phase-1 steps: `mode` (new|supported) decides whether Phase 1 scaffolds a
-    // new source or just a case; `sourcePath`/`casePath`/`branch`/`caseName` name
-    // the files. Empty when the body had no parseable URL — the probe step then
-    // stops the run. `leader` is the issue a "sample" defers to (else "").
-    writeOutputs({
-      skipAgent: res.skipAgent,
-      reason: res.reason,
-      mode: res.mode,
-      url: res.url,
-      host: res.host,
-      waitSelector: res.waitSelector,
-      slug: res.slug,
-      sourceBase: res.sourceBase,
-      caseName: res.caseName,
-      branch: res.branch,
-      sourcePath: res.sourcePath,
-      casePath: res.casePath,
-      leader: res.duplicateOf ?? "",
-    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
   })().catch((e) => {
-    console.error("Triage check errored — proceeding to the agent (fail open):", e);
-    writeOutputs({ skipAgent: false, reason: "" });
+    console.error("Triage errored — proceeding (fail open):", e);
+    process.stdout.write(JSON.stringify({ skipAgent: false, reason: "" }) + "\n");
   });
 
-  // The OTHER open extractor-request issues, gathered by the workflow via `gh`.
-  // Missing/unreadable file -> [] (fail open: the duplicate check is skipped).
+  // The OTHER open extractor-request issues, which the agent gathers via the
+  // GitHub tools and writes to OPEN_REQUESTS_FILE (the shell has no GitHub API).
+  // Missing/unreadable -> [] (fail open: the duplicate check is simply skipped).
   function readOpenRequests() {
     try {
       const parsed = JSON.parse(fs.readFileSync(OPEN_REQUESTS_PATH, "utf8"));
@@ -254,11 +256,5 @@ if (require.main === module) {
     } catch (e) {
       return [];
     }
-  }
-
-  function writeOutputs(outputs) {
-    if (!process.env.GITHUB_OUTPUT) return;
-    const lines = Object.entries(outputs).map(([k, v]) => `${k}=${v}`);
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, lines.join("\n") + "\n");
   }
 }

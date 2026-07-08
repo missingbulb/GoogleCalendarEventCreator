@@ -24,7 +24,7 @@ Portable agent-architecture principles that aren't specific to this project (the
 unattended-agent judgment boundary, the bounded-and-enforced write surface) are
 maintained as portable, project-agnostic rules outside this repo. The worked
 examples for both are this repo's auto-extractor pipeline
-([auto-extractor.md](../routines/create-extractor/auto-extractor.md)).
+([routine.md](../routines/create-extractor/routine.md)).
 
 ## How extraction works
 

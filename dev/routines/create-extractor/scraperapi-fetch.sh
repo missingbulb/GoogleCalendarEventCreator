@@ -5,10 +5,10 @@
 # most event sites, and ScraperAPI's residential proxy + render=true (real JS
 # rendering) gets a real page. This file owns every workaround we've had to add for
 # that specific API, so they're visible and in one spot rather than smeared across
-# the pipeline. Split out of phase1-prepare.sh so it can be reused and unit-tested in
+# the pipeline. Split out of 3-prepare.sh so it can be reused and unit-tested in
 # isolation (dev/routines/create-extractor/test/scraperapi-fetch.test.js). Sourcing this file
 # only DEFINES the function; running it directly
-# (scraperapi-fetch.sh <url> <out> [wait_selector]) invokes it. See auto-extractor.md.
+# (scraperapi-fetch.sh <url> <out> [wait_selector]) invokes it. See routine.md.
 #
 # The ScraperAPI request we build (query params on api.scraperapi.com):
 #   render=true            execute the page's JS, so a single-page-app returns real
@@ -96,7 +96,7 @@ scraperapi_fetch() {
   fi
 }
 
-# Run as a script; a no-op when sourced (so phase1-prepare.sh and the tests can reuse
+# Run as a script; a no-op when sourced (so 3-prepare.sh and the tests can reuse
 # the function without firing a fetch).
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   scraperapi_fetch "$@"

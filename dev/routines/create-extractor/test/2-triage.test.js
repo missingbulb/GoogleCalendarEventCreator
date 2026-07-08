@@ -1,5 +1,5 @@
 // Offline unit tests for the auto-extractor pre-flight triage
-// (triage-extractor-request.js): the workflow step that closes a request
+// (2-triage.js): the workflow step that closes a request
 // whose host is already on config.js's fallback allow/denylist, before spending
 // an agent run. Lists are injected so the cases don't depend on the shipped
 // (empty) config; the host-matching itself is covered in fallback-policy.test.js.
@@ -7,7 +7,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { firstUrl, waitSelectorOf, runTriage } = require("../triage-extractor-request");
+const { firstUrl, waitSelectorOf, runTriage } = require("../2-triage");
 
 // A GitHub issue-form body renders each field under a "### <label>" heading.
 const bodyWith = (url) => `### URL\n\n${url}\n\n### Name\n\n_No response_\n`;

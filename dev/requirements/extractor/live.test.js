@@ -3,7 +3,7 @@
 //
 // These run OFFLINE against committed cached HTML files in
 // data/, recorded from each site by the auto-extractor pipeline
-// (dev/routines/create-extractor/phase1-prepare.sh's scraperapi_fetch, which
+// (dev/routines/create-extractor/3-prepare.sh's scraperapi_fetch, which
 // fetches through ScraperAPI). Asserting against a cached copy of the real page
 // makes the suite deterministic and runnable anywhere (no network), while still
 // reflecting each site's current markup.
@@ -67,7 +67,7 @@
 // `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
 // `extractor-request` issue with the page URL — Phase 1 fetches it via ScraperAPI);
 // to record one by hand, fetch the .url through ScraperAPI with a key (see
-// dev/routines/create-extractor/phase1-prepare.sh's scraperapi_fetch). Run the suite
+// dev/routines/create-extractor/3-prepare.sh's scraperapi_fetch). Run the suite
 // once to see the actual extracted values in the failure output, then copy them
 // into `expected`.
 "use strict";
@@ -114,7 +114,7 @@ for (const file of caseFiles) {
     const cachedHtmlPath = dataFile(`${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
-      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see dev/routines/create-extractor/phase1-prepare.sh`
+      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see dev/routines/create-extractor/3-prepare.sh`
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Quality floor for an agent-produced integration case, enforced by
-// phase2-finalize.sh BEFORE a PR is opened — a deterministic backstop to the
+// 4-postconditions.sh BEFORE a PR is opened — a deterministic backstop to the
 // agent's Step-1 judgment (architecture rule: bound the agent's output from
 // outside the agent). A case fails the floor two ways:
 //
@@ -44,7 +44,7 @@ function caseVerdict(caseObj) {
 module.exports = { caseVerdict };
 
 // CLI: print the verdict code for the case file path in $CASE_FILE (used by
-// phase2-finalize.sh). A missing/unparseable file reads as "empty".
+// 4-postconditions.sh). A missing/unparseable file reads as "empty".
 if (require.main === module) {
   let obj = null;
   try {
