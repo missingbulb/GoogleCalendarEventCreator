@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Postconditions for the daily fallback-coverage routine
-# (dev/incremental-maintenance/auto-fallback-coverage/routine.md).
+# (dev/routines/auto-fallback-coverage/routine.md).
 #
 # Runs AFTER the agent has made a candidate change, and bundles every
 # deterministic validation that a "win" is clean, generic, real and non-regressing.

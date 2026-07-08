@@ -7,13 +7,13 @@
 // source's matches() and vice-versa, so the workflow
 // scaffolds the source (with its matches() filled) before calling this.
 //
-//   node dev/create-extractor/add-supported-domain.js <host>
+//   node dev/routines/create-extractor/add-supported-domain.js <host>
 "use strict";
 
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join(__dirname, "..", "..", "extension", "fallback-lists.json");
+const FILE = path.join(__dirname, "..", "..", "..", "extension", "fallback-lists.json");
 
 // Pure: return `list` with `host` present, sorted and de-duplicated.
 function withDomain(list, host) {

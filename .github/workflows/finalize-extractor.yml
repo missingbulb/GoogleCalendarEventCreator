@@ -10,7 +10,7 @@ run-name: "Finalize extractor · #${{ github.event.issue.number }} — ${{ githu
 # split out because the agent now runs in its own environment (web), not inside
 # Actions. It re-derives the branch from the issue, enforces the agent's two-file
 # blast radius against the scaffold commit, runs the quality floor, re-verifies,
-# opens the PR, and dispatches test.yml. See dev/create-extractor/auto-extractor.md.
+# opens the PR, and dispatches test.yml. See dev/routines/create-extractor/auto-extractor.md.
 #
 # Why a label (not the agent calling the script directly): Phase 2 is the EXTERNAL
 # enforcement of the agent's containment — the blast-radius guard reverts whatever
@@ -67,7 +67,7 @@ jobs:
         # Tee into a shared log the failure step reads, so a genuine break reports WHY
         # on the issue (a later step can't see an earlier one's output otherwise).
         # pipefail is on by the default shell, so the pipe doesn't mask a non-zero exit.
-        run: node dev/create-extractor/derive-names.js 2>&1 | tee -a "$RUNNER_TEMP/finalize.log"
+        run: node dev/routines/create-extractor/derive-names.js 2>&1 | tee -a "$RUNNER_TEMP/finalize.log"
 
       - name: Configure git
         run: |
@@ -91,7 +91,7 @@ jobs:
           HOST:         ${{ steps.names.outputs.host }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO:         ${{ github.repository }}
-        run: bash dev/create-extractor/phase2-finalize.sh 2>&1 | tee -a "$RUNNER_TEMP/finalize.log"
+        run: bash dev/routines/create-extractor/phase2-finalize.sh 2>&1 | tee -a "$RUNNER_TEMP/finalize.log"
 
       # A genuine break only (an expected non-PR verdict — empty / degenerate — is
       # handled green inside the script). Reaching here means npm ci, the
@@ -113,7 +113,7 @@ jobs:
             [ -n "${GH_TOKEN:-}" ] && REASON="${REASON//${GH_TOKEN}/***}"
           fi
           {
-            echo "⚠️ The finalize-extractor workflow failed unexpectedly. [View run]($RUN_URL). The agent's work is on its branch; manual finalization may be needed — see dev/create-extractor/adding-a-source.md."
+            echo "⚠️ The finalize-extractor workflow failed unexpectedly. [View run]($RUN_URL). The agent's work is on its branch; manual finalization may be needed — see dev/routines/create-extractor/adding-a-source.md."
             if [ -n "$REASON" ]; then
               printf '\n<details><summary>Why it failed (last lines of the run log)</summary>\n\n```\n%s\n```\n\n</details>\n' "$REASON"
             fi

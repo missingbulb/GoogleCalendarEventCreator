@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 1 of the auto-implement-extractor pipeline — all deterministic, run by the
 # workflow (.github/workflows/auto-implement-extractor.yml), not the agent. See
-# dev/create-extractor/auto-extractor.md.
+# dev/routines/create-extractor/auto-extractor.md.
 #
 # Two modes (set by triage via $MODE):
 #   new       — the host has no source yet. Branch off main, record the event page,
@@ -19,7 +19,7 @@
 # (set by the workflow step). cd's to the repo root, so it runs from anywhere.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$HERE/../.."
+cd "$HERE/../../.."
 
 MODE="${MODE:-new}"
 
@@ -27,7 +27,7 @@ MODE="${MODE:-new}"
 # ScraperAPI-specific handling (tier escalation on failure, .il geo-targeting, the
 # #279 non-HTML→fail guard, and the #603 wait_for_selector). Lives in
 # scraperapi-fetch.sh so it can be unit-tested in isolation
-# (dev/create-extractor/test/scraperapi-fetch.test.js). Sourcing only defines the function.
+# (dev/routines/create-extractor/test/scraperapi-fetch.test.js). Sourcing only defines the function.
 source "$HERE/scraperapi-fetch.sh"
 
 if [ -z "${EVENT_URL:-}" ]; then

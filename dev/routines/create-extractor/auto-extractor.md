@@ -36,7 +36,7 @@ concerns now live with that routine, not in this repo. Everything deterministic 
 before the agent (triage, scaffold) and after it (blast-radius, re-verify,
 PR) — stays in the two workflows; the agent owns only the judgment step. This
 covers the mechanics; what a *correct* extractor looks like lives in
-`dev/create-extractor/adding-a-source.md`.
+`dev/routines/create-extractor/adding-a-source.md`.
 
 ## How to trigger it
 
@@ -57,7 +57,7 @@ label by hand, as long as the issue body contains an event page URL.
 ## Where the pieces live
 
 Almost everything for this pipeline is one self-contained folder,
-`dev/create-extractor/`:
+`dev/routines/create-extractor/`:
 
 - `agent-prompt-extractor.md` — the agent's prompt, **self-contained** (no
   build-time interpolation): the web routine points the agent at it, and it tells
@@ -79,7 +79,7 @@ Almost everything for this pipeline is one self-contained folder,
   and all our ScraperAPI-specific handling (`scraperapi_fetch`: tier escalation on
   failure, `.il` geo-targeting, the #279 non-HTML→fail guard, and the #603
   `wait_for_selector`); `phase1-prepare.sh` sources it. It's split out so the fetch
-  logic is unit-tested in isolation (`dev/create-extractor/test/scraperapi-fetch.test.js`).
+  logic is unit-tested in isolation (`dev/routines/create-extractor/test/scraperapi-fetch.test.js`).
 
 Three files **must** live under `.github/` because GitHub pins them there. They
 stay put and refer back to the folder:
@@ -335,7 +335,7 @@ issue.
   undownloadable-page case above.
 
 In any of these, fall back to the manual process in
-`dev/create-extractor/adding-a-source.md`.
+`dev/routines/create-extractor/adding-a-source.md`.
 
 ## Review gate
 
@@ -354,7 +354,7 @@ integration case (not an e2e/heavy-browser test), so one green run suffices.
 
 ## Updating the agent prompt
 
-The prompt is `dev/create-extractor/agent-prompt-extractor.md`. It is
+The prompt is `dev/routines/create-extractor/agent-prompt-extractor.md`. It is
 **self-contained** — no placeholders, no build step: the web routine points the
 agent at it, and the agent derives the per-issue specifics (mode, branch, source
 path, case path, host) from the issue's event URL via `resolve-source.js` +

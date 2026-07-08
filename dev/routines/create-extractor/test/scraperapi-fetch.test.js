@@ -1,4 +1,4 @@
-// Tests for scraperapi_fetch (dev/create-extractor/scraperapi-fetch.sh) — our single
+// Tests for scraperapi_fetch (dev/routines/create-extractor/scraperapi-fetch.sh) — our single
 // ScraperAPI page fetch and the home of its API-specific handling.
 //
 // Retry policy under test (the deliberate #279/#587 rule): retry on FAILURE, never
