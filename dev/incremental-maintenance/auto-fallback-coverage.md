@@ -9,6 +9,36 @@ correctly change nothing**: the gate already captures every prior win, so a
 genuinely new *generic* win is rare, and a forced or fake one is worse than
 nothing. A no-win run means no branch and no PR.
 
+## Precondition — skip the run when nothing meaningful changed in the last 24h
+
+**Before doing anything else** (before the baseline `npm install` / `test:live`
+run), gate the whole routine on there having been a **meaningful code change in the
+last 24 hours** on the base branch (`main`). Most days nothing lands, and a run
+over unchanged code re-derives yesterday's answer and burns a full Opus run for
+nothing — so an idle repo should skip. This is just a cheap "has anything happened
+lately?" gate, **not** a prediction that the change will yield a win.
+
+A **meaningful code change** is any commit in the window that touches real source —
+i.e. *not* a commit whose files are entirely docs (`*.md`) or derived **GENERATED**
+/ generated artifacts (those are outputs, not inputs). It is **deliberately broad
+and reusable** across the daily routines: don't try to prove a change is relevant
+to fallback coverage specifically before running. **When in doubt, run** — a run
+that finds nothing is cheap and self-correcting (it just makes no PR), whereas a
+too-clever gate that skips a real opportunity is not. So the only things that
+suppress a run are an idle repo or pure docs/generated churn.
+
+Check it directly on the fresh clone, e.g.:
+
+```sh
+git log --since="24 hours ago" origin/main --name-only --pretty=format: \
+  | grep -Ev '(^$|\.md$|GENERATED|\.generated\.)' | grep -q . || echo "nothing meaningful"
+```
+
+If nothing meaningful changed, **stop immediately** — no baseline run, no branch,
+no PR, and nothing to log on the tracking issue — and print
+`"No meaningful code changes in the last 24h — skipping fallback-coverage run."`
+Otherwise proceed to the baseline run below.
+
 ## Scope — the only code it may change
 
 Just the **generic** extractor: `extension/event-extractors/extract-unsupported.js` and the shared
