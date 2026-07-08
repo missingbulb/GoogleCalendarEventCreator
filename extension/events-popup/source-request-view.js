@@ -13,8 +13,10 @@
 //
 // An ES module, loaded on demand by popup.js via dynamic import(). The two
 // `make*` functions are the controller's entry points; `buildSourceRequestUrl`
-// and `buildIssueUrl` are also exported for the unit tests. This is the
-// source-request half of the former background.js.
+// and `buildIssueUrl` are also exported for the unit tests. The repo slug and
+// template filename are exported too, so the unit tests assert against the single
+// source of these strings (importing them) rather than re-hardcoding the literals.
+// This is the source-request half of the former background.js.
 //
 // The "Suggest Correction" link targets the "Event source request" issue form
 // (.github/ISSUE_TEMPLATE/extractor-request.yml): a logged-in GitHub user lands
@@ -27,8 +29,8 @@
 // The form applies the `extractor-request` label, which kicks off the
 // auto-implement-extractor workflow — so a submitted request flows straight into
 // the agent that writes the extractor and opens a PR.
-const SOURCE_REQUEST_REPO = "missingbulb/GoogleCalendarEventCreator";
-const SOURCE_REQUEST_TEMPLATE = "extractor-request.yml";
+export const SOURCE_REQUEST_REPO = "missingbulb/GoogleCalendarEventCreator";
+export const SOURCE_REQUEST_TEMPLATE = "extractor-request.yml";
 const SOURCE_REQUEST_LABEL = "extractor-request";
 
 // The "how this extension finds events" explanation the "Disagree?" link expands

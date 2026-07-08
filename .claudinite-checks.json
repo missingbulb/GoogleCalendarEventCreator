@@ -21,14 +21,6 @@
   ],
   "sharedConstants": [
     {
-      "what": "extractor-request.yml template filename",
-      "value": "extractor-request.yml",
-      "counts": {
-        "extension/events-popup/source-request-view.js": 2,
-        "extension-test/events-popup/source-request-view.test.js": 2
-      }
-    },
-    {
       "what": "release zip filename — must match between the build script and the thin workflow stubs that pass it to the Claudinite canon workflows (zip_path in release/daily, zip_name in publish/daily)",
       "value": "google-calendar-event-creator.zip",
       "counts": {
@@ -36,14 +28,6 @@
         ".github/workflows/release.yml": 1,
         ".github/workflows/publish-chrome-store.yml": 1,
         ".github/workflows/daily-release.yml": 2
-      }
-    },
-    {
-      "what": "GitHub repo slug",
-      "value": "missingbulb/GoogleCalendarEventCreator",
-      "counts": {
-        "extension/events-popup/source-request-view.js": 1,
-        "extension-test/events-popup/source-request-view.test.js": 1
       }
     },
     {
