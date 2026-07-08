@@ -30,7 +30,7 @@ needed for day-to-day development.
 The auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
 site support) is likewise self-contained in
 [`dev/routines/create-extractor/`](dev/routines/create-extractor/) (start at
-[`dev/routines/create-extractor/auto-extractor.md`](dev/routines/create-extractor/auto-extractor.md));
+[`dev/routines/create-extractor/routine.md`](dev/routines/create-extractor/routine.md));
 the daily routines that incrementally improve the shipped extractor live alongside it
 under [`dev/routines/`](dev/routines/) (currently
 [`dev/routines/auto-fallback-coverage/`](dev/routines/auto-fallback-coverage/)). Read

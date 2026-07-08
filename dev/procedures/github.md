@@ -42,10 +42,10 @@ against the branch, and a UI change's reviewable output (the pixel diff GitHub
 renders, and the inline gallery in the branch's `dev/requirements/requirements.md`)
 needs a branch pushed to GitHub to view at all.
 
-(Three portable CI/automation rules — `GITHUB_TOKEN` doesn't trigger another
-workflow, an automated job needs a unique branch per run, and a workflow adding a
-brand-new label must create it first — are relied on by this repo's auto-extractor
-pipeline; see [auto-extractor.md](../routines/create-extractor/auto-extractor.md).)
+(The create-extractor pipeline used to be two GitHub Actions workflows with an
+agent between them; it is now a single Claude Code routine that owns every stage —
+see [routine.md](../routines/create-extractor/routine.md) — so the portable
+workflow-relay rules it used to lean on no longer apply.)
 
 ## Alert on silent workflow failures
 
@@ -68,8 +68,9 @@ What this file owns is this repo's classification:
   call.
 - `test.yml` is attended PR CI: a red required check blocks merge with the author
   watching — no reporter.
-- `auto-implement-extractor.yml` / `finalize-extractor.yml` already flag the
-  triggering issue on failure (comment + label) — no reporter.
+- The **create-extractor routine** is a Claude Code routine, not an Actions
+  workflow — it hands a failed run to a human on the issue
+  (`extractor-blocked-needs-human`), so it's outside this Actions classification.
 - A **new** unattended workflow adds a failure job per the action header's recipe.
 
 ## Driving a merge cheaply (wall time + tokens)

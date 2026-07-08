@@ -2,7 +2,7 @@
 // lookup the auto-implement-extractor pipeline needs for its "supported" mode
 // (a request whose host already has a dedicated extractor: instead of closing it,
 // the pipeline adds a fresh integration case for the submitted page, hardening the
-// existing source). See auto-extractor.md.
+// existing source). See routine.md.
 //
 // The crux: a source's file name is NOT derivable from the host (cinema.co.il is
 // handled by telavivcinematheque.js, slug "cinema" ≠ basename
@@ -17,8 +17,8 @@
 // host regex) runs here. We load sources ONE AT A TIME so a newly-pushed matcher
 // can be attributed to the file that added it.
 //
-// As a module (tests + derive-names/triage): exports resolveSourceBaseName().
-// As a script (the workflows):
+// As a module (tests + triage): exports resolveSourceBaseName().
+// As a script (the routine):
 //   node dev/routines/create-extractor/resolve-source.js <event-url-or-host>
 //   prints the basename (e.g. "telavivcinematheque") to stdout, or exits 1 when
 //   no source matches.

@@ -203,25 +203,23 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- Cached HTML is recorded by the **auto-extractor pipeline**: the `scraperapi_fetch`
-  bash function in `dev/routines/create-extractor/phase1-prepare.sh` fetches
+- Cached HTML is recorded by the **create-extractor routine**: the `scraperapi_fetch`
+  bash function in `dev/routines/create-extractor/3-prepare.sh` fetches
   the event page via an inline curl→ScraperAPI (`render=true`, so a single-page-app
-  records with real data) when Phase 1 runs.
+  records with real data) in the routine's prepare stage.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
   push to `main`: it runs the unit tests, then the integration tests against
   the cached HTML files **already committed** in `data/` — it never fetches or
   refreshes anything itself, so it's fast and has no network dependency.
-- There is **no standalone refresh workflow** anymore. A cached page is
-  (re)recorded only by the auto-extractor pipeline — file (or re-file) an
-  `extractor-request` issue for the page and it's fetched via ScraperAPI in
-  Phase 1 — or by hand by fetching the `.url` through ScraperAPI with a key (see
-  `scraperapi_fetch` in `phase1-prepare.sh`). There's no one-step push path to refresh
-  a drifted fixture now.
+- There is **no standalone refresh workflow**. A cached page is (re)recorded only
+  by the create-extractor routine — file (or re-file) an `extractor-request` issue
+  for the page and it's fetched via ScraperAPI in the routine's prepare stage — or
+  by hand by fetching the `.url` through ScraperAPI with a key (see `scraperapi_fetch`
+  in `3-prepare.sh`). There's no one-step push path to refresh a drifted fixture.
 
-The cached-HTML commit is pushed with the default `GITHUB_TOKEN` (whose pushes
-never trigger another workflow run), carries a `[skip ci]` marker, and the
-Tests workflow ignores pushes that only touch `data/**` — belt-and-suspenders
-against that commit ever re-triggering CI.
+The routine records the page and commits it on the extractor branch (the scaffold
+commit), so the cached HTML lands in that extractor's own PR and is reviewed with
+it — there's no separate cached-HTML commit or CI-suppression dance any more.
 
 ### Adding a cached integration case
 
@@ -431,13 +429,13 @@ commission-while-editing trap goes in the file's header comment rather than
   `CHROME_PATH`, so verify changes to it via CI).
 - **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
   the inline curl→ScraperAPI in `scraperapi_fetch`
-  (`dev/routines/create-extractor/phase1-prepare.sh`), which uses
+  (`dev/routines/create-extractor/3-prepare.sh`), which uses
   `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
   so a single-page-app records with real data. The repo carries no SPA-shell
   detector or headless-Chrome render of its own (`spa-shell.js` /
   `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
   fetching moved to ScraperAPI). The recorder (`scraperapi_fetch` in
-  `scraperapi-fetch.sh`, sourced by `phase1-prepare.sh`) is now just fetch → write.
+  `scraperapi-fetch.sh`, sourced by `3-prepare.sh`) is now just fetch → write.
   The aid for a flaky SPA render is a **`Wait-for selector`** a source request can
   carry — the extension derives it from the user's live, hydrated page
   (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
