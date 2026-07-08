@@ -36,10 +36,14 @@
 #      body-text scan reads document.body.textContent, which INCLUDES <script> JSON
 #      (Next.js __NEXT_DATA__), <noscript>, <style>, <select>/<option> — none of
 #      which Chrome's innerText exposes, so a win matching only such content is
-#      illusory. (grep can't see CSS-hidden text — eyeball that separately. And
-#      widening a body-text scan-window cap can make a DIFFERENT case start matching
-#      a <script> blob it never reached: before raising any cap, re-run the whole
-#      corpus at the new size and confirm no other case gains a wrong value.)
+#      illusory; a real win comes from visible text or a Chrome-read DOM attribute
+#      (meta / JSON-LD / microdata / <time datetime>). (grep can't see CSS-hidden
+#      text — eyeball that separately. And widening a body-text scan-window cap can
+#      make a DIFFERENT case start matching a <script> blob it never reached: before
+#      raising any cap, re-run the whole corpus at the new size — ideally with
+#      <script>/<style>/<noscript> stripped first, approximating innerText — and
+#      confirm no other case gains a wrong value; pick a bound comfortably above the
+#      real win but below the nearest offending blob.)
 
 set -uo pipefail
 cd "$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
