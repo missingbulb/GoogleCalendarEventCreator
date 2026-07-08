@@ -109,6 +109,15 @@ trap spanning files. See the full locality rule in
   (8 → 16 → 24…), so `registry.js` resets `GCal.sources` to a fresh array on load
   and is pinned first in the load order (#189). Anything that runs at injection
   time must be safe to run again.
+- **The mounted `.claudinite` canon can be stale mid-session — re-run the sync
+  hook before concluding an upstream fix hasn't synced.** The gitignored canon is
+  refreshed by the `sync-claudinite.sh` SessionStart hook, so a session that
+  started before an upstream commit (or whose hook fell back to the prior copy
+  while offline) carries the older canon. When a task hinges on whether the mount
+  carries fix X (e.g. pruning a local override the canon now subsumes), run
+  `.claude/hooks/sync-claudinite.sh` by hand and re-check before reporting it
+  absent — a stale mount, not an un-merged upstream, is the likelier cause when
+  the fix is known to have landed.
 - **The cloud Setup script runs as root starting in the repo's parent dir
   (`/home/user`), not the checkout** — a project instance of the portable
   "setup script may start above the checkout" rule maintained outside this repo.
