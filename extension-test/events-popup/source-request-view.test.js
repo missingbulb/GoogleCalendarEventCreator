@@ -9,10 +9,13 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
-// source-request-view.js is an ES module; import it before the tests run.
+// source-request-view.js is an ES module; import it before the tests run. The
+// repo slug and template filename are imported (not re-hardcoded) so this test
+// asserts against their single source — see source-request-view.js.
 let buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill;
+let SOURCE_REQUEST_REPO, SOURCE_REQUEST_TEMPLATE;
 before(async () => {
-  ({ buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill } = await import(
+  ({ buildSourceRequestUrl, buildIssueUrl, sourceRequestPrefill, SOURCE_REQUEST_REPO, SOURCE_REQUEST_TEMPLATE } = await import(
     pathToFileURL(path.join(__dirname, "..", "..", "extension", "events-popup", "source-request-view.js"))
   ));
 });
@@ -29,8 +32,8 @@ const PREFILL = {
 
 test("opens the repo's issue form, labeled extractor-request", () => {
   const u = new URL(buildSourceRequestUrl(PREFILL));
-  assert.equal(u.origin + u.pathname, "https://github.com/missingbulb/GoogleCalendarEventCreator/issues/new");
-  assert.equal(u.searchParams.get("template"), "extractor-request.yml");
+  assert.equal(u.origin + u.pathname, `https://github.com/${SOURCE_REQUEST_REPO}/issues/new`);
+  assert.equal(u.searchParams.get("template"), SOURCE_REQUEST_TEMPLATE);
   assert.equal(u.searchParams.get("labels"), "extractor-request");
 });
 
@@ -92,7 +95,7 @@ test("omits empty fields so the user fills them in on the form", () => {
 // each "- type:" block).
 function templateFields() {
   const template = fs.readFileSync(
-    path.join(__dirname, "..", "..", ".github", "ISSUE_TEMPLATE", "extractor-request.yml"),
+    path.join(__dirname, "..", "..", ".github", "ISSUE_TEMPLATE", SOURCE_REQUEST_TEMPLATE),
     "utf8"
   );
   return template
@@ -168,12 +171,10 @@ test("defaults the timezone to the user's current zone when the fallback found n
   assert.equal(sourceRequestPrefill({ url: "https://example.com/e" }, null).timezone, here);
 });
 
-// The inline explanation's "open an issue" link opens a blank issue on this repo.
-// (Hostname/path asserted without repeating the repo slug literal — that string is
-// single-sourced and guarded by the shared-constants check in .claudinite-checks.json.)
+// The inline explanation's "open an issue" link opens a blank issue on this repo,
+// built from the same single-sourced repo slug the source-request form uses.
 test("the \"open an issue\" link points at a blank new-issue form in this repo on github.com", () => {
   const u = new URL(buildIssueUrl());
-  assert.equal(u.hostname, "github.com");
-  assert.ok(u.pathname.endsWith("/issues/new"), `unexpected issue path: ${u.pathname}`);
+  assert.equal(u.origin + u.pathname, `https://github.com/${SOURCE_REQUEST_REPO}/issues/new`);
   assert.equal(u.search, "", "a blank issue — no template/labels, unlike the source-request form");
 });
