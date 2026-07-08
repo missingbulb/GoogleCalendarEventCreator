@@ -5,7 +5,7 @@
 #
 # Runs AFTER the agent has made a candidate change, and bundles every
 # deterministic validation that a "win" is clean, generic, real and non-regressing.
-#   Exit 0   → the win is valid; open the PR.
+#   Exit 0   → the win is valid; finalize and open the PR.
 #   Non-zero → a postcondition FAILED. Mark the run failed; do NOT retry and do
 #              NOT open a PR. A failure means this deliberately-lean spec let the
 #              agent produce an invalid change — the fix is to re-introduce guiding
@@ -27,10 +27,11 @@
 #      the fallback-coverage high-watermark gate, which FAILS on any field
 #      regression. (Red-before-green and authoring the covering test are the
 #      agent's job; this asserts the end state.)
-#   3. WIN — the regenerated baseline really improved on the pre-change snapshot
-#      preconditions.sh saved: every headline % is >= the snapshot and at least one
-#      is strictly greater. A change that improves nothing, or lifts one field while
-#      dropping another, is not a clean win.
+#   3. WIN — the regenerated baseline really improved on the committed (pre-change)
+#      baseline: every headline % is >= the committed value and at least one is
+#      strictly greater. A change that improves nothing, or lifts one field while
+#      dropping another, is not a clean win. (Compares the working tree to the base
+#      ref, so no state has to be carried over from preconditions.)
 #   4. JSDOM — no value passed as an argument is a jsdom-only artifact. The offline
 #      body-text scan reads document.body.textContent, which INCLUDES <script> JSON
 #      (Next.js __NEXT_DATA__), <noscript>, <style>, <select>/<option> — none of
@@ -41,8 +42,7 @@
 #      corpus at the new size and confirm no other case gains a wrong value.)
 
 set -uo pipefail
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$(git -C "$here" rev-parse --show-toplevel)"
+cd "$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 
 fail() { echo "POSTCONDITION FAILED — mark this run failed, do not retry: $*" >&2; exit 1; }
 
@@ -62,13 +62,12 @@ $(printf '  %s\n' $offenders)"
 npm test || fail "npm test is not green"
 
 # ── 3. WIN ──
-snapshot="$here/.baseline.snapshot.json"
-[ -f "$snapshot" ] || fail "no baseline snapshot — preconditions.sh was not run this session"
+blpath="dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json"
+pre_json="$(git show "$ref:$blpath" 2>/dev/null)" || fail "no committed baseline at $ref to compare against"
+post_json="$(cat "$blpath" 2>/dev/null)" || fail "regenerated baseline missing — run the live suite first"
 node -e '
-  const fs = require("fs");
-  const pre = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-  const post = JSON.parse(fs.readFileSync(
-    "dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json", "utf8"));
+  const pre = JSON.parse(process.argv[1]);
+  const post = JSON.parse(process.argv[2]);
   const fields = ["criticalFieldsPct", "allFieldsPct"];
   const regressed = fields.filter(f => post[f] < pre[f]);
   const improved  = fields.filter(f => post[f] > pre[f]);
@@ -76,7 +75,7 @@ node -e '
   if (regressed.length) { console.error(`regressed: ${regressed.join(", ")} (${show})`); process.exit(1); }
   if (!improved.length) { console.error(`no improvement over baseline (${show})`); process.exit(1); }
   console.log(`win: ${show}`);
-' "$snapshot" || fail "coverage did not cleanly improve over the baseline"
+' "$pre_json" "$post_json" || fail "coverage did not cleanly improve over the committed baseline"
 
 # ── 4. JSDOM ──
 for value in "$@"; do
@@ -96,5 +95,5 @@ for value in "$@"; do
   ' "$value" || fail "recovered value is a jsdom-only artifact (illusory in Chrome): \"$value\""
 done
 
-echo "All postconditions passed — the win is valid. Open the PR."
+echo "All postconditions passed — the win is valid. Finalize and open the PR."
 exit 0
