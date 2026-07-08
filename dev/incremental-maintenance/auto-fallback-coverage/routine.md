@@ -58,19 +58,13 @@ bash dev/incremental-maintenance/auto-fallback-coverage/postconditions.sh "<reco
 - **Non-zero → the run has FAILED.** Do not retry and do not open a PR; surface the
   failure so guiding prose can be re-introduced to this routine.
 
-## 5. Finalize
+## 5. Open the PR (never merge)
 
-```sh
-bash dev/incremental-maintenance/auto-fallback-coverage/finalize.sh "<commit subject>"
-```
+Branch `claude/fallback-coverage/<date>`, commit the change plus the regenerated
+GENERATED artifacts, and push. Then open a **PR for review** (never merge) whose
+body gives the hypothesis, why it's generic (which unseen sites it helps), how the
+jsdom trap was ruled out, the before→after numbers, and the covering test.
 
-It branches (`claude/fallback-coverage/<date>`), commits the change plus the
-regenerated GENERATED artifacts, and pushes. Then, via the GitHub tools (the shell
-has no GitHub API):
-
-- Open a **PR for review**, never merge. Body: the hypothesis, why it's generic
-  (which unseen sites it helps), how the jsdom trap was ruled out, the before→after
-  numbers, and the covering test.
-- Log the run as a dated comment on the standing *Auto-Improvements Tracker -
-  Fallback Extractor Coverage* issue (find it **by title**, currently #366; open it
-  if missing, reopen it if closed), and `Refs` that issue in the PR.
+Then log the run as a dated comment on the standing *Auto-Improvements Tracker -
+Fallback Extractor Coverage* issue (find it **by title**, currently #366; open it
+if missing, reopen it if closed), and `Refs` that issue in the PR.
