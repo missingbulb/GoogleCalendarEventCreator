@@ -10,11 +10,6 @@
   "accept": [
     {
       "rule": "warning-suppression",
-      "path": "dev/requirements/extractor/data/",
-      "reason": "cached third-party event pages (linguist-vendored fixtures, recorded verbatim) — the sites' own inline scripts carry lint-suppression comments in their markup; these are not our code's suppression decisions and the fixtures must not be edited"
-    },
-    {
-      "rule": "warning-suppression",
       "path": "dev/routines/create-extractor/test/extractor-naming.test.js",
       "reason": "the no-eval lint-ignore on line 48 is a deliberate, reviewed test that eval()s a matches() regex built from a URL — a controlled test input, not a quick-path suppression of a real warning"
     }
