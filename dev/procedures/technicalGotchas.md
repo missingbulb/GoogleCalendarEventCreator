@@ -16,7 +16,7 @@ trap spanning files. See the full locality rule in
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
   us.** Page fetching is delegated wholesale to ScraperAPI (see `scraperapi_fetch` in
-  `dev/create-extractor/phase1-prepare.sh` / the bot-block gotcha
+  `dev/routines/create-extractor/phase1-prepare.sh` / the bot-block gotcha
   below), and `render=true` makes it execute the page's JS and return the
   post-render HTML — so a JS app records with real data instead of an empty shell.
   The repo no longer carries any SPA-shell detection or headless-Chrome render of
@@ -76,7 +76,7 @@ trap spanning files. See the full locality rule in
   engineering practice maintained outside this repo); here the
   escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
   only page fetch (`scraperapi_fetch` in
-  `dev/create-extractor/phase1-prepare.sh`) routes through ScraperAPI's
+  `dev/routines/create-extractor/phase1-prepare.sh`) routes through ScraperAPI's
   residential proxy (with `render=true`, so a single-page-app records real data).
   Unset (a fresh clone, the cloud sandbox), it fetches directly and stays
   bot-blocked — so a target page can only be recorded by the auto-extractor

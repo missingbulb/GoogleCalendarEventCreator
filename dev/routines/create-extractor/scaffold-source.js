@@ -7,7 +7,7 @@
 // Refuses to overwrite an existing source file (a real extractor must never be
 // clobbered by a re-run).
 //
-//   node dev/create-extractor/scaffold-source.js <event-url>
+//   node dev/routines/create-extractor/scaffold-source.js <event-url>
 "use strict";
 
 const fs = require("node:fs");
@@ -63,7 +63,7 @@ if (require.main === module) {
     console.error(`scaffold-source: no usable slug from URL ${JSON.stringify(url)}`);
     process.exit(1);
   }
-  const dest = path.join(__dirname, "..", "..", "extension", "event-extractors", "custom", `${slug}.js`);
+  const dest = path.join(__dirname, "..", "..", "..", "extension", "event-extractors", "custom", `${slug}.js`);
   if (fs.existsSync(dest)) {
     console.error(`scaffold-source: ${dest} already exists — refusing to overwrite`);
     process.exit(1);

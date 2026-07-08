@@ -11,7 +11,7 @@ no PR.
 ## 1. Precondition
 
 ```sh
-bash dev/incremental-maintenance/auto-fallback-coverage/preconditions.sh
+bash dev/routines/auto-fallback-coverage/preconditions.sh
 ```
 
 Non-zero exit → **stop**: nothing meaningful changed; no branch, no PR, nothing to log.
@@ -78,7 +78,7 @@ and stop.
 Pass every value the change newly recovered via the body-text scan as arguments:
 
 ```sh
-bash dev/incremental-maintenance/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
+bash dev/routines/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
 ```
 
 - Exit 0 → the win is valid; go to step 5.

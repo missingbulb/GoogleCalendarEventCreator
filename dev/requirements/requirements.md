@@ -1399,7 +1399,7 @@ that runs the real extractor against a **real cached page**
 (`dev/requirements/extractor/data/server-fetched/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
 `dev/requirements/extractor/extractor-support.test.js`. Adding a new source
-(see `dev/create-extractor/adding-a-source.md`) adds a row here. A bot-blocked host with no
+(see `dev/routines/create-extractor/adding-a-source.md`) adds a row here. A bot-blocked host with no
 cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
 is covered by unit tests only.
 
@@ -1868,7 +1868,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/create-extractor/auto-extractor.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/routines/create-extractor/auto-extractor.md`.
 
 <table>
 <tr>
@@ -1889,7 +1889,7 @@ The "Suggest Correction" flow that turns a missed page into first-class support.
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `dev/routines/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.2 -->
 
 </td>
 <td valign="top">
@@ -1904,7 +1904,7 @@ The "Suggest Correction" flow that turns a missed page into first-class support.
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `dev/routines/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.3 -->
 
 </td>
 <td valign="top">

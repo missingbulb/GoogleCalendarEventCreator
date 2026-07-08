@@ -19,7 +19,7 @@ run-name: "Prepare extractor · #${{ github.event.issue.number }} — ${{ github
 # finishes it adds `extractor-agent-done`, which fires finalize-extractor.yml
 # (Phase 2: blast-radius guard, re-verify, PR). Everything deterministic stays in
 # the workflows; the agent owns only the judgment step. See
-# dev/create-extractor/auto-extractor.md.
+# dev/routines/create-extractor/auto-extractor.md.
 #
 # The GITHUB_TOKEN is standard and always available; no other secret is needed
 # (the agent runs in Claude Code on the web, not here).
@@ -103,7 +103,7 @@ jobs:
         # WHY it failed on the issue (GitHub gives a later step no access to an earlier
         # step's output otherwise). pipefail is on via the job's `defaults.run.shell:
         # bash` above, so the pipe doesn't mask a non-zero exit.
-        run: node dev/create-extractor/triage-extractor-request.js 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
+        run: node dev/routines/create-extractor/triage-extractor-request.js 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # A same-host request in flight isn't discarded: its event page is folded
       # into the LEADER issue as an extra sample, so that extractor can pick up a
@@ -118,7 +118,7 @@ jobs:
           SAMPLE_URL: ${{ steps.triage.outputs.url }}
         run: |
           ISSUE_BODY="$(gh issue view "$LEADER" --repo "${{ github.repository }}" --json body -q .body)" \
-            node dev/create-extractor/attach-sample-url.js > /tmp/leader-body.md
+            node dev/routines/create-extractor/attach-sample-url.js > /tmp/leader-body.md
           gh issue edit "$LEADER" --repo "${{ github.repository }}" --body-file /tmp/leader-body.md
           echo "Attached $SAMPLE_URL to leader #$LEADER as an additional sample."
 
@@ -183,20 +183,20 @@ jobs:
           EVENT_URL:    ${{ steps.triage.outputs.url }}
           WAIT_SELECTOR: ${{ steps.triage.outputs.waitSelector }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: bash dev/create-extractor/phase1-prepare.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
+        run: bash dev/routines/create-extractor/phase1-prepare.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # Hand off to the agent: the branch is scaffolded + pushed, so swap the
       # label — remove `extractor-request`, add `extractor-agent-ready`. Adding
       # that label is what triggers the Claude Code on the web routine that writes
       # extract() + the case (it derives the branch/file names from the issue URL
       # itself). The agent then adds `extractor-agent-done`, firing
-      # finalize-extractor.yml. See dev/create-extractor/handoff-to-agent.sh.
+      # finalize-extractor.yml. See dev/routines/create-extractor/handoff-to-agent.sh.
       - name: Hand off to the implementation agent
         if: success() && steps.triage.outputs.skipAgent != 'true'
         env:
           GH_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: bash dev/create-extractor/handoff-to-agent.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
+        run: bash dev/routines/create-extractor/handoff-to-agent.sh 2>&1 | tee -a "$RUNNER_TEMP/prepare.log"
 
       # One comment for a GENUINE failure only. An expected stop (triaged close,
       # agent bail) is handled green elsewhere, so reaching here means something
@@ -235,7 +235,7 @@ jobs:
             [ -n "${GH_TOKEN:-}" ]        && REASON="${REASON//${GH_TOKEN}/***}"
           fi
           {
-            echo "⚠️ The auto-implement workflow failed before it could hand off to the agent. [View run]($RUN_URL). Flagging \`extractor-blocked-needs-human\` — manual implementation may be needed, see dev/create-extractor/adding-a-source.md."
+            echo "⚠️ The auto-implement workflow failed before it could hand off to the agent. [View run]($RUN_URL). Flagging \`extractor-blocked-needs-human\` — manual implementation may be needed, see dev/routines/create-extractor/adding-a-source.md."
             if [ -n "$REASON" ]; then
               printf '\n<details><summary>Why it failed (last lines of the run log)</summary>\n\n```\n%s\n```\n\n</details>\n' "$REASON"
             fi

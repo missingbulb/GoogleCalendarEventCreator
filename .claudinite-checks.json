@@ -7,7 +7,13 @@
     "spec-driven-product"
   ],
   "rules": {},
-  "accept": [],
+  "accept": [
+    {
+      "rule": "warning-suppression",
+      "path": "dev/routines/create-extractor/test/extractor-naming.test.js",
+      "reason": "the no-eval lint-ignore comment on line 48 is pre-existing and unchanged; relocating the file under dev/routines/ makes the whole file read as added vs the base, so the check cannot tell the marker is old. Not a new suppression decision. Safe to drop this acceptance once the move has merged."
+    }
+  ],
   "sharedConstants": [
     {
       "what": "extractor-agent-done label — the agent's success signal that fires the finalize workflow. The agent ADDS it (agent-prompt-extractor.md), the finalize workflow's trigger guard CONSUMES it (finalize-extractor.yml), and phase2-finalize.sh CLEARS it (and the anomaly hand-offs reference it). Counts include comments.",
@@ -15,9 +21,9 @@
       "counts": {
         ".github/workflows/auto-implement-extractor.yml": 2,
         ".github/workflows/finalize-extractor.yml": 2,
-        "dev/create-extractor/handoff-to-agent.sh": 1,
-        "dev/create-extractor/phase2-finalize.sh": 5,
-        "dev/create-extractor/agent-prompt-extractor.md": 3
+        "dev/routines/create-extractor/handoff-to-agent.sh": 1,
+        "dev/routines/create-extractor/phase2-finalize.sh": 5,
+        "dev/routines/create-extractor/agent-prompt-extractor.md": 3
       }
     },
     {
@@ -25,27 +31,27 @@
       "value": "extractor-agent-ready",
       "counts": {
         ".github/workflows/auto-implement-extractor.yml": 3,
-        "dev/create-extractor/handoff-to-agent.sh": 4,
-        "dev/create-extractor/phase2-finalize.sh": 1,
-        "dev/create-extractor/agent-prompt-extractor.md": 4
+        "dev/routines/create-extractor/handoff-to-agent.sh": 4,
+        "dev/routines/create-extractor/phase2-finalize.sh": 1,
+        "dev/routines/create-extractor/agent-prompt-extractor.md": 4
       }
     },
     {
       "what": "extractor-blocked-needs-human label — the human-triage signal added when the automation can't proceed and hands the issue to a person: the agent's bail path (agent-prompt-extractor.md), the finalize anomaly hand-off (phase2-finalize.sh), and the prepare workflow's failure step (auto-implement-extractor.yml) when Phase 1 breaks before the hand-off (e.g. an undownloadable page). Created idempotently before use. Counts include comments.",
       "value": "extractor-blocked-needs-human",
       "counts": {
-        "dev/create-extractor/phase2-finalize.sh": 3,
-        "dev/create-extractor/agent-prompt-extractor.md": 4,
+        "dev/routines/create-extractor/phase2-finalize.sh": 3,
+        "dev/routines/create-extractor/agent-prompt-extractor.md": 4,
         ".github/workflows/auto-implement-extractor.yml": 6
       }
     },
     {
-      "what": "extractor-request trigger label. Counts include comments AND the substring inside the filename dev/create-extractor/triage-extractor-request.js (the guard counts substrings). Spans: the prepare workflow (header comments, trigger guard, gh issue list filter, the triage-script filename, and the failure step that drops it when handing off to a human), the hand-off script's swap, the popup's request button, and its test.",
+      "what": "extractor-request trigger label. Counts include comments AND the substring inside the filename dev/routines/create-extractor/triage-extractor-request.js (the guard counts substrings). Spans: the prepare workflow (header comments, trigger guard, gh issue list filter, the triage-script filename, and the failure step that drops it when handing off to a human), the hand-off script's swap, the popup's request button, and its test.",
       "value": "extractor-request",
       "counts": {
         ".github/ISSUE_TEMPLATE/extractor-request.yml": 1,
         ".github/workflows/auto-implement-extractor.yml": 11,
-        "dev/create-extractor/handoff-to-agent.sh": 2,
+        "dev/routines/create-extractor/handoff-to-agent.sh": 2,
         "extension/events-popup/source-request-view.js": 5,
         "extension-test/events-popup/source-request-view.test.js": 4
       }

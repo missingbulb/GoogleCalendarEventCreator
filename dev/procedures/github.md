@@ -45,7 +45,7 @@ needs a branch pushed to GitHub to view at all.
 (Three portable CI/automation rules — `GITHUB_TOKEN` doesn't trigger another
 workflow, an automated job needs a unique branch per run, and a workflow adding a
 brand-new label must create it first — are relied on by this repo's auto-extractor
-pipeline; see [auto-extractor.md](../create-extractor/auto-extractor.md).)
+pipeline; see [auto-extractor.md](../routines/create-extractor/auto-extractor.md).)
 
 ## Alert on silent workflow failures
 

@@ -6,7 +6,7 @@
 # rendering) gets a real page. This file owns every workaround we've had to add for
 # that specific API, so they're visible and in one spot rather than smeared across
 # the pipeline. Split out of phase1-prepare.sh so it can be reused and unit-tested in
-# isolation (dev/create-extractor/test/scraperapi-fetch.test.js). Sourcing this file
+# isolation (dev/routines/create-extractor/test/scraperapi-fetch.test.js). Sourcing this file
 # only DEFINES the function; running it directly
 # (scraperapi-fetch.sh <url> <out> [wait_selector]) invokes it. See auto-extractor.md.
 #

@@ -29,11 +29,13 @@ needed for day-to-day development.
 
 The auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
 site support) is likewise self-contained in
-[`dev/create-extractor/`](dev/create-extractor/) (start at
-[`dev/create-extractor/auto-extractor.md`](dev/create-extractor/auto-extractor.md));
-the daily routines that incrementally improve the shipped extractor live in
-[`dev/incremental-maintenance/`](dev/incremental-maintenance/). Read either **only**
-when working on that pipeline/routine — neither is needed for day-to-day development.
+[`dev/routines/create-extractor/`](dev/routines/create-extractor/) (start at
+[`dev/routines/create-extractor/auto-extractor.md`](dev/routines/create-extractor/auto-extractor.md));
+the daily routines that incrementally improve the shipped extractor live alongside it
+under [`dev/routines/`](dev/routines/) (currently
+[`dev/routines/auto-fallback-coverage/`](dev/routines/auto-fallback-coverage/)). Read
+either **only** when working on that pipeline/routine — neither is needed for
+day-to-day development.
 
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `dev/procedures/technicalGotchas.md` (imported below).
