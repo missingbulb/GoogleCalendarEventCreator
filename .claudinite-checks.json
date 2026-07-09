@@ -13,11 +13,6 @@
       "rule": "warning-suppression",
       "path": "dev/routines/create-extractor/test/extractor-naming.test.js",
       "reason": "the no-eval lint-ignore on line 48 is a deliberate, reviewed test that eval()s a matches() regex built from a URL — a controlled test input, not a quick-path suppression of a real warning"
-    },
-    {
-      "rule": "warning-suppression",
-      "path": "dev/requirements/extractor/data/",
-      "reason": "these are verbatim cached third-party event pages (recorded via ScraperAPI / user-submitted), used as offline extraction fixtures — the lint-suppression pragmas flagged here live inside the captured sites' own bundled JavaScript, not our code. Editing the fixtures to strip them would corrupt the recorded HTML the live/fallback tests assert against; they are not our suppressions to resolve"
     }
   ],
   "sharedConstants": [
