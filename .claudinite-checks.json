@@ -17,14 +17,7 @@
   ],
   "sharedConstants": [
     {
-      "what": "release zip filename — the build script's output name. The single workflow stub no longer carries it: the canon derives the zip name from the repo name (kebab-cased + .zip), which resolves to this value, so it lives only in the build script now.",
-      "value": "google-calendar-event-creator.zip",
-      "counts": {
-        "dev/build/release/build-zip.js": 3
-      }
-    },
-    {
-      "what": "extension version — one X.Y.Z token per manifest, kept identical across both files (bumped by the daily-release patcher and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
+      "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
       "value": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
       "regex": true,
       "counts": {
