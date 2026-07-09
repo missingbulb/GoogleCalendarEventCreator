@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Google Calendar Event Creator",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Extracts event details (name, date/time, location, description) from the current page and opens a pre-filled Google Calendar event.",
   "permissions": [
     "activeTab",
