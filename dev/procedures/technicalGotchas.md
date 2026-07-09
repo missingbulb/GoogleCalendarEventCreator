@@ -123,7 +123,7 @@ trap spanning files. See the full locality rule in
   "setup script may start above the checkout" rule maintained outside this repo.
   A bare `npm ci` there finds no `package.json` and silently installs nothing (the tests
   then trigger a confusing mid-session install); the generic
-  `.claude/environment-setup.sh` `cd`s into the checkout first. (#186 / #196)
+  `.claudinite/environment-setup.sh` `cd`s into the checkout first. (#186 / #196)
 - **`clean()` collapses all whitespace including newlines — use it only for
   single-line fields.** Title and location are whitespace-collapsed, but a
   description run through `clean()` loses every line break (it bit Meetup,

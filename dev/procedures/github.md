@@ -147,7 +147,7 @@ Files under this rule (kept in sync with `.gitattributes`):
 ### One-time local git setup
 
 The `ours` driver and conflict-replay are per-clone git config, not committed.
-`.claude/environment-setup.sh` sets them in the cloud sandbox; on a local clone
+`.claudinite/environment-setup.sh` sets them in the cloud sandbox; on a local clone
 run once:
 
 ```
