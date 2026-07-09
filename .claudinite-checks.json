@@ -17,13 +17,10 @@
   ],
   "sharedConstants": [
     {
-      "what": "release zip filename — must match between the build script and the thin workflow stubs that pass it to the Claudinite canon workflows (zip_path in release/daily, zip_name in publish/daily)",
+      "what": "release zip filename — the build script's output name. The single workflow stub no longer carries it: the canon derives the zip name from the repo name (kebab-cased + .zip), which resolves to this value, so it lives only in the build script now.",
       "value": "google-calendar-event-creator.zip",
       "counts": {
-        "dev/build/release/build-zip.js": 3,
-        ".github/workflows/release.yml": 1,
-        ".github/workflows/publish-chrome-store.yml": 1,
-        ".github/workflows/daily-release.yml": 2
+        "dev/build/release/build-zip.js": 3
       }
     },
     {

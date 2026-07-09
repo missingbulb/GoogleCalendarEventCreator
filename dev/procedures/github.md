@@ -62,10 +62,10 @@ cause is fixed.
 
 What this file owns is this repo's classification:
 
-- The four standard release stubs (`release.yml`, `publish-chrome-store.yml`,
-  `daily-release.yml`, `deploy-privacy-page.yml`) are unattended and already
-  covered — their reporters fire inside the canon reusable workflows the stubs
-  call.
+- The single standard release stub (`release.yml`, named `Release`, whose three
+  `if:`-guarded jobs call the canon create-package / publish / daily reusable
+  workflows) is unattended and already covered — the reporters fire inside those
+  canon reusable workflows, keyed on the per-operation names.
 - `test.yml` is attended PR CI: a red required check blocks merge with the author
   watching — no reporter.
 - The **create-extractor routine** is a Claude Code routine, not an Actions
