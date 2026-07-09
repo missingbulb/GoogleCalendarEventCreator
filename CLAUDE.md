@@ -72,8 +72,8 @@ The synced canon is **gitignored**; only a tracked marker file is committed, as 
 one-glance signal that this repo mounts Claudinite (the sync hook preserves it
 across each refresh). A fresh checkout that hasn't run the hook yet has nothing to
 import until the next session start (or running the hook by hand) populates it;
-`.claude/cloud-setup.sh` primes it once per environment. Pin to a specific commit
-instead of tracking `main` by setting `CLAUDINITE_REF`.
+`.claudinite/environment-setup.sh` primes it once per environment. Pin to a specific
+commit instead of tracking `main` by setting `CLAUDINITE_REF`.
 
 It is consumed **read-only**; lessons are *captured locally* (above). Reconciling
 the local docs with the canon is Claudinite's responsibility, not this repo's; the

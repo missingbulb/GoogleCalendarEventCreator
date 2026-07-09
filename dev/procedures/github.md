@@ -148,8 +148,8 @@ Files under this rule (kept in sync with `.gitattributes`):
 ### One-time local git setup
 
 The `ours` driver and conflict-replay are per-clone git config, not committed.
-`.claude/cloud-setup.sh` sets them in the cloud sandbox; on a local clone run
-once:
+`.claudinite/environment-setup.sh` sets them in the cloud sandbox; on a local clone
+run once:
 
 ```
 git config rerere.enabled true     # replay a resolution the next time it recurs
