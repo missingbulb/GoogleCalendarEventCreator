@@ -17,17 +17,7 @@
   ],
   "sharedConstants": [
     {
-      "what": "release zip filename — must match between the build script and the thin workflow stubs that pass it to the Claudinite canon workflows (zip_path in release/daily, zip_name in publish/daily)",
-      "value": "google-calendar-event-creator.zip",
-      "counts": {
-        "dev/build/release/build-zip.js": 3,
-        ".github/workflows/release.yml": 1,
-        ".github/workflows/publish-chrome-store.yml": 1,
-        ".github/workflows/daily-release.yml": 2
-      }
-    },
-    {
-      "what": "extension version — one X.Y.Z token per manifest, kept identical across both files (bumped by the daily-release patcher and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
+      "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
       "value": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
       "regex": true,
       "counts": {
