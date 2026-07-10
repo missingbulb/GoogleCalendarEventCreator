@@ -107,7 +107,13 @@ trap spanning files. See the full locality rule in
   carries fix X (e.g. pruning a local override the canon now subsumes), run
   `.claude/hooks/sync-claudinite.sh` by hand and re-check before reporting it
   absent — a stale mount, not an un-merged upstream, is the likelier cause when
-  the fix is known to have landed.
+  the fix is known to have landed. The same staleness works the *other* way: a
+  stale mount also surfaces **spurious conformance findings** an already-merged
+  canon fix would skip — so re-run the sync hook and re-check **before committing a
+  workaround for a check finding** (a `.claudinite-checks.json` subtree accept, a
+  suppression pragma). Twice a fixtures accept was added for a
+  warning-suppression finding, then reverted once the mount picked up the
+  vendored-skip fix that already made those files pass (#664, #665).
 - **The cloud Setup script runs as root starting in the repo's parent dir
   (`/home/user`), not the checkout** — a project instance of the portable
   "setup script may start above the checkout" rule maintained outside this repo.
