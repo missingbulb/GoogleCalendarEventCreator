@@ -69,6 +69,11 @@ What this file owns is this repo's classification:
   names. Its per-repo values live in the required `.github/release.config`.
 - `test.yml` is attended PR CI: a red required check blocks merge with the author
   watching — no reporter.
+- `fetch-page.yml` (the `workflow_dispatch` ScraperAPI fetch) is **attended by its
+  dispatcher**: the create-extractor routine dispatches it, polls the run, and on
+  failure labels the issue `extractor-blocked-needs-human` — so a red run reaches a
+  human through the routine, not the Actions list. No reporter (and being
+  dispatch-only, it never runs unwatched).
 - The **create-extractor routine** is a Claude Code routine, not an Actions
   workflow — it hands a failed run to a human on the issue
   (`extractor-blocked-needs-human`), so it's outside this Actions classification.

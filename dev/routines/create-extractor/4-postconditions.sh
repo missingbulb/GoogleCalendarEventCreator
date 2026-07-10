@@ -22,6 +22,10 @@ fail() { echo "POSTCONDITION FAILED — do not open a PR, hand the issue to a hu
 # freshly-scaffolded one (the agent filled its extract()).
 SRC="${SOURCE_PATH:?SOURCE_PATH required}"
 CASE_FILE="dev/requirements/extractor/expected/$CASE_NAME.json"
+# The recorded page. The fetch-page workflow (routine.md step 4) commits it AFTER
+# 3-prepare's scaffold commit, so it shows up as changed-since-scaffold below even
+# though the agent didn't author it — allow it alongside the two agent-owned files.
+PAGE="dev/requirements/extractor/data/server-fetched/$CASE_NAME.html"
 
 # The scaffold commit = 3-prepare's commit on this branch (off main), matched by its
 # message; fall back to the oldest branch-only commit. The agent's changes are
@@ -30,11 +34,12 @@ SCAFFOLD=$(git log --format='%H' --grep="chore: scaffold" origin/main..HEAD 2>/d
 [ -n "$SCAFFOLD" ] || SCAFFOLD=$(git rev-list origin/main..HEAD 2>/dev/null | tail -1)
 [ -n "$SCAFFOLD" ] || fail "no scaffold commit found on the branch — was 3-prepare run?"
 
-# 1. SCOPE — only the source + the case may differ from the scaffold. Anything else
-#    the agent touched (a shared helper, the load lists, a new file) fails the run.
+# 1. SCOPE — only the source + the case may differ from the scaffold (plus the
+#    workflow-recorded page). Anything else the agent touched (a shared helper, the
+#    load lists, a new file) fails the run.
 changed="$( { git diff --name-only "$SCAFFOLD"; git ls-files --others --exclude-standard; } \
   | sort -u | sed '/^$/d' )"
-offenders="$(printf '%s\n' "$changed" | grep -Fvx -e "$SRC" -e "$CASE_FILE" || true)"
+offenders="$(printf '%s\n' "$changed" | grep -Fvx -e "$SRC" -e "$CASE_FILE" -e "$PAGE" || true)"
 [ -z "$offenders" ] || fail "out-of-scope changes (only $SRC and $CASE_FILE may change):
 $(printf '  %s\n' $offenders)"
 

@@ -6,8 +6,10 @@ one) for the event page that issue names — end to end, in one session. Everyth
 deterministic is offloaded to the numbered scripts (`1-`…`4-`) and the helpers they
 call; you own the **judgment** — deciding the route and writing `extract()` — and
 every GitHub interaction (the shell here has no GitHub API, so issues/labels/PRs are
-your MCP tool calls). The only external dependency the owner provisions is
-`SCRAPER_API_KEY`, so `3-prepare.sh` can record the page from this environment.
+your MCP tool calls). The event page is recorded by the **fetch-page GitHub Action**
+(step 4), which holds `SCRAPER_API_KEY` as an Actions secret — the routine's own
+environment never sees the key. The owner provisions that secret once in the repo's
+Actions settings; nothing else external is needed.
 
 Run the stages in order. A script that exits non-zero stops the run the way its
 step describes — most stops hand the issue to a human, none open a PR.
@@ -18,8 +20,8 @@ step describes — most stops hand the issue to a human, none open a PR.
 bash dev/routines/create-extractor/1-preconditions.sh
 ```
 
-Non-zero → **stop** (no env / dirty tree; it printed why). Otherwise `npm install`
-once, then continue.
+Non-zero → **stop** (dirty tree; it printed why). Otherwise `npm install` once, then
+continue.
 
 ## 2. Triage — pick the route
 
@@ -49,21 +51,49 @@ shipped extension can't disagree). Act on `reason`:
   `mode`/`branch`/`caseName`/`host`/`url`/`sourcePath`/`waitSelector` — the next
   stages take them as env.
 
-## 3. Prepare — record + scaffold (deterministic)
+## 3. Prepare — scaffold + push (deterministic)
 
 ```sh
 MODE=<mode> BRANCH=<branch> CASE_NAME=<caseName> HOST=<host> EVENT_URL=<url> \
-  ISSUE_NUMBER=<n> WAIT_SELECTOR=<waitSelector> \
+  ISSUE_NUMBER=<n> \
   bash dev/routines/create-extractor/3-prepare.sh
 ```
 
-It branches, records the page, scaffolds (a new source + case in `new` mode; only a
-case in `supported` mode), proves a green baseline, and commits the scaffold.
-Non-zero → the page couldn't be recorded (bot wall / dead URL / non-HTML render):
-**comment the failure and label the issue `extractor-blocked-needs-human`**, then
-stop.
+It branches, writes the page's `.url`, scaffolds (a new source + case in `new` mode;
+only a case in `supported` mode), proves a green offline baseline, commits the
+scaffold, and **pushes the branch** (so the fetch workflow can run on it). It does
+**not** record the page — that's step 4. Non-zero → **comment the failure and label
+the issue `extractor-blocked-needs-human`**, then stop.
 
-## 4. Implement — write the extractor (your judgment)
+## 4. Fetch — record the page via the GitHub Action
+
+The page fetch lives in a workflow (`.github/workflows/fetch-page.yml`) because it
+needs `SCRAPER_API_KEY`, which GitHub holds as an Actions secret and the routine's
+own environment does not. **Dispatch it on the pushed branch** with the MCP GitHub
+tools — `ref = <branch>`, inputs `case_name = <caseName>`, `url = <url>`, and
+`wait_for_selector = <waitSelector>` (omit/blank if triage gave none):
+
+```
+actions_run_trigger(workflow="fetch-page.yml", ref=<branch>,
+  inputs={case_name:<caseName>, url:<url>, wait_for_selector:<waitSelector>})
+```
+
+Then **poll the run to completion** (`actions_list`/`actions_get`, on the short
+back-off in `dev/procedures/github.md` — this environment can't observe GitHub
+state from the shell). The workflow records the page and commits
+`dev/requirements/extractor/data/server-fetched/<caseName>.html` back to the branch
+with `[skip ci]`. On completion:
+
+- **success** → `git pull origin <branch>` to bring the recorded `.html` into the
+  working tree, then continue to step 5.
+- **failure** → the page couldn't be recorded (bot wall / dead URL / empty render):
+  **comment the failure and label the issue `extractor-blocked-needs-human`**, then
+  stop.
+
+(`workflow_dispatch` only works once `fetch-page.yml` is on `main`; a branch cut
+from `main` inherits it, so this is a no-op concern in steady state.)
+
+## 5. Implement — write the extractor (your judgment)
 
 **Your write surface is exactly two files** — the source and the case —
 and `4-postconditions.sh` fails the run if anything else changed, so straying
@@ -106,19 +136,19 @@ Then confirm both suites are green (`npm run test:live`, `npm run test:offline`)
 no source change, **comment a one-sentence diagnosis of what the page actually is,
 label the issue `extractor-blocked-needs-human`**, and stop. No PR.
 
-## 5. Postcondition
+## 6. Postcondition
 
 ```sh
 MODE=<mode> BRANCH=<branch> CASE_NAME=<caseName> SOURCE_PATH=<sourcePath> \
   ISSUE_NUMBER=<n> bash dev/routines/create-extractor/4-postconditions.sh
 ```
 
-It re-checks the scope (only the two files changed), the quality floor (a real,
-located event — not `empty`/`degenerate`), and re-verifies the whole suite. Non-zero
-→ **comment the printed reason, label `extractor-blocked-needs-human`, no PR**, and
-stop.
+It re-checks the scope (only the two files changed, plus the workflow-recorded
+page), the quality floor (a real, located event — not `empty`/`degenerate`), and
+re-verifies the whole suite. Non-zero → **comment the printed reason, label
+`extractor-blocked-needs-human`, no PR**, and stop.
 
-## 6. Open the PR (never merge)
+## 7. Open the PR (never merge)
 
 Commit the two files, push the branch, and open a **PR for review** via the GitHub
 tools with `Closes #<n>` in the body — new-source: *"Implements the extractor for

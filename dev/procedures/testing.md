@@ -203,23 +203,25 @@ behaves exactly as in Chrome — and run through the real extractor files. This
 keeps the suite deterministic and runnable anywhere, while still reflecting each
 site's markup at the time it was recorded:
 
-- Cached HTML is recorded by the **create-extractor routine**: the `scraperapi_fetch`
-  bash function in `dev/routines/create-extractor/3-prepare.sh` fetches
-  the event page via an inline curl→ScraperAPI (`render=true`, so a single-page-app
-  records with real data) in the routine's prepare stage.
+- Cached HTML is recorded by the **fetch-page workflow**
+  (`.github/workflows/fetch-page.yml`): a bare curl→ScraperAPI (`render=true`, so a
+  single-page-app records with real data) that runs on the extractor branch and
+  commits the `<name>.html` back to it. The workflow holds `SCRAPER_API_KEY` as an
+  Actions secret; the create-extractor routine dispatches it (step 4) rather than
+  fetching the page itself.
 - The **Tests** workflow (`.github/workflows/test.yml`) runs on every PR and
   push to `main`: it runs the unit tests, then the integration tests against
   the cached HTML files **already committed** in `data/` — it never fetches or
   refreshes anything itself, so it's fast and has no network dependency.
-- There is **no standalone refresh workflow**. A cached page is (re)recorded only
-  by the create-extractor routine — file (or re-file) an `extractor-request` issue
-  for the page and it's fetched via ScraperAPI in the routine's prepare stage — or
-  by hand by fetching the `.url` through ScraperAPI with a key (see `scraperapi_fetch`
-  in `3-prepare.sh`). There's no one-step push path to refresh a drifted fixture.
+- `fetch-page.yml` is dispatched **per page**, not a bulk refresh. A cached page is
+  (re)recorded by dispatching it (the routine does this automatically for an
+  `extractor-request` issue; by hand, run it from the Actions tab / API with the
+  `case_name` + `url` inputs). Its commit carries `[skip ci]` and only touches
+  `data/**`, which `test.yml`'s `paths-ignore` skips.
 
-The routine records the page and commits it on the extractor branch (the scaffold
-commit), so the cached HTML lands in that extractor's own PR and is reviewed with
-it — there's no separate cached-HTML commit or CI-suppression dance any more.
+The fetch workflow commits the recorded page on the extractor branch (a `[skip ci]`
+commit on top of 3-prepare's scaffold), so the cached HTML lands in that extractor's
+own PR and is reviewed with it.
 
 ### Adding a cached integration case
 
@@ -227,17 +229,15 @@ New cached HTML can't be fetched here (the sandbox is bot-blocked — see
 [`technicalGotchas.md`](technicalGotchas.md)), so record the cached HTML *before* writing the case
 and read its exact `expected` off the committed file instead of guessing:
 
-1. Commit two new files — but **not** the case file yet:
-   - `dev/requirements/extractor/data/server-fetched/<name>.html` — an empty (zero-byte) file; the empty file is the
-     "fetch me" signal for the refresh script.
+1. Commit one new file — but **not** the case file yet:
    - `dev/requirements/extractor/data/server-fetched/<name>.url` — a plain-text file containing just the event page URL
      (e.g. `https://www.meetup.com/.../`). This file stays for good: it's the
-     single source of truth for the page's URL (used by the refresh script and
+     single source of truth for the page's URL (used by the fetch workflow and
      by `live.test.js`), so the URL is **not** repeated in the case file.
-2. Push the branch. The **Refresh cached HTML files** workflow runs
-   automatically (the push adds a `data/` file), fills in the empty
-   `dev/requirements/extractor/data/server-fetched/<name>.html`, and commits it back to the branch; `test:live` stays
-   green because no case asserts it yet.
+2. Push the branch, then **dispatch `.github/workflows/fetch-page.yml`** on it
+   (Actions tab / API) with inputs `case_name=<name>` and `url=<the event URL>`. It
+   records the page and commits `dev/requirements/extractor/data/server-fetched/<name>.html` back to the branch with
+   `[skip ci]`; `test:live` stays green because no case asserts it yet.
 3. Pull, then add `dev/requirements/extractor/expected/<name>.json` (same `<name>`, just
    `description` + `expected`, no `url`) and run `npm run test:live` — it now
    runs against the local cached HTML, so its output gives you the exact
@@ -427,21 +427,18 @@ commission-while-editing trap goes in the file's header comment rather than
   `dev/requirements/heavy/extension-load.chrome.test.js` (`npm run test:e2e` —
   the real unpacked extension under Chrome for Testing; skips without
   `CHROME_PATH`, so verify changes to it via CI).
-- **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is
-  the inline curl→ScraperAPI in `scraperapi_fetch`
-  (`dev/routines/create-extractor/3-prepare.sh`), which uses
-  `SCRAPER_API_KEY`, and `render=true` makes it execute the page's JS,
-  so a single-page-app records with real data. The repo carries no SPA-shell
-  detector or headless-Chrome render of its own (`spa-shell.js` /
-  `render-page.js` and the `render-page.chrome.test.js` heavy test were removed when
-  fetching moved to ScraperAPI). The recorder (`scraperapi_fetch` in
-  `scraperapi-fetch.sh`, sourced by `3-prepare.sh`) is now just fetch → write.
-  The aid for a flaky SPA render is a **`Wait-for selector`** a source request can
-  carry — the extension derives it from the user's live, hydrated page
+- **SPA rendering is delegated to ScraperAPI, not done here.** Page fetching is a
+  bare curl→ScraperAPI in the fetch-page workflow
+  (`.github/workflows/fetch-page.yml`), which uses the `SCRAPER_API_KEY` Actions
+  secret, and `render=true` makes it execute the page's JS, so a single-page-app
+  records with real data. The repo carries no SPA-shell detector or headless-Chrome
+  render of its own (`spa-shell.js` / `render-page.js` and the
+  `render-page.chrome.test.js` heavy test were removed when fetching moved to
+  ScraperAPI; the former tier/geo/guard fetch script was retired when the fetch moved
+  into the workflow as a bare curl). The aid for a flaky SPA render
+  is a **`Wait-for selector`** a source request can carry — the extension derives it
+  from the user's live, hydrated page
   (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
-  event extractor, #603) and the pipeline passes it to ScraperAPI as
-  `wait_for_selector` so it waits for real content before snapshotting — a real
-  readiness signal, unlike the fixed `wait` reverted in #595. The old standard-tier
-  unexpanded-SPA re-fetch loop (#599) was **removed**: `scraperapi_fetch` never
-  retries a 200 now (a bad/non-HTML render fails for a human instead), so
-  `wait_for_selector` is the mechanism for getting a hydrated page, not a retry.
+  event extractor, #603) and the routine passes it to the workflow as the
+  `wait_for_selector` input, which ScraperAPI waits on before snapshotting — a real
+  readiness signal, unlike the fixed `wait` reverted in #595.

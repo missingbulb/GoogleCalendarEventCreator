@@ -3,8 +3,8 @@
 //
 // These run OFFLINE against committed cached HTML files in
 // data/, recorded from each site by the auto-extractor pipeline
-// (dev/routines/create-extractor/3-prepare.sh's scraperapi_fetch, which
-// fetches through ScraperAPI). Asserting against a cached copy of the real page
+// (the fetch-page workflow, .github/workflows/fetch-page.yml, which fetches
+// through ScraperAPI). Asserting against a cached copy of the real page
 // makes the suite deterministic and runnable anywhere (no network), while still
 // reflecting each site's current markup.
 //
@@ -37,9 +37,9 @@
 // The scenario's source URL lives alongside the cached HTML, in
 // data/<provenance>/<name>.url, where <provenance> is server-fetched/
 // (pipeline-recorded) or user-submitted/ — the single source of truth —
-// scraperapi_fetch fetches it, and the suite loads the HTML into a DOM at that URL so
-// hostname-based site detection behaves as in Chrome). It is NOT repeated in the
-// case file.
+// the fetch-page workflow records it, and the suite loads the HTML into a DOM at
+// that URL so hostname-based site detection behaves as in Chrome). It is NOT
+// repeated in the case file.
 //
 // `expected.events` must be the *complete*, exact array the extractor
 // produces. Each event is deep-equal compared against:
@@ -65,11 +65,10 @@
 // To cover a new website or platform: add a dev/requirements/extractor/data/server-fetched/<name>.url
 // with the event page URL and a case file (dev/requirements/extractor/expected/<name>.json) with its
 // `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
-// `extractor-request` issue with the page URL — Phase 1 fetches it via ScraperAPI);
-// to record one by hand, fetch the .url through ScraperAPI with a key (see
-// dev/routines/create-extractor/3-prepare.sh's scraperapi_fetch). Run the suite
-// once to see the actual extracted values in the failure output, then copy them
-// into `expected`.
+// `extractor-request` issue with the page URL — the routine fetches it via the
+// fetch-page workflow); to record one by hand, dispatch that workflow (or fetch the
+// .url through ScraperAPI yourself). Run the suite once to see the actual extracted
+// values in the failure output, then copy them into `expected`.
 "use strict";
 
 const { test, before } = require("node:test");
