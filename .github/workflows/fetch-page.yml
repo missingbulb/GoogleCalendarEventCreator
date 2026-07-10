@@ -1,0 +1,84 @@
+name: Fetch cached page
+
+# On-demand ScraperAPI fetch for the create-extractor routine
+# (dev/routines/create-extractor/routine.md). The routine runs in the Claude web
+# environment, which is a poor home for the ScraperAPI secret; the one page fetch
+# lives here instead, where GitHub owns SCRAPER_API_KEY as an Actions secret. The
+# routine dispatches this workflow (workflow_dispatch) for the branch it is working
+# on, passing the case name + event URL; the workflow records the page and commits
+# the HTML fixture back to that branch. The routine then pulls it and continues.
+#
+# Deliberately a bare ScraperAPI curl — no proxy-tier escalation, geo-targeting, or
+# non-HTML-render guard. The point is the smallest thing that lets GitHub own the
+# secret. render=true executes the page's JS so a single-page-app records real
+# content instead of an empty shell; wait_for_selector (when the routine supplies a
+# selector the extension derived from the live page) makes ScraperAPI wait for real
+# content before snapshotting.
+#
+# The commit is pushed with the Actions GITHUB_TOKEN and carries [skip ci]; it only
+# touches dev/requirements/extractor/data/**, which test.yml's paths-ignore skips —
+# so recording a page never triggers CI (and a GITHUB_TOKEN push cannot anyway).
+
+on:
+  workflow_dispatch:
+    inputs:
+      case_name:
+        description: Fixture base name (writes data/server-fetched/<case_name>.html)
+        required: true
+      url:
+        description: Event page URL to record
+        required: true
+      wait_for_selector:
+        description: Optional CSS selector to wait for before snapshotting
+        required: false
+        default: ""
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+
+      # Inputs are passed through env (never interpolated into the script body) so a
+      # crafted case name / URL can't inject shell. jq is preinstalled on the runner.
+      - name: Record the page via ScraperAPI
+        env:
+          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
+          CASE_NAME: ${{ inputs.case_name }}
+          URL: ${{ inputs.url }}
+          WAIT_FOR_SELECTOR: ${{ inputs.wait_for_selector }}
+        run: |
+          test -n "$SCRAPER_API_KEY" || { echo "SCRAPER_API_KEY secret is not set" >&2; exit 1; }
+          out="dev/requirements/extractor/data/server-fetched/${CASE_NAME}.html"
+          mkdir -p "$(dirname "$out")"
+          # url-encode the URL (and selector) so their &/?/# can't leak as sibling
+          # ScraperAPI query params.
+          params="api_key=${SCRAPER_API_KEY}&render=true&url=$(jq -rn --arg u "$URL" '$u|@uri')"
+          if [ -n "$WAIT_FOR_SELECTOR" ]; then
+            params="${params}&wait_for_selector=$(jq -rn --arg s "$WAIT_FOR_SELECTOR" '$s|@uri')"
+            echo "Waiting for selector '$WAIT_FOR_SELECTOR' before snapshot."
+          fi
+          curl -fsS --max-time 120 --retry 5 --retry-max-time 300 \
+            "https://api.scraperapi.com/?${params}" -o "$out"
+          test -s "$out"    # an undownloadable page fails here → the routine hands off
+          echo "Recorded $(wc -c < "$out") bytes to $out"
+
+      - name: Commit the recorded page to the branch
+        env:
+          CASE_NAME: ${{ inputs.case_name }}
+        run: |
+          out="dev/requirements/extractor/data/server-fetched/${CASE_NAME}.html"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$out"
+          git commit -m "chore: record ${CASE_NAME} page via ScraperAPI [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

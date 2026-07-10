@@ -15,8 +15,8 @@ trap spanning files. See the full locality rule in
 [workflow.md](workflow.md).
 
 - **JS single-page-app pages are rendered by ScraperAPI (`render=true`), not by
-  us.** Page fetching is delegated wholesale to ScraperAPI (see `scraperapi_fetch` in
-  `dev/routines/create-extractor/3-prepare.sh` / the bot-block gotcha
+  us.** Page fetching is delegated wholesale to ScraperAPI (see the fetch-page
+  workflow `.github/workflows/fetch-page.yml` / the bot-block gotcha
   below), and `render=true` makes it execute the page's JS and return the
   post-render HTML — so a JS app records with real data instead of an empty shell.
   The repo no longer carries any SPA-shell detection or headless-Chrome render of
@@ -74,16 +74,15 @@ trap spanning files. See the full locality rule in
   portable GitHub procedures maintained outside this repo.
 - **Bot-blocking from CI is by datacenter IP (the general rule is a portable
   engineering practice maintained outside this repo); here the
-  escape hatch is the optional `SCRAPER_API_KEY` secret.** When set, the pipeline's
-  only page fetch (`scraperapi_fetch` in
-  `dev/routines/create-extractor/3-prepare.sh`) routes through ScraperAPI's
-  residential proxy (with `render=true`, so a single-page-app records real data).
-  Unset (a fresh clone, the cloud sandbox), it fetches directly and stays
-  bot-blocked — so a target page can only be recorded by the auto-extractor
-  pipeline running in CI (where the secret is wired), not locally. ScraperAPI is the
-  whole fetching surface — swap the vendor in that one function if it underperforms.
-  Facebook returns a hard 400 even through the proxy, so it stays unit-tests-only —
-  it can't be a cached live case.
+  escape hatch is the `SCRAPER_API_KEY` Actions secret.** The pipeline's only page
+  fetch lives in the fetch-page workflow (`.github/workflows/fetch-page.yml`), which
+  routes a bare curl through ScraperAPI's residential proxy (with `render=true`, so a
+  single-page-app records real data) using `secrets.SCRAPER_API_KEY`. The key lives
+  in **GitHub Actions**, not the routine's own environment — so a page is recorded by
+  dispatching that workflow (the create-extractor routine does this in step 4), not by
+  a local fetch. ScraperAPI is the whole fetching surface — swap the vendor in that
+  one workflow if it underperforms. Facebook returns a hard 400 even through the
+  proxy, so it stays unit-tests-only — it can't be a cached live case.
 - **jsdom-vs-Chrome DOM traps bit this repo directly.** `GCal.bodyText()`'s
   `innerText || textContent` fallback hits the jsdom `body.innerText`-is-null
   gotcha, and the default `runScripts: "outside-only"` parsing of `<noscript>`

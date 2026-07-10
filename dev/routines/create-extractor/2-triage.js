@@ -94,7 +94,7 @@ function fieldValue(body, label) {
 // the pipeline re-records the page. A selector is one line; take only the first,
 // strip an accidental surrounding code span, and bound the length so a pasted
 // paragraph or a hostile issue body can't feed a giant value into the fetch URL
-// (scraperapi_fetch url-encodes it regardless).
+// (the fetch-page workflow url-encodes it regardless).
 function waitSelectorOf(body) {
   const first = fieldValue(body, "Wait-for selector").split(/\r?\n/)[0].trim();
   return first.replace(/^`+|`+$/g, "").trim().slice(0, 200);
