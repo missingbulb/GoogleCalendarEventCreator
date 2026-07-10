@@ -86,10 +86,18 @@ as a fixed poll-and-sleep ritual. These came out of a post-mortem on exactly tha
 gap:
 
 - **Merge on an already-green check; don't trigger or wait for a duplicate
-  run.** A branch `git push` already runs `test.yml` on the head commit. Opening
+  run — but in a web session there is no push-run to merge on.** From a local
+  CLI, a branch `git push` already runs `test.yml` on the head commit, so opening
   a PR on that *same* commit fires a second, identical run — for a deterministic
-  offline/docs change it tells you nothing new. Before waiting, check whether the
-  PR head SHA already has a green required check (from the push) and merge on it.
+  offline/docs change it tells you nothing new; check the PR head SHA for a green
+  required check and merge on that. **In the Claude web session this shortcut does
+  NOT apply:** a push through the in-session git proxy triggers **no** `test.yml`
+  run at all (`list_workflow_runs` for the branch shows zero — the proxy push emits
+  no workflow-triggering event, the same practical outcome as the
+  `GITHUB_TOKEN`-doesn't-trigger-a-workflow rule). So there's nothing green to merge
+  on — **dispatch it yourself** (`actions_run_trigger` `run_workflow` on the branch
+  ref, which `test.yml`'s `workflow_dispatch` trigger allows) and poll that one run
+  to green before merging. Don't sit waiting for a push-run that never comes.
 - **Poll on a short interval; don't guess one long sleep, and don't subscribe.**
   The shell **can't observe GitHub state** here — the git remote is a git-only
   proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s), there's
