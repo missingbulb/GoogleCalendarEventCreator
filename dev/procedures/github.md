@@ -51,11 +51,11 @@ workflow-relay rules it used to lean on no longer apply.)
 
 An **unattended** workflow — one with no human watching the run, so a red entry in
 the Actions list reaches nobody — must converge a failure to a human-visible state
-on failure, never just exit red. The rule and the reporter both live in the
-Claudinite canon (the rule: `tasks/git-and-github.md`; the reporter: the
-`report-failure` composite action,
+on failure, never just exit red. The rule (an unattended workflow must escalate
+its own failure to a human-visible state) and the reporter both live in the
+Claudinite canon — the reporter is the `report-failure` composite action,
 `missingbulb/Claudinite/.github/actions/report-failure@main`, whose header owns
-the caller recipe and wiring constraints) — follow them there; a copy here would
+the caller recipe and wiring constraints — so follow them there; a copy here would
 drift. The reporter keys one standing issue per workflow by name (labelled
 `workflow-failure`) and reopens a closed one on recurrence — close it once the
 cause is fixed.
