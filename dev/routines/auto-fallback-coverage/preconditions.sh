@@ -9,7 +9,7 @@
 # WHY THE GATE EXISTS
 #   The routine's result is a pure function of its inputs. Most days nothing lands
 #   on main, and a run over unchanged code re-derives yesterday's answer while
-#   burning a full Opus run. So an idle repo skips. This is a cheap "has anything
+#   burning a full model run. So an idle repo skips. This is a cheap "has anything
 #   happened lately?" check, NOT a prediction that the change will yield a win.
 #
 # WHAT "MEANINGFUL" MEANS — deliberately broad, and reusable

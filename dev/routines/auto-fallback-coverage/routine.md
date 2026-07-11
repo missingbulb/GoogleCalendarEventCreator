@@ -1,6 +1,6 @@
 # Fallback-coverage routine
 
-Daily Claude **Opus** routine, offline on a fresh clone. Goal: make the **generic**
+Daily Claude routine (on a strong model), offline on a fresh clone. Goal: make the **generic**
 fallback extractor — `extension/event-extractors/extract-unsupported.js` and the
 shared `extension/event-extractors/helpers/*.js` — recover **more** of what the
 dedicated per-site sources get, measured by the fallback-coverage gate. **Most runs
