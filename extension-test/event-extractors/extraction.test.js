@@ -677,6 +677,89 @@ test("Meetup: an unrecognized timezone string is ignored", () => {
   assert.equal(e.ctz, ""); // no usable timezone -> empty
 });
 
+// --- Generic (unsupported-site) ctz derivation (#674) ----------------------
+// The fallback derives an event timezone only when two independent
+// page-declared hints agree — helpers/derive-timezone.js pins the acceptance
+// rules unit-by-unit (extension-test/event-extractors/helpers/); these pin the
+// end-to-end effect: the event gains the ctz and its times localize to it.
+
+test("Generic site: ctz from a stated timezone corroborated by the event's own offset; times localize", () => {
+  const html = `
+    <script>self.__APP__ = {"event":{"timezone":"Asia/Jerusalem"}};</script>
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Rooftop Concert",
+      "startDate": "2026-07-07T20:00:00+03:00", "endDate": "2026-07-07T23:00:00+03:00",
+      "location": { "@type": "Place", "name": "HaTachana" } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.tickets.example/rooftop");
+  assert.equal(e.ctz, "Asia/Jerusalem");
+  // With the zone known, offset times are stored as floating wall-clock in it —
+  // exactly what a dedicated source would produce.
+  assert.equal(e.times[0].start, "2026-07-07T20:00:00");
+  assert.equal(e.times[0].end, "2026-07-07T23:00:00");
+});
+
+test("Generic site: ctz from the JSON-LD venue country + the declared offset (no stated zone)", () => {
+  // US + -04:00 in June is Eastern time and nothing else.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "DevConf", "startDate": "2026-06-09T08:00:00-04:00",
+      "location": { "@type": "Place", "name": "Javits Center",
+                    "address": { "addressLocality": "New York", "addressCountry": "US" } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.devconf.example/2026");
+  assert.equal(e.ctz, "America/New_York");
+  assert.equal(e.times[0].start, "2026-06-09T08:00:00");
+});
+
+test("Generic site: a UTC-serialized time gains the zone of a single-zone country corroborated by the page language", () => {
+  // eventer.co.il-style: the JSON-LD instant is in UTC (Z — deliberately not an
+  // offset hint), but address country IL and the Hebrew page agree.
+  const html = `<html lang="he"><body>
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "לילה לא שקט", "startDate": "2026-07-09T16:30:00.000Z",
+      "location": { "@type": "Place", "name": "מוזיאון תל אביב",
+                    "address": { "addressLocality": "תל אביב", "addressCountry": "IL" } } }
+    </script></body></html>`;
+
+  const e = firstEvent(html, "https://www.tickets.example/8lfff");
+  assert.equal(e.ctz, "Asia/Jerusalem");
+  assert.equal(e.times[0].start, "2026-07-09T19:30:00"); // 16:30Z shown as Israel wall-clock
+});
+
+test("Generic site: one hint alone derives no ctz — the offset-bearing time is kept as-is", () => {
+  // An offset with nothing independent to corroborate it (no stated zone, no
+  // country, no locale) must not be turned into a zone.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "MusicEvent", "name": "Club Night", "startDate": "2026-07-01T20:00:00+02:00",
+      "location": { "@type": "Place", "name": "Warehouse 9",
+                    "address": { "addressLocality": "Somewhere" } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.club.example/night");
+  assert.equal(e.ctz, "");
+  assert.equal(e.times[0].start, "2026-07-01T20:00:00+02:00"); // exact instant preserved, unzoned
+});
+
+test("Generic site: a stated venue country alone (floating times, non-agreeing locale) derives no ctz", () => {
+  // stubhub-style: the address names Israel but the page is en-US boilerplate
+  // and the times are floating — a single hint, so the event ships without a
+  // ctz rather than with a guessed one.
+  const html = `<html lang="en-US"><body>
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Concert", "startDate": "2026-07-04T20:30:00",
+      "location": { "@type": "Place", "name": "Park HaYarkon",
+                    "address": { "addressLocality": "Tel Aviv", "addressCountry": "Israel" } } }
+    </script></body></html>`;
+
+  const e = firstEvent(html, "https://www.resale.example/concert");
+  assert.equal(e.ctz, "");
+  assert.equal(e.times[0].start, "2026-07-04T20:30:00");
+});
+
 test("Page with no event information at all: returns no events", () => {
   // A title (og:title / <h1> / document title) is present on essentially every
   // page, so a title with no date is not an event — the popup shows nothing.
