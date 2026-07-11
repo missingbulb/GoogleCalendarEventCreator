@@ -295,6 +295,24 @@ test("Generic site: location falls back to 'Event @ Venue' in the page title", (
   assert.equal(e.times[0].location, "Peace Forest, Jerusalem");
 });
 
+test("Generic site: 'Event @ Venue' title is trimmed when a fuller structured location is known", () => {
+  // The "Event @ Venue" convention duplicates the venue in the title. When a
+  // structured signal (here place meta) gives a FULLER location that leads with
+  // that same venue, the "@ Venue" tail is redundant — trim the title to the
+  // event name alone (matching how a dedicated source reads it). The location is
+  // untouched.
+  const html = `
+    <meta property="og:title" content="Berry Sakharof @ Peace Forest">
+    <meta property="og:street-address" content="Peace Forest">
+    <meta property="og:locality" content="Jerusalem">
+    <meta property="og:country-name" content="Israel">
+    <p>16 June 2026 7:00 pm</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.title, "Berry Sakharof");
+  assert.equal(e.times[0].location, "Peace Forest, Jerusalem, Israel");
+});
+
 test("Generic site: midnight-UTC <time datetime> is refined using the start time from og:description", () => {
   // Sites sometimes set <time datetime="YYYY-MM-DDT00:00:00.000Z"> as a date
   // placeholder while the actual start time is only in the visible text or

@@ -12,8 +12,8 @@ Headline coverage over all 34 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **66.7%** | 68 / 102 |
-| **All fields** | **44.4%** | 88 / 198 |
+| **Critical fields** (title + start + location) | **67.6%** | 69 / 102 |
+| **All fields** | **44.9%** | 89 / 198 |
 | Event coverage *(informational)* | 24.8% | 40 / 161 |
 
 ### Gate
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 66.7% | 66.7% | ✓ |
-| All fields | 44.4% | 44.4% | ✓ |
+| Critical fields | 67.6% | 67.6% | ✓ |
+| All fields | 44.9% | 44.9% | ✓ |
 
 Gated over **34** shared case(s).
 
@@ -33,7 +33,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 34 | 28 | 4 | 2 | 82.4% |
+| `title` **(critical)** | 34 | 29 | 3 | 2 | 85.3% |
 | `start` **(critical)** | 34 | 24 | 8 | 2 | 70.6% |
 | `end` | 22 | 13 | 0 | 9 | 59.1% |
 | `location` **(critical)** | 34 | 16 | 5 | 13 | 47.1% |
@@ -45,7 +45,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Host | Cases | Events found (fb/custom) | Critical % | All % |
 | --- | --: | --: | --: | --: |
-| `bandsintown.com` | 1 | 1/1 | 66.7% | 66.7% |
+| `bandsintown.com` | 1 | 1/1 | 100% | 83.3% |
 | `barby.co.il` | 1 | 1/1 | 66.7% | 40% |
 | `cinema.co.il` | 5 | 5/118 | 53.3% | 26.7% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 83.3% |
@@ -74,7 +74,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 
 | Case | Events fb/custom | title | start | end | loc | ctz | len | desc |
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| `bandsintown-berry-sakharof` | 1/1 | ~ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
+| `bandsintown-berry-sakharof` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `barby` | 1/1 | ✓ | ✓ | — | ✗ | ✗ | — | ~ |
 | `dash-datadoghq` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |
 | `dice` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ✓ |

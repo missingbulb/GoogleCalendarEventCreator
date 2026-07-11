@@ -35,13 +35,34 @@
   function extract() {
     const embedded = embeddedEvents.find();
     // Several embedded events => a listing page; surface each.
-    if (embedded.length > 1) return embedded.map(embeddedEvents.toEvent);
+    if (embedded.length > 1) return embedded.map(embeddedEvents.toEvent).map(trimVenueTitle);
 
-    const event = merge(embeddedEvents.toEvent(embedded[0]), heuristics());
+    const event = trimVenueTitle(merge(embeddedEvents.toEvent(embedded[0]), heuristics()));
     // The heuristics always fill a title (og:title -> <h1> -> document title),
     // present on essentially every page, so a title alone is not an event. Treat
     // this as an event only when the page embedded one or a date was parsed.
     return embedded.length > 0 || event.start ? [event] : [];
+  }
+
+  // "Event @ Venue" titles (bandsintown, Songkick, and many music/ticketing
+  // listings — whether the title arrives via JSON-LD or og:title) repeat the venue
+  // in the title. When a FULLER location is known — one that leads with that same
+  // venue but carries more (street, city, country) — the "@ Venue" tail is
+  // redundant, so trim the title to the event name alone, the way a dedicated
+  // source reads it. Guarded to a strict superset (the location starts with the
+  // venue but is longer) so we only strip when the venue is known independently: a
+  // location that is exactly the title's tail (e.g. one parsed back out of the
+  // title by venueFromTitle) leaves the title untouched.
+  function trimVenueTitle(event) {
+    if (!event || !event.title) return event;
+    const at = event.title.indexOf(" @ ");
+    if (at < 0) return event;
+    const venueTail = clean(event.title.slice(at + 3));
+    const loc = clean(event.location);
+    if (venueTail && loc && loc !== venueTail && loc.startsWith(venueTail)) {
+      event.title = clean(event.title.slice(0, at));
+    }
+    return event;
   }
 
   // Best-effort scrape of any page's meta tags / microdata / text.
