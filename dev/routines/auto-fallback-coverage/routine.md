@@ -1,6 +1,6 @@
 # Fallback-coverage routine
 
-Daily Claude **Opus** routine, offline on a fresh clone. Goal: make the **generic**
+Daily Claude routine (on a strong model), offline on a fresh clone. Goal: make the **generic**
 fallback extractor — `extension/event-extractors/extract-unsupported.js` and the
 shared `extension/event-extractors/helpers/*.js` — recover **more** of what the
 dedicated per-site sources get, measured by the fallback-coverage gate. **Most runs
@@ -61,9 +61,15 @@ work, because a run that trips one there is marked **failed**:
   (Widening a scan-window cap can make a *different* case match a `<script>` blob it
   never reached — re-run the whole corpus before raising any cap.)
 - **No forbidden win.** Don't invent `ctz` or `eventLengthInMinutes` (a wrong `ctz`
-  is worse than none); `start`/`end` already match when they resolve to the same
-  instant, so don't chase representation-only differences; never override a miss a
-  unit test deliberately asserts.
+  is worse than none). `ctz` may only be *derived*, never guessed: two independent
+  page-declared hints must agree — the contract
+  `extension/event-extractors/helpers/derive-timezone.js` implements (#674/#676) —
+  so never weaken its refusal rules for a coverage win. When a change fills a field
+  generically, also check the cases whose dedicated source deliberately leaves that
+  field EMPTY (stubhub/seetickets set no `ctz`) still come out empty — a "win"
+  there silently breaks strict parity. `start`/`end` already match when they
+  resolve to the same instant, so don't chase representation-only differences;
+  never override a miss a unit test deliberately asserts.
 - **Covered and clean.** Add or extend a case in
   `extension-test/event-extractors/extraction.test.js`, red-before-green; the full
   `npm test` must be green (postcondition: *suite*). Never weaken a test, lower the
