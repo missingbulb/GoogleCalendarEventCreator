@@ -20,7 +20,10 @@
 //               date-and-time pattern in the page's visible text
 //               ("June 14, 2026 at 7 PM", "14 June 2026", "6/14/2026", ISO)
 //   location    itemprop="location" -> <address> -> the first reasonably
-//               short element whose class/id mentions "venue" or "location"
+//               short element whose class/id mentions "venue" or "location" ->
+//               OG place/business/geo meta tags -> the "@ Venue" title tail ->
+//               an "(Online)"-style title parenthetical -> the street address
+//               in the page's footer/header chrome (single-venue sites)
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
 //   ctz         derived only when two independent page-declared hints agree (a
@@ -142,6 +145,9 @@
     if (!out.location && /\((virtual|online|webinar)\)/i.test(out.title || "")) {
       out.location = "Online";
     }
+    // Dead last — even the "(Online)" inference above outranks it, because site
+    // chrome describes the site, not this event.
+    if (!out.location) out.location = chromeAddress();
 
     // Preserve the description's line breaks. Meta descriptions often contain
     // literal HTML markup (e.g. "<br />") rather than real newlines — parse
@@ -194,6 +200,88 @@
     if (i < 0) return "";
     const venue = clean(title.slice(i + 3));
     return venue.length <= 80 ? venue : "";
+  }
+
+  // Href of a maps service — a "directions to us" link marks its own text as
+  // the site's street address.
+  const MAPS_SERVICE = /(?:maps\.google\.|google\.[a-z.]+\/maps|waze\.com|openstreetmap\.org|maps\.apple\.com|bing\.com\/maps)/i;
+  // An icon file whose name says "this is where we are" (location.png,
+  // map-pin.svg, map_marker.webp, …) — the wrapping link's text is the address.
+  const PIN_ICON = /(?:location|map[-_]?pin|map[-_]?marker)[^/]*\.(?:png|svg|gif|jpe?g|webp|ico)/i;
+
+  // Last-resort location: the street address a single-venue site (a club, a
+  // cinema, a theater) publishes once in its page chrome instead of repeating
+  // it in every event's details. The footer is scanned first, then the header
+  // (some venues use a top contact bar). Only deliberate "this is our address"
+  // markers are read — never arbitrary chrome text — in signal-strength order:
+  //   1. a maps-service link (Google Maps, Waze, OSM, Apple/Bing Maps)
+  //   2. an element whose class/id mentions "addres" (covers "address" and the
+  //      bare "addres" misspelling seen in the wild)
+  //   3. a link marked by a location-pin icon (PIN_ICON above)
+  // Each candidate must still read like a street address (looksLikeAddress), so
+  // "Get Directions" links, phone numbers, and copyright lines never qualify.
+  // Ranked below every event-specific signal (including the "(Online)" title
+  // inference): chrome describes the site, so on a multi-venue platform an
+  // office address in the footer must lose to any per-event location the page
+  // exposes — platforms publish JSON-LD/meta locations, which win far earlier.
+  function chromeAddress() {
+    const markers = [
+      (root) => [...root.querySelectorAll("a[href]")].filter((a) => MAPS_SERVICE.test(a.getAttribute("href"))),
+      (root) => root.querySelectorAll('[class*="addres" i], [id*="addres" i]'),
+      (root) =>
+        [...root.querySelectorAll("a")].filter((a) =>
+          [...a.querySelectorAll("img")].some((img) =>
+            PIN_ICON.test(`${img.getAttribute("src") || ""} ${img.getAttribute("data-src") || ""}`)
+          )
+        ),
+    ];
+    for (const scope of ['footer, [class*="footer" i], [id*="footer" i]', 'header, [class*="header" i], [id*="header" i]']) {
+      const roots = document.querySelectorAll(scope);
+      for (const marked of markers) {
+        for (const root of roots) {
+          for (const el of marked(root)) {
+            const address = addressText(el);
+            if (address) return withSiteVenue(address);
+          }
+        }
+      }
+    }
+    return "";
+  }
+
+  // The candidate's own visible text. In a real (scripting-enabled) Chrome a
+  // <noscript>'s content is one RAW TEXT node — naive textContent would splice
+  // image markup into the address (the technicalGotchas.md jsdom-vs-Chrome trap
+  // that bit custom/telavivcinematheque.js) — so noscript/script/style subtrees
+  // are dropped from a clone before reading. A leading "Address:"-style label
+  // is dropped too.
+  function addressText(el) {
+    const copy = el.cloneNode(true);
+    for (const n of copy.querySelectorAll("noscript, script, style")) n.remove();
+    const t = clean(copy.textContent).replace(/^(?:address|כתובת)\s*:\s*/i, "");
+    return looksLikeAddress(t) ? t : "";
+  }
+
+  // A plausible one-line street address: short, carries a street number, is
+  // mostly words rather than digits (a phone number is the reverse), and isn't
+  // an email / URL / copyright line.
+  function looksLikeAddress(t) {
+    if (t.length < 5 || t.length > 120) return false;
+    const letters = (t.match(/\p{L}/gu) || []).length;
+    const digits = (t.match(/\d/g) || []).length;
+    if (!digits || letters < 3 || letters < digits) return false;
+    return !/[@©]|https?:|copyright|all rights reserved|כל הזכויות/i.test(t);
+  }
+
+  // On a single-venue site the site IS the venue, so when the page names itself
+  // (og:site_name) the venue leads the composed location — "<venue>, <address>"
+  // — the way a dedicated single-venue source (and a human typing a Calendar
+  // location) writes it. Skipped when the name already appears in the address,
+  // or is merely the site's domain ("stubhub.com" is not a venue).
+  function withSiteVenue(address) {
+    const site = clean(meta("og:site_name"));
+    if (!site || address.includes(site) || /^[\w.-]+\.[a-z]{2,}$/i.test(site)) return address;
+    return `${site}, ${address}`;
   }
 
   // First element matching `sel` whose text is plausibly a venue string

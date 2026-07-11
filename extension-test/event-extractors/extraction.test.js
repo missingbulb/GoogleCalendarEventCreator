@@ -353,6 +353,141 @@ test("Generic site: '(Virtual)' or '(Online)' parenthetical in the title signals
   }
 });
 
+test("Generic site: location falls back to the footer's maps-service link (single-venue site)", () => {
+  // A single-venue site (a club, a cinema, a theater) rarely repeats its address
+  // in each event's details — it publishes it once, in the page chrome. A footer
+  // link to a maps service ("directions to us") whose text is the street address
+  // is the strongest such marker (barby.co.il's footer is this exact shape).
+  const html = `
+    <h1>אפרת גוש</h1>
+    <p>16/06/2026 21:00</p>
+    <div class="footer">
+      <a href="https://www.google.com/maps/dir/?api=1&destination=Barby">הנמל 1 - נמל יפו</a>
+      <a href="tel:+97235188123">03-5188123</a>
+    </div>`;
+
+  const e = firstEvent(html, "https://www.club.example/show/4401");
+  assert.equal(e.times[0].location, "הנמל 1 - נמל יפו");
+});
+
+test("Generic site: footer chrome address is composed with og:site_name — on a single-venue site the site IS the venue", () => {
+  // The location-pin icon link (an <img> named location/map-pin/map-marker) is a
+  // footer convention for "our address" (cinema.co.il's footer is this shape,
+  // <noscript> fallback and all). In a real, scripting-enabled Chrome the
+  // <noscript> content is a RAW TEXT node — reading textContent naively would
+  // splice image markup into the address (see technicalGotchas.md), so the
+  // noscript subtree must be dropped before reading. The site's own name
+  // (og:site_name) then leads the composed location, the way a dedicated
+  // single-venue source (and a human typing into Calendar) writes it.
+  const html = `
+    <meta property="og:site_name" content="סינמטק תל אביב">
+    <h1>הילדה השמאלית</h1>
+    <time datetime="2026-06-17T20:00:00"></time>
+    <div id="colophon" class="site-footer">
+      <ul><li>
+        <a href="#"><img data-src="https://cdn.example/images/location.png"><noscript><img src="https://cdn.example/images/location.png" alt="img"></noscript>רחוב הארבעה 5, תל אביב</a>
+      </li></ul>
+    </div>`;
+
+  const e = firstEvent(html, "https://www.cinema.example/event/left-handed-girl/");
+  assert.equal(e.times[0].location, "סינמטק תל אביב, רחוב הארבעה 5, תל אביב");
+});
+
+test("Generic site: an address-marked footer element is read; phone and copyright lines never qualify", () => {
+  // class/id mentioning "addres" (matching the common misspelling seen in the
+  // wild as well as "address") marks the element that carries the street
+  // address. The looks-like-an-address bar — short, a street number, more
+  // letters than digits, no ©/email/URL — is what keeps the neighboring footer
+  // furniture (phone numbers, copyright lines) from ever qualifying.
+  const html = `
+    <h1>Efrat Gosh Premiere</h1>
+    <p>June 16, 2026 at 9 PM</p>
+    <footer>
+      <span id="footer-phone">03-5188123</span>
+      <div class="copyright-address">© 2026 The Club. All rights reserved.</div>
+      <span id="footer-addres">HaNamal 1, Jaffa Port</span>
+    </footer>`;
+
+  const e = firstEvent(html, "https://www.club.example/show");
+  assert.equal(e.times[0].location, "HaNamal 1, Jaffa Port");
+});
+
+test("Generic site: footer with no address-like text yields no location at all", () => {
+  // A maps link whose text is just a call to action ("Get Directions") and an
+  // address-marked element holding only a phone number both fail the
+  // looks-like-an-address bar — better no location than footer noise.
+  const html = `
+    <h1>Community Picnic</h1>
+    <p>Sunday, October 4, 2026 at 10 AM</p>
+    <footer>
+      <a href="https://maps.google.com/?q=somewhere">Get Directions</a>
+      <div class="address">03-5188123</div>
+    </footer>`;
+
+  const e = firstEvent(html, "https://www.example.com/picnic");
+  assert.equal(e.times[0].location, undefined);
+});
+
+test("Generic site: any event-specific location signal beats the footer chrome address", () => {
+  // Site chrome describes the SITE, not the event: on a multi-venue platform the
+  // footer address is the operator's office (ticketmaster.co.il's footer names
+  // the ticketing company's own address). Every event-specific signal — here the
+  // OG place meta — must win over it.
+  const html = `
+    <meta property="og:title" content="Harvest Market">
+    <meta property="og:street-address" content="500 Main St">
+    <meta property="og:locality" content="Springfield">
+    <p>Sunday, October 4, 2026 at 10 AM</p>
+    <footer>
+      <div class="footer-address">Address: 2 HaYarkon St, Bnei Brak, Floor 19</div>
+    </footer>`;
+
+  const e = firstEvent(html, "https://www.example.com/market");
+  assert.equal(e.times[0].location, "500 Main St, Springfield");
+});
+
+test("Generic site: an '(Online)' title beats the footer chrome address", () => {
+  // A virtual event's page often still carries the organizer's office address in
+  // the footer; the event-specific "(Online)" parenthetical wins.
+  const html = `
+    <meta property="og:title" content="Tech Summit (Online)">
+    <p>July 8, 2026 at 2 PM</p>
+    <footer><div class="address">500 Main St, Springfield</div></footer>`;
+
+  const e = firstEvent(html, "https://www.example.com/summit");
+  assert.equal(e.times[0].location, "Online");
+});
+
+test("Generic site: a domain-shaped og:site_name is not prepended to the chrome address", () => {
+  // Some sites set og:site_name to their bare domain ("stubhub.com",
+  // "www.livenation.de") — a domain is not a venue name, so the address stands
+  // alone. An 'Address:'-style label ahead of the street address is dropped.
+  const html = `
+    <meta property="og:site_name" content="www.club.example">
+    <h1>Album Premiere</h1>
+    <p>June 16, 2026 at 9 PM</p>
+    <footer><div class="street-address">Address: HaNamal 1, Jaffa Port</div></footer>`;
+
+  const e = firstEvent(html, "https://www.club.example/show");
+  assert.equal(e.times[0].location, "HaNamal 1, Jaffa Port");
+});
+
+test("Generic site: a header address is read when the footer has none", () => {
+  // Some venue sites put the address in a top contact bar instead of the footer
+  // (tabitisrael.co.il's restaurant pages do); the footer is preferred, the
+  // header is the runner-up.
+  const html = `
+    <h1>Wine Tasting Dinner</h1>
+    <p>June 20, 2026 at 8 PM</p>
+    <header class="top-bar">
+      <span class="restaurant-address">שדרות חן 52, תל אביב</span>
+    </header>
+    <footer><span>© The Restaurant</span></footer>`;
+
+  const e = firstEvent(html, "https://www.restaurant.example/events/wine");
+  assert.equal(e.times[0].location, "שדרות חן 52, תל אביב");
+});
+
 test("Generic site: the date/time body-text scan reaches past a long nav block before the real content", () => {
   // A heavy nav/menu (a WordPress mega-menu, category list, …) can push a page's
   // real content well past a short prefix of the body text; the scan window
