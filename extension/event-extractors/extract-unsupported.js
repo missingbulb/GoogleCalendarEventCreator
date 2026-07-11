@@ -26,8 +26,12 @@
 //               in the page's footer/header chrome (single-venue sites)
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
+//   ctz         derived only when two independent page-declared hints agree (a
+//               stated inline-JSON timezone, the events' own UTC offsets, the
+//               JSON-LD venue country, the page locale) — see
+//               helpers/derive-timezone.js (#674); otherwise absent
 (() => {
-  const { clean, text, meta, blockText, htmlToText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts } = GCal;
+  const { clean, text, meta, blockText, htmlToText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts, deriveCtz } = GCal;
 
   // How much of the page's body text the date/time scan below considers. Large
   // enough to reach past a long nav/menu block (e.g. a WordPress mega-menu)
@@ -38,13 +42,25 @@
   function extract() {
     const embedded = embeddedEvents.find();
     // Several embedded events => a listing page; surface each.
-    if (embedded.length > 1) return embedded.map(embeddedEvents.toEvent).map(trimVenueTitle);
+    if (embedded.length > 1) return withCtz(embedded.map(embeddedEvents.toEvent).map(trimVenueTitle));
 
     const event = trimVenueTitle(merge(embeddedEvents.toEvent(embedded[0]), heuristics()));
     // The heuristics always fill a title (og:title -> <h1> -> document title),
     // present on essentially every page, so a title alone is not an event. Treat
     // this as an event only when the page embedded one or a date was parsed.
-    return embedded.length > 0 || event.start ? [event] : [];
+    return embedded.length > 0 || event.start ? withCtz([event]) : [];
+  }
+
+  // The one field the heuristics can never scrape directly: the event's
+  // timezone. deriveCtz (helpers/derive-timezone.js) answers only when two
+  // independent page-declared hints agree; a "" answer leaves the events
+  // exactly as before (#674). Page-level on purpose: every event on the page
+  // shares the one corroborated zone, and a page whose events span zones never
+  // gets one (the offset/country unanimity rules see to it).
+  function withCtz(events) {
+    const ctz = deriveCtz(events.flatMap((e) => [e.start, e.end]));
+    if (ctz) for (const e of events) e.ctz = ctz;
+    return events;
   }
 
   // "Event @ Venue" titles (bandsintown, Songkick, and many music/ticketing
