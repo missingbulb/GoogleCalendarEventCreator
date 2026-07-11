@@ -1,6 +1,7 @@
 [
   "event-extractors/registry.js",
   "event-extractors/helpers/dates.js",
+  "event-extractors/helpers/derive-timezone.js",
   "event-extractors/helpers/dom.js",
   "event-extractors/helpers/embedded-events.js",
   "event-extractors/helpers/merge.js",

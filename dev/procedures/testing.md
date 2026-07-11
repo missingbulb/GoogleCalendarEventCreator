@@ -67,9 +67,11 @@ change.
   norm/sort the popup uses, no parallel harness needed. When comparing its
   output to a dedicated source, most start/end *differences* are just the
   dedicated source localizing to floating time via its hardcoded `ctz` (same
-  instant), not extraction bugs; the real gaps are missing fields (`ctz`,
-  durations, site-specific descriptions) it can't know generically. (This is the
-  same comparison the fallback-coverage gate automates — see below.)
+  instant), not extraction bugs; the real gaps are missing fields it can't know
+  generically (durations, site-specific descriptions, and — where the page
+  doesn't declare corroborating hints, see `helpers/derive-timezone.js` —
+  `ctz`). (This is the same comparison the fallback-coverage gate automates —
+  see below.)
 - **All requirements live in `dev/requirements/`.** The spec docs and
   every validating test are in that one top-level folder; the document model and
   the how-to-add-one rules are in
