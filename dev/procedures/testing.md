@@ -18,7 +18,11 @@ npm test               # everything above (offline + live + UI)
 General test discipline — see a test fail before trusting it,
 green-twice-before-merge, snapshot-through-the-real-code-path, high-watermark
 gating, self-diagnosing remote tests — is a portable practice maintained outside
-this repo; jsdom-vs-Chrome
+this repo. One local refinement: a **refusal test** (one asserting a guard yields
+nothing, e.g. `ctz === ""`) can't go red against the pre-change code, which also
+yielded nothing — "see it fail" for those means *mutating the new guard* (weaken
+the check, watch the test bite, restore), as derive-timezone's unanimity cases
+were verified. jsdom-vs-Chrome
 traps live in [`technicalGotchas.md`](technicalGotchas.md). This file is the
 project-specific testing decisions plus how to run and extend the suites. The
 detailed mechanics of each test harness live as comments **in that harness**

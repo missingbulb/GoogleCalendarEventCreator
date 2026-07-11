@@ -118,7 +118,12 @@ gap:
 - **Never tight-poll.** *Tight* means back-to-back status calls with no sleep
   between — pure token waste (as is re-reading a background job's output file after
   its completion notification already fired). The short-interval poll loop above is
-  not tight-polling: each poll is separated by a real sleep.
+  not tight-polling: each poll is separated by a real sleep. While that sleep runs,
+  do real work (review the diff, draft the PR body) or end the turn — filler calls
+  to look busy (a no-op `true`, peeking at the sleep's output file before its
+  notification, stacking a shorter second sleep) are tight-polling in disguise. And
+  a background `Monitor`/watch script can't observe CI either — it's still the
+  shell, which can't see GitHub (above); the MCP poll is the only observer.
 - **Batch tool loading.** `ToolSearch` for every GitHub MCP tool the flow needs
   (`issue_write`, `create_pull_request`, `pull_request_read`,
   `merge_pull_request`) in one call, not one per turn.

@@ -64,8 +64,10 @@ When the repo owner says **"learned lessons"**, treat it as a defined
 instruction to run the lessons-learned pass — the method, the friction signals,
 and the "no new lessons is valid" bar are a portable practice maintained outside
 this repo (dedupe ruthlessly, route each lesson to the doc that owns it, most
-runs add nothing) — over the current conversation, on **Opus**, since the
-reflection needs the stronger model. Otherwise it runs only when the repo owner
+runs add nothing) — over the current conversation, on **the strongest model
+available** (Opus when this rule was written; a session already running a
+stronger tier runs it in place rather than spawning a weaker Opus subagent),
+since the reflection needs it. Otherwise it runs only when the repo owner
 asks for it — never extract from a conversation unprompted.
 
 As part of the same pass, also run the standing **efficiency analysis** of the
