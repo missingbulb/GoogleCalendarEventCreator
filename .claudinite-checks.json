@@ -25,5 +25,8 @@
         "package.json": 1
       }
     }
-  ]
+  ],
+  "maintenance": {
+    "delivery": "push"
+  }
 }
