@@ -81,7 +81,13 @@ trap spanning files. See the full locality rule in
   gotcha, and the default `runScripts: "outside-only"` parsing of `<noscript>`
   is the other one — both are portable Node/jsdom gotchas maintained outside
   this repo. They bit the body-text scan, `extension-test/harness.js`, and
-  `custom/telavivcinematheque.js` (#130 / #137).
+  `custom/telavivcinematheque.js` (#130 / #137). The **opposite** direction bites
+  in a real *scripting-enabled* Chrome, where a `<noscript>`'s content is a single
+  **raw-text** node: reading an ancestor's `textContent` splices the noscript's
+  inner markup into the string, so strip `noscript`/`script`/`style` from a clone
+  before reading any element's user-facing text (the generic fallback's
+  footer-address reader in `extension/event-extractors/extract-unsupported.js` does
+  this, #675).
 - **Injected block markup inside a `<p>` silently empties it — read the sibling,
   not the tag.** The portable HTML rule (raw-HTML injection of a block element makes
   the parser auto-close the `<p>`, so the content lands as its `nextElementSibling`
