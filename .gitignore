@@ -15,11 +15,18 @@ dev/requirements/shared/.artifacts/
 docs/
 
 # Claudinite shared-rules canon: synced in by the SessionStart hook
-# (.claudinite/sync-claudinite.sh) as a read-only artifact, never committed --
-# so ignore the synced contents EXCEPT the committed sync-claudinite.sh hook (the
-# tracked one-glance signal that this repo mounts Claudinite, doubling as the
-# Method B sync hook). The two rules below must stay in that order so git still
-# descends into the dir to re-include the hook; the third is its swap-staging dir.
+# (.claudinite/mount/sync-claudinite.sh) as a read-only artifact, never committed
+# -- so ignore the synced contents EXCEPT the committed hook at
+# .claudinite/mount/sync-claudinite.sh (the tracked one-glance signal that this
+# repo mounts Claudinite, doubling as the Method B sync hook). Tracking a file
+# inside an otherwise-ignored dir needs the dir re-included first, hence the
+# mount/ pair (re-include the dir, then ignore its contents) before the file
+# negation. .claudinite.new/ is the swap-staging dir; .claudinite-hooks.log is the
+# durable hook log kept outside .claudinite/ so the sync's dir swap can't wipe it.
 /.claudinite/*
-!/.claudinite/sync-claudinite.sh
+!/.claudinite/mount/
+/.claudinite/mount/*
+!/.claudinite/mount/sync-claudinite.sh
 /.claudinite.new/
+/.claudinite-hooks.log
+/.claudinite-hooks.log.tmp
