@@ -59,7 +59,7 @@ unattended-agent architecture principles, and the repo owner's personal
 interaction preferences — is **not** maintained in this repo. It lives in the
 shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo and is
 **mounted read-only** via Claudinite's **Method B**: the
-[`.claudinite/sync-claudinite.sh`](.claudinite/sync-claudinite.sh) SessionStart
+[`.claudinite/mount/sync-claudinite.sh`](.claudinite/mount/sync-claudinite.sh) SessionStart
 hook downloads the latest `main` as a codeload tarball over plain HTTPS at the
 start of every session, so the canon stays current with no pin to bump. (Why
 Method B and not a submodule: in a Claude Code web session the in-session git
