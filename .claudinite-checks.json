@@ -1,5 +1,24 @@
 {
   "packs": [
+    {
+      "id": "barriers",
+      "config": {
+        "rules": [
+          {
+            "from": ["extension", "extension-test", "dev", ".github", "README.md", "CLAUDE.md"],
+            "to": ["product/MarketWiki", "product/UsersWiki", "product/sample-data"],
+            "except": [
+              {
+                "path": "dev/routines/product-wiki-growth/routine.md",
+                "to": ["product/MarketWiki", "product/UsersWiki", "product/sample-data"],
+                "reason": "the growth routine's own doc names the wiki folders it maintains"
+              }
+            ],
+            "reason": "product/MarketWiki, product/UsersWiki, and product/sample-data are a self-growing market/user/competitor research wiki kept decoupled from the extension's source, tests, and docs; product/product-requirements is the one folder still reachable from here"
+          }
+        ]
+      }
+    },
     "basics",
     "chrome-extension",
     "chrome-extension-release",

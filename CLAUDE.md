@@ -33,9 +33,12 @@ site support) is likewise self-contained in
 [`dev/routines/create-extractor/routine.md`](dev/routines/create-extractor/routine.md));
 the daily routines that incrementally improve the shipped extractor live alongside it
 under [`dev/routines/`](dev/routines/) (currently
-[`dev/routines/auto-fallback-coverage/`](dev/routines/auto-fallback-coverage/)). Read
-either **only** when working on that pipeline/routine — neither is needed for
-day-to-day development.
+[`dev/routines/auto-fallback-coverage/`](dev/routines/auto-fallback-coverage/)) — as does
+the self-growing product-side wiki's growth routine,
+[`dev/routines/product-wiki-growth/`](dev/routines/product-wiki-growth/routine.md) (see
+[`product/README.md`](product/README.md) for what it maintains). Read any of these
+**only** when working on that pipeline/routine — none is needed for day-to-day
+development.
 
 Non-obvious technical gotchas — codebase footguns that have cost real debugging
 time — live in `dev/procedures/technicalGotchas.md` (imported below).
