@@ -3,7 +3,7 @@
 // that exists, and only files that exist. `npm test` discovers by glob, so a test
 // missing from test:offline still runs there; what this check catches is the
 // offline suite silently thinning as tests are added, moved, or renamed (the rule
-// this converts was prose in the old dev/procedures/testing.md).
+// this converts was prose in the project's old testing procedure doc).
 //
 // Local-pack check modules are dependency-free on purpose: they return plain
 // finding objects ({ rule, severity, file, line, what, why, fix, doc }) instead of
