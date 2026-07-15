@@ -24,7 +24,7 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
 > right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [`dev/procedures/testing.md`](../procedures/testing.md). Likewise, the toolbar-icon leaves
+> [the testing-guide skill](../../.claudinite/local_packs/gcec/skills/testing-guide/SKILL.md). Likewise, the toolbar-icon leaves
 > (§10) are verified offline through a **fake Chrome**, so they pin the icon the
 > extension *generates*, not that real Chrome *paints* it — only the e2e test does
 > that.
@@ -1399,7 +1399,7 @@ that runs the real extractor against a **real cached page**
 (`dev/requirements/extractor/data/server-fetched/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
 `dev/requirements/extractor/extractor-support.test.js`. Adding a new source
-(see `dev/routines/create-extractor/routine.md`) adds a row here. A bot-blocked host with no
+(see `.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md`) adds a row here. A bot-blocked host with no
 cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
 is covered by unit tests only.
 
@@ -1755,7 +1755,7 @@ here: the rendered §4–§5 requirements are the executable contract.
 
 ## 14. Event fields
 
-Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `dev/procedures/technicalGotchas.md`).
+Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `.claudinite/local_packs/gcec/RULES.md`).
 
 <table>
 <tr>
@@ -1868,7 +1868,7 @@ The rules that govern the *instant* the Calendar event lands on (how a time is *
 
 ## 16. Requesting support
 
-The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `dev/routines/create-extractor/routine.md`.
+The "Suggest Correction" flow that turns a missed page into first-class support. The issue-form prefill is covered by `extension-test/events-popup/source-request-view.test.js`; the automation pipeline by the auto-extractor unit tests and `.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md`.
 
 <table>
 <tr>
@@ -1889,7 +1889,7 @@ The "Suggest Correction" flow that turns a missed page into first-class support.
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/routines/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.2 -->
+🔧 _Logic leaf — **untested here** — currently covered by `.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/test/2-triage.test.js`._ <!-- req-gallery:16.2 -->
 
 </td>
 <td valign="top">
@@ -1904,7 +1904,7 @@ The "Suggest Correction" flow that turns a missed page into first-class support.
 <tr>
 <td valign="top" width="320">
 
-🔧 _Logic leaf — **untested here** — currently covered by `dev/routines/create-extractor/test/triage-extractor-request.test.js`._ <!-- req-gallery:16.3 -->
+🔧 _Logic leaf — **untested here** — currently covered by `.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/test/2-triage.test.js`._ <!-- req-gallery:16.3 -->
 
 </td>
 <td valign="top">

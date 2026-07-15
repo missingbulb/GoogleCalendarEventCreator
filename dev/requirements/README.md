@@ -106,9 +106,10 @@ Either way the rule is one sentence: **on an actual↔expected mismatch the agen
 surfaces *actual*, *expected*, and the *diff*, and asks the owner to approve or
 reject — it never edits the success criterion itself.** For the visual kinds the
 mechanics (revert the baseline, render the diff, ask via a popup, only re-baseline
-on approval) live in
-[`dev/procedures/workflow.md`](../procedures/workflow.md); the same
-discipline applies to an `extractor` JSON diff and a `logic`/`behavior` assertion.
+on approval) live in the gcec pack's
+[snapshot-approval skill](../../.claudinite/local_packs/gcec/skills/snapshot-approval/SKILL.md);
+the same discipline applies to an `extractor` JSON diff and a `logic`/`behavior`
+assertion.
 
 ## Layout
 
@@ -150,7 +151,8 @@ dev/requirements/
   gallery in `requirements.md` after an intentional popup/view/CSS/icon change.
   **Never** silently re-baseline a moved snapshot — surface the visual diff for the
   owner's approval (see [The owner-approval contract](#the-owner-approval-contract)
-  and [`dev/procedures/workflow.md`](../procedures/workflow.md)).
+  and the gcec pack's
+  [snapshot-approval skill](../../.claudinite/local_packs/gcec/skills/snapshot-approval/SKILL.md)).
 - `npm run regen` — load lists + UI snapshots + fallback-coverage baseline.
 - `npm run test:live` — the extractor live/support + fallback-coverage suites
   (offline, against the committed `extractor/data/` fixtures).
@@ -158,7 +160,7 @@ dev/requirements/
 ## How to add a new supported site
 
 Adding a per-site extractor is its own documented flow — see
-[`dev/routines/create-extractor/routine.md`](../routines/create-extractor/routine.md).
+[`.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md`](../../.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md).
 It adds an `extractor` leaf to `requirements.md` §11 plus a reviewed live case under
 `extractor/expected/`.
 
@@ -168,5 +170,5 @@ A green build means every leaf is **claimed** by a case of the right kind, **not
 that every leaf is *faithfully* verified. The `behavior` cases stub the
 `chrome.tabs.create`/`window.close` boundary; many `logic` leaves are `tbd`
 (covered today by unit tests, not yet wired here). These gaps are deliberate and
-tracked — see the banner in `requirements.md` and
-[`dev/procedures/testing.md`](../procedures/testing.md).
+tracked — see the banner in `requirements.md` and the gcec pack's
+[testing-guide skill](../../.claudinite/local_packs/gcec/skills/testing-guide/SKILL.md).

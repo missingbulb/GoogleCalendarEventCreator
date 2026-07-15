@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Postconditions for the daily fallback-coverage routine
-# (dev/routines/auto-fallback-coverage/routine.md).
+# (.claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage/routine.md).
 #
 # Runs AFTER the agent has made a candidate change, and bundles every
 # deterministic validation that a "win" is clean, generic, real and non-regressing.

@@ -113,7 +113,7 @@ for (const file of caseFiles) {
     const cachedHtmlPath = dataFile(`${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
-      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see dev/routines/create-extractor/3-prepare.sh`
+      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see .claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/3-prepare.sh`
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");

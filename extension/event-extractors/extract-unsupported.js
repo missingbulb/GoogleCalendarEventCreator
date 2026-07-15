@@ -251,7 +251,7 @@
 
   // The candidate's own visible text. In a real (scripting-enabled) Chrome a
   // <noscript>'s content is one RAW TEXT node — naive textContent would splice
-  // image markup into the address (the technicalGotchas.md jsdom-vs-Chrome trap
+  // image markup into the address (the gcec RULES.md jsdom-vs-Chrome trap
   // that bit custom/telavivcinematheque.js) — so noscript/script/style subtrees
   // are dropped from a clone before reading. A leading "Address:"-style label
   // is dropped too.

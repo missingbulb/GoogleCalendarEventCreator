@@ -12,7 +12,8 @@
 // the toolbar icon.
 //
 // A case is a self-contained scenario: its data lives only in the case file
-// (never in production code, never in a shared gallery). See dev/procedures/testing.md.
+// (never in production code, never in a shared gallery). See the testing-guide
+// skill (.claudinite/local_packs/gcec/skills/testing-guide/SKILL.md).
 "use strict";
 
 const { test } = require("node:test");

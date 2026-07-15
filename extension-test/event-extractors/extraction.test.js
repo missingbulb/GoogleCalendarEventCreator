@@ -375,7 +375,7 @@ test("Generic site: footer chrome address is composed with og:site_name — on a
   // footer convention for "our address" (cinema.co.il's footer is this shape,
   // <noscript> fallback and all). In a real, scripting-enabled Chrome the
   // <noscript> content is a RAW TEXT node — reading textContent naively would
-  // splice image markup into the address (see technicalGotchas.md), so the
+  // splice image markup into the address (see the gcec pack’s RULES.md), so the
   // noscript subtree must be dropped before reading. The site's own name
   // (og:site_name) then leads the composed location, the way a dedicated
   // single-venue source (and a human typing into Calendar) writes it.

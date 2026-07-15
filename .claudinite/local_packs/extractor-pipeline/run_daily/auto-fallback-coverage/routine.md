@@ -11,7 +11,7 @@ no PR.
 ## 1. Precondition
 
 ```sh
-bash dev/routines/auto-fallback-coverage/preconditions.sh
+bash .claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage/preconditions.sh
 ```
 
 Non-zero exit → **stop**: nothing meaningful changed; no branch, no PR, nothing to log.
@@ -29,7 +29,8 @@ your candidate targets. This run is your pre-change reference (the committed
 `fallback-coverage.baseline.GENERATED.json`); don't `git stash`/rerun to re-derive
 it — that conflicts on the `ours`-driver GENERATED artifacts. A committed baseline
 listing **fewer** `cases` than the live run is pre-existing drift, not something
-your change introduced. Gate mechanics: [testing.md](../../procedures/testing.md).
+your change introduced. Gate mechanics: [the pack's RULES.md](../../RULES.md)
+(and the gate's own headers).
 
 ## 3. Improve — the feedback loop
 
@@ -84,7 +85,7 @@ and stop.
 Pass every value the change newly recovered via the body-text scan as arguments:
 
 ```sh
-bash dev/routines/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
+bash .claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
 ```
 
 - Exit 0 → the win is valid; go to step 5.
@@ -95,9 +96,9 @@ bash dev/routines/auto-fallback-coverage/postconditions.sh "<recovered value>" .
 
 Branch `claude/fallback-coverage/<date>`, commit the change plus the regenerated
 GENERATED artifacts, and push. Then open a **PR for review** — it never merges
-itself; from there it goes through the usual flow
-([github.md](../../procedures/github.md)), and CI must go green **twice** (it
-touches `test:live`). PR body: the hypothesis, why it's generic (which unseen sites
+itself; from there it goes through the usual flow (the gcec pack's
+[merge-and-ci skill](../../../gcec/skills/merge-and-ci/SKILL.md)), and CI must
+go green **twice** (it touches `test:live`). PR body: the hypothesis, why it's generic (which unseen sites
 it helps), how the jsdom trap was ruled out, the before→after numbers, and the
 covering test.
 

@@ -23,7 +23,7 @@ test("the scaffolded stub is loadable and registers a working matcher", () => {
   // its matcher. Only matches() is exercised (a pure host check).
   const fs = require("node:fs");
   const path = require("node:path");
-  const ROOT = path.join(__dirname, "..", "..", "..", "..");
+  const ROOT = path.join(__dirname, "..", "..", "..", "..", "..", "..");
   const sandbox = { URL, document: { querySelector: () => null } };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT, "extension/event-extractors/registry.js"), "utf8"), sandbox);

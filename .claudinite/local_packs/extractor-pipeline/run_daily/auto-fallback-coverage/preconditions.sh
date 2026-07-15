@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Precondition gate for the daily fallback-coverage routine
-# (dev/routines/auto-fallback-coverage/routine.md).
+# (.claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage/routine.md).
 #
 #   Exit 0   → a meaningful code change landed in the window ⇒ run the routine.
 #   Non-zero → nothing meaningful changed ⇒ the routine stops (it prints why).

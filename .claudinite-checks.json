@@ -8,16 +8,21 @@
     "node",
     "spec-driven-product",
     "tidy-repo",
-    "grow_with_claudinite"
-  ],
-  "rules": {},
-  "accept": [
+    "grow_with_claudinite",
+    "gcec",
     {
-      "rule": "warning-suppression",
-      "path": "dev/routines/create-extractor/test/extractor-naming.test.js",
-      "reason": "the no-eval lint-ignore on line 48 is a deliberate, reviewed test that eval()s a matches() regex built from a URL — a controlled test input, not a quick-path suppression of a real warning"
+      "id": "extractor-pipeline",
+      "accept": [
+        {
+          "rule": "warning-suppression",
+          "path": ".claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/test/extractor-naming.test.js",
+          "reason": "the no-eval lint-ignore on line 48 is a deliberate, reviewed test that eval()s a matches() regex built from a URL — a controlled test input, not a quick-path suppression of a real warning"
+        }
+      ]
     }
   ],
+  "rules": {},
+  "accept": [],
   "sharedConstants": [
     {
       "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",

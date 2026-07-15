@@ -13,7 +13,7 @@
 
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$HERE/../../.."
+cd "$HERE/../../../../.."
 
 fail() { echo "POSTCONDITION FAILED — do not open a PR, hand the issue to a human: $*" >&2; exit 1; }
 

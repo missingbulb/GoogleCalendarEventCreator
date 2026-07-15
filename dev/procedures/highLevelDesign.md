@@ -10,21 +10,14 @@ click, `popup.js` injects `event-extractors/` and runs `assemble-events.js`, whi
 the matching `custom/<site>.js` (or `extract-unsupported.js`);
 `build-calendar-url.js` builds the URL `events-view.js` renders.
 
-## Architecture rules of the road
-
-Overarching rules for *how we build this* (whenever we agree on a new or changed
-top-level architectural guideline, update this section as part of the same change):
-
-- Adding support for a new host is the most common change — the architecture must
-  keep it a single, self-contained new file
-  (`extension/event-extractors/custom/<site>.js`) plus regenerating the load list,
-  touching nothing else and assuming nothing about other extractors.
-
-Portable agent-architecture principles that aren't specific to this project (the
-unattended-agent judgment boundary, the bounded-and-enforced write surface) are
-maintained as portable, project-agnostic rules outside this repo. The worked
-examples for both are this repo's auto-extractor pipeline
-([routine.md](../routines/create-extractor/routine.md)).
+The top-level **architecture rules of the road** live in the gcec local pack's
+[RULES.md](../../.claudinite/local_packs/gcec/RULES.md) (injected at session
+start), not here — whenever we agree on a new or changed top-level architectural
+guideline, update that section as part of the same change. Portable
+agent-architecture principles (the unattended-agent judgment boundary, the
+bounded-and-enforced write surface) are maintained outside this repo; the worked
+example for both is this repo's auto-extractor pipeline
+([routine.md](../../.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md)).
 
 ## How extraction works
 

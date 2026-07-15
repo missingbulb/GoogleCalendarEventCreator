@@ -17,7 +17,7 @@ step describes — most stops hand the issue to a human, none open a PR.
 ## 1. Precondition
 
 ```sh
-bash dev/routines/create-extractor/1-preconditions.sh
+bash .claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/1-preconditions.sh
 ```
 
 Non-zero → **stop** (dirty tree; it printed why). Otherwise `npm install` once, then
@@ -32,7 +32,7 @@ then run:
 
 ```sh
 OPEN_REQUESTS_FILE=<that file> ISSUE_BODY=<body> ISSUE_TITLE=<title> ISSUE_NUMBER=<n> \
-  node dev/routines/create-extractor/2-triage.js
+  node .claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/2-triage.js
 ```
 
 It prints one JSON object — `{ skipAgent, reason, mode, url, host, waitSelector,
@@ -44,7 +44,7 @@ shipped extension can't disagree). Act on `reason`:
   issue** as not planned with `message`, and stop.
 - **`sample`** → another open request (`#duplicateOf`) already owns this host. Fold
   this page into that leader issue as an extra sample: fetch the leader's body,
-  rewrite it with `node dev/routines/create-extractor/attach-sample-url.js` (pass the
+  rewrite it with `node .claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/attach-sample-url.js` (pass the
   body + this `url`), post the rewritten body, comment + close this issue with
   `message`, and stop.
 - **anything else** (`supported` or a blank reason) → **proceed**. Keep triage's
@@ -56,7 +56,7 @@ shipped extension can't disagree). Act on `reason`:
 ```sh
 MODE=<mode> BRANCH=<branch> CASE_NAME=<caseName> HOST=<host> EVENT_URL=<url> \
   ISSUE_NUMBER=<n> \
-  bash dev/routines/create-extractor/3-prepare.sh
+  bash .claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/3-prepare.sh
 ```
 
 It branches, writes the page's `.url`, scaffolds (a new source + case in `new` mode;
@@ -79,8 +79,9 @@ actions_run_trigger(workflow="fetch-page.yml", ref=<branch>,
 ```
 
 Then **poll the run to completion** (`actions_list`/`actions_get`, on the short
-back-off in `dev/procedures/github.md` — this environment can't observe GitHub
-state from the shell). The workflow records the page and commits
+back-off in the gcec pack's merge-and-ci skill
+(`.claudinite/local_packs/gcec/skills/merge-and-ci/SKILL.md`) — this environment
+can't observe GitHub state from the shell). The workflow records the page and commits
 `dev/requirements/extractor/data/server-fetched/<caseName>.html` back to the branch
 with `[skip ci]`. On completion:
 
@@ -140,7 +141,7 @@ label the issue `extractor-blocked-needs-human`**, and stop. No PR.
 
 ```sh
 MODE=<mode> BRANCH=<branch> CASE_NAME=<caseName> SOURCE_PATH=<sourcePath> \
-  ISSUE_NUMBER=<n> bash dev/routines/create-extractor/4-postconditions.sh
+  ISSUE_NUMBER=<n> bash .claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/4-postconditions.sh
 ```
 
 It re-checks the scope (only the two files changed, plus the workflow-recorded
@@ -188,7 +189,7 @@ green toolbar icon, and its host must also be in `supportedDomains`
 
 When the routine hands an issue to a human (`extractor-blocked-needs-human`), or to
 add a source by hand: follow the same shape — add `custom/<site>.js`, `npm run
-index`, register the host in `supportedDomains`, add a reviewed case
-(`dev/procedures/testing.md`), and record the host as an extractor-support
-requirement leaf in `dev/requirements/requirements.md` §11 (see
-[`dev/requirements/README.md`](../../requirements/README.md)).
+index`, register the host in `supportedDomains`, add a reviewed case (the
+[add-live-case](../../skills/add-live-case/SKILL.md) skill), and record the host
+as an extractor-support requirement leaf in `dev/requirements/requirements.md`
+§11 (see [`dev/requirements/README.md`](../../../../../dev/requirements/README.md)).
