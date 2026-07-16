@@ -3,9 +3,9 @@
 Product-level requirements for the Google Calendar Event Creator extension — the
 market/user-facing **why** and **what**, as opposed to the engineering **how**.
 
-This is the one folder under `product/` the rest of the repo may still reference
+This is the one folder under `product-wiki/` the rest of the repo may still reference
 (see the barrier rule in [`.claudinite-checks.json`](../../.claudinite-checks.json)).
-`product/MarketWiki/`, `product/UsersWiki/`, and `product/sample-data/` are a
+`product-wiki/Market/`, `product-wiki/Users/`, and `product-wiki/sample-data/` are a
 self-growing research wiki that the extension's source, tests, and docs must stay
 decoupled from; this file is the reviewed, human-maintained distillation that's
 allowed to cross that line.
@@ -17,9 +17,9 @@ allowed to cross that line.
   exactly what the shipped extension does today.
 - **This folder** — the **product** requirements that spec exists to satisfy: who
   it's for, what problem it solves, and what "good" looks like from the market/user
-  side. Sourced from [`../MarketWiki/`](../MarketWiki/README.md),
-  [`../UsersWiki/`](../UsersWiki/README.md), and
-  [`../CompetitorsWiki/`](../CompetitorsWiki/README.md) — folders the
+  side. Sourced from [`../Market/`](../Market/README.md),
+  [`../Users/`](../Users/README.md), and
+  [`../Competitors/`](../Competitors/README.md) — folders the
   rest of the repo may **not** read directly.
 - Unlike the two wikis, **this file is not auto-grown.** The wikis are maintained by
   the scheduled routine
@@ -38,7 +38,7 @@ how the shipped extension solves this today (a toolbar button, one popup, no
 OAuth/API keys, `calendar.google.com/render` prefilled for the user to review and
 save).
 
-## Target users (see UsersWiki for the full research)
+## Target users (see Users for the full research)
 
 - Individuals who land on a single event page (a concert, a talk, a meetup) and
   want it on their calendar in one click.
@@ -46,7 +46,7 @@ save).
   want.
 - Anyone who'd rather not create a Google account connection or paste an API key
   just to add one event — see the competitive positioning in
-  [`../CompetitorsWiki/README.md`](../CompetitorsWiki/README.md).
+  [`../Competitors/README.md`](../Competitors/README.md).
 
 ## Core product requirements
 
@@ -71,10 +71,10 @@ not a restatement of the test spec.
 - No account/auth flow, no server component, no analytics — keeping "zero
   installation friction" is itself a requirement, not an omission.
 - No calendar other than Google Calendar's prefilled-event URL scheme today —
-  MarketWiki tracks whether Outlook/Apple Calendar/ICS export is worth adding.
+  Market tracks whether Outlook/Apple Calendar/ICS export is worth adding.
 
 ## Sourcing
 
-Distilled from `../MarketWiki/README.md` and `../UsersWiki/README.md` as of their
+Distilled from `../Market/README.md` and `../Users/README.md` as of their
 last growth-log entries. When the wikis' "Open questions" surface something that
 should change a product requirement, review it and update this file by hand.

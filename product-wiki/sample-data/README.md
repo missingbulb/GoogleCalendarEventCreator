@@ -1,7 +1,7 @@
 # Sample data
 
-Small, illustrative examples that `MarketWiki/` or `UsersWiki/` (including
-`CompetitorsWiki/`) point to when a claim benefits from a concrete example
+Small, illustrative examples that `Market/` or `Users/` (including
+`Competitors/`) point to when a claim benefits from a concrete example
 — e.g. a redacted screenshot of a competitor's flow, or a sample extracted-event
 JSON used to illustrate a usage pattern.
 

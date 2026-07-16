@@ -1,18 +1,18 @@
-# CompetitorsWiki
+# Competitors
 
 A self-growing survey of tools competing to do what this extension does: get an
 event from a webpage onto a calendar with minimal friction. Not exhaustive — a
 general lay of the land, kept current by the growth routine (see
 [`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md)).
-Sibling to [`../MarketWiki/`](../MarketWiki/README.md) (the calendar-market
-landscape) and [`../UsersWiki/`](../UsersWiki/README.md) (who uses this
+Sibling to [`../Market/`](../Market/README.md) (the calendar-market
+landscape) and [`../Users/`](../Users/README.md) (who uses this
 extension).
 
 ## Landscape (as of 2026-07-15)
 
 | Tool | Approach | Notes |
 |---|---|---|
-| [Eventy](https://chromewebstore.google.com/detail/eventy/kfancgcbhdkeohknmidbnioccmmoknjl) | AI extraction from webpages, email, flyers, concert posters, even screenshots | Broadest input surface of the group; 4.4★ on the Chrome Web Store. Exports to Google Calendar or `.ics` (Outlook/Apple Calendar) — covers the multi-calendar gap this project doesn't (see MarketWiki open question). |
+| [Eventy](https://chromewebstore.google.com/detail/eventy/kfancgcbhdkeohknmidbnioccmmoknjl) | AI extraction from webpages, email, flyers, concert posters, even screenshots | Broadest input surface of the group; 4.4★ on the Chrome Web Store. Exports to Google Calendar or `.ics` (Outlook/Apple Calendar) — covers the multi-calendar gap this project doesn't (see Market open question). |
 | [Add To Calendar](https://chromewebstore.google.com/detail/add-to-calendar/jnbpajadakhkpcncmbfhkgaaoioofkfd) | Highlight text → right-click → "Intelligent Technology" scan for title/date/time/address | 4.4★. Closest in spirit to a lightweight, single-purpose tool rather than a broad AI product. |
 | [Calendar Event Creator](https://chromewebstore.google.com/detail/calendar-event-creator/nbdaijdcnmhjhoekcdcgdjcjheajgpad) | Select event text → right-click → OpenAI API extracts details | Requires an OpenAI-backed flow — a real friction point vs. "no API key" positioning. |
 | [ChatGPT for Google Calendar](https://chromewebstore.google.com/detail/chatgpt-for-google-calend/laejdmahdkleahgkdpiapfdcmleedhca) | LLM-based extraction of title/date/time/location from any webpage | Google-Calendar-only, like this project, but LLM-dependent rather than rule-based + generic-fallback. |
@@ -31,7 +31,7 @@ extension).
   detail.
 - **Multi-calendar export (`.ics`, Outlook, Apple Calendar) is common among
   AI-based competitors** (Eventy, Smart Calendars AI) but absent here — flagged
-  as an open question in MarketWiki, now cross-referenced from the competitive
+  as an open question in Market, now cross-referenced from the competitive
   angle too.
 - **Ratings cluster around 4.4★** for the dedicated single-purpose tools — no
   major quality outlier found yet in this pass; revisit once review counts are

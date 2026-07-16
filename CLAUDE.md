@@ -36,7 +36,7 @@ under [`dev/routines/`](dev/routines/) (currently
 [`dev/routines/auto-fallback-coverage/`](dev/routines/auto-fallback-coverage/)) — as does
 the self-growing product-side wiki's growth routine,
 [`dev/routines/product-wiki-growth/`](dev/routines/product-wiki-growth/routine.md) (see
-[`product/README.md`](product/README.md) for what it maintains). Read any of these
+[`product-wiki/README.md`](product-wiki/README.md) for what it maintains). Read any of these
 **only** when working on that pipeline/routine — none is needed for day-to-day
 development.
 
