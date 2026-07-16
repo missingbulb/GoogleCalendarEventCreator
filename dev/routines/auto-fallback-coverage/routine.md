@@ -8,13 +8,27 @@ correctly change nothing** — the gate already banks every prior win, so a new
 generic win is rare and a forced or fake one is worse than none. No win → no branch,
 no PR.
 
-## 1. Precondition
+## How this runs — cheap dispatcher, then a strong subagent
 
-```sh
-bash dev/routines/auto-fallback-coverage/preconditions.sh
-```
+The nightly trigger does **not** boot a strong model straight into this routine.
+Because most nights the precondition skips, that would burn a full strong-model boot
+(the model + the `CLAUDE.md` `@import` chain + the SessionStart hooks) just to run a
+gate and stop. Instead the trigger fires [`runner.md`](runner.md) — a tiny prompt on
+the **cheapest model**, in a **context-free session** — which runs the code gate
+(`run.sh`, wrapping `preconditions.sh`) and spins up a strong-model subagent to
+execute **this** file **only** when the gate passes. So the strong model (and this
+routine's whole context) is paid for solely on the nights there's real work.
 
-Non-zero exit → **stop**: nothing meaningful changed; no branch, no PR, nothing to log.
+You are that strong subagent. The gate has already passed — **start at step 2**.
+
+## 1. Precondition — already handled by the dispatcher
+
+The cheap dispatcher ([`runner.md`](runner.md)) ran the gate
+(`bash dev/routines/auto-fallback-coverage/run.sh`, which wraps `preconditions.sh`)
+before spawning you, and only spawned you because it exited 0. So the precondition is
+already satisfied — **do not re-run it**; go straight to step 2. (If you are running
+this routine by hand, run `bash dev/routines/auto-fallback-coverage/run.sh` first; a
+non-zero exit means nothing meaningful changed — stop, no branch, no PR.)
 
 ## 2. Measure the baseline
 
