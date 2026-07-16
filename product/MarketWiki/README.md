@@ -4,8 +4,7 @@ A self-growing wiki of the market environment this extension operates in: what
 calendar platforms exist, what kinds of pages people extract events from, and
 what usage patterns show up in that market. Distinct from
 [`../UsersWiki/`](../UsersWiki/README.md) (who uses *this* extension and how) and
-[`../UsersWiki/competitors/`](../UsersWiki/competitors/README.md) (who else builds
-this).
+[`../CompetitorsWiki/`](../CompetitorsWiki/README.md) (who else builds this).
 
 ## How this wiki grows
 

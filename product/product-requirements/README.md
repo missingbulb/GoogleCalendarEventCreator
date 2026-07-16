@@ -17,9 +17,9 @@ allowed to cross that line.
   exactly what the shipped extension does today.
 - **This folder** — the **product** requirements that spec exists to satisfy: who
   it's for, what problem it solves, and what "good" looks like from the market/user
-  side. Sourced from [`../MarketWiki/`](../MarketWiki/README.md) and
-  [`../UsersWiki/`](../UsersWiki/README.md) (including
-  [`../UsersWiki/competitors/`](../UsersWiki/competitors/README.md)) — folders the
+  side. Sourced from [`../MarketWiki/`](../MarketWiki/README.md),
+  [`../UsersWiki/`](../UsersWiki/README.md), and
+  [`../CompetitorsWiki/`](../CompetitorsWiki/README.md) — folders the
   rest of the repo may **not** read directly.
 - Unlike the two wikis, **this file is not auto-grown.** The wikis are maintained by
   the scheduled routine
@@ -46,7 +46,7 @@ save).
   want.
 - Anyone who'd rather not create a Google account connection or paste an API key
   just to add one event — see the competitive positioning in
-  [`../UsersWiki/competitors/README.md`](../UsersWiki/competitors/README.md).
+  [`../CompetitorsWiki/README.md`](../CompetitorsWiki/README.md).
 
 ## Core product requirements
 

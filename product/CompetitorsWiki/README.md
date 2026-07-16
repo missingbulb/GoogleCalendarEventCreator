@@ -1,9 +1,12 @@
-# Competitors
+# CompetitorsWiki
 
 A self-growing survey of tools competing to do what this extension does: get an
 event from a webpage onto a calendar with minimal friction. Not exhaustive — a
 general lay of the land, kept current by the growth routine (see
-[`dev/routines/product-wiki-growth/routine.md`](../../../dev/routines/product-wiki-growth/routine.md)).
+[`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md)).
+Sibling to [`../MarketWiki/`](../MarketWiki/README.md) (the calendar-market
+landscape) and [`../UsersWiki/`](../UsersWiki/README.md) (who uses this
+extension).
 
 ## Landscape (as of 2026-07-15)
 

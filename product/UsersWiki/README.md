@@ -1,10 +1,10 @@
 # UsersWiki
 
 A self-growing wiki of the people who use (or would use) this extension, and how
-— usage patterns, personas, and pain points. Paired with
-[`competitors/`](competitors/README.md), a self-growing survey of the other tools
-competing for the same job. For the broader calendar-market context these users
-sit in, see [`../MarketWiki/`](../MarketWiki/README.md).
+— usage patterns, personas, and pain points. Its sibling wikis cover the other
+tools chasing the same job ([`../CompetitorsWiki/`](../CompetitorsWiki/README.md))
+and the broader calendar-market context these users sit in
+([`../MarketWiki/`](../MarketWiki/README.md)).
 
 ## How this wiki grows
 
@@ -26,7 +26,7 @@ never silently overwrite.
   grant, an account, or send page content to a third-party AI API just to copy a
   date into a calendar. This persona is who the "no sign-in, no API key" product
   requirement is *for* — see the positioning notes in
-  [`competitors/README.md`](competitors/README.md).
+  [`../CompetitorsWiki/README.md`](../CompetitorsWiki/README.md).
 
 ## Usage patterns
 
@@ -35,7 +35,7 @@ never silently overwrite.
   committing (see `dev/requirements/requirements.md`).
 - Works from whatever page the user is already on — no search, no lookup, no
   separate "paste a URL" step, unlike several competitor tools (see
-  `competitors/README.md`).
+  `../CompetitorsWiki/README.md`).
 
 ## Pain points to track (hypotheses — verify with real feedback as it arrives)
 
@@ -55,7 +55,7 @@ never silently overwrite.
 Personas and pain points above are hypotheses seeded from the product's existing
 design decisions (`dev/procedures/highLevelDesign.md`,
 `dev/requirements/requirements.md`) and general competitor positioning (see
-`competitors/README.md`'s sources) — not yet from direct user research. Flag this
+`../CompetitorsWiki/README.md`'s sources) — not yet from direct user research. Flag this
 clearly until real user feedback (reviews, issues, support requests) backs a
 claim here.
 

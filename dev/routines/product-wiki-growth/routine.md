@@ -3,7 +3,7 @@
 A scheduled Claude Code routine that keeps
 [`product/MarketWiki/`](../../../product/MarketWiki/README.md),
 [`product/UsersWiki/`](../../../product/UsersWiki/README.md), and
-[`product/UsersWiki/competitors/`](../../../product/UsersWiki/competitors/README.md)
+[`product/CompetitorsWiki/`](../../../product/CompetitorsWiki/README.md)
 current — the self-growing market/user/competitor research wiki for this
 extension. Modeled on
 [`dev/routines/auto-fallback-coverage/`](../auto-fallback-coverage/routine.md):
@@ -55,7 +55,7 @@ Fresh clone (or `git merge origin/main` if resuming), `npm install` not required
 
 Read all three wiki files
 (`product/MarketWiki/README.md`, `product/UsersWiki/README.md`,
-`product/UsersWiki/competitors/README.md`) and their "Open questions" sections.
+`product/CompetitorsWiki/README.md`) and their "Open questions" sections.
 Pick the one or two open questions across the set most worth researching this
 run — don't try to close everything in one pass; a few well-sourced updates beat
 a wholesale rewrite.
@@ -64,7 +64,7 @@ a wholesale rewrite.
 
 Web-search the picked question(s). Write findings directly into the relevant
 wiki file(s) following the mechanic above. Stay inside `product/MarketWiki/`,
-`product/UsersWiki/` (including `competitors/`), and, only if a finding needs an
+`product/UsersWiki/`, `product/CompetitorsWiki/`, and, only if a finding needs an
 illustrative example, `product/sample-data/`. **Never edit
 `product/product-requirements/`** — if a finding seems important enough to
 change a product requirement, say so in the growth log and leave it for human
