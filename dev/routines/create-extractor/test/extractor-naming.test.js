@@ -45,7 +45,7 @@ test("matchesRegexFor escapes dots and covers host + subdomains", () => {
   );
   // The produced literal, evaluated, must accept the bare host and a subdomain
   // and reject the parent — and accept the supportedDomains entry (= the host).
-  const re = eval(matchesRegexFor("https://www.axs.com/e")); // eslint-disable-line no-eval
+  const re = eval(matchesRegexFor("https://www.axs.com/e")); // eslint-disable-line no-eval -- controlled test input: eval()s a matches() regex built from a fixed URL, not a quick-path suppression of a real warning
   assert.ok(re.test("axs.com"));
   assert.ok(re.test("tickets.axs.com"));
   assert.ok(!re.test("notaxs.com"));

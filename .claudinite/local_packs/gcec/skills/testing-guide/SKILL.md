@@ -18,7 +18,7 @@ npm test               # everything above except e2e
 The invariants (mirror tree, reviewed-contract cases, `REFERENCE_NOW` floor,
 refusal-test discipline) are always-loaded in the gcec pack's RULES.md. General
 test discipline (see-it-fail, green-twice, high-watermark gating) is canon.
-Adding a cached live case is the extractor-pipeline pack's **add-live-case**
+Adding a cached live case is the gcec pack's **add-live-case**
 skill; the fallback-coverage gate's invariants are in that pack's RULES.md.
 
 ## The requirements model — every leaf has exactly one case

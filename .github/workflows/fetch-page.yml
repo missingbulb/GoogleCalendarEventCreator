@@ -1,7 +1,7 @@
 name: Fetch cached page
 
 # On-demand ScraperAPI fetch for the create-extractor routine
-# (.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md). The routine runs in the Claude web
+# (dev/routines/create-extractor/routine.md). The routine runs in the Claude web
 # environment, which is a poor home for the ScraperAPI secret; the one page fetch
 # lives here instead, where GitHub owns SCRAPER_API_KEY as an Actions secret. The
 # routine dispatches this workflow (workflow_dispatch) for the branch it is working

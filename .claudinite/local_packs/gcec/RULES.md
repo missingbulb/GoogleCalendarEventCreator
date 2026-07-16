@@ -2,8 +2,9 @@
 
 The project's standing working rules — injected at session start while this pack
 is declared. Activity-scoped procedures live in this pack's skills
-(snapshot-approval, merge-and-ci, testing-guide) and surface on demand; the
-extractor-automation domain has its own pack (extractor-pipeline).
+(snapshot-approval, merge-and-ci, testing-guide, add-live-case) and surface on
+demand; the extractor-automation domain's standing rules are the "Extractor
+pipeline" section below, and its two routines live under `dev/routines/`.
 
 ## Working rules
 
@@ -155,9 +156,60 @@ classification: the `Release` stub (`chrome-extension-release.yml`) is
 unattended and already covered — the reporters fire inside the vendored
 create-package/publish/daily workflows, keyed per operation, with per-repo
 values in `.github/release.config`; `test.yml` is attended PR CI — no reporter;
-`fetch-page.yml` is attended by its dispatcher (see the extractor-pipeline
-pack); a **new** unattended workflow adds a failure job per the canon action
-header's recipe.
+`fetch-page.yml` is attended by its dispatcher (see the extractor pipeline
+section below); a **new** unattended workflow adds a failure job per the canon
+action header's recipe.
+
+## Extractor pipeline
+
+Standing rules for the extractor-automation domain — the create-extractor routine
+(an `extractor-request` issue → a PR adding site support) and the daily
+auto-fallback-coverage routine, both under
+[`dev/routines/`](../../../dev/routines/) (read a routine spec only when working
+on that pipeline). Adding a cached live case is the
+[add-live-case](skills/add-live-case/SKILL.md) skill.
+
+- **All page fetching is delegated to ScraperAPI via the fetch-page workflow**
+  (`.github/workflows/fetch-page.yml`): a bare curl through ScraperAPI's
+  residential proxy with `render=true`, so a single-page app records post-render
+  HTML with real data. Bot-blocking from CI/sandbox IPs is the portable rule
+  maintained in the canon; here the escape hatch is the `SCRAPER_API_KEY`
+  **GitHub Actions secret** — a page is recorded by dispatching that workflow (the
+  create-extractor routine does this in its step 4), never by a local fetch (this
+  sandbox is bot-blocked). ScraperAPI is the whole fetching surface — swap the
+  vendor in that one workflow if it underperforms. The aid for a flaky SPA render
+  is the **`Wait-for selector`** a source request can carry
+  (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
+  event extractor, #603), passed to the workflow as `wait_for_selector`.
+- **Facebook can't be a cached live case** — a hard HTTP 400 even through the
+  proxy, so its extraction stays unit-tests-only
+  (`extension-test/event-extractors/extraction.test.js`).
+- **Rendered output isn't deterministic.** A re-record can legitimately shift a
+  live case's `expected` — treat such drift like a site-markup change, and prefer
+  extracting JSON-LD/`og:` (which apps still inject) over brittle DOM positions.
+- **`fetch-page.yml` is attended by its dispatcher** (the workflow-failure
+  classification above): the create-extractor routine dispatches it, polls the
+  run, and on failure labels the issue `extractor-blocked-needs-human` — a red run
+  reaches a human through the routine, not the Actions list, so the workflow
+  carries no failure reporter (and being dispatch-only it never runs unwatched).
+- **The fallback-coverage gate is a high-watermark over a changing case set.** It
+  ratchets up on an unchanged case set and re-anchors when the set changes,
+  compared over the cases the runs **share** — so adding an extractor never fails
+  it (#240) while a pre-existing case that regresses still does. A removed/renamed
+  case the watermark still lists makes it stale: the local refresh re-anchors it
+  (commit that); in CI it's an error to fix. *Caveat:* never commit a re-anchored
+  baseline while the gate is red — a regression bundled with a case-set change can
+  be re-anchored over. Detailed mechanics self-document in the gate's own headers
+  (`dev/requirements/extractor/fallback/fallback-coverage.js` / `.test.js`).
+- **To see what the generic/unsupported extractor gets** on any cached page — even
+  a supported host — load the files, set `GCal.sources = []`, then call
+  `GCal.extract()`: the documented way to force the unsupported-host path through
+  the same norm/sort the popup uses. Most start/end *differences* vs a dedicated
+  source are just its hardcoded `ctz` localizing to floating time (same instant),
+  not extraction bugs; the real gaps are fields it can't know generically
+  (durations, site-specific descriptions, and — where the page doesn't declare
+  corroborating hints, see `helpers/derive-timezone.js` — `ctz`). This is the
+  comparison the fallback-coverage gate automates.
 
 ## Architecture rules of the road
 
@@ -172,11 +224,12 @@ this section as part of the same change (the design doc itself is
 
 ## Capture policy — lessons land in the local packs
 
-**The local packs are this repo's whole capture surface.** Route each lesson to
-the pack that owns its territory — extractor-automation to extractor-pipeline,
-everything else here to gcec — then pick the *mechanism* before writing prose
-(the canon promotion ladder, applied locally): a check in the pack's `rules`
-beats prose every time (`test-offline-list-sync` is the worked example — a
+**The gcec local pack is this repo's capture surface.** Route each lesson to its
+section here (extractor-automation to the "Extractor pipeline" section,
+everything else to the fitting section) — then pick the *mechanism* before
+writing prose (the canon promotion ladder, applied locally): a check in the
+pack's `rules` beats prose every time (`test-offline-list-sync` is the worked
+example — a
 testable sentence became a rule module with red-first fixtures); an
 activity-scoped procedure becomes a pack skill; only what neither can carry
 lands in RULES.md, terse.

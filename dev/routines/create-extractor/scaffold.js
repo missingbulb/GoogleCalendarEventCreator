@@ -19,7 +19,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { hostname, slugFor, matchesRegexFor, namesFor } = require("./extractor-naming");
 
-const ROOT = path.join(__dirname, "..", "..", "..", "..", "..");
+const ROOT = path.join(__dirname, "..", "..", "..");
 const sourcePath = (slug) => path.join(ROOT, "extension", "event-extractors", "custom", `${slug}.js`);
 const casePath = (name) => path.join(ROOT, "dev", "requirements", "extractor", "expected", `${name}.json`);
 const LISTS_FILE = path.join(ROOT, "extension", "fallback-lists.json");

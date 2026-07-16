@@ -168,7 +168,7 @@ function skipMessage(reason, { host, duplicateOf }) {
 // duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
   const { classifyHost } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "..", "..", "..", "extension", "fallback-policy.js"))
+    pathToFileURL(path.join(__dirname, "..", "..", "..", "extension", "fallback-policy.js"))
   );
 
   const url = firstUrl(body) || firstUrl(title);

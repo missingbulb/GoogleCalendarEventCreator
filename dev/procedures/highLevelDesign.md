@@ -17,7 +17,7 @@ guideline, update that section as part of the same change. Portable
 agent-architecture principles (the unattended-agent judgment boundary, the
 bounded-and-enforced write surface) are maintained outside this repo; the worked
 example for both is this repo's auto-extractor pipeline
-([routine.md](../../.claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/routine.md)).
+([routine.md](../../dev/routines/create-extractor/routine.md)).
 
 ## How extraction works
 

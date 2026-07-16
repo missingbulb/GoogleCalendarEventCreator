@@ -41,5 +41,5 @@ test("the resolved file actually exists on disk", () => {
   const fs = require("node:fs");
   const path = require("node:path");
   const base = resolveSourceBaseName("https://www.cinema.co.il/event/1");
-  assert.ok(fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "..", "..", "extension", "event-extractors", "custom", `${base}.js`)));
+  assert.ok(fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "extension", "event-extractors", "custom", `${base}.js`)));
 });

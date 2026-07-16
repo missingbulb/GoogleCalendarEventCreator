@@ -14,7 +14,7 @@ complexity). The tests run **offline** against committed cached HTML in
 `.url` file's URL so hostname detection behaves exactly as in Chrome.
 
 New cached HTML can't be fetched from this sandbox (bot-blocked — see the
-extractor-pipeline pack's RULES.md), so record the page *before* writing the
+gcec pack's RULES.md, "Extractor pipeline" section), so record the page *before* writing the
 case and read its exact `expected` off the committed file instead of guessing:
 
 1. Commit one new file — but **not** the case file yet:

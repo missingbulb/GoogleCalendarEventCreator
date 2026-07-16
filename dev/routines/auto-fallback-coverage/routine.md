@@ -11,7 +11,7 @@ no PR.
 ## 1. Precondition
 
 ```sh
-bash .claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage/preconditions.sh
+bash dev/routines/auto-fallback-coverage/preconditions.sh
 ```
 
 Non-zero exit → **stop**: nothing meaningful changed; no branch, no PR, nothing to log.
@@ -29,7 +29,7 @@ your candidate targets. This run is your pre-change reference (the committed
 `fallback-coverage.baseline.GENERATED.json`); don't `git stash`/rerun to re-derive
 it — that conflicts on the `ours`-driver GENERATED artifacts. A committed baseline
 listing **fewer** `cases` than the live run is pre-existing drift, not something
-your change introduced. Gate mechanics: [the pack's RULES.md](../../RULES.md)
+your change introduced. Gate mechanics: [the gcec pack’s RULES.md](../../../.claudinite/local_packs/gcec/RULES.md)
 (and the gate's own headers).
 
 ## 3. Improve — the feedback loop
@@ -85,7 +85,7 @@ and stop.
 Pass every value the change newly recovered via the body-text scan as arguments:
 
 ```sh
-bash .claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
+bash dev/routines/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
 ```
 
 - Exit 0 → the win is valid; go to step 5.
@@ -97,7 +97,7 @@ bash .claudinite/local_packs/extractor-pipeline/run_daily/auto-fallback-coverage
 Branch `claude/fallback-coverage/<date>`, commit the change plus the regenerated
 GENERATED artifacts, and push. Then open a **PR for review** — it never merges
 itself; from there it goes through the usual flow (the gcec pack's
-[merge-and-ci skill](../../../gcec/skills/merge-and-ci/SKILL.md)), and CI must
+[merge-and-ci skill](../../../.claudinite/local_packs/gcec/skills/merge-and-ci/SKILL.md)), and CI must
 go green **twice** (it touches `test:live`). PR body: the hypothesis, why it's generic (which unseen sites
 it helps), how the jsdom trap was ruled out, the before→after numbers, and the
 covering test.

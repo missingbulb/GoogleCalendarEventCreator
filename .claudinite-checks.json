@@ -9,17 +9,7 @@
     "spec-driven-product",
     "tidy-repo",
     "grow_with_claudinite",
-    "gcec",
-    {
-      "id": "extractor-pipeline",
-      "accept": [
-        {
-          "rule": "warning-suppression",
-          "path": ".claudinite/local_packs/extractor-pipeline/run_daily/create-extractor/test/extractor-naming.test.js",
-          "reason": "the no-eval lint-ignore on line 48 is a deliberate, reviewed test that eval()s a matches() regex built from a URL — a controlled test input, not a quick-path suppression of a real warning"
-        }
-      ]
-    }
+    "gcec"
   ],
   "rules": {},
   "accept": [],
