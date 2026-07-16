@@ -79,8 +79,9 @@ actions_run_trigger(workflow="fetch-page.yml", ref=<branch>,
 ```
 
 Then **poll the run to completion** (`actions_list`/`actions_get`, on the short
-back-off in `dev/procedures/github.md` — this environment can't observe GitHub
-state from the shell). The workflow records the page and commits
+back-off in the gcec pack's merge-and-ci skill
+(`.claudinite/local_packs/gcec/skills/merge-and-ci/SKILL.md`) — this environment
+can't observe GitHub state from the shell). The workflow records the page and commits
 `dev/requirements/extractor/data/server-fetched/<caseName>.html` back to the branch
 with `[skip ci]`. On completion:
 
@@ -188,7 +189,7 @@ green toolbar icon, and its host must also be in `supportedDomains`
 
 When the routine hands an issue to a human (`extractor-blocked-needs-human`), or to
 add a source by hand: follow the same shape — add `custom/<site>.js`, `npm run
-index`, register the host in `supportedDomains`, add a reviewed case
-(`dev/procedures/testing.md`), and record the host as an extractor-support
-requirement leaf in `dev/requirements/requirements.md` §11 (see
-[`dev/requirements/README.md`](../../requirements/README.md)).
+index`, register the host in `supportedDomains`, add a reviewed case (the
+[add-live-case](../../../.claudinite/local_packs/gcec/skills/add-live-case/SKILL.md) skill), and record the host
+as an extractor-support requirement leaf in `dev/requirements/requirements.md`
+§11 (see [`dev/requirements/README.md`](../../requirements/README.md)).

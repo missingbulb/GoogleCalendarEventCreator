@@ -1,7 +1,8 @@
 # File descriptions
 
 A per-file map of the repo. See [highLevelDesign.md](highLevelDesign.md) for how
-extraction works (and its "rules of the road" section), and
+extraction works (the architecture rules of the road live in the gcec local
+pack's [RULES.md](../../.claudinite/local_packs/gcec/RULES.md)), and
 [requirements.md §12–§16](../requirements/requirements.md) for what the
 extension does.
 
@@ -48,7 +49,8 @@ extension does.
 | `dev/build/release/build-zip.js` | Builds `dist/google-calendar-event-creator.zip` (`npm run build`) from the shipping list |
 | `dev/routines/create-extractor/` | The create-extractor routine in one folder: `routine.md` (the label-wired agentic spec) driving four ordinal stage scripts — `1-preconditions.sh` (clean-tree gate), `2-triage.js` (route + names via the sources' real `matches()`), `3-prepare.sh` (scaffold + baseline + push), `4-postconditions.sh` (scope + quality + re-verify) — plus the helpers they call (`resolve-source.js`, `extractor-naming.js`, `scaffold.js`, `case-quality.js`, `attach-sample-url.js`). The page fetch lives in `.github/workflows/fetch-page.yml` (so GitHub owns the ScraperAPI secret); the Claude Code session owns judgment + GitHub I/O |
 | `dev/routines/create-extractor/2-triage.js` | Stage 0 of the routine: runs the sources' real `matches()` + the popup's `classifyHost` to route a request (supported → add-a-case · deny/allow/sample → close · else → new source) and compute every mode-aware name, printed as one JSON object |
-| `dev/routines/` | Home for the repo's unattended routines: the create-extractor routine (`create-extractor/`, implements a site extractor from an `extractor-request` issue) and the daily incremental-maintenance routines that improve the shipped extractor over time (currently `auto-fallback-coverage/`, which widens the generic fallback extractor's field coverage — the gate itself lives under `dev/requirements/extractor/fallback/`) |
+| `.claudinite/local_packs/` | This repo's own Claudinite pack (tracked project content, run by the same engine as the canon): `gcec/` — the project's standing rules (`RULES.md`), its own conformance checks, and its working skills (snapshot-approval / merge-and-ci / testing-guide / add-live-case) |
+| `dev/routines/` | The repo's unattended routines, scheduled outside this repo: `create-extractor/` (implements a site extractor from an `extractor-request` issue) and `auto-fallback-coverage/` (widens the generic fallback's field coverage; the coverage gate itself lives under `dev/requirements/extractor/fallback/`) |
 | `dev/routines/auto-fallback-coverage/routine.md` | The agentic spec: gate, measure the baseline, iterate on one or more generic wins, validate, finalize. The job (the measure→edit→re-measure feedback loop and the genericity/trap constraints) lives here; the deterministic mechanics live in the sibling scripts |
 | `dev/routines/auto-fallback-coverage/preconditions.sh` | 24h freshness gate: exits non-zero (skip the routine) unless a meaningful non-docs/non-generated change landed on the base branch in the window, else 0. Pure git inspection, no side effects |
 | `dev/routines/auto-fallback-coverage/postconditions.sh` | Post-work validation of a candidate win: diff-scope, full `npm test`, a real improvement over the committed baseline, and (per value arg) the jsdom-artifact check. Any non-zero exit means the run failed and must not retry or open a PR |

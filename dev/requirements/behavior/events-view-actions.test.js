@@ -18,7 +18,7 @@
 // CANNOT confirm that a REAL Chrome actually opens the tab, places it adjacent,
 // or tears the popup down — only that our code asked it to. A faithful (non-stub)
 // verification of these leaves is still owed; the approach is TBD by the repo
-// owner — see the UI-testing tracking issue referenced in testing.md.
+// owner — see the UI-testing tracking issue (#435, per the gcec testing-guide skill).
 // Until then, 3.4/9.1/9.2/9.3 are only PARTIALLY verified.
 // =====================================================================
 "use strict";

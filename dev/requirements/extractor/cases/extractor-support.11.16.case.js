@@ -1,4 +1,4 @@
-// facebook.com is bot-blocked from the recorder/CI (see technicalGotchas.md), so
+// facebook.com is bot-blocked from the recorder/CI (see the gcec pack’s RULES.md), so
 // there's no cached page — its extractor is covered by unit tests only (tbd).
 "use strict";
 

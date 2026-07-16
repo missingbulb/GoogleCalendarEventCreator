@@ -80,7 +80,7 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 
 - [Executable requirements](dev/requirements/README.md) — how requirements are modeled (a numbered breakdown where every leaf has a validating case) and how to add one.
 - [Requirements](dev/requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
-- [High-level design](dev/procedures/highLevelDesign.md) — how extraction works, plus the top-level architecture rules of the road.
+- [High-level design](dev/procedures/highLevelDesign.md) — how extraction works.
 - [File descriptions](dev/procedures/fileDescriptions.md) — the per-file map.
-- [Testing](dev/procedures/testing.md) — the test kinds (integration / unit / UI) and how to run and extend them.
-- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) (which imports `dev/procedures/`).
+- [Testing](.claudinite/local_packs/gcec/skills/testing-guide/SKILL.md) — the test kinds (integration / unit / UI) and how to run and extend them.
+- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) and the project's Claudinite local packs under [`.claudinite/local_packs/`](.claudinite/local_packs/).
