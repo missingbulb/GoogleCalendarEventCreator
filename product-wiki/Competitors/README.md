@@ -2,8 +2,8 @@
 
 A self-growing survey of tools competing to do what this extension does: get an
 event from a webpage onto a calendar with minimal friction. Not exhaustive — a
-general lay of the land, kept current by the growth routine (see
-[`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md)).
+general lay of the land, kept current by the Claudinite **product-wiki** pack's
+growth worker (mounted read-only under `.claudinite/`).
 Sibling to [`../Market/`](../Market/README.md) (the calendar-market
 landscape) and [`../Users/`](../Users/README.md) (who uses this
 extension).

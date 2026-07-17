@@ -14,8 +14,8 @@ instead of re-deriving market context from scratch on every question, an agent
 passes — later runs read what's already here before researching, extend or
 correct it, cite every claim, and only prune a claim when it's superseded (never
 silently). The mechanic (schedule, what counts as a real update, when to open a
-PR) is defined in
-[`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md).
+PR) is owned by the Claudinite **product-wiki** pack's growth worker (mounted
+read-only under `.claudinite/`).
 Nothing in this file is guaranteed current — check the growth log's date and
 treat older entries as a starting point to verify, not ground truth.
 

@@ -22,8 +22,8 @@ allowed to cross that line.
   [`../Competitors/`](../Competitors/README.md) — folders the
   rest of the repo may **not** read directly.
 - Unlike the two wikis, **this file is not auto-grown.** The wikis are maintained by
-  the scheduled routine
-  ([`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md));
+  the Claudinite **product-wiki** pack's scheduled growth worker (mounted
+  read-only under `.claudinite/`);
   this file only changes when a human (or a session acting on the owner's behalf)
   reviews the wikis and decides something here should change — it's the crossing
   point the rest of the repo depends on, so it stays stable and reviewed.
