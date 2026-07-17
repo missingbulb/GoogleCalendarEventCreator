@@ -33,8 +33,15 @@ treat older entries as a starting point to verify, not ground truth.
 - Google Calendar's event-creation URL scheme
   (`calendar.google.com/calendar/render?action=TEMPLATE`) — what this extension
   targets — has no first-party equivalent this project currently uses for Outlook
-  or Apple Calendar. **Open question:** is ICS export or an Outlook deep link
-  worth adding, given web Outlook's share of the market?
+  or Apple Calendar. Google Calendar is ~23% of the calendar-tool market (6sense),
+  but the portable multi-calendar path is **`.ics` (RFC 5545)**, not per-vendor
+  deep links: Outlook, Apple Calendar, and any RFC-5545 app both export and import
+  it, and existing Chrome extensions (ics2gcal, ICS to GCal) already one-click a
+  `.ics` into Google Calendar. So the export question is really "emit a standards
+  `.ics`" rather than "add an Outlook deep link" — the same lever the AI
+  competitors already pull (Eventy, Smart Calendars AI; see Competitors). Tradeoff:
+  a `.ics` is a *download*, where the render URL is a no-download click-through —
+  the exact friction this product optimises away.
 
 ## Event-source landscape (what pages people extract *from*)
 
@@ -69,8 +76,9 @@ recur across the market:
 - How much of the "AI-powered extraction" trend (see competitors wiki) is
   actually driven by JS-heavy SPA pages that a rule-based extractor + ScraperAPI
   render struggles with, vs. genuine accuracy gains from an LLM?
-- Is there market signal for Outlook/ICS export, or is Google Calendar's share
-  large enough that it's not worth the surface area?
+- If multi-calendar export is ever added, does the `.ics`-download step erode the
+  no-download/no-account friction the render URL avoids? (Weigh against the reach
+  gain — see the Outlook/`.ics` note above, resolved 2026-07-17.)
 - What share of "event" pages in the wild already carry `schema.org/Event`
   JSON-LD vs. requiring DOM/text heuristics? (Would sharpen the fallback-coverage
   routine's generic-extraction priorities too — see
@@ -82,7 +90,14 @@ recur across the market:
 - [Google Calendar - Market Share, Competitor Insights in Collaborative Calendars (6sense)](https://6sense.com/tech/calendar/google-calendar-market-share)
 - [The 6 best calendar apps in 2026 (Zapier)](https://zapier.com/blog/best-calendar-apps/)
 - [Calendar Applications Market Research Report 2034 (Dataintelo)](https://dataintelo.com/report/calendar-applications-market)
+- [ics2gcal — import .ics into Google Calendar (GitHub)](https://github.com/fmeum/ics2gcal)
+- [ICS to GCal — Chrome Web Store](https://chromewebstore.google.com/detail/ics-to-gcal/ljobcbehhifehkmamikmchekbbljopao)
 
 ## Growth log
 
 - **2026-07-15** — initial seed (folder scaffolding + first research pass).
+- **2026-07-17** — researched the Outlook/`.ics` export question: `.ics` (RFC 5545)
+  is the portable multi-calendar lever (Outlook/Apple/any app import+export it;
+  ics2gcal / ICS to GCal already do one-click Google Calendar import), not
+  per-vendor deep links — folded into the platform-landscape note; opened a
+  follow-up on the `.ics`-download-vs-render-URL friction tradeoff.
