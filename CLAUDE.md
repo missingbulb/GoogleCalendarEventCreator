@@ -55,6 +55,14 @@ road** moved to the gcec pack's RULES.md; whenever we agree on a new or changed
 architectural guideline, update that section as part of the same change) — and
 [`fileDescriptions.md`](dev/procedures/fileDescriptions.md), the per-file map.
 
+The product-side research wiki lives under
+[`product-wiki/`](product-wiki/README.md) — a self-growing
+market/user/competitor/domain corpus, walled off from the code (a barriers rule
+in [`.claudinite-checks.json`](.claudinite-checks.json)) and grown by
+[`dev/routines/product-wiki-growth/`](dev/routines/product-wiki-growth/routine.md).
+Read it only when working on that wiki; it's not needed for day-to-day
+development.
+
 ## Shared portable rules (the Claudinite canon)
 
 The project-agnostic **canon** — general software-engineering practices, agentic
