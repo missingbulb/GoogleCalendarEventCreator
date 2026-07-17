@@ -11,6 +11,8 @@ through `product-requirements/`.
   how (personas, usage patterns, pain points).
 - [`Competitors/`](Competitors/README.md) — self-growing: a survey of the
   other tools competing for the same job.
+- [`Domain/`](Domain/README.md) — self-growing: the problem domain itself — how
+  events are represented on the web (formats, page shapes, timezone/recurrence).
 - [`sample-data/`](sample-data/README.md) — small illustrative examples the
   wikis point to (not test fixtures — those live under `dev/requirements/`).
 - [`product-requirements/`](product-requirements/README.md) — the one folder
@@ -19,7 +21,7 @@ through `product-requirements/`.
 
 ## Why walled off
 
-`Market/`, `Users/`, `Competitors/`, and `sample-data/` are evolving,
+`Market/`, `Users/`, `Competitors/`, `Domain/`, and `sample-data/` are evolving,
 loosely-sourced research — exactly the kind of content the rest of the repo (extension source,
 engineering requirements, procedures) must not silently start depending on,
 since an autonomous routine keeps rewriting it. `product-requirements/` is the
@@ -29,7 +31,7 @@ only it. See the `barriers` pack entry in
 
 ## How it grows
 
-`Market/`, `Users/`, and `Competitors/` follow Andrej
+`Market/`, `Users/`, `Competitors/`, and `Domain/` follow Andrej
 Karpathy's ["LLM Wiki"](https://medium.com/@urvvil08/andrej-karpathys-llm-wiki-create-your-own-knowledge-base-8779014accd5)
 pattern — compile findings into the wiki once, refine in place on later passes,
 rather than re-deriving everything from scratch each time. The mechanic

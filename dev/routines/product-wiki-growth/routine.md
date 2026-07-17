@@ -2,9 +2,10 @@
 
 A scheduled Claude Code routine that keeps
 [`product-wiki/Market/`](../../../product-wiki/Market/README.md),
-[`product-wiki/Users/`](../../../product-wiki/Users/README.md), and
-[`product-wiki/Competitors/`](../../../product-wiki/Competitors/README.md)
-current — the self-growing market/user/competitor research wiki for this
+[`product-wiki/Users/`](../../../product-wiki/Users/README.md),
+[`product-wiki/Competitors/`](../../../product-wiki/Competitors/README.md), and
+[`product-wiki/Domain/`](../../../product-wiki/Domain/README.md)
+current — the self-growing market/user/competitor/domain research wiki for this
 extension. Modeled on
 [`dev/routines/auto-fallback-coverage/`](../auto-fallback-coverage/routine.md):
 **most runs should find little or nothing new.** A forced or fabricated "update"
@@ -53,9 +54,10 @@ Fresh clone (or `git merge origin/main` if resuming), `npm install` not required
 
 ### 2. Pick a target
 
-Read all three wiki files
+Read all four wiki files
 (`product-wiki/Market/README.md`, `product-wiki/Users/README.md`,
-`product-wiki/Competitors/README.md`) and their "Open questions" sections.
+`product-wiki/Competitors/README.md`, `product-wiki/Domain/README.md`) and their
+"Open questions" sections.
 Pick the one or two open questions across the set most worth researching this
 run — don't try to close everything in one pass; a few well-sourced updates beat
 a wholesale rewrite.
@@ -64,8 +66,9 @@ a wholesale rewrite.
 
 Web-search the picked question(s). Write findings directly into the relevant
 wiki file(s) following the mechanic above. Stay inside `product-wiki/Market/`,
-`product-wiki/Users/`, `product-wiki/Competitors/`, and, only if a finding needs an
-illustrative example, `product-wiki/sample-data/`. **Never edit
+`product-wiki/Users/`, `product-wiki/Competitors/`, `product-wiki/Domain/`, and,
+only if a finding needs an illustrative example, `product-wiki/sample-data/`.
+**Never edit
 `product-wiki/product-requirements/`** — if a finding seems important enough to
 change a product requirement, say so in the growth log and leave it for human
 review instead.

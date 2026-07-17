@@ -6,15 +6,15 @@
         "rules": [
           {
             "from": ["extension", "extension-test", "dev", ".github", "README.md", "CLAUDE.md"],
-            "to": ["product-wiki/Market", "product-wiki/Users", "product-wiki/Competitors", "product-wiki/sample-data"],
+            "to": ["product-wiki/Market", "product-wiki/Users", "product-wiki/Competitors", "product-wiki/Domain", "product-wiki/sample-data"],
             "except": [
               {
                 "path": "dev/routines/product-wiki-growth/routine.md",
-                "to": ["product-wiki/Market", "product-wiki/Users", "product-wiki/Competitors", "product-wiki/sample-data"],
+                "to": ["product-wiki/Market", "product-wiki/Users", "product-wiki/Competitors", "product-wiki/Domain", "product-wiki/sample-data"],
                 "reason": "the growth routine's own doc names the wiki folders it maintains"
               }
             ],
-            "reason": "product-wiki/Market, product-wiki/Users, product-wiki/Competitors, and product-wiki/sample-data are a self-growing market/user/competitor research wiki kept decoupled from the extension's source, tests, and docs; product-wiki/product-requirements is the one folder still reachable from here"
+            "reason": "product-wiki/Market, product-wiki/Users, product-wiki/Competitors, product-wiki/Domain, and product-wiki/sample-data are a self-growing market/user/competitor/domain research wiki kept decoupled from the extension's source, tests, and docs; product-wiki/product-requirements is the one folder still reachable from here"
           }
         ]
       }
