@@ -31,7 +31,9 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
   }
 
   // Normalize a raw datetime attribute / JSON-LD value to the string contract.
-  function normalizeDateValue(raw) {
+  // `dayFirst` (default false) reads an ambiguous numeric slash date day-first
+  // rather than month-first — see parseDateFromText.
+  function normalizeDateValue(raw, dayFirst) {
     raw = GCal.clean(raw);
     if (!raw) return "";
     if (/^\d{12,}$/.test(raw)) {
@@ -43,12 +45,19 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(raw)) {
       return raw.replace(" ", "T"); // already ISO-ish; keep any offset/Z as-is
     }
-    return parseDateFromText(raw);
+    return parseDateFromText(raw, dayFirst);
   }
 
   // Find the first date (optionally with a time) inside free-form text and
   // return it in the string contract. Returns "" when nothing matches.
-  function parseDateFromText(s) {
+  //
+  // `dayFirst` (default false) controls how an AMBIGUOUS numeric slash date
+  // (both components ≤ 12, e.g. "05/07/2026") is read: month-first by default
+  // (V8's US convention), day-first when the caller knows the page declares a
+  // non-US locale — the everyday DD/MM/YYYY format across Europe, Israel, and
+  // Latin America. Unambiguous slash dates (a component > 12) and the "."/"-"
+  // separators are always day-first regardless, as before.
+  function parseDateFromText(s, dayFirst) {
     s = GCal.clean(s);
     if (!s) return "";
 
@@ -74,8 +83,10 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       const mm = +m[3];
       const sep = m[2];
       if (dd < 1 || dd > 31 || mm < 1 || mm > 12) continue;
-      // Ambiguous slash date (e.g. 06/07/2026): leave to US-style V8 parsing below.
-      if (sep === "/" && dd <= 12) continue;
+      // Ambiguous slash date (e.g. 06/07/2026): leave to US-style V8 parsing
+      // below — unless the caller signalled a day-first (non-US) locale, in
+      // which case read it day-first here like the "."/"-" separators.
+      if (sep === "/" && dd <= 12 && !dayFirst) continue;
       const day = `${m[4]}-${pad(mm)}-${pad(dd)}`;
       if (m[5] != null) return `${day}T${pad(+m[5])}:${m[6]}:00`;
       // The inline time group missed (e.g. "16/06/2026 | שעת פתיחת דלתות: 21:00"):

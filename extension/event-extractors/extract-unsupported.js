@@ -41,14 +41,38 @@
 
   function extract() {
     const embedded = embeddedEvents.find();
+    // Ambiguous numeric dates ("05/07/2026") are read day-first when the page
+    // declares a non-US locale — the DD/MM/YYYY convention most of the world
+    // (and every non-US site here) writes, in both JSON-LD and visible text.
+    const dayFirst = pageUsesDayFirstDates();
     // Several embedded events => a listing page; surface each.
-    if (embedded.length > 1) return withCtz(embedded.map(embeddedEvents.toEvent).map(trimVenueTitle));
+    if (embedded.length > 1) return withCtz(embedded.map((ld) => embeddedEvents.toEvent(ld, dayFirst)).map(trimVenueTitle));
 
-    const event = trimVenueTitle(merge(embeddedEvents.toEvent(embedded[0]), heuristics()));
+    const event = trimVenueTitle(merge(embeddedEvents.toEvent(embedded[0], dayFirst), heuristics(dayFirst)));
     // The heuristics always fill a title (og:title -> <h1> -> document title),
     // present on essentially every page, so a title alone is not an event. Treat
     // this as an event only when the page embedded one or a date was parsed.
     return embedded.length > 0 || event.start ? withCtz([event]) : [];
+  }
+
+  // Whether the page's own declared locale is a day-first one (DD/MM/YYYY) — the
+  // everyday format outside the US, so an ambiguous numeric slash date should be
+  // read day-first (see helpers/dates.js). Conservative: only a POSITIVE non-US
+  // locale signal flips it — an explicit region that isn't US (he-IL, en-GB, …)
+  // or a non-English language; a bare "en" (region unknown) keeps the safe
+  // month-first default rather than guessing. Mirrors derive-timezone.js's read
+  // of <html lang> / og:locale.
+  function pageUsesDayFirstDates() {
+    const MONTH_FIRST_REGIONS = new Set(["US"]);
+    const langAttr = document.documentElement ? document.documentElement.getAttribute("lang") : "";
+    for (const raw of [langAttr, meta("og:locale")]) {
+      const m = /^([a-z]{2,3})(?:[-_]([a-z]{2}))?/i.exec(clean(raw));
+      if (!m) continue;
+      const region = (m[2] || "").toUpperCase();
+      if (region) return !MONTH_FIRST_REGIONS.has(region);
+      if (m[1].toLowerCase() !== "en") return true;
+    }
+    return false;
   }
 
   // The one field the heuristics can never scrape directly: the event's
@@ -84,8 +108,10 @@
     return event;
   }
 
-  // Best-effort scrape of any page's meta tags / microdata / text.
-  function heuristics() {
+  // Best-effort scrape of any page's meta tags / microdata / text. `dayFirst`
+  // (see extract) is forwarded to every date parse so an ambiguous numeric slash
+  // date is read day-first on a non-US-locale page.
+  function heuristics(dayFirst) {
     const out = {};
 
     out.title = stripSiteSuffix(meta("og:title")) || text("h1") || clean(document.title);
@@ -93,13 +119,15 @@
     const startProp = document.querySelector('[itemprop="startDate"]');
     if (startProp) {
       out.start = normalizeDateValue(
-        startProp.getAttribute("content") || startProp.getAttribute("datetime") || startProp.textContent
+        startProp.getAttribute("content") || startProp.getAttribute("datetime") || startProp.textContent,
+        dayFirst
       );
     }
     const endProp = document.querySelector('[itemprop="endDate"]');
     if (endProp) {
       out.end = normalizeDateValue(
-        endProp.getAttribute("content") || endProp.getAttribute("datetime") || endProp.textContent
+        endProp.getAttribute("content") || endProp.getAttribute("datetime") || endProp.textContent,
+        dayFirst
       );
     }
     if (!out.start) {
@@ -108,11 +136,11 @@
     }
     if (!out.start) {
       const timeEl = document.querySelector("time[datetime]");
-      if (timeEl) out.start = normalizeDateValue(timeEl.getAttribute("datetime"));
+      if (timeEl) out.start = normalizeDateValue(timeEl.getAttribute("datetime"), dayFirst);
     }
     if (!out.start) {
       const body = bodyText().slice(0, BODY_TEXT_SCAN_LIMIT);
-      out.start = parseDateFromText(body);
+      out.start = parseDateFromText(body, dayFirst);
       // A start scraped from text often sits next to its end as a time range
       // ("6:30 pm - 10:00 pm"); recover the end when nothing structured gave one.
       if (out.start && !out.end) out.end = endFromTimeRange(body, out.start);
@@ -124,7 +152,7 @@
       const datePrefix = out.start.slice(0, 10);
       const body = bodyText().slice(0, BODY_TEXT_SCAN_LIMIT);
       for (const src of [meta("og:description"), meta("description"), body]) {
-        const refined = parseDateFromText(src);
+        const refined = parseDateFromText(src, dayFirst);
         if (refined && refined.includes("T") && refined.startsWith(datePrefix)) {
           out.start = refined;
           if (!out.end) out.end = endFromTimeRange(src, out.start);
