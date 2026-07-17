@@ -235,6 +235,42 @@ test("Generic site: an unambiguous day-first slash date (DD/MM/YYYY, DD>12) is p
   assert.equal(e.times[0].start, "2026-06-16");
 });
 
+test("Generic site: an AMBIGUOUS slash date is read day-first when the page declares a non-US locale", () => {
+  // "05/07/2026" is genuinely ambiguous (day and month both ≤ 12). A page that
+  // declares a day-first locale — <html lang="he">, an "en_IL"/"en-GB" og:locale,
+  // any explicit region that isn't US — is telling us it writes DD/MM/YYYY, so we
+  // read the 5th of July, not May 7th. This is what a per-site source for a
+  // non-US host does; it's the everyday case for European/Israeli event pages
+  // that emit "05/07/2026" in JSON-LD startDate or visible text (tel-aviv.gov.il).
+  const html = `<!DOCTYPE html><html lang="he"><head>
+      <meta property="og:title" content="מופע המחול">
+    </head><body><h1>מופע המחול</h1><p>05/07/2026 19:00</p></body></html>`;
+
+  const e = firstEvent(html, "https://www.example.com/dance");
+  assert.equal(e.times[0].start, "2026-07-05T19:00:00");
+});
+
+test("Generic site: an ambiguous slash date stays month-first when no day-first locale is declared", () => {
+  // The guard for the rule above: with no positive non-US locale signal (a bare
+  // "en", or no <html lang> at all), the ambiguous "05/07/2026" keeps V8's US
+  // month-first reading (May 7th) — we never GUESS day-first, we only follow a
+  // locale the page itself states.
+  const html = `<h1>Show</h1><p>05/07/2026</p>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.times[0].start, "2026-05-07");
+});
+
+test("Generic site: an ambiguous slash date stays month-first on an explicit en-US locale", () => {
+  // An explicit US region is the one locale that keeps the month-first reading.
+  const html = `<!DOCTYPE html><html lang="en-US"><head>
+      <meta property="og:title" content="Show">
+    </head><body><h1>Show</h1><p>05/07/2026</p></body></html>`;
+
+  const e = firstEvent(html, "https://www.example.com/show");
+  assert.equal(e.times[0].start, "2026-05-07");
+});
+
 test("Generic site: a Hebrew month date with bullet-separated time is parsed", () => {
   // Israeli sites write dates as "4 ביולי 2026•21:00" — day, Hebrew month name,
   // year, bullet separator, 24-hour time. V8 can't parse Hebrew months with new
@@ -375,7 +411,7 @@ test("Generic site: footer chrome address is composed with og:site_name — on a
   // footer convention for "our address" (cinema.co.il's footer is this shape,
   // <noscript> fallback and all). In a real, scripting-enabled Chrome the
   // <noscript> content is a RAW TEXT node — reading textContent naively would
-  // splice image markup into the address (see technicalGotchas.md), so the
+  // splice image markup into the address (see the gcec pack’s RULES.md), so the
   // noscript subtree must be dropped before reading. The site's own name
   // (og:site_name) then leads the composed location, the way a dedicated
   // single-venue source (and a human typing into Calendar) writes it.

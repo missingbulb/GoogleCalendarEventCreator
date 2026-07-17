@@ -58,12 +58,16 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return found;
   }
 
-  function toEvent(ld) {
+  // `dayFirst` (default false) is forwarded to normalizeDateValue so a non-ISO
+  // startDate/endDate written as an ambiguous DD/MM/YYYY slash date (which
+  // schema.org shouldn't carry, but non-US sites emit anyway) is read day-first
+  // when the caller knows the page's locale is day-first.
+  function toEvent(ld, dayFirst) {
     if (!ld) return {};
     return {
       title: GCal.clean(ld.name),
-      start: GCal.normalizeDateValue(ld.startDate),
-      end: GCal.normalizeDateValue(ld.endDate),
+      start: GCal.normalizeDateValue(ld.startDate, dayFirst),
+      end: GCal.normalizeDateValue(ld.endDate, dayFirst),
       location: flattenLocation(ld.location),
       // Render the (possibly HTML) description preserving its <br>/newline
       // layout, rather than collapsing it to a single line.

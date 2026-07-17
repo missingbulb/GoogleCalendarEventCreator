@@ -1,10 +1,10 @@
 # Fallback extractor coverage
 
-> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` (logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten whenever the tests run locally. See `dev/procedures/testing.md`.
+> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` (logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten whenever the tests run locally. See `.claudinite/local_packs/gcec/RULES.md`.
 
 What the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`) recovers on each integration-test page, compared to that page's **dedicated per-site source** — the reviewed-correct extraction the live test pins down. For every `dev/requirements/extractor/expected/*.json` page, `GCal.extract()` is run twice on the same cached HTML: once normally (custom) and once with the site registry emptied (fallback). We grade the fallback's **primary event** (`events[0]` after the chronological sort) field-by-field against the custom primary event, counting a field only when the custom event filled it.
 
-`start`/`end` count as a match when the values are byte-identical **or** resolve to the same absolute instant — a dedicated source localizing to a floating time via its `ctz` is the same moment as the fallback's offset-bearing time, not a miss (see `dev/procedures/testing.md`). A floating time read an hour off, or a date that dropped its time, is a real miss.
+`start`/`end` count as a match when the values are byte-identical **or** resolve to the same absolute instant — a dedicated source localizing to a floating time via its `ctz` is the same moment as the fallback's offset-bearing time, not a miss (see `.claudinite/local_packs/gcec/RULES.md`). A floating time read an hour off, or a date that dropped its time, is a real miss.
 
 ## Score
 
@@ -12,8 +12,8 @@ Headline coverage over all 34 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **72.5%** | 74 / 102 |
-| **All fields** | **53.5%** | 106 / 198 |
+| **Critical fields** (title + start + location) | **73.5%** | 75 / 102 |
+| **All fields** | **54%** | 107 / 198 |
 | Event coverage *(informational)* | 24.8% | 40 / 161 |
 
 ### Gate
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 72.5% | 72.5% | ✓ |
-| All fields | 53.5% | 53.5% | ✓ |
+| Critical fields | 73.5% | 73.5% | ✓ |
+| All fields | 54% | 54% | ✓ |
 
 Gated over **34** shared case(s).
 
@@ -34,7 +34,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
 | `title` **(critical)** | 34 | 29 | 3 | 2 | 85.3% |
-| `start` **(critical)** | 34 | 24 | 8 | 2 | 70.6% |
+| `start` **(critical)** | 34 | 25 | 7 | 2 | 73.5% |
 | `end` | 22 | 13 | 0 | 9 | 59.1% |
 | `location` **(critical)** | 34 | 21 | 6 | 7 | 61.8% |
 | `ctz` | 31 | 12 | 0 | 19 | 38.7% |
@@ -63,7 +63,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `seetickets.com` | 1 | 1/1 | 100% | 100% |
 | `stubhub.com` | 1 | 6/6 | 100% | 100% |
 | `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
-| `tel-aviv.gov.il` | 1 | 1/1 | 33.3% | 40% |
+| `tel-aviv.gov.il` | 1 | 1/1 | 66.7% | 60% |
 | `thinkdrink.co.il` | 1 | 1/1 | 100% | 60% |
 | `ticketmaster.co.il` | 1 | 1/1 | 100% | 80% |
 | `visit.tel-aviv.gov.il` | 2 | 2/2 | 33.3% | 16.7% |
@@ -98,7 +98,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `seetickets` | 1/1 | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
 | `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
-| `tel-aviv` | 1/1 | ✓ | ~ | — | ~ | ✓ | — | ~ |
+| `tel-aviv` | 1/1 | ✓ | ✓ | — | ~ | ✓ | — | ~ |
 | `telavivcinematheque-506` | 1/109 | ~ | ✓ | — | ✓ | ✗ | — | ✗ |
 | `telavivcinematheque-left-handed-girl` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | ✗ | ~ |
 | `telavivcinematheque-poetry-bookstores` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | ✗ | ~ |

@@ -10,7 +10,7 @@
 // makes satori clip the TOP and paint the bottom — exactly the "scrolled all the
 // way down" view, which is the only way to see the count label that lives as the
 // list's last item. (satori behavior is verified by rendering, not reasoned
-// about — see testing.md.)
+// about — see the gcec testing-guide skill.)
 //
 // The same staticness applies to the edge fades (popup.css's .scroll-fade): the
 // real popup toggles them from live scroll metrics (popup.js), which read 0 under

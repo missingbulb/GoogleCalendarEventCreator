@@ -23,10 +23,14 @@ docs/
 # mount/ pair (re-include the dir, then ignore its contents) before the file
 # negation. .claudinite.new/ is the swap-staging dir; .claudinite-hooks.log is the
 # durable hook log kept outside .claudinite/ so the sync's dir swap can't wipe it.
+# local_packs/ is the OTHER tracked exception: this repo's own per-project packs
+# (.claudinite/local_packs/<name>/ — rules, checks, run_daily tasks, skills),
+# committed here and preserved across the sync hook's dir swap like the hook itself.
 /.claudinite/*
 !/.claudinite/mount/
 /.claudinite/mount/*
 !/.claudinite/mount/sync-claudinite.sh
+!/.claudinite/local_packs/
 /.claudinite.new/
 /.claudinite-hooks.log
 /.claudinite-hooks.log.tmp

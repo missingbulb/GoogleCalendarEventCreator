@@ -21,7 +21,7 @@
 // icon"); imageData is the robust route. And an MV3 service worker has no DOM —
 // no <img>/<canvas> — so we decode the packaged PNGs into ImageData via
 // fetch -> createImageBitmap -> OffscreenCanvas. (Same DOM-less-worker trap as
-// the old chrome.action.setIcon path, #204; see technicalGotchas.md.)
+// the old chrome.action.setIcon path, #204; see the gcec pack’s RULES.md.)
 async function loadImageData(iconPath, size) {
   const blob = await fetch(chrome.runtime.getURL(iconPath)).then((r) => r.blob());
   const bitmap = await createImageBitmap(blob);

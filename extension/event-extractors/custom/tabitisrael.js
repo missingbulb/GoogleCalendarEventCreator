@@ -41,7 +41,7 @@
   // page's "<day-of-week> D/M" date and "HH:MM" time. The year is absent on the
   // page, so pick the nearest upcoming year for that day/month. Uses UTC
   // component math throughout to avoid the local-midnight/toISOString day shift
-  // (see technicalGotchas.md).
+  // (see the gcec pack’s RULES.md gotchas).
   function buildStart(dateRaw, timeRaw) {
     const dm = (dateRaw || "").match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
     const tm = (timeRaw || "").match(/(\d{1,2}):(\d{2})/);
