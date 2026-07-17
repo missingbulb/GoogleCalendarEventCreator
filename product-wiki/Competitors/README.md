@@ -36,16 +36,24 @@ extension).
 - **Ratings cluster around 4.4★** for the dedicated single-purpose tools — no
   major quality outlier found yet in this pass; revisit once review counts are
   gathered (not captured in this seed).
+- **Cross-browser, the field is thinner and still selection-based.** Beyond the
+  Chrome Web Store, Firefox carries "Create a Google Calendar Event" and "Checker
+  Plus for Google Calendar" (highlight text → right-click → event), and
+  Calendly / Smart Calendars AI span Chrome/Firefox/Edge/Safari — but these are
+  right-click-selection or scheduling tools, not per-site structured extractors.
+  No JSON-LD/microdata-aware competitor surfaced on Firefox/Edge either, so the
+  structured-extraction niche is open cross-browser too, not just on Chrome.
 
 ## Open questions (for the next growth pass)
 
 - Pull actual review counts / install counts where the Chrome Web Store exposes
   them, to gauge relative traction, not just star ratings.
 - Is there a competitor doing per-site *structured* extraction (JSON-LD/microdata
-  aware) rather than generic AI-on-raw-text? None found in this first pass —
-  worth a deeper look, since that's closer to this project's actual approach.
-- Check for Firefox/Edge/Safari-native competitors, not just Chrome Web Store
-  listings.
+  aware) rather than generic AI-on-raw-text? Still none found — now checked across
+  Chrome, Firefox, and Edge (see the cross-browser note above). Worth periodic
+  re-checks, since that's closest to this project's approach.
+- Safari-native tools weren't reachable in this pass (no store scan) — a later
+  cycle should confirm whether the Safari picture differs from Chrome/Firefox.
 
 ## Sources
 
@@ -56,7 +64,15 @@ extension).
 - [Add To Calendar — Chrome Web Store](https://chromewebstore.google.com/detail/add-to-calendar/jnbpajadakhkpcncmbfhkgaaoioofkfd)
 - [CalendarAdd (GitHub)](https://github.com/mattkrins/CalendarAdd)
 - [20 Best Google Calendar Extensions for Chrome (SavvyCal)](https://savvycal.com/articles/google-calendar-extension/)
+- [Create a Google Calendar Event — Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/create-a-google-calendar-event/)
+- [Checker Plus for Google Calendar — Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/checker-plus-for-calendar/)
 
 ## Growth log
 
 - **2026-07-15** — initial seed (folder scaffolding + first competitive scan).
+- **2026-07-17** — ran the cross-browser scan (open question): Firefox has
+  selection-based "Create a Google Calendar Event" and "Checker Plus"; Calendly /
+  Smart Calendars AI span Chrome/Firefox/Edge/Safari — all right-click/scheduling,
+  none per-site structured. No JSON-LD-aware rival on Firefox/Edge either.
+  Resolved the cross-browser question; narrowed the structured-extraction one to
+  "Safari still unchecked".

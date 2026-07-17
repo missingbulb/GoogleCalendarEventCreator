@@ -89,12 +89,20 @@ structural decision behind "one button per event":
 - The timezone shapes above are the domain justification for the refusal-to-guess
   `ctz` contract — a product-requirements-level stance, distilled in
   [`../product-requirements/`](../product-requirements/README.md).
+- **`Event` JSON-LD is real but a minority signal.** The Google/schema.org usage
+  statistics (June 2026 dataset) put `schema.org/Event` on **fewer than ~1 million
+  domains** — an order of magnitude behind common types like `author` (10M+);
+  Web Data Commons corroborates from the Common Crawl corpus. So a large share of
+  event pages carry *no* `Event` block, which is exactly why the DOM/text and
+  `og:`/microdata fallback path (and the fallback-coverage routine) carries real
+  weight rather than being a rare edge case.
 
 ## Open questions
 
-- What share of real-world event pages carry `schema.org/Event` JSON-LD vs.
-  needing microdata/microformat/DOM fallback? A rough measured split would sharpen
-  the generic fallback's priorities (cross-ref the fallback-coverage routine).
+- A precise `Event`-JSON-LD-vs-fallback split per *target host* — this cycle got
+  the web-wide direction (Event schema is a minority; resolved 2026-07-17) but not
+  a measured split over the sites this extension actually sees; the
+  fallback-coverage corpus is the place to derive that.
 - Recurring/series pages: what's the right product behaviour — one instance, the
   next upcoming, or an explicit "this repeats" affordance?
 - Are `h-event` microformats still worth a dedicated reader in 2026, or has
@@ -111,9 +119,17 @@ structural decision behind "one button per event":
 - [microformats.org — microdata](http://microformats.org/wiki/microdata)
 - [RFC 5545 — Internet Calendaring and Scheduling Core Object Specification (iCalendar)](https://datatracker.ietf.org/doc/html/rfc5545)
 - [Handling Dates and Times — CalConnect iCalendar dev guide](https://devguide.calconnect.org/iCalendar-Topics/Handling-Dates-and-Times/)
+- [Announcing the Schema.org usage statistics dataset (blog.schema.org, 2026)](https://blog.schema.org/2026/06/04/announcing-the-schema-org-usage-statistics-dataset/)
+- [Structured data — 2024 Web Almanac (HTTP Archive)](https://almanac.httparchive.org/en/2024/structured-data)
+- [Web Data Commons — schema.org data sets](https://webdatacommons.org/structureddata/schemaorg/)
 
 ## Growth log
 
 - **2026-07-16** — initial seed (folder scaffolding + first research pass on web
   event-representation formats, page-shape taxonomy, and timezone/recurrence
   semantics).
+- **2026-07-17** — answered the JSON-LD-prevalence open question directionally:
+  the Google/schema.org usage stats put `Event` on fewer than ~1M domains (far
+  behind common types), so `Event` markup is a minority and the DOM/fallback path
+  carries a large share — added to Implications; narrowed the open question to a
+  per-target-host measured split via the fallback-coverage corpus.
