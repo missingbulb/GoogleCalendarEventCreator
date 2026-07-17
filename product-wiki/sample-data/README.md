@@ -13,9 +13,9 @@ it's reference material for the product wiki, kept separate so the two concerns
 (verified extraction behavior vs. illustrative product research) can't drift
 into each other.
 
-Currently empty — the growth routine
-([`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md))
-or a contributor adds a file here only when a wiki page needs one to point to.
+Currently empty — the Claudinite **product-wiki** pack's growth worker (mounted
+read-only under `.claudinite/`) or a contributor adds a file here only when a
+wiki page needs one to point to.
 Keep anything added here small and non-sensitive: it's part of the wiki the
 barriers pack keeps isolated from the rest of the repo, but it's still a
 committed file in a public repo.

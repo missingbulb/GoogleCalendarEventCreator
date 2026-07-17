@@ -35,6 +35,6 @@ only it. See the `barriers` pack entry in
 Karpathy's ["LLM Wiki"](https://medium.com/@urvvil08/andrej-karpathys-llm-wiki-create-your-own-knowledge-base-8779014accd5)
 pattern — compile findings into the wiki once, refine in place on later passes,
 rather than re-deriving everything from scratch each time. The mechanic
-(schedule, what counts as real growth, review flow) is defined in
-[`dev/routines/product-wiki-growth/routine.md`](../dev/routines/product-wiki-growth/routine.md).
+(schedule, what counts as real growth, review flow) is owned by the Claudinite
+**product-wiki** pack's growth worker (mounted read-only under `.claudinite/`).
 `product-requirements/` is **not** auto-grown — it only changes on human review.

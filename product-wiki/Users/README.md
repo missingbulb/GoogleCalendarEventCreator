@@ -8,9 +8,9 @@ and the broader calendar-market context these users sit in
 
 ## How this wiki grows
 
-Same mechanic as Market — see
-[`dev/routines/product-wiki-growth/routine.md`](../../dev/routines/product-wiki-growth/routine.md)
-and the "LLM Wiki" framing there: compile once, refine in place, cite sources,
+Same mechanic as Market — the Claudinite **product-wiki** pack's growth worker
+(mounted read-only under `.claudinite/`), following the "LLM Wiki" pattern:
+compile once, refine in place, cite sources,
 never silently overwrite.
 
 ## Personas (initial pass — refine as real usage signal appears)
