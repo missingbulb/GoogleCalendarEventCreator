@@ -10,10 +10,8 @@ pipeline" section below, and its two routines live under `dev/routines/`.
 
 - **Merges to `main` are squash, `(#N)` appended to the title** — a linear,
   one-commit-per-PR history. CI must be green first (twice for e2e/heavy-browser
-  changes). An approval applies **only backward**: a later follow-up, even a fix
-  to the just-merged change, needs its own approval. The project mechanics of
-  driving a merge (dispatching CI in a web session, the poll back-off) are the
-  merge-and-ci skill.
+  changes). The project mechanics of driving a merge (dispatching CI in a web
+  session, the poll back-off) are the merge-and-ci skill.
 - **Generated files are regenerated, never hand-merged.** On a conflict take
   either side and rerun `npm run regen` (load lists + UI snapshots +
   fallback-coverage baseline/report). The committed `.gitattributes` maps each
