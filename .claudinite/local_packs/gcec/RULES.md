@@ -185,6 +185,16 @@ on that pipeline). Adding a cached live case is the
 - **Rendered output isn't deterministic.** A re-record can legitimately shift a
   live case's `expected` — treat such drift like a site-markup change, and prefer
   extracting JSON-LD/`og:` (which apps still inject) over brittle DOM positions.
+- **An ambiguous numeric slash date is read by the page's declared locale,
+  centrally — never per-source, never guessed.** `"05/07/2026"` (both parts ≤ 12)
+  reads month-first by default (V8's US convention) and flips day-first only on a
+  *positive* non-US signal — an explicit non-US region in `<html lang>` /
+  `og:locale`, or a non-English language; a bare `en` (region unknown) stays
+  month-first rather than guess. Resolution lives in `helpers/dates.js`
+  (`parseDateFromText` / `normalizeDateValue` take a `dayFirst` flag, threaded
+  from `extract-unsupported.js`'s `pageUsesDayFirstDates`), mirroring
+  `derive-timezone.js`'s locale read; unambiguous dates (a part > 12) and the
+  `.` / `-` separators are always day-first regardless (#686).
 - **`fetch-page.yml` is attended by its dispatcher** (the workflow-failure
   classification above): the create-extractor routine dispatches it, polls the
   run, and on failure labels the issue `extractor-blocked-needs-human` — a red run
