@@ -32,12 +32,20 @@ redesigns and single-page-app rendering.
   vocabulary, embedded in the markup rather than a separate block. Common on
   server-rendered sites; JSON-LD is now preferred and gets new features first, so
   microdata/RDFa are a declining but still-present fallback worth reading when no
-  JSON-LD block exists.
+  JSON-LD block exists. Web-wide, Microdata is still material — the *Web Almanac
+  2024* has it steady on roughly a quarter of pages (~26%), well ahead of
+  microformats below.
 - **`h-event` / hCalendar microformats** — an older, class-attribute convention
   (`h-event`, `p-name`, `dt-start`, `p-location`). Google added hCalendar event
   support back in 2010; adoption has been overtaken by schema.org, but legacy and
-  indie-web event pages still use it. Note: microformats are **not** part of the
-  schema.org vocabulary, so a separate reader is needed.
+  indie-web event pages still use it. **A 2026 prevalence check settles whether
+  they're worth a dedicated reader — no:** the HTTP Archive *Web Almanac 2024*
+  puts *all* microformats combined below ~1% of pages (hCalendar only a fraction
+  of that), against JSON-LD at ~41% (up from 34% in 2022) and Microdata steady at
+  ~26%. So `h-event`/hCalendar is a negligible tail; where it does appear, the
+  generic text/`og:` fallback is enough. Note: microformats are **not** part of
+  the schema.org vocabulary, so any dedicated reader would need its own parser —
+  another reason not to build one for a sub-1% format.
 - **OpenGraph / meta tags** (`og:title`, `og:description`, and event-ish `<meta>`)
   — not event-specific, but SPA pages very often still inject them, so they are a
   reliable low-fidelity fallback for title/description when nothing structured
@@ -96,6 +104,10 @@ structural decision behind "one button per event":
   event pages carry *no* `Event` block, which is exactly why the DOM/text and
   `og:`/microdata fallback path (and the fallback-coverage routine) carries real
   weight rather than being a rare edge case.
+- **No dedicated microformats reader is warranted.** The 2026 prevalence check
+  (see the `h-event` bullet) puts *all* microformats combined under ~1% of pages,
+  so `h-event`/hCalendar stays a fallback-only concern — extraction effort belongs
+  on the JSON-LD → Microdata → `og:`/text ladder, not a bespoke hCalendar parser.
 
 ## Open questions
 
@@ -105,8 +117,6 @@ structural decision behind "one button per event":
   fallback-coverage corpus is the place to derive that.
 - Recurring/series pages: what's the right product behaviour — one instance, the
   next upcoming, or an explicit "this repeats" affordance?
-- Are `h-event` microformats still worth a dedicated reader in 2026, or has
-  schema.org adoption made them negligible? (Needs a real prevalence check.)
 - Does any meaningful share of target sites express events only via `.ics`
   download links (no in-page structured data) worth following?
 
@@ -133,3 +143,9 @@ structural decision behind "one button per event":
   behind common types), so `Event` markup is a minority and the DOM/fallback path
   carries a large share — added to Implications; narrowed the open question to a
   per-target-host measured split via the fallback-coverage corpus.
+- **2026-07-19** — answered the `h-event`/microformats open question with a real
+  prevalence check: the HTTP Archive *Web Almanac 2024* puts all microformats
+  combined below ~1% of pages (vs JSON-LD ~41% / Microdata ~26%), so
+  hCalendar/`h-event` is a negligible tail not worth a dedicated reader — folded
+  into the microformats format bullet and Implications; removed that open
+  question.
