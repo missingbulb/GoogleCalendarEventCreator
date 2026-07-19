@@ -1,0 +1,20 @@
+{
+  "description": "somo.social event page (React/Next.js): title, start/end and description come from the page's schema.org JSON-LD Event, the fuller venue address from the DOM, and ctz is derived from the venue's country (Asia/Jerusalem), anchoring the UTC-serialized times to the venue's local zone.",
+  "expected": {
+    "events": [
+      {
+        "title": "anecdotes presents: Advanced AI for Engineers",
+        "ctz": "Asia/Jerusalem",
+        "details": "https://somo.social/en/e/anecdotes-presents-advanced-727\n\nJoin us for an enlightening tech meetup on Advanced AI for Engineers! 🚀 Dive deep into the future of artificial intelligence with industry experts:\n\nAlon Elishkov Harel - Core & AI Team Lead at Anecdotes\nAsaf Salomon - Senior AI Innovation at Anecdotes\nSahar Carmel - Director of AI Enablement, founder of GetCandleKeep & Squid Club\n\nDon't miss this chance to expand your knowledge and network with fellow engineers in a vibrant atmosphere. 💡🤝\nFor tickets and more details, visit here!",
+        "times": [
+          {
+            "start": "2026-07-27T18:00:00",
+            "end": "2026-07-27T20:00:00",
+            "eventLengthInMinutes": null,
+            "location": "בית ויקטוריה, המלאכה 3, תל אביב-יפו, Israel"
+          }
+        ]
+      }
+    ]
+  }
+}
