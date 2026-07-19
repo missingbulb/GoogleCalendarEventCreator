@@ -122,8 +122,14 @@ field guide you (a `1` that yields a multi-date listing is a sign to re-examine)
 Then write it, **filling the case from the real run, never by hand**:
 
 ```sh
-npm run test:live 2>&1   # the placeholder case fails but PRINTS the real extracted values
+CI=1 npm run test:live 2>&1   # placeholder case fails but PRINTS the real extracted values
 ```
+
+Run it with **`CI=1`**: a plain `npm run test:live` locally rewrites the two
+`dev/requirements/extractor/fallback/fallback-coverage*.GENERATED.*` files, which are
+**outside** the routine's two-file write surface and make step 6's scope check fail;
+`CI=1` skips that refresh (the committed baseline is the CI truth) and still prints the
+values. If a run without it dirtied them, `git checkout --` those two files before step 6.
 
 Copy those values into the case's `expected` (there is **no `url` field** — the URL
 lives in the `data/server-fetched/<caseName>.url` file), write a one-line
@@ -131,7 +137,7 @@ lives in the `data/server-fetched/<caseName>.url` file), write a one-line
 auto-scrape and **often wrong** (a US venue on a `.de` URL, `[object Object]`, a
 mismatched date). A large divergence (different country/date/venue) is a **red flag
 to re-examine whether this is really one event**, not a cue to copy the hints in.
-Then confirm both suites are green (`npm run test:live`, `npm run test:offline`).
+Then confirm both suites are green (`CI=1 npm run test:live`, `npm run test:offline`).
 
 **Bail** (the page was not one usable event): leave the case's `events` empty, make
 no source change, **comment a one-sentence diagnosis of what the page actually is,
@@ -180,7 +186,12 @@ example and `custom/telavivcinematheque.js` as the multi-event/series one (retur
 object with an `events` array, one entry per occurrence; the orchestrator groups
 same-titled showings); skim `extension/event-extractors/helpers/{dom,text,dates}.js`
 for the shared `GCal` helpers. Supply only the fields the page needs; don't invent a
-`ctz` you can't derive. `matches()` (already filled by the scaffold) is the single
+`ctz` you can't derive — but a `ctz` you *can* derive isn't optional: when the page
+states the venue's country (even only as free text in the address) and that country
+has a single timezone, derive it (`custom/somo.js` maps the address country → zone via
+`GCal.COUNTRY_TIMEZONES`). A `+00:00`/`Z` start/end is UTC *serialization*, not the
+venue's zone — it neither supplies the `ctz` nor vetoes deriving one from the venue.
+`matches()` (already filled by the scaffold) is the single
 thing that makes a page count as supported — it gates the source *and* drives the
 green toolbar icon, and its host must also be in `supportedDomains`
 (`extension/fallback-lists.json`), which the scaffold registered.
