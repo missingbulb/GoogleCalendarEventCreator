@@ -140,11 +140,6 @@ below). Portable rules these instantiate live in the canon packs/skills.
   not the checkout — a bare `npm ci` there silently installs nothing;
   `.claudinite/mount/environment-setup.sh` `cd`s into the checkout first
   (#186/#196).
-- **Two portable GitHub gotchas this repo relies on**: large fixtures need
-  `linguist-vendored` (the `dev/requirements/extractor/data/**/*.html` fixtures,
-  `.gitattributes`, #78), and Markdown inside a raw `<td>` needs surrounding
-  blank lines — with the `<!-- … -->`-marker-last-token nuance — (the
-  two-column gallery, `dev/requirements/shared/build-requirements-gallery.js`).
 
 ## Workflow-failure classification
 
