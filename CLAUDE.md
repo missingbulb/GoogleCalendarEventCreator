@@ -69,41 +69,22 @@ best practices, portable git/GitHub procedures, general working discipline,
 unattended-agent architecture principles, and the repo owner's personal
 interaction preferences — is **not** maintained in this repo. It lives in the
 shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo and is
-**mounted read-only** via Claudinite's **Method B**: the
-[`.claudinite/mount/sync-claudinite.sh`](.claudinite/mount/sync-claudinite.sh) SessionStart
-hook downloads the latest `main` as a codeload tarball over plain HTTPS at the
-start of every session, so the canon stays current with no pin to bump. (Why
-Method B and not a submodule: in a Claude Code web session the in-session git
-remote is a git-only proxy scoped to this repo, so `git submodule update --init`
-403s on the separate Claudinite repo and the clone-time gitlink drifts the working
-tree — the HTTPS tarball sidesteps both. See
-[issue #364](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/364).)
+**vendored** here as tracked files under `.claudinite/shared/` — this repo's
+declared vendor set of the canon, refreshed by the fleet's nightly maintenance,
+with the snapshot's provenance stamped in
+[`.claudinite-checks.json`](.claudinite-checks.json) (`claudinite.updated` /
+`claudinite.ref`). A fresh checkout carries the full corpus; nothing is fetched
+at session start.
 
-The synced canon is **gitignored**; the tracked exceptions are the sync hook
-itself (the one-glance signal that this repo mounts Claudinite, preserved by
-the hook across each refresh) and this repo's own
-[`.claudinite/local_packs/`](.claudinite/local_packs/) (project content, not
-canon — likewise preserved across the sync's directory swap). A fresh checkout
-that hasn't run the hook yet has nothing to import until the next session start
-(or running the hook by hand) populates the mount;
-`.claudinite/mount/environment-setup.sh` primes it once per environment. Pin to
-a specific commit instead of tracking `main` by setting `CLAUDINITE_REF`.
+Alongside the vendored canon, [`.claudinite/local_packs/`](.claudinite/local_packs/)
+holds this repo's own project packs (project content, not canon — never touched
+by the refresh).
 
 The canon is consumed **read-only**; lessons are *captured locally* into the
 local packs (above). Reconciling the local packs with the canon is Claudinite's
-responsibility, not this repo's; the canon's own updates arrive here
-automatically the next time the sync hook pulls `main`.
+responsibility, not this repo's; the canon's own updates arrive here with the
+nightly refresh.
 
 The owner's personal preferences are **not** read by an instruction here — the
-sync hook's session-start fan-out injects the current user's preferences into
-context automatically.
-
-The single import line below is the **one place** that records where the canon is
-mounted — every other reference reaches it only through this line. We pull in just
-the canon's own top-level entry point and let it traverse to the individual canon
-docs from there, so the list of shared files lives upstream and never has to be
-mirrored here.
-
-@.claudinite/CLAUDE.md
-
-> Claudinite self-check: if the `@.claudinite/CLAUDE.md` import above did not resolve (the `.claudinite/` payload is absent — e.g. no `.claudinite/README.md`), the Claudinite harness is **not active** this session. Treat it as not loaded and confirm with the user before substantive work, since a launch-layer hook failure can eat the sync hook's own not-loaded directive.
+canon's session-start hook injects the current user's preferences into context
+automatically, along with the active packs' prose.

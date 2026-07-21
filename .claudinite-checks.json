@@ -12,11 +12,9 @@
     "grow_with_claudinite",
     "gcec"
   ],
-  "rules": {},
-  "accept": [],
   "sharedConstants": [
     {
-      "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
+      "what": "extension version \u2014 one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
       "value": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
       "regex": true,
       "counts": {
@@ -26,6 +24,10 @@
     }
   ],
   "maintenance": {
-    "delivery": "push"
+    "delivery": "auto-merge"
+  },
+  "claudinite": {
+    "updated": "2026-07-21T22:51:44.715Z",
+    "ref": "d6bca9351cd0396cf068ea1199c6475993623a5d"
   }
 }
