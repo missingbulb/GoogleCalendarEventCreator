@@ -93,10 +93,6 @@ Project-wide footguns only — a trap you'd only hit *while editing one specific
 file* belongs in that file's top-of-file header comment (see the capture policy
 below). Portable rules these instantiate live in the canon packs/skills.
 
-- **Service-worker paths must be extension-root absolute** (the portable MV3
-  rule): the worker runs from `icon/toolbar-icon.js`, so any path handed to a
-  Chrome API or `fetch` needs a leading slash or `chrome.runtime.getURL(...)` —
-  a bare relative path resolves against `icon/` and silently fails (#146, #204).
 - **A bare `hostSuffix: "example.com"` declarativeContent matcher also matches
   `evilexample.com`** — pair `hostEquals: "example.com"` with
   `hostSuffix: ".example.com"` to mean "apex or any subdomain". The real
