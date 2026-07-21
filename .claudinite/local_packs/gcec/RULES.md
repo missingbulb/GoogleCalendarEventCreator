@@ -26,7 +26,7 @@ pipeline" section below, and its two routines live under `dev/routines/`.
   drift gate. If `regen` reports a coverage regression, that's the real gate
   firing — review it, don't paper over it.
 - **One-time local git setup** (the cloud sandbox gets it from
-  `.claudinite/mount/environment-setup.sh`): `git config rerere.enabled true`
+  `.claudinite/shared/engine/hooks/environment-setup-command.sh`): `git config rerere.enabled true`
   and `git config merge.ours.driver true`. Without them nothing breaks — the
   generated files just fall back to a manual conflicting merge.
 - **Keep divergence small**: when starting work on a branch, `git merge
@@ -127,14 +127,16 @@ below). Portable rules these instantiate live in the canon packs/skills.
   event"** — gating on `Boolean(site)` surfaced phantom events on home pages
   (#133); a real event requires actual data (JSON-LD or a parsed date), never a
   mere host match.
-- **The mounted `.claudinite` canon can be stale mid-session** — re-run
-  `.claudinite/mount/sync-claudinite.sh` by hand and re-check **before**
-  concluding an upstream fix hasn't synced and **before committing a workaround
-  for a check finding** (an accept, a suppression pragma): a stale mount twice
-  produced spurious findings whose fixes had already merged (#664, #665).
+- **The vendored `.claudinite/shared` canon reflects its stamp, not canon
+  `main`** — check the `claudinite` stamp in `.claudinite-checks.json` (and
+  whether the nightly refresh has run since an upstream fix merged) **before**
+  concluding an upstream fix hasn't arrived and **before committing a
+  workaround for a check finding** (an accept, a suppression pragma): a stale
+  canon twice produced spurious findings whose fixes had already merged
+  (#664, #665).
 - **The cloud Setup script runs as root starting in the repo's parent dir**,
   not the checkout — a bare `npm ci` there silently installs nothing;
-  `.claudinite/mount/environment-setup.sh` `cd`s into the checkout first
+  `.claudinite/shared/engine/hooks/environment-setup-command.sh` `cd`s into the checkout first
   (#186/#196).
 
 ## Workflow-failure classification
