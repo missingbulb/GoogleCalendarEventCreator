@@ -1,7 +1,7 @@
 # gcec pack (local)
 
 This project's general working pack — a **local pack**
-(`.claudinite/local_packs/` — tracked project content, run by the same
+(`.claudinite/local/packs/` — tracked project content, run by the same
 Claudinite engine as the canon packs). It replaced the always-`@`-imported
 `dev/procedures/{workflow,github,testing,technicalGotchas}.md` docs: the
 always-relevant rules became [RULES.md](RULES.md) (injected at session start),

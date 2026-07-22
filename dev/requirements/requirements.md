@@ -24,7 +24,7 @@ pixel-assertable, so both are specified here as numbered, snapshot-pinned leaves
 > **stubs `chrome.tabs.create`/`window.close`** — confirming our code *asks* for the
 > right action, **not** that a real Chrome performs it. A faithful (non-stub)
 > verification is still owed; tracked in the issue linked from
-> [the testing-guide skill](../../.claudinite/local_packs/gcec/skills/testing-guide/SKILL.md). Likewise, the toolbar-icon leaves
+> [the testing-guide skill](../../.claudinite/local/packs/gcec/skills/testing-guide/SKILL.md). Likewise, the toolbar-icon leaves
 > (§10) are verified offline through a **fake Chrome**, so they pin the icon the
 > extension *generates*, not that real Chrome *paints* it — only the e2e test does
 > that.
@@ -1755,7 +1755,7 @@ here: the rendered §4–§5 requirements are the executable contract.
 
 ## 14. Event fields
 
-Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `.claudinite/local_packs/gcec/RULES.md`).
+Field-level rules for the values that land in the Calendar event. Single-line fields are whitespace-collapsed; multi-line description preserves its breaks (see the `clean()` gotcha in `.claudinite/local/packs/gcec/RULES.md`).
 
 <table>
 <tr>

@@ -2,15 +2,15 @@
 
 Project conventions and how-tos. The project's own working rules live in its
 **Claudinite local pack** under
-[`.claudinite/local_packs/`](.claudinite/local_packs/) — tracked project
+[`.claudinite/local/packs/`](.claudinite/local/packs/) — tracked project
 content, discovered and run by the same Claudinite engine as the shared canon
 packs (prose injected at session start, checks at every Stop and in CI, skills
 mounted on demand), declared like any pack in
 [`.claudinite-checks.json`](.claudinite-checks.json):
 
-- [`gcec`](.claudinite/local_packs/gcec/README.md) — the project's working pack:
+- [`gcec`](.claudinite/local/packs/gcec/README.md) — the project's working pack:
   the standing project rules
-  ([RULES.md](.claudinite/local_packs/gcec/RULES.md) — working rules, owner
+  ([RULES.md](.claudinite/local/packs/gcec/RULES.md) — working rules, owner
   commands, testing invariants, codebase gotchas, the extractor-pipeline rules,
   the architecture rules of the road, and the capture policy), the project's own
   conformance checks, and the snapshot-approval / merge-and-ci / testing-guide /
@@ -76,7 +76,7 @@ with the snapshot's provenance stamped in
 `claudinite.ref`). A fresh checkout carries the full corpus; nothing is fetched
 at session start.
 
-Alongside the vendored canon, [`.claudinite/local_packs/`](.claudinite/local_packs/)
+Alongside the vendored canon, [`.claudinite/local/packs/`](.claudinite/local/packs/)
 holds this repo's own project packs (project content, not canon — never touched
 by the refresh).
 

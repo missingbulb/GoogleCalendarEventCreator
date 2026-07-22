@@ -10,7 +10,7 @@
     "product-wiki",
     "tidy-repo",
     "grow_with_claudinite",
-    "gcec"
+    "local/gcec"
   ],
   "sharedConstants": [
     {

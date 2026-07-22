@@ -82,5 +82,5 @@ URLs, so it requests **no** "tabs"/browsing-history access.
 - [Requirements](dev/requirements/requirements.md) — the numbered, executable requirements spec (popup UI, toolbar icon, extractor support, and product behavior), each leaf backed by a case.
 - [High-level design](dev/procedures/highLevelDesign.md) — how extraction works.
 - [File descriptions](dev/procedures/fileDescriptions.md) — the per-file map.
-- [Testing](.claudinite/local_packs/gcec/skills/testing-guide/SKILL.md) — the test kinds (integration / unit / UI) and how to run and extend them.
-- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) and the project's Claudinite local packs under [`.claudinite/local_packs/`](.claudinite/local_packs/).
+- [Testing](.claudinite/local/packs/gcec/skills/testing-guide/SKILL.md) — the test kinds (integration / unit / UI) and how to run and extend them.
+- Maintainer/agent guidance lives in [`CLAUDE.md`](CLAUDE.md) and the project's Claudinite local packs under [`.claudinite/local/packs/`](.claudinite/local/packs/).

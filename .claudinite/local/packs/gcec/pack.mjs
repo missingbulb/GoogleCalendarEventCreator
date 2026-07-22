@@ -1,7 +1,7 @@
 import testOfflineListSync from './test-offline-list-sync.mjs';
 
 // The gcec pack: this project's general working pack, as a LOCAL Claudinite pack
-// (.claudinite/local_packs/ — tracked project content, discovered and run by the
+// (.claudinite/local/packs/ — tracked project content, discovered and run by the
 // same engine as the canon packs). It carries the standing project rules
 // (RULES.md, injected at session start while the pack is declared), the project's
 // own conformance checks (run at every Stop and in CI alongside the canon

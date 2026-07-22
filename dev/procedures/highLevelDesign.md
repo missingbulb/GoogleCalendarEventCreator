@@ -11,7 +11,7 @@ the matching `custom/<site>.js` (or `extract-unsupported.js`);
 `build-calendar-url.js` builds the URL `events-view.js` renders.
 
 The top-level **architecture rules of the road** live in the gcec local pack's
-[RULES.md](../../.claudinite/local_packs/gcec/RULES.md) (injected at session
+[RULES.md](../../.claudinite/local/packs/gcec/RULES.md) (injected at session
 start), not here — whenever we agree on a new or changed top-level architectural
 guideline, update that section as part of the same change. Portable
 agent-architecture principles (the unattended-agent judgment boundary, the
