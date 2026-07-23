@@ -4,7 +4,7 @@ Project conventions and how-tos. The project's own working rules live in its
 **Claudinite local pack** under
 [`.claudinite/local/packs/`](.claudinite/local/packs/) — tracked project
 content, discovered and run by the same Claudinite engine as the shared canon
-packs (prose injected at session start, checks at every Stop and in CI, skills
+packs (prose injected at session start, checks at every Stop, skills
 mounted on demand), declared like any pack in
 [`.claudinite-checks.json`](.claudinite-checks.json):
 
@@ -29,7 +29,7 @@ pipeline — neither is needed for day-to-day development.
 
 Nothing here `@`-imports the pack's prose: the active packs' RULES.md — canon
 and local alike — are injected automatically by the Claudinite SessionStart
-hooks, their checks run at every Stop and in CI, and their skills surface when
+hooks, their checks run at every Stop, and their skills surface when
 the activity matches. Lessons learned **in this repo** are captured into the
 gcec local pack; the capture policy (route to the right section, prefer a check
 over prose, file-local footguns in the file's own header) lives in the gcec

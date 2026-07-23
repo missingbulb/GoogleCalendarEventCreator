@@ -12,6 +12,11 @@
     "grow_with_claudinite",
     "local/gcec"
   ],
+  "schedule": {
+    "dailyHour": 4,
+    "weeklyDay": "Sun",
+    "monthlyDay": 1
+  },
   "sharedConstants": [
     {
       "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
