@@ -14,6 +14,16 @@ export default {
   expected_outcome: 'open-pr',            // a generic win lands as a PR the owner reviews; never auto-merged
 
   agent_instructions: 'task.md',
+  // The best-effort run bound the executor surfaces into the subagent's brief
+  // (agent-preprocessing DESIGN §2, §6): "fail after N minutes". Very generous —
+  // this is an OPEN-ENDED judgment loop (hypothesize → edit → the network-bound
+  // `test:live` → compare, iterated), not a predictable mechanical run, so the
+  // bound is extreme runaway protection, not a scheduling knob. No deterministic
+  // pre-step is split into agent_preprocessing here: the baseline the agent picks
+  // targets from is measured by `test:live` on a fresh clone and must be SEEN by
+  // the agent, and preprocessing has no code→agent data channel (DESIGN §3), so
+  // the whole task stays a single agentic stage.
+  agent_execution_timeout: 5400,
 
   // This is the old preconditions.sh, moved into code over the `commits` signal
   // (DESIGN §6): the result is a pure function of the source, and most days nothing
