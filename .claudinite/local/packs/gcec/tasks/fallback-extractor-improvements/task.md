@@ -8,13 +8,20 @@ correctly change nothing** — the gate already banks every prior win, so a new
 generic win is rare and a forced or fake one is worse than none. No win → no branch,
 no PR.
 
-## 1. Precondition
+## 1. Scope — the strong model runs only because the cheap gate already passed
 
-```sh
-bash dev/routines/auto-fallback-coverage/preconditions.sh
-```
+This task is a two-tier run, cheap gate first: the **scheduler** (a pure-code Action,
+no model at all) ran this task's precondition (`task.mjs`, over the `commits` signal),
+and only *because* it found a meaningful change did it dispatch you — a strong-model
+subagent — via the `ready-for-agent` issue. Most nights the gate skips and no strong
+model ever boots; you are paid for solely on the nights there's real work. (This is
+the "cheap dispatcher front door" cost model — the scheduler precondition is that
+front door, cheaper than a dispatcher session because it runs no model.)
 
-Non-zero exit → **stop**: nothing meaningful changed; no branch, no PR, nothing to log.
+So **you don't re-run that gate.** The dispatch issue's **Context** names the
+substantive commits in the window; treat it as binding scope and don't re-litigate
+whether to run. Still: **most runs correctly change nothing** (below), so "ran" never
+means "must produce a PR".
 
 ## 2. Measure the baseline
 
@@ -29,7 +36,7 @@ your candidate targets. This run is your pre-change reference (the committed
 `fallback-coverage.baseline.GENERATED.json`); don't `git stash`/rerun to re-derive
 it — that conflicts on the `ours`-driver GENERATED artifacts. A committed baseline
 listing **fewer** `cases` than the live run is pre-existing drift, not something
-your change introduced. Gate mechanics: [the gcec pack’s RULES.md](../../../.claudinite/local_packs/gcec/RULES.md)
+your change introduced. Gate mechanics: [the gcec pack’s RULES.md](../../RULES.md)
 (and the gate's own headers).
 
 ## 3. Improve — the feedback loop
@@ -85,7 +92,7 @@ and stop.
 Pass every value the change newly recovered via the body-text scan as arguments:
 
 ```sh
-bash dev/routines/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
+bash .claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/postconditions.sh "<recovered value>" ...
 ```
 
 - Exit 0 → the win is valid; go to step 5.
@@ -97,7 +104,7 @@ bash dev/routines/auto-fallback-coverage/postconditions.sh "<recovered value>" .
 Branch `claude/fallback-coverage/<date>`, commit the change plus the regenerated
 GENERATED artifacts, and push. Then open a **PR for review** — it never merges
 itself; from there it goes through the usual flow (the gcec pack's
-[merge-and-ci skill](../../../.claudinite/local_packs/gcec/skills/merge-and-ci/SKILL.md)), and CI must
+[merge-and-ci skill](../../skills/merge-and-ci/SKILL.md)), and CI must
 go green **twice** (it touches `test:live`). PR body: the hypothesis, why it's generic (which unseen sites
 it helps), how the jsdom trap was ruled out, the before→after numbers, and the
 covering test.

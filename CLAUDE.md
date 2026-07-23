@@ -2,32 +2,34 @@
 
 Project conventions and how-tos. The project's own working rules live in its
 **Claudinite local pack** under
-[`.claudinite/local_packs/`](.claudinite/local_packs/) — tracked project
+[`.claudinite/local/packs/`](.claudinite/local/packs/) — tracked project
 content, discovered and run by the same Claudinite engine as the shared canon
-packs (prose injected at session start, checks at every Stop and in CI, skills
+packs (prose injected at session start, checks at every Stop, skills
 mounted on demand), declared like any pack in
 [`.claudinite-checks.json`](.claudinite-checks.json):
 
-- [`gcec`](.claudinite/local_packs/gcec/README.md) — the project's working pack:
+- [`gcec`](.claudinite/local/packs/gcec/README.md) — the project's working pack:
   the standing project rules
-  ([RULES.md](.claudinite/local_packs/gcec/RULES.md) — working rules, owner
+  ([RULES.md](.claudinite/local/packs/gcec/RULES.md) — working rules, owner
   commands, testing invariants, codebase gotchas, the extractor-pipeline rules,
   the architecture rules of the road, and the capture policy), the project's own
   conformance checks, and the snapshot-approval / merge-and-ci / testing-guide /
   add-live-case skills.
 
-The two unattended routines that grow and improve site support — the
-auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
-site support) and the daily auto-fallback-coverage routine — live under
-[`dev/routines/`](dev/routines/) (start at
-[`dev/routines/create-extractor/routine.md`](dev/routines/create-extractor/routine.md) or
-[`dev/routines/auto-fallback-coverage/routine.md`](dev/routines/auto-fallback-coverage/routine.md)),
-scheduled outside this repo. Read a routine spec **only** when working on that
+The two unattended routines that grow and improve site support are being converted
+into **gcec pack tasks**, run by the per-repo Claudinite scheduler (each task is a
+`tasks/<name>/{task.mjs,task.md}` — the declaration + precondition beside the worker
+prose, per-project-scheduling §1). The daily fallback-extractor-improvements task lives at
+[`.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`](.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md);
+the auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
+site support) is still the legacy routine at
+[`dev/routines/create-extractor/routine.md`](dev/routines/create-extractor/routine.md)
+until its conversion lands. Read a task/routine spec **only** when working on that
 pipeline — neither is needed for day-to-day development.
 
 Nothing here `@`-imports the pack's prose: the active packs' RULES.md — canon
 and local alike — are injected automatically by the Claudinite SessionStart
-hooks, their checks run at every Stop and in CI, and their skills surface when
+hooks, their checks run at every Stop, and their skills surface when
 the activity matches. Lessons learned **in this repo** are captured into the
 gcec local pack; the capture policy (route to the right section, prefer a check
 over prose, file-local footguns in the file's own header) lives in the gcec
@@ -76,7 +78,7 @@ with the snapshot's provenance stamped in
 `claudinite.ref`). A fresh checkout carries the full corpus; nothing is fetched
 at session start.
 
-Alongside the vendored canon, [`.claudinite/local_packs/`](.claudinite/local_packs/)
+Alongside the vendored canon, [`.claudinite/local/packs/`](.claudinite/local/packs/)
 holds this repo's own project packs (project content, not canon — never touched
 by the refresh).
 

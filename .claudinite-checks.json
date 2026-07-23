@@ -12,6 +12,11 @@
     "grow_with_claudinite",
     "local/gcec"
   ],
+  "taskScheduler": {
+    "dailyHour": 4,
+    "weeklyDay": "Sun",
+    "monthlyDay": 1
+  },
   "sharedConstants": [
     {
       "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
@@ -27,7 +32,7 @@
     "delivery": "auto-merge"
   },
   "claudinite": {
-    "updated": "2026-07-23T00:32:51.000Z",
-    "ref": "80783ebbc1b9d37f85d544864c9c55343c5dddea"
+    "updated": "2026-07-23T09:21:42.087Z",
+    "ref": "b5103ea4341a29c070a34508275809efb96b3a05"
   }
 }

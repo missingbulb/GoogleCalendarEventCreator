@@ -1,7 +1,7 @@
 # gcec pack (local)
 
 This project's general working pack — a **local pack**
-(`.claudinite/local_packs/` — tracked project content, run by the same
+(`.claudinite/local/packs/` — tracked project content, run by the same
 Claudinite engine as the canon packs). It replaced the always-`@`-imported
 `dev/procedures/{workflow,github,testing,technicalGotchas}.md` docs: the
 always-relevant rules became [RULES.md](RULES.md) (injected at session start),
@@ -17,7 +17,7 @@ fingerprinted or seeded.
 | Prose | [RULES.md](RULES.md) — working rules, owner commands, testing invariants, codebase gotchas, workflow-failure classification, architecture rules of the road, the capture policy |
 | Checks | [test-offline-list-sync](test-offline-list-sync.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
 | Daily tasks | none |
-| Skills | [snapshot-approval](skills/snapshot-approval/SKILL.md) · [merge-and-ci](skills/merge-and-ci/SKILL.md) · [testing-guide](skills/testing-guide/SKILL.md) |
+| Skills | [snapshot-approval](skills/snapshot-approval/SKILL.md) · [merge-and-ci](skills/merge-and-ci/SKILL.md) · [testing-guide](skills/testing-guide/SKILL.md) · [add-live-case](skills/add-live-case/SKILL.md) |
 
 ## Rules
 

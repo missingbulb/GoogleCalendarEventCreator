@@ -12,7 +12,7 @@
 // the repo's own `npm test` (pack.test.mjs).
 const id = 'test-offline-list-sync';
 const severity = 'blocking';
-const doc = '.claudinite/local_packs/gcec/RULES.md';
+const doc = '.claudinite/local/packs/gcec/RULES.md';
 const why =
   'npm test discovers by glob but test:offline is a hand-kept list — a new or ' +
   'moved extension-test file silently drops out of the offline suite';
