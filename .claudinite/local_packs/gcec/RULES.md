@@ -93,31 +93,33 @@ Project-wide footguns only — a trap you'd only hit *while editing one specific
 file* belongs in that file's top-of-file header comment (see the capture policy
 below). Portable rules these instantiate live in the canon packs/skills.
 
-- **A bare `hostSuffix: "example.com"` declarativeContent matcher also matches
-  `evilexample.com`** — pair `hostEquals: "example.com"` with
-  `hostSuffix: ".example.com"` to mean "apex or any subdomain". The real
-  URL→icon match runs inside Chrome, verified only by the CI-only real-Chrome
-  test (`dev/requirements/heavy/extension-load.chrome.test.js`).
+- **The declarativeContent host-matching trap is portable (canon)** — a bare
+  `hostSuffix` also matches a lookalike host (`chrome-extension` pack owns the
+  trap and the `hostEquals` + `.example.com` fix). Here the real URL→icon match
+  runs inside Chrome, verified only by the CI-only real-Chrome test
+  (`dev/requirements/heavy/extension-load.chrome.test.js`).
 - **CDP-introspecting the MV3 worker hits the portable traps** (canon): here
   they bit `declarativeContent…getRules` (hung until job timeout), which is why
   the awaited signal is built from plain promises and the worker publishes
   `globalThis.iconRulesReady` for the test to poll. Bound every probe and add a
   test-level timeout regardless.
-- **jsdom-vs-Chrome DOM traps bit this repo directly**: `body.innerText` is
-  null in jsdom and `<noscript>` parses into live DOM (#130/#137). The
-  **opposite** bites in scripting-enabled Chrome — a `<noscript>`'s content is
-  one raw-text node, so strip `noscript`/`script`/`style` from a clone before
+- **The jsdom-vs-Chrome DOM traps are portable (canon)** — `body.innerText`
+  null in jsdom, and `<noscript>` parsed into live DOM (the opposite of
+  scripting-enabled Chrome, where it stays one raw-text node); the `node` pack
+  owns both. They bit this repo directly (#130/#137). The **production** remedy
+  the canon leaves out: strip `noscript`/`script`/`style` from a clone before
   reading any element's user-facing text (the fallback's footer-address reader
   does this, #675).
 - **Injected block markup inside a `<p>` silently empties it** — the parser
   auto-closes the `<p>` and the content lands as its `nextElementSibling`; a
   `.foo p` selector reads `""` with no error. Bit tel-aviv's description blocks
   (#602) — read the sibling, not the tag.
-- **The shared `GCal` global must be augmented, not replaced, and per-load
-  state reset**: a wholesale `globalThis.GCal = {…}` wiped other files'
-  attachments (#48); per-source `GCal.sources.push(...)` stacked duplicates on
-  every reopen, so `registry.js` resets `GCal.sources` on load and is pinned
-  first in the load order (#189).
+- **The shared-global augment-not-replace + reset-per-load rule is portable
+  (canon)** — the `chrome-extension` pack owns it (a wholesale
+  `globalThis.X = {…}` wipes other injected files' attachments; reset any
+  accumulated state at load). Here it's `GCal` (#48): `registry.js` resets
+  `GCal.sources` on load and is pinned **first** in the load order so it runs
+  before any source pushes (#189).
 - **`clean()` collapses all whitespace including newlines — single-line fields
   only.** A description run through it loses every line break (#131, #140,
   #141); multi-line text goes through the block helpers (`blockText` /
