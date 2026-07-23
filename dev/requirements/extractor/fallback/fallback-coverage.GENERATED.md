@@ -8,13 +8,13 @@ What the generic **fallback** extractor (`extension/event-extractors/extract-uns
 
 ## Score
 
-Headline coverage over all 34 cases in the corpus:
+Headline coverage over all 35 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **73.5%** | 75 / 102 |
-| **All fields** | **54%** | 107 / 198 |
-| Event coverage *(informational)* | 24.8% | 40 / 161 |
+| **Critical fields** (title + start + location) | **74.3%** | 78 / 105 |
+| **All fields** | **54.4%** | 111 / 204 |
+| Event coverage *(informational)* | 25.3% | 41 / 162 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 73.5% | 73.5% | ✓ |
-| All fields | 54% | 54% | ✓ |
+| Critical fields | 74.3% | 74.3% | ✓ |
+| All fields | 54.4% | 54.4% | ✓ |
 
-Gated over **34** shared case(s).
+Gated over **35** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 34 | 29 | 3 | 2 | 85.3% |
-| `start` **(critical)** | 34 | 25 | 7 | 2 | 73.5% |
-| `end` | 22 | 13 | 0 | 9 | 59.1% |
-| `location` **(critical)** | 34 | 21 | 6 | 7 | 61.8% |
-| `ctz` | 31 | 12 | 0 | 19 | 38.7% |
+| `title` **(critical)** | 35 | 30 | 3 | 2 | 85.7% |
+| `start` **(critical)** | 35 | 26 | 7 | 2 | 74.3% |
+| `end` | 23 | 14 | 0 | 9 | 60.9% |
+| `location` **(critical)** | 35 | 22 | 6 | 7 | 62.9% |
+| `ctz` | 32 | 12 | 0 | 20 | 37.5% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 32 | 7 | 18 | 7 | 21.9% |
+| `description` | 33 | 7 | 19 | 7 | 21.2% |
 
 ## By host
 
@@ -52,7 +52,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `dice.fm` | 1 | 1/1 | 100% | 100% |
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
 | `eventbrite.com` | 2 | 2/2 | 100% | 71.4% |
-| `eventer.co.il` | 1 | 1/1 | 66.7% | 66.7% |
+| `eventer.co.il` | 1 | 1/1 | 100% | 83.3% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 83.3% |
 | `events.datadoghq.com` | 1 | 1/1 | 66.7% | 40% |
 | `livenation.de` | 1 | 4/4 | 100% | 100% |
@@ -61,6 +61,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `seatgeek.com` | 1 | 0/7 | 0% | 0% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `seetickets.com` | 1 | 1/1 | 100% | 100% |
+| `somo.social` | 1 | 1/1 | 66.7% | 50% |
 | `stubhub.com` | 1 | 6/6 | 100% | 100% |
 | `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
 | `tel-aviv.gov.il` | 1 | 1/1 | 66.7% | 60% |
@@ -85,7 +86,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `edinburghfringe-sophie-duker` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `eventbrite-1989775742810` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ~ |
 | `eventbrite-games-for-change` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ~ |
-| `eventer` | 1/1 | ✓ | ✓ | ✓ | ~ | ✓ | — | ~ |
+| `eventer` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ~ |
 | `eventim-co-il-the90sshow` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ~ |
 | `events-datadoghq` | 1/1 | ~ | ✓ | — | ✓ | ✗ | — | ~ |
 | `livenation` | 39/4 | ✓ | ✓ | — | ✓ | — | — | — |
@@ -96,6 +97,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `seatgeek` | 0/7 | ✗ | ✗ | ✗ | ✗ | ✗ | — | — |
 | `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `seetickets` | 1/1 | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
+| `somo` | 1/1 | ✓ | ✓ | ✓ | ~ | ✗ | — | ~ |
 | `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `tel-aviv` | 1/1 | ✓ | ✓ | — | ~ | ✓ | — | ~ |
