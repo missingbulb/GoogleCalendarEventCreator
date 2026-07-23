@@ -83,9 +83,6 @@ pipeline" section below, and its two routines live under `dev/routines/`.
   wall clock. The pinned day is the floor of the cases' dates: author a
   neutral/upcoming case **on or after it** so it's pill-free; use a past date or
   a future year only when the case is *pinning* a pill.
-- **A refusal test can't go red against pre-change code** (it asserts a guard
-  yields nothing, which the old code also did) — "see it fail" for those means
-  *mutating the new guard* (weaken the check, watch the test bite, restore).
 
 ## Codebase gotchas
 
@@ -93,11 +90,11 @@ Project-wide footguns only — a trap you'd only hit *while editing one specific
 file* belongs in that file's top-of-file header comment (see the capture policy
 below). Portable rules these instantiate live in the canon packs/skills.
 
-- **A bare `hostSuffix: "example.com"` declarativeContent matcher also matches
-  `evilexample.com`** — pair `hostEquals: "example.com"` with
-  `hostSuffix: ".example.com"` to mean "apex or any subdomain". The real
-  URL→icon match runs inside Chrome, verified only by the CI-only real-Chrome
-  test (`dev/requirements/heavy/extension-load.chrome.test.js`).
+- **`declarativeContent`/`UrlFilter` host-match verification is CI-only** — the
+  lookalike-`hostSuffix` gotcha and the `hostEquals` + dot-`hostSuffix`
+  apex-or-subdomain fix are the canon `chrome-extension` pack's; the real
+  URL→icon match runs inside Chrome, exercised here only by the CI-only
+  real-Chrome test (`dev/requirements/heavy/extension-load.chrome.test.js`).
 - **CDP-introspecting the MV3 worker hits the portable traps** (canon): here
   they bit `declarativeContent…getRules` (hung until job timeout), which is why
   the awaited signal is built from plain promises and the worker publishes
