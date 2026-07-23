@@ -100,21 +100,17 @@ below). Portable rules these instantiate live in the canon packs/skills.
   the awaited signal is built from plain promises and the worker publishes
   `globalThis.iconRulesReady` for the test to poll. Bound every probe and add a
   test-level timeout regardless.
-- **jsdom-vs-Chrome DOM traps bit this repo directly**: `body.innerText` is
-  null in jsdom and `<noscript>` parses into live DOM (#130/#137). The
-  **opposite** bites in scripting-enabled Chrome — a `<noscript>`'s content is
-  one raw-text node, so strip `noscript`/`script`/`style` from a clone before
-  reading any element's user-facing text (the fallback's footer-address reader
-  does this, #675).
+- **The jsdom-vs-Chrome DOM traps bit this repo directly** (canon): #130/#137
+  drove the **production** remedy the canon (framed for tests) leaves out —
+  strip `noscript`/`script`/`style` from a clone before reading any element's
+  user-facing text (the fallback's footer-address reader does this, #675).
 - **Injected block markup inside a `<p>` silently empties it** — the parser
   auto-closes the `<p>` and the content lands as its `nextElementSibling`; a
   `.foo p` selector reads `""` with no error. Bit tel-aviv's description blocks
   (#602) — read the sibling, not the tag.
-- **The shared `GCal` global must be augmented, not replaced, and per-load
-  state reset**: a wholesale `globalThis.GCal = {…}` wiped other files'
-  attachments (#48); per-source `GCal.sources.push(...)` stacked duplicates on
-  every reopen, so `registry.js` resets `GCal.sources` on load and is pinned
-  first in the load order (#189).
+- **The augment-not-replace + reset-per-load rule lands on `GCal` here**
+  (canon): `registry.js` resets `GCal.sources` on load and is pinned **first**
+  in the load order so it runs before any source pushes (#48, #189).
 - **`clean()` collapses all whitespace including newlines — single-line fields
   only.** A description run through it loses every line break (#131, #140,
   #141); multi-line text goes through the block helpers (`blockText` /
