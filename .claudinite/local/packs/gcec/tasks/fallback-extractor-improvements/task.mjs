@@ -1,4 +1,4 @@
-// gcec local task: auto-fallback-coverage — the daily attempt to make the GENERIC
+// gcec local task: fallback-extractor-improvements — the daily attempt to make the GENERIC
 // fallback extractor recover more of what the dedicated per-site sources get
 // (per-project-scheduling DESIGN §6). Worker: task.md. Most runs correctly change
 // nothing — the coverage gate already banks every prior win — so a forced or fake
@@ -7,13 +7,13 @@
 // Self-contained (imports nothing): the whole contract is this default export.
 
 export default {
-  id: 'auto-fallback-coverage',
+  id: 'fallback-extractor-improvements',
   frequency: 'daily',            // fires on the repo's daily anchor hour
-  signals: ['commits'],
-  model: 'opus',                 // closing a real generic-extractor gap is heavy judgment
-  outcome: 'open-pr',            // a generic win lands as a PR the owner reviews; never auto-merged
+  precondition_signals: ['commits'],
+  agent_model: 'opus',                 // closing a real generic-extractor gap is heavy judgment
+  expected_outcome: 'open-pr',            // a generic win lands as a PR the owner reviews; never auto-merged
 
-  worker: 'task.md',
+  agent_instructions: 'task.md',
 
   // This is the old preconditions.sh, moved into code over the `commits` signal
   // (DESIGN §6): the result is a pure function of the source, and most days nothing

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Postconditions for the daily fallback-coverage routine
-# (.claudinite/local/packs/gcec/tasks/auto-fallback-coverage/task.md).
+# (.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md).
 #
 # Runs AFTER the agent has made a candidate change, and bundles every
 # deterministic validation that a "win" is clean, generic, real and non-regressing.

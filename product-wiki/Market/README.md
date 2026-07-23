@@ -82,7 +82,7 @@ recur across the market:
 - What share of "event" pages in the wild already carry `schema.org/Event`
   JSON-LD vs. requiring DOM/text heuristics? (Would sharpen the fallback-coverage
   routine's generic-extraction priorities too — see
-  `.claudinite/local/packs/gcec/tasks/auto-fallback-coverage/task.md`.)
+  `.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`.)
 
 ## Sources
 

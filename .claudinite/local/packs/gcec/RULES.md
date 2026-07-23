@@ -151,9 +151,10 @@ action header's recipe.
 ## Extractor pipeline
 
 Standing rules for the extractor-automation domain — the create-extractor routine
-(an `extractor-request` issue → a PR adding site support) and the daily
-auto-fallback-coverage routine, both under
-[`dev/routines/`](../../../dev/routines/) (read a routine spec only when working
+(an `extractor-request` issue → a PR adding site support), still under
+[`dev/routines/`](../../../dev/routines/), and the daily
+fallback-extractor-improvements task, now a gcec pack task under
+[`tasks/`](tasks/fallback-extractor-improvements/) (read a spec only when working
 on that pipeline). Adding a cached live case is the
 [add-live-case](skills/add-live-case/SKILL.md) skill.
 

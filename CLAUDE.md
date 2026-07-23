@@ -19,8 +19,8 @@ mounted on demand), declared like any pack in
 The two unattended routines that grow and improve site support are being converted
 into **gcec pack tasks**, run by the per-repo Claudinite scheduler (each task is a
 `tasks/<name>/{task.mjs,task.md}` — the declaration + precondition beside the worker
-prose, per-project-scheduling §1). The daily auto-fallback-coverage task lives at
-[`.claudinite/local/packs/gcec/tasks/auto-fallback-coverage/task.md`](.claudinite/local/packs/gcec/tasks/auto-fallback-coverage/task.md);
+prose, per-project-scheduling §1). The daily fallback-extractor-improvements task lives at
+[`.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`](.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md);
 the auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
 site support) is still the legacy routine at
 [`dev/routines/create-extractor/routine.md`](dev/routines/create-extractor/routine.md)

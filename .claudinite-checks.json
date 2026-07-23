@@ -12,7 +12,7 @@
     "grow_with_claudinite",
     "local/gcec"
   ],
-  "schedule": {
+  "taskScheduler": {
     "dailyHour": 4,
     "weeklyDay": "Sun",
     "monthlyDay": 1
@@ -32,7 +32,7 @@
     "delivery": "auto-merge"
   },
   "claudinite": {
-    "updated": "2026-07-23T08:16:18.667Z",
+    "updated": "2026-07-23T09:21:42.087Z",
     "ref": "b5103ea4341a29c070a34508275809efb96b3a05"
   }
 }

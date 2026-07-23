@@ -46,7 +46,7 @@ never silently overwrite.
 ## Pain points to track (hypotheses — verify with real feedback as it arrives)
 
 - Extraction misses or gets a field wrong on a page with unusual markup — the
-  fallback-coverage routine (`.claudinite/local/packs/gcec/tasks/auto-fallback-coverage/`) is the
+  fallback-coverage routine (`.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/`) is the
   engineering mechanism that narrows this over time; this wiki tracks it from the
   *user* side (which misses actually get reported/matter).
 - Timezone correctness on pages that don't declare one clearly — see

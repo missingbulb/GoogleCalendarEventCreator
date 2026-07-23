@@ -92,7 +92,7 @@ and stop.
 Pass every value the change newly recovered via the body-text scan as arguments:
 
 ```sh
-bash .claudinite/local/packs/gcec/tasks/auto-fallback-coverage/postconditions.sh "<recovered value>" ...
+bash .claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/postconditions.sh "<recovered value>" ...
 ```
 
 - Exit 0 → the win is valid; go to step 5.
