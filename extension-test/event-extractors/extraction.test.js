@@ -104,6 +104,42 @@ test("JSON-LD location: city/state repeated inside streetAddress is not duplicat
   assert.equal(e.times[0].location, "The Williamsburg Hotel Bar, 96 Wythe Ave, Brooklyn, NY");
 });
 
+test("JSON-LD location: a Place name that is already a full formatted address is used verbatim, not re-appended", () => {
+  // Some sites stuff the venue's whole formatted postal address into Place.name
+  // ("Museum, Kaplan Street, Springfield, USA") AND repeat the pieces in the
+  // structured `address`. When the name already contains BOTH the city
+  // (addressLocality) and the street core (streetAddress minus its house
+  // number), the parsed-out parts only duplicate it and tack on noise (the
+  // administrative district), so the name is taken as-is — the way a dedicated
+  // source reads it. Mirrors eventer.co.il's JSON-LD.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Spring Gala", "startDate": "2026-07-01T20:00:00",
+      "location": { "@type": "Place", "name": "Riverside Museum, Kaplan Street, Springfield, USA",
+                    "address": { "streetAddress": "27 Kaplan Street", "addressLocality": "Springfield",
+                                 "addressRegion": "Greater Springfield" } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.somevenue.example/show");
+  assert.equal(e.times[0].location, "Riverside Museum, Kaplan Street, Springfield, USA");
+});
+
+test("JSON-LD location: a Place name holding only the city (not the street) still gets the street composed in", () => {
+  // Guard for the full-address shortcut above: a venue merely named after its
+  // city ("Zappa Tel Aviv") is NOT a complete address — the street must still
+  // be composed in. Mirrors eventim.co.il's JSON-LD.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "The 90s Show", "startDate": "2026-07-01T20:00:00",
+      "location": { "@type": "Place", "name": "Zappa Tel Aviv - Midtown",
+                    "address": { "streetAddress": "Menachem Begin Road 144", "addressLocality": "Tel Aviv",
+                                 "postalCode": "6492102" } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.somevenue.example/90s");
+  assert.equal(e.times[0].location, "Zappa Tel Aviv - Midtown, Menachem Begin Road 144, 6492102");
+});
+
 test("JSON-LD location: an addressCountry Country object (not a plain string) contributes its name, not '[object Object]'", () => {
   // schema.org allows addressCountry to be a Country object ({ "@type":
   // "Country", "name": "..." }) rather than a plain string — seen on

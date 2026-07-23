@@ -84,9 +84,15 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     if (!loc) return "";
     if (Array.isArray(loc)) loc = loc[0];
     if (typeof loc === "string") return GCal.clean(loc);
+    const addr = loc.address;
+    // Some sites put the venue's whole formatted postal address into Place.name
+    // AND repeat the pieces in `address`. When the name already spells out both
+    // the city and the street, it's a complete address on its own — appending
+    // the parsed parts only duplicates them and tacks on noise (the district),
+    // so use the name verbatim, the way a dedicated source reads it.
+    if (nameIsFullAddress(loc.name, addr)) return GCal.clean(loc.name);
     const p = GCal.parts((cand, kept) => kept.toLowerCase().includes(cand.toLowerCase()));
     p.add(loc.name);
-    const addr = loc.address;
     if (typeof addr === "string") {
       p.add(addr);
     } else if (addr && typeof addr === "object") {
@@ -96,6 +102,23 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       if (!addr.addressRegion) p.add(countryName(addr.addressCountry));
     }
     return p.join();
+  }
+
+  // Whether Place.name is ITSELF the full formatted address — a comma-separated
+  // string that already contains both the city (addressLocality) and the street
+  // (streetAddress with its house number removed, since the name may reorder or
+  // drop the number). Only then is re-composing the structured parts redundant.
+  // Requiring BOTH the city and a substantive (≥4 char) street core keeps a
+  // venue merely named after its city ("Zappa Tel Aviv", street elsewhere) from
+  // qualifying, so its street is still composed in.
+  function nameIsFullAddress(name, addr) {
+    if (!addr || typeof addr !== "object") return false;
+    const hay = GCal.clean(name).toLowerCase();
+    if (!hay.includes(",")) return false;
+    const locality = GCal.clean(addr.addressLocality).toLowerCase();
+    const streetCore = GCal.clean(String(addr.streetAddress || "").replace(/\d+/g, " ")).toLowerCase();
+    if (!locality || streetCore.length < 4) return false;
+    return hay.includes(locality) && hay.includes(streetCore);
   }
 
   // schema.org allows addressCountry to be a plain string OR a Country object
