@@ -201,6 +201,6 @@ green toolbar icon, and its host must also be in `supportedDomains`
 When the routine hands an issue to a human (`extractor-blocked-needs-human`), or to
 add a source by hand: follow the same shape — add `custom/<site>.js`, `npm run
 index`, register the host in `supportedDomains`, add a reviewed case (the
-[add-live-case](../../../.claudinite/local_packs/gcec/skills/add-live-case/SKILL.md) skill), and record the host
+[add-live-case](../../../.claudinite/local/packs/gcec/skills/add-live-case/SKILL.md) skill), and record the host
 as an extractor-support requirement leaf in `dev/requirements/requirements.md`
 §11 (see [`dev/requirements/README.md`](../../requirements/README.md)).
