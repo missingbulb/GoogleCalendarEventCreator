@@ -18,3 +18,7 @@ docs/
 # canon at .claudinite/shared/ and the local packs are tracked).
 /.claudinite-hooks.log
 /.claudinite-hooks.log.tmp
+
+# Scratch worktrees the Agent tool's isolation:"worktree" mode creates for
+# subagents that mutate files in parallel — local execution state, never repo content.
+.claude/worktrees/
