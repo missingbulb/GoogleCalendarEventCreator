@@ -1,4 +1,4 @@
-// gcec local task: fallback-extractor-improvements — the daily attempt to make the GENERIC
+// gcec local task: fallback-extractor-improvements — the weekly attempt to make the GENERIC
 // fallback extractor recover more of what the dedicated per-site sources get
 // (per-project-scheduling DESIGN §6). Worker: task.md. Most runs correctly change
 // nothing — the coverage gate already banks every prior win — so a forced or fake
@@ -8,7 +8,7 @@
 
 export default {
   id: 'fallback-extractor-improvements',
-  frequency: 'daily',            // fires on the repo's daily anchor hour
+  frequency: 'weekly',            // fires on the repo's weekly anchor day/hour
   precondition_signals: ['commits'],
   agent_model: 'opus',                 // closing a real generic-extractor gap is heavy judgment
   expected_outcome: 'open-pr',            // a generic win lands as a PR the owner reviews; never auto-merged
@@ -26,13 +26,13 @@ export default {
   agent_execution_timeout: 5400,
 
   // This is the old preconditions.sh, moved into code over the `commits` signal
-  // (DESIGN §6): the result is a pure function of the source, and most days nothing
-  // meaningful lands, so a run over unchanged code would re-derive yesterday's
+  // (DESIGN §6): the result is a pure function of the source, and most weeks nothing
+  // meaningful lands, so a run over unchanged code would re-derive last week's
   // answer while burning a full model run. `commits.substantiveChange` is exactly
-  // the shell's "a commit touched real source, not only docs/GENERATED" notion —
-  // fixing the live cadence bug the weekly cron caused (daily spec vs weekly fire).
-  // When in doubt the day still runs: a run that finds nothing is cheap and makes
-  // no PR; a too-clever skip that misses a real opportunity is not.
+  // the shell's "a commit touched real source, not only docs/GENERATED" notion,
+  // windowed to whatever's landed since the last successful run. When in doubt
+  // the week still runs: a run that finds nothing is cheap and makes no PR; a
+  // too-clever skip that misses a real opportunity is not.
   precondition(signals) {
     const commits = signals.commits ?? {};
     if (!commits.substantiveChange) {
