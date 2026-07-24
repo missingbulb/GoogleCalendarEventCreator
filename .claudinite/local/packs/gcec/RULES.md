@@ -148,7 +148,7 @@ action header's recipe.
 
 Standing rules for the extractor-automation domain — the create-extractor routine
 (an `extractor-request` issue → a PR adding site support), still under
-[`dev/routines/`](../../../../dev/routines/), and the daily
+[`dev/routines/`](../../../../dev/routines/), and the weekly
 fallback-extractor-improvements task, now a gcec pack task under
 [`tasks/`](tasks/fallback-extractor-improvements/) (read a spec only when working
 on that pipeline). Adding a cached live case is the

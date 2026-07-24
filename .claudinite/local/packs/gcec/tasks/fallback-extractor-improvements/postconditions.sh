@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Postconditions for the daily fallback-coverage routine
+# Postconditions for the weekly fallback-coverage routine
 # (.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md).
 #
 # Runs AFTER the agent has made a candidate change, and bundles every

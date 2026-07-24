@@ -1,6 +1,6 @@
 # Fallback-coverage routine
 
-Daily Claude routine (on a strong model), offline on a fresh clone. Goal: make the **generic**
+Weekly Claude routine (on a strong model), offline on a fresh clone. Goal: make the **generic**
 fallback extractor — `extension/event-extractors/extract-unsupported.js` and the
 shared `extension/event-extractors/helpers/*.js` — recover **more** of what the
 dedicated per-site sources get, measured by the fallback-coverage gate. **Most runs
@@ -13,8 +13,8 @@ no PR.
 This task is a two-tier run, cheap gate first: the **scheduler** (a pure-code Action,
 no model at all) ran this task's precondition (`task.mjs`, over the `commits` signal),
 and only *because* it found a meaningful change did it dispatch you — a strong-model
-subagent — via the `ready-for-agent` issue. Most nights the gate skips and no strong
-model ever boots; you are paid for solely on the nights there's real work. (This is
+subagent — via the `ready-for-agent` issue. Most weeks the gate skips and no strong
+model ever boots; you are paid for solely on the weeks there's real work. (This is
 the "cheap dispatcher front door" cost model — the scheduler precondition is that
 front door, cheaper than a dispatcher session because it runs no model.)
 
