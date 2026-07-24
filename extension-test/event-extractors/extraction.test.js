@@ -173,6 +173,40 @@ test("JSON-LD location: an addressCountry Country object holding a short code is
   assert.equal(e.times[0].location, "Hollywood Casino Amphitheater, 14141 Riverport Dr, Maryland Heights, 63043");
 });
 
+test("JSON-LD with raw (unescaped) control chars inside a string value is still parsed (tolerant recovery)", () => {
+  // Server-side templating that drops a multi-line description straight into a
+  // schema.org "description" emits RAW newlines inside the JSON string — invalid
+  // JSON that makes a strict JSON.parse() throw, silently discarding an
+  // otherwise-valid Event (seen on ASP.NET/SharePoint, e.g. visit.tel-aviv.gov.il).
+  // The reader escapes the control characters inside the string and recovers the
+  // Event. The recovered location — assembled from separate JSON-LD fields, so it
+  // can never leak out of the raw <script> text as one contiguous string — is the
+  // assertion that pins the parse actually succeeding. The literal newline below
+  // is intentional (it is the defect being tolerated).
+  const html = `
+    <script type="application/ld+json">
+    { "@context": "http://www.schema.org", "@type": "Event",
+      "name": "Heritage Talk",
+      "description": "First line of the talk.
+Second line, after a raw newline.",
+      "startDate": "2026-07-05T18:00:00",
+      "endDate": "2026-07-05T20:00:00",
+      "location": { "@type": "Place", "name": "City Museum",
+                    "address": { "streetAddress": "Bialik St 27", "addressCountry": "Israel" } } }
+    </script>
+    <h1>Heritage Talk</h1>`;
+
+  const e = firstEvent(html, "https://www.some-cms.example/events/heritage-talk");
+  assert.equal(e.title, "Heritage Talk");
+  assert.equal(e.times[0].start, "2026-07-05T18:00:00");
+  assert.equal(e.times[0].end, "2026-07-05T20:00:00");
+  assert.equal(e.times[0].location, "City Museum, Bialik St 27, Israel");
+  assert.ok(
+    e.description.includes("First line") && e.description.includes("Second line"),
+    "both lines of the raw-newline description survive"
+  );
+});
+
 test("Generic site with no structured data: heuristics only", () => {
   const html = `
     <meta name="description" content="Gloves and trash grabbers provided.">

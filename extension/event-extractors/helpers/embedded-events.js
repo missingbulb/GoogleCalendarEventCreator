@@ -49,13 +49,76 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       }
     };
     for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
-      try {
-        visit(JSON.parse(script.textContent));
-      } catch (e) {
-        /* malformed JSON-LD; ignore */
-      }
+      const parsed = parseLd(script.textContent);
+      if (parsed !== undefined) visit(parsed);
     }
     return found;
+  }
+
+  // Parse a JSON-LD block, tolerating the single most common real-world defect:
+  // RAW (unescaped) control characters — literal newlines, tabs, carriage
+  // returns — sitting inside a string value. The JSON spec forbids them, but
+  // server-side templating that drops a multi-line description straight into a
+  // schema.org "description" emits them anyway (seen on ASP.NET/SharePoint and
+  // hand-built CMSes), which makes a strict JSON.parse throw and silently
+  // discards an otherwise-perfectly-good Event. So on a parse failure, escape
+  // only the control characters that appear INSIDE strings and retry once —
+  // this rewrites nothing structural (control chars between tokens are already
+  // valid whitespace and are left untouched) and never fabricates data. Returns
+  // undefined when even the salvaged text won't parse.
+  function parseLd(text) {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      try {
+        return JSON.parse(escapeControlCharsInStrings(text));
+      } catch (e2) {
+        return undefined;
+      }
+    }
+  }
+
+  // Escape raw control characters (code point < 0x20) that occur inside a JSON
+  // string literal, leaving everything else — including whitespace between
+  // tokens — byte-for-byte identical. Tracks string/escape state so a control
+  // char outside a string (structural whitespace) is not rewritten.
+  function escapeControlCharsInStrings(text) {
+    let out = "";
+    let inStr = false;
+    let escaped = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (!inStr) {
+        out += ch;
+        if (ch === '"') inStr = true;
+        continue;
+      }
+      if (escaped) {
+        out += ch;
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        out += ch;
+        escaped = true;
+        continue;
+      }
+      if (ch === '"') {
+        out += ch;
+        inStr = false;
+        continue;
+      }
+      const code = text.charCodeAt(i);
+      if (code < 0x20) {
+        if (ch === "\n") out += "\\n";
+        else if (ch === "\r") out += "\\r";
+        else if (ch === "\t") out += "\\t";
+        else out += "\\u" + code.toString(16).padStart(4, "0");
+        continue;
+      }
+      out += ch;
+    }
+    return out;
   }
 
   // `dayFirst` (default false) is forwarded to normalizeDateValue so a non-ISO
