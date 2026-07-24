@@ -7,7 +7,7 @@ Claudinite engine as the canon packs). It replaced the always-`@`-imported
 always-relevant rules became [RULES.md](RULES.md) (injected at session start),
 the activity-scoped procedures became this pack's skills (surfaced on demand),
 and the first always-testable rule became a check. Declared by hand in
-[`.claudinite-checks.json`](../../../.claudinite-checks.json); never
+[`.claudinite-checks.json`](../../../../.claudinite-checks.json); never
 fingerprinted or seeded.
 
 ## Contents
