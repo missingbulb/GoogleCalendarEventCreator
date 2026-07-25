@@ -23,19 +23,26 @@ all. Open the PR early for those.
 
 ## Getting a green check in a Claude web session
 
-- **There is no push-run to merge on.** A push through the in-session git proxy
-  triggers **no** `test.yml` run (the proxy push emits no workflow-triggering
-  event — same practical outcome as the `GITHUB_TOKEN` rule). **Dispatch it
-  yourself** (`actions_run_trigger` / `run_workflow` on the branch ref —
-  `test.yml` allows `workflow_dispatch`) and poll that one run to green before
-  merging. Don't sit waiting for a push-run that never comes. (From a local
-  CLI, the push-run exists — check the PR head SHA for a green required check
-  and merge on that instead of firing a duplicate.)
+- **The push-run exists — don't dispatch a duplicate.** A push through the
+  in-session git proxy **does** trigger `test.yml`: the workflow's `push`
+  trigger covers `main` and `claude/**` precisely so an agent branch gets CI
+  without a PR, and a branch that also has an open PR gets a `pull_request` run
+  too (two `test` check runs on the same head SHA — the workflow's own comment
+  calls that accepted duplication). Merge on whichever is green; only reach for
+  `actions_run_trigger` / `run_workflow` when no run appeared at all (a branch
+  outside `claude/**`, or a `paths-ignore`/`[skip ci]` push). Firing a manual
+  dispatch on top of a run that already exists just buys a third run and its
+  wall time.
 - **The shell can't observe GitHub state here.** The git remote is a git-only
   proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
   there's no API token in the env, and `gh` reaches no `api.github.com` — only
-  the MCP `get_check_runs`/`get_status` poll sees check state; a background
-  bash/Monitor loop cannot.
+  an MCP poll sees check state; a background bash/Monitor loop cannot.
+- **Poll `get_check_runs`, never `get_status`.** `pull_request_read`'s
+  `get_status` reads the legacy commit-status API, which nothing in this repo
+  writes — it returns `state: "pending"`, `total_count: 0` forever, including
+  long after every check run has finished green. Trusting it means waiting on a
+  transition that never comes. CI here is GitHub Actions **check runs**, so
+  `get_check_runs` is the only reading of "is CI green" that is ever true.
 - **Poll on a short back-off, never one long sleep, never tight.** Loop
   **MCP poll → background sleep → MCP poll** until the check leaves
   `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating — a
