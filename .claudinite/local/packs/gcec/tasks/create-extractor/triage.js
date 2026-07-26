@@ -1,6 +1,7 @@
-// Triage for the create-extractor routine (routine.md): before the agent does any
-// work, decide how to handle an extractor-request issue. The host's situation
-// sorts it into one of these:
+// Triage for the create-extractor task: decide how to handle an extractor-request
+// issue. Called by `prepare.mjs` (the task's agent_preprocessing worker) — so this
+// decision is code that runs Action-side before any agent exists, not something an
+// agent is asked to reason about. The host's situation sorts it into one of these:
 //   "supported" — the host already has a dedicated source. We DON'T close it any
 //                 more: the pipeline runs in **supported mode** and adds a fresh
 //                 integration case to that existing source (hardening it against a
@@ -18,29 +19,23 @@
 // mode, no-match in new-source mode.
 //
 // Reuses fallback-policy.js (the popup's host classifier) for deny/allow and
-// resolve-source.js (the sources' matches()) for supported, so the workflow and
+// resolve-source.js (the sources' matches()) for supported, so the pipeline and
 // the popup can never disagree about a host.
 //
-// CLI (run by the routine's agent):
-//   in  (env):  ISSUE_BODY, ISSUE_TITLE, ISSUE_NUMBER — the issue's raw fields
-//   in  (file): $OPEN_REQUESTS_FILE (default /tmp/open-requests.json) — the array
-//               of OTHER open extractor-request issues ([{number,title,body}]),
-//               which the agent gathers via the GitHub tools and writes here (the
-//               shell has no GitHub API); this script never touches the network, so
-//               the unit tests stay offline. Missing -> the sample check is skipped.
-//   out (stdout): one JSON object — { skipAgent, reason, mode, url, host,
-//                 waitSelector, slug, sourceBase, caseName, branch, sourcePath,
-//                 casePath, duplicateOf, message }
-// As a module (the tests): exports firstUrl(), waitSelectorOf(), runTriage().
+// Pure and offline by design — the caller supplies the issue and its open peers,
+// and every GitHub read/write around this lives in prepare.mjs. That split is what
+// keeps the whole routing decision unit-testable with no network.
+//
+//   runTriage({body, title, number}, lists?, openRequests?)
+//     -> { skipAgent, reason, mode, url, host, waitSelector, slug, sourceBase,
+//          caseName, branch, sourcePath, casePath, listing, duplicateOf, message }
 "use strict";
 
-const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const { ROOT } = require("./repo-root");
 const { namesFor } = require("./extractor-naming");
 const { resolveSourceBaseName } = require("./resolve-source");
-
-const OPEN_REQUESTS_PATH = process.env.OPEN_REQUESTS_FILE || "/tmp/open-requests.json";
 
 // Turn an issue's event URL (+ number) into every mode-aware name the routine
 // uses, for BOTH modes. The authority on "is this host already supported" is an
@@ -94,7 +89,7 @@ function fieldValue(body, label) {
 // the pipeline re-records the page. A selector is one line; take only the first,
 // strip an accidental surrounding code span, and bound the length so a pasted
 // paragraph or a hostile issue body can't feed a giant value into the fetch URL
-// (the fetch-page workflow url-encodes it regardless).
+// (prepare.mjs url-encodes it regardless).
 function waitSelectorOf(body) {
   const first = fieldValue(body, "Wait-for selector").split(/\r?\n/)[0].trim();
   return first.replace(/^`+|`+$/g, "").trim().slice(0, 200);
@@ -168,7 +163,7 @@ function skipMessage(reason, { host, duplicateOf }) {
 // duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
   const { classifyHost } = await import(
-    pathToFileURL(path.join(__dirname, "..", "..", "..", "extension", "fallback-policy.js"))
+    pathToFileURL(path.join(ROOT, "extension", "fallback-policy.js"))
   );
 
   const url = firstUrl(body) || firstUrl(title);
@@ -213,48 +208,3 @@ async function runTriage({ body = "", title = "", number } = {}, lists, openRequ
 }
 
 module.exports = { firstUrl, waitSelectorOf, runTriage };
-
-// CLI (run by the routine's agent): read the issue fields + the gathered open
-// peers, print the whole decision as one JSON object to stdout for the agent to
-// read. A short human line goes to stderr. Fails OPEN — any error prints a
-// proceed decision rather than silently dropping a real request.
-if (require.main === module) {
-  (async () => {
-    const res = await runTriage(
-      {
-        body: process.env.ISSUE_BODY,
-        title: process.env.ISSUE_TITLE,
-        number: process.env.ISSUE_NUMBER,
-      },
-      undefined,
-      readOpenRequests()
-    );
-    if (res.skipAgent) {
-      const detail =
-        res.reason === "sample" ? `extra sample for #${res.duplicateOf}` : `on the ${res.reason}list`;
-      console.error(`Auto-triaged: ${res.host || res.url} (${detail}) — close, no extractor.`);
-    } else {
-      console.error(
-        res.url
-          ? `Proceed for ${res.host || res.url} in ${res.mode} mode (case ${res.caseName}).`
-          : "No URL found in the issue."
-      );
-    }
-    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
-  })().catch((e) => {
-    console.error("Triage errored — proceeding (fail open):", e);
-    process.stdout.write(JSON.stringify({ skipAgent: false, reason: "" }) + "\n");
-  });
-
-  // The OTHER open extractor-request issues, which the agent gathers via the
-  // GitHub tools and writes to OPEN_REQUESTS_FILE (the shell has no GitHub API).
-  // Missing/unreadable -> [] (fail open: the duplicate check is simply skipped).
-  function readOpenRequests() {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(OPEN_REQUESTS_PATH, "utf8"));
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      return [];
-    }
-  }
-}

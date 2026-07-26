@@ -13,19 +13,24 @@ mounted on demand), declared like any pack in
   ([RULES.md](.claudinite/local/packs/gcec/RULES.md) — working rules, owner
   commands, testing invariants, codebase gotchas, the extractor-pipeline rules,
   the architecture rules of the road, and the capture policy), the project's own
-  conformance checks, and the snapshot-approval / merge-and-ci / testing-guide /
-  add-live-case skills.
+  conformance checks, and the snapshot-approval / merge-and-ci / testing-guide skills.
 
-The two unattended routines that grow and improve site support are being converted
-into **gcec pack tasks**, run by the per-repo Claudinite scheduler (each task is a
-`tasks/<name>/{task.mjs,task.md}` — the declaration + precondition beside the worker
-prose, per-project-scheduling §1). The weekly fallback-extractor-improvements task lives at
-[`.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`](.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md);
-the auto-implement-extractor pipeline (an `extractor-request` issue → a PR adding
-site support) is still the legacy routine at
-[`dev/routines/create-extractor/routine.md`](dev/routines/create-extractor/routine.md)
-until its conversion lands. Read a task/routine spec **only** when working on that
-pipeline — neither is needed for day-to-day development.
+The unattended work that grows and improves site support runs as **gcec pack
+tasks**, on the per-repo Claudinite scheduler (each task is a
+`tasks/<name>/` holding `task.mjs` — the declaration + the pure precondition —
+beside its deterministic preprocessing worker and, when a stage needs judgment, the
+`task.md` an agent follows; per-project-scheduling §1):
+
+- [`create-extractor`](.claudinite/local/packs/gcec/tasks/create-extractor/task.md)
+  — an `extractor-request` issue becomes a PR adding site support.
+- [`record-page`](.claudinite/local/packs/gcec/tasks/record-page/task.mjs) —
+  records the cached page for any live case whose `.url` is committed and whose
+  `.html` is not (agentless).
+- [`fallback-extractor-improvements`](.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md)
+  — the weekly attempt to widen the generic fallback extractor.
+
+Read a task spec **only** when working on that pipeline — none is needed for
+day-to-day development.
 
 Nothing here `@`-imports the pack's prose: the active packs' RULES.md — canon
 and local alike — are injected automatically by the Claudinite SessionStart

@@ -18,8 +18,8 @@ npm test               # everything above except e2e
 The invariants (mirror tree, reviewed-contract cases, `REFERENCE_NOW` floor,
 refusal-test discipline) are always-loaded in the gcec pack's RULES.md. General
 test discipline (see-it-fail, green-twice, high-watermark gating) is canon.
-Adding a cached live case is the gcec pack's **add-live-case**
-skill; the fallback-coverage gate's invariants are in that pack's RULES.md.
+Adding a cached live case is covered under "Live integration tests" below; the
+fallback-coverage gate's invariants are in the gcec pack's RULES.md.
 
 ## The requirements model — every leaf has exactly one case
 
@@ -49,11 +49,24 @@ is *claimed*, not every leaf *faithfully* verified (#435; the banner in
 `expected/`: `expected.events` is the **complete, exact** array the extractor
 produces — deep-equal on `title`/`start`/`end`/`location`/`ctz`/`details`, no
 matchers, array length included. The page URL lives **only** in
-`data/server-fetched/<name>.url` (single source of truth — the fetch workflow
-and the test both read it; never in the case file). Tests run offline against
-the committed cached HTML, loaded into a DOM at the `.url`'s URL so hostname
-detection behaves exactly as in Chrome. `test.yml` never fetches — recording
-goes through the fetch-page workflow (see add-live-case).
+`data/server-fetched/<name>.url` (single source of truth — the recorder and the
+test both read it; never in the case file). Tests run offline against the
+committed cached HTML, loaded into a DOM at the `.url`'s URL so hostname
+detection behaves exactly as in Chrome. `test.yml` never fetches.
+
+**Adding one.** Usually you don't: file an `extractor-request` issue with the
+event URL and the `create-extractor` task records the page, writes the
+extractor, and opens the PR. To add a case by hand, land the `.url` alone first
+— a committed `.url` with no sibling `.html` *is* the request the `record-page`
+task acts on, so it fetches the page (ScraperAPI; this sandbox is bot-blocked)
+and opens a PR carrying it. Merge that, then run `npm run test:live` and paste
+the printed values into `expected/<name>.json` — never hand-write them.
+
+**Gardening.** When an event page is taken down, point `<name>.url` at a newer
+event **and delete the stale `<name>.html`** in the same commit; that is the
+whole re-record request. Until an HTML file exists, `test:live` fails with
+`Missing cached HTML for "<name>"`, so land the refresh before (or with) the
+case's updated `expected`.
 
 ## UI snapshots
 

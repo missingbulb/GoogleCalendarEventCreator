@@ -1,8 +1,8 @@
 // Deterministic branch / cache-file names for the auto-implement-extractor
-// workflow, derived purely from the event URL's host. The workflow does Phase 1
-// (branch + cache the page) before the agent runs, so these names can't be the
+// task, derived purely from the event URL's host. The task's preprocessing
+// branches and records the page before the agent runs, so these names can't be the
 // agent's judgement call any more — they have to be reproducible from the URL
-// alone. Pure (no I/O), so it's unit-tested, and the workflow and triage agree
+// alone. Pure (no I/O), so it's unit-tested, and preprocessing and triage agree
 // on the names.
 //
 //   slug      — host, www-stripped, a common public suffix removed, dots → "-":

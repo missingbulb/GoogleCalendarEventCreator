@@ -1,13 +1,13 @@
-// Deterministic scaffolding for the create-extractor routine's prepare stage
-// (3-prepare.sh), merged from what used to be three files (scaffold-source /
+// Deterministic scaffolding for the create-extractor task's preprocessing stage
+// (prepare.mjs), merged from what used to be three files (scaffold-source /
 // scaffold-case / add-supported-domain). Everything here is derivable from the
 // event URL + mode before the agent runs; the agent's only job is to fill
-// extract() + the case against the real cached page.
+// extract() + the case against the real recorded page.
 //
 //   node scaffold.js <mode> <caseName> <host> [event-url]
 //     supported : write ONLY the placeholder case for the existing source
 //     new       : write the source stub (matches() filled) + the placeholder case,
-//                 and register <host> in supportedDomains. (3-prepare then runs
+//                 and register <host> in supportedDomains. (prepare.mjs then runs
 //                 `npm run index`.)
 //
 // Refuses to overwrite an existing source or case (a real one must never be
@@ -18,8 +18,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { hostname, slugFor, matchesRegexFor, namesFor } = require("./extractor-naming");
-
-const ROOT = path.join(__dirname, "..", "..", "..");
+const { ROOT } = require("./repo-root");
 const sourcePath = (slug) => path.join(ROOT, "extension", "event-extractors", "custom", `${slug}.js`);
 const casePath = (name) => path.join(ROOT, "dev", "requirements", "extractor", "expected", `${name}.json`);
 const LISTS_FILE = path.join(ROOT, "extension", "fallback-lists.json");

@@ -160,7 +160,7 @@ dev/requirements/
 ## How to add a new supported site
 
 Adding a per-site extractor is its own documented flow — see
-[`dev/routines/create-extractor/routine.md`](../../dev/routines/create-extractor/routine.md).
+[`.claudinite/local/packs/gcec/tasks/create-extractor/task.md`](../../.claudinite/local/packs/gcec/tasks/create-extractor/task.md).
 It adds an `extractor` leaf to `requirements.md` §11 plus a reviewed live case under
 `extractor/expected/`.
 

@@ -3,8 +3,8 @@
 //
 // These run OFFLINE against committed cached HTML files in
 // data/, recorded from each site by the auto-extractor pipeline
-// (the fetch-page workflow, .github/workflows/fetch-page.yml, which fetches
-// through ScraperAPI). Asserting against a cached copy of the real page
+// (the gcec create-extractor / record-page tasks, which fetch through
+// ScraperAPI). Asserting against a cached copy of the real page
 // makes the suite deterministic and runnable anywhere (no network), while still
 // reflecting each site's current markup.
 //
@@ -37,7 +37,7 @@
 // The scenario's source URL lives alongside the cached HTML, in
 // data/<provenance>/<name>.url, where <provenance> is server-fetched/
 // (pipeline-recorded) or user-submitted/ — the single source of truth —
-// the fetch-page workflow records it, and the suite loads the HTML into a DOM at
+// the record-page task records it, and the suite loads the HTML into a DOM at
 // that URL so hostname-based site detection behaves as in Chrome). It is NOT
 // repeated in the case file.
 //
@@ -65,9 +65,9 @@
 // To cover a new website or platform: add a dev/requirements/extractor/data/server-fetched/<name>.url
 // with the event page URL and a case file (dev/requirements/extractor/expected/<name>.json) with its
 // `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
-// `extractor-request` issue with the page URL — the routine fetches it via the
-// fetch-page workflow); to record one by hand, dispatch that workflow (or fetch the
-// .url through ScraperAPI yourself). Run the suite once to see the actual extracted
+// `extractor-request` issue with the page URL and the create-extractor task does
+// the rest); to add just a page, commit its .url and the record-page task fetches
+// it. Run the suite once to see the actual extracted
 // values in the failure output, then copy them into `expected`.
 "use strict";
 
@@ -113,7 +113,7 @@ for (const file of caseFiles) {
     const cachedHtmlPath = dataFile(`${name}.html`);
     assert.ok(
       fs.existsSync(cachedHtmlPath) && fs.statSync(cachedHtmlPath).size > 0,
-      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue), or by hand via ScraperAPI — see dev/routines/create-extractor/3-prepare.sh`
+      `Missing cached HTML for "${name}". It's recorded by the auto-extractor pipeline (an extractor-request issue) — see .claudinite/local/packs/gcec/tasks/create-extractor/prepare.mjs`
     );
 
     const html = fs.readFileSync(cachedHtmlPath, "utf8");

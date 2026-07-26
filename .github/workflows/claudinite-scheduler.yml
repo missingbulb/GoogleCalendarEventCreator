@@ -39,4 +39,5 @@ jobs:
       - name: Evaluate schedule and dispatch due tasks
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
         run: node .claudinite/shared/engine/scheduler/run.mjs
