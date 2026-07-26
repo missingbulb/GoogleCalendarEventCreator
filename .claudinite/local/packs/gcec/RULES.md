@@ -150,7 +150,7 @@ cached page) and the weekly **generic-extractor-improvements** (read a spec only
 on that pipeline). Adding or refreshing a cached live case by hand is the
 [testing-guide](skills/testing-guide/SKILL.md) skill.
 
-- **All page fetching goes through [`scraperapi.mjs`](scraperapi.mjs), from a
+- **All page fetching goes through [`scraperapi.mjs`](tasks/create-extractor/scraperapi.mjs), from a
   task's preprocessing worker and nowhere else.** A rendered fetch through
   ScraperAPI's residential proxy (`render=true`, so a single-page app records
   post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the

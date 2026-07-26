@@ -42,7 +42,7 @@ import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync } from 
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { recordPage } from '../../scraperapi.mjs';
+import { recordPage } from './scraperapi.mjs';
 
 const require = createRequire(import.meta.url);
 const { runTriage } = require('./triage.js');

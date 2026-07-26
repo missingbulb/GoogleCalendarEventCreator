@@ -25,7 +25,7 @@ extension does.
 | `dev/requirements/extractor/expected/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`); split by provenance into `server-fetched/` (pipeline-recorded, secret-scan-excluded) and `user-submitted/` (hand-supplied, push-protected), resolved by `data-files.js` |
 | `.claudinite/local/packs/gcec/tasks/create-extractor/prepare.mjs` | The create-extractor task's preprocessing worker: triage + close, branch, scaffold, prove a green offline baseline, **record the page through ScraperAPI**, push, open the draft PR, and request the agent only if an `extract()` is left to write |
-| `.claudinite/local/packs/gcec/scraperapi.mjs` | The project's one page-fetching surface — a rendered ScraperAPI fetch, usable only from a task's preprocessing worker (the only stage the `SCRAPER_API_KEY` Actions secret reaches) |
+| `.claudinite/local/packs/gcec/tasks/create-extractor/scraperapi.mjs` | The project's one page-fetching surface — a rendered ScraperAPI fetch, usable only from a task's preprocessing worker (the only stage the `SCRAPER_API_KEY` Actions secret reaches) |
 | `dev/requirements/extractor/live.test.js` | Runs the reviewed assertions against the cached HTML files |
 | `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |
 | `extension-test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
