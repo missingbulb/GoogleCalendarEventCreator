@@ -8,9 +8,10 @@ pipeline" section below, and its two routines live under `dev/routines/`.
 
 ## Working rules
 
-- **Merges to `main` are squash, `(#N)` appended to the title** — a linear,
-  one-commit-per-PR history. CI must be green first (twice for e2e/heavy-browser
-  changes). The project mechanics of driving a merge (dispatching CI in a web
+- **This repo's one divergence from the canon merge recipe: CI must be green
+  first** — twice for e2e/heavy-browser changes. (Merge method and title are the
+  canon default, `squash` with `(#N)`, enforced by the `squash-merge-history`
+  check.) The project mechanics of driving a merge (dispatching CI in a web
   session, the poll back-off, when to arm auto-merge instead of waiting) are the
   merge-and-ci skill — **load it for any PR a session opens**, including one
   opened incidentally mid-task by an unattended run, not only for a deliberate
