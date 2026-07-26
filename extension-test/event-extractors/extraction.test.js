@@ -140,6 +140,48 @@ test("JSON-LD location: a Place name holding only the city (not the street) stil
   assert.equal(e.times[0].location, "Zappa Tel Aviv - Midtown, Menachem Begin Road 144, 6492102");
 });
 
+test("JSON-LD location: a country is not appended to a street address that skipped the city", () => {
+  // A PostalAddress that carries a street but leaves addressLocality EMPTY has a
+  // hole in its hierarchy, and the country then jumps a level: "Bialik Street 27,
+  // Israel" names no findable place, and a dedicated source writes the street
+  // without it. So the country is appended only when the address didn't skip the
+  // city (or when the country is all we have) — the same "don't tack on a part
+  // that adds nothing locatable" reasoning that drops a country code after a
+  // region. Mirrors visit.tel-aviv.gov.il's JSON-LD.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Savta Stories", "startDate": "2026-07-14T10:00:00",
+      "location": { "@type": "Place", "name": "City Museum Tel Aviv-Yafo",
+                    "address": { "@type": "PostalAddress", "streetAddress": "Bialik Street 27",
+                                 "addressLocality": "", "addressCountry": "Israel" } } }
+    </script>`;
+
+  const e = firstEvent(html, "https://www.somecity.example/events/savta-stories");
+  assert.equal(e.times[0].location, "City Museum Tel Aviv-Yafo, Bialik Street 27");
+});
+
+test("JSON-LD location: a country IS kept when the address names its city too", () => {
+  // The guard for the rule above: a complete street/city/country hierarchy is
+  // exactly the case the country belongs in (livenation.de's shape), and a
+  // city-and-country address with no street keeps it as well.
+  const withCity = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Harbour Show", "startDate": "2026-08-01T20:00:00",
+      "location": { "@type": "Place", "name": "Harbour Hall",
+                    "address": { "streetAddress": "12 Dock Rd", "addressLocality": "Cork",
+                                 "addressCountry": "Ireland" } } }
+    </script>`;
+  assert.equal(firstEvent(withCity, "https://www.x.example/a").times[0].location, "Harbour Hall, 12 Dock Rd, Cork, Ireland");
+
+  const cityOnly = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "City Fest", "startDate": "2026-08-02T20:00:00",
+      "location": { "@type": "Place", "name": "Somewhere Central",
+                    "address": { "addressLocality": "Cork", "addressCountry": "Ireland" } } }
+    </script>`;
+  assert.equal(firstEvent(cityOnly, "https://www.x.example/b").times[0].location, "Somewhere Central, Cork, Ireland");
+});
+
 test("JSON-LD location: an addressCountry Country object (not a plain string) contributes its name, not '[object Object]'", () => {
   // schema.org allows addressCountry to be a Country object ({ "@type":
   // "Country", "name": "..." }) rather than a plain string — seen on
@@ -183,6 +225,11 @@ test("JSON-LD with raw (unescaped) control chars inside a string value is still 
   // can never leak out of the raw <script> text as one contiguous string — is the
   // assertion that pins the parse actually succeeding. The literal newline below
   // is intentional (it is the defect being tolerated).
+  //
+  // This page's address is also the city-skipping shape (a streetAddress with no
+  // addressLocality), so the composed location stops at the street instead of
+  // tacking on the country — see the country/city tests above. Still two separate
+  // JSON-LD fields joined together, so it pins the parse just as tightly.
   const html = `
     <script type="application/ld+json">
     { "@context": "http://www.schema.org", "@type": "Event",
@@ -200,7 +247,7 @@ Second line, after a raw newline.",
   assert.equal(e.title, "Heritage Talk");
   assert.equal(e.times[0].start, "2026-07-05T18:00:00");
   assert.equal(e.times[0].end, "2026-07-05T20:00:00");
-  assert.equal(e.times[0].location, "City Museum, Bialik St 27, Israel");
+  assert.equal(e.times[0].location, "City Museum, Bialik St 27");
   assert.ok(
     e.description.includes("First line") && e.description.includes("Second line"),
     "both lines of the raw-newline description survive"
