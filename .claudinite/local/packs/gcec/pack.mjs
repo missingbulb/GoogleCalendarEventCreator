@@ -18,6 +18,6 @@ export default {
   marker: null,
   prose: 'RULES.md',
   rules: [testOfflineListSync],
-  skills: ['snapshot-approval', 'merge-and-ci', 'testing-guide', 'add-live-case'],
+  skills: ['snapshot-approval', 'merge-and-ci', 'testing-guide'],
   run_daily: [],
 };

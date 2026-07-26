@@ -2,17 +2,18 @@
 // but whose `.html` is not. Agentless: pure preprocessing, no model, no issue.
 //
 // This is the other half of retiring `.github/workflows/fetch-page.yml`. That
-// workflow was dispatched by hand for the add-live-case flow (and for gardening: a
-// case whose event page was taken down and re-pointed at a newer one), because a
-// session cannot hold SCRAPER_API_KEY. A worker can — so the dispatch-and-poll
-// surface becomes a declarative one: commit the `.url`, delete the stale `.html`,
-// and the next scheduler run records the page and opens the PR.
+// workflow was dispatched by hand to record a page for a hand-authored case, and
+// for gardening (a case whose event page was taken down and re-pointed at a newer
+// one), because a session cannot hold SCRAPER_API_KEY. A worker can — so the
+// dispatch-and-poll surface becomes a declarative one: commit the `.url`, delete
+// the stale `.html`, and the next scheduler run records the page and opens the PR.
+// The procedure lives in the testing-guide skill.
 //
 // Self-contained (imports nothing): the whole contract is this default export.
 
 export default {
   id: 'record-page',
-  frequency: 'hourly',           // the add-live-case flow waits on this; an hour is the worst case
+  frequency: 'hourly',           // a hand-authored case waits on this; an hour is the worst case
   precondition_signals: ['commits'],
   agent_model: 'none',                 // nothing to judge — a page either records or it doesn't
   expected_outcome: 'open-pr',            // the recorded page lands as a PR a maintainer merges

@@ -33,15 +33,15 @@ test("an open request fires the task and names it as binding scope", async () =>
   assert.match(v.context.join("\n"), /#12/);
 });
 
-test("a request already handed to a human is not eligible", async () => {
+test("a request already handed to a human (needs-human) is not eligible", async () => {
   const task = await load();
-  const v = task.precondition(signals([req(4, ["extractor-request", "extractor-blocked-needs-human"])]));
+  const v = task.precondition(signals([req(4, ["extractor-request", "needs-human"])]));
   assert.equal(v.run, false);
 });
 
-test("a request claimed by a run in flight is not eligible — this is what stops an hourly re-scaffold", async () => {
+test("a request claimed by a run (agent-running) is not eligible — this is what stops an hourly re-scaffold", async () => {
   const task = await load();
-  const v = task.precondition(signals([req(4, ["extractor-request", "extractor-in-progress"])]));
+  const v = task.precondition(signals([req(4, ["extractor-request", "agent-running"])]));
   assert.equal(v.run, false);
 });
 

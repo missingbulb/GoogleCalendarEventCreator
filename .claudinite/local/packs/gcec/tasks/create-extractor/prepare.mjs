@@ -12,8 +12,9 @@
 //   2. triage each eligible one oldest-first (triage.js, over the committed
 //      sources' real matches() + the popup's classifyHost) and CLOSE every
 //      deny/allow/duplicate with its canned message — no agent, no branch;
-//   3. for the first request that genuinely needs an extractor: claim it, branch,
-//      scaffold, prove the offline baseline green, and commit;
+//   3. for the first request that genuinely needs an extractor: claim it
+//      (`agent-running`, the scheduler's own label — no custom vocabulary here),
+//      branch, scaffold, prove the offline baseline green, and commit;
 //   4. RECORD THE PAGE through ScraperAPI directly. Preprocessing runs inside
 //      Actions, where SCRAPER_API_KEY already lives (the task names it in
 //      `required_secrets`, which the wiring converge stamps into the workflow).
@@ -48,22 +49,31 @@ const { runTriage } = require('./triage.js');
 const { addSample } = require('./attach-sample-url.js');
 
 const API = 'https://api.github.com';
+// `extractor-request` marks the issue KIND (the form applies it; it stays for the
+// issue's life). Its STATE uses the scheduler's own labels rather than any
+// invented here — the scheduler guarantees they exist before preprocessing runs,
+// so nothing below has to create them:
+//   agent-running — this pipeline owns the request (from claim until its PR lands)
+//   needs-human   — handed over; the pipeline will not pick it up again
+// `ready-for-agent` is never applied to a request: it is the executor's trigger.
 const REQUEST_LABEL = 'extractor-request';
-const BLOCKED_LABEL = 'extractor-blocked-needs-human';
-// The claim label. It is what makes the precondition's cheap gate correct across
-// hours: the scheduler runs this task hourly and does NOT know a previous run is
-// still in flight (preprocessing runs before, and independently of, the dispatch
-// issue's at-most-one-open guard). A claimed request drops out of the precondition's
-// eligible set, so an in-flight extractor is never scaffolded twice.
-const CLAIMED_LABEL = 'extractor-in-progress';
+const CLAIMED_LABEL = 'agent-running';
+const BLOCKED_LABEL = 'needs-human';
+const BRANCH_PREFIX = 'claude/extractor/';
 const DATA_DIR = 'dev/requirements/extractor/data/server-fetched';
+
+// How long a claimed request with nothing to show for it may sit before this
+// pipeline releases it. The executor's stale-`agent-running` sweep covers dispatch
+// issues only (it cannot know that a request stays claimed while its PR is in
+// review), so releasing our OWN stale claims is this worker's job.
+const STALE_CLAIM_MS = 6 * 60 * 60 * 1000;
 
 // --- pure helpers (unit-tested; no I/O) --------------------------------------
 
 // The requests this run may act on, oldest first. Mirrors the precondition's
-// eligibility exactly (task.mjs `eligibleRequests`) so the gate and the worker can
-// never disagree about what "eligible" means — the worker re-derives it from full
-// issue objects rather than trusting the gate's older snapshot.
+// eligibility exactly so the gate and the worker can never disagree about what
+// "eligible" means — the worker re-derives it from full issue objects rather than
+// trusting the gate's older snapshot.
 export function eligible(issues) {
   const labelsOf = (i) => (i.labels ?? []).map((l) => (typeof l === 'string' ? l : l?.name ?? ''));
   return (issues ?? [])
@@ -75,6 +85,24 @@ export function eligible(issues) {
         && !labels.includes(CLAIMED_LABEL);
     })
     .sort((a, b) => a.number - b.number);
+}
+
+// Claimed requests whose claim is stale: nothing this pipeline produced is still
+// open for them (no `claude/extractor/*` PR says `Closes #N`) and the issue has
+// been quiet past the grace period — so a run died between claiming and delivering.
+// Releasing the claim makes them eligible again next hour. `openPrs` is the repo's
+// open PRs; `now` is passed in so this is pure.
+export function staleClaims(issues, openPrs, now) {
+  const claimedByPr = new Set(
+    (openPrs ?? [])
+      .filter((pr) => String(pr?.head?.ref ?? '').startsWith(BRANCH_PREFIX))
+      .flatMap((pr) => [...String(pr?.body ?? '').matchAll(/\bCloses #(\d+)/gi)].map((m) => Number(m[1]))),
+  );
+  return (issues ?? [])
+    .filter((i) => (i.labels ?? []).some((l) => (typeof l === 'string' ? l : l?.name) === CLAIMED_LABEL))
+    .filter((i) => !claimedByPr.has(i.number))
+    .filter((i) => now - new Date(i.updated_at ?? 0).getTime() > STALE_CLAIM_MS)
+    .map((i) => i.number);
 }
 
 // The PR title for a finished run, by mode — the same two phrasings the routine
@@ -114,14 +142,6 @@ async function gh(path, { method = 'GET', body } = {}) {
 }
 
 const comment = (n, text) => gh(`/repos/${REPO}/issues/${n}/comments`, { method: 'POST', body: { body: text } });
-
-// GitHub 422s when an unknown label is applied and never creates one on demand, so
-// the thing that assigns a label guarantees it first (idempotent; self-healing if
-// someone deletes it).
-async function ensureLabel(name, color, description) {
-  const { status } = await gh(`/repos/${REPO}/labels`, { method: 'POST', body: { name, color, description } });
-  if (status !== 201 && status !== 422) console.log(`! could not ensure label "${name}": ${status}`);
-}
 
 const addLabel = (n, name) => gh(`/repos/${REPO}/issues/${n}/labels`, { method: 'POST', body: { labels: [name] } });
 const removeLabel = (n, name) => gh(`/repos/${REPO}/issues/${n}/labels/${encodeURIComponent(name)}`, { method: 'DELETE' });
@@ -163,7 +183,6 @@ async function closeSkipped(issue, decision) {
 // release the claim. Never a task failure — the pipeline correctly declining a page
 // is a normal outcome.
 async function handToHuman(number, why) {
-  await ensureLabel(BLOCKED_LABEL, 'D93F0B', 'An automated extractor run stopped here and needs a maintainer');
   await comment(number, why);
   await addLabel(number, BLOCKED_LABEL);
   await removeLabel(number, CLAIMED_LABEL);
@@ -236,9 +255,22 @@ export async function main() {
   if (!REPO || !TOKEN) throw new Error('no CLAUDINITE_REPO/GITHUB_TOKEN — not in an Actions context');
   if (!scraperKey) throw new Error('SCRAPER_API_KEY is not set');
 
-  const requests = eligible(await openRequests());
+  const allRequests = await openRequests();
+
+  // Release our own stale claims first (the executor's sweep covers dispatch
+  // issues only). A request claimed by a run that died before delivering becomes
+  // eligible again; one whose PR is still open stays claimed however long review
+  // takes.
+  const { json: openPrs } = await gh(`/repos/${REPO}/pulls?state=open&per_page=100`);
+  for (const number of staleClaims(allRequests, Array.isArray(openPrs) ? openPrs : [], Date.now())) {
+    await removeLabel(number, CLAIMED_LABEL);
+    await comment(number, 'Releasing this request: an automated run claimed it but never delivered a pull request. The pipeline will pick it up again on its next pass.');
+    console.log(`create-extractor: released a stale claim on #${number}`);
+  }
+
+  const requests = eligible(allRequests);
   if (!requests.length) {
-    console.log('create-extractor: no eligible request (the precondition\'s snapshot is stale) — nothing to do');
+    console.log('create-extractor: nothing eligible to act on this run');
     return;
   }
 
@@ -253,7 +285,7 @@ export async function main() {
     const d = await runTriage({ body: issue.body ?? '', title: issue.title, number: issue.number }, undefined, peers);
     if (d.skipAgent) { await closeSkipped(issue, d); continue; }
     if (!d.url || !d.branch) {
-      await handToHuman(issue.number, 'This request has no parseable event URL, so the pipeline could not act on it. Edit the issue to include the event page URL and remove the `extractor-blocked-needs-human` label to retry.');
+      await handToHuman(issue.number, 'This request has no parseable event URL, so the pipeline could not act on it. Edit the issue to include the event page URL and remove the `needs-human` label to retry.');
       continue;
     }
     target = issue;
@@ -267,7 +299,6 @@ export async function main() {
 
   // Claim it before any expensive work, so the next hourly run's precondition sees
   // it as in flight even if this run dies partway.
-  await ensureLabel(CLAIMED_LABEL, '0E8A16', 'An automated extractor run is working on this request');
   await addLabel(target.number, CLAIMED_LABEL);
   console.log(`create-extractor: #${target.number} → ${decision.host} (${decision.mode} mode, case ${decision.caseName})`);
 

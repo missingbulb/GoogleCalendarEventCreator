@@ -2,7 +2,7 @@
 
 The project's standing working rules — injected at session start while this pack
 is declared. Activity-scoped procedures live in this pack's skills
-(snapshot-approval, merge-and-ci, testing-guide, add-live-case) and surface on
+(snapshot-approval, merge-and-ci, testing-guide) and surface on
 demand; the extractor-automation domain's standing rules are the "Extractor
 pipeline" section below, and its three scheduled tasks live under `tasks/`.
 
@@ -147,8 +147,8 @@ Standing rules for the extractor-automation domain — the three gcec pack
 [`tasks/`](tasks/): **create-extractor** (an `extractor-request` issue → a PR
 adding site support), **record-page** (records a committed `.url`'s cached page),
 and the weekly **fallback-extractor-improvements** (read a spec only when working
-on that pipeline). Adding a cached live case is the
-[add-live-case](skills/add-live-case/SKILL.md) skill.
+on that pipeline). Adding or refreshing a cached live case by hand is the
+[testing-guide](skills/testing-guide/SKILL.md) skill.
 
 - **All page fetching goes through [`scraperapi.mjs`](scraperapi.mjs), from a
   task's preprocessing worker and nowhere else.** A rendered fetch through
@@ -184,7 +184,7 @@ on that pipeline). Adding a cached live case is the
   `.` / `-` separators are always day-first regardless (#686).
 - **An unrecordable page is a dead end, not a failed run.** When a fetch can't
   produce a page (bot wall, dead URL, empty render), create-extractor's
-  preprocessing labels the request `extractor-blocked-needs-human` with the reason
+  preprocessing labels the request `needs-human` with the reason
   and exits **0** — a task failure would converge to a `needs-human` dispatch
   issue as well, duplicating the signal and implying the pipeline broke when it
   correctly declined. Same for record-page: the pages that did record still land.

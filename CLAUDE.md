@@ -13,8 +13,7 @@ mounted on demand), declared like any pack in
   ([RULES.md](.claudinite/local/packs/gcec/RULES.md) — working rules, owner
   commands, testing invariants, codebase gotchas, the extractor-pipeline rules,
   the architecture rules of the road, and the capture policy), the project's own
-  conformance checks, and the snapshot-approval / merge-and-ci / testing-guide /
-  add-live-case skills.
+  conformance checks, and the snapshot-approval / merge-and-ci / testing-guide skills.
 
 The unattended work that grows and improves site support runs as **gcec pack
 tasks**, on the per-repo Claudinite scheduler (each task is a

@@ -45,11 +45,17 @@ export default {
   // commit. Preprocessing runs inside Actions, where the secret already is.
   required_secrets: ['SCRAPER_API_KEY'],
 
-  // Eligibility, and nothing more. A request is eligible when it is an open
-  // `extractor-request` that is neither already handed to a human nor claimed by a
-  // run in flight — the claim label is what keeps this correct hour over hour,
-  // since preprocessing runs before (and independently of) the dispatch issue's
-  // at-most-one-open guard, and would otherwise re-scaffold a live request.
+  // Eligibility, and nothing more. `extractor-request` marks the issue KIND and
+  // stays for its whole life; its STATE is the scheduler's own vocabulary rather
+  // than labels invented here — `agent-running` (a run owns this) and
+  // `needs-human` (handed over). The scheduler already guarantees both exist, and
+  // the executor's stale-claim sweep is scoped to dispatch issues, so a request
+  // may hold `agent-running` for as long as its PR sits in review.
+  //
+  // The claim is what keeps this correct hour over hour: preprocessing runs before
+  // (and independently of) the dispatch issue's at-most-one-open guard, and would
+  // otherwise re-scaffold a live request every hour. `ready-for-agent` is
+  // deliberately never used here — it is the executor's trigger.
   //
   // Deliberately NOT here: parsing the URL out of a body (the signal has no
   // bodies), running the sources' matches() (that is filesystem work over the
@@ -60,11 +66,11 @@ export default {
     const eligible = open.filter((i) => {
       const labels = i.labels ?? [];
       return labels.includes('extractor-request')
-        && !labels.includes('extractor-blocked-needs-human')
-        && !labels.includes('extractor-in-progress');
+        && !labels.includes('agent-running')
+        && !labels.includes('needs-human');
     });
     if (!eligible.length) {
-      return { run: false, reason: 'no open extractor-request issue is eligible (none open, or all blocked / already in flight)' };
+      return { run: false, reason: 'no open extractor-request issue is eligible (none open, or all claimed / handed to a human)' };
     }
     const numbers = eligible.map((i) => i.number).sort((a, b) => a - b);
     return {
@@ -72,7 +78,7 @@ export default {
       reason: `${numbers.length} eligible extractor request(s): ${numbers.map((n) => `#${n}`).join(', ')}`,
       context: [
         `Eligible requests this run: ${numbers.map((n) => `#${n}`).join(', ')} — preprocessing acts on the lowest-numbered one that needs an extractor and closes the rest.`,
-        'Requests labelled extractor-blocked-needs-human or extractor-in-progress are out of scope — do not touch them.',
+        'Requests labelled agent-running or needs-human are out of scope — do not touch them.',
         'Preprocessing has already branched, scaffolded, recorded the page, and opened a DRAFT PR. Continue on that PR; do not re-scaffold and do not re-fetch the page.',
       ],
     };

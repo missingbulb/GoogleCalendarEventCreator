@@ -85,8 +85,12 @@ triggers `test.yml` on the PR; one green run suffices.
 **Bail** (the page was not one usable event, or the postcondition failed): leave
 the case's `events` empty, make no source change, **close the draft PR**, comment
 a one-sentence diagnosis of what the page actually is on the request issue, and
-label it `extractor-blocked-needs-human` (removing `extractor-in-progress`). No
-PR, no merge.
+swap its `agent-running` label for `needs-human`. No PR, no merge.
+
+Either way the request keeps `extractor-request` — that marks what the issue *is*,
+for its whole life; `agent-running` / `needs-human` carry its state. On success
+leave `agent-running` in place: it is what stops the pipeline re-scaffolding the
+request while its PR is in review, and merging the PR closes the issue.
 
 ---
 
@@ -118,10 +122,10 @@ venue's zone — it neither supplies the `ctz` nor vetoes deriving one from the 
 
 ## Manual fallback
 
-When the pipeline hands an issue to a human (`extractor-blocked-needs-human`), or
-to add a source by hand: same shape — add `custom/<site>.js`, `npm run index`,
+When the pipeline hands an issue to a human (`needs-human`), or to add a source by
+hand: same shape — add `custom/<site>.js`, `npm run index`,
 register the host in `supportedDomains` (`extension/fallback-lists.json`), add a
-reviewed case (the [add-live-case](../../skills/add-live-case/SKILL.md) skill), and
+reviewed case (the [testing-guide](../../skills/testing-guide/SKILL.md) skill), and
 record the host as an extractor-support requirement leaf in
 `dev/requirements/requirements.md` §11 (see
 [`dev/requirements/README.md`](../../../../../../dev/requirements/README.md)).
