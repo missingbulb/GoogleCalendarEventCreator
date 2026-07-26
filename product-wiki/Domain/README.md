@@ -12,11 +12,13 @@ the knowledge that most directly drives extraction requirements.
 ## Machine-readable event formats (as of 2026-07-16)
 
 Ordered roughly by how useful they are to a rule-based extractor — highest-signal
-first. The project's stance (see the *Codebase gotchas* section of
-`.claudinite/local/packs/gcec/RULES.md` — the `dev/procedures/technicalGotchas.md`
-this page previously cited was superseded when that doc was folded into the gcec
-pack) is to **prefer machine-readable markup over brittle DOM scraping**, because
-it survives redesigns and single-page-app rendering.
+first. The project's stance (see the **architecture rules of the road** section of
+`.claudinite/local/packs/gcec/RULES.md`, where it reads "prefer extracting
+JSON-LD/`og:` (which apps still inject) over brittle DOM positions" — the
+`dev/procedures/technicalGotchas.md` this page previously cited was superseded
+when that doc was folded into the gcec pack) is to **prefer machine-readable
+markup over brittle DOM scraping**, because it survives redesigns and
+single-page-app rendering.
 
 - **schema.org `Event` as JSON-LD** — the highest-value target and the one Google
   actively rewards. Emitted as a standalone `<script type="application/ld+json">`
@@ -80,8 +82,15 @@ structural decision behind "one button per event":
 
 ## Timezone & recurrence semantics
 
-- **Timezone** is the trust-critical field: a wrong `ctz` is worse than none
-  (`derive-timezone.js`'s unanimity rule). The domain gives three shapes — an
+- **Timezone** is the trust-critical field: a wrong `ctz` is worse than none —
+  the unanimity rule, stated in the contract header of
+  `extension/event-extractors/helpers/derive-timezone.js` itself (not in the gcec
+  pack's RULES.md): a zone is returned **only when two independent page-declared
+  hints agree**, and `""` whenever anything disagrees. The four hint kinds that
+  file recognises are *stated* (an IANA zone in inline-script JSON), *offset* (the
+  event's own UTC offset — a trailing `Z` explicitly does **not** count, since
+  pages habitually serialize in UTC regardless of venue), *country*, and *locale*.
+  The domain gives three shapes — an
   **offset-bearing** instant (ISO-8601 `…+02:00`, or `.ics` `Z`/`TZID`), a
   **floating** time (no zone; "same wall-clock everywhere"), and **no time signal
   at all**. Only the first lets `ctz` be *derived* rather than guessed.
@@ -198,3 +207,12 @@ structural decision behind "one button per event":
   this page carried: `dev/procedures/technicalGotchas.md` no longer exists — its
   content moved into the gcec pack's `RULES.md` *Codebase gotchas* section — and
   `derive-timezone.js` lives at `extension/event-extractors/helpers/`.
+- **2026-07-26 (same pass, second half)** — verified the replacement citations
+  written earlier the same day and corrected two of them: the JSON-LD-over-DOM
+  stance lives in RULES.md's **architecture rules of the road**, not *Codebase
+  gotchas* (only the "supported host ≠ an event" rule is in *Codebase gotchas*),
+  and the `ctz` unanimity rule is **not in RULES.md at all** — its home is the
+  contract header of `extension/event-extractors/helpers/derive-timezone.js`.
+  Quoted that contract's actual terms (two independent hints must agree; a
+  trailing `Z` is not a hint) so the claim is checkable rather than a pointer to
+  the wrong section.

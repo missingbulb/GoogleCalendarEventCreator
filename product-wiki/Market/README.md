@@ -53,12 +53,18 @@ recur across the market:
 
 - **Single-event pages** — a venue, a talk, a concert; one clear event, often with
   `schema.org`/JSON-LD event markup (the highest-signal, most future-proof
-  extraction target — see the JSON-LD note in the *Codebase gotchas* section of
-  `.claudinite/local/packs/gcec/RULES.md`; the `technicalGotchas.md` this line
-  previously cited was superseded when that doc was folded into the gcec pack).
+  extraction target — see the JSON-LD note in the **architecture rules of the
+  road** section of `.claudinite/local/packs/gcec/RULES.md`; the
+  `technicalGotchas.md` this line previously cited was superseded when that doc
+  was folded into the gcec pack).
   Machine-readable markup is increasingly common because search engines reward it
   (Google's "Events" rich results), which is a structural tailwind for any
-  extension that prefers JSON-LD/`og:` over brittle DOM scraping.
+  extension that prefers JSON-LD/`og:` over brittle DOM scraping — but "common" is
+  a *page-wide* fact, not an event-specific one, and this line overstated it until
+  2026-07-26: JSON-LD reaches ~41% of pages and Microdata ~26%, while
+  `schema.org/Event` specifically is on fewer than ~1M domains. The tailwind is
+  real; it does not mean most event pages are structured. See
+  [`../Domain/`](../Domain/README.md)'s format ranking.
 - **Listing/series pages** — a calendar-of-events page with several entries; the
   extension already special-cases "one button per event" for this shape (see
   `product-requirements/README.md` requirement 4).
@@ -98,6 +104,8 @@ recur across the market:
 - [Calendar Applications Market Research Report 2034 (Dataintelo)](https://dataintelo.com/report/calendar-applications-market)
 - [ics2gcal — import .ics into Google Calendar (GitHub)](https://github.com/fmeum/ics2gcal)
 - [ICS to GCal — Chrome Web Store](https://chromewebstore.google.com/detail/ics-to-gcal/ljobcbehhifehkmamikmchekbbljopao)
+- [Structured data — 2024 Web Almanac (HTTP Archive)](https://almanac.httparchive.org/en/2024/structured-data) — the ~41% JSON-LD / ~26% Microdata page-wide figures
+- [Announcing the Schema.org usage statistics dataset (blog.schema.org, 2026)](https://blog.schema.org/2026/06/04/announcing-the-schema-org-usage-statistics-dataset/) — `schema.org/Event` on fewer than ~1M domains
 
 ## Growth log
 
@@ -112,3 +120,8 @@ recur across the market:
   *Codebase gotchas* section), and cross-linked the JSON-LD-prevalence open
   question to the answer Domain already recorded on 2026-07-17, leaving only the
   per-target-host split open here.
+- **2026-07-26 (same pass, second half)** — pointed the RULES.md citation at the
+  right section (**architecture rules of the road**, not *Codebase gotchas*), and
+  qualified the "machine-readable markup is increasingly common" claim, which was
+  true page-wide but overstated for *event* pages specifically — cited the ~41% /
+  ~26% / <1M-domains figures here rather than leaving them only in Domain.
