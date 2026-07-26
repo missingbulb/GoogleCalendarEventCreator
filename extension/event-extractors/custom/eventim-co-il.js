@@ -12,25 +12,25 @@
 // Where each field comes from:
 //   title       the page's <h1>
 //   start       datetime attribute of the first <time> element
-//   end/location  schema.org JSON-LD subEvent (MusicEvent) via embeddedEvents
+//   end/location  the generic base's read of the schema.org JSON-LD subEvent
+//               (MusicEvent), where the DOM's .venue-name isn't present
 //   description full text from .external-content .moretext-teaser (<br> → newlines)
 //   ctz         always "Asia/Jerusalem" — eventim.co.il is Israel-only
 (() => {
-  const { text, firstText, blockText, normalizeDateValue, merge, embeddedEvents } = GCal;
+  const { text, firstText, blockText, normalizeDateValue } = GCal;
 
   GCal.sources.push({
     name: "eventim-co-il",
     matches: (host) => /(^|\.)eventim\.co\.il$/.test(host),
     extract() {
       const timeEl = document.querySelector("time[datetime]");
-      const dom = {
+      return {
         title: text("h1"),
         start: timeEl ? normalizeDateValue(timeEl.getAttribute("datetime")) : "",
         location: firstText([".venue-name", ".event-venue"]),
         description: blockText(".external-content .moretext-teaser"),
         ctz: "Asia/Jerusalem",
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

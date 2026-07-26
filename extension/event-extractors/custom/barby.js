@@ -22,7 +22,7 @@
 //   ctz         fixed to Asia/Jerusalem (Barby is in Tel Aviv)
 //
 (() => {
-  const { text, blockText, merge, embeddedEvents } = GCal;
+  const { text, blockText } = GCal;
 
   // Parse "DD/MM/YYYY | שעת פתיחת דלתות: HH:MM" (Israeli day-first date).
   function parseBarbyDate(raw) {
@@ -38,14 +38,13 @@
     matches: (host) => /(^|\.)barby\.co\.il$/.test(host),
     extract() {
       const addr = text("#footer-addres");
-      const dom = {
+      return {
         title: text("h1.show-card-showname"),
         start: parseBarbyDate(text(".show-card-showdate h4")),
         location: addr ? `בארבי, ${addr}` : "בארבי, הנמל 1, נמל יפו",
         description: blockText(".show1-description"),
         ctz: "Asia/Jerusalem",
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

@@ -1,10 +1,17 @@
-// The extractor for UNSUPPORTED sites — pages whose host has no per-site source
-// (event-extractors/custom/<site>.js). It scrapes a best-effort event from the page;
-// the popup then shows it as a calendar button when it's complete enough (title
-// + location + start) and the host isn't denylisted, and otherwise/also uses it
-// to pre-fill the "request this source" form — see events-popup/popup.js's chooseContent.
-// assemble-events.js only calls it when no source matched. It is not a "layer"
-// that supported sources lean on: those are self-contained.
+// THE CORE GENERIC EXTRACTOR — the one extractor that runs on every page,
+// whatever its host. It scrapes a best-effort event from any page's own
+// self-description, and it is the BASE LAYER of the whole pipeline:
+//   - on a host with no per-site source, it is the only extractor, and the popup
+//     shows its event as a calendar button when it's complete enough (title +
+//     location + start) and the host isn't denylisted, otherwise/also using it to
+//     pre-fill the "request this source" form (events-popup/popup.js's chooseContent);
+//   - on a supported host, assemble-events.js runs it FIRST and merges the site's
+//     source over it, so a per-site extractor only has to state the fields this
+//     one gets wrong (event-extractors/custom/<site>.js);
+//   - on a host listed in core/generic-sites.js, it IS the site's support — those
+//     hosts are fully supported with no per-site extractor at all.
+// It is core, not one of the extractors under custom/: nothing here may know
+// about a specific site.
 //
 // extract() returns an array of the page's best-effort events (empty when the
 // page describes none), which assemble-events.js normalizes and presents. It
@@ -342,5 +349,5 @@
     return "";
   }
 
-  GCal.unsupportedSiteEvents = { extract };
+  GCal.genericExtractor = { extract };
 })();

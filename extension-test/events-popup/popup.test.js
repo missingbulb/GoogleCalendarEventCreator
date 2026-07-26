@@ -11,8 +11,8 @@
 // are decided (issue #192):
 //
 //   1  supported host                    -> events only
-//   1b supported host, dedicated source   -> the generic fallback's events +
-//      found nothing (#456)                  a "Suggest Correction" request link
+//   1b supported host, dedicated source   -> the generic base's events +
+//      contributed nothing (#456)            a "Suggest Correction" request link
 //   2  denylisted host                   -> "No events found" (no link, no prompt)
 //   3  not denylisted, nothing complete  -> "No events found" + Disagree? link
 //   4  complete event, allowlisted       -> events only (no support ask)
@@ -77,10 +77,10 @@ test("State 1 — supported host with no events: empty events, no extras", () =>
   assert.equal(view.policyLink, false);
 });
 
-// --- State 1b: supported host whose dedicated source found nothing (#456) ---
+// --- State 1b: supported host whose dedicated source contributed nothing (#456) ---
 // The orchestrator (assemble-events.js) sets `fallback: true` when a SUPPORTED
-// host's dedicated source returned no events and it therefore ran the generic
-// extractor. The popup shows the fallback's complete events WITH the "Suggest
+// host's dedicated source contributed nothing, leaving the events entirely to the
+// core generic base. The popup shows those complete events WITH the "Suggest
 // Correction" link (the dedicated source missed them — a correction is exactly
 // what we want), regardless of the host's allow/deny listing.
 

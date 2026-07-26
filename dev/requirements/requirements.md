@@ -181,8 +181,8 @@ found no events, the glyph stands **alone** — no link beneath it.
 <td valign="top">
 
 `3.1` **Suggest Correction** — shown in the unlisted-with-event state (state 5),
-and on a supported host where the dedicated source found nothing but the generic
-fallback did (state 1b — see §12). It sits on the **heading line,
+and on a supported host where the dedicated source contributed nothing but the
+core generic extractor found an event (state 1b — see §12). It sits on the **heading line,
 right-aligned** (the heading becomes a row: title on the left, link on the right,
 vertically centered). Clicking it opens the prefilled source-request issue (the
 issue form itself is out of scope — see §12).
@@ -1389,18 +1389,27 @@ an allowlisted host — the icon stays the manifest default, **blue**.
 
 ## 11. Required explicit support for Extractors
 
-Each host below has **explicit, dedicated extractor support** — a self-contained
-source under `extension/event-extractors/custom/` whose `matches(host)` claims the page,
-so the toolbar icon goes green and the popup extracts the event from that site's
-own markup (not the generic fallback). This section is the **executable
-catalogue** of that support: each leaf is one supported host, validated by a
+Each host below has **explicit support** — a registered source whose
+`matches(host)` claims the page, so the toolbar icon goes green and the popup
+presents the event as a supported site's own. Support comes in two forms, and a
+host is equally supported either way:
+
+- a **per-site source** under `extension/event-extractors/custom/`, stating the
+  fields the core generic extractor gets wrong for that site;
+- **the core generic extractor alone**, for a site whose pages describe
+  themselves completely — the host is listed in
+  `extension/event-extractors/core/generic-sites.js` and has no per-site file at
+  all.
+
+This section is the **executable catalogue** of that support: each leaf is one
+supported host, validated by a
 `kind: "extractor"` case (`dev/requirements/<kind>/cases/extractor-support.<id>.case.js`)
-that runs the real extractor against a **real cached page**
+that runs the real pipeline against a **real cached page**
 (`dev/requirements/extractor/data/server-fetched/<page>.html`) and asserts the host is recognized as
 supported and yields a complete event (title + location + start) —
-`dev/requirements/extractor/extractor-support.test.js`. Adding a new source
+`dev/requirements/extractor/extractor-support.test.js`. Adding a newly supported host
 (see `.claudinite/local/packs/gcec/tasks/create-extractor/task.md`) adds a row here. A bot-blocked host with no
-cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extractor
+cacheable page (e.g. `facebook.com`) is listed with a `tbd` case — its extraction
 is covered by unit tests only.
 
 <table>
@@ -1482,7 +1491,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Validated against [berry-sakharof](extractor/expected/bandsintown-berry-sakharof.json)._ <!-- req-gallery:11.6 -->
+🧩 _Validated against `bandsintown-berry-sakharof`._ <!-- req-gallery:11.6 -->
 
 </td>
 <td valign="top">
@@ -1512,7 +1521,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Validated against [dash-datadoghq](extractor/expected/dash-datadoghq.json)._ <!-- req-gallery:11.8 -->
+🧩 _Validated against `dash-datadoghq`._ <!-- req-gallery:11.8 -->
 
 </td>
 <td valign="top">
@@ -1664,7 +1673,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 
 ![Flowchart of the popup's five states](shared/popup-states-flowchart.png)
 
-- `12.4` **Supported host — the "Suggest Correction" label.** A supported host always shows its dedicated extractor's events (icon stays green); whether it *also* offers "Suggest Correction" depends on where the shown events came from:
+- `12.4` **Supported host — the "Suggest Correction" label.** A supported host always shows its events (icon stays green); whether it *also* offers "Suggest Correction" depends on whether the host's own extractor contributed them. A host supported by the core generic extractor alone (no per-site file) never shows the label — the generic extractor *is* its support, so nothing was missed:
 
 <table>
 <tr>
@@ -1675,7 +1684,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 </td>
 <td valign="top">
 
-`12.4.1` When the dedicated extractor returned the events, the "Suggest Correction" label is **not** shown — the dedicated source did its job.
+`12.4.1` When the host's own extractor contributed the events, the "Suggest Correction" label is **not** shown — the source did its job.
 
 </td>
 </tr>
@@ -1690,13 +1699,13 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 </td>
 <td valign="top">
 
-`12.4.2` When the dedicated extractor found nothing but the generic fallback did, the events are shown **with** the "Suggest Correction" label — the dedicated source missed them, so a correction is worth offering.
+`12.4.2` When a host's dedicated extractor contributed nothing and the events came from the core generic extractor alone, they are shown **with** the "Suggest Correction" label — the dedicated source missed them, so a correction is worth offering.
 
 </td>
 </tr>
 </table>
 
-- `12.6` **Fallback completeness.** A fallback (non-dedicated) event is shown only when it has all three of a title, a location, and a start; missing any one, the popup shows the empty "nothing found" state:
+- `12.6` **Fallback completeness.** A fallback event — one from the core generic extractor on a host whose own extractor didn't contribute — is shown only when it has all three of a title, a location, and a start; missing any one, the popup shows the empty "nothing found" state:
 
 <table>
 <tr>

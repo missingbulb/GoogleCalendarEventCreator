@@ -16,8 +16,8 @@
 #   postconditions.sh "<recovered value 1>" "<recovered value 2>" ...
 #
 # Checks (all deterministic):
-#   1. SCOPE — the diff touches ONLY the generic extractor and its allowed
-#      companions: extract-unsupported.js and the shared helpers/*.js (the generic
+#   1. SCOPE — the diff touches ONLY the core generic extractor and its allowed
+#      companions: core/generic.js and the shared helpers/*.js (the generic
 #      extractor), a covering test in extension-test/event-extractors/extraction.test.js,
 #      and the regenerated fallback-coverage GENERATED artifacts. A custom/<site>.js
 #      edit or a host special-case is out of scope — it isn't a GENERIC win. (This
@@ -55,7 +55,7 @@ git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=main
 git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=HEAD
 
 # ── 1. SCOPE ──
-allowed='^(extension/event-extractors/extract-unsupported\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/fallback/fallback-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
+allowed='^(extension/event-extractors/core/generic\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/fallback/fallback-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
 changed="$( { git diff --name-only "$ref"...HEAD 2>/dev/null; git diff --name-only HEAD 2>/dev/null; \
               git ls-files --others --exclude-standard; } | sort -u | sed '/^$/d' )"
 offenders="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"

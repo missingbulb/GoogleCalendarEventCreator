@@ -55,6 +55,85 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
   assert.equal(e.times[0].location, "Oregon Convention Center, Portland, OR");
 });
 
+// --- The two-layer model: core generic base + per-site overrides -------------
+// core/generic.js runs on every page and produces the base event; a per-site
+// source states only the fields it gets better, and they win field by field. A
+// host listed in core/generic-sites.js has no per-site file at all and is
+// supported by the base alone. See assemble-events.js.
+
+test("Site overrides win field by field over the generic base", () => {
+  // eventer.js states title/location/description/ctz; start and end are left to
+  // the base's read of the page's own JSON-LD, which the source never touches.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "JSON-LD Title",
+      "startDate": "2026-07-09T16:30:00.000Z", "endDate": "2026-07-09T20:30:00.000Z",
+      "location": { "@type": "Place", "name": "JSON-LD Venue" },
+      "description": "Truncated snippet…" }
+    </script>
+    <h1>לילה לא שקט</h1>
+    <div class="locationDescription"><div class="ng-binding">מוזיאון תל אביב לאמנות, תל אביב-יפו</div></div>
+    <div class="extendedInfo boxDetailsItem"><p></p><p>The full description the JSON-LD truncates.</p></div>`;
+
+  const e = firstEvent(html, "https://www.eventer.co.il/8lfff");
+  assert.equal(e.title, "לילה לא שקט"); // the source's <h1>, not the JSON-LD name
+  assert.equal(e.times[0].location, "מוזיאון תל אביב לאמנות, תל אביב-יפו");
+  assert.ok(e.description.includes("The full description"));
+  // Not stated by the source at all — supplied by the generic base underneath,
+  // localized to the ctz the source did state.
+  assert.equal(e.times[0].start, "2026-07-09T19:30:00");
+  assert.equal(e.times[0].end, "2026-07-09T23:30:00");
+  assert.equal(e.ctz, "Asia/Jerusalem");
+});
+
+test("A generic-sites host is fully supported with no per-site extractor", () => {
+  // stubhub.com has no custom/<site>.js: core/generic-sites.js registers the host
+  // and the core generic extractor reads the page's JSON-LD on its own. The host
+  // is supported like any other — and `fallback` stays false, because nothing was
+  // missed: the generic extractor IS this site's support.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "MusicEvent", "name": "Late Night Jazz",
+      "startDate": "2026-07-01T20:00:00-04:00",
+      "location": { "@type": "Place", "name": "Blue Note",
+                    "address": { "streetAddress": "131 W 3rd St", "addressLocality": "New York" } } }
+    </script>`;
+
+  const ev = extractFromHtml(html, "https://www.stubhub.com/event/154321/");
+  assert.equal(ev.supported, true);
+  assert.equal(ev.fallback, false);
+  assert.equal(ev.events.length, 1);
+  assert.equal(ev.events[0].title, "Late Night Jazz");
+  assert.equal(ev.events[0].times[0].location, "Blue Note, 131 W 3rd St, New York");
+});
+
+test("A source that enumerates the page's events replaces the base rather than overriding it", () => {
+  // ticketmaster.js returns its own `events` array (one per performance). The
+  // base reads the same page as one event; the source's list wins whole, with its
+  // page-level ctz/description filling each entry.
+  const html = `
+    <meta property="og:title" content="A Title The Base Would Use">
+    <h1 class="btx-title">רביד פלוטניק</h1>
+    <div class="event-location"><a class="venue-link">רדינג 3, תל אביב - יפו</a></div>
+    <div class="perf-date"><span>4 ביולי 2026</span><span>21:00</span></div>
+    <div class="performance-listing">
+      <div class="date-box"><span class="day">4</span><span class="month">יולי</span></div>
+      <div class="time">יום שבת • 21:00</div>
+    </div>
+    <div class="performance-listing">
+      <div class="date-box"><span class="day">5</span><span class="month">יולי</span></div>
+      <div class="time">יום ראשון • 20:00</div>
+    </div>`;
+
+  const ev = extractFromHtml(html, "https://www.ticketmaster.co.il/event/123/ALL/iw");
+  assert.equal(ev.events.length, 1); // the two performances group into one event
+  assert.equal(ev.events[0].title, "רביד פלוטניק"); // never og:title from the base
+  assert.deepEqual(
+    [...ev.events[0].times].map((t) => t.start),
+    ["2026-07-04T21:00:00", "2026-07-05T20:00:00"]
+  );
+});
+
 test("Facebook: title from <h1>, date parsed from visible text", () => {
   const html = `
     <title>Summer Rooftop Party | Facebook</title>

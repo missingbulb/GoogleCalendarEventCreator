@@ -18,14 +18,14 @@
 //   description summary + structuredContent.modules from __NEXT_DATA__; falls
 //               back to DOM selectors, then the JSON-LD short description
 //
-// Eventbrite embeds complete JSON-LD (including endDate), and its server-
-// rendered markup varies a lot between pages, so this reads the event the page
-// embeds about itself (via the shared GCal.embeddedEvents helper) and lets the
-// DOM selectors below override it where they match. That keeps the source
-// self-contained: it gathers every field itself — notably the end time, which
-// only the embedded data carries — without depending on a later merge.
+// Eventbrite embeds complete JSON-LD (including endDate), which the generic base
+// already reads, so this source only states what the DOM and __NEXT_DATA__ say
+// better: the event title, the exact start, the address block, the FULL
+// description (JSON-LD carries only a short one), the event's own timezone, and
+// the explicit duration. Anything a page's selectors don't match — notably the
+// end time — stays as the base read it.
 (() => {
-  const { firstText, normalizeDateValue, parseDateFromText, merge, embeddedEvents, clean, jsonScript } = GCal;
+  const { firstText, normalizeDateValue, parseDateFromText, clean, jsonScript } = GCal;
 
   GCal.sources.push({
     name: "eventbrite",
@@ -69,7 +69,7 @@
       }
 
       const durationSeconds = ctx && ctx.basicInfo && ctx.basicInfo.eventDurationSeconds;
-      const dom = {
+      return {
         title: firstText(["h1.event-title", "h1"]),
         start: timeEl
           ? normalizeDateValue(timeEl.getAttribute("datetime"))
@@ -79,9 +79,6 @@
         ctz: isValidTimezone(tz) ? tz : "",
         eventLengthInMinutes: durationSeconds ? Math.round(durationSeconds / 60) : null,
       };
-      // DOM values win where present; the page's embedded event fills the rest
-      // (end time, and location/description on pages whose selectors don't match).
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

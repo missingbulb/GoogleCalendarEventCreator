@@ -18,13 +18,14 @@
 //   location    venue name/info nodes, found by their data-testid attributes
 //   description the #event-details section
 //
-// Meetup also embeds JSON-LD, but its `description` there is only a ~155-char
-// truncated snippet (same as the og:description meta tag). The *full* event
-// description lives in one of the page's inline JSON state blobs, as a
+// Meetup also embeds JSON-LD, which the generic base reads (that's where the end
+// time comes from), but its `description` there is only a ~155-char truncated
+// snippet (same as the og:description meta tag). The *full* event description
+// lives in one of the page's inline JSON state blobs, as a
 // `"description":"<markdown>"` string under the event object. When the
 // #event-details DOM node isn't present (e.g. server-rendered/cached HTML),
 // we read that full string so the calendar gets the complete description
-// rather than the snippet the jsonld.js layer would otherwise supply.
+// rather than the snippet the base would otherwise supply.
 //
 // Meetup groups (and thus their events) can be based in any timezone. The
 // group's IANA timezone name is embedded as plaintext in one of the page's
@@ -34,7 +35,7 @@
 // (rather than the viewer's), so it's only used when it's a recognized IANA
 // name.
 (() => {
-  const { text, firstText, blockText, normalizeBlock, normalizeDateValue, scriptsText, findTimezone, merge, embeddedEvents } = GCal;
+  const { text, firstText, blockText, normalizeBlock, normalizeDateValue, scriptsText, findTimezone } = GCal;
 
   // The full event description, pulled from the inline JSON state. Meetup
   // embeds it (and several shorter snippets) as JSON-escaped
@@ -63,7 +64,7 @@
       const timeEl = document.querySelector(
         "#event-info time[datetime], main time[datetime], time[datetime]"
       );
-      const dom = {
+      return {
         title: text("h1"),
         start: timeEl ? normalizeDateValue(timeEl.getAttribute("datetime")) : "",
         location: firstText([
@@ -84,12 +85,6 @@
         })(),
         ctz: findTimezone(scriptsText(), /"timezone"\s*:\s*"([^"]+)"/),
       };
-      // Self-contained: Meetup's own DOM/inline-JSON fields win (notably the
-      // FULL description, where the page's embedded data only carries a
-      // truncated snippet); the page's embedded event fills the gaps it leaves —
-      // the end time, and the venue location on pages whose DOM venue nodes
-      // aren't present.
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

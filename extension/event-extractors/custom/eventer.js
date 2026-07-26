@@ -25,8 +25,8 @@
 //
 // Where each field comes from:
 //   title       the page's <h1>
-//   start/end   schema.org JSON-LD (startDate/endDate) via embeddedEvents — the
-//               page has no resolved <time> element
+//   start/end   the generic base's read of the schema.org JSON-LD
+//               (startDate/endDate) — the page has no resolved <time> element
 //   location    the resolved text node inside .locationDescription, rather than
 //               JSON-LD's flattened address (which would also restate the street/
 //               city already folded into the venue name)
@@ -34,19 +34,18 @@
 //               above) — JSON-LD's own description is only a 155-char snippet
 //   ctz         always "Asia/Jerusalem" — eventer.co.il is Israel-only
 (() => {
-  const { text, blockText, merge, embeddedEvents } = GCal;
+  const { text, blockText } = GCal;
 
   GCal.sources.push({
     name: "eventer",
     matches: (host) => /(^|\.)eventer\.co\.il$/.test(host),
     extract() {
-      const dom = {
+      return {
         title: text("h1"),
         location: text(".locationDescription div.ng-binding"),
         description: blockText(".extendedInfo.boxDetailsItem"),
         ctz: "Asia/Jerusalem",
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

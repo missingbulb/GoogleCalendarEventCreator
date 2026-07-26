@@ -179,7 +179,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   `og:locale`, or a non-English language; a bare `en` (region unknown) stays
   month-first rather than guess. Resolution lives in `helpers/dates.js`
   (`parseDateFromText` / `normalizeDateValue` take a `dayFirst` flag, threaded
-  from `extract-unsupported.js`'s `pageUsesDayFirstDates`), mirroring
+  from `core/generic.js`'s `pageUsesDayFirstDates`), mirroring
   `derive-timezone.js`'s locale read; unambiguous dates (a part > 12) and the
   `.` / `-` separators are always day-first regardless (#686).
 - **An unrecordable page is a dead end, not a failed run.** When a fetch can't
@@ -197,15 +197,20 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   baseline while the gate is red — a regression bundled with a case-set change can
   be re-anchored over. Detailed mechanics self-document in the gate's own headers
   (`dev/requirements/extractor/fallback/fallback-coverage.js` / `.test.js`).
-- **To see what the generic/unsupported extractor gets** on any cached page — even
-  a supported host — load the files, set `GCal.sources = []`, then call
-  `GCal.extract()`: the documented way to force the unsupported-host path through
-  the same norm/sort the popup uses. Most start/end *differences* vs a dedicated
-  source are just its hardcoded `ctz` localizing to floating time (same instant),
-  not extraction bugs; the real gaps are fields it can't know generically
-  (durations, site-specific descriptions, and — where the page doesn't declare
-  corroborating hints, see `helpers/derive-timezone.js` — `ctz`). This is the
-  comparison the fallback-coverage gate automates.
+- **To see what the core generic extractor gets ON ITS OWN** on any cached page —
+  even a supported host — load the files, set `GCal.sources = []`, then call
+  `GCal.extract()`: the documented way to strip every per-site override and see
+  the bare base through the same norm/sort the popup uses. (`GCal.extract()`
+  alone no longer answers this: the generic extractor is the base layer of every
+  extraction now, so on a supported host its output already carries the site's
+  overrides.) Most start/end *differences* vs a dedicated source are just its
+  hardcoded `ctz` localizing to floating time (same instant), not extraction
+  bugs; the real gaps are fields it can't know generically (durations,
+  site-specific descriptions, and — where the page doesn't declare corroborating
+  hints, see `helpers/derive-timezone.js` — `ctz`). This is the comparison the
+  fallback-coverage gate automates — and a case where it shows NO gap is a
+  candidate for deleting the per-site source and listing the host in
+  `core/generic-sites.js`.
 
 ## Architecture rules of the road
 
@@ -213,10 +218,23 @@ Whenever we agree on a new or changed top-level architectural guideline, update
 this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
+- **The core generic extractor is the base layer of every extraction**
+  (`extension/event-extractors/core/generic.js`) — it runs on every page, and a
+  per-site source is only a layer of *overrides* merged over it, stating the
+  fields it gets better. A source never re-reads what the page already says about
+  itself, and nothing in `core/` may know about a specific site.
+- **A site we fully support gets no extractor file when there is nothing to
+  override.** Its host goes in `core/generic-sites.js` (a `matches`-only
+  registration) and stays fully supported — green icon, no correction prompt.
+  When a `custom/<site>.js` shrinks to nothing, delete it and move the host
+  there; when a generic-site starts needing a fix the generic extractor can't
+  make site-agnostically, move it back. Never keep a file whose only content is
+  a restatement of the generic base, and never annotate one as "nothing to add".
 - Adding support for a new host is the most common change — the architecture
-  must keep it a single, self-contained new file
-  (`extension/event-extractors/custom/<site>.js`) plus regenerating the load
-  list, touching nothing else and assuming nothing about other extractors.
+  must keep it a single-file change: a host added to `core/generic-sites.js`,
+  or one self-contained new `extension/event-extractors/custom/<site>.js`, plus
+  regenerating the load list — touching nothing else and assuming nothing about
+  other extractors.
 
 ## Capture policy — lessons land in the local packs
 

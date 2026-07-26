@@ -19,10 +19,10 @@
 //               block (`.BenefitInstructions`, with its own heading)
 //   ctz         always "Asia/Jerusalem" — a Tel Aviv municipality listing
 //
-// A one-off event page (no `.childOut` cards) falls back to the page's own
-// schema.org JSON-LD for a single start/end/location.
+// A one-off event page (no `.childOut` cards) leaves the single start/end/
+// location to the generic base's read of the page's own schema.org JSON-LD.
 (() => {
-  const { clean, text, blockText, merge, embeddedEvents } = GCal;
+  const { clean, text, blockText } = GCal;
 
   // "5.7.26<br> יום ראשון, 19:00" (the <br> renders as a newline via blockText)
   // -> "2026-07-05T19:00:00".
@@ -85,8 +85,7 @@
       if (events.length) {
         return { events, description: description(), ctz: "Asia/Jerusalem" };
       }
-      const dom = { title: text("h1"), description: description(), ctz: "Asia/Jerusalem" };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
+      return { title: text("h1"), description: description(), ctz: "Asia/Jerusalem" };
     },
   });
 })();

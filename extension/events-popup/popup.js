@@ -251,14 +251,16 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 // link. The five states, in the order they're decided (specified in
 // dev/requirements/requirements.md §12–§16; diagram in dev/requirements/shared/popup-states-flowchart.png):
 //
-//   State 1 — supported host (a per-site source matched): show its events.
+//   State 1 — supported host (a registered source matched): show its events.
 //     `supported` is the same GCal.isSupportedHost check that colors the toolbar
-//     icon, so the popup's supported/unsupported split and the icon agree.
-//   State 1b — supported host whose per-site source found NOTHING, so the
-//     orchestrator ran the generic fallback (`data.fallback`): show the
-//     fallback's complete events AND a "Suggest Correction" link, since the
+//     icon, so the popup's supported/unsupported split and the icon agree. This
+//     covers a host served by the core generic extractor alone as much as one
+//     with a per-site source — both are support, and neither is a `fallback`.
+//   State 1b — supported host whose PER-SITE source contributed NOTHING, so what
+//     the orchestrator assembled is the generic base alone (`data.fallback`):
+//     show those complete events AND a "Suggest Correction" link, since the
 //     dedicated source missed them (#456). Decided before the denylist, like
-//     State 1. Falls through to the bare empty state if the fallback found
+//     State 1. Falls through to the bare empty state if the base found
 //     nothing complete either.
 //   State 2 — denylisted host: "No events found", and NO prompt — we've
 //     explicitly decided not to extract there, so we don't surface a fallback
@@ -273,14 +275,15 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 export function chooseContent(data, listing = "none") {
   const all = data && data.events && data.events.length ? [...data.events] : [];
 
-  // State 1 — a supported host whose dedicated source produced its own events:
-  // show them. It's self-contained, so no request button and no policy link.
+  // State 1 — a supported host whose support did its job (a per-site source
+  // recognized the page, or the core generic extractor is this host's support by
+  // design): show the events, with no request button and no policy link.
   if (data && data.supported && !data.fallback) {
     return { events: all, request: null, policyLink: false };
   }
 
-  // State 1b — a supported host whose dedicated source found NOTHING, so the
-  // orchestrator fell back to the generic extractor (data.fallback). Show its
+  // State 1b — a supported host whose dedicated source contributed NOTHING, so
+  // what we have is the generic base alone (data.fallback). Show its
   // complete events AND offer the "Suggest Correction" link: the dedicated source
   // missed them, so a correction is exactly what we want (regardless of the
   // host's allow/deny listing — a supported host's miss is always worth

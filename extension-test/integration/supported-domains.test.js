@@ -1,15 +1,21 @@
 // Drift guard: config.js's supportedDomains (fallback-lists.json) — the
 // static list the auto-extractor triage uses to skip a request for a host we
-// already cover — must stay in sync with the actual per-site sources. The
+// already cover — must stay in sync with the actual registered sources. The
 // runtime never relies on this list (it derives "supported" straight from the
 // sources via GCal.isSupportedHost); the list exists only so the triage can
 // decide without loading the pipeline. This test stops the two from disagreeing.
 //
-// Each source's matches() is a regex, not a domain literal, so we can't read the
-// domain out of it — instead we LOAD the real sources (DOM-free, pure Node vm,
-// the same way extension-test/integration/extension-loads.test.js boots them: only
-// matches() runs here, and that's a pure host check) and run the matchers
-// against the list, both directions:
+// "Registered sources" is BOTH kinds: the per-site extractors under custom/, and
+// the hosts core/generic-sites.js registers as fully served by the core generic
+// extractor alone (a matcher with no extract()). Both make a host supported, so
+// both must be mirrored in supportedDomains — and moving a host between them
+// must not disturb the list.
+//
+// Each source's matches() is a regex or closure, not a domain literal, so we
+// can't read the domain out of it — instead we LOAD the real sources (DOM-free,
+// pure Node vm, the same way extension-test/integration/extension-loads.test.js boots
+// them: only matches() runs here, and that's a pure host check) and run the
+// matchers against the list, both directions:
 //   - every listed domain is matched by some source  (no stale/orphan entries);
 //   - every source matches some listed domain         (no source left off).
 // So a new source added without a supportedDomains entry, or an entry left
@@ -25,7 +31,8 @@ const vm = require("node:vm");
 const ROOT = path.join(__dirname, "..", "..");
 const EXT = path.join(ROOT, "extension"); // the extension root; pipeline paths are relative to it
 
-// Load event-extractors/registry.js + every event-extractors/custom/*.js into a bare sandbox.
+// Load event-extractors/registry.js + every event-extractors/custom/*.js + the
+// generic-site registrations into a bare sandbox.
 // No DOM is stubbed: a source's extract() touches document, but only its
 // matches() runs here, and that's a pure host regex. registry.js sets
 // globalThis.GCal (the context's global), each source pushes its matcher onto
@@ -40,6 +47,7 @@ function loadSources() {
     .filter((f) => f.endsWith(".js"))
     .sort();
   for (const f of sources) run(`event-extractors/custom/${f}`);
+  run("event-extractors/core/generic-sites.js");
   return sandbox.GCal;
 }
 
@@ -60,7 +68,8 @@ test("every supportedDomains entry is matched by a real source (no orphans)", ()
     assert.ok(
       GCal.sources.some((s) => s.matches(domain)),
       `supportedDomains lists "${domain}", but no source's matches() accepts it — ` +
-        `remove the stale entry from extension/fallback-lists.json or fix the host`
+        `remove the stale entry from extension/fallback-lists.json, add the host to ` +
+        `event-extractors/core/generic-sites.js, or fix the host`
     );
   }
 });

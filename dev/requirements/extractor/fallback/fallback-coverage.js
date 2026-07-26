@@ -1,16 +1,21 @@
-// Fallback-vs-custom extraction coverage: measures what the GENERIC fallback
-// extractor (event-extractors/extract-unsupported.js) recovers on each integration-test
-// page, relative to that page's dedicated per-site source (the ground truth).
+// Bare-generic-vs-custom extraction coverage: measures what the CORE GENERIC
+// extractor (event-extractors/core/generic.js) recovers ON ITS OWN for each
+// integration-test page, relative to the reviewed-correct extraction for that page.
 //
 // For every dev/requirements/extractor/expected/*.json page we run GCal.extract() twice
 // against the same cached HTML (dev/requirements/extractor/data/server-fetched/<name>.html):
-//   - custom:   the normal pipeline, with the matching site source registered.
-//               This is the reviewed-correct extraction (dev/requirements/extractor/
-//               live.test.js pins it to the case's `expected`).
-//   - fallback: the SAME pipeline with GCal.sources emptied, which forces the
-//               unsupported-host path (assemble-events.js -> fallbackEvents),
-//               exactly as the gcec pack’s RULES.md describes for inspecting the
-//               generic extractor on a supported page.
+//   - custom:   the normal pipeline — the generic base with the matching site
+//               source's overrides merged over it. This is the reviewed-correct
+//               extraction (dev/requirements/extractor/live.test.js pins it to
+//               the case's `expected`).
+//   - fallback: the SAME pipeline with GCal.sources emptied, which strips every
+//               per-site override and leaves the bare generic base, exactly as
+//               the gcec pack’s RULES.md describes for inspecting the generic
+//               extractor on a supported page.
+//
+// The gap between the two IS the per-site sources' remaining value: a page where
+// it closes to zero is a candidate for deleting that source and listing its host
+// in event-extractors/core/generic-sites.js.
 //
 // We then grade, field by field, how close the fallback's PRIMARY event
 // (events[0] after the pipeline's own chronological sort) comes to the custom
@@ -364,14 +369,17 @@ function renderMarkdown(cov, watermark) {
   );
   L.push("");
   L.push(
-    "What the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`) " +
-      "recovers on each integration-test page, compared to that page's **dedicated " +
-      "per-site source** — the reviewed-correct extraction the live test pins down. " +
+    "What the core generic extractor (`extension/event-extractors/core/generic.js`) recovers " +
+      "**on its own** for each integration-test page, compared to the full pipeline — that " +
+      "generic base with the page's **per-site overrides** merged over it, the " +
+      "reviewed-correct extraction the live test pins down. " +
       "For every `dev/requirements/extractor/expected/*.json` page, `GCal.extract()` is run twice " +
       "on the same cached HTML: once normally (custom) and once with the site " +
-      "registry emptied (fallback). We grade the fallback's **primary event** " +
+      "registry emptied (fallback), which strips every override. We grade the fallback's **primary event** " +
       "(`events[0]` after the chronological sort) field-by-field against the custom " +
-      "primary event, counting a field only when the custom event filled it."
+      "primary event, counting a field only when the custom event filled it. A page " +
+      "where the gap closes to zero is a candidate for deleting its per-site source " +
+      "and listing the host in `core/generic-sites.js`."
   );
   L.push("");
   L.push(
