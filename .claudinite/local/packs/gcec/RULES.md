@@ -155,10 +155,10 @@ on that pipeline). Adding a cached live case is the
   ScraperAPI's residential proxy (`render=true`, so a single-page app records
   post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the
   portable rule maintained in the canon; here the escape hatch is the
-  `SCRAPER_API_KEY` **GitHub Actions secret**, which reaches a worker because its
-  task declares `agent_preprocessing_secrets: ['SCRAPER_API_KEY']` and reaches
-  nothing else — never a local fetch (this sandbox is bot-blocked), and never an
-  agent session (which holds no repo secrets). **Never re-introduce a workflow
+  `SCRAPER_API_KEY` **GitHub Actions secret**, which the scheduler unpacks into a
+  preprocessing worker's env — never a local fetch (this sandbox is bot-blocked),
+  and never an agent session (which holds no repo secrets). Both tasks name it in
+  `required_secrets`, which is how the owner gets asked to configure it. **Never re-introduce a workflow
   whose only job is to hold that secret for an agent**: `fetch-page.yml` was
   exactly that, and the dispatch/poll/pull round-trip it forced on the agent is
   what preprocessing removed. ScraperAPI is the whole fetching surface — swap the

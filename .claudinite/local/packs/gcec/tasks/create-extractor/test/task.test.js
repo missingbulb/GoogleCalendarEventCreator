@@ -58,7 +58,7 @@ test("the declaration carries the full contract, including the secret preprocess
   assert.deepEqual(task.precondition_signals, ["issues"]);
   assert.equal(task.expected_outcome, "open-pr");   // a human always reviews the extraction
   assert.equal(task.agent_preprocessing, "node prepare.mjs");
-  assert.deepEqual(task.agent_preprocessing_secrets, ["SCRAPER_API_KEY"]);
+  assert.deepEqual(task.required_secrets, ["SCRAPER_API_KEY"]);
   assert.ok(task.agent_preprocessing_timeout > 0 && task.agent_execution_timeout > 0);
 });
 

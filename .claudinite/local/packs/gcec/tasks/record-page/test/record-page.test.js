@@ -34,7 +34,7 @@ test("the declaration is agentless and declares the secret its worker spends", a
   const t = await task();
   assert.equal(t.agent_model, "none");
   assert.equal(t.agent_preprocessing, "node worker.mjs");
-  assert.deepEqual(t.agent_preprocessing_secrets, ["SCRAPER_API_KEY"]);
+  assert.deepEqual(t.required_secrets, ["SCRAPER_API_KEY"]);
 });
 
 test("pendingCases: a .url with no .html is pending; one already recorded is not", async () => {

@@ -7,10 +7,10 @@
 // ScraperAPI underperforms, and both tasks follow.
 //
 // Only usable from a task's `agent_preprocessing` worker: it needs
-// SCRAPER_API_KEY, which reaches a worker through the task's declared
-// `agent_preprocessing_secrets` and reaches nothing else (an executor session
-// holds no repo secrets). This sandbox is bot-blocked, so a direct fetch from a
-// session would fail even with a key.
+// SCRAPER_API_KEY, and the scheduler unpacks the repo's Actions secrets into a
+// worker's env — an executor session holds none. Both tasks name it in their
+// `required_secrets` so the owner is asked to configure it. This sandbox is
+// bot-blocked, so a direct fetch from a session would fail even with a key.
 
 import { mkdirSync, writeFileSync, statSync } from 'node:fs';
 import { dirname } from 'node:path';

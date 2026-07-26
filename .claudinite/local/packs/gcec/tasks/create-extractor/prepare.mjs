@@ -14,12 +14,12 @@
 //      deny/allow/duplicate with its canned message — no agent, no branch;
 //   3. for the first request that genuinely needs an extractor: claim it, branch,
 //      scaffold, prove the offline baseline green, and commit;
-//   4. RECORD THE PAGE through ScraperAPI directly. This is why the task declares
-//      `agent_preprocessing_secrets: ['SCRAPER_API_KEY']`: preprocessing runs
-//      inside Actions, where that secret already lives. The `fetch-page.yml`
-//      workflow existed solely to hold it for an agent that couldn't — dispatch,
-//      poll, pull. Deleted; this is three lines of curl in the same process that
-//      needs the bytes;
+//   4. RECORD THE PAGE through ScraperAPI directly. Preprocessing runs inside
+//      Actions, where SCRAPER_API_KEY already lives (the task names it in
+//      `required_secrets` so adoption asks the owner to configure it). The
+//      `fetch-page.yml` workflow existed solely to hold that secret for an agent
+//      that couldn't — dispatch, poll, pull. Deleted; this is one fetch in the
+//      same process that needs the bytes;
 //   5. push, open the DRAFT PR the agent continues on, and request the agent
 //      (CLAUDINITE_REQUEST_AGENT).
 //
@@ -229,9 +229,9 @@ export async function main() {
   TOKEN = process.env.GITHUB_TOKEN;
   const base = process.env.CLAUDINITE_DEFAULT_BRANCH || 'main';
   const requestFile = process.env.CLAUDINITE_REQUEST_AGENT;
-  // Declared in task.mjs as agent_preprocessing_secrets, so the scheduler already
-  // failed the task with a named reason if the repo has not configured it. This
-  // guard is for a hand run.
+  // Named in task.mjs's `required_secrets`, so the owner has been asked to
+  // configure it (bootstrap at adoption, a standing issue from the scheduler
+  // otherwise). Nothing gates on that ask, so check it here and say so plainly.
   const scraperKey = process.env.SCRAPER_API_KEY;
   if (!REPO || !TOKEN) throw new Error('no CLAUDINITE_REPO/GITHUB_TOKEN — not in an Actions context');
   if (!scraperKey) throw new Error('SCRAPER_API_KEY is not set');

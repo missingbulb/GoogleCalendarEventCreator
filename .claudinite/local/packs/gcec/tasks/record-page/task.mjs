@@ -20,7 +20,7 @@ export default {
   agent_instructions: 'worker.mjs',      // vestigial for a none task; the real work is the preprocessing command below
   agent_preprocessing: 'node worker.mjs',
   agent_preprocessing_timeout: 900,       // several rendered ScraperAPI fetches, worst case
-  agent_preprocessing_secrets: ['SCRAPER_API_KEY'],
+  required_secrets: ['SCRAPER_API_KEY'],
 
   // Fire when a default-branch commit touched the cached-page directory — the only
   // way a `.url` gains or changes an entry needing a record. Cheap and exact: the
