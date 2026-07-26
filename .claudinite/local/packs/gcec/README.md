@@ -26,7 +26,7 @@ fingerprinted or seeded.
 | test:offline list matches tree | **hardcoded** (`test-offline-list-sync`) |
 | Squash merges, `(#N)` | prose (+ canon squash checks) |
 | Generated files: regen, never hand-merge | prose (+ each artifact's own gate) |
-| Branch start: merge main + regen | prose |
+| Branch sync: rebase main + regen | prose |
 | Gallery regenerated → link in chat | prose |
 | Snapshot moves need owner approval | skill (snapshot-approval) |
 | bump version = full release | prose (owner command) |

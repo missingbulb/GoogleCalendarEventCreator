@@ -37,12 +37,6 @@ all. Open the PR early for those.
   proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
   there's no API token in the env, and `gh` reaches no `api.github.com` — only
   an MCP poll sees check state; a background bash/Monitor loop cannot.
-- **Poll `get_check_runs`, never `get_status`.** `pull_request_read`'s
-  `get_status` reads the legacy commit-status API, which nothing in this repo
-  writes — it returns `state: "pending"`, `total_count: 0` forever, including
-  long after every check run has finished green. Trusting it means waiting on a
-  transition that never comes. CI here is GitHub Actions **check runs**, so
-  `get_check_runs` is the only reading of "is CI green" that is ever true.
 - **Poll on a short back-off, never one long sleep, never tight.** Loop
   **MCP poll → background sleep → MCP poll** until the check leaves
   `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating — a
