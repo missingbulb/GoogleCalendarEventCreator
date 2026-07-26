@@ -9,6 +9,7 @@
   "event-extractors/helpers/timezone-names.js",
   "event-extractors/helpers/timezones.js",
   "event-extractors/custom/barby.js",
+  "event-extractors/custom/comy.js",
   "event-extractors/custom/edinburghfringe.js",
   "event-extractors/custom/eventbrite.js",
   "event-extractors/custom/eventer.js",

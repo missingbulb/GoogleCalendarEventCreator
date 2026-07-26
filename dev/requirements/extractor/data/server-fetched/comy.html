@@ -1,0 +1,1233 @@
+<!DOCTYPE html><html lang="he" dir="rtl"><head><style>:root{--litepicker-container-months-color-bg: #fff;--litepicker-container-months-box-shadow-color: #ddd;--litepicker-footer-color-bg: #fafafa;--litepicker-footer-box-shadow-color: #ddd;--litepicker-tooltip-color-bg: #fff;--litepicker-month-header-color: #333;--litepicker-button-prev-month-color: #9e9e9e;--litepicker-button-next-month-color: #9e9e9e;--litepicker-button-prev-month-color-hover: #2196f3;--litepicker-button-next-month-color-hover: #2196f3;--litepicker-month-width: calc(var(--litepicker-day-width) * 7);--litepicker-month-weekday-color: #9e9e9e;--litepicker-month-week-number-color: #9e9e9e;--litepicker-day-width: 38px;--litepicker-day-color: #333;--litepicker-day-color-hover: #2196f3;--litepicker-is-today-color: #f44336;--litepicker-is-in-range-color: #bbdefb;--litepicker-is-locked-color: #9e9e9e;--litepicker-is-start-color: #fff;--litepicker-is-start-color-bg: #2196f3;--litepicker-is-end-color: #fff;--litepicker-is-end-color-bg: #2196f3;--litepicker-button-cancel-color: #fff;--litepicker-button-cancel-color-bg: #9e9e9e;--litepicker-button-apply-color: #fff;--litepicker-button-apply-color-bg: #2196f3;--litepicker-button-reset-color: #909090;--litepicker-button-reset-color-hover: #2196f3;--litepicker-highlighted-day-color: #333;--litepicker-highlighted-day-color-bg: #ffeb3b}.show-week-numbers{--litepicker-month-width: calc(var(--litepicker-day-width) * 8)}.litepicker{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;font-size:0.8em;display:none}.litepicker button{border:none;background:none}.litepicker .container__main{display:-webkit-box;display:-ms-flexbox;display:flex}.litepicker .container__months{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;background-color:var(--litepicker-container-months-color-bg);border-radius:5px;-webkit-box-shadow:0 0 5px var(--litepicker-container-months-box-shadow-color);box-shadow:0 0 5px var(--litepicker-container-months-box-shadow-color);width:calc(var(--litepicker-month-width) + 10px);-webkit-box-sizing:content-box;box-sizing:content-box}.litepicker .container__months.columns-2{width:calc((var(--litepicker-month-width) * 2) + 20px)}.litepicker .container__months.columns-3{width:calc((var(--litepicker-month-width) * 3) + 30px)}.litepicker .container__months.columns-4{width:calc((var(--litepicker-month-width) * 4) + 40px)}.litepicker .container__months.split-view .month-item-header .button-previous-month,.litepicker .container__months.split-view .month-item-header .button-next-month{visibility:visible}.litepicker .container__months .month-item{padding:5px;width:var(--litepicker-month-width);-webkit-box-sizing:content-box;box-sizing:content-box}.litepicker .container__months .month-item-header{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-ms-flex-pack:justify;justify-content:space-between;font-weight:500;padding:10px 5px;text-align:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;color:var(--litepicker-month-header-color)}.litepicker .container__months .month-item-header div{-webkit-box-flex:1;-ms-flex:1;flex:1}.litepicker .container__months .month-item-header div>.month-item-name{margin-right:5px}.litepicker .container__months .month-item-header div>.month-item-year{padding:0}.litepicker .container__months .month-item-header .reset-button{color:var(--litepicker-button-reset-color)}.litepicker .container__months .month-item-header .reset-button>svg{fill:var(--litepicker-button-reset-color)}.litepicker .container__months .month-item-header .reset-button *{pointer-events:none}.litepicker .container__months .month-item-header .reset-button:hover{color:var(--litepicker-button-reset-color-hover)}.litepicker .container__months .month-item-header .reset-button:hover>svg{fill:var(--litepicker-button-reset-color-hover)}.litepicker .container__months .month-item-header .button-previous-month,.litepicker .container__months .month-item-header .button-next-month{visibility:hidden;text-decoration:none;padding:3px 5px;border-radius:3px;-webkit-transition:color 0.3s, border 0.3s;transition:color 0.3s, border 0.3s;cursor:default}.litepicker .container__months .month-item-header .button-previous-month *,.litepicker .container__months .month-item-header .button-next-month *{pointer-events:none}.litepicker .container__months .month-item-header .button-previous-month{color:var(--litepicker-button-prev-month-color)}.litepicker .container__months .month-item-header .button-previous-month>svg,.litepicker .container__months .month-item-header .button-previous-month>img{fill:var(--litepicker-button-prev-month-color)}.litepicker .container__months .month-item-header .button-previous-month:hover{color:var(--litepicker-button-prev-month-color-hover)}.litepicker .container__months .month-item-header .button-previous-month:hover>svg{fill:var(--litepicker-button-prev-month-color-hover)}.litepicker .container__months .month-item-header .button-next-month{color:var(--litepicker-button-next-month-color)}.litepicker .container__months .month-item-header .button-next-month>svg,.litepicker .container__months .month-item-header .button-next-month>img{fill:var(--litepicker-button-next-month-color)}.litepicker .container__months .month-item-header .button-next-month:hover{color:var(--litepicker-button-next-month-color-hover)}.litepicker .container__months .month-item-header .button-next-month:hover>svg{fill:var(--litepicker-button-next-month-color-hover)}.litepicker .container__months .month-item-weekdays-row{display:-webkit-box;display:-ms-flexbox;display:flex;justify-self:center;-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;color:var(--litepicker-month-weekday-color)}.litepicker .container__months .month-item-weekdays-row>div{padding:5px 0;font-size:85%;-webkit-box-flex:1;-ms-flex:1;flex:1;width:var(--litepicker-day-width);text-align:center}.litepicker .container__months .month-item:first-child .button-previous-month{visibility:visible}.litepicker .container__months .month-item:last-child .button-next-month{visibility:visible}.litepicker .container__months .month-item.no-previous-month .button-previous-month{visibility:hidden}.litepicker .container__months .month-item.no-next-month .button-next-month{visibility:hidden}.litepicker .container__days{display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap;justify-self:center;-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box}.litepicker .container__days>div,.litepicker .container__days>a{padding:5px 0;width:var(--litepicker-day-width)}.litepicker .container__days .day-item{color:var(--litepicker-day-color);text-align:center;text-decoration:none;border-radius:3px;-webkit-transition:color 0.3s, border 0.3s;transition:color 0.3s, border 0.3s;cursor:default}.litepicker .container__days .day-item:hover{color:var(--litepicker-day-color-hover);-webkit-box-shadow:inset 0 0 0 1px var(--litepicker-day-color-hover);box-shadow:inset 0 0 0 1px var(--litepicker-day-color-hover)}.litepicker .container__days .day-item.is-today{color:var(--litepicker-is-today-color)}.litepicker .container__days .day-item.is-locked{color:var(--litepicker-is-locked-color)}.litepicker .container__days .day-item.is-locked:hover{color:var(--litepicker-is-locked-color);-webkit-box-shadow:none;box-shadow:none;cursor:default}.litepicker .container__days .day-item.is-in-range{background-color:var(--litepicker-is-in-range-color);border-radius:0}.litepicker .container__days .day-item.is-start-date{color:var(--litepicker-is-start-color);background-color:var(--litepicker-is-start-color-bg);border-top-left-radius:5px;border-bottom-left-radius:5px;border-top-right-radius:0;border-bottom-right-radius:0}.litepicker .container__days .day-item.is-start-date.is-flipped{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:5px;border-bottom-right-radius:5px}.litepicker .container__days .day-item.is-end-date{color:var(--litepicker-is-end-color);background-color:var(--litepicker-is-end-color-bg);border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:5px;border-bottom-right-radius:5px}.litepicker .container__days .day-item.is-end-date.is-flipped{border-top-left-radius:5px;border-bottom-left-radius:5px;border-top-right-radius:0;border-bottom-right-radius:0}.litepicker .container__days .day-item.is-start-date.is-end-date{border-top-left-radius:5px;border-bottom-left-radius:5px;border-top-right-radius:5px;border-bottom-right-radius:5px}.litepicker .container__days .day-item.is-highlighted{color:var(--litepicker-highlighted-day-color);background-color:var(--litepicker-highlighted-day-color-bg)}.litepicker .container__days .week-number{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;color:var(--litepicker-month-week-number-color);font-size:85%}.litepicker .container__footer{text-align:right;padding:10px 5px;margin:0 5px;background-color:var(--litepicker-footer-color-bg);-webkit-box-shadow:inset 0px 3px 3px 0px var(--litepicker-footer-box-shadow-color);box-shadow:inset 0px 3px 3px 0px var(--litepicker-footer-box-shadow-color);border-bottom-left-radius:5px;border-bottom-right-radius:5px}.litepicker .container__footer .preview-date-range{margin-right:10px;font-size:90%}.litepicker .container__footer .button-cancel{background-color:var(--litepicker-button-cancel-color-bg);color:var(--litepicker-button-cancel-color);border:0;padding:3px 7px 4px;border-radius:3px}.litepicker .container__footer .button-cancel *{pointer-events:none}.litepicker .container__footer .button-apply{background-color:var(--litepicker-button-apply-color-bg);color:var(--litepicker-button-apply-color);border:0;padding:3px 7px 4px;border-radius:3px;margin-left:10px;margin-right:10px}.litepicker .container__footer .button-apply:disabled{opacity:0.7}.litepicker .container__footer .button-apply *{pointer-events:none}.litepicker .container__tooltip{position:absolute;margin-top:-4px;padding:4px 8px;border-radius:4px;background-color:var(--litepicker-tooltip-color-bg);-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.25);box-shadow:0 1px 3px rgba(0,0,0,0.25);white-space:nowrap;font-size:11px;pointer-events:none;visibility:hidden}.litepicker .container__tooltip:before{position:absolute;bottom:-5px;left:calc(50% - 5px);border-top:5px solid rgba(0,0,0,0.12);border-right:5px solid transparent;border-left:5px solid transparent;content:""}.litepicker .container__tooltip:after{position:absolute;bottom:-4px;left:calc(50% - 4px);border-top:4px solid var(--litepicker-tooltip-color-bg);border-right:4px solid transparent;border-left:4px solid transparent;content:""}
+</style><style>:root {
+  --litepicker-mobilefriendly-backdrop-color-bg: #000;
+}
+
+.litepicker-backdrop {
+  display: none;
+  background-color: var(--litepicker-mobilefriendly-backdrop-color-bg);
+  opacity: 0.3;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.litepicker-open {
+  overflow: hidden;
+}
+
+.litepicker.mobilefriendly[data-plugins*="mobilefriendly"] {
+  transform: translate(-50%, -50%);
+  font-size: 1.1rem;
+  --litepicker-container-months-box-shadow-color: #616161;
+}
+.litepicker.mobilefriendly-portrait {
+  --litepicker-day-width: 13.5vw;
+  --litepicker-month-width: calc(var(--litepicker-day-width) * 7);
+}
+.litepicker.mobilefriendly-landscape {
+  --litepicker-day-width: 5.5vw;
+  --litepicker-month-width: calc(var(--litepicker-day-width) * 7);
+}
+
+.litepicker[data-plugins*="mobilefriendly"] .container__months {
+  overflow: hidden;
+}
+
+.litepicker.mobilefriendly[data-plugins*="mobilefriendly"] .container__months .month-item-header {
+  height: var(--litepicker-day-width);
+}
+
+.litepicker.mobilefriendly[data-plugins*="mobilefriendly"] .container__days > div {
+  height: var(--litepicker-day-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.litepicker[data-plugins*="mobilefriendly"] .container__months .month-item {
+  transform-origin: center;
+}
+
+.litepicker[data-plugins*="mobilefriendly"] .container__months .month-item.touch-target-next {
+  animation-name: lp-bounce-target-next;
+  animation-duration: .5s;
+  animation-timing-function: ease;
+}
+
+.litepicker[data-plugins*="mobilefriendly"] .container__months .month-item.touch-target-prev {
+  animation-name: lp-bounce-target-prev;
+  animation-duration: .5s;
+  animation-timing-function: ease;
+}
+
+@keyframes lp-bounce-target-next {
+  from {
+    transform: translateX(100px) scale(0.5);
+  }
+  to {
+    transform: translateX(0px) scale(1);
+  }
+}
+
+@keyframes lp-bounce-target-prev {
+  from {
+    transform: translateX(-100px) scale(0.5);
+  }
+  to {
+    transform: translateX(0px) scale(1);
+  }
+}</style>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<link rel="shortcut icon" href="https://comy.co.il/wp-content/themes/comy/images/favicon.ico" type="image/x-icon">
+		<meta name="ajax" content="https://comy.co.il/wp-admin/admin-ajax.php">
+		<meta name="loader_img" content="https://comy.co.il/wp-content/themes/comy/images/logo.png">
+		<meta name="action_img" content="https://comy.co.il/wp-content/themes/comy/images/action.png">
+		<meta name="delayed" content="https://comy.co.il/wp-content/themes/comy/images/postpond.png">
+		<meta name="almost_sold_out_img" content="https://comy.co.il/wp-content/themes/comy/images/asoldwhite.png">
+		<meta name="almost_sold_out_img_mobile" content="https://comy.co.il/wp-content/themes/comy/images/asold_mobile.png">
+		<meta name="sold_out_img" content="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png">
+		<meta name="dropdown_img" content="https://comy.co.il/wp-content/themes/comy/images/dropdown.png">
+		<meta name="cal_white_img" content="https://comy.co.il/wp-content/themes/comy/images/cal-white.png">
+		<meta name="percent_img" content="https://comy.co.il/wp-content/themes/comy/images/percent.png">
+		<meta name="events_page" content="https://comy.co.il/?post_type=page&amp;p=93">
+		<!-- Google Tag Manager in head -->
+		<script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/js?id=G-SGJKDBEFHY&amp;cx=c&amp;gtm=4e67m1h2"></script><script src="https://connect.facebook.net/signals/config/1882798952183686?v=2.9.363&amp;r=stable&amp;domain=comy.co.il&amp;hme=de91ab0f62915af60750e9ff269a9938d70054f827732c0fc5f10a02500a436d&amp;ex_m=108%2C210%2C160%2C22%2C73%2C74%2C151%2C69%2C68%2C11%2C169%2C93%2C16%2C143%2C131%2C39%2C76%2C81%2C139%2C165%2C171%2C26%2C27%2C28%2C30%2C48%2C152%2C78%2C116%2C18%2C20%2C44%2C40%2C42%2C41%2C86%2C95%2C99%2C114%2C150%2C153%2C46%2C115%2C24%2C21%2C123%2C70%2C36%2C155%2C154%2C156%2C147%2C145%2C25%2C35%2C59%2C113%2C167%2C71%2C17%2C158%2C118%2C84%2C67%2C19%2C88%2C89%2C120%2C87%2C141%2C140%2C144%2C100%2C166%2C34%2C49%2C117%2C47%2C8%2C4%2C5%2C7%2C6%2C3%2C94%2C105%2C172%2C177%2C224%2C75%2C237%2C236%2C235%2C23%2C33%2C55%2C107%2C61%2C10%2C64%2C101%2C102%2C103%2C109%2C134%2C31%2C29%2C136%2C137%2C138%2C133%2C132%2C161%2C77%2C164%2C162%2C163%2C50%2C60%2C127%2C15%2C168%2C45%2C282%2C283%2C281%2C296%2C312%2C217%2C206%2C62%2C207%2C205%2C315%2C306%2C52%2C218%2C111%2C135%2C83%2C125%2C54%2C124%2C130%2C129%2C58%2C65%2C63%2C157%2C79%2C80%2C119%2C37%2C32%2C53%2C56%2C104%2C170%2C1%2C128%2C14%2C126%2C12%2C2%2C57%2C96%2C66%2C122%2C92%2C91%2C173%2C174%2C97%2C98%2C9%2C106%2C51%2C148%2C90%2C82%2C72%2C121%2C110%2C43%2C149%2C0%2C85%2C142%2C146%2C159%2C38%2C112%2C13%2C175%2C234%2C232%2C227%2C229%2C230%2C231%2C228%2C216%2C233%2C226%2C239%2C198%2C192%2C196%2C197%2C195%2C190%2C336%2C201%2C193%2C194%2C220%2C191%2C189%2C215%2C241%2C211%2C183%2C184%2C179%2C185%2C182%2C180%2C181%2C178%2C176%2C187%2C188%2C186%2C284%2C335%2C305%2C303%2C304%2C302%2C199%2C244%2C251%2C245%2C247%2C250%2C248%2C249%2C246%2C243%2C260%2C255%2C257%2C254%2C261%2C258%2C253%2C259%2C256%2C252%2C298%2C309" async=""></script><script src="https://connect.facebook.net/signals/config/482338462933839?v=2.9.363&amp;r=stable&amp;domain=comy.co.il&amp;hme=de91ab0f62915af60750e9ff269a9938d70054f827732c0fc5f10a02500a436d&amp;ex_m=108%2C210%2C160%2C22%2C73%2C74%2C151%2C69%2C68%2C11%2C169%2C93%2C16%2C143%2C131%2C39%2C76%2C81%2C139%2C165%2C171%2C26%2C27%2C28%2C30%2C48%2C152%2C78%2C116%2C18%2C20%2C44%2C40%2C42%2C41%2C86%2C95%2C99%2C114%2C150%2C153%2C46%2C115%2C24%2C21%2C123%2C70%2C36%2C155%2C154%2C156%2C147%2C145%2C25%2C35%2C59%2C113%2C167%2C71%2C17%2C158%2C118%2C84%2C67%2C19%2C88%2C89%2C120%2C87%2C141%2C140%2C144%2C100%2C166%2C34%2C49%2C117%2C47%2C8%2C4%2C5%2C7%2C6%2C3%2C94%2C105%2C172%2C177%2C224%2C75%2C237%2C236%2C235%2C23%2C33%2C55%2C107%2C61%2C10%2C64%2C101%2C102%2C103%2C109%2C134%2C31%2C29%2C136%2C137%2C138%2C133%2C132%2C161%2C77%2C164%2C162%2C163%2C50%2C60%2C127%2C15%2C168%2C45%2C282%2C283%2C281%2C296%2C312%2C217%2C206%2C62%2C207%2C205%2C315%2C306%2C52%2C218%2C111%2C135%2C83%2C125%2C54%2C124%2C130%2C129%2C58%2C65%2C63%2C157%2C79%2C80%2C119%2C37%2C32%2C53%2C56%2C104%2C170%2C1%2C128%2C14%2C126%2C12%2C2%2C57%2C96%2C66%2C122%2C92%2C91%2C173%2C174%2C97%2C98%2C9%2C106%2C51%2C148%2C90%2C82%2C72%2C121%2C110%2C43%2C149%2C0%2C85%2C142%2C146%2C159%2C38%2C112%2C13%2C175" async=""></script><script async="" src="https://connect.facebook.net/en_US/fbevents.js"></script><script type="text/javascript" async="" src="https://www.googletagmanager.com/gtag/destination?id=AW-406018887&amp;cx=c&amp;gtm=4e67m0"></script><script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-NC2DDVC"></script><script async="" src="https://www.googletagmanager.com/gtm.js?id=GTM-M8KVMWZ"></script><script>(function (w, d, s, l, i) {
+				w[l] = w[l] || [];
+				w[l].push({
+					'gtm.start'                    :
+						new Date().getTime(), event: 'gtm.js'
+				});
+				var f                          = d.getElementsByTagName(s)[0],
+				    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+				j.async                        = true;
+				j.src                          =
+					'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+				f.parentNode.insertBefore(j, f);
+			})(window, document, 'script', 'dataLayer', 'GTM-M8KVMWZ');</script>
+		<!-- End Google Tag Manager -->
+
+		<script>(function (w, d, s, l, i) {
+				w[l] = w[l] || [];
+				w[l].push({
+					'gtm.start'                    :
+						new Date().getTime(), event: 'gtm.js'
+				});
+				var f                          = d.getElementsByTagName(s)[0],
+				    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+				j.async = true;
+				j.src =
+					'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+				f.parentNode.insertBefore(j, f);
+			})(window, document, 'script', 'dataLayer', 'GTM-NC2DDVC');</script>
+     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+
+	<!-- This site is optimized with the Yoast SEO plugin v17.7.1 - https://yoast.com/wordpress/plugins/seo/ -->
+	<title>אדיר מילר האתר הרשמי - כרטיס ב-164₪ בלבד למופע סטנדאפ</title>
+	<meta name="description" content="לוח הופעות של אדיר מילר. כרטיסים ב-164₪ בלבד למופעי סטנדאפ של כוכב רמזור וצומת מילר ואחד מהסטנדאפיסטים המבוקשים בישראל. אדיר מילר במופע אילתורים קומי, שנון ומצחיק">
+	<link rel="canonical" href="https://comy.co.il/event/adir-miller/">
+	<meta property="og:locale" content="he_IL">
+	<meta property="og:type" content="article">
+	<meta property="og:title" content="אדיר מילר האתר הרשמי - כרטיס ב-164₪ בלבד למופע סטנדאפ">
+	<meta property="og:description" content="לוח הופעות רשמי של אדיר מילר. כרטיסים ב-164₪ בלבד למופעי סטנדאפ של כוכב רמזור וצומת מילר ואחד מהסטנדאפיסטים המבוקשים בישראל. אדיר מילר במופע אילתורים קומי, שנון ומצחיק">
+	<meta property="og:url" content="https://comy.co.il/event/adir-miller/">
+	<meta property="og:site_name" content="קומי - הופעות">
+	<meta property="article:publisher" content="https://www.facebook.com/Comy-%d7%9b%d7%a8%d7%98%d7%99%d7%a1%d7%99%d7%9d-%d7%9c%d7%9b%d7%9c-%d7%9e%d7%94-%d7%a9%d7%9e%d7%a6%d7%97%d7%99%d7%a7-248010300431/">
+	<meta property="article:modified_time" content="2026-07-21T09:38:42+00:00">
+	<meta property="og:image" content="https://cdn.comy.co.il/wp-content/uploads/2026/06/01141126/Adir-miler-social_1200x630.jpg">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="אדיר מילר האתר הרשמי - כרטיס ב-164₪ בלבד למופע סטנדאפ">
+	<meta name="twitter:description" content="לוח הופעות רשמי של אדיר מילר. כרטיסים ב-164₪ בלבד למופעי סטנדאפ של כוכב רמזור וצומת מילר ואחד מהסטנדאפיסטים המבוקשים בישראל. אדיר מילר במופע אילתורים קומי, שנון ומצחיק">
+	<meta name="twitter:image" content="https://cdn.comy.co.il/wp-content/uploads/2026/06/01141126/Adir-miler-social_1200x630.jpg">
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://comy.co.il/#website","url":"https://comy.co.il/","name":"\u05e7\u05d5\u05de\u05d9 - \u05d4\u05d5\u05e4\u05e2\u05d5\u05ea","description":"\u05d0\u05ea\u05e8 \u05d5\u05d5\u05e8\u05d3\u05e4\u05e8\u05e1 \u05d7\u05d3\u05e9","potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://comy.co.il/?s={search_term_string}"},"query-input":"required name=search_term_string"}],"inLanguage":"he-IL"},{"@type":"ImageObject","@id":"https://comy.co.il/event/adir-miller/#primaryimage","inLanguage":"he-IL","url":"https://cdn.comy.co.il/wp-content/uploads/2026/06/01141126/Adir-miler-social_1200x630.jpg","contentUrl":"https://cdn.comy.co.il/wp-content/uploads/2026/06/01141126/Adir-miler-social_1200x630.jpg","width":1200,"height":630},{"@type":"WebPage","@id":"https://comy.co.il/event/adir-miller/#webpage","url":"https://comy.co.il/event/adir-miller/","name":"\u05d0\u05d3\u05d9\u05e8 \u05de\u05d9\u05dc\u05e8 \u05d4\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 - \u05db\u05e8\u05d8\u05d9\u05e1 \u05d1-164\u20aa \u05d1\u05dc\u05d1\u05d3 \u05dc\u05de\u05d5\u05e4\u05e2 \u05e1\u05d8\u05e0\u05d3\u05d0\u05e4","isPartOf":{"@id":"https://comy.co.il/#website"},"datePublished":"2021-02-28T10:05:32+00:00","dateModified":"2026-07-21T09:38:42+00:00","description":"\u05dc\u05d5\u05d7 \u05d4\u05d5\u05e4\u05e2\u05d5\u05ea \u05e9\u05dc \u05d0\u05d3\u05d9\u05e8 \u05de\u05d9\u05dc\u05e8. \u05db\u05e8\u05d8\u05d9\u05e1\u05d9\u05dd \u05d1-164\u20aa \u05d1\u05dc\u05d1\u05d3 \u05dc\u05de\u05d5\u05e4\u05e2\u05d9 \u05e1\u05d8\u05e0\u05d3\u05d0\u05e4 \u05e9\u05dc \u05db\u05d5\u05db\u05d1 \u05e8\u05de\u05d6\u05d5\u05e8 \u05d5\u05e6\u05d5\u05de\u05ea \u05de\u05d9\u05dc\u05e8 \u05d5\u05d0\u05d7\u05d3 \u05de\u05d4\u05e1\u05d8\u05e0\u05d3\u05d0\u05e4\u05d9\u05e1\u05d8\u05d9\u05dd \u05d4\u05de\u05d1\u05d5\u05e7\u05e9\u05d9\u05dd \u05d1\u05d9\u05e9\u05e8\u05d0\u05dc. \u05d0\u05d3\u05d9\u05e8 \u05de\u05d9\u05dc\u05e8 \u05d1\u05de\u05d5\u05e4\u05e2 \u05d0\u05d9\u05dc\u05ea\u05d5\u05e8\u05d9\u05dd \u05e7\u05d5\u05de\u05d9, \u05e9\u05e0\u05d5\u05df \u05d5\u05de\u05e6\u05d7\u05d9\u05e7","breadcrumb":{"@id":"https://comy.co.il/event/adir-miller/#breadcrumb"},"inLanguage":"he-IL","potentialAction":[{"@type":"ReadAction","target":["https://comy.co.il/event/adir-miller/"]}]},{"@type":"BreadcrumbList","@id":"https://comy.co.il/event/adir-miller/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://comy.co.il/"},{"@type":"ListItem","position":2,"name":"Events","item":"https://comy.co.il/event/"},{"@type":"ListItem","position":3,"name":"\u05d0\u05d3\u05d9\u05e8 \u05de\u05d9\u05dc\u05e8"}]}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel="dns-prefetch" href="//comy.co.il">
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel="stylesheet" id="wp-block-library-rtl-css" href="https://comy.co.il/wp-includes/css/dist/block-library/style-rtl.min.css?ver=5.8.2" type="text/css" media="all">
+<link rel="stylesheet" id="acc_style-css" href="https://comy.co.il/wp-content/plugins/access_ama/dist/ac.css?ver=1.1.1" type="text/css" media="all">
+<link rel="stylesheet" id="contact-form-7-css" href="https://comy.co.il/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.5.5" type="text/css" media="all">
+<link rel="stylesheet" id="contact-form-7-rtl-css" href="https://comy.co.il/wp-content/plugins/contact-form-7/includes/css/styles-rtl.css?ver=5.5.5" type="text/css" media="all">
+<link rel="stylesheet" id="slick-css-css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css?ver=5.8.2" type="text/css" media="all">
+<link rel="stylesheet" id="slick-css-theme-css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css?ver=5.8.2" type="text/css" media="all">
+<link rel="stylesheet" id="app-css" href="https://comy.co.il/wp-content/themes/comy/style/app.css?ver=1785072989" type="text/css" media="all">
+<script type="text/javascript" src="https://comy.co.il/wp-includes/js/jquery/jquery.min.js?ver=3.6.0" id="jquery-core-js"></script>
+<script type="text/javascript" src="https://comy.co.il/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2" id="jquery-migrate-js"></script>
+<link rel="https://api.w.org/" href="https://comy.co.il/wp-json/"><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://comy.co.il/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://comy.co.il/wp-includes/wlwmanifest.xml"> 
+<meta name="generator" content="WordPress 5.8.2">
+<link rel="shortlink" href="https://comy.co.il/?p=225">
+<link rel="alternate" type="application/json+oembed" href="https://comy.co.il/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fcomy.co.il%2Fevent%2Fadir-miller%2F">
+<link rel="alternate" type="text/xml+oembed" href="https://comy.co.il/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fcomy.co.il%2Fevent%2Fadir-miller%2F&amp;format=xml">
+	  <script>
+		  const app_cities = ['תל אביב','חדרה','','חיפה','רמת גן','גני תקווה','באר שבע','פתח תקווה','הרצליה','חבל מודיעין ','רחובות','ת"א','שבי ציון','ראשון לציון','ירושלים','הוד השרון','נתניה','נהריה','צורן','נס ציונה','כפר סבא','אילת','יגור','מודיעין','חולון','בית החייל - תל אביב','רנה שני חדרה','צוותא תל אביב - ט"ו באב','בית ציוני אמריקה - מרתה','מועדון הביט-חיפה','גריי מודיעין פתיחת דלתות 19:30','בית ציוני אמריקה-תל אביב','תיאטרון היהלום - רמת גן','תיאטרון ירושלים','מדיטק חולון','היכל התרבות עפולה','צוותא תל אביב','בית יד לבנים רעננה','מרכז הבמה גני תקווה','אוזן בר - פתיחת דלתות 20:00','תמוז בית ליצירה מוזיקלית- ב"ש','תיאטרון המסילה - פתח תקווה','הוט סינמה קריון','היכל התרבות ראש העין','היכל התרבות מוזה - חוף הכרמל','הוט סינמה כפר סבא-אושילנד','היכל ספי ריבלין - מתנ"ס קריית השרון - נתניה','בית העם ירושלים - פסטיבל הקומדיה הישראלי','בית ציוני אמריקה - מרלן','ZOA קומדי בר - בית ציוני אמריקה תא','היכל בעיר הרצליה','היכל התרבות קרית גת','תיאטרון האקספו ת"א','היכל התרבות דרום השרון','היכל התרבות-בית העם ירושלים','היכל התרבות יבנה','היכל התרבות יקנעם','היכל אומנויות הבמה הרצליה','יד לבנים - אשדוד','תאטרון הבית גולדה פתח תקווה','המשכן לאומנויות נס ציונה','איירפורט סיטי-היכל התרבות','בית נגלר קרית חיים-חיפה','היכל התרבות העירוני כפר יונה','גבעת ברנר-אולם המופעים','תיאטרון הבימה תל אביב','תיאטרון בית לסין - תל אביב','היכל התרבות מודיעין','רעננה - בית יד לבנים','תיאטרון חולון','היכל התרבות ראשון לציון','גריי תל אביב -פתיחת דלתות 19:30','פאב הפרה - פתיחת דלתות 20:00','תיאטרון גבעתיים','אולם FRIENDS -(מופת) ראשל"צ','ניסן נתיב-ירושלים - פסטיבל הקומדיה','בית גבריאל כינרת - עמק הירדן','המשכן למוסיקה ואומנויות רעננה','היכל התרבות כפר סבא','אלומה הוד השרון','אולם רפפורט חיפה','היכל ע״ש אריק איינשטיין- עיר ימים נתניה','מתנס גן יבנה','גריי יהוד פתיחת דלתות 19:30','היכל התרבות אשקלון','אולם "הרעות" פרדסיה','המשכן לאומנויות הבמה אשדוד','היכל התרבות נס ציונה','אולם מופעים מטה אשר כברי','היכל התרבות קדימה צורן','בית ציוני אמריקה-מאירהוף','המשכן לאומנויות נס ציונה - ט"ו באב','פרינדס ירושלים - בית שמואל לשעבר','גריי מודיעין - פתיחת דלתות 20:00','רחובות בית העם','מעלה אדומים-היכל התרבות','היכל התרבות מודיעין-מכבים רעות','המשכן לאמנויות הבמה באר שבע','היכל התרבות - נתניה','טבעון - אולם זוהר','מוזיאון תל אביב','אודיטוריום רוזין-ת"א','אודיטוריום ספיר-כפר סבא','היכל התרבות תל מונד','אודטוריום ספיר כפר סבא - ט"ו באב','בית נגלר, קריית חיים, חיפה - ט"ו באב','זכרון יעקב-בית התותחן','היכל התרבות כרמיאל','מרכז אומנויות הבמה מתנס פרדס חנה כרכור','מרכז תרבות באר טוביה','צוותא 1','כפר ויתקין','קיבוץ יפעת','היכל התרבות יבנה - סילבסטר','היכל בעיר הרצליה - ט"ו באב','היכל התרבות אורנית','אלומה הוד השרון - טו בא"ב','גריי תל אביב -פתיחת דלתות 20:00','ניסן נתיב ירושלים','בית ציוני אמריקה - ת"א','היכל התרבות נתניה - דורטמונד','גריי מודיעין פתיחת דלתות 12:30','גריי בר יהוד-פתיחת דלתות 12:30','גריי יהוד - פתיחת דלתות 20:30','היכל התרבות מעלות תרשיחא','משכן פיס לאומנויות הבמה נתיבות','אקספו אילת','אודיטוריום חיפה','היכל התרבות ערד','היכל התרבות פתח תקווה','מגדה - מרכז תרבות מגידו','שרובר תיאטרון-ירושלים','בית העם ז’ראר בכר ירושלים','היכל התרבות מנשה - גן שמואל','אילת-תאטראות','תיאטרון יד למגינים יגור','בית יד לבנים - רמת השרון','מוזיאון תל-אביב - אולם רקאנטי','כפר בלום - בית העם','מוזיאון ארץ ישראל - רמת אביב','תיאטרון ירושלים-רבקה קראון','מופת יהוד','היכל התרבות נהריה','קרית התרבות קרית אונו','מתנ"ס גבעת שמואל','היכל התרבות בת ים','בית החייל תל אביב-סילבסטר','שיכוני המזרח ראשון לציון','Babu bar - תל אביב- פתיחת דלתות 20:00','מודיעין - מנחם עינן','בית חיל האוויר- הרצליה','בית שטיינברג חולון'];
+	  </script>
+   		<style type="text/css" id="wp-custom-css">
+			ul.nav-parta:not(.but-thin) {
+    display: none;
+}
+
+
+#events .event .edt-left .edt-left-new .place-string, #events-page .event .edt-left .edt-left-new .place-string {
+    min-width: 100%;
+    justify-content: flex-start;
+    margin-top: 5px;
+}
+
+
+#events .event-details .bonus-select, #events-page .event-details .bonus-select {
+    top: calc(100% - 50px);
+}
+#events .ed-top, #events-page .ed-top {
+    align-items: flex-start;
+}
+
+
+#events .event .edt-left .edt-left-new .place-string p:nth-child(2),
+.single-place-string p:nth-child(2) {
+    display: none;
+}
+
+.edt-right {
+    min-width: 200px;
+}
+
+.home #content > .box, #content > div {
+    max-width: unset;
+}
+
+div#home-page-events{
+	justify-content:center;
+}
+nav#nav ul.nav-part.but-thin li:nth-child(2) {
+    display: none;
+}
+
+@media (max-width: 798px){
+    .event-sold-out img {
+    width: 60px;
+        height:auto
+}
+}
+
+#club-img img {
+    width: 100%;
+}
+.cky-revisit-bottom-left {
+    left: 100px!important;
+    bottom: 35px!important;
+}
+div#home-page-events h3 {
+    max-width: 160px;
+}
+.postid-15450  #events-page .te-details h1 {
+    max-width: 260px;
+}
+
+
+#nav ul.nav-part.but-thin li:last-child {
+    display: none;
+}		</style>
+			<style>.swal2-popup.swal2-toast{flex-direction:column;align-items:stretch;width:auto;padding:1.25em;overflow-y:hidden;background:#fff;box-shadow:0 0 .625em #d9d9d9}.swal2-popup.swal2-toast .swal2-header{flex-direction:row;padding:0}.swal2-popup.swal2-toast .swal2-title{flex-grow:1;justify-content:flex-start;margin:0 .625em;font-size:1em}.swal2-popup.swal2-toast .swal2-loading{justify-content:center}.swal2-popup.swal2-toast .swal2-input{height:2em;margin:.3125em auto;font-size:1em}.swal2-popup.swal2-toast .swal2-validation-message{font-size:1em}.swal2-popup.swal2-toast .swal2-footer{margin:.5em 0 0;padding:.5em 0 0;font-size:.8em}.swal2-popup.swal2-toast .swal2-close{position:static;width:.8em;height:.8em;line-height:.8}.swal2-popup.swal2-toast .swal2-content{justify-content:flex-start;margin:0 .625em;padding:0;font-size:1em;text-align:initial}.swal2-popup.swal2-toast .swal2-html-container{padding:.625em 0 0}.swal2-popup.swal2-toast .swal2-html-container:empty{padding:0}.swal2-popup.swal2-toast .swal2-icon{width:2em;min-width:2em;height:2em;margin:0 .5em 0 0}.swal2-popup.swal2-toast .swal2-icon .swal2-icon-content{display:flex;align-items:center;font-size:1.8em;font-weight:700}@media all and (-ms-high-contrast:none),(-ms-high-contrast:active){.swal2-popup.swal2-toast .swal2-icon .swal2-icon-content{font-size:.25em}}.swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring{width:2em;height:2em}.swal2-popup.swal2-toast .swal2-icon.swal2-error [class^=swal2-x-mark-line]{top:.875em;width:1.375em}.swal2-popup.swal2-toast .swal2-icon.swal2-error [class^=swal2-x-mark-line][class$=left]{left:.3125em}.swal2-popup.swal2-toast .swal2-icon.swal2-error [class^=swal2-x-mark-line][class$=right]{right:.3125em}.swal2-popup.swal2-toast .swal2-actions{flex:1;flex-basis:auto!important;align-self:stretch;width:auto;height:2.2em;height:auto;margin:0 .3125em;margin-top:.3125em;padding:0}.swal2-popup.swal2-toast .swal2-styled{margin:.125em .3125em;padding:.3125em .625em;font-size:1em}.swal2-popup.swal2-toast .swal2-styled:focus{box-shadow:0 0 0 1px #fff,0 0 0 3px rgba(100,150,200,.5)}.swal2-popup.swal2-toast .swal2-success{border-color:#a5dc86}.swal2-popup.swal2-toast .swal2-success [class^=swal2-success-circular-line]{position:absolute;width:1.6em;height:3em;transform:rotate(45deg);border-radius:50%}.swal2-popup.swal2-toast .swal2-success [class^=swal2-success-circular-line][class$=left]{top:-.8em;left:-.5em;transform:rotate(-45deg);transform-origin:2em 2em;border-radius:4em 0 0 4em}.swal2-popup.swal2-toast .swal2-success [class^=swal2-success-circular-line][class$=right]{top:-.25em;left:.9375em;transform-origin:0 1.5em;border-radius:0 4em 4em 0}.swal2-popup.swal2-toast .swal2-success .swal2-success-ring{width:2em;height:2em}.swal2-popup.swal2-toast .swal2-success .swal2-success-fix{top:0;left:.4375em;width:.4375em;height:2.6875em}.swal2-popup.swal2-toast .swal2-success [class^=swal2-success-line]{height:.3125em}.swal2-popup.swal2-toast .swal2-success [class^=swal2-success-line][class$=tip]{top:1.125em;left:.1875em;width:.75em}.swal2-popup.swal2-toast .swal2-success [class^=swal2-success-line][class$=long]{top:.9375em;right:.1875em;width:1.375em}.swal2-popup.swal2-toast .swal2-success.swal2-icon-show .swal2-success-line-tip{-webkit-animation:swal2-toast-animate-success-line-tip .75s;animation:swal2-toast-animate-success-line-tip .75s}.swal2-popup.swal2-toast .swal2-success.swal2-icon-show .swal2-success-line-long{-webkit-animation:swal2-toast-animate-success-line-long .75s;animation:swal2-toast-animate-success-line-long .75s}.swal2-popup.swal2-toast.swal2-show{-webkit-animation:swal2-toast-show .5s;animation:swal2-toast-show .5s}.swal2-popup.swal2-toast.swal2-hide{-webkit-animation:swal2-toast-hide .1s forwards;animation:swal2-toast-hide .1s forwards}.swal2-container{display:flex;position:fixed;z-index:1060;top:0;right:0;bottom:0;left:0;flex-direction:row;align-items:center;justify-content:center;padding:.625em;overflow-x:hidden;transition:background-color .1s;-webkit-overflow-scrolling:touch}.swal2-container.swal2-backdrop-show,.swal2-container.swal2-noanimation{background:rgba(0,0,0,.4)}.swal2-container.swal2-backdrop-hide{background:0 0!important}.swal2-container.swal2-top{align-items:flex-start}.swal2-container.swal2-top-left,.swal2-container.swal2-top-start{align-items:flex-start;justify-content:flex-start}.swal2-container.swal2-top-end,.swal2-container.swal2-top-right{align-items:flex-start;justify-content:flex-end}.swal2-container.swal2-center{align-items:center}.swal2-container.swal2-center-left,.swal2-container.swal2-center-start{align-items:center;justify-content:flex-start}.swal2-container.swal2-center-end,.swal2-container.swal2-center-right{align-items:center;justify-content:flex-end}.swal2-container.swal2-bottom{align-items:flex-end}.swal2-container.swal2-bottom-left,.swal2-container.swal2-bottom-start{align-items:flex-end;justify-content:flex-start}.swal2-container.swal2-bottom-end,.swal2-container.swal2-bottom-right{align-items:flex-end;justify-content:flex-end}.swal2-container.swal2-bottom-end>:first-child,.swal2-container.swal2-bottom-left>:first-child,.swal2-container.swal2-bottom-right>:first-child,.swal2-container.swal2-bottom-start>:first-child,.swal2-container.swal2-bottom>:first-child{margin-top:auto}.swal2-container.swal2-grow-fullscreen>.swal2-modal{display:flex!important;flex:1;align-self:stretch;justify-content:center}.swal2-container.swal2-grow-row>.swal2-modal{display:flex!important;flex:1;align-content:center;justify-content:center}.swal2-container.swal2-grow-column{flex:1;flex-direction:column}.swal2-container.swal2-grow-column.swal2-bottom,.swal2-container.swal2-grow-column.swal2-center,.swal2-container.swal2-grow-column.swal2-top{align-items:center}.swal2-container.swal2-grow-column.swal2-bottom-left,.swal2-container.swal2-grow-column.swal2-bottom-start,.swal2-container.swal2-grow-column.swal2-center-left,.swal2-container.swal2-grow-column.swal2-center-start,.swal2-container.swal2-grow-column.swal2-top-left,.swal2-container.swal2-grow-column.swal2-top-start{align-items:flex-start}.swal2-container.swal2-grow-column.swal2-bottom-end,.swal2-container.swal2-grow-column.swal2-bottom-right,.swal2-container.swal2-grow-column.swal2-center-end,.swal2-container.swal2-grow-column.swal2-center-right,.swal2-container.swal2-grow-column.swal2-top-end,.swal2-container.swal2-grow-column.swal2-top-right{align-items:flex-end}.swal2-container.swal2-grow-column>.swal2-modal{display:flex!important;flex:1;align-content:center;justify-content:center}.swal2-container.swal2-no-transition{transition:none!important}.swal2-container:not(.swal2-top):not(.swal2-top-start):not(.swal2-top-end):not(.swal2-top-left):not(.swal2-top-right):not(.swal2-center-start):not(.swal2-center-end):not(.swal2-center-left):not(.swal2-center-right):not(.swal2-bottom):not(.swal2-bottom-start):not(.swal2-bottom-end):not(.swal2-bottom-left):not(.swal2-bottom-right):not(.swal2-grow-fullscreen)>.swal2-modal{margin:auto}@media all and (-ms-high-contrast:none),(-ms-high-contrast:active){.swal2-container .swal2-modal{margin:0!important}}.swal2-popup{display:none;position:relative;box-sizing:border-box;flex-direction:column;justify-content:center;width:32em;max-width:100%;padding:1.25em;border:none;border-radius:5px;background:#fff;font-family:inherit;font-size:1rem}.swal2-popup:focus{outline:0}.swal2-popup.swal2-loading{overflow-y:hidden}.swal2-header{display:flex;flex-direction:column;align-items:center;padding:0 1.8em}.swal2-title{position:relative;max-width:100%;margin:0 0 .4em;padding:0;color:#595959;font-size:1.875em;font-weight:600;text-align:center;text-transform:none;word-wrap:break-word}.swal2-actions{display:flex;z-index:1;box-sizing:border-box;flex-wrap:wrap;align-items:center;justify-content:center;width:100%;margin:1.25em auto 0;padding:0}.swal2-actions:not(.swal2-loading) .swal2-styled[disabled]{opacity:.4}.swal2-actions:not(.swal2-loading) .swal2-styled:hover{background-image:linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,.1))}.swal2-actions:not(.swal2-loading) .swal2-styled:active{background-image:linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2))}.swal2-loader{display:none;align-items:center;justify-content:center;width:2.2em;height:2.2em;margin:0 1.875em;-webkit-animation:swal2-rotate-loading 1.5s linear 0s infinite normal;animation:swal2-rotate-loading 1.5s linear 0s infinite normal;border-width:.25em;border-style:solid;border-radius:100%;border-color:#2778c4 transparent #2778c4 transparent}.swal2-styled{margin:.3125em;padding:.625em 1.1em;box-shadow:none;font-weight:500}.swal2-styled:not([disabled]){cursor:pointer}.swal2-styled.swal2-confirm{border:0;border-radius:.25em;background:initial;background-color:#2778c4;color:#fff;font-size:1em}.swal2-styled.swal2-deny{border:0;border-radius:.25em;background:initial;background-color:#d14529;color:#fff;font-size:1em}.swal2-styled.swal2-cancel{border:0;border-radius:.25em;background:initial;background-color:#757575;color:#fff;font-size:1em}.swal2-styled:focus{outline:0;box-shadow:0 0 0 3px rgba(100,150,200,.5)}.swal2-styled::-moz-focus-inner{border:0}.swal2-footer{justify-content:center;margin:1.25em 0 0;padding:1em 0 0;border-top:1px solid #eee;color:#545454;font-size:1em}.swal2-timer-progress-bar-container{position:absolute;right:0;bottom:0;left:0;height:.25em;overflow:hidden;border-bottom-right-radius:5px;border-bottom-left-radius:5px}.swal2-timer-progress-bar{width:100%;height:.25em;background:rgba(0,0,0,.2)}.swal2-image{max-width:100%;margin:1.25em auto}.swal2-close{position:absolute;z-index:2;top:0;right:0;align-items:center;justify-content:center;width:1.2em;height:1.2em;padding:0;overflow:hidden;transition:color .1s ease-out;border:none;border-radius:5px;background:0 0;color:#ccc;font-family:serif;font-size:2.5em;line-height:1.2;cursor:pointer}.swal2-close:hover{transform:none;background:0 0;color:#f27474}.swal2-close:focus{outline:0;box-shadow:inset 0 0 0 3px rgba(100,150,200,.5)}.swal2-close::-moz-focus-inner{border:0}.swal2-content{z-index:1;justify-content:center;margin:0;padding:0 1.6em;color:#545454;font-size:1.125em;font-weight:400;line-height:normal;text-align:center;word-wrap:break-word}.swal2-checkbox,.swal2-file,.swal2-input,.swal2-radio,.swal2-select,.swal2-textarea{margin:1em auto}.swal2-file,.swal2-input,.swal2-textarea{box-sizing:border-box;width:100%;transition:border-color .3s,box-shadow .3s;border:1px solid #d9d9d9;border-radius:.1875em;background:inherit;box-shadow:inset 0 1px 1px rgba(0,0,0,.06);color:inherit;font-size:1.125em}.swal2-file.swal2-inputerror,.swal2-input.swal2-inputerror,.swal2-textarea.swal2-inputerror{border-color:#f27474!important;box-shadow:0 0 2px #f27474!important}.swal2-file:focus,.swal2-input:focus,.swal2-textarea:focus{border:1px solid #b4dbed;outline:0;box-shadow:0 0 0 3px rgba(100,150,200,.5)}.swal2-file::-moz-placeholder,.swal2-input::-moz-placeholder,.swal2-textarea::-moz-placeholder{color:#ccc}.swal2-file:-ms-input-placeholder,.swal2-input:-ms-input-placeholder,.swal2-textarea:-ms-input-placeholder{color:#ccc}.swal2-file::placeholder,.swal2-input::placeholder,.swal2-textarea::placeholder{color:#ccc}.swal2-range{margin:1em auto;background:#fff}.swal2-range input{width:80%}.swal2-range output{width:20%;color:inherit;font-weight:600;text-align:center}.swal2-range input,.swal2-range output{height:2.625em;padding:0;font-size:1.125em;line-height:2.625em}.swal2-input{height:2.625em;padding:0 .75em}.swal2-input[type=number]{max-width:10em}.swal2-file{background:inherit;font-size:1.125em}.swal2-textarea{height:6.75em;padding:.75em}.swal2-select{min-width:50%;max-width:100%;padding:.375em .625em;background:inherit;color:inherit;font-size:1.125em}.swal2-checkbox,.swal2-radio{align-items:center;justify-content:center;background:#fff;color:inherit}.swal2-checkbox label,.swal2-radio label{margin:0 .6em;font-size:1.125em}.swal2-checkbox input,.swal2-radio input{flex-shrink:0;margin:0 .4em}.swal2-input-label{display:flex;justify-content:center;margin:1em auto}.swal2-validation-message{align-items:center;justify-content:center;margin:0 -2.7em;padding:.625em;overflow:hidden;background:#f0f0f0;color:#666;font-size:1em;font-weight:300}.swal2-validation-message::before{content:"!";display:inline-block;width:1.5em;min-width:1.5em;height:1.5em;margin:0 .625em;border-radius:50%;background-color:#f27474;color:#fff;font-weight:600;line-height:1.5em;text-align:center}.swal2-icon{position:relative;box-sizing:content-box;justify-content:center;width:5em;height:5em;margin:1.25em auto 1.875em;border:.25em solid transparent;border-radius:50%;border-color:#000;font-family:inherit;line-height:5em;cursor:default;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.swal2-icon .swal2-icon-content{display:flex;align-items:center;font-size:3.75em}.swal2-icon.swal2-error{border-color:#f27474;color:#f27474}.swal2-icon.swal2-error .swal2-x-mark{position:relative;flex-grow:1}.swal2-icon.swal2-error [class^=swal2-x-mark-line]{display:block;position:absolute;top:2.3125em;width:2.9375em;height:.3125em;border-radius:.125em;background-color:#f27474}.swal2-icon.swal2-error [class^=swal2-x-mark-line][class$=left]{left:1.0625em;transform:rotate(45deg)}.swal2-icon.swal2-error [class^=swal2-x-mark-line][class$=right]{right:1em;transform:rotate(-45deg)}.swal2-icon.swal2-error.swal2-icon-show{-webkit-animation:swal2-animate-error-icon .5s;animation:swal2-animate-error-icon .5s}.swal2-icon.swal2-error.swal2-icon-show .swal2-x-mark{-webkit-animation:swal2-animate-error-x-mark .5s;animation:swal2-animate-error-x-mark .5s}.swal2-icon.swal2-warning{border-color:#facea8;color:#f8bb86}.swal2-icon.swal2-info{border-color:#9de0f6;color:#3fc3ee}.swal2-icon.swal2-question{border-color:#c9dae1;color:#87adbd}.swal2-icon.swal2-success{border-color:#a5dc86;color:#a5dc86}.swal2-icon.swal2-success [class^=swal2-success-circular-line]{position:absolute;width:3.75em;height:7.5em;transform:rotate(45deg);border-radius:50%}.swal2-icon.swal2-success [class^=swal2-success-circular-line][class$=left]{top:-.4375em;left:-2.0635em;transform:rotate(-45deg);transform-origin:3.75em 3.75em;border-radius:7.5em 0 0 7.5em}.swal2-icon.swal2-success [class^=swal2-success-circular-line][class$=right]{top:-.6875em;left:1.875em;transform:rotate(-45deg);transform-origin:0 3.75em;border-radius:0 7.5em 7.5em 0}.swal2-icon.swal2-success .swal2-success-ring{position:absolute;z-index:2;top:-.25em;left:-.25em;box-sizing:content-box;width:100%;height:100%;border:.25em solid rgba(165,220,134,.3);border-radius:50%}.swal2-icon.swal2-success .swal2-success-fix{position:absolute;z-index:1;top:.5em;left:1.625em;width:.4375em;height:5.625em;transform:rotate(-45deg)}.swal2-icon.swal2-success [class^=swal2-success-line]{display:block;position:absolute;z-index:2;height:.3125em;border-radius:.125em;background-color:#a5dc86}.swal2-icon.swal2-success [class^=swal2-success-line][class$=tip]{top:2.875em;left:.8125em;width:1.5625em;transform:rotate(45deg)}.swal2-icon.swal2-success [class^=swal2-success-line][class$=long]{top:2.375em;right:.5em;width:2.9375em;transform:rotate(-45deg)}.swal2-icon.swal2-success.swal2-icon-show .swal2-success-line-tip{-webkit-animation:swal2-animate-success-line-tip .75s;animation:swal2-animate-success-line-tip .75s}.swal2-icon.swal2-success.swal2-icon-show .swal2-success-line-long{-webkit-animation:swal2-animate-success-line-long .75s;animation:swal2-animate-success-line-long .75s}.swal2-icon.swal2-success.swal2-icon-show .swal2-success-circular-line-right{-webkit-animation:swal2-rotate-success-circular-line 4.25s ease-in;animation:swal2-rotate-success-circular-line 4.25s ease-in}.swal2-progress-steps{flex-wrap:wrap;align-items:center;max-width:100%;margin:0 0 1.25em;padding:0;background:inherit;font-weight:600}.swal2-progress-steps li{display:inline-block;position:relative}.swal2-progress-steps .swal2-progress-step{z-index:20;flex-shrink:0;width:2em;height:2em;border-radius:2em;background:#2778c4;color:#fff;line-height:2em;text-align:center}.swal2-progress-steps .swal2-progress-step.swal2-active-progress-step{background:#2778c4}.swal2-progress-steps .swal2-progress-step.swal2-active-progress-step~.swal2-progress-step{background:#add8e6;color:#fff}.swal2-progress-steps .swal2-progress-step.swal2-active-progress-step~.swal2-progress-step-line{background:#add8e6}.swal2-progress-steps .swal2-progress-step-line{z-index:10;flex-shrink:0;width:2.5em;height:.4em;margin:0 -1px;background:#2778c4}[class^=swal2]{-webkit-tap-highlight-color:transparent}.swal2-show{-webkit-animation:swal2-show .3s;animation:swal2-show .3s}.swal2-hide{-webkit-animation:swal2-hide .15s forwards;animation:swal2-hide .15s forwards}.swal2-noanimation{transition:none}.swal2-scrollbar-measure{position:absolute;top:-9999px;width:50px;height:50px;overflow:scroll}.swal2-rtl .swal2-close{right:auto;left:0}.swal2-rtl .swal2-timer-progress-bar{right:0;left:auto}@supports (-ms-accelerator:true){.swal2-range input{width:100%!important}.swal2-range output{display:none}}@media all and (-ms-high-contrast:none),(-ms-high-contrast:active){.swal2-range input{width:100%!important}.swal2-range output{display:none}}@-webkit-keyframes swal2-toast-show{0%{transform:translateY(-.625em) rotateZ(2deg)}33%{transform:translateY(0) rotateZ(-2deg)}66%{transform:translateY(.3125em) rotateZ(2deg)}100%{transform:translateY(0) rotateZ(0)}}@keyframes swal2-toast-show{0%{transform:translateY(-.625em) rotateZ(2deg)}33%{transform:translateY(0) rotateZ(-2deg)}66%{transform:translateY(.3125em) rotateZ(2deg)}100%{transform:translateY(0) rotateZ(0)}}@-webkit-keyframes swal2-toast-hide{100%{transform:rotateZ(1deg);opacity:0}}@keyframes swal2-toast-hide{100%{transform:rotateZ(1deg);opacity:0}}@-webkit-keyframes swal2-toast-animate-success-line-tip{0%{top:.5625em;left:.0625em;width:0}54%{top:.125em;left:.125em;width:0}70%{top:.625em;left:-.25em;width:1.625em}84%{top:1.0625em;left:.75em;width:.5em}100%{top:1.125em;left:.1875em;width:.75em}}@keyframes swal2-toast-animate-success-line-tip{0%{top:.5625em;left:.0625em;width:0}54%{top:.125em;left:.125em;width:0}70%{top:.625em;left:-.25em;width:1.625em}84%{top:1.0625em;left:.75em;width:.5em}100%{top:1.125em;left:.1875em;width:.75em}}@-webkit-keyframes swal2-toast-animate-success-line-long{0%{top:1.625em;right:1.375em;width:0}65%{top:1.25em;right:.9375em;width:0}84%{top:.9375em;right:0;width:1.125em}100%{top:.9375em;right:.1875em;width:1.375em}}@keyframes swal2-toast-animate-success-line-long{0%{top:1.625em;right:1.375em;width:0}65%{top:1.25em;right:.9375em;width:0}84%{top:.9375em;right:0;width:1.125em}100%{top:.9375em;right:.1875em;width:1.375em}}@-webkit-keyframes swal2-show{0%{transform:scale(.7)}45%{transform:scale(1.05)}80%{transform:scale(.95)}100%{transform:scale(1)}}@keyframes swal2-show{0%{transform:scale(.7)}45%{transform:scale(1.05)}80%{transform:scale(.95)}100%{transform:scale(1)}}@-webkit-keyframes swal2-hide{0%{transform:scale(1);opacity:1}100%{transform:scale(.5);opacity:0}}@keyframes swal2-hide{0%{transform:scale(1);opacity:1}100%{transform:scale(.5);opacity:0}}@-webkit-keyframes swal2-animate-success-line-tip{0%{top:1.1875em;left:.0625em;width:0}54%{top:1.0625em;left:.125em;width:0}70%{top:2.1875em;left:-.375em;width:3.125em}84%{top:3em;left:1.3125em;width:1.0625em}100%{top:2.8125em;left:.8125em;width:1.5625em}}@keyframes swal2-animate-success-line-tip{0%{top:1.1875em;left:.0625em;width:0}54%{top:1.0625em;left:.125em;width:0}70%{top:2.1875em;left:-.375em;width:3.125em}84%{top:3em;left:1.3125em;width:1.0625em}100%{top:2.8125em;left:.8125em;width:1.5625em}}@-webkit-keyframes swal2-animate-success-line-long{0%{top:3.375em;right:2.875em;width:0}65%{top:3.375em;right:2.875em;width:0}84%{top:2.1875em;right:0;width:3.4375em}100%{top:2.375em;right:.5em;width:2.9375em}}@keyframes swal2-animate-success-line-long{0%{top:3.375em;right:2.875em;width:0}65%{top:3.375em;right:2.875em;width:0}84%{top:2.1875em;right:0;width:3.4375em}100%{top:2.375em;right:.5em;width:2.9375em}}@-webkit-keyframes swal2-rotate-success-circular-line{0%{transform:rotate(-45deg)}5%{transform:rotate(-45deg)}12%{transform:rotate(-405deg)}100%{transform:rotate(-405deg)}}@keyframes swal2-rotate-success-circular-line{0%{transform:rotate(-45deg)}5%{transform:rotate(-45deg)}12%{transform:rotate(-405deg)}100%{transform:rotate(-405deg)}}@-webkit-keyframes swal2-animate-error-x-mark{0%{margin-top:1.625em;transform:scale(.4);opacity:0}50%{margin-top:1.625em;transform:scale(.4);opacity:0}80%{margin-top:-.375em;transform:scale(1.15)}100%{margin-top:0;transform:scale(1);opacity:1}}@keyframes swal2-animate-error-x-mark{0%{margin-top:1.625em;transform:scale(.4);opacity:0}50%{margin-top:1.625em;transform:scale(.4);opacity:0}80%{margin-top:-.375em;transform:scale(1.15)}100%{margin-top:0;transform:scale(1);opacity:1}}@-webkit-keyframes swal2-animate-error-icon{0%{transform:rotateX(100deg);opacity:0}100%{transform:rotateX(0);opacity:1}}@keyframes swal2-animate-error-icon{0%{transform:rotateX(100deg);opacity:0}100%{transform:rotateX(0);opacity:1}}@-webkit-keyframes swal2-rotate-loading{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}@keyframes swal2-rotate-loading{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown){overflow:hidden}body.swal2-height-auto{height:auto!important}body.swal2-no-backdrop .swal2-container{top:auto;right:auto;bottom:auto;left:auto;max-width:calc(100% - .625em * 2);background-color:transparent!important}body.swal2-no-backdrop .swal2-container>.swal2-modal{box-shadow:0 0 10px rgba(0,0,0,.4)}body.swal2-no-backdrop .swal2-container.swal2-top{top:0;left:50%;transform:translateX(-50%)}body.swal2-no-backdrop .swal2-container.swal2-top-left,body.swal2-no-backdrop .swal2-container.swal2-top-start{top:0;left:0}body.swal2-no-backdrop .swal2-container.swal2-top-end,body.swal2-no-backdrop .swal2-container.swal2-top-right{top:0;right:0}body.swal2-no-backdrop .swal2-container.swal2-center{top:50%;left:50%;transform:translate(-50%,-50%)}body.swal2-no-backdrop .swal2-container.swal2-center-left,body.swal2-no-backdrop .swal2-container.swal2-center-start{top:50%;left:0;transform:translateY(-50%)}body.swal2-no-backdrop .swal2-container.swal2-center-end,body.swal2-no-backdrop .swal2-container.swal2-center-right{top:50%;right:0;transform:translateY(-50%)}body.swal2-no-backdrop .swal2-container.swal2-bottom{bottom:0;left:50%;transform:translateX(-50%)}body.swal2-no-backdrop .swal2-container.swal2-bottom-left,body.swal2-no-backdrop .swal2-container.swal2-bottom-start{bottom:0;left:0}body.swal2-no-backdrop .swal2-container.swal2-bottom-end,body.swal2-no-backdrop .swal2-container.swal2-bottom-right{right:0;bottom:0}@media print{body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown){overflow-y:scroll!important}body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown)>[aria-hidden=true]{display:none}body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown) .swal2-container{position:static!important}}body.swal2-toast-shown .swal2-container{background-color:transparent}body.swal2-toast-shown .swal2-container.swal2-top{top:0;right:auto;bottom:auto;left:50%;transform:translateX(-50%)}body.swal2-toast-shown .swal2-container.swal2-top-end,body.swal2-toast-shown .swal2-container.swal2-top-right{top:0;right:0;bottom:auto;left:auto}body.swal2-toast-shown .swal2-container.swal2-top-left,body.swal2-toast-shown .swal2-container.swal2-top-start{top:0;right:auto;bottom:auto;left:0}body.swal2-toast-shown .swal2-container.swal2-center-left,body.swal2-toast-shown .swal2-container.swal2-center-start{top:50%;right:auto;bottom:auto;left:0;transform:translateY(-50%)}body.swal2-toast-shown .swal2-container.swal2-center{top:50%;right:auto;bottom:auto;left:50%;transform:translate(-50%,-50%)}body.swal2-toast-shown .swal2-container.swal2-center-end,body.swal2-toast-shown .swal2-container.swal2-center-right{top:50%;right:0;bottom:auto;left:auto;transform:translateY(-50%)}body.swal2-toast-shown .swal2-container.swal2-bottom-left,body.swal2-toast-shown .swal2-container.swal2-bottom-start{top:auto;right:auto;bottom:0;left:0}body.swal2-toast-shown .swal2-container.swal2-bottom{top:auto;right:auto;bottom:0;left:50%;transform:translateX(-50%)}body.swal2-toast-shown .swal2-container.swal2-bottom-end,body.swal2-toast-shown .swal2-container.swal2-bottom-right{top:auto;right:0;bottom:0;left:auto}</style></head>
+	<body class="rtl event-template-default single single-event postid-225 using-mouse acc-active"><nav id="acc-toolbar-wrap"><button id="acc-toggle-toolbar" aria-label="Open Accessibility menu"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/Wheelchair_symbol.svg" alt=""></button><div id="acc-toolbar" tabindex="0"><header id="acc_header"><h2>תפריט נגישות</h2><button id="acc-toolbar-close" aria-label="סגירת סרגל הנגישות"></button></header><div id="acc_body"><div id="acc_bodyTopBns"><div class="flachbg"></div><div id="acc_row_keyboard" class="amap_row amap_row1"><button id="acc-keyboard" class="" data-type="keyboard" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/keyboard.svg" alt="ניווט מקלדת"><span>ניווט מקלדת</span></button></div><div id="acc_row_animation" class="amap_row amap_row1"><button id="acc-animation" class="" data-type="animation" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/animations.svg" alt="ביטול הבהובים"><span>ביטול הבהובים</span></button></div></div><div id="acc_mainBtns"><div id="acc-toolbar-contrast" class="amap_row amap_row3"><button id="acc-contrast-mono" class="" data-type="mono" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/monochrome.png" alt="מונוכרום"><span>מונוכרום</span></button><button id="acc-contrast-dark" class="" data-type="dark" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/contrastD.svg" alt="ניגודיות כהה"><span>ניגודיות כהה</span></button><button id="acc-contrast-bright" class="" data-type="bright" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/contrastB.svg" alt="ניגודיות בהירה"><span>ניגודיות בהירה</span></button></div><div id="acc-toolbar-textsize" class="amap_row amap_row3"><button id="acc-text-up" class="" data-type="bigger" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/fontPlus.svg" alt="הגדלת גופן"><span>הגדלת גופן</span></button><button id="acc-text-down" class="" data-type="smaller" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/fontMinus.svg" alt="הקטנת גופן"><span>הקטנת גופן</span></button><button id="acc-font-readable" class="" data-type="readable" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/font.svg" alt="גופן קריא"><span>גופן קריא</span></button></div><div id="acc-toolbar-ui" class="amap_row amap_row3"><button id="acc-cursor-b" class="" data-type="b" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/arrowB.svg" alt="סמן גדול שחור"><span>סמן גדול שחור</span></button><button id="acc-cursor-w" class="" data-type="w" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/arrowW.svg" alt="סמן גדול לבן"><span>סמן גדול לבן</span></button><button id="acc-zoom" class="" data-type="zoom" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/zoom.svg" alt="תצוגה מוגדלת"><span>תצוגה מוגדלת</span></button></div><div id="acc-toolbar-elemnts" class="amap_row amap_row3"><button id="acc-links" class="" data-type="links" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/links.svg" alt="הדגשת קישורים"><span>הדגשת קישורים</span></button><button id="acc-titles" class="" data-type="titles" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/titles.svg" alt="הדגשת כותרות"><span>הדגשת כותרות</span></button><button id="acc-imgalt" class="" data-type="imgalt" aria-selected="false" tabindex="0"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/imgAlt.svg" alt="תיאור תמונה"><span>תיאור תמונה</span></button></div></div></div><div id="acc_footer"><div id="acc-footer-buttons" class="amap_row amap_row3"><button id="acc-clearall" class="" data-type="reset" aria-selected="false" tabindex="0"><span>איפוס נגישות</span></button><button id="acc-contact" class="" data-type="feedback" aria-selected="false" tabindex="0"><span>שליחת משוב</span></button><button id="acc-statement" class="" data-type="statement" aria-selected="false" tabindex="0"><span>הצהרת נגישות</span></button></div><div class="amap_row amap_logo"><a href="http://www.amazing.co.il" target="_blank"><img src="https://comy.co.il/wp-content/plugins/access_ama/icons/amazing_logo.png" alt="amazing.co.il"></a></div></div><section id="acc-contactform" role="form" tabindex="0" style="display: none;">
+                        <div id="acc-contactform-header">
+                            <h4>שליחת משוב</h4>
+                            <button id="acc-contactform-close" class="acc-close-btn" aria-label="סגירת המשוב וחזרה לסרגל הנגישות"></button>
+                        </div>
+                        <div id="acc-contactform-content">
+                            <div class="flachbg"></div>
+                         <form action="https://comy.co.il/wp-admin/admin-ajax.php?action=send_feedback" enctype="multipart/form-data" tabindex="0" id="acc-theform" method="POST" aria-describedby="שליחת משוב">
+                            <p>נתקלתם בבעיית נגישות באתר?<br>שלחו לנו פירוט בטופס הבא</p>
+                                <label for="acc_feedback_name">
+                                    <apan>שם מלא</apan>
+                                    <input tabindex="0" aria-required="true" type="text" name="acc_feedback_name" id="acc_feedback_name" required="">
+                                </label>
+                                <label for="acc_feedback_name">
+                                    <apan>כתובת מייל</apan>
+                                    <input tabindex="0" aria-required="true" type="email" name="acc_feedback_mail" id="acc_feedback_mail" required="">
+                                </label>
+                                <label for="acc_feedback_msg">
+                                    <apan>אנא פרטו במספר מילים</apan>
+                                    <textarea tabindex="0" name="acc_feedback_msg" aria-required="true" id="acc_feedback_msg" cols="20" rows="10" required=""></textarea>
+                                </label>
+                                <input type="hidden" aria-hidden="true" name="acc_feedback_pageurl" id="acc_feedback_pageurl" value="comy.co.il/event/adir-miller/">
+                                <p class="antispam" aria-hidden="true">
+                                    <input name="acc_feedback_antispam" id="acc_feedback_antispam" type="text" value="">
+                                </p>
+                                <input tabindex="0" type="submit" value="שליחה">
+                            </form><div id="acc_feedback_output"></div></div>
+                    <span class="last-tabindex" tabindex="0" data-for="acc-contactform"></span></section><span class="last-tabindex" tabindex="0" data-for="acc-toolbar"></span></div></nav>
+		<noscript>
+			<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NC2DDVC"
+			        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+		</noscript>
+		<div id="mobile-verifier"></div>
+
+		<header>
+			<div class="box">
+				<div id="user-actions">
+					<div id="menu">
+						<div><img src="https://comy.co.il/wp-content/themes/comy/images/user.png" alt="איזור משתמש" title="איזור משתמש"></div>
+						<p>
+							<span>היי לך,</span>
+							<span>כניסה לאיזור האישי</span>
+						</p>
+					</div>
+
+
+					<div id="search" class="same-height not-home">
+						<div><img src="https://comy.co.il/wp-content/themes/comy/images/search.png" alt="חיפוש" title="חיפוש"></div>
+					</div>
+
+				</div>
+
+				<div id="logo">
+					<div>
+                     <a href="https://comy.co.il">
+						<img src="https://comy.co.il/wp-content/themes/comy/images/logo.png" alt="קומי – הופעות" title="קומי – הופעות">
+
+                     </a>					</div>
+				</div>
+			</div>
+		</header>
+
+		<nav id="nav">
+			<header>
+				<div class="top"><a href="#" title="סגור">X</a></div>
+				<div class="bottom">
+					<span><img src="https://comy.co.il/wp-content/themes/comy/images/user.png" alt="תמונת המשתמש"></span>
+					<span>היי לך, הכניסה מכאן</span>
+				</div>
+			</header>
+			<ul class="nav-part">
+                                    <li><a href="https://tickets.comy.co.il/booking/customer-portal">ההזמנות שלי</a></li>
+                				                			</ul>
+
+			<ul class="nav-part but-thin">
+                                    <li><a href="https://comy.co.il/?post_type=page&amp;p=54">תקנון</a></li>
+                                                    <li><a href="https://comy.co.il/?post_type=page&amp;p=55">מדיניות פרטיות</a></li>
+                                <li><a href="tel:*5289" title="חייגו אלינו">שירות לקוחות <span class="call-ltr">*5289</span></a></li>
+			</ul>
+			<footer>
+				<span>אתר זה מאובטח באמצעות SSL</span>
+			</footer>
+		</nav>
+
+		<div id="content">
+<div id="search-form" class=" slide-up">
+	<div id="mobile-applied-filters" data-image="https://comy.co.il/wp-content/themes/comy/images/x.png">
+
+	</div>
+	<div class="box hide-in-mobile">
+		<div id="search-input" class="just-nav">
+			<input type="text" class="auto-clean" data-unique="main-search" placeholder="זרקו שם אמן/אולם/עיר ואנחנו ניקח את זה משם">
+			<img id="search-button" class="just-nav" src="https://comy.co.il/wp-content/themes/comy/images/search.png" alt="חיפוש">
+		</div>
+		<div id="data-boxes">
+			<div id="search-cal">
+				<a href="#" data-default="https://comy.co.il/wp-content/themes/comy/images/cal.png" data-alt="לפי לוח שנה"><img src="https://comy.co.il/wp-content/themes/comy/images/cal.png" alt="לפי לוח שנה"></a>
+				<div id="inline-calendar-desktop" class="inline-calendar"><div class="litepicker" data-plugins="" style="display: inline-block; position: relative;"><div class="container__main"><div class="container__months"><div class="month-item no-previous-month"><div class="month-item-header"><button type="button" class="button-previous-month">&lt;</button><div><strong class="month-item-name">יולי</strong><span class="month-item-year">2026</span></div><button type="button" class="button-next-month">&gt;</button></div><div class="month-item-weekdays-row"><div title="יום ראשון">יום א׳</div><div title="יום שני">יום ב׳</div><div title="יום שלישי">יום ג׳</div><div title="יום רביעי">יום ד׳</div><div title="יום חמישי">יום ה׳</div><div title="יום שישי">יום ו׳</div><div title="יום שבת">שבת</div></div><div class="container__days"><div></div><div></div><div></div><div class="day-item is-locked" data-time="1782864000000" tabindex="-1">1</div><div class="day-item is-locked" data-time="1782950400000" tabindex="-1">2</div><div class="day-item is-locked" data-time="1783036800000" tabindex="-1">3</div><div class="day-item is-locked" data-time="1783123200000" tabindex="-1">4</div><div class="day-item is-locked" data-time="1783209600000" tabindex="-1">5</div><div class="day-item is-locked" data-time="1783296000000" tabindex="-1">6</div><div class="day-item is-locked" data-time="1783382400000" tabindex="-1">7</div><div class="day-item is-locked" data-time="1783468800000" tabindex="-1">8</div><div class="day-item is-locked" data-time="1783555200000" tabindex="-1">9</div><div class="day-item is-locked" data-time="1783641600000" tabindex="-1">10</div><div class="day-item is-locked" data-time="1783728000000" tabindex="-1">11</div><div class="day-item is-locked" data-time="1783814400000" tabindex="-1">12</div><div class="day-item is-locked" data-time="1783900800000" tabindex="-1">13</div><div class="day-item is-locked" data-time="1783987200000" tabindex="-1">14</div><div class="day-item is-locked" data-time="1784073600000" tabindex="-1">15</div><div class="day-item is-locked" data-time="1784160000000" tabindex="-1">16</div><div class="day-item is-locked" data-time="1784246400000" tabindex="-1">17</div><div class="day-item is-locked" data-time="1784332800000" tabindex="-1">18</div><div class="day-item is-locked" data-time="1784419200000" tabindex="-1">19</div><div class="day-item is-locked" data-time="1784505600000" tabindex="-1">20</div><div class="day-item is-locked" data-time="1784592000000" tabindex="-1">21</div><div class="day-item is-locked" data-time="1784678400000" tabindex="-1">22</div><div class="day-item is-locked" data-time="1784764800000" tabindex="-1">23</div><div class="day-item is-locked" data-time="1784851200000" tabindex="-1">24</div><div class="day-item is-locked" data-time="1784937600000" tabindex="-1">25</div><div class="day-item is-today" data-time="1785024000000" tabindex="0">26</div><div class="day-item" data-time="1785110400000" tabindex="0">27</div><div class="day-item" data-time="1785196800000" tabindex="0">28</div><div class="day-item" data-time="1785283200000" tabindex="0">29</div><div class="day-item" data-time="1785369600000" tabindex="0">30</div><div class="day-item" data-time="1785456000000" tabindex="0">31</div></div></div></div></div><div class="container__footer">
+      <span class="preview-date-range"></span>
+      <button type="button" class="button-cancel">ביטול</button>
+      <button type="button" class="button-apply">יאללה</button>
+      </div><div class="container__tooltip"></div></div></div>
+			</div>
+
+			<div id="search-automate">
+				<div class="search-auto just-nav auto-clean" data-unique="today" data-search="today">
+					<span class="close-button"><a href="#"><img src="https://comy.co.il/wp-content/themes/comy/images/x.png" alt="clear"></a></span>
+					<span>היום</span>
+				</div>
+
+				<div class="search-auto just-nav auto-clean" data-unique="tomorrow" data-search="tomorrow">
+					<span class="close-button"><a href="#"><img src="https://comy.co.il/wp-content/themes/comy/images/x.png" alt="clear"></a></span>
+					<span>מחר</span>
+				</div>
+
+				<div class="search-auto just-nav auto-clean" data-unique="weekend" data-search="weekend">
+					<span class="close-button"><a href="#"><img src="https://comy.co.il/wp-content/themes/comy/images/x.png" alt="clear"></a></span>
+					<span>סופ"ש</span>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+	<div id="inline-calendar" class="inline-calendar"></div>
+	<div id="events-sorting">
+		<div class="box like-top">
+			<div class="h1">איפה?</div>
+
+			<div class="sort only-one near auto-clean-grade-2" data-unique="near">
+				<span class="close-button"><a href="#"><img src="https://comy.co.il/wp-content/themes/comy/images/x.png" alt="clear"></a></span>
+				<span class="img-button"><img src="https://comy.co.il/wp-content/themes/comy/images/near.png" alt="כמה רחוק"></span>
+				<span>קרוב לבית</span>
+			</div>
+
+			<div class="sort only-one anywhere auto-clean-grade-2" data-unique="anywhere">
+				<span class="close-button"><a href="#"><img src="https://comy.co.il/wp-content/themes/comy/images/x.png" alt="clear"></a></span>
+				<span class="img-button"><img src="https://comy.co.il/wp-content/themes/comy/images/car.png" alt="כמה רחוק"></span>
+				<span>בכל מקום</span>
+			</div>
+
+			<div class="sort by-area auto-clean-grade-2" data-unique="area">
+				<div class="area-of-click">
+					<span class="close-button"><a href="#"><img src="https://comy.co.il/wp-content/themes/comy/images/x.png" alt="clear"></a></span>
+					<span class="img-button"><img src="https://comy.co.il/wp-content/themes/comy/images/area.png" alt="באיזה איזור"></span>
+					<span class="where" data-default="באיזור">באיזור</span>
+					<span class="arrow"><img src="https://comy.co.il/wp-content/themes/comy/images/dropdown.png" alt="לפתיחת התפריט"></span>
+				</div>
+
+				<div class="areas">
+					<ul>
+						<li data-value="צפון">צפון</li>
+						<li data-value="מרכז">מרכז</li>
+						<li data-value="דרום">דרום</li>
+						<li data-value="שפלה">שפלה</li>
+						<li data-value="ירושלים והסביבה">ירושלים והסביבה</li>
+					</ul>
+				</div>
+			</div>
+			<div id="city-search-title">בעיר שלכם:</div>
+			<div id="city-search-input" class="just-nav ">
+				<input type="text" placeholder="מאיפה אתם? מבטיחים לא לצחוק עליכם" class="auto-clean-grade-2" data-unique="city-input">
+				<img id="city-search-button" class="just-nav" src="https://comy.co.il/wp-content/themes/comy/images/search.png" alt="חיפוש">
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div id="events-page">
+
+	<div class="box smaller">
+     
+		 <div id="the-event">
+			 <div class="te-image" style="background-image: url(https://cdn.comy.co.il/wp-content/uploads/2026/06/11105227/Adir-Miller_350.jpg)">
+				 <div class="mobile"><img src="https://cdn.comy.co.il/wp-content/uploads/2026/06/11105227/Adir-Miller_350.jpg" alt="אדיר מילר"></div>
+              			 </div>
+
+			 <div class="te-details ">
+				 <h1>אדיר מילר</h1>
+				 <h2>סטנדאפ</h2>
+
+				 <p>במופע סטנדאפ ואילתורים<br>
+</p><h6>צילום: אושר עדן פשינסקי</h6><br>
+*לתשומת לבכם,יש להימנע מרכישת כרטיסים ממקורות שאינם רשמיים או מורשים.כרטיסים שנרכשו מגורמים בלתי מורשים עלולים להיות מזויפים או לא תקפים,ולא נוכל לכבד אותם בכניסה למופע.כדי להבטיח את כניסתכם,יש לרכוש כרטיסים אך ורק דרך האתר של COMY.<p></p>
+
+				 <div class="te-date">
+                                    					 <span>28/07/2026 - 16/12/2026</span>
+				 </div>
+				 <div class="ticket-price"></div>
+                            			 </div>
+
+		 </div>
+
+      
+     		<div id="events">
+         			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>28.07</div>
+									 </div>
+									 <span class="single-light"> יום ג' 21:45</span>
+								 </div>
+
+								 <div class="single-place-string"><p>אקספו אילת</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>05.08</div>
+									 </div>
+									 <span class="single-light"> יום ד' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות מודיעין-מכבים רעות</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>06.08</div>
+									 </div>
+									 <span class="single-light"> יום ה' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל אומנויות הבמה הרצליה</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>12.08</div>
+									 </div>
+									 <span class="single-light"> יום ד' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות ראשון לציון</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>20.08</div>
+									 </div>
+									 <span class="single-light"> יום ה' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>בית החייל - תל אביב</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>30.08</div>
+									 </div>
+									 <span class="single-light"> יום א' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>רחובות בית העם</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>05.09</div>
+									 </div>
+									 <span class="single-light"> יום ש' 21:00</span>
+								 </div>
+
+								 <div class="single-place-string"><p>אודיטוריום חיפה</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>08.09</div>
+									 </div>
+									 <span class="single-light"> יום ג' 20:00</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות ערד</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>09.09</div>
+									 </div>
+									 <span class="single-light"> יום ד' 21:00</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות פתח תקווה</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="#" class="single-page-event not-clickable ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>15.09</div>
+									 </div>
+									 <span class="single-light"> יום ג' 20:00</span>
+								 </div>
+
+								 <div class="single-place-string"><p>המשכן לאמנויות הבמה באר שבע</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              				  <div class="event-sold-out">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldwhite.png" alt="הכל אזל" class="mobile">
+                      <img src="https://comy.co.il/wp-content/themes/comy/images/soldyellow.png" alt="הכל אזל" class="desktop">
+                  </div>
+               
+                                               </div>
+				 <div class="single-event-click gray-it">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="https://tickets.comy.co.il/booking/features/825?prsntId=54695" class="single-page-event  ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>22.09</div>
+									 </div>
+									 <span class="single-light"> יום ג' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>בית החייל - תל אביב</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              
+                                               </div>
+				 <div class="single-event-click ">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="https://tickets.comy.co.il/booking/features/825?prsntId=54250" class="single-page-event  ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>16.10</div>
+									 </div>
+									 <span class="single-light"> יום ו' 22:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל אומנויות הבמה הרצליה</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              
+                                               </div>
+				 <div class="single-event-click ">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="https://tickets.comy.co.il/booking/features/825?prsntId=54548" class="single-page-event  ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>21.10</div>
+									 </div>
+									 <span class="single-light"> יום ד' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות ראשון לציון</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              
+                                               </div>
+				 <div class="single-event-click ">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="https://tickets.comy.co.il/booking/features/825?prsntId=53306" class="single-page-event  ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>28.10</div>
+									 </div>
+									 <span class="single-light"> יום ד' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>המשכן לאומנויות הבמה אשדוד</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              
+                                               </div>
+				 <div class="single-event-click ">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="https://tickets.comy.co.il/booking/features/825?prsntId=53529" class="single-page-event  ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>09.11</div>
+									 </div>
+									 <span class="single-light"> יום ב' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות פתח תקווה</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              
+                                               </div>
+				 <div class="single-event-click ">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          			 <a href="https://tickets.comy.co.il/booking/features/825?prsntId=53701" class="single-page-event  ">
+				 <div class="single-event-details">
+					 <div class="single-ed-top">
+						 <div class="single-edt-left">
+							 <div class="single-edt-left-new">
+								 <div class="single-date-details">
+									 <div class="date ">
+										 <!--											-->										 <div>16.12</div>
+									 </div>
+									 <span class="single-light"> יום ד' 20:30</span>
+								 </div>
+
+								 <div class="single-place-string"><p>היכל התרבות אשקלון</p></div>
+
+                              							 </div>
+						 </div>
+					 </div>
+
+				 </div>
+                 <div class="event-labels">
+              
+              
+                                               </div>
+				 <div class="single-event-click ">
+                     <p>
+                         <img src="https://comy.co.il/wp-content/themes/comy/images/action.png" alt="לחצו למעבר להופעה">
+                     </p>
+				 </div>
+			 </a>
+          		</div>
+	</div>
+</div>
+
+
+    <div id="show-form-popup">
+        <div id="sfp-close">x</div>
+        <div id="sfp-background"></div>
+        <div id="sfp-contact" data-title="אדיר מילר - סטנדאפ">
+            <main class="cms white-the-cms"><h1>רשימת המתנה</h1>
+<h4 class="wp-block-heading" id="contact_form_event_name">{{event_name}}</h4>
+
+
+
+<p id="contact_form_event_date">{{event_date}}</p>
+
+
+
+<hr class="wp-block-separator">
+
+
+
+<div id="form_box" class="wp-block-group"><div class="wp-block-group__inner-container">
+<p> הירשמו כאן, ובמידה ויתפנו כרטיסים, נדאג לעדכן אתכם בהקדם בוואטסאפ.</p>
+
+
+
+<div class="wp-block-contact-form-7-contact-form-selector"><div role="form" class="wpcf7" id="wpcf7-f7136-o1" lang="he-IL" dir="rtl">
+<div class="screen-reader-response"><p role="status" aria-live="polite" aria-atomic="true"></p> <ul></ul></div>
+<form action="/event/adir-miller/#wpcf7-f7136-o1" method="post" class="wpcf7-form init" novalidate="novalidate" data-status="init">
+<div style="display: none;">
+<input type="hidden" name="_wpcf7" value="7136">
+<input type="hidden" name="_wpcf7_version" value="5.5.5">
+<input type="hidden" name="_wpcf7_locale" value="he_IL">
+<input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f7136-o1">
+<input type="hidden" name="_wpcf7_container_post" value="0">
+<input type="hidden" name="_wpcf7_posted_data_hash" value="">
+</div>
+<p><label> שם מלא<br>
+    <span class="wpcf7-form-control-wrap your-name"><input type="text" name="your-name" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false"></span> </label></p>
+<p><label> טלפון<br>
+    <span class="wpcf7-form-control-wrap your-phone"><input type="tel" name="your-phone" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-tel wpcf7-validates-as-required wpcf7-validates-as-tel" aria-required="true" aria-invalid="false"></span> </label><br>
+<label> אימייל<br>
+    <span class="wpcf7-form-control-wrap your-email"><input type="email" name="your-email" value="" size="40" class="wpcf7-form-control wpcf7-text wpcf7-email wpcf7-validates-as-required wpcf7-validates-as-email" aria-required="true" aria-invalid="false"></span> </label><br>
+<label> כמה כרטיסים תרצו?<br>
+    <span class="wpcf7-form-control-wrap tickets_number"><input type="number" name="tickets_number" value="" class="wpcf7-form-control wpcf7-number wpcf7-validates-as-required wpcf7-validates-as-number" aria-required="true" aria-invalid="false"></span> </label></p>
+<input type="hidden" name="event-name" value="" class="wpcf7-form-control wpcf7-hidden">
+<input type="hidden" name="event-date" value="" class="wpcf7-form-control wpcf7-hidden">
+<p><input type="submit" value="רשמו אותי" class="wpcf7-form-control has-spinner wpcf7-submit"><span class="wpcf7-spinner"></span></p>
+<div class="wpcf7-response-output" aria-hidden="true"></div></form></div></div>
+</div></div>
+
+
+
+<p id="form_response"></p>
+</main>        </div>
+    </div>
+    
+
+</div>
+<div id="footer-credits">
+    <div id="sticky-whatsapp">
+        <a href="https://wa.me/972559576586">
+            <img src="https://comy.co.il/wp-content/themes/comy/images/whatsapp_logo-2x.png" alt="שיחת וואטסאפ עם נציג ">
+        </a>
+    </div>
+    <div id="by-2207">
+		<a href="https://amazing.co.il/" target="_blank">
+			<img src="https://comy.co.il/wp-content/themes/comy/images/amazing.png" alt="אמייזינג ווב" title="אמייזינג ווב">
+		</a>
+	</div>
+</div>
+        <div id="ama-cookie-banner" class="ama-cookie-banner show">
+            <button class="ama-cookie-close" aria-label="Close cookie banner">×</button>
+            <div class="ama-cookie-content">
+                <div class="ama-cookie-text">
+                    
+                    <p>לידיעתך, באתר זה נעשה שימוש בקבצי Cookies כדי לספק לך חווית גלישה טובה יותר.</p>
+                    <p>למידע נוסף ניתן לעיין <a href="https://comy.co.il/תקנון-האתר" target="_blank">במדיניות הפרטיות</a></p>
+                        </div>
+            </div>
+        </div>
+                <style>
+        .ama-cookie-banner {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #333333;
+            color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            max-width: 320px;
+             line-height: 1.4;
+            display: none;
+        }
+    
+        .ama-cookie-banner.show {
+            display: block;
+        }
+        
+        .ama-cookie-content {
+            position: relative;
+        }
+        
+        .ama-cookie-close {
+            position: absolute;
+            top: 10px;
+            left: 10px; 
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .ama-cookie-close:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .ama-cookie-text {
+            margin: 0;
+        }
+        
+        .ama-cookie-text p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+
+        }
+    
+        .ama-cookie-text p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .ama-cookie-text a {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        
+        .ama-cookie-text a:hover {
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .ama-cookie-banner {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                top: auto;
+                bottom: 20px;
+                transform: none;
+            }
+        }
+        </style>
+                <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const banner = document.getElementById('ama-cookie-banner');
+            const closeBtn = document.querySelector('.ama-cookie-close');
+            
+            // Check if cookie exists
+            function getCookie(name) {
+                const value = "; " + document.cookie;
+                const parts = value.split("; " + name + "=");
+                if (parts.length === 2) {
+                    return parts.pop().split(";").shift();
+                }
+                return null;
+            }
+            
+            // Set cookie
+            function setCookie(name, value, days) {
+                const expires = new Date();
+                expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = name + "=" + value + ";expires=" + expires.toUTCString() + ";path=/";
+            }
+            
+            // Show banner if cookie doesn't exist
+            if (!getCookie('ama_cookie_consent')) {
+                if (banner) {
+                    banner.classList.add('show');
+                }
+            }
+            
+            // Close banner and set cookie
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    if (banner) {
+                        banner.style.opacity = '0';
+                        banner.style.transform = 'translateY(-50%) translateX(-100%)';
+                        setTimeout(function() {
+                            banner.style.display = 'none';
+                        }, 300);
+                    }
+                    setCookie('ama_cookie_consent', 'accepted', 365);
+                });
+            }
+        });
+        </script>
+        <script type="text/javascript" id="acc-js-extra">
+/* <![CDATA[ */
+var acc = {"mediaPath":"https:\/\/comy.co.il\/wp-content\/plugins\/access_ama\/icons\/","statement_url":"https:\/\/comy.co.il\/wp-admin\/admin-ajax.php?action=get_statement","feedback_action":"https:\/\/comy.co.il\/wp-admin\/admin-ajax.php?action=send_feedback","current_page_url":"comy.co.il\/event\/adir-miller\/","showFeedbackForm":"1","locale":{"accessibility_menu":"\u05ea\u05e4\u05e8\u05d9\u05d8 \u05e0\u05d2\u05d9\u05e9\u05d5\u05ea","quick_navigation":"\u05ea\u05e4\u05e8\u05d9\u05d8 \u05de\u05e2\u05d1\u05e8 \u05de\u05d4\u05d9\u05e8","close_acc_menu":"\u05e1\u05d2\u05d9\u05e8\u05ea \u05e1\u05e8\u05d2\u05dc \u05d4\u05e0\u05d2\u05d9\u05e9\u05d5\u05ea","back_to_this_menu":"\u05d7\u05d6\u05e8\u05d4 \u05dc\u05ea\u05e4\u05e8\u05d9\u05d8 \u05d6\u05d4 : ","open_acc_menu":"Open Accessibility menu","close_statement":"Close Statement","send_feedback":"\u05e9\u05dc\u05d9\u05d7\u05ea \u05de\u05e9\u05d5\u05d1","close_feedback":"\u05e1\u05d2\u05d9\u05e8\u05ea \u05d4\u05de\u05e9\u05d5\u05d1 \u05d5\u05d7\u05d6\u05e8\u05d4 \u05dc\u05e1\u05e8\u05d2\u05dc \u05d4\u05e0\u05d2\u05d9\u05e9\u05d5\u05ea","acc_statement":"\u05d4\u05e6\u05d4\u05e8\u05ea \u05e0\u05d2\u05d9\u05e9\u05d5\u05ea","full_name":"\u05e9\u05dd \u05de\u05dc\u05d0","send":"\u05e9\u05dc\u05d9\u05d7\u05d4","feedback_msg":"\u05d0\u05e0\u05d0 \u05e4\u05e8\u05d8\u05d5 \u05d1\u05de\u05e1\u05e4\u05e8 \u05de\u05d9\u05dc\u05d9\u05dd","email":"\u05db\u05ea\u05d5\u05d1\u05ea \u05de\u05d9\u05d9\u05dc","acc_feedback_description":"\u05e0\u05ea\u05e7\u05dc\u05ea\u05dd \u05d1\u05d1\u05e2\u05d9\u05d9\u05ea \u05e0\u05d2\u05d9\u05e9\u05d5\u05ea \u05d1\u05d0\u05ea\u05e8?<br\/>\u05e9\u05dc\u05d7\u05d5 \u05dc\u05e0\u05d5 \u05e4\u05d9\u05e8\u05d5\u05d8 \u05d1\u05d8\u05d5\u05e4\u05e1 \u05d4\u05d1\u05d0","acc_icon":"https:\/\/comy.co.il\/wp-content\/plugins\/access_ama\/icons\/Wheelchair_symbol.svg"},"keybordVavItems":[{"name":"*","items":[{"target":"#search-form","label":"\u05ea\u05e4\u05e8\u05d9\u05d8 \u05e2\u05dc\u05d9\u05d5\u05df"},{"target":"#content","label":"\u05ea\u05d5\u05db\u05df \u05de\u05e8\u05db\u05d6\u05d9"}]},{"name":"home","items":[{"target":"#search-form","label":"\u05ea\u05e4\u05e8\u05d9\u05d8 \u05e2\u05dc\u05d9\u05d5\u05df"},{"target":"#home-page-events","label":"\u05e8\u05e9\u05d9\u05de\u05ea \u05d4\u05d4\u05d5\u05e4\u05e2\u05d5\u05ea"}]},{"name":"single-event","items":[{"target":"#topNav","label":"\u05ea\u05e4\u05e8\u05d9\u05d8 \u05e2\u05dc\u05d9\u05d5\u05df"},{"target":"#the-event","label":"\u05ea\u05d5\u05db\u05df \u05de\u05e8\u05db\u05d6\u05d9"},{"target":"#events","label":"\u05d4\u05d6\u05de\u05e0\u05ea \u05db\u05e8\u05d8\u05d9\u05e1\u05d9\u05dd"}]}]};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://comy.co.il/wp-content/plugins/access_ama/dist/ac.js?ver=1.1.1" id="acc-js"></script>
+<script type="text/javascript" src="https://comy.co.il/wp-includes/js/dist/vendor/regenerator-runtime.min.js?ver=0.13.7" id="regenerator-runtime-js"></script>
+<script type="text/javascript" src="https://comy.co.il/wp-includes/js/dist/vendor/wp-polyfill.min.js?ver=3.15.0" id="wp-polyfill-js"></script>
+<script type="text/javascript" id="contact-form-7-js-extra">
+/* <![CDATA[ */
+var wpcf7 = {"api":{"root":"https:\/\/comy.co.il\/wp-json\/","namespace":"contact-form-7\/v1"},"cached":"1"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://comy.co.il/wp-content/plugins/contact-form-7/includes/js/index.js?ver=5.5.5" id="contact-form-7-js"></script>
+<script type="text/javascript" id="rocket-browser-checker-js-after">
+"use strict";var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||!1,descriptor.configurable=!0,"value"in descriptor&&(descriptor.writable=!0),Object.defineProperty(target,descriptor.key,descriptor)}}return function(Constructor,protoProps,staticProps){return protoProps&&defineProperties(Constructor.prototype,protoProps),staticProps&&defineProperties(Constructor,staticProps),Constructor}}();function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor))throw new TypeError("Cannot call a class as a function")}var RocketBrowserCompatibilityChecker=function(){function RocketBrowserCompatibilityChecker(options){_classCallCheck(this,RocketBrowserCompatibilityChecker),this.passiveSupported=!1,this._checkPassiveOption(this),this.options=!!this.passiveSupported&&options}return _createClass(RocketBrowserCompatibilityChecker,[{key:"_checkPassiveOption",value:function(self){try{var options={get passive(){return!(self.passiveSupported=!0)}};window.addEventListener("test",null,options),window.removeEventListener("test",null,options)}catch(err){self.passiveSupported=!1}}},{key:"initRequestIdleCallback",value:function(){!1 in window&&(window.requestIdleCallback=function(cb){var start=Date.now();return setTimeout(function(){cb({didTimeout:!1,timeRemaining:function(){return Math.max(0,50-(Date.now()-start))}})},1)}),!1 in window&&(window.cancelIdleCallback=function(id){return clearTimeout(id)})}},{key:"isDataSaverModeOn",value:function(){return"connection"in navigator&&!0===navigator.connection.saveData}},{key:"supportsLinkPrefetch",value:function(){var elem=document.createElement("link");return elem.relList&&elem.relList.supports&&elem.relList.supports("prefetch")&&window.IntersectionObserver&&"isIntersecting"in IntersectionObserverEntry.prototype}},{key:"isSlowConnection",value:function(){return"connection"in navigator&&"effectiveType"in navigator.connection&&("2g"===navigator.connection.effectiveType||"slow-2g"===navigator.connection.effectiveType)}}]),RocketBrowserCompatibilityChecker}();
+</script>
+<script type="text/javascript" id="rocket-preload-links-js-extra">
+/* <![CDATA[ */
+var RocketPreloadLinksConfig = {"excludeUris":"\/(.+\/)?feed\/?.+\/?|\/(?:.+\/)?embed\/|\/(index\\.php\/)?wp\\-json(\/.*|$)|\/wp-admin\/|\/logout\/|\/wp-login.php","usesTrailingSlash":"1","imageExt":"jpg|jpeg|gif|png|tiff|bmp|webp|avif","fileExt":"jpg|jpeg|gif|png|tiff|bmp|webp|avif|php|pdf|html|htm","siteUrl":"https:\/\/comy.co.il","onHoverDelay":"100","rateThrottle":"3"};
+/* ]]> */
+</script>
+<script type="text/javascript" id="rocket-preload-links-js-after">
+(function() {
+"use strict";var r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},e=function(){function i(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(e,t,n){return t&&i(e.prototype,t),n&&i(e,n),e}}();function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var t=function(){function n(e,t){i(this,n),this.browser=e,this.config=t,this.options=this.browser.options,this.prefetched=new Set,this.eventTime=null,this.threshold=1111,this.numOnHover=0}return e(n,[{key:"init",value:function(){!this.browser.supportsLinkPrefetch()||this.browser.isDataSaverModeOn()||this.browser.isSlowConnection()||(this.regex={excludeUris:RegExp(this.config.excludeUris,"i"),images:RegExp(".("+this.config.imageExt+")$","i"),fileExt:RegExp(".("+this.config.fileExt+")$","i")},this._initListeners(this))}},{key:"_initListeners",value:function(e){-1<this.config.onHoverDelay&&document.addEventListener("mouseover",e.listener.bind(e),e.listenerOptions),document.addEventListener("mousedown",e.listener.bind(e),e.listenerOptions),document.addEventListener("touchstart",e.listener.bind(e),e.listenerOptions)}},{key:"listener",value:function(e){var t=e.target.closest("a"),n=this._prepareUrl(t);if(null!==n)switch(e.type){case"mousedown":case"touchstart":this._addPrefetchLink(n);break;case"mouseover":this._earlyPrefetch(t,n,"mouseout")}}},{key:"_earlyPrefetch",value:function(t,e,n){var i=this,r=setTimeout(function(){if(r=null,0===i.numOnHover)setTimeout(function(){return i.numOnHover=0},1e3);else if(i.numOnHover>i.config.rateThrottle)return;i.numOnHover++,i._addPrefetchLink(e)},this.config.onHoverDelay);t.addEventListener(n,function e(){t.removeEventListener(n,e,{passive:!0}),null!==r&&(clearTimeout(r),r=null)},{passive:!0})}},{key:"_addPrefetchLink",value:function(i){return this.prefetched.add(i.href),new Promise(function(e,t){var n=document.createElement("link");n.rel="prefetch",n.href=i.href,n.onload=e,n.onerror=t,document.head.appendChild(n)}).catch(function(){})}},{key:"_prepareUrl",value:function(e){if(null===e||"object"!==(void 0===e?"undefined":r(e))||!1 in e||-1===["http:","https:"].indexOf(e.protocol))return null;var t=e.href.substring(0,this.config.siteUrl.length),n=this._getPathname(e.href,t),i={original:e.href,protocol:e.protocol,origin:t,pathname:n,href:t+n};return this._isLinkOk(i)?i:null}},{key:"_getPathname",value:function(e,t){var n=t?e.substring(this.config.siteUrl.length):e;return n.startsWith("/")||(n="/"+n),this._shouldAddTrailingSlash(n)?n+"/":n}},{key:"_shouldAddTrailingSlash",value:function(e){return this.config.usesTrailingSlash&&!e.endsWith("/")&&!this.regex.fileExt.test(e)}},{key:"_isLinkOk",value:function(e){return null!==e&&"object"===(void 0===e?"undefined":r(e))&&(!this.prefetched.has(e.href)&&e.origin===this.config.siteUrl&&-1===e.href.indexOf("?")&&-1===e.href.indexOf("#")&&!this.regex.excludeUris.test(e.href)&&!this.regex.images.test(e.href))}}],[{key:"run",value:function(){"undefined"!=typeof RocketPreloadLinksConfig&&new n(new RocketBrowserCompatibilityChecker({capture:!0,passive:!0}),RocketPreloadLinksConfig).init()}}]),n}();t.run();
+}());
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/litepicker-polyfills-ie11/dist/index.js?ver=5.8.2" id="polyfill-js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js?ver=5.8.2" id="lite-picker-js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/litepicker/dist/plugins/mobilefriendly.js?ver=5.8.2" id="lite-picker-mobile-js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js?ver=5.8.2" id="slick-js-js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/sweetalert2@10?ver=5.8.2" id="sweet-alert-js"></script>
+<script type="text/javascript" src="https://comy.co.il/wp-includes/js/dist/vendor/lodash.min.js?ver=4.17.19" id="lodash-js"></script>
+<script type="text/javascript" id="lodash-js-after">
+window.lodash = _.noConflict();
+</script>
+<script type="text/javascript" src="https://comy.co.il/wp-content/themes/comy/script/app.js?ver=1785072989" id="app-js"></script>
+<script type="text/javascript" src="https://comy.co.il/wp-includes/js/wp-embed.min.js?ver=5.8.2" id="wp-embed-js"></script>
+<!-- Google Tag Manager (noscript) in body -->
+<noscript>
+	<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8KVMWZ"
+	        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+<style>
+	@media all and (max-device-width: 800px) {
+		div#live-chat-widget {
+			right: auto !important;
+			left: 0 !important;
+		}
+	}
+</style>
+
+
+
+
+
+
+<script type="text/javascript" id="" charset="">!function(b,e,f,g,a,c,d){b.fbq||(a=b.fbq=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},b._fbq||(b._fbq=a),a.push=a,a.loaded=!0,a.version="2.0",a.queue=[],c=e.createElement(f),c.async=!0,c.src=g,d=e.getElementsByTagName(f)[0],d.parentNode.insertBefore(c,d))}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","482338462933839");fbq("track","PageView");</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=482338462933839&amp;ev=PageView&amp;noscript=1"></noscript>
+
+<script id="" text="" charset="" type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=AW-406018887"></script>
+<script type="text/javascript" id="" charset="">!function(b,e,f,g,a,c,d){b.fbq||(a=b.fbq=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},b._fbq||(b._fbq=a),a.push=a,a.loaded=!0,a.version="2.0",a.queue=[],c=e.createElement(f),c.async=!0,c.src=g,d=e.getElementsByTagName(f)[0],d.parentNode.insertBefore(c,d))}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","482338462933839");fbq("track","PageView");</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=482338462933839&amp;ev=PageView&amp;noscript=1"></noscript>
+
+<script type="text/javascript" id="" charset="">window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date);gtag("config","AW-406018887");</script>
+
+<script type="text/javascript" id="" charset="">!function(b,e,f,g,a,c,d){b.fbq||(a=b.fbq=function(){a.callMethod?a.callMethod.apply(a,arguments):a.queue.push(arguments)},b._fbq||(b._fbq=a),a.push=a,a.loaded=!0,a.version="2.0",a.queue=[],c=e.createElement(f),c.async=!0,c.src=g,d=e.getElementsByTagName(f)[0],d.parentNode.insertBefore(c,d))}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");fbq("init","1882798952183686");fbq("track","PageView");</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1882798952183686&amp;ev=PageView&amp;noscript=1"></noscript>
+</body></html>
