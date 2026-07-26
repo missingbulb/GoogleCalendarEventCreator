@@ -160,9 +160,15 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       p.add(addr);
     } else if (addr && typeof addr === "object") {
       p.add(addr.streetAddress).add(addr.addressLocality).add(addr.addressRegion).add(addr.postalCode);
-      // A country code after a region is noise ("..., NY, us"); keep the
-      // country only when it's the most specific thing we have.
-      if (!addr.addressRegion) p.add(countryName(addr.addressCountry));
+      // A country code after a region is noise ("..., NY, us"), and so is a
+      // country bolted straight onto a street whose city the address left out:
+      // "Bialik Street 27, Israel" skips a level of the hierarchy and names no
+      // findable place, which is why a dedicated source writes the street alone.
+      // So append the country only when nothing finer already stands in for it —
+      // no region, and either the address named its city or it gave no street at
+      // all (leaving the country the most specific thing we have).
+      const skipsCity = GCal.clean(addr.streetAddress) && !GCal.clean(addr.addressLocality);
+      if (!addr.addressRegion && !skipsCity) p.add(countryName(addr.addressCountry));
     }
     return p.join();
   }
