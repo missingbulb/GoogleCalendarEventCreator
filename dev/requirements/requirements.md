@@ -1389,17 +1389,16 @@ an allowlisted host — the icon stays the manifest default, **blue**.
 
 ## 11. Required explicit support for Extractors
 
-Each host below has **explicit support** — a registered source whose
-`matches(host)` claims the page, so the toolbar icon goes green and the popup
-presents the event as a supported site's own. Support comes in two forms, and a
-host is equally supported either way:
+Each host below has **explicit support** — it is listed in `supportedDomains`
+(`extension/fallback-lists.json`), the one declaration of the hosts we claim, so
+the toolbar icon goes green and the popup presents the event as a supported
+site's own. What does the extracting comes in two forms, and a host is equally
+supported either way:
 
 - a **per-site source** under `extension/event-extractors/custom/`, stating the
   fields the core generic extractor gets wrong for that site;
 - **the core generic extractor alone**, for a site whose pages describe
-  themselves completely — the host is listed in
-  `extension/generic-sites.js` and has no per-site file at
-  all.
+  themselves completely — the host has no per-site file at all.
 
 This section is the **executable catalogue** of that support: each leaf is one
 supported host, validated by a

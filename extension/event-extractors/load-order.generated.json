@@ -27,6 +27,5 @@
   "event-extractors/custom/ticketmaster.js",
   "event-extractors/custom/visit-tel-aviv.js",
   "generic-extractor.js",
-  "generic-sites.js",
   "event-extractors/assemble-events.js"
 ]

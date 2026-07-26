@@ -5,7 +5,7 @@ in [requirements.md §12–§16](../requirements/requirements.md); the per-file 
 [fileDescriptions.md](fileDescriptions.md); tunable product decisions live in
 `extension/config.js`.
 
-`toolbar-icon.js` colors the toolbar icon by host (a source matches or it doesn't). On
+`toolbar-icon.js` colors the toolbar icon by host (from `fallback-lists.json`'s host lists). On
 click, `popup.js` injects `event-extractors/` and runs `assemble-events.js`, which runs
 `generic-extractor.js` and merges the matching `custom/<site>.js` over it;
 `build-calendar-url.js` builds the URL `events-view.js` renders.
@@ -23,7 +23,7 @@ example for both is this repo's auto-extractor pipeline
 
 Everything — the popup and the tests alike — runs through one top-level
 extractor, `GCal.extract()`, which selects the per-URL source internally and
-returns `{ events, supported, fallback }`. Each event is self-described (title, location,
+returns `{ events, fallback }`. Each event is self-described (title, location,
 description, timezone, and its timing in `times[]` — one instance per showing,
 each with its own start/end/duration), so a caller can build a Calendar URL for
 any instance without consulting page-level state. Events that match on every
@@ -49,18 +49,26 @@ Extraction is **two layers, not two paths**:
    page, a multi-night run), which replaces the base rather than overriding it.
    Each lives in its own file with a comment describing the HTML it expects.
 
-So a site whose pages describe themselves completely needs **no source file at
-all**: its host goes in `extension/generic-sites.js` and is
-fully supported by the base alone — same green icon, same popup, no
-"Suggest Correction" prompt. When adding support for a platform, check the
-generic extractor first and only write a `custom/<site>.js` for what it gets
-wrong; either way run `npm run index` to regenerate the load list
-(`extension/event-extractors/load-order.generated.json`). A source that shrinks to
-nothing gets deleted and its host moves to `generic-sites.js`.
+**Being supported is declared, not derived.** `supportedDomains` in
+`extension/fallback-lists.json` is the one list of hosts we claim; both the
+toolbar service worker (icon color) and the popup (which render state) read it
+directly, so they cannot disagree. It is NOT a mirror of the extractors: a site
+whose pages describe themselves completely is fully supported with **no source
+file at all** — same green icon, same popup, no "Suggest Correction" prompt —
+because no per-site source claimed the page and so nothing was missed. The one
+invariant a drift test guards is the other direction: every per-site source's
+host must appear in that list.
 
-An **unsupported** host (no registered source of either kind) simply gets the
-base events with `supported: false`; the popup then decides whether they're
-complete enough to show and whether to invite a source request.
+So adding support for a platform is: list the host, then check whether the
+generic extractor already reads its pages right. If it does, you're done. If it
+doesn't, add a `custom/<site>.js` for what it gets wrong and run `npm run index`
+to regenerate the load list
+(`extension/event-extractors/load-order.generated.json`). A source that shrinks to
+nothing is simply deleted — its host stays listed, and stays supported.
+
+An **unsupported** host (not on the list) gets the same base events; the popup
+then decides whether they're complete enough to show and whether to invite a
+source request.
 
 The popup's `chooseContent` is the single decision behind what's rendered: it
 keys off `supported`, the host's classification against `extension/config.js`'s

@@ -1,25 +1,20 @@
-// Drift guard: config.js's supportedDomains (fallback-lists.json) — the
-// static list the auto-extractor triage uses to skip a request for a host we
-// already cover — must stay in sync with the actual registered sources. The
-// runtime never relies on this list (it derives "supported" straight from the
-// sources via GCal.isSupportedHost); the list exists only so the triage can
-// decide without loading the pipeline. This test stops the two from disagreeing.
+// Drift guard: every per-site extractor's host must be declared in
+// fallback-lists.json's `supportedDomains` — so a source can never exist for a
+// host we don't claim as supported (the toolbar icon would stay blue while the
+// popup showed the source's events, and the auto-extractor triage would accept a
+// "please support this site" request for a site we already cover).
 //
-// "Registered sources" is BOTH kinds: the per-site extractors under custom/, and
-// the hosts generic-sites.js registers as fully served by the core generic
-// extractor alone (a matcher with no extract()). Both make a host supported, so
-// both must be mirrored in supportedDomains — and moving a host between them
-// must not disturb the list.
+// ONE DIRECTION ONLY, on purpose. The reverse — "every listed domain has a
+// source" — is deliberately NOT asserted: `supportedDomains` is the declaration
+// of what we support, and a site whose pages the core generic extractor already
+// reads correctly is supported with no per-site file at all. Requiring a source
+// per entry is exactly the duplication this guard used to force.
 //
-// Each source's matches() is a regex or closure, not a domain literal, so we
-// can't read the domain out of it — instead we LOAD the real sources (DOM-free,
-// pure Node vm, the same way extension-test/integration/extension-loads.test.js boots
-// them: only matches() runs here, and that's a pure host check) and run the
-// matchers against the list, both directions:
-//   - every listed domain is matched by some source  (no stale/orphan entries);
-//   - every source matches some listed domain         (no source left off).
-// So a new source added without a supportedDomains entry, or an entry left
-// behind after a source is removed/renamed, fails here.
+// Each source's matches() is a regex, not a domain literal, so we can't read the
+// domain out of it — instead we LOAD the real sources (DOM-free, pure Node vm,
+// the same way extension-test/integration/extension-loads.test.js boots them: only
+// matches() runs here, and that's a pure host check) and run the matchers
+// against the list.
 "use strict";
 
 const { test } = require("node:test");
@@ -31,8 +26,8 @@ const vm = require("node:vm");
 const ROOT = path.join(__dirname, "..", "..");
 const EXT = path.join(ROOT, "extension"); // the extension root; pipeline paths are relative to it
 
-// Load event-extractors/registry.js + every event-extractors/custom/*.js + the
-// generic-site registrations into a bare sandbox.
+// Load event-extractors/registry.js + every event-extractors/custom/*.js into a
+// bare sandbox.
 // No DOM is stubbed: a source's extract() touches document, but only its
 // matches() runs here, and that's a pure host regex. registry.js sets
 // globalThis.GCal (the context's global), each source pushes its matcher onto
@@ -47,7 +42,6 @@ function loadSources() {
     .filter((f) => f.endsWith(".js"))
     .sort();
   for (const f of sources) run(`event-extractors/custom/${f}`);
-  run("generic-sites.js");
   return sandbox.GCal;
 }
 
@@ -63,23 +57,12 @@ test("supportedDomains is a non-empty array", () => {
   );
 });
 
-test("every supportedDomains entry is matched by a real source (no orphans)", () => {
-  for (const domain of supportedDomains) {
-    assert.ok(
-      GCal.sources.some((s) => s.matches(domain)),
-      `supportedDomains lists "${domain}", but no source's matches() accepts it — ` +
-        `remove the stale entry from extension/fallback-lists.json, add the host to ` +
-        `generic-sites.js, or fix the host`
-    );
-  }
-});
-
 test("every source is represented by a supportedDomains entry (none missing)", () => {
   for (const s of GCal.sources) {
     assert.ok(
       supportedDomains.some((domain) => s.matches(domain)),
       `source "${s.name}" matches none of supportedDomains — add a domain it covers ` +
-        `to extension/fallback-lists.json so the triage can skip requests for it`
+        `to extension/fallback-lists.json, or delete the source if we don't claim its host`
     );
   }
 });

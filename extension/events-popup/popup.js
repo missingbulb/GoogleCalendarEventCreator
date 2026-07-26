@@ -5,7 +5,7 @@
 // — are loaded on demand with import() so the popup pulls in just what the page
 // needs.
 import { GCalConfig } from "../config.js";
-import { classifyHost, isPresentableFallbackEvent } from "../fallback-policy.js";
+import { classifyHost, isSupportedDomain, isPresentableFallbackEvent } from "../fallback-policy.js";
 import { deriveWaitSelector } from "./derive-wait-selector.js";
 
 async function init() {
@@ -27,6 +27,14 @@ async function init() {
     // Restricted page (chrome://, Web Store, etc.) — fall back to tab metadata.
     console.warn("Could not extract from page:", e);
   }
+
+  // Whether we support this host is a DECLARATION, not something the extraction
+  // can report: fallback-lists.json's `supportedDomains` is the one list, and the
+  // toolbar icon reads the very same list to color itself — so the popup's
+  // supported/unsupported split and the icon cannot disagree. The injected
+  // pipeline never sees it (the page world has no access to product config); all
+  // it reports is `fallback` — that a per-site source claimed the page and missed.
+  data.supported = isSupportedDomain(tab.url);
 
   // If we found an event, derive the ScraperAPI wait_for_selector for a possible
   // source request (#603) — a SECOND, separate injection, because this is a
@@ -251,11 +259,11 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 // link. The five states, in the order they're decided (specified in
 // dev/requirements/requirements.md §12–§16; diagram in dev/requirements/shared/popup-states-flowchart.png):
 //
-//   State 1 — supported host (a registered source matched): show its events.
-//     `supported` is the same GCal.isSupportedHost check that colors the toolbar
-//     icon, so the popup's supported/unsupported split and the icon agree. This
-//     covers a host served by the core generic extractor alone as much as one
-//     with a per-site source — both are support, and neither is a `fallback`.
+//   State 1 — supported host (its host is in `supportedDomains`): show its
+//     events. That's the same list the toolbar icon colors itself from, so the
+//     popup's supported/unsupported split and the icon agree. It covers a host
+//     the core generic extractor serves on its own as much as one with a per-site
+//     source — both are support, and neither is a `fallback`.
 //   State 1b — supported host whose PER-SITE source contributed NOTHING, so what
 //     the orchestrator assembled is the generic base alone (`data.fallback`):
 //     show those complete events AND a "Suggest Correction" link, since the

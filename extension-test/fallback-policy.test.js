@@ -13,9 +13,9 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 // fallback-policy.js is an ES module; import it before the tests run.
-let classifyHost, isPresentableFallbackEvent;
+let classifyHost, isSupportedDomain, isPresentableFallbackEvent;
 before(async () => {
-  ({ classifyHost, isPresentableFallbackEvent } = await import(
+  ({ classifyHost, isSupportedDomain, isPresentableFallbackEvent } = await import(
     pathToFileURL(path.join(__dirname, "..", "extension", "fallback-policy.js"))
   ));
 });
@@ -65,4 +65,34 @@ test("classifyHost uses the shipped config by default (meetup.com allow, cnn.com
   assert.equal(classifyHost("https://www.meetup.com/some-group/events/123/"), "allow");
   assert.equal(classifyHost("https://cnn.com/2026/01/01/some-article"), "deny");
   assert.equal(classifyHost("https://unlisted.example/e/1"), "none");
+});
+
+// --- isSupportedDomain -------------------------------------------------------
+// THE answer to "do we support this host". It is load-bearing in two places that
+// must agree: the popup reads it to pick its render state, and the toolbar
+// service worker colors the icon from the very same `supportedDomains` list. It
+// is NOT derived from the extractors — a host we support may have a per-site
+// source under event-extractors/custom/, or none at all where the core generic
+// extractor already reads its pages correctly.
+const SUPPORTED = { supportedDomains: ["example.com"] };
+
+test("isSupportedDomain matches a host, its www, and its subdomains", () => {
+  assert.equal(isSupportedDomain("https://example.com/e/1", SUPPORTED), true);
+  assert.equal(isSupportedDomain("https://www.example.com/e/1", SUPPORTED), true);
+  assert.equal(isSupportedDomain("https://tickets.example.com/e/1", SUPPORTED), true);
+});
+
+test("isSupportedDomain does not match a near-miss host or an unparseable URL", () => {
+  assert.equal(isSupportedDomain("https://notexample.com/e/1", SUPPORTED), false);
+  assert.equal(isSupportedDomain("https://example.com.evil.test/e/1", SUPPORTED), false);
+  assert.equal(isSupportedDomain("chrome://extensions", SUPPORTED), false);
+});
+
+test("isSupportedDomain answers for a host we support with NO per-site extractor", () => {
+  // stubhub.com has no event-extractors/custom/ file — the core generic extractor
+  // reads it — and it is supported all the same, straight off the shipped list.
+  assert.equal(isSupportedDomain("https://www.stubhub.com/event/154321/"), true);
+  // …exactly as for a host that does have one.
+  assert.equal(isSupportedDomain("https://www.meetup.com/g/events/1/"), true);
+  assert.equal(isSupportedDomain("https://unlisted.example/e/1"), false);
 });

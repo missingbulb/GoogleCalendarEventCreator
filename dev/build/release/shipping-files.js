@@ -21,7 +21,6 @@ const SHIPPING_PATHS = [
   "fallback-policy.js", // host classifier for the generic fallback; imported by the popup at runtime
   "fallback-lists.json", // the allow/deny/supported host lists; fetched by the worker, imported by config.js
   "generic-extractor.js", // the core generic extractor — injected on every page (outside event-extractors/ by design)
-  "generic-sites.js", // the hosts it alone serves; injected alongside it
   "event-extractors", // the per-site extractors + helpers + registry/orchestrator + generated load list (popup fetches/injects)
   "events-popup", // popup (html/css/js + views) and the calendar-URL builder
   "icon", // the toolbar-icon service worker and its images/ PNGs the manifest references

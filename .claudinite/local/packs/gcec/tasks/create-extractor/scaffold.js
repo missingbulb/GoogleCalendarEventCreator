@@ -40,8 +40,8 @@ function sourceStub(url) {
 // (generic-extractor.js), which has already read the page's own
 // schema.org JSON-LD, Open Graph tags, microdata and visible dates. State ONLY
 // the fields it gets wrong — anything you leave out comes from that base. If it
-// turns out to get everything right, delete this file and add the host to
-// generic-sites.js instead.
+// turns out to get everything right, just delete this file — the host is already
+// registered in supportedDomains, so the site stays fully supported without it.
 (() => {
   const { text, firstText, blockText, normalizeDateValue } = GCal;
 

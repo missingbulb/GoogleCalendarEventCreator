@@ -14,8 +14,8 @@
 //               extractor on a supported page.
 //
 // The gap between the two IS the per-site sources' remaining value: a page where
-// it closes to zero is a candidate for deleting that source and listing its host
-// in generic-sites.js.
+// it closes to zero is a candidate for deleting that source outright — its host
+// stays in supportedDomains, so the site stays fully supported.
 //
 // We then grade, field by field, how close the fallback's PRIMARY event
 // (events[0] after the pipeline's own chronological sort) comes to the custom
@@ -379,7 +379,7 @@ function renderMarkdown(cov, watermark) {
       "(`events[0]` after the chronological sort) field-by-field against the custom " +
       "primary event, counting a field only when the custom event filled it. A page " +
       "where the gap closes to zero is a candidate for deleting its per-site source " +
-      "and listing the host in `generic-sites.js`."
+      "outright — the host stays in `supportedDomains`, so the site stays supported."
   );
   L.push("");
   L.push(

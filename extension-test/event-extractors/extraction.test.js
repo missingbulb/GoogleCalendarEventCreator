@@ -58,7 +58,7 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
 // --- The two-layer model: core generic base + per-site overrides -------------
 // generic-extractor.js runs on every page and produces the base event; a per-site
 // source states only the fields it gets better, and they win field by field. A
-// host listed in generic-sites.js has no per-site file at all and is
+// site the base already reads correctly has no per-site file at all and is
 // supported by the base alone. See assemble-events.js.
 
 test("Site overrides win field by field over the generic base", () => {
@@ -86,11 +86,13 @@ test("Site overrides win field by field over the generic base", () => {
   assert.equal(e.ctz, "Asia/Jerusalem");
 });
 
-test("A generic-sites host is fully supported with no per-site extractor", () => {
-  // stubhub.com has no custom/<site>.js: generic-sites.js registers the host
-  // and the core generic extractor reads the page's JSON-LD on its own. The host
-  // is supported like any other — and `fallback` stays false, because nothing was
-  // missed: the generic extractor IS this site's support.
+test("A host with no per-site extractor is read by the generic base, and is not a fallback", () => {
+  // stubhub.com has no custom/<site>.js at all — the core generic extractor reads
+  // the page's JSON-LD on its own. `fallback` stays false because no dedicated
+  // source claimed the page and missed it: nothing was missed. (That stubhub is a
+  // SUPPORTED host is a separate, declared fact — fallback-lists.json's
+  // supportedDomains, asserted in integration/supported-domains.test.js — and the
+  // popup, not the pipeline, reads it.)
   const html = `
     <script type="application/ld+json">
     { "@type": "MusicEvent", "name": "Late Night Jazz",
@@ -100,7 +102,6 @@ test("A generic-sites host is fully supported with no per-site extractor", () =>
     </script>`;
 
   const ev = extractFromHtml(html, "https://www.stubhub.com/event/154321/");
-  assert.equal(ev.supported, true);
   assert.equal(ev.fallback, false);
   assert.equal(ev.events.length, 1);
   assert.equal(ev.events[0].title, "Late Night Jazz");
@@ -1229,7 +1230,7 @@ test("Supported host, no event on the page: returns no events", () => {
 
   const ev = extractFromHtml(html, "https://www.cinema.co.il/");
   assert.equal(ev.events.length, 0); // nothing suggested
-  assert.equal(ev.supported, true); // but the host is still recognized (green icon)
+  assert.equal(ev.fallback, false); // and no correction to suggest for a non-event page
 });
 
 test("Supported host, dedicated extractor finds nothing but the page has a generic event: falls back and flags it (#456)", () => {
@@ -1242,8 +1243,7 @@ test("Supported host, dedicated extractor finds nothing but the page has a gener
     <address>The Echo, Los Angeles</address>`;
 
   const ev = extractFromHtml(html, "https://www.meetup.com/some-group/events/123/");
-  assert.equal(ev.supported, true); // the host stays supported (green icon)
-  assert.equal(ev.fallback, true);  // the events came from the generic fallback
+  assert.equal(ev.fallback, true);  // the events came from the generic base alone
   assert.equal(ev.events.length, 1);
   assert.equal(ev.events[0].title, "Indie Rock Night");
   assert.equal(ev.events[0].times[0].location, "The Echo, Los Angeles");
@@ -1255,7 +1255,6 @@ test("Supported host, neither dedicated nor fallback finds an event: nothing, fa
 
   const ev = extractFromHtml(html, "https://www.meetup.com/brooklyn-rustaceans/");
   assert.equal(ev.events.length, 0);
-  assert.equal(ev.supported, true);
   assert.equal(ev.fallback, false);
 });
 

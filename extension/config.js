@@ -74,14 +74,17 @@ export const GCalConfig = {
   sourceFallbackAllowlist: fallbackLists.allowlist,
   sourceFallbackDenylist: fallbackLists.denylist,
 
-  // Hosts that already have a dedicated per-site source. This is NOT a fallback
-  // list — it's a static mirror of the sources' own matches(), used ONLY by the
-  // auto-extractor triage to close a "please support <host>" request for a site
-  // we already cover, before spending an agent run. The runtime never reads it:
-  // the extension derives "is this supported?" straight from the sources via
-  // GCal.isSupportedHost (in registry.js). The list
-  // can't silently drift from the sources — a drift-guard test loads the real
-  // sources and asserts each entry is matched by a source and each source is
-  // matched by an entry.
+  // THE list of hosts we support — the single declaration behind "is this a
+  // supported site", read by everything that needs the answer: the toolbar
+  // service worker (green icon), the popup (which render state), and the
+  // auto-extractor triage (close a "please support <host>" request for a site we
+  // already cover, before spending an agent run).
+  //
+  // This is NOT a mirror of the extractors. A supported host may have a per-site
+  // source under event-extractors/custom/, or none at all when the core generic
+  // extractor already reads its pages correctly — support is declared here, and
+  // an extractor is only added for what the generic extractor gets wrong. The one
+  // invariant, guarded by a drift test: every per-site source's host appears
+  // here, so a source can never exist for a host we don't claim.
   supportedDomains: fallbackLists.supportedDomains,
 };

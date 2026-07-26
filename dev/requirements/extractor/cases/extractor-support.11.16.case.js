@@ -5,8 +5,8 @@
 module.exports = {
   tbd: true,
   description:
-    "facebook.com — fully covered by the core generic extractor (generic-sites.js); " +
+    "facebook.com — fully covered by the core generic extractor, with no per-site file; " +
     "unit-tested only, bot-blocked from caching",
   host: "facebook.com",
-  source: "extension/generic-sites.js",
+  source: "extension/generic-extractor.js",
 };

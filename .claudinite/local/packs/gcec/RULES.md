@@ -210,7 +210,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   hints, see `helpers/derive-timezone.js` — `ctz`). This is the comparison the
   fallback-coverage gate automates — and a case where it shows NO gap is a
   candidate for deleting the per-site source and listing the host in
-  `generic-sites.js`.
+  `supportedDomains`).
 
 ## Architecture rules of the road
 
@@ -221,25 +221,31 @@ this section as part of the same change (the design doc itself is
 - **`extension/event-extractors/` is the extensibility point for PER-SITE
   extractors, and nothing else belongs in it.** The generic extractor is a
   fundamentally different thing — one fixed, site-agnostic reader, not another
-  entry in the set — so it and its host list live at the extension root
-  (`extension/generic-extractor.js`, `extension/generic-sites.js`).
+  entry in the set — so it lives at the extension root
+  (`extension/generic-extractor.js`).
 - **The core generic extractor is the base layer of every extraction** — it runs
   on every page, and a per-site source is only a layer of *overrides* merged over
   it, stating the fields it gets better. A source never re-reads what the page
   already says about itself, and the generic extractor may never know about a
   specific site.
+- **Being supported is DECLARED, never derived from the extractors.**
+  `supportedDomains` in `extension/fallback-lists.json` is the one list of hosts
+  we claim, read directly by the toolbar worker and the popup. Never add a second
+  list, and never register a placeholder source just to make a host count as
+  supported. The only guarded direction is that every per-site source's host
+  appears in the list.
 - **A site we fully support gets no extractor file when there is nothing to
-  override.** Its host goes in `generic-sites.js` (a `matches`-only
-  registration) and stays fully supported — green icon, no correction prompt.
-  When a `custom/<site>.js` shrinks to nothing, delete it and move the host
-  there; when a generic-site starts needing a fix the generic extractor can't
-  make site-agnostically, move it back. Never keep a file whose only content is
-  a restatement of the generic base, and never annotate one as "nothing to add".
+  override.** It stays listed in `supportedDomains` and stays fully supported —
+  green icon, no correction prompt — with no file at all. When a
+  `custom/<site>.js` shrinks to nothing, just delete it; when such a site starts
+  needing a fix the generic extractor can't make site-agnostically, add the file
+  back. Never keep a file whose only content is a restatement of the generic
+  base, and never annotate one as "nothing to add".
 - Adding support for a new host is the most common change — the architecture
-  must keep it a single-file change: a host added to `generic-sites.js`,
-  or one self-contained new `extension/event-extractors/custom/<site>.js`, plus
-  regenerating the load list — touching nothing else and assuming nothing about
-  other extractors.
+  must keep it a single-file change: a host added to `supportedDomains`, plus —
+  only when the generic extractor gets that site wrong — one self-contained new
+  `extension/event-extractors/custom/<site>.js` and a regenerated load list,
+  touching nothing else and assuming nothing about other extractors.
 
 ## Capture policy — lessons land in the local packs
 

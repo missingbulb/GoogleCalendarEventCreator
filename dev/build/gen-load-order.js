@@ -14,20 +14,14 @@
 // Ordering rule (the only ordering that matters): the registry and shared
 // helpers load FIRST (they build globalThis.GCal), the per-site sources
 // (event-extractors/custom/*.js) load next — sorted, for a stable conflict-free
-// list — and the tail is pinned: the generic extractor and the hosts it alone
-// serves, then the orchestrator (event-extractors/assemble-events.js, whose
-// completion value is the extraction result).
+// list — and the tail is pinned: the generic extractor, then the orchestrator
+// (event-extractors/assemble-events.js, whose completion value is the result).
 //
-// The two generic files live OUTSIDE event-extractors/ (at the extension root):
+// generic-extractor.js lives OUTSIDE event-extractors/ (at the extension root):
 // event-extractors/ is the extensibility point for per-site extractors, and the
 // generic extractor is a different thing — the base layer every one of them
-// overrides. They're pinned by name here rather than globbed, since they're the
-// only injected files outside that folder.
-//
-// generic-sites.js is pinned AFTER every custom/<site>.js on purpose: it
-// registers a bare matcher per host served by the generic extractor alone, and
-// assemble-events.js takes the FIRST source whose matches() accepts the host, so
-// a dedicated source added for one of those hosts always wins.
+// overrides. It's pinned by name here rather than globbed, since it's the only
+// injected file outside that folder.
 
 "use strict";
 
@@ -44,12 +38,11 @@ const EXT = path.join(ROOT, "extension");
 const DIR = "event-extractors";
 const OUTPUT = "event-extractors/load-order.generated.json";
 
-// All paths below are extension-root-relative, so the two generic files carry no
+// All paths below are extension-root-relative, so generic-extractor.js carries no
 // directory prefix while everything else sits under event-extractors/.
 const PINNED_FIRST = [`${DIR}/registry.js`]; // followed by helpers/*, added below
-// The generic layer, then the orchestrator. See the ordering rule above for why
-// generic-sites.js is pinned behind the per-site sources.
-const PINNED_LAST = ["generic-extractor.js", "generic-sites.js", `${DIR}/assemble-events.js`];
+// The generic base layer, then the orchestrator.
+const PINNED_LAST = ["generic-extractor.js", `${DIR}/assemble-events.js`];
 
 const isJs = (f) => f.endsWith(".js");
 

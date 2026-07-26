@@ -26,7 +26,7 @@ export function isPresentableFallbackEvent(event) {
 }
 
 // True when `host` equals `entry` or is a subdomain of it — the same shape of
-// host match GCal.isSupportedHost uses for sources.
+// host match a source's own matches() uses.
 function hostMatchesList(host, list) {
   return (list || []).some((entry) => host === entry || host.endsWith("." + entry));
 }
@@ -41,13 +41,15 @@ function hostFromUrl(url) {
   }
 }
 
-// True when `url`'s host already has a dedicated per-site source, per
-// config.js's supportedDomains. That list is a static mirror of the sources'
-// own matches(); the runtime truth is GCal.isSupportedHost
-// (event-extractors/registry.js), which runs the matchers directly. Used ONLY by the
-// auto-extractor triage to close a request for a site we already cover before
-// spending an agent run. Subdomain-aware, same host match as the allow/deny
-// lists. `lists` defaults to the shipped config; tests pass their own.
+// True when we support `url`'s host, per config.js's supportedDomains — THE one
+// declaration of which hosts we claim. It is not derived from the extractors:
+// a host we support may have a per-site source under event-extractors/custom/,
+// or may be served by the core generic extractor alone with no source file at
+// all. Read by the popup (to pick its render state), by the toolbar service
+// worker via the same list (to color the icon), and by the auto-extractor triage
+// (to close a request for a site we already cover before spending an agent run).
+// Subdomain-aware, same host match as the allow/deny lists. `lists` defaults to
+// the shipped config; tests pass their own.
 export function isSupportedDomain(url, lists = GCalConfig) {
   return hostMatchesList(hostFromUrl(url), lists.supportedDomains);
 }

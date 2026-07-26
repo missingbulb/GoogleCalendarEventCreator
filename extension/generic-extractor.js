@@ -8,8 +8,9 @@
 //   - on a supported host, assemble-events.js runs it FIRST and merges the site's
 //     source over it, so a per-site extractor only has to state the fields this
 //     one gets wrong (event-extractors/custom/<site>.js);
-//   - on a host listed in generic-sites.js, it IS the site's support — those
-//     hosts are fully supported with no per-site extractor at all.
+//   - on a supported host with no per-site source, it IS the site's support —
+//     such a site is fully supported (supportedDomains lists it) with no
+//     extractor file of its own.
 //
 // It deliberately lives OUTSIDE event-extractors/, which is the extensibility
 // point for per-site extractors: this is a fundamentally different thing — one

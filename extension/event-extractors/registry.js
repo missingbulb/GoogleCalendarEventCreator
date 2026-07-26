@@ -5,10 +5,10 @@
 // `GCal.sources` is the registry: each per-site source pushes
 //   { name, matches(hostname), extract() }
 // onto it, and assemble-events.js takes the first source whose `matches` returns
-// true. `extract()` is OPTIONAL: a source registered with only `matches` is a
-// host that generic-sites.js declares fully covered by the core generic
-// extractor, so there is nothing to override. Either way the host counts as
-// supported (isSupportedHost below, and hence the toolbar icon).
+// true. A host with no source is not thereby unsupported — whether we support a
+// host is declared in extension/fallback-lists.json's `supportedDomains`, and a
+// site the core generic extractor already reads correctly is supported with no
+// source here at all.
 //
 // A source's `extract()` returns OVERRIDES, not a whole event: the core generic
 // extractor (generic-extractor.js) has already produced a base event for the page, and
@@ -43,21 +43,6 @@
 // isDeniedHost() reads it at call time via `|| []` so it degrades gracefully.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
   sources: [],
-
-  // THE single source of truth for "is this page a supported site": its
-  // hostname has a registered source whose `matches` returns true. The toolbar
-  // service worker derives the icon color from this;
-  // the popup gets the same answer from the injected extraction result
-  // (assemble-events.js reports whether a source matched). DOM-free, so it runs
-  // the same in the service worker, the popup, and content-script contexts.
-  isSupportedHost(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "");
-      return GCal.sources.some((s) => s.matches(host));
-    } catch (e) {
-      return false; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
-    }
-  },
 
   // True when the host is on the fallback denylist — the popup suppresses
   // fallback events there, and the toolbar icon shows a gray tile.
