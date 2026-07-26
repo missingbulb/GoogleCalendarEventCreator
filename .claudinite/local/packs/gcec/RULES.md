@@ -130,6 +130,17 @@ below). Portable rules these instantiate live in the canon packs/skills.
   workaround for a check finding** (an accept, a suppression pragma): a stale
   canon twice produced spurious findings whose fixes had already merged
   (#664, #665).
+- **A stale `origin/main` fabricates work-scoped check findings** — the checks
+  resolve their base to the first of `origin/main` / `origin/master` / `main` /
+  `master` that exists (`resolveBaseRef` in
+  `.claudinite/shared/engine/checks/helpers/repo-context.mjs`), so an unfetched
+  remote-tracking ref leaves the merge-base behind main's real tip and commits
+  already **on** main get reported as introduced by your work. A fresh session
+  on a branch with *no commits of its own* was told to rebase away main's own
+  merge commit — a blocking `squash-merge-history` finding that a single
+  `git fetch` erased (#717). **`git fetch origin main` before believing — or
+  acting on — a work-scoped finding**; the destructive fix it suggests is the
+  trap, not the finding.
 - **The cloud Setup script runs as root starting in the repo's parent dir**,
   not the checkout — a bare `npm ci` there silently installs nothing;
   `.claudinite/shared/engine/hooks/environment-setup-command.sh` `cd`s into the checkout first
