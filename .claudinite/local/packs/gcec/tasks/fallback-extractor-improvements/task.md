@@ -104,8 +104,8 @@ bash .claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/postcond
 Branch `claude/fallback-coverage/<date>`, commit the change plus the regenerated
 GENERATED artifacts, and push. Then open a **PR for review** — it never merges
 itself; from there it goes through the usual flow (the gcec pack's
-[merge-and-ci skill](../../skills/merge-and-ci/SKILL.md)), and CI must
-go green **twice** (it touches `test:live`). PR body: the hypothesis, why it's generic (which unseen sites
+[merge-and-ci skill](../../skills/merge-and-ci/SKILL.md)). PR body: the
+hypothesis, why it's generic (which unseen sites
 it helps), how the jsdom trap was ruled out, the before→after numbers, and the
 covering test.
 
