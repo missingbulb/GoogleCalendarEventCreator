@@ -86,11 +86,11 @@ test("Site overrides win field by field over the generic base", () => {
   assert.equal(e.ctz, "Asia/Jerusalem");
 });
 
-test("A host with no per-site extractor is read by the generic base, and is not a fallback", () => {
+test("A host with no per-site extractor is read by the generic base, and is not a miss", () => {
   // stubhub.com has no custom/<site>.js at all — the core generic extractor reads
-  // the page's JSON-LD on its own. `fallback` stays false because no dedicated
+  // the page's JSON-LD on its own. `sourceMissed` stays false because no dedicated
   // source claimed the page and missed it: nothing was missed. (That stubhub is a
-  // SUPPORTED host is a separate, declared fact — fallback-lists.json's
+  // SUPPORTED host is a separate, declared fact — host-lists.json's
   // supportedDomains, asserted in integration/supported-domains.test.js — and the
   // popup, not the pipeline, reads it.)
   const html = `
@@ -102,7 +102,7 @@ test("A host with no per-site extractor is read by the generic base, and is not 
     </script>`;
 
   const ev = extractFromHtml(html, "https://www.stubhub.com/event/154321/");
-  assert.equal(ev.fallback, false);
+  assert.equal(ev.sourceMissed, false);
   assert.equal(ev.events.length, 1);
   assert.equal(ev.events[0].title, "Late Night Jazz");
   assert.equal(ev.events[0].times[0].location, "Blue Note, 131 W 3rd St, New York");
@@ -601,7 +601,7 @@ test("Generic site: 'Event @ Venue' title is trimmed when a fuller structured lo
 test("Generic site: midnight-UTC <time datetime> is refined using the start time from og:description", () => {
   // Sites sometimes set <time datetime="YYYY-MM-DDT00:00:00.000Z"> as a date
   // placeholder while the actual start time is only in the visible text or
-  // og:description ("Join us on June 23, 2026 at 10:00 AM!"). The fallback
+  // og:description ("Join us on June 23, 2026 at 10:00 AM!"). The generic extractor
   // should prefer the timed value over the midnight placeholder.
   const html = `
     <meta property="og:description" content="Join us on June 23, 2026 at 10:00 AM!">
@@ -1098,7 +1098,7 @@ test("Meetup: an unrecognized timezone string is ignored", () => {
 });
 
 // --- Generic (unsupported-site) ctz derivation (#674) ----------------------
-// The fallback derives an event timezone only when two independent
+// The generic extractor derives an event timezone only when two independent
 // page-declared hints agree — helpers/derive-timezone.js pins the acceptance
 // rules unit-by-unit (extension-test/event-extractors/helpers/); these pin the
 // end-to-end effect: the event gains the ctz and its times localize to it.
@@ -1230,12 +1230,12 @@ test("Supported host, no event on the page: returns no events", () => {
 
   const ev = extractFromHtml(html, "https://www.cinema.co.il/");
   assert.equal(ev.events.length, 0); // nothing suggested
-  assert.equal(ev.fallback, false); // and no correction to suggest for a non-event page
+  assert.equal(ev.sourceMissed, false); // and no correction to suggest for a non-event page
 });
 
 test("Supported host, dedicated extractor finds nothing but the page has a generic event: falls back and flags it (#456)", () => {
   // meetup.js reads <time datetime> / JSON-LD only; with neither present it finds
-  // no event, so the orchestrator runs the generic fallback, which reads the
+  // no event, so the orchestrator runs the generic extractor, which reads the
   // og:title + event:start_time meta + <address> the dedicated source ignores.
   const html = `
     <meta property="og:title" content="Indie Rock Night">
@@ -1243,23 +1243,23 @@ test("Supported host, dedicated extractor finds nothing but the page has a gener
     <address>The Echo, Los Angeles</address>`;
 
   const ev = extractFromHtml(html, "https://www.meetup.com/some-group/events/123/");
-  assert.equal(ev.fallback, true);  // the events came from the generic base alone
+  assert.equal(ev.sourceMissed, true);  // the events came from the generic base alone
   assert.equal(ev.events.length, 1);
   assert.equal(ev.events[0].title, "Indie Rock Night");
   assert.equal(ev.events[0].times[0].location, "The Echo, Los Angeles");
   assert.equal(ev.events[0].times[0].start, "2026-09-12T20:00:00");
 });
 
-test("Supported host, neither dedicated nor fallback finds an event: nothing, fallback flag stays false (#456)", () => {
+test("Supported host, neither the source nor the base finds an event: nothing, sourceMissed stays false (#456)", () => {
   const html = `<h1>Brooklyn Rustaceans</h1><p>Welcome to our group.</p>`;
 
   const ev = extractFromHtml(html, "https://www.meetup.com/brooklyn-rustaceans/");
   assert.equal(ev.events.length, 0);
-  assert.equal(ev.fallback, false);
+  assert.equal(ev.sourceMissed, false);
 });
 
 test("Page with a parseable date but no site/JSON-LD: still yields the event", () => {
-  // A date is a real event signal, so the generic fallback keeps the event.
+  // A date is a real event signal, so the generic extractor keeps the event.
   const html = `<h1>Block Party</h1><p>Join us on Saturday, July 11, 2026 at 2 PM.</p>`;
 
   const ev = extractFromHtml(html, "https://www.blog.example/block-party");
@@ -1270,7 +1270,7 @@ test("Page with a parseable date but no site/JSON-LD: still yields the event", (
 
 test("Generic (unsupported) site: HTML markup in og:description is converted to plain text", () => {
   // Sites like ticketmaster.co.il embed literal HTML (e.g. "<br />") in their
-  // og:description attribute value. The fallback should convert it to newlines
+  // og:description attribute value. The generic extractor should convert it to newlines
   // rather than returning the raw markup string.
   const html = `
     <meta property="og:description" content="Line one<br />Line two<br /><br />Line three">

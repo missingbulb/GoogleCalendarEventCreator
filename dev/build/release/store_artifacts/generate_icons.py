@@ -10,7 +10,7 @@ store image guidelines: https://developer.chrome.com/docs/webstore/images#icons
     chrome.declarativeContent:
       icon{size}.png            blue  — page not yet classified
       icon{size}-supported.png  green — site has a first-class extractor
-      icon{size}-denied.png     gray  — site is on the fallback denylist
+      icon{size}-denied.png     gray  — site is on the unsupported-host denylist
     These are tiny, so the glyph fills the frame for legibility.
 
   Polished calendar art — the larger sizes Chrome and the store show, from one

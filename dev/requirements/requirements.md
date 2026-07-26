@@ -1331,7 +1331,7 @@ event-level location).
 The toolbar/extension icon signals how the current page's host is classified —
 before the popup is even opened — so the user knows at a glance whether a one-click
 extraction is first-class. It reflects the *host's classification*, not whether an
-event was found (the icon can't read the page, so a page where the generic fallback
+event was found (the icon can't read the page, so a page where the generic extractor
 later finds an event still shows the blue icon). When the host is denylisted **or**
 supported it would otherwise show two icons; supported wins. These are ordinary
 snapshot leaves whose cases set `kind: "icon"`, so their images are rendered by the
@@ -1363,7 +1363,7 @@ list**), the icon is **green**.
 </td>
 <td valign="top">
 
-`10.2` On a host on the fallback **denylist** (where we've deliberately
+`10.2` On a host on the unsupported-host **denylist** (where we've deliberately
 decided not to extract), the icon is **gray**.
 
 </td>
@@ -1390,7 +1390,7 @@ an allowlisted host — the icon stays the manifest default, **blue**.
 ## 11. Required explicit support for Extractors
 
 Each host below has **explicit support** — it is listed in `supportedDomains`
-(`extension/fallback-lists.json`), the one declaration of the hosts we claim, so
+(`extension/host-lists.json`), the one declaration of the hosts we claim, so
 the toolbar icon goes green and the popup presents the event as a supported
 site's own. What does the extracting comes in two forms, and a host is equally
 supported either way:
@@ -1668,7 +1668,7 @@ is covered by unit tests only.
 
 ## 12. Popup states (what the popup shows)
 
-When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found (`chooseContent` + the host classifier); *how* each state renders is §1–§3, and those renderings are already pinned there by snapshots: the denylisted empty state (`2.3`), the nothing-found "Disagree?" state (`2.2`/`3.2`), and an unlisted host's event with "Suggest Correction" (`3.1`). This section pins only the two slices §1–§3 don't — each a **real popup snapshot** driven through the production `chooseContent`: whether a **supported** host shows the "Suggest Correction" label (`12.4`), and the completeness rule that decides whether a fallback event is shown at all (`12.6`).
+When opened, the popup lands in one of **five states**, decided by the host's classification and what the extractors found (`chooseContent` + the host classifier); *how* each state renders is §1–§3, and those renderings are already pinned there by snapshots: the denylisted empty state (`2.3`), the nothing-found "Disagree?" state (`2.2`/`3.2`), and an unlisted host's event with "Suggest Correction" (`3.1`). This section pins only the two slices §1–§3 don't — each a **real popup snapshot** driven through the production `chooseContent`: whether a **supported** host shows the "Suggest Correction" label (`12.4`), and the completeness rule that decides whether a scraped event is shown at all (`12.6`).
 
 ![Flowchart of the popup's five states](shared/popup-states-flowchart.png)
 
@@ -1704,7 +1704,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 </tr>
 </table>
 
-- `12.6` **Fallback completeness.** A fallback event — one from the core generic extractor on a host whose own extractor didn't contribute — is shown only when it has all three of a title, a location, and a start; missing any one, the popup shows the empty "nothing found" state:
+- `12.6` **Scraped-event completeness.** A scraped event — one from the core generic extractor on a host whose own extractor didn't contribute — is shown only when it has all three of a title, a location, and a start; missing any one, the popup shows the empty "nothing found" state:
 
 <table>
 <tr>
@@ -1715,7 +1715,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 </td>
 <td valign="top">
 
-`12.6.1` A fallback event with **no title** is treated as nothing found.
+`12.6.1` A scraped event with **no title** is treated as nothing found.
 
 </td>
 </tr>
@@ -1730,7 +1730,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 </td>
 <td valign="top">
 
-`12.6.2` A fallback event with **no location** is treated as nothing found.
+`12.6.2` A scraped event with **no location** is treated as nothing found.
 
 </td>
 </tr>
@@ -1745,7 +1745,7 @@ When opened, the popup lands in one of **five states**, decided by the host's cl
 </td>
 <td valign="top">
 
-`12.6.3` A fallback event with **no start** is treated as nothing found.
+`12.6.3` A scraped event with **no start** is treated as nothing found.
 
 </td>
 </tr>
@@ -1789,7 +1789,7 @@ Field-level rules for the values that land in the Calendar event. Single-line fi
 </td>
 <td valign="top">
 
-`14.2` Title falls back to the page/tab title, and then to a configured default (`fallbackEventTitle`) when the page gives none.
+`14.2` Title falls back to the page/tab title, and then to a configured default (`defaultEventTitle`) when the page gives none.
 
 </td>
 </tr>

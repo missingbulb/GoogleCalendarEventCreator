@@ -1,5 +1,5 @@
 // The toolbar icon reflects whether a page has a site-specific source: supported
-// hosts get the green tile, fallback-denylisted hosts the gray tile, everything
+// hosts get the green tile, denylisted hosts the gray tile, everything
 // else the default blue tile (the manifest default_icon, so it needs no rule).
 //
 // The worker no longer reads tab URLs — it registers chrome.declarativeContent
@@ -20,7 +20,7 @@ const vm = require("node:vm");
 const ROOT = path.join(__dirname, "..", "..");
 const EXT = path.join(ROOT, "extension"); // the extension root; worker + lists are relative to it
 const WORKER = path.join(EXT, "icon/toolbar-icon.js");
-const LISTS = JSON.parse(fs.readFileSync(path.join(EXT, "fallback-lists.json"), "utf8"));
+const LISTS = JSON.parse(fs.readFileSync(path.join(EXT, "host-lists.json"), "utf8"));
 
 // Boot the worker with the external boundaries stubbed: the host-list/icon
 // fetches, the OffscreenCanvas decode (no DOM in a worker), and the

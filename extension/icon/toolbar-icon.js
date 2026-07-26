@@ -1,5 +1,5 @@
 // Background service worker: colors the toolbar icon to signal page support —
-// green tile on a host with a site-specific extractor, gray on a fallback-
+// green tile on a supported host, gray on a
 // denylisted host, blue (the manifest default_icon) everywhere else.
 //
 // It does this with chrome.declarativeContent, NOT by reading tab URLs. The
@@ -9,7 +9,7 @@
 // history". (The old design listened to chrome.tabs.onActivated/onUpdated and
 // read tab.url for every tab, which is exactly what required "tabs".)
 //
-// The host lists come from fallback-lists.json — the same single
+// The host lists come from host-lists.json — the same single
 // source of truth the popup's classifier reads.
 // `supportedDomains` is the static mirror of the sources' own matches() (kept
 // honest by a drift-guard test); the icon decides at host
@@ -59,7 +59,7 @@ function hostMatchers(host) {
 // Denied is listed before supported so that if a host ever appeared on both, the
 // later (supported/green) action would win; today the lists don't overlap.
 async function buildRules() {
-  const lists = await fetch(chrome.runtime.getURL("fallback-lists.json")).then((r) => r.json());
+  const lists = await fetch(chrome.runtime.getURL("host-lists.json")).then((r) => r.json());
   const green = await iconImageData("-supported");
   const gray = await iconImageData("-denied");
 

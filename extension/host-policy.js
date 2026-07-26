@@ -1,4 +1,4 @@
-// The top-level classifier for the generic FALLBACK extractor — the events
+// The top-level classifier for the core generic extractor — the events
 // scraped on a host that has no per-site source. It answers two questions: is a
 // scraped event complete enough to present, and how should we treat a given host?
 //
@@ -13,12 +13,12 @@
 import { GCalConfig } from "./config.js";
 
 // A host with no per-site source yields only best-effort guesses, so we present
-// a fallback event only when it carries all three main fields — a title, a
+// a scraped event only when it carries all three main fields — a title, a
 // location AND a start time — not on a date alone. Location and start are
 // per-instance (the multi-instance `times[]` model): the primary showing must
 // name a venue and at least one showing must have a start. A flat { start,
 // location } event is tolerated too, so callers/tests can pass either shape.
-export function isPresentableFallbackEvent(event) {
+export function isPresentableEvent(event) {
   if (!event || !event.title) return false;
   const times = Array.isArray(event.times) && event.times.length ? event.times : [event];
   if (!times[0] || !times[0].location) return false;
@@ -54,9 +54,9 @@ export function isSupportedDomain(url, lists = GCalConfig) {
   return hostMatchesList(hostFromUrl(url), lists.supportedDomains);
 }
 
-// Classify a host against config.js's fallback lists:
-//   "deny"  — suppress its fallback events (generic guesses there are noise);
-//   "allow" — show them, but don't ask for support (the fallback is trusted);
+// Classify a host against config.js's host lists:
+//   "deny"  — suppress its scraped events (generic guesses there are noise);
+//   "allow" — show them, but don't ask for support (generic extraction is trusted);
 //   "none"  — on neither list (or an unparseable URL): show them AND invite a
 //             support request.
 // Deny wins if a host is somehow on both lists. `lists` defaults to the shipped
@@ -64,7 +64,7 @@ export function isSupportedDomain(url, lists = GCalConfig) {
 export function classifyHost(url, lists = GCalConfig) {
   const host = hostFromUrl(url);
   if (host === "") return "none"; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
-  if (hostMatchesList(host, lists.sourceFallbackDenylist)) return "deny";
-  if (hostMatchesList(host, lists.sourceFallbackAllowlist)) return "allow";
+  if (hostMatchesList(host, lists.unsupportedDenylist)) return "deny";
+  if (hostMatchesList(host, lists.unsupportedAllowlist)) return "allow";
   return "none";
 }

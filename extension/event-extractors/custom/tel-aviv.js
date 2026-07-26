@@ -76,7 +76,7 @@
     name: "tel-aviv",
     // Anchored to the apex/www host only — NOT "(^|\.)tel-aviv\.gov\.il$" — because
     // visit.tel-aviv.gov.il is a distinct subdomain with its own dedicated source
-    // (custom/visit-tel-aviv.js) and its own fallback-lists.json entry; a
+    // (custom/visit-tel-aviv.js) and its own host-lists.json entry; a
     // subdomain-matching regex here would shadow it (this source loads first,
     // alphabetically).
     matches: (host) => /^(www\.)?tel-aviv\.gov\.il$/.test(host),

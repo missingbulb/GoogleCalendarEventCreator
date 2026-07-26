@@ -5,17 +5,17 @@
 // (event-extractors/load-order.generated.json) — its completion value is what
 // chrome.scripting.executeScript returns to the popup.
 //
-// The result is always { events: [...], fallback } — `events` holds the extracted
-// events (possibly empty), and `fallback` is true when a per-site source claimed
+// The result is always { events: [...], sourceMissed } — `events` holds the extracted
+// events (possibly empty), and `sourceMissed` is true when a per-site source claimed
 // this page but found nothing of its own, so what we're showing came from the
 // generic base alone (#456) — the one signal the popup reads to add a
 // "Suggest Correction" link for events the dedicated source missed.
 //
 // WHETHER THE HOST IS SUPPORTED IS NOT DECIDED HERE. That is a product
-// declaration, not an extraction result: extension/fallback-lists.json's
+// declaration, not an extraction result: extension/host-lists.json's
 // `supportedDomains` is the one list that says which hosts we claim, and both the
 // toolbar icon (icon/toolbar-icon.js) and the popup (events-popup/popup.js, via
-// fallback-policy.js's isSupportedDomain) read it directly — so they cannot
+// host-policy.js's isSupportedDomain) read it directly — so they cannot
 // disagree. The pipeline can't see that list anyway: it's injected into the page
 // world, which has no access to the extension's product config.
 //
@@ -56,7 +56,7 @@
 // them when they're complete enough (title + location + start), and
 // otherwise/also offers a "request this source" link — see events-popup/popup.js's
 // chooseContent. A supported host whose dedicated source found nothing carries
-// `fallback: true`, telling the popup to show the generic events with
+// `sourceMissed: true`, telling the popup to show the generic events with
 // that request link too (#456).
 //
 // ONE PATH, TWO LAYERS. The core generic extractor (generic-extractor.js) runs on
@@ -80,7 +80,7 @@
 // with them event by event.
 //
 // To support a new event platform, add its host to `supportedDomains` in
-// extension/fallback-lists.json, then check whether the core generic extractor
+// extension/host-lists.json, then check whether the core generic extractor
 // already gets the page right — if it does, you are done, and the site has no
 // extractor file at all. Only when it doesn't, add
 // event-extractors/custom/<site>.js that pushes onto GCal.sources (see
@@ -103,7 +103,7 @@
     // URL's `ctz` then places them, and the times read as the event's city shows.
     // Each occurrence is normalized into one `times` instance; a source that
     // already returns `times[]` has its instances normalized in place.
-    const normInstance = (t, ctz, fallbackLocation) => {
+    const normInstance = (t, ctz, eventLocation) => {
       const out = {
         start: GCal.localizeToZone(t.start || "", ctz),
         end: t.end ? GCal.localizeToZone(t.end, ctz) : null,
@@ -112,7 +112,7 @@
       // Location is per-instance (the multi-instance model lets each showing carry
       // its own venue — a touring show, a film at several cinemas); fall back to
       // the event-level location when an instance doesn't name its own.
-      const location = t.location != null ? t.location : fallbackLocation;
+      const location = t.location != null ? t.location : eventLocation;
       if (location) out.location = location;
       return out;
     };
@@ -138,13 +138,13 @@
     const overrides = (site && site.extract()) || {};
     const events = group(compose(overrides, base, norm));
 
-    // `fallback` says a per-site source claimed this page and came up empty, so
-    // what we're showing is the generic base alone — the event that source missed
-    // (#456). The popup (chooseContent) reads it as the single signal to add a
-    // "Suggest Correction" link. A host with no source at all leaves it false,
-    // whether or not we support that host: where the generic extractor IS the
-    // support, nothing was missed and there is nothing to correct.
-    const fallback = Boolean(site) && !sourceContributed(overrides) && events.length > 0;
+    // `sourceMissed` says a per-site source claimed this page and came up empty,
+    // so what we're showing is the generic base alone (#456). The popup
+    // (chooseContent) reads it as the single signal to add a "Suggest Correction"
+    // link. A host with no source at all leaves it false, whether or not we
+    // support that host: where the generic extractor IS the support, nothing was
+    // missed and there is nothing to correct.
+    const sourceMissed = Boolean(site) && !sourceContributed(overrides) && events.length > 0;
 
     // Present everything chronologically regardless of the order the page (or a
     // site extractor's performance list) gave it in. start is an ISO-ish string
@@ -155,7 +155,7 @@
     for (const e of events) e.times.sort((a, b) => cmpStart(a.start, b.start));
     events.sort((a, b) => cmpStart(a.times[0].start, b.times[0].start));
 
-    return { events, fallback };
+    return { events, sourceMissed };
   }
 
   // Lexicographic start compare with empty/absent sorting last.
@@ -239,7 +239,7 @@
   }
 
   // Whether the site source RECOGNIZED the page, as opposed to leaving it whole
-  // to the generic base (which is what makes the result a `fallback`). It counts
+  // to the generic base (which is what sets `sourceMissed`). It counts
   // as recognized when the source named the event or dated it — a title or a
   // start. Those are the two fields that identify WHICH event a page is about;
   // the rest deliberately don't count, because several sources state them as
@@ -247,9 +247,9 @@
   // from: a single-venue site's fixed `location` (custom/barby.js), a
   // virtual-only platform's "Online", a fixed `ctz` ("Asia/Jerusalem").
   //
-  // A source leaving the start to the base is normal now and is NOT a fallback —
+  // A source leaving the start to the base is normal now and is NOT a miss —
   // that's the whole point of the base layer (custom/tel-aviv.js's one-off event
-  // pages take their start from the page's JSON-LD). It's a fallback only when
+  // pages take their start from the page's JSON-LD). It's a miss only when
   // the source contributed neither.
   function sourceContributed(overrides) {
     const identified = (e) => Boolean(e.title || e.start);

@@ -1,5 +1,5 @@
 // Drift guard: every per-site extractor's host must be declared in
-// fallback-lists.json's `supportedDomains` — so a source can never exist for a
+// host-lists.json's `supportedDomains` — so a source can never exist for a
 // host we don't claim as supported (the toolbar icon would stay blue while the
 // popup showed the source's events, and the auto-extractor triage would accept a
 // "please support this site" request for a site we already cover).
@@ -47,13 +47,13 @@ function loadSources() {
 
 const GCal = loadSources();
 const { supportedDomains } = JSON.parse(
-  fs.readFileSync(path.join(EXT, "fallback-lists.json"), "utf8")
+  fs.readFileSync(path.join(EXT, "host-lists.json"), "utf8")
 );
 
 test("supportedDomains is a non-empty array", () => {
   assert.ok(
     Array.isArray(supportedDomains) && supportedDomains.length > 0,
-    "extension/fallback-lists.json must define a non-empty supportedDomains array"
+    "extension/host-lists.json must define a non-empty supportedDomains array"
   );
 });
 
@@ -62,7 +62,7 @@ test("every source is represented by a supportedDomains entry (none missing)", (
     assert.ok(
       supportedDomains.some((domain) => s.matches(domain)),
       `source "${s.name}" matches none of supportedDomains — add a domain it covers ` +
-        `to extension/fallback-lists.json, or delete the source if we don't claim its host`
+        `to extension/host-lists.json, or delete the source if we don't claim its host`
     );
   }
 });

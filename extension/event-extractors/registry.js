@@ -6,7 +6,7 @@
 //   { name, matches(hostname), extract() }
 // onto it, and assemble-events.js takes the first source whose `matches` returns
 // true. A host with no source is not thereby unsupported — whether we support a
-// host is declared in extension/fallback-lists.json's `supportedDomains`, and a
+// host is declared in extension/host-lists.json's `supportedDomains`, and a
 // site the core generic extractor already reads correctly is supported with no
 // source here at all.
 //
@@ -36,26 +36,6 @@
 // the popup re-injects the whole pipeline on every open (into a page world that
 // persists between opens), so without it each source's `GCal.sources.push(...)`
 // would stack a duplicate matcher on every reopen.
-//
-// `GCal.sourceFallbackDenylist` is set asynchronously by the toolbar service
-// worker (which fetches fallback-lists.json at startup).
-// It is not available in the page-injection context — extractors don't need it.
-// isDeniedHost() reads it at call time via `|| []` so it degrades gracefully.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
   sources: [],
-
-  // True when the host is on the fallback denylist — the popup suppresses
-  // fallback events there, and the toolbar icon shows a gray tile.
-  // Reads GCal.sourceFallbackDenylist, set by the toolbar service worker
-  // fetching fallback-lists.json at startup.
-  isDeniedHost(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "");
-      return (GCal.sourceFallbackDenylist || []).some(
-        (entry) => host === entry || host.endsWith("." + entry)
-      );
-    } catch (e) {
-      return false;
-    }
-  },
 });

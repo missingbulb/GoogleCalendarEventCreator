@@ -135,7 +135,7 @@ dev/requirements/
   behavior/ kind.js events-view-actions.test.js  cases/<slug>.<id>.case.js
   logic/   kind.js  product-requirements.test.js  cases/<slug>.<id>.case.js
   extractor/
-    kind.js  extractor-support.test.js  live.test.js  fallback/
+    kind.js  extractor-support.test.js  live.test.js  generic-coverage/
     cases/<slug>.<id>.case.js      the §11 support leaves (one per host)
     expected/<page>.json           reviewed exact-value contracts (live.test.js)
     data/<page>.{html,url}         cached event-page fixtures
@@ -153,8 +153,8 @@ dev/requirements/
   owner's approval (see [The owner-approval contract](#the-owner-approval-contract)
   and the gcec pack's
   [snapshot-approval skill](../../.claudinite/local/packs/gcec/skills/snapshot-approval/SKILL.md)).
-- `npm run regen` — load lists + UI snapshots + fallback-coverage baseline.
-- `npm run test:live` — the extractor live/support + fallback-coverage suites
+- `npm run regen` — load lists + UI snapshots + generic-coverage baseline.
+- `npm run test:live` — the extractor live/support + generic-coverage suites
   (offline, against the committed `extractor/data/` fixtures).
 
 ## How to add a new supported site

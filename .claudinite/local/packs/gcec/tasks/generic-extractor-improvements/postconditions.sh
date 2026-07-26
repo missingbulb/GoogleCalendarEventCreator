@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Postconditions for the weekly fallback-coverage routine
-# (.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md).
+# Postconditions for the weekly generic-coverage routine
+# (.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.md).
 #
 # Runs AFTER the agent has made a candidate change, and bundles every
 # deterministic validation that a "win" is clean, generic, real and non-regressing.
@@ -19,12 +19,12 @@
 #   1. SCOPE — the diff touches ONLY the core generic extractor and its allowed
 #      companions: generic-extractor.js and the shared helpers/*.js (the generic
 #      extractor), a covering test in extension-test/event-extractors/extraction.test.js,
-#      and the regenerated fallback-coverage GENERATED artifacts. A custom/<site>.js
+#      and the regenerated generic-coverage GENERATED artifacts. A custom/<site>.js
 #      edit or a host special-case is out of scope — it isn't a GENERIC win. (This
 #      enforces WHICH files changed; whether the rule keys off a widely-used
 #      convention rather than one page's quirk is the agent's judgment.)
 #   2. SUITE — `npm test` is green. Runs the whole offline+live+UI suite, including
-#      the fallback-coverage high-watermark gate, which FAILS on any field
+#      the generic-coverage high-watermark gate, which FAILS on any field
 #      regression. (Red-before-green and authoring the covering test are the
 #      agent's job; this asserts the end state.)
 #   3. WIN — the regenerated baseline really improved on the committed (pre-change)
@@ -55,7 +55,7 @@ git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=main
 git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=HEAD
 
 # ── 1. SCOPE ──
-allowed='^(extension/generic-extractor\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/fallback/fallback-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
+allowed='^(extension/generic-extractor\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/generic-coverage/generic-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
 changed="$( { git diff --name-only "$ref"...HEAD 2>/dev/null; git diff --name-only HEAD 2>/dev/null; \
               git ls-files --others --exclude-standard; } | sort -u | sed '/^$/d' )"
 offenders="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
@@ -66,7 +66,7 @@ $(printf '  %s\n' $offenders)"
 npm test || fail "npm test is not green"
 
 # ── 3. WIN ──
-blpath="dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json"
+blpath="dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json"
 pre_json="$(git show "$ref:$blpath" 2>/dev/null)" || fail "no committed baseline at $ref to compare against"
 post_json="$(cat "$blpath" 2>/dev/null)" || fail "regenerated baseline missing — run the live suite first"
 node -e '

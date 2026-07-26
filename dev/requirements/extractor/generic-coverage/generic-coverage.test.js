@@ -1,21 +1,21 @@
-// The integration test for the GENERIC fallback extractor
+// The integration test for the core generic extractor
 // (generic-extractor.js): a high-watermark gate on how much it
 // recovers, per page, relative to each page's dedicated per-site source.
 //
-// The comparison itself lives in fallback-coverage.js (run GCal.extract()
+// The comparison itself lives in generic-coverage.js (run GCal.extract()
 // twice on every cached case page — once normally, once with the site registry
-// emptied — and grade the fallback's primary event field-by-field against the
+// emptied — and grade the bare run's primary event field-by-field against the
 // custom one). This file turns that into a regression gate plus a refreshed
 // human-readable report:
 //
 //   - One GATE test asserts the current critical-field and all-field coverage
 //     have not dropped below the stored watermark in
-//     fallback-coverage.baseline.GENERATED.json — compared over the cases the run and the
+//     generic-coverage.baseline.GENERATED.json — compared over the cases the run and the
 //     watermark SHARE. A newly added case isn't in the watermark's `cases` list,
 //     so it's excluded: adding an extractor never fails the gate (#240). Existing
 //     cases are still held to the bar, so a regression bundled with an addition
 //     is still caught.
-//   - A REFRESH test (skipped in CI) rewrites fallback-coverage.GENERATED.md and the
+//   - A REFRESH test (skipped in CI) rewrites generic-coverage.GENERATED.md and the
 //     baseline: it ratchets the watermark UP on an unchanged case set, and
 //     re-anchors it to the current full-set aggregate when the set changed (a
 //     new/removed case). It writes the working tree only; committing is the
@@ -40,10 +40,10 @@ const {
   renderNotableDifferences,
   gateStatus,
   nextBaseline,
-} = require("./fallback-coverage");
+} = require("./generic-coverage");
 
-const BASELINE_PATH = path.join(__dirname, "fallback-coverage.baseline.GENERATED.json");
-const REPORT_PATH = path.join(__dirname, "fallback-coverage.GENERATED.md");
+const BASELINE_PATH = path.join(__dirname, "generic-coverage.baseline.GENERATED.json");
+const REPORT_PATH = path.join(__dirname, "generic-coverage.GENERATED.md");
 const GATED = ["criticalFieldsPct", "allFieldsPct"];
 const isCI = Boolean(process.env.CI);
 
@@ -57,15 +57,15 @@ const gate = gateStatus(baseline, coverage);
 const tenths = (x) => Math.round((x || 0) * 10);
 
 const BASELINE_COMMENT =
-  "High-watermark gate for the generic fallback extractor's coverage, asserted by " +
-  "fallback-coverage.test.js and explained in dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md. criticalFieldsPct/" +
+  "High-watermark gate for the core generic extractor's coverage, asserted by " +
+  "generic-coverage.test.js and explained in dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md. criticalFieldsPct/" +
   "allFieldsPct are the best field-match percentages reached against the dedicated sources, and " +
   "cases is the list they were computed over. The gate compares the current run to these over the " +
   "SHARED cases, so adding a new case never fails it; the watermark ratchets up on an unchanged " +
   "case set and re-anchors to the current aggregate when the set changes. Re-baseline by hand " +
   "(lower a number) only for a deliberate, reviewed drop.";
 
-test("fallback-coverage report and baseline are refreshed (skipped in CI)", (t) => {
+test("generic-coverage report and baseline are refreshed (skipped in CI)", (t) => {
   if (isCI) {
     t.skip("CI: read-only gate — the committed report and baseline are the reviewed truth");
     return;
@@ -76,13 +76,13 @@ test("fallback-coverage report and baseline are refreshed (skipped in CI)", (t) 
 });
 
 // The actual mismatched values, surfaced as test output (local and CI) rather
-// than committed to the report — reference material for improving the fallback,
+// than committed to the report — reference material for improving the generic extractor,
 // and a record of what diverged when the gate fails. Informational; no assert.
-test("fallback value differences (informational)", () => {
+test("bare generic value differences (informational)", () => {
   console.log("\n" + renderNotableDifferences(coverage) + "\n");
 });
 
-test("fallback coverage has not regressed below the high-watermark", (t) => {
+test("generic coverage has not regressed below the high-watermark", (t) => {
   // A case the watermark covers but the run no longer has (a removed/renamed
   // case) makes the stored aggregate stale — it can't be compared apples-to-
   // apples over the shared subset. The local refresh has already re-anchored the
@@ -91,7 +91,7 @@ test("fallback coverage has not regressed below the high-watermark", (t) => {
   if (gate.removed.length) {
     const msg =
       `Baseline lists case(s) no longer present: ${gate.removed.join(", ")}. The watermark was ` +
-      `re-anchored in your working tree — commit the updated dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json.`;
+      `re-anchored in your working tree — commit the updated dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json.`;
     if (isCI) assert.fail(msg + " (CI sees a stale committed baseline.)");
     t.skip(msg);
     return;
@@ -102,11 +102,11 @@ test("fallback coverage has not regressed below the high-watermark", (t) => {
   for (const key of GATED) {
     assert.ok(
       tenths(gate.current[key]) >= tenths(baseline[key]),
-      `Fallback ${key} dropped to ${gate.current[key]}% over the ${gate.shared.length} cases shared ` +
+      `Generic coverage ${key} dropped to ${gate.current[key]}% over the ${gate.shared.length} cases shared ` +
         `with the watermark (${baseline[key]}%)${note}. The generic extractor lost coverage relative to ` +
-        `the dedicated sources — see dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md and the value differences printed above. ` +
+        `the dedicated sources — see dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md and the value differences printed above. ` +
         `If this is an intentional, reviewed change, lower ${key} in ` +
-        `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json.`
+        `dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json.`
     );
   }
 });

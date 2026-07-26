@@ -346,7 +346,7 @@ export function venueLines(text) {
 function titleEl(event, tab) {
   const el = document.createElement("span");
   el.className = "e-title";
-  el.textContent = event.title || tab.title || GCalConfig.fallbackEventTitle;
+  el.textContent = event.title || tab.title || GCalConfig.defaultEventTitle;
   return el;
 }
 

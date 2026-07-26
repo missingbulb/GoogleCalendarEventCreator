@@ -14,7 +14,7 @@ dev/requirements/extractor/data/**/*.html linguist-vendored
 # drift guard, the UI snapshot pixel diff, the coverage gate). See the
 # "Generated files" rule in .claudinite/local/packs/gcec/RULES.md.
 extension/event-extractors/load-order.generated.json                merge=ours
-dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json   merge=ours
-dev/requirements/extractor/fallback/fallback-coverage.GENERATED.md              merge=ours
+dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json   merge=ours
+dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md              merge=ours
 dev/requirements/popup/cases/*.png                                              merge=ours
 dev/requirements/icon/cases/*.png                                               merge=ours

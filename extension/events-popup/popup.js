@@ -5,7 +5,7 @@
 // — are loaded on demand with import() so the popup pulls in just what the page
 // needs.
 import { GCalConfig } from "../config.js";
-import { classifyHost, isSupportedDomain, isPresentableFallbackEvent } from "../fallback-policy.js";
+import { classifyHost, isSupportedDomain, isPresentableEvent } from "../host-policy.js";
 import { deriveWaitSelector } from "./derive-wait-selector.js";
 
 async function init() {
@@ -29,11 +29,11 @@ async function init() {
   }
 
   // Whether we support this host is a DECLARATION, not something the extraction
-  // can report: fallback-lists.json's `supportedDomains` is the one list, and the
+  // can report: host-lists.json's `supportedDomains` is the one list, and the
   // toolbar icon reads the very same list to color itself — so the popup's
   // supported/unsupported split and the icon cannot disagree. The injected
   // pipeline never sees it (the page world has no access to product config); all
-  // it reports is `fallback` — that a per-site source claimed the page and missed.
+  // it reports is `sourceMissed` — that a per-site source claimed the page and missed.
   data.supported = isSupportedDomain(tab.url);
 
   // If we found an event, derive the ScraperAPI wait_for_selector for a possible
@@ -139,14 +139,14 @@ export async function render({ data, tab, listing, now = new Date(), configurati
     eventsEl.addEventListener("scroll", updateScrollFades);
 
     // A quiet right-aligned "Suggest Correction" link next to the heading text,
-    // shown when chooseContent returns a `request`: State 5 (a complete fallback
-    // event on an unlisted host) or State 1b (a supported host whose dedicated
+    // shown when chooseContent returns a `request`: State 5 (a complete event on an
+    // unlisted, unsupported host) or State 1b (a supported host whose dedicated
     // source missed, #456). Only fires when events are shown, so it lives on the
     // heading line.
     if (request) {
       const view = await import("./source-request-view.js");
       headingEl.classList.add("with-link");
-      // allEvents here is the fallback's presentable events; its length tells the
+      // allEvents here is the presentable events; its length tells the
       // form whether the page carries multiple events (pre-selects the dropdown).
       // data.waitSelector is the ScraperAPI wait_for_selector hint derived from
       // this live page (assemble-events.js, #603) — seeded into the request form.
@@ -252,8 +252,8 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 }
 
 // THE one decision behind what the popup renders, given the injected extraction
-// result and the host's fallback classification (classifyHost, in
-// fallback-policy.js). Returns { events, request, policyLink } — `events` are the
+// result and the host's classification (classifyHost, in
+// host-policy.js). Returns { events, request, policyLink } — `events` are the
 // buttons to show (possibly empty), `request` is the prefill for a "request
 // support" button (or null), `policyLink` is whether to show the "Disagree?"
 // link. The five states, in the order they're decided (specified in
@@ -263,22 +263,22 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 //     events. That's the same list the toolbar icon colors itself from, so the
 //     popup's supported/unsupported split and the icon agree. It covers a host
 //     the core generic extractor serves on its own as much as one with a per-site
-//     source — both are support, and neither is a `fallback`.
+//     source — both are support, and neither sets `sourceMissed`.
 //   State 1b — supported host whose PER-SITE source contributed NOTHING, so what
-//     the orchestrator assembled is the generic base alone (`data.fallback`):
+//     the orchestrator assembled is the generic base alone (`data.sourceMissed`):
 //     show those complete events AND a "Suggest Correction" link, since the
 //     dedicated source missed them (#456). Decided before the denylist, like
 //     State 1. Falls through to the bare empty state if the base found
 //     nothing complete either.
 //   State 2 — denylisted host: "No events found", and NO prompt — we've
-//     explicitly decided not to extract there, so we don't surface a fallback
+//     explicitly decided not to extract there, so we don't surface a scraped
 //     event, a support request, or even the policy link. Decided before the
-//     fallback result, so it holds whether or not the fallback scraped anything.
-//   State 3 — not denylisted, and the fallback found nothing complete: "No
+//     extraction result, so it holds whether or not anything was scraped.
+//   State 3 — not denylisted, and nothing complete was found: "No
 //     events found" with the quiet "Disagree?" link to the policy doc.
-//   State 4 — a complete fallback event (title + location + start), allowlisted:
-//     show the event; don't ask for support (the fallback is trusted here).
-//   State 5 — a complete fallback event, on neither list: show the event AND a
+//   State 4 — a complete event (title + location + start), allowlisted:
+//     show the event; don't ask for support (generic extraction is trusted here).
+//   State 5 — a complete event, on neither list: show the event AND a
 //     "request support" button, so a good page can become a first-class source.
 export function chooseContent(data, listing = "none") {
   const all = data && data.events && data.events.length ? [...data.events] : [];
@@ -286,32 +286,32 @@ export function chooseContent(data, listing = "none") {
   // State 1 — a supported host whose support did its job (a per-site source
   // recognized the page, or the core generic extractor is this host's support by
   // design): show the events, with no request button and no policy link.
-  if (data && data.supported && !data.fallback) {
+  if (data && data.supported && !data.sourceMissed) {
     return { events: all, request: null, policyLink: false };
   }
 
   // State 1b — a supported host whose dedicated source contributed NOTHING, so
-  // what we have is the generic base alone (data.fallback). Show its
+  // what we have is the generic base alone (data.sourceMissed). Show its
   // complete events AND offer the "Suggest Correction" link: the dedicated source
   // missed them, so a correction is exactly what we want (regardless of the
   // host's allow/deny listing — a supported host's miss is always worth
-  // reporting). When the fallback turned up nothing complete, fall through to the
+  // reporting). When nothing complete turned up, fall through to the
   // bare empty state — no policy link, since a supported host isn't disputing the
   // extraction policy.
-  if (data && data.supported && data.fallback) {
-    const presentable = all.filter(isPresentableFallbackEvent);
+  if (data && data.supported && data.sourceMissed) {
+    const presentable = all.filter(isPresentableEvent);
     return presentable.length
       ? { events: presentable, request: presentable[0], policyLink: false }
       : { events: [], request: null, policyLink: false };
   }
 
   // State 2: a denylisted host shows nothing and prompts for nothing — that
-  // decision is already made, regardless of what the fallback scraped.
+  // decision is already made, regardless of what was scraped.
   if (listing === "deny") {
     return { events: [], request: null, policyLink: false };
   }
 
-  const presentable = all.filter(isPresentableFallbackEvent);
+  const presentable = all.filter(isPresentableEvent);
 
   // State 3: nothing complete to show — offer the quiet "how this works" link.
   if (!presentable.length) {

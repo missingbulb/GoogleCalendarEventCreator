@@ -42,10 +42,10 @@ const SOURCES = extractorSources();
  *   extractor that infers a date's missing year off "now" (GCal.now in
  *   helpers/dates.js) resolves it deterministically. Omitted -> real clock, as
  *   in production. Keeps a no-year case (tabitisrael) from rotting over time.
- * @returns {object}     The extractor's result: { events: [{ title, description, ctz, times }], fallback }.
+ * @returns {object}     The extractor's result: { events: [{ title, description, ctz, times }], sourceMissed }.
  *   Note there is no `supported`: whether a host is supported is a declaration in
- *   extension/fallback-lists.json, not something the pipeline can see — the popup
- *   pairs this result with fallback-policy.js's isSupportedDomain(tab.url).
+ *   extension/host-lists.json, not something the pipeline can see — the popup
+ *   pairs this result with host-policy.js's isSupportedDomain(tab.url).
  */
 function extractFromHtml(html, url, opts = {}) {
   const dom = new JSDOM(html, { url, runScripts: opts.runScripts || "outside-only" });

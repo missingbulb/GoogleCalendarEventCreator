@@ -18,8 +18,8 @@ const EXTENSION_DIR = "extension";
 const SHIPPING_PATHS = [
   "manifest.json",
   "config.js", // tunable product decisions; imported by the popup modules at runtime
-  "fallback-policy.js", // host classifier for the generic fallback; imported by the popup at runtime
-  "fallback-lists.json", // the allow/deny/supported host lists; fetched by the worker, imported by config.js
+  "host-policy.js", // host classifier for the generic extractor; imported by the popup at runtime
+  "host-lists.json", // the allow/deny/supported host lists; fetched by the worker, imported by config.js
   "generic-extractor.js", // the core generic extractor — injected on every page (outside event-extractors/ by design)
   "event-extractors", // the per-site extractors + helpers + registry/orchestrator + generated load list (popup fetches/injects)
   "events-popup", // popup (html/css/js + views) and the calendar-URL builder

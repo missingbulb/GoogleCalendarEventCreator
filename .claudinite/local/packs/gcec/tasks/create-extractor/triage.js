@@ -7,8 +7,8 @@
 //                 integration case to that existing source (hardening it against a
 //                 second real page) instead of scaffolding a new one; resolve-
 //                 source.js resolves which existing source via the sources' matches().
-//   "deny"      — the host is on the fallback denylist.            } these three
-//   "allow"     — the host is on the fallback allowlist (generic   } still CLOSE
+//   "deny"      — the host is on the unsupported-host denylist.            } these three
+//   "allow"     — the host is on the unsupported-host allowlist (generic   } still CLOSE
 //                 extractor already handles it).                    } the request
 //   "sample"    — another OPEN extractor-request issue already targets this host
 //                 (a request whose PR is still in review keeps its issue open).
@@ -18,7 +18,7 @@
 // supported and "no match" both PROCEED (skipAgent=false) — supported in supported
 // mode, no-match in new-source mode.
 //
-// Reuses fallback-policy.js (the popup's host classifier) for deny/allow and
+// Reuses host-policy.js (the popup's host classifier) for deny/allow and
 // resolve-source.js (the sources' matches()) for supported, so the pipeline and
 // the popup can never disagree about a host.
 //
@@ -131,7 +131,7 @@ function skipMessage(reason, { host, duplicateOf }) {
     case "deny":
       return (
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
-        `fallback **denylist** — we deliberately don't extract events there, so a custom source ` +
+        `unsupported-host **denylist** — we deliberately don't extract events there, so a custom source ` +
         `won't be added.\n\n` +
         `See the host classifier in \`extension/config.js\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
@@ -139,7 +139,7 @@ function skipMessage(reason, { host, duplicateOf }) {
     case "allow":
       return (
         `This request was auto-triaged and closed without an agent run: \`${host}\` is on the ` +
-        `fallback **allowlist** — the generic extractor already handles it, so a custom source ` +
+        `unsupported-host **allowlist** — the generic extractor already handles it, so a custom source ` +
         `isn't needed.\n\n` +
         `See the host classifier in \`extension/config.js\`. ` +
         `If you think this is wrong, comment and a maintainer can revisit.`
@@ -163,7 +163,7 @@ function skipMessage(reason, { host, duplicateOf }) {
 // duplicate check); omit it to skip that check.
 async function runTriage({ body = "", title = "", number } = {}, lists, openRequests = []) {
   const { classifyHost } = await import(
-    pathToFileURL(path.join(ROOT, "extension", "fallback-policy.js"))
+    pathToFileURL(path.join(ROOT, "extension", "host-policy.js"))
   );
 
   const url = firstUrl(body) || firstUrl(title);

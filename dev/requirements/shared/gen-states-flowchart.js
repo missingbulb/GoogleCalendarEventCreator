@@ -5,7 +5,7 @@
 // supported host shows its dedicated extractor's events (State 1), or — when that
 // extractor finds nothing — falls back to the generic one and shows its events
 // with a "Suggest Correction" link (State 1b); an unsupported host runs the
-// denylist / fallback / allowlist chain (States 2–5).
+// denylist / scraped-event / allowlist chain (States 2–5).
 //
 //   node dev/requirements/shared/gen-states-flowchart.js
 //
@@ -69,8 +69,8 @@ parts.push(
 );
 
 // The flow forks at the top: a SUPPORTED host (left column, spine x=SUP) runs the
-// dedicated source then a fallback; an UNSUPPORTED host (right column, spine
-// x=UNS) runs the denylist / fallback / allowlist chain. Terminal state boxes
+// dedicated source then the generic base; an UNSUPPORTED host (right column,
+// spine x=UNS) runs the denylist / scraped-event / allowlist chain. Terminal state boxes
 // hang off each spine — left of SUP, right of UNS.
 const SUP = 500; // supported-column decision spine
 const UNS = 820; // unsupported-column decision spine
@@ -99,11 +99,11 @@ parts.push(box(LBOX, 270, 300, 54, ["State 1 — supported host", "Show the extr
 parts.push(line(SUP, 316, SUP, 374));
 parts.push(tag(SUP - 20, 347, "no"));
 
-// Dedicated source empty -> generic fallback finds a complete event? -> State 1b
-parts.push(diamond(SUP, 412, 250, 100, ["Generic fallback finds", "a complete event?", "(title + location + start)"]));
+// Dedicated source empty -> the generic base finds a complete event? -> State 1b
+parts.push(diamond(SUP, 412, 250, 100, ["Generic extractor finds", "a complete event?", "(title + location + start)"]));
 parts.push(line(SUP - 125, 412, LBOX + 150, 412));
 parts.push(tag(SUP - 152, 403, "yes"));
-parts.push(box(LBOX, 412, 300, 56, ["State 1b — supported (fallback)", "Show event + “Suggest Correction”"], SHOW));
+parts.push(box(LBOX, 412, 300, 56, ["State 1b — supported (source missed)", "Show event + “Suggest Correction”"], SHOW));
 parts.push(line(SUP, 462, SUP, 552));
 parts.push(tag(SUP - 20, 510, "no"));
 parts.push(box(SUP, 580, 320, 56, ["Supported host, nothing found", "“No events found” (no prompt)"], NONE));
@@ -118,8 +118,8 @@ parts.push(box(RBOX, 270, 300, 54, ["State 2 — denylisted", "“No events foun
 parts.push(line(UNS, 313, UNS, 374));
 parts.push(tag(UNS + 20, 347, "no"));
 
-// Fallback found a complete event? -> State 3 (no)
-parts.push(diamond(UNS, 412, 250, 100, ["Generic fallback finds", "a complete event?", "(title + location + start)"]));
+// Generic extractor found a complete event? -> State 3 (no)
+parts.push(diamond(UNS, 412, 250, 100, ["Generic extractor finds", "a complete event?", "(title + location + start)"]));
 parts.push(line(UNS + 125, 412, RBOX - 150, 412));
 parts.push(tag(UNS + 152, 403, "no"));
 parts.push(box(RBOX, 412, 300, 56, ["State 3 — nothing found", "“No events found” + “Disagree?”"], NONE));

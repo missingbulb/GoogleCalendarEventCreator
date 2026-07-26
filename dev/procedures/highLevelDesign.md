@@ -5,7 +5,7 @@ in [requirements.md §12–§16](../requirements/requirements.md); the per-file 
 [fileDescriptions.md](fileDescriptions.md); tunable product decisions live in
 `extension/config.js`.
 
-`toolbar-icon.js` colors the toolbar icon by host (from `fallback-lists.json`'s host lists). On
+`toolbar-icon.js` colors the toolbar icon by host (from `host-lists.json`'s host lists). On
 click, `popup.js` injects `event-extractors/` and runs `assemble-events.js`, which runs
 `generic-extractor.js` and merges the matching `custom/<site>.js` over it;
 `build-calendar-url.js` builds the URL `events-view.js` renders.
@@ -23,7 +23,7 @@ example for both is this repo's auto-extractor pipeline
 
 Everything — the popup and the tests alike — runs through one top-level
 extractor, `GCal.extract()`, which selects the per-URL source internally and
-returns `{ events, fallback }`. Each event is self-described (title, location,
+returns `{ events, sourceMissed }`. Each event is self-described (title, location,
 description, timezone, and its timing in `times[]` — one instance per showing,
 each with its own start/end/duration), so a caller can build a Calendar URL for
 any instance without consulting page-level state. Events that match on every
@@ -50,7 +50,7 @@ Extraction is **two layers, not two paths**:
    Each lives in its own file with a comment describing the HTML it expects.
 
 **Being supported is declared, not derived.** `supportedDomains` in
-`extension/fallback-lists.json` is the one list of hosts we claim; both the
+`extension/host-lists.json` is the one list of hosts we claim; both the
 toolbar service worker (icon color) and the popup (which render state) read it
 directly, so they cannot disagree. It is NOT a mirror of the extractors: a site
 whose pages describe themselves completely is fully supported with **no source
@@ -72,8 +72,8 @@ source request.
 
 The popup's `chooseContent` is the single decision behind what's rendered: it
 keys off `supported`, the host's classification against `extension/config.js`'s
-`sourceFallbackDenylist` / `sourceFallbackAllowlist` (via `extension/fallback-policy.js`),
-and whether the fallback event is complete (title + location + start). The five
+`unsupportedDenylist` / `unsupportedAllowlist` (via `extension/host-policy.js`),
+and whether the scraped event is complete (title + location + start). The five
 resulting states — and what the toolbar icon means alongside them — are specified
 in [requirements.md §12–§16](../requirements/requirements.md).
 

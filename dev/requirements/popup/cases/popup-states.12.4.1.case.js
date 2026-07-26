@@ -1,4 +1,4 @@
-// chooseContent State 1: data.supported true, no data.fallback — a dedicated
+// chooseContent State 1: data.supported true, no data.sourceMissed — a dedicated
 // extractor's events, shown WITHOUT the "Suggest Correction" label.
 "use strict";
 

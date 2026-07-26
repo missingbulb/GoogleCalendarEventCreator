@@ -9,11 +9,11 @@
 // — the extractors don't read product config — so it stays a plain module
 // rather than the GCal-global classic scripts the page injection uses.
 
-// The fallback allow/denylists live in their own JSON file so both this ES
+// The unsupported-host allow/denylists live in their own JSON file so both this ES
 // module and the service worker's classic-script context (which can't import
 // ES modules, so it fetches the JSON at runtime — see the toolbar service
 // worker) can read from the same source.
-import fallbackLists from "./fallback-lists.json" with { type: "json" };
+import hostLists from "./host-lists.json" with { type: "json" };
 
 export const GCalConfig = {
   // Event length when a page gives a start time but no end. Timed events only;
@@ -48,22 +48,22 @@ export const GCalConfig = {
   maxEventUrlLength: 6000,
 
   // Title used when neither the page nor the tab gave one.
-  fallbackEventTitle: "New event",
+  defaultEventTitle: "New event",
 
-  // Host classifier for the generic FALLBACK extractor — the events scraped on
+  // Host classifier for the core generic extractor — the events scraped on
   // a host that has no per-site source. The
-  // fallback only ever surfaces an event with a title, a location AND a start
+  // popup only ever surfaces an event with a title, a location AND a start
   // time; these two lists then decide what the popup does with it. A host on
-  // NEITHER list is "unknown": its fallback events are shown AND the popup
+  // NEITHER list is "unknown": its scraped events are shown AND the popup
   // offers a "request support for this site" link (so a good page can become a
   // first-class source). These lists override that default:
-  //   sourceFallbackAllowlist — trust the fallback here: show its events but
+  //   unsupportedAllowlist — trust generic extraction here: show its events but
   //     DON'T pester for support (generic extraction already works site-wide).
-  //   sourceFallbackDenylist  — generic guesses here are noise (e.g. a news
+  //   unsupportedDenylist  — generic guesses here are noise (e.g. a news
   //     site where a date in an article reads as an event): never surface a
-  //     fallback event; the popup shows "no events found" instead.
+  //     scraped event; the popup shows "no events found" instead.
   // Matching is by exact host or any subdomain — "example.com" also covers
-  // "www.example.com" and "sub.example.com". The default (show fallback events
+  // "www.example.com" and "sub.example.com". The default (show scraped events
   // + invite a support request) is the common case; these are the escape
   // hatches you populate as specific hosts warrant.
   //
@@ -71,8 +71,8 @@ export const GCalConfig = {
   // these lists for it (a supported host short-circuits before classifyHost).
   // Its allowlist entry only lets the auto-extractor triage close a redundant
   // "please support meetup.com" request without spinning up an agent.
-  sourceFallbackAllowlist: fallbackLists.allowlist,
-  sourceFallbackDenylist: fallbackLists.denylist,
+  unsupportedAllowlist: hostLists.allowlist,
+  unsupportedDenylist: hostLists.denylist,
 
   // THE list of hosts we support — the single declaration behind "is this a
   // supported site", read by everything that needs the answer: the toolbar
@@ -86,5 +86,5 @@ export const GCalConfig = {
   // an extractor is only added for what the generic extractor gets wrong. The one
   // invariant, guarded by a drift test: every per-site source's host appears
   // here, so a source can never exist for a host we don't claim.
-  supportedDomains: fallbackLists.supportedDomains,
+  supportedDomains: hostLists.supportedDomains,
 };

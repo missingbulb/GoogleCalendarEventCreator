@@ -32,7 +32,6 @@ test("a helper loaded before the registry still leaves both intact", () => {
   assert.equal(typeof sandbox.GCal.clean, "function", "the dom helper survives");
   // ...nor should the helper have prevented registry.js's bootstrap.
   assert.ok(Array.isArray(sandbox.GCal.sources), "GCal.sources is present");
-  assert.equal(typeof sandbox.GCal.isDeniedHost, "function");
 });
 
 test("a source registers onto GCal.sources whichever order the base files run", () => {

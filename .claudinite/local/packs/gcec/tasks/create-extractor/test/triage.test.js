@@ -1,8 +1,8 @@
 // Offline unit tests for the auto-extractor pre-flight triage
 // (triage.js): the preprocessing step that closes a request
-// whose host is already on config.js's fallback allow/denylist, before spending
+// whose host is already on config.js's unsupported-host allow/denylist, before spending
 // an agent run. Lists are injected so the cases don't depend on the shipped
-// (empty) config; the host-matching itself is covered in fallback-policy.test.js.
+// (empty) config; the host-matching itself is covered in host-policy.test.js.
 "use strict";
 
 const { test } = require("node:test");
@@ -32,7 +32,7 @@ test("waitSelectorOf reads the Wait-for selector field, or '' when blank/absent"
 });
 
 test("runTriage surfaces the wait selector for the workflow to pass through", async () => {
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: [] };
   const res = await runTriage(
     { body: bodyWithSelector("https://unknown.example/e/1", "#eventDescription") },
     lists
@@ -41,7 +41,7 @@ test("runTriage surfaces the wait selector for the workflow to pass through", as
 });
 
 test("a denylisted host is closed (agent skipped), with a denylist message", async () => {
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: ["news.example"] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: ["news.example"] };
   const res = await runTriage({ body: bodyWith("https://www.news.example/article/42") }, lists);
   assert.equal(res.skipAgent, true);
   assert.equal(res.listing, "deny");
@@ -50,7 +50,7 @@ test("a denylisted host is closed (agent skipped), with a denylist message", asy
 });
 
 test("an allowlisted host is closed, with an allowlist message", async () => {
-  const lists = { sourceFallbackAllowlist: ["good.example"], sourceFallbackDenylist: [] };
+  const lists = { unsupportedAllowlist: ["good.example"], unsupportedDenylist: [] };
   const res = await runTriage({ body: bodyWith("https://good.example/events/9") }, lists);
   assert.equal(res.skipAgent, true);
   assert.equal(res.listing, "allow");
@@ -58,7 +58,7 @@ test("an allowlisted host is closed, with an allowlist message", async () => {
 });
 
 test("an unlisted, unsupported host PROCEEDS in new-source mode", async () => {
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: [] };
   const res = await runTriage({ body: bodyWith("https://unknown.example/e/1") }, lists);
   assert.equal(res.skipAgent, false);
   assert.equal(res.mode, "new");
@@ -67,7 +67,7 @@ test("an unlisted, unsupported host PROCEEDS in new-source mode", async () => {
 });
 
 test("the result carries the deterministic new-mode names the workflow needs", async () => {
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: [] };
   const res = await runTriage({ body: bodyWith("https://www.unknown.example/events/9"), number: 7 }, lists);
   assert.equal(res.url, "https://www.unknown.example/events/9");
   assert.equal(res.host, "unknown.example");
@@ -81,7 +81,7 @@ test("the result carries the deterministic new-mode names the workflow needs", a
 });
 
 test("falls back to the URL in the title when the body has none", async () => {
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: ["bad.example"] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: ["bad.example"] };
   const res = await runTriage(
     { body: "_No response_", title: "Event source request - https://bad.example/e/2" },
     lists
@@ -92,8 +92,8 @@ test("falls back to the URL in the title when the body has none", async () => {
 
 test("no URL at all: not triaged (the agent handles the missing-URL case)", async () => {
   const res = await runTriage({ body: "please add support", title: "support please" }, {
-    sourceFallbackAllowlist: ["x.example"],
-    sourceFallbackDenylist: ["y.example"],
+    unsupportedAllowlist: ["x.example"],
+    unsupportedDenylist: ["y.example"],
   });
   assert.equal(res.skipAgent, false);
   assert.equal(res.host, "");
@@ -137,7 +137,7 @@ test("the supported check is subdomain-aware (www and sub both resolve)", async 
 
 test("a supported host beats the deny/allow lists (it adds a case regardless)", async () => {
   // Even if someone listed a supported host, having a real source wins.
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: ["eventbrite.com"] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: ["eventbrite.com"] };
   const res = await runTriage({ body: bodyWith("https://www.eventbrite.com/e/x-1"), number: 5 }, lists);
   assert.equal(res.reason, "supported");
   assert.equal(res.skipAgent, false);
@@ -145,7 +145,7 @@ test("a supported host beats the deny/allow lists (it adds a case regardless)", 
 
 // --- Concurrent duplicate requests ------------------------------------------
 
-const dupLists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: [], supportedDomains: [] };
+const dupLists = { unsupportedAllowlist: [], unsupportedDenylist: [], supportedDomains: [] };
 
 test("a newer request for a host with an earlier OPEN request is deferred as a sample", async () => {
   const openRequests = [{ number: 10, body: bodyWith("https://dup.example/e/1") }];
@@ -203,7 +203,7 @@ test("without the current issue number the duplicate check fails open (proceeds)
 });
 
 test("a settled listing wins over a sample (denylist beats the dup check)", async () => {
-  const lists = { sourceFallbackAllowlist: [], sourceFallbackDenylist: ["dup.example"], supportedDomains: [] };
+  const lists = { unsupportedAllowlist: [], unsupportedDenylist: ["dup.example"], supportedDomains: [] };
   const openRequests = [{ number: 1, body: bodyWith("https://dup.example/e/1") }];
   const res = await runTriage({ body: bodyWith("https://dup.example/e/2"), number: 9 }, lists, openRequests);
   assert.equal(res.reason, "deny");

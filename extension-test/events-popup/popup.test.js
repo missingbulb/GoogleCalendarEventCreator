@@ -3,7 +3,7 @@
 //   - chooseContent() — THE single decision behind what the popup renders;
 //   - makeTruncationLabel() — the count label that caps the scrollable list.
 // The host classifier and presentability gate chooseContent leans on live in
-// fallback-policy.js and are tested in extension-test/fallback-policy.test.js.
+// host-policy.js and are tested in extension-test/host-policy.test.js.
 //
 // chooseContent renders three things off its { events, request, policyLink }:
 // event buttons, a "request support" button (seeded with an event), and a quiet
@@ -19,7 +19,7 @@
 //   5  complete event, on neither list   -> events + request button
 //
 // This supersedes the strict #101 rule that an unsupported host must NEVER
-// surface a scraped event: #192 deliberately shows a *complete* fallback event
+// surface a scraped event: #192 deliberately shows a *complete* scraped event
 // (title + location + start) on an unsupported host. What still holds from #101
 // is that `supported` (which colors the toolbar icon) is untouched — we never
 // relabel such a host "supported"; the icon stays blue while the popup, which
@@ -57,7 +57,7 @@ before(async () => {
   ));
 });
 
-// A complete fallback event (presentable); and one missing a location (not).
+// A complete event (presentable); and one missing a location (not).
 const FULL = { title: "Some Show", location: "The Venue", start: "2026-07-01T20:00:00" };
 const NO_LOCATION = { title: "Some Show", start: "2026-07-01T20:00:00" };
 
@@ -78,14 +78,14 @@ test("State 1 — supported host with no events: empty events, no extras", () =>
 });
 
 // --- State 1b: supported host whose dedicated source contributed nothing (#456) ---
-// The orchestrator (assemble-events.js) sets `fallback: true` when a SUPPORTED
+// The orchestrator (assemble-events.js) sets `sourceMissed: true` when a SUPPORTED
 // host's dedicated source contributed nothing, leaving the events entirely to the
 // core generic base. The popup shows those complete events WITH the "Suggest
 // Correction" link (the dedicated source missed them — a correction is exactly
 // what we want), regardless of the host's allow/deny listing.
 
-test("State 1b — supported host, dedicated source empty, fallback found a complete event: events AND a request link", () => {
-  const view = chooseContent({ events: [FULL], supported: true, fallback: true }, "none");
+test("State 1b — supported host, dedicated source empty, the base found a complete event: events AND a request link", () => {
+  const view = chooseContent({ events: [FULL], supported: true, sourceMissed: true }, "none");
   assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, FULL);
   assert.equal(view.policyLink, false);
@@ -94,26 +94,26 @@ test("State 1b — supported host, dedicated source empty, fallback found a comp
 test("State 1b — the correction link shows even on an allowlisted supported host", () => {
   // meetup.com is both supported AND allowlisted; a dedicated miss is still a
   // defect worth reporting, so the request link shows regardless of listing.
-  const view = chooseContent({ events: [FULL], supported: true, fallback: true }, "allow");
+  const view = chooseContent({ events: [FULL], supported: true, sourceMissed: true }, "allow");
   assert.equal(view.request, FULL);
 });
 
-test("State 1b — fallback found only an incomplete event: bare empty state, no link", () => {
-  const view = chooseContent({ events: [NO_LOCATION], supported: true, fallback: true }, "none");
+test("State 1b — the base found only an incomplete event: bare empty state, no link", () => {
+  const view = chooseContent({ events: [NO_LOCATION], supported: true, sourceMissed: true }, "none");
   assert.equal(view.events.length, 0);
   assert.equal(view.request, null);
   assert.equal(view.policyLink, false); // a supported host isn't disputing policy
 });
 
-test("State 1 — a supported host's OWN events (fallback false) get no correction link", () => {
-  const view = chooseContent({ events: [FULL], supported: true, fallback: false }, "none");
+test("State 1 — a supported host's OWN events (sourceMissed false) get no correction link", () => {
+  const view = chooseContent({ events: [FULL], supported: true, sourceMissed: false }, "none");
   assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, null);
   assert.equal(view.policyLink, false);
 });
 
 test("State 2 — denylisted host: 'No events found' with NO link or prompt, even with a complete event", () => {
-  // The denylist decision holds regardless of what the fallback scraped.
+  // The denylist decision holds regardless of what was scraped.
   const view = chooseContent({ events: [FULL], supported: false }, "deny");
   assert.equal(view.events.length, 0);
   assert.equal(view.request, null);
@@ -160,7 +160,7 @@ test("State 5 — complete event, on neither list: events AND a request button s
   assert.equal(view.policyLink, false);
 });
 
-test("only complete fallback events are shown; incomplete ones are dropped", () => {
+test("only complete events are shown; incomplete ones are dropped", () => {
   const view = chooseContent({ events: [NO_LOCATION, FULL], supported: false }, "none");
   assert.deepEqual(view.events, [FULL]);
   assert.equal(view.request, FULL);

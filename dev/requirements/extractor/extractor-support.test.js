@@ -7,7 +7,7 @@
 // events-view-actions.test.js for the `kind: "behavior"` leaves.
 //
 // Support is DECLARED, not derived: a host is supported because it is listed in
-// extension/fallback-lists.json's `supportedDomains` (the same list the toolbar
+// extension/host-lists.json's `supportedDomains` (the same list the toolbar
 // icon and the popup read), and this test asserts that declaration alongside the
 // extraction. A case's `source` names whichever file the support rests on — a
 // per-site event-extractors/custom/<site>.js, or extension/generic-extractor.js
@@ -34,9 +34,9 @@ const extractorCases = loadCases().filter((c) => c.kind === "extractor");
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 const { supportedDomains } = JSON.parse(
-  fs.readFileSync(path.join(ROOT, "extension", "fallback-lists.json"), "utf8")
+  fs.readFileSync(path.join(ROOT, "extension", "host-lists.json"), "utf8")
 );
-// The same subdomain-aware match fallback-policy.js's isSupportedDomain applies.
+// The same subdomain-aware match host-policy.js's isSupportedDomain applies.
 const isSupported = (host) =>
   supportedDomains.some((entry) => host === entry || host.endsWith("." + entry));
 
@@ -49,7 +49,7 @@ for (const testCase of extractorCases) {
   if (testCase.tbd) {
     test(`${id}: ${testCase.host} extractor is tracked but untested (no cached page)`, (t) => {
       assert.ok(testCase.source, `${testCase.name}: a tbd extractor case must still name its source`);
-      assert.ok(isSupported(testCase.host), `${testCase.host}: not declared in fallback-lists.json's supportedDomains`);
+      assert.ok(isSupported(testCase.host), `${testCase.host}: not declared in host-lists.json's supportedDomains`);
       t.skip("bot-blocked host: no cached page to validate against — covered by unit tests");
     });
     continue;
@@ -70,7 +70,7 @@ for (const testCase of extractorCases) {
 
     assert.ok(
       isSupported(testCase.host),
-      `${testCase.host}: not declared in fallback-lists.json's supportedDomains — the toolbar icon would stay blue and the popup would treat it as an unsupported site`
+      `${testCase.host}: not declared in host-lists.json's supportedDomains — the toolbar icon would stay blue and the popup would treat it as an unsupported site`
     );
     assert.ok(Array.isArray(result.events) && result.events.length > 0, `${testCase.host}: extractor produced no events`);
     const [ev] = result.events;

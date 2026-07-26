@@ -1,5 +1,5 @@
-// gcec local task: fallback-extractor-improvements — the weekly attempt to make the GENERIC
-// fallback extractor recover more of what the dedicated per-site sources get
+// gcec local task: generic-extractor-improvements — the weekly attempt to make the GENERIC
+// generic extractor recover more of what the dedicated per-site sources get
 // (per-project-scheduling DESIGN §6). Worker: task.md. Most runs correctly change
 // nothing — the coverage gate already banks every prior win — so a forced or fake
 // win is worse than none; no win → no branch, no PR.
@@ -7,7 +7,7 @@
 // Self-contained (imports nothing): the whole contract is this default export.
 
 export default {
-  id: 'fallback-extractor-improvements',
+  id: 'generic-extractor-improvements',
   frequency: 'weekly',            // fires on the repo's weekly anchor day/hour
   precondition_signals: ['commits'],
   agent_model: 'opus',                 // closing a real generic-extractor gap is heavy judgment

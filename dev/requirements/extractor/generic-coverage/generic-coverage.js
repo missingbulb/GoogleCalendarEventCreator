@@ -8,7 +8,7 @@
 //               source's overrides merged over it. This is the reviewed-correct
 //               extraction (dev/requirements/extractor/live.test.js pins it to
 //               the case's `expected`).
-//   - fallback: the SAME pipeline with GCal.sources emptied, which strips every
+//   - bare:     the SAME pipeline with GCal.sources emptied, which strips every
 //               per-site override and leaves the bare generic base, exactly as
 //               the gcec pack’s RULES.md describes for inspecting the generic
 //               extractor on a supported page.
@@ -17,12 +17,12 @@
 // it closes to zero is a candidate for deleting that source outright — its host
 // stays in supportedDomains, so the site stays fully supported.
 //
-// We then grade, field by field, how close the fallback's PRIMARY event
+// We then grade, field by field, how close the bare run's PRIMARY event
 // (events[0] after the pipeline's own chronological sort) comes to the custom
-// primary event, and separately track how many events each found (the fallback
+// primary event, and separately track how many events each found (the bare run
 // can't enumerate a listing page the way a dedicated source can). The result
-// feeds two consumers: fallback-coverage.test.js (the high-watermark gate) and
-// the human-readable fallback-coverage.GENERATED.md report.
+// feeds two consumers: generic-coverage.test.js (the high-watermark gate) and
+// the human-readable generic-coverage.GENERATED.md report.
 //
 // This file owns the comparison logic only; it reads the same generated
 // load-order the popup injects and the harness uses, so it exercises the real,
@@ -41,7 +41,7 @@ const { dataFile } = require("../data-files");
 
 // The seven normalized event fields GCal.extract() returns (see
 // event-extractors/assemble-events.js's norm()). CRITICAL is the subset the popup
-// requires before it will surface a fallback event at all (title + location +
+// requires before it will surface a scraped event at all (title + location +
 // start — see events-popup/popup.js's chooseContent / config.js).
 const ALL_FIELDS = ["title", "start", "end", "location", "ctz", "eventLengthInMinutes", "description"];
 const CRITICAL_FIELDS = ["title", "start", "location"];
@@ -54,7 +54,7 @@ const SOURCES = (() => {
 })();
 
 // Run the real pipeline against `html` loaded at `url` and return BOTH gradings
-// from a SINGLE jsdom parse: the supported run, then the fallback run with the
+// from a SINGLE jsdom parse: the supported run, then the bare run with the
 // site registry emptied so GCal.extract() takes the unsupported path. Parsing
 // the page is the dominant cost here, and GCal.extract() is read-only on the DOM
 // (the only documented mutation, each source's GCal.sources.push at load, isn't
@@ -68,8 +68,8 @@ function runBothExtracts(html, url) {
     for (const src of SOURCES) dom.window.eval(src);
     const custom = JSON.parse(dom.window.eval("JSON.stringify(GCal.extract())"));
     dom.window.eval("GCal.sources = [];");
-    const fallback = JSON.parse(dom.window.eval("JSON.stringify(GCal.extract())"));
-    return { custom, fallback };
+    const bare = JSON.parse(dom.window.eval("JSON.stringify(GCal.extract())"));
+    return { custom, bare };
   } finally {
     dom.window.close();
   }
@@ -97,12 +97,12 @@ function flattenPrimary(event) {
 
 // --- Date equivalence -------------------------------------------------------
 // A dedicated source localizes a known-timezone event to a FLOATING wall-clock
-// plus a ctz; the fallback (no ctz) keeps the absolute instant. These are the
+// plus a ctz; the bare run (no ctz) keeps the absolute instant. These are the
 // same moment in different clothes, and the gcec pack’s RULES.md says not to
 // treat that representation gap as a miss. So start/end count as a match when
 // EITHER the raw strings are equal (the dedicated source only added a ctz, e.g.
 // bandsintown) OR both values resolve to the same absolute instant (e.g.
-// "...T09:00:00" + ctz vs "...T09:00:00+03:00"). A fallback value that can't be
+// "...T09:00:00" + ctz vs "...T09:00:00+03:00"). A bare value that can't be
 // anchored to the custom instant (a floating time read an hour off because the
 // page's UTC time was kept unzoned, or a date-only value that lost the time) is
 // correctly a miss.
@@ -147,17 +147,17 @@ function datesMatch(customVal, customCtz, fbVal, fbCtz) {
   return ci != null && fi != null && ci === fi;
 }
 
-// Grade one field of the custom primary event against the fallback primary
+// Grade one field of the custom primary event against the bare primary
 // event. Returns "match" | "diff" | "miss"; only "match" counts as a hit.
 // (The caller decides gradeability: a field the custom event left empty is
 // not graded at all.)
-function gradeField(field, customEvent, fallbackEvent) {
+function gradeField(field, customEvent, bareEvent) {
   const cv = str(customEvent[field]);
-  const fv = str(fallbackEvent ? fallbackEvent[field] : "");
+  const fv = str(bareEvent ? bareEvent[field] : "");
   if (!fv) return "miss";
   const ok =
     field === "start" || field === "end"
-      ? datesMatch(cv, str(customEvent.ctz), fv, str(fallbackEvent.ctz))
+      ? datesMatch(cv, str(customEvent.ctz), fv, str(bareEvent.ctz))
       : cv === fv;
   return ok ? "match" : "diff";
 }
@@ -177,12 +177,12 @@ function computeCoverage() {
     const url = readFileSync(urlPath, "utf8").trim();
     const html = readFileSync(htmlPath, "utf8");
 
-    const { custom, fallback } = runBothExtracts(html, url);
+    const { custom, bare } = runBothExtracts(html, url);
     // Grade the PRIMARY instance: events carry their timing in times[] (the
     // multi-instance model), so flatten the first instance's start/end/duration
     // onto the event before comparing the start/end/len fields field-by-field.
     const c0 = flattenPrimary((custom.events || [])[0]);
-    const f0 = (fallback.events || [])[0] ? flattenPrimary((fallback.events || [])[0]) : null;
+    const f0 = (bare.events || [])[0] ? flattenPrimary((bare.events || [])[0]) : null;
 
     const cells = {};
     let criticalHits = 0;
@@ -192,7 +192,7 @@ function computeCoverage() {
     for (const field of ALL_FIELDS) {
       const gradeable = Boolean(str(c0[field]));
       const state = gradeable ? gradeField(field, c0, f0) : "na";
-      cells[field] = { state, custom: str(c0[field]), fallback: str(f0 ? f0[field] : "") };
+      cells[field] = { state, custom: str(c0[field]), bare: str(f0 ? f0[field] : "") };
       if (gradeable) {
         allGradeable++;
         if (state === "match") allHits++;
@@ -204,14 +204,14 @@ function computeCoverage() {
     }
 
     const customCount = (custom.events || []).length;
-    const fallbackCount = (fallback.events || []).length;
+    const bareCount = (bare.events || []).length;
     cases.push({
       name,
       host: hostOf(url),
       url,
       customCount,
-      fallbackCount,
-      eventsCovered: Math.min(fallbackCount, customCount),
+      bareCount,
+      eventsCovered: Math.min(bareCount, customCount),
       cells,
       criticalHits,
       criticalGradeable,
@@ -220,7 +220,7 @@ function computeCoverage() {
     });
   }
 
-  // Aggregate by field type (which fields the fallback reproduces well/poorly).
+  // Aggregate by field type (which fields the bare run reproduces well/poorly).
   const byField = {};
   for (const field of ALL_FIELDS) {
     byField[field] = { field, gradeable: 0, match: 0, diff: 0, miss: 0 };
@@ -360,11 +360,11 @@ function cell(value, max = 48) {
 
 function renderMarkdown(cov, watermark) {
   const L = [];
-  L.push("# Fallback extractor coverage");
+  L.push("# generic extractor coverage");
   L.push("");
   L.push(
-    "> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` " +
-      "(logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten " +
+    "> **Auto-generated** by `dev/requirements/extractor/generic-coverage/generic-coverage.test.js` " +
+      "(logic in `dev/requirements/extractor/generic-coverage/generic-coverage.js`). Do not hand-edit — it is rewritten " +
       "whenever the tests run locally. See `.claudinite/local/packs/gcec/RULES.md`."
   );
   L.push("");
@@ -375,7 +375,7 @@ function renderMarkdown(cov, watermark) {
       "reviewed-correct extraction the live test pins down. " +
       "For every `dev/requirements/extractor/expected/*.json` page, `GCal.extract()` is run twice " +
       "on the same cached HTML: once normally (custom) and once with the site " +
-      "registry emptied (fallback), which strips every override. We grade the fallback's **primary event** " +
+      "registry emptied (the bare run), which strips every override. We grade the bare run's **primary event** " +
       "(`events[0]` after the chronological sort) field-by-field against the custom " +
       "primary event, counting a field only when the custom event filled it. A page " +
       "where the gap closes to zero is a candidate for deleting its per-site source " +
@@ -385,7 +385,7 @@ function renderMarkdown(cov, watermark) {
   L.push(
     "`start`/`end` count as a match when the values are byte-identical **or** resolve " +
       "to the same absolute instant — a dedicated source localizing to a floating " +
-      "time via its `ctz` is the same moment as the fallback's offset-bearing time, " +
+      "time via its `ctz` is the same moment as the bare run's offset-bearing time, " +
       "not a miss (see `.claudinite/local/packs/gcec/RULES.md`). A floating time read " +
       "an hour off, or a date that dropped its time, is a real miss."
   );
@@ -415,7 +415,7 @@ function renderMarkdown(cov, watermark) {
   L.push("### Gate");
   L.push("");
   L.push(
-    "The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json`) compares the current run to the stored " +
+    "The gate (`dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json`) compares the current run to the stored " +
       "watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's " +
       "excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark " +
       "ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes."
@@ -442,7 +442,7 @@ function renderMarkdown(cov, watermark) {
         : "")
   );
   L.push("");
-  L.push("Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).");
+  L.push("Event coverage is reported but **not gated** (a few listing pages the bare run can't enumerate dominate it).");
   L.push("");
 
   // By field type
@@ -477,13 +477,13 @@ function renderMarkdown(cov, watermark) {
   // version to find it.
   L.push("## By exemplar");
   L.push("");
-  L.push("Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback didn't) · — source left it empty");
+  L.push("Legend: ✓ match · ~ different value · ✗ missing (source had it, the bare run didn't) · — source left it empty");
   L.push("");
   const head = ["Case", "Events fb/custom", ...ALL_FIELDS.map((f) => FIELD_LABELS[f])];
   L.push(`| ${head.join(" | ")} |`);
   L.push(`| ${head.map((_, i) => (i < 2 ? "---" : ":-:")).join(" | ")} |`);
   for (const c of cov.cases) {
-    const row = [`\`${c.name}\``, `${c.fallbackCount}/${c.customCount}`];
+    const row = [`\`${c.name}\``, `${c.bareCount}/${c.customCount}`];
     for (const field of ALL_FIELDS) row.push(STATE_SYMBOL[c.cells[field].state]);
     L.push(`| ${row.join(" | ")} |`);
   }
@@ -492,13 +492,13 @@ function renderMarkdown(cov, watermark) {
   return L.join("\n");
 }
 
-// The notable value differences — fields where the fallback produced a wrong or
+// The notable value differences — fields where the bare run produced a wrong or
 // weaker value rather than just missing one. Emitted as TEST OUTPUT (not written
 // to the committed report) so the actual mismatched values are there to guide
-// future fallback work without bloating the artifact. Returns "" when there are
+// future generic-extractor work without bloating the artifact. Returns "" when there are
 // none.
 function renderNotableDifferences(cov) {
-  const L = ["Fallback values that DIFFER from the dedicated source (wrong/weaker, not merely missing):"];
+  const L = ["Bare generic values that DIFFER from the dedicated source (wrong/weaker, not merely missing):"];
   let any = false;
   for (const c of cov.cases) {
     const diffs = ALL_FIELDS.filter((f) => c.cells[f].state === "diff");
@@ -506,7 +506,7 @@ function renderNotableDifferences(cov) {
     any = true;
     L.push(`  ${c.name}`);
     for (const f of diffs) {
-      L.push(`    ${f}: custom [${cell(c.cells[f].custom)}]  vs  fallback [${cell(c.cells[f].fallback)}]`);
+      L.push(`    ${f}: custom [${cell(c.cells[f].custom)}]  vs  bare [${cell(c.cells[f].bare)}]`);
     }
   }
   if (!any) L.push("  (none)");

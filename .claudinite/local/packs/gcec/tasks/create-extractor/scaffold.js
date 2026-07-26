@@ -21,7 +21,7 @@ const { hostname, slugFor, matchesRegexFor, namesFor } = require("./extractor-na
 const { ROOT } = require("./repo-root");
 const sourcePath = (slug) => path.join(ROOT, "extension", "event-extractors", "custom", `${slug}.js`);
 const casePath = (name) => path.join(ROOT, "dev", "requirements", "extractor", "expected", `${name}.json`);
-const LISTS_FILE = path.join(ROOT, "extension", "fallback-lists.json");
+const LISTS_FILE = path.join(ROOT, "extension", "host-lists.json");
 
 // Pure: the source-file text for a URL. The header + matches() are complete; the
 // extract() body is a starting point the agent refines against the cached page.

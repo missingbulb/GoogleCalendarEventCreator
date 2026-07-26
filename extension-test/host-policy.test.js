@@ -1,9 +1,9 @@
-// Contract for fallback-policy.js — the classifier for the generic FALLBACK
+// Contract for host-policy.js — the host classifier for the core generic
 // extractor, used by the popup (popup.js's chooseContent) and the auto-extractor
 // triage. Two exports:
-//   - isPresentableFallbackEvent — a scraped fallback event is only worth showing
+//   - isPresentableEvent — a scraped scraped event is only worth showing
 //     when it carries all three main fields (title, location AND a start time);
-//   - classifyHost — "deny" / "allow" / "none" for a host against the fallback
+//   - classifyHost — "deny" / "allow" / "none" for a host against the unsupported-host
 //     allow/deny lists, apex- and subdomain-aware.
 "use strict";
 
@@ -12,31 +12,31 @@ const assert = require("node:assert/strict");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
-// fallback-policy.js is an ES module; import it before the tests run.
-let classifyHost, isSupportedDomain, isPresentableFallbackEvent;
+// host-policy.js is an ES module; import it before the tests run.
+let classifyHost, isSupportedDomain, isPresentableEvent;
 before(async () => {
-  ({ classifyHost, isSupportedDomain, isPresentableFallbackEvent } = await import(
-    pathToFileURL(path.join(__dirname, "..", "extension", "fallback-policy.js"))
+  ({ classifyHost, isSupportedDomain, isPresentableEvent } = await import(
+    pathToFileURL(path.join(__dirname, "..", "extension", "host-policy.js"))
   ));
 });
 
-// A complete fallback event (presentable); and one missing a location (not).
+// A complete scraped event (presentable); and one missing a location (not).
 const FULL = { title: "Some Show", location: "The Venue", start: "2026-07-01T20:00:00" };
 const NO_LOCATION = { title: "Some Show", start: "2026-07-01T20:00:00" };
 
-// --- isPresentableFallbackEvent: all three main fields required ---
+// --- isPresentableEvent: all three main fields required ---
 
-test("a fallback event needs title, location AND start to be presentable", () => {
-  assert.equal(isPresentableFallbackEvent(FULL), true);
-  assert.equal(isPresentableFallbackEvent(NO_LOCATION), false); // no location
-  assert.equal(isPresentableFallbackEvent({ title: "T", location: "L" }), false); // no start
-  assert.equal(isPresentableFallbackEvent({ location: "L", start: "2026-07-01" }), false); // no title
-  assert.equal(isPresentableFallbackEvent(undefined), false);
+test("a scraped event needs title, location AND start to be presentable", () => {
+  assert.equal(isPresentableEvent(FULL), true);
+  assert.equal(isPresentableEvent(NO_LOCATION), false); // no location
+  assert.equal(isPresentableEvent({ title: "T", location: "L" }), false); // no start
+  assert.equal(isPresentableEvent({ location: "L", start: "2026-07-01" }), false); // no title
+  assert.equal(isPresentableEvent(undefined), false);
 });
 
 // --- classifyHost: against injected lists ---
 
-const LISTS = { sourceFallbackAllowlist: ["good.example"], sourceFallbackDenylist: ["bad.example"] };
+const LISTS = { unsupportedAllowlist: ["good.example"], unsupportedDenylist: ["bad.example"] };
 
 test("classifyHost matches a host, its www, and its subdomains", () => {
   assert.equal(classifyHost("https://bad.example/x", LISTS), "deny");
@@ -52,7 +52,7 @@ test("classifyHost does not match a near-miss host", () => {
 });
 
 test("classifyHost: deny wins when a host is on both lists", () => {
-  const both = { sourceFallbackAllowlist: ["x.example"], sourceFallbackDenylist: ["x.example"] };
+  const both = { unsupportedAllowlist: ["x.example"], unsupportedDenylist: ["x.example"] };
   assert.equal(classifyHost("https://x.example/", both), "deny");
 });
 

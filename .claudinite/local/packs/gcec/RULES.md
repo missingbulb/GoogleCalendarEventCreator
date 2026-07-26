@@ -18,13 +18,13 @@ pipeline" section below, and its three scheduled tasks live under `tasks/`.
   merge.
 - **Generated files are regenerated, never hand-merged.** On a conflict take
   either side and rerun `npm run regen` (load lists + UI snapshots +
-  fallback-coverage baseline/report). The committed `.gitattributes` maps each
+  generic-coverage baseline/report). The committed `.gitattributes` maps each
   generated file to the `ours` merge driver; a stale artifact can't slip through
   — its own gate fails. Under the rule (kept in sync with `.gitattributes`):
   `extension/event-extractors/load-order.generated.json` (from `npm run index`),
   `dev/requirements/<kind>/cases/*.png` (from `npm run refresh:ui`), and
-  `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json`
-  + `fallback-coverage.GENERATED.md` (from the fallback-coverage test). The
+  `dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json`
+  + `generic-coverage.GENERATED.md` (from the generic-coverage test). The
   inline gallery in `dev/requirements/requirements.md` is part-authored prose —
   **not** on the `ours` driver; reconcile via `npm run regen` + the gallery
   drift gate. If `regen` reports a coverage regression, that's the real gate
@@ -146,7 +146,7 @@ per the canon action header's recipe.
 Standing rules for the extractor-automation domain — the three gcec pack
 [`tasks/`](tasks/): **create-extractor** (an `extractor-request` issue → a PR
 adding site support), **record-page** (records a committed `.url`'s cached page),
-and the weekly **fallback-extractor-improvements** (read a spec only when working
+and the weekly **generic-extractor-improvements** (read a spec only when working
 on that pipeline). Adding or refreshing a cached live case by hand is the
 [testing-guide](skills/testing-guide/SKILL.md) skill.
 
@@ -188,7 +188,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   and exits **0** — a task failure would converge to a `needs-human` dispatch
   issue as well, duplicating the signal and implying the pipeline broke when it
   correctly declined. Same for record-page: the pages that did record still land.
-- **The fallback-coverage gate is a high-watermark over a changing case set.** It
+- **The generic-coverage gate is a high-watermark over a changing case set.** It
   ratchets up on an unchanged case set and re-anchors when the set changes,
   compared over the cases the runs **share** — so adding an extractor never fails
   it (#240) while a pre-existing case that regresses still does. A removed/renamed
@@ -196,7 +196,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   (commit that); in CI it's an error to fix. *Caveat:* never commit a re-anchored
   baseline while the gate is red — a regression bundled with a case-set change can
   be re-anchored over. Detailed mechanics self-document in the gate's own headers
-  (`dev/requirements/extractor/fallback/fallback-coverage.js` / `.test.js`).
+  (`dev/requirements/extractor/generic-coverage/generic-coverage.js` / `.test.js`).
 - **To see what the core generic extractor gets ON ITS OWN** on any cached page —
   even a supported host — load the files, set `GCal.sources = []`, then call
   `GCal.extract()`: the documented way to strip every per-site override and see
@@ -208,7 +208,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   bugs; the real gaps are fields it can't know generically (durations,
   site-specific descriptions, and — where the page doesn't declare corroborating
   hints, see `helpers/derive-timezone.js` — `ctz`). This is the comparison the
-  fallback-coverage gate automates — and a case where it shows NO gap is a
+  generic-coverage gate automates — and a case where it shows NO gap is a
   candidate for deleting the per-site source and listing the host in
   `supportedDomains`).
 
@@ -229,7 +229,7 @@ this section as part of the same change (the design doc itself is
   already says about itself, and the generic extractor may never know about a
   specific site.
 - **Being supported is DECLARED, never derived from the extractors.**
-  `supportedDomains` in `extension/fallback-lists.json` is the one list of hosts
+  `supportedDomains` in `extension/host-lists.json` is the one list of hosts
   we claim, read directly by the toolbar worker and the popup. Never add a second
   list, and never register a placeholder source just to make a host count as
   supported. The only guarded direction is that every per-site source's host

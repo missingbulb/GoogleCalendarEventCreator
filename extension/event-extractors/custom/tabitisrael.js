@@ -22,8 +22,10 @@
 //               multi-line — blockText preserves its <br> line breaks)
 //   ctz         hardcoded Asia/Jerusalem (every Tabit venue is in Israel)
 //
-// A matched host runs THIS source only — the generic fallback does not run for a
-// supported host, so it produces every field itself.
+// This source states every field itself, not because it has to — the core
+// generic extractor runs underneath it like anywhere else — but because there is
+// nothing for that base to read here: the page's only JSON-LD is a `Restaurant`,
+// so it carries no event, no date, and no og: event metadata.
 (() => {
   const { text, blockText } = GCal;
   const pad = (n) => String(n).padStart(2, "0");
