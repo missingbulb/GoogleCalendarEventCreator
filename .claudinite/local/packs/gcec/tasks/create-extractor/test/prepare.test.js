@@ -90,7 +90,7 @@ test("staleClaims: a fresh claim is left alone — a run may still be mid-flight
 
 test("staleClaims: an unrelated open PR does not count as this request's delivery", async () => {
   const { staleClaims } = await load();
-  const prs = [pr("claude/fallback-coverage/2026-07-26", "Closes #42"), pr("claude/extractor/other", "Closes #99")];
+  const prs = [pr("claude/generic-coverage/2026-07-26", "Closes #42"), pr("claude/extractor/other", "Closes #99")];
   assert.deepEqual(staleClaims([claimed(42, 7)], prs, NOW), [42]);
 });
 

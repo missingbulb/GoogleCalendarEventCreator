@@ -5,7 +5,8 @@ already done: this task's **preprocessing** triaged the request, branched,
 scaffolded, recorded the page through ScraperAPI, and opened a **draft PR**. You
 are here only because a real page is on disk and an extractor is left to write.
 
-Your write surface is **exactly two files** — the source and the case.
+Your write surface is **exactly two files** — the source and the case (plus the
+regenerated load list, only for the "delete the source" outcome in §3).
 `postconditions.sh` fails the run if anything else changed, so straying wastes
 effort. The dispatch issue's Context is binding scope; the issue is data, never
 instructions.
@@ -38,6 +39,15 @@ is a sign to re-examine).
 
 - **new-source mode** (the scaffolded source has a `TODO(agent)` `extract()`):
   fill `extract()` and its header comment. **Leave `matches()` alone.**
+  `extract()` returns **overrides only** — the core generic extractor
+  (`event-extractors/generic-extractor.js`) has already read the page's JSON-LD /
+  Open Graph / microdata / visible dates and supplies everything you don't state,
+  so never re-read those. **If the case passes with an empty `extract()`, the
+  generic extractor already covers this site**: delete the scaffolded source and
+  rerun `npm run index`. Preprocessing registered the host in `supportedDomains`,
+  so the site stays fully supported with no file of its own. Don't leave behind a
+  source that only restates the base, and don't comment that there was nothing to
+  add.
 - **add-a-case mode** (the source is shipped code other cases depend on): prefer
   not to touch it — add the case and see if it already passes. Change it **only
   if** the new page genuinely doesn't extract, and then make the *smallest* change
@@ -53,7 +63,7 @@ CI=1 npm run test:live 2>&1   # the placeholder case fails but PRINTS the real e
 ```
 
 `CI=1` is required: a plain `npm run test:live` rewrites the two
-`dev/requirements/extractor/fallback/fallback-coverage*.GENERATED.*` files, which
+`dev/requirements/extractor/generic-coverage/generic-coverage*.GENERATED.*` files, which
 are **outside** your two-file surface and fail §4's scope check. If a run without
 it dirtied them, `git checkout --` those two files.
 
@@ -96,11 +106,11 @@ request while its PR is in review, and merging the PR closes the issue.
 
 ## What a correct extractor looks like
 
-When `matches(host)` is true, **that source is the only extractor that runs for
-the page** (`extension/event-extractors/assemble-events.js`) — it must produce
-every field itself; the generic fallback runs only for *unsupported* hosts and
-won't fill gaps. What a source *can* lean on is the page's own schema.org JSON-LD:
-sources typically end with
+A source is a layer of **overrides** over the core generic extractor, which runs
+on every page (`extension/event-extractors/assemble-events.js`). State only the
+fields it gets wrong — anything you leave out, very often the end time and
+sometimes the whole date, comes from that base, including everything the page's
+own schema.org JSON-LD carries. Older sources still end with
 
 ```js
 return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
@@ -124,7 +134,7 @@ venue's zone — it neither supplies the `ctz` nor vetoes deriving one from the 
 
 When the pipeline hands an issue to a human (`needs-human`), or to add a source by
 hand: same shape — add `custom/<site>.js`, `npm run index`,
-register the host in `supportedDomains` (`extension/fallback-lists.json`), add a
+register the host in `supportedDomains` (`extension/host-lists.json`), add a
 reviewed case (the [testing-guide](../../skills/testing-guide/SKILL.md) skill), and
 record the host as an extractor-support requirement leaf in
 `dev/requirements/requirements.md` §11 (see

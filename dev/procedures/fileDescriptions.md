@@ -9,8 +9,8 @@ extension does.
 | File            | Purpose                                                       |
 | --------------- | ------------------------------------------------------------- |
 | `extension/manifest.json` | Manifest V3 definition (`activeTab` + `scripting` + `declarativeContent` permissions) |
-| `extension/config.js` | Tunable product decisions (durations, the event cap, the fallback host allow/denylist); imported by the popup modules |
-| `extension/host-policy.js` | The generic fallback's host classifier (`classifyHost`) + presentability gate, shared by the popup and the auto-extractor triage |
+| `extension/config.js` | Tunable product decisions (durations, the event cap, the unsupported-host allow/denylist); imported by the popup modules |
+| `extension/host-policy.js` | The host classifier (`classifyHost`, `isSupportedDomain`) + the presentability gate for a scraped event, shared by the popup and the auto-extractor triage |
 | `extension/events-popup/popup.html`, `extension/events-popup/popup.css`, `extension/events-popup/popup.js` | Toolbar popup: controller that runs the extractor, picks a view (`chooseContent`), and renders it (markup + extracted styles) |
 | `extension/events-popup/events-view.js` | Renders one card per event — a clickable button for a single occurrence, or a grouped card with a button per showing for a multi-instance event (loaded on demand via `import()`) |
 | `extension/events-popup/source-request-view.js` | The unsupported-host affordances (loaded on demand): "Suggest Correction" (opens the prefilled GitHub issue) and "Disagree?" (expands the `POLICY_EXPLANATION` "how this works" text inline in the popup, with an "open an issue" link) |
@@ -20,7 +20,7 @@ extension does.
 | `extension/event-extractors/generic-extractor.js` | `GCal.genericExtractor`: THE core generic extractor, run on every page — best-effort event (embedded JSON-LD + generic heuristics over meta tags, microdata, `<time>`, and visible text). It is the base layer every per-site source overrides, the only extractor on an unsupported host, and the whole of the support for a site with no per-site file |
 | `extension/event-extractors/custom/meetup.js`, `eventbrite.js`, `edinburghfringe.js`, `telavivcinematheque.js`, `ticketmaster.js`, … | One per site the generic extractor gets wrong: hardcoded selectors + inline host matcher, stating ONLY the fields it overrides (or its own enumerated `events`) |
 | `extension/events-popup/build-calendar-url.js` | Builds the pre-filled Google Calendar template URL (incl. markdown→HTML for details) |
-| `extension/event-extractors/assemble-events.js` | Orchestrator `GCal.extract()`: runs the core generic extractor for the base events and merges the matched site source's overrides over them; normalizes/sorts events and reports `supported` + `fallback` |
+| `extension/event-extractors/assemble-events.js` | Orchestrator `GCal.extract()`: runs the core generic extractor for the base events and merges the matched site source's overrides over them; normalizes/sorts events and reports `sourceMissed` |
 | `extension/event-extractors/load-order.generated.json` | Generated injection order (`npm run index`); single source of truth |
 | `dev/requirements/extractor/expected/`   | Reviewed live-test cases (`description` + expected values), one JSON each |
 | `dev/requirements/extractor/data/` | Per-case cached HTML (`<name>.html`) the live tests assert against, each paired with its source URL (`<name>.url`); split by provenance into `server-fetched/` (pipeline-recorded, secret-scan-excluded) and `user-submitted/` (hand-supplied, push-protected), resolved by `data-files.js` |
@@ -30,9 +30,9 @@ extension does.
 | `extension-test/event-extractors/extraction.test.js`, `extension-test/events-popup/build-calendar-url.test.js` | Internal offline unit tests |
 | `extension-test/harness.js` | Shared test harness (loads the pipeline files into a jsdom DOM and runs `GCal.extract()`) |
 | `dev/requirements/extractor/generic-coverage/generic-coverage.js` | Compares the generic extractor to each dedicated source across the cached cases (the coverage gate's logic + the report renderer) |
-| `dev/requirements/extractor/generic-coverage/generic-coverage.test.js` | High-watermark gate on the fallback's field coverage vs. the dedicated sources; refreshes `dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md` and ratchets the baseline locally |
+| `dev/requirements/extractor/generic-coverage/generic-coverage.test.js` | High-watermark gate on the generic extractor's own field coverage vs. the dedicated sources; refreshes `dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md` and ratchets the baseline locally |
 | `dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json` | Stored high-watermark percentages the coverage gate asserts against (test-rewritten; `GENERATED` in the name flags it — don't hand-merge) |
-| `dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md` | Generated report: what the fallback recovers vs. the dedicated sources, per host / field type / case |
+| `dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md` | Generated report: what the generic extractor recovers alone vs. the dedicated sources, per host / field type / case |
 | `dev/requirements/<kind>/cases/<name>.case.js` | One UI snapshot case: fake data (`{ description, data, listing?, tab?, action? }`) fed to the popup's real `render()`. Its scenario lives only here — no shared gallery |
 | `dev/requirements/<kind>/cases/<name>.png` | Committed reference image for the matching case, browsable on GitHub |
 | `dev/requirements/shared/render/actions.js` | Reusable `(document) => void` case gestures (e.g. `scrollToBottom`, which pins `#events` so satori paints the bottom) |

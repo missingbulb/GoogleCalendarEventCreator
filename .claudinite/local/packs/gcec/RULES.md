@@ -104,7 +104,7 @@ below). Portable rules these instantiate live in the canon packs/skills.
 - **The jsdom-vs-Chrome DOM traps bit this repo directly** (canon): #130/#137
   drove the **production** remedy the canon (framed for tests) leaves out —
   strip `noscript`/`script`/`style` from a clone before reading any element's
-  user-facing text (the fallback's footer-address reader does this, #675).
+  user-facing text (the generic extractor's footer-address reader does this, #675).
 - **Injected block markup inside a `<p>` silently empties it** — the parser
   auto-closes the `<p>` and the content lands as its `nextElementSibling`; a
   `.foo p` selector reads `""` with no error. Bit tel-aviv's description blocks

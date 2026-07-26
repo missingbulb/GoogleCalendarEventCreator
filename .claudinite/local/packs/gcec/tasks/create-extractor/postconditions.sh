@@ -46,15 +46,28 @@ PREP=$(git log --format='%H' --grep='chore: scaffold' --grep='chore: record' ori
 [ -n "$PREP" ] || fail "no preprocessing commit found on the branch — was prepare.mjs run?"
 
 # 1. SCOPE — only the source + the case may differ from what preprocessing left.
-#    Anything else the agent touched (a shared helper, the load lists, a re-recorded
-#    page, a new file) fails the run. The recorded page is INSIDE the baseline now
+#    Anything else the agent touched (a shared helper, a re-recorded page, a new
+#    file) fails the run. The recorded page is INSIDE the baseline now
 #    (preprocessing committed it), so it is no longer an allowed change — a
 #    re-recorded page is exactly the kind of drift this should catch.
+#    The one other allowed outcome is the "nothing to override" one (task.md §3):
+#    when the core generic extractor already covers the site, the agent DELETES
+#    the scaffolded source, which regenerates the load list. That one generated
+#    file is allowed for that reason alone. (The host needs no further change:
+#    preprocessing already registered it in supportedDomains, which is what makes
+#    the site supported.)
+LOAD_ORDER="extension/event-extractors/load-order.generated.json"
 changed="$( { git diff --name-only "$PREP"; git ls-files --others --exclude-standard; } \
   | sort -u | sed '/^$/d' )"
-offenders="$(printf '%s\n' "$changed" | grep -Fvx -e "$SRC" -e "$CASE_FILE" || true)"
+offenders="$(printf '%s\n' "$changed" | grep -Fvx -e "$SRC" -e "$CASE_FILE" -e "$LOAD_ORDER" || true)"
 [ -z "$offenders" ] || fail "out-of-scope changes (only $SRC and $CASE_FILE may change):
 $(printf '  %s\n' $offenders)"
+
+# 1b. …and that escape hatch is exactly that: the load list may only differ
+#     because the scaffolded source was deleted.
+if printf '%s\n' "$changed" | grep -Fxq "$LOAD_ORDER"; then
+  [ ! -e "$SRC" ] || fail "$LOAD_ORDER changed but $SRC still exists — the load list is generated, never hand-edited"
+fi
 
 # 2. QUALITY FLOOR — a deterministic backstop to the agent's bail judgment. The
 #    case must be a real, presentable event: not 'empty' (nothing extracted) and
