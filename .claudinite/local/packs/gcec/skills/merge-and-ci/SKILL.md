@@ -1,6 +1,6 @@
 ---
 name: merge-and-ci
-description: Drive this repo's PR-to-merged flow cheaply — when to open the PR, how to get CI green in a Claude web session, and how to poll without wasting wall time or tokens. Use when merging a change, waiting on CI, or opening a PR that touches e2e/heavy/UI tests.
+description: Drive this repo's PR-to-merged flow cheaply — when to open the PR, how to get CI green in a Claude web session, how to poll without wasting wall time or tokens, and when to arm auto-merge instead of waiting. Use whenever a session opens, watches, or lands a PR here — including one opened incidentally mid-task by an unattended or scheduled run, and any moment you ask "is CI green yet?" — not only for a deliberate merge or an e2e/heavy/UI change.
 ---
 
 # Merge and CI in this repo
@@ -54,6 +54,17 @@ all. Open the PR early for those.
   never deliver CI **success** (only failures/comments/reviews), so the
   transition you're waiting for never arrives. It's for babysitting a PR, not
   merge-on-green.
+- **Won't sit and poll to green? Arm auto-merge — never end a turn on a
+  subscription.** A run that opens a PR it can't watch to the end (an
+  unattended/scheduled run, or a fix opened incidentally mid-task) should
+  `enable_pr_auto_merge` with `SQUASH` and finish: this repo's
+  `maintenance.delivery` is `auto-merge`, so GitHub lands it the moment the
+  checks pass, with no turn held open and no human in the loop. Ending the turn
+  "waiting for CI events" instead strands the PR until a person notices —
+  measured, in session `558026a0` (2026-07-24): both `test` runs were green at
+  03:58:27Z, the turn had ended at 03:57:56Z on a `subscribe_pr_activity` watch,
+  and PR #718 sat unmerged until the owner typed "lgtm" **63 minutes** later.
+  That one avoidable wait was 85% of the session's 74-minute wall clock.
 - **Batch tool loading**: one `ToolSearch` for every GitHub MCP tool the flow
   needs (`issue_write`, `create_pull_request`, `pull_request_read`,
   `merge_pull_request`), not one per turn.
