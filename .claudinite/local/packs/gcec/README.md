@@ -24,7 +24,7 @@ fingerprinted or seeded.
 | Rule (≤5 words) | How enforced |
 |---|---|
 | test:offline list matches tree | **hardcoded** (`test-offline-list-sync`) |
-| Squash merges, `(#N)` | prose (+ canon squash checks) |
+| CI green before merge (2× heavy) | prose (canon owns method/title) |
 | Generated files: regen, never hand-merge | prose (+ each artifact's own gate) |
 | Branch sync: rebase main + regen | prose |
 | Gallery regenerated → link in chat | prose |
