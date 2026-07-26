@@ -2,10 +2,20 @@
 // the generated load order, and is DOM-free so it runs identically in the page
 // (injected content script), the popup, and the service worker.
 //
-// `GCal.sources` is the registry: each custom per-site source pushes
+// `GCal.sources` is the registry: each per-site source pushes
 //   { name, matches(hostname), extract() }
-// onto it, and assemble-events.js runs the first source whose `matches` returns
-// true. Each source produces a partial event object with these optional fields:
+// onto it, and assemble-events.js takes the first source whose `matches` returns
+// true. A host with no source is not thereby unsupported — whether we support a
+// host is declared in extension/host-lists.json's `supportedDomains`, and a
+// site the core generic extractor already reads correctly is supported with no
+// source here at all.
+//
+// A source's `extract()` returns OVERRIDES, not a whole event: the core generic
+// extractor (generic-extractor.js) has already produced a base event for the page, and
+// assemble-events.js merges these fields over it, first non-empty value winning.
+// State only what the base gets wrong. (A source may instead return its own
+// `events` array, which replaces the base — see assemble-events.js.) The
+// overridable fields, all optional:
 //   title, location, description : plain strings
 //   start, end                   : one of
 //       "YYYY-MM-DD"                  -> all-day event
@@ -26,41 +36,6 @@
 // the popup re-injects the whole pipeline on every open (into a page world that
 // persists between opens), so without it each source's `GCal.sources.push(...)`
 // would stack a duplicate matcher on every reopen.
-//
-// `GCal.sourceFallbackDenylist` is set asynchronously by the toolbar service
-// worker (which fetches fallback-lists.json at startup).
-// It is not available in the page-injection context — extractors don't need it.
-// isDeniedHost() reads it at call time via `|| []` so it degrades gracefully.
 globalThis.GCal = Object.assign(globalThis.GCal || {}, {
   sources: [],
-
-  // THE single source of truth for "is this page a supported site": its
-  // hostname has a registered source whose `matches` returns true. The toolbar
-  // service worker derives the icon color from this;
-  // the popup gets the same answer from the injected extraction result
-  // (assemble-events.js reports whether a source matched). DOM-free, so it runs
-  // the same in the service worker, the popup, and content-script contexts.
-  isSupportedHost(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "");
-      return GCal.sources.some((s) => s.matches(host));
-    } catch (e) {
-      return false; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
-    }
-  },
-
-  // True when the host is on the fallback denylist — the popup suppresses
-  // fallback events there, and the toolbar icon shows a gray tile.
-  // Reads GCal.sourceFallbackDenylist, set by the toolbar service worker
-  // fetching fallback-lists.json at startup.
-  isDeniedHost(url) {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "");
-      return (GCal.sourceFallbackDenylist || []).some(
-        (entry) => host === entry || host.endsWith("." + entry)
-      );
-    } catch (e) {
-      return false;
-    }
-  },
 });

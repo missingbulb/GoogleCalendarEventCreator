@@ -33,7 +33,7 @@
 // stay an all-day date.
 //
 (() => {
-  const { text, blockText, merge, embeddedEvents, endFromTimeRange } = GCal;
+  const { text, blockText, endFromTimeRange } = GCal;
 
   // Parse the structured opening-hours window ("10:00-14:00") into { start, end }
   // "HH:MM" strings, or null when there's no real window: an absent/garbled value,
@@ -89,7 +89,7 @@
       const venue = text(".EventLocationAddress a");
       const street = text(".EventLocationAddress");
       const location = [venue, street].filter(Boolean).join(", ");
-      const dom = {
+      return {
         title: text("h1.EventLocationTitle"),
         start,
         end,
@@ -97,7 +97,6 @@
         description: blockText(document.querySelector(".EventLocationDescription")),
         ctz: "Asia/Jerusalem",
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

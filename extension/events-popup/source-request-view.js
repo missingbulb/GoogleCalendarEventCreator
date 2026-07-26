@@ -1,7 +1,7 @@
 // The two unsupported-host affordances the popup controller (popup.js) renders
 // for a host with no per-site source:
 //
-//   makeSourceRequestLink — shown when the generic fallback found a complete
+//   makeSourceRequestLink — shown when the generic extractor found a complete
 //     event on an unlisted host (State 5): a small right-aligned "Suggest
 //     Correction" link on the heading line that opens a prefilled GitHub "Event
 //     source request" issue, seeded with the scraped event.
@@ -146,7 +146,7 @@ function headingLink(text, url, tab) {
   return link;
 }
 
-// State 5: a complete fallback event on an unlisted host. A "Suggest Correction"
+// State 5: a complete scraped event on an unlisted host. A "Suggest Correction"
 // link that opens the prefilled GitHub "Event source request" issue, seeded with
 // the scraped event — a logged-in user just submits the already-filled form.
 export function makeSourceRequestLink(tab, event, eventCount = 1, waitSelector = "") {
@@ -206,7 +206,7 @@ function buildPolicyPanel(tab) {
 // the rest in the form itself.
 //
 // `eventCount` is how many complete events the popup found on the page (the
-// fallback's presentable events); it seeds the form's "event-count" field, so a
+// presentable events); it seeds the form's "event-count" field, so a
 // count >1 tells the agent the page is a multi-event listing to extract whole,
 // not to bail on. The hint fields below still describe just the first event.
 //
@@ -225,7 +225,7 @@ export function sourceRequestPrefill(tab, event, eventCount = 1, waitSelector = 
     name: event.title || tab.title || "",
     start: instance.start || "",
     end: instance.end || "",
-    // When the fallback couldn't read a timezone off the page, default to the
+    // When extraction couldn't read a timezone off the page, default to the
     // user's current zone — a sensible guess they can correct in the form
     // (the event page they're on is usually in their own zone), better than blank.
     timezone: event.ctz || currentTimezone(),

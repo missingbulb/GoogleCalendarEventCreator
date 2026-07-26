@@ -153,8 +153,8 @@ test("prefills the detected event count, defaulting to 1", () => {
   assert.equal(sourceRequestPrefill(PREFILL, {})["event-count"], "1");
 });
 
-// The prefill seeds the timezone from the fallback event's ctz, but falls back
-// to the user's current zone when the fallback found none (so the form opens
+// The prefill seeds the timezone from the scraped event's ctz, but falls back
+// to the user's current zone when the extraction found none (so the form opens
 // with a sensible guess instead of a blank timezone).
 test("prefills the timezone from the extracted event's ctz", () => {
   const p = sourceRequestPrefill(
@@ -164,7 +164,7 @@ test("prefills the timezone from the extracted event's ctz", () => {
   assert.equal(p.timezone, "Europe/Paris");
 });
 
-test("defaults the timezone to the user's current zone when the fallback found none", () => {
+test("defaults the timezone to the user's current zone when the extraction found none", () => {
   const here = new Intl.DateTimeFormat().resolvedOptions().timeZone;
   // No ctz on the event, and an event-less page, both default to the runtime zone.
   assert.equal(sourceRequestPrefill({ url: "https://example.com/e" }, {}).timezone, here);

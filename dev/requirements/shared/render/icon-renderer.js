@@ -15,7 +15,7 @@ const { PNG } = require("pngjs");
 const { FakeBrowser } = require("./fake-chrome");
 
 // The shipped extension lives under extension/; the worker's own fetch paths
-// ("fallback-lists.json", "icon/images/…") are extension-root-relative, so the fake browser reads
+// ("host-lists.json", "icon/images/…") are extension-root-relative, so the fake browser reads
 // from EXT_ROOT.
 const EXT_ROOT = path.join(__dirname, "..", "..", "..", "..", "extension");
 const WORKER = path.join(EXT_ROOT, "icon/toolbar-icon.js");

@@ -1,8 +1,8 @@
 "use strict";
 
 module.exports = {
-  description: "dash.datadoghq.com — extracted by custom/dash-datadoghq.js",
+  description: "dash.datadoghq.com — fully covered by the core generic extractor, with no per-site file",
   host: "dash.datadoghq.com",
-  source: "extension/event-extractors/custom/dash-datadoghq.js",
+  source: "extension/event-extractors/generic-extractor.js",
   page: "dash-datadoghq",
 };

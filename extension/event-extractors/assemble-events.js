@@ -1,16 +1,25 @@
-// Orchestrator: picks the right extractors for the current page and returns
-// the events found on it, plus whether the page is on a supported host.
+// Orchestrator: runs the core generic extractor over the current page, merges the
+// matching per-site source's overrides onto it, and returns the events found.
 //
 // Must be the LAST file in the generated load list
 // (event-extractors/load-order.generated.json) — its completion value is what
 // chrome.scripting.executeScript returns to the popup.
 //
-// The result is always { events: [...], supported, fallback } — `events` holds
-// the extracted events (possibly empty), `supported` is true when a registered
-// source matched this page's host, and `fallback` is true only when a SUPPORTED
-// host's dedicated source found nothing so we ran the generic extractor instead
-// (#456) — the one signal the popup reads to add a "Suggest Correction" link for
-// events the dedicated source missed. Each event is fully self-described —
+// The result is always { events: [...], sourceMissed } — `events` holds the extracted
+// events (possibly empty), and `sourceMissed` is true when a per-site source claimed
+// this page but found nothing of its own, so what we're showing came from the
+// generic base alone (#456) — the one signal the popup reads to add a
+// "Suggest Correction" link for events the dedicated source missed.
+//
+// WHETHER THE HOST IS SUPPORTED IS NOT DECIDED HERE. That is a product
+// declaration, not an extraction result: extension/host-lists.json's
+// `supportedDomains` is the one list that says which hosts we claim, and both the
+// toolbar icon (icon/toolbar-icon.js) and the popup (events-popup/popup.js, via
+// host-policy.js's isSupportedDomain) read it directly — so they cannot
+// disagree. The pipeline can't see that list anyway: it's injected into the page
+// world, which has no access to the extension's product config.
+//
+// Each event is fully self-described —
 // { title, description, ctz, times: [ { start, end, eventLengthInMinutes?,
 // location? }, ... ] } — so a caller (the popup) can build a Google Calendar URL
 // for any of its instances without consulting page-level state.
@@ -42,34 +51,42 @@
 // on an event directly, each instance optionally carrying its own `location` —
 // norm() takes it as-is.
 //
-// The popup reads `supported` (with the events) to decide what to render: a
-// supported host shows its events; an unsupported host shows the generic
-// fallback's events when they're complete enough (title + location + start),
-// and otherwise/also offers a "request this source" link — see events-popup/popup.js's
+// The popup pairs these events with its own read of `supportedDomains` to decide
+// what to render: a supported host shows its events; an unsupported host shows
+// them when they're complete enough (title + location + start), and
+// otherwise/also offers a "request this source" link — see events-popup/popup.js's
 // chooseContent. A supported host whose dedicated source found nothing carries
-// `fallback: true`, telling the popup to show the generic fallback's events with
-// that request link too (#456). `supported` is the same answer
-// GCal.isSupportedHost gives the toolbar icon, so the popup's supported/
-// unsupported split and the icon can never disagree.
+// `sourceMissed: true`, telling the popup to show the generic events with
+// that request link too (#456).
 //
-// Two distinct paths, depending on whether a site source matches:
-//   - Supported host: the matching site source is SELF-CONTAINED — it produces
-//     every field of its events itself (reusing shared helpers, including the
-//     GCal.embeddedEvents reader, as it sees fit). No other extractor's output
-//     is merged over it. A source may return a single partial event, or its own
-//     `events` array (e.g. custom/telavivcinematheque.js for a series page)
-//     with page-level description/ctz that fill any field an individual event
-//     didn't carry. If it finds NO events, we run the generic fallback as a
-//     last resort and flag the result `fallback: true` (#456) — never merged
-//     over the source, only used when the source itself came up empty.
-//   - Unsupported host: no per-site extractor exists, so we defer to the
-//     unsupported-site extractor (GCal.unsupportedSiteEvents) for a best-effort
-//     event. The popup presents it when it's complete enough (title + location +
-//     start) and otherwise falls back to the "request this source" flow.
+// ONE PATH, TWO LAYERS. The core generic extractor (generic-extractor.js) runs on
+// EVERY page and produces the base events. A per-site source
+// (custom/<site>.js) is a layer of OVERRIDES on top of it: its extract()
+// returns only the fields it states better than the generic base, and they win
+// field by field (GCal.merge). So a source never has to re-read what any page
+// already says about itself — the page's own schema.org JSON-LD, Open Graph
+// tags, microdata and visible dates all arrive from the base — and a site whose
+// pages describe themselves completely needs NO source file at all: no source
+// claims the page, so the base alone answers for it. Being *supported* is an
+// independent, declared fact (see above), so such a site is fully supported with
+// no extractor of its own.
 //
-// To support a new event platform, add event-extractors/custom/<site>.js that pushes
-// onto GCal.sources (see custom/meetup.js for the pattern), run `npm run index`
-// to regenerate the load list, and add a test case under dev/requirements/extractor/expected/.
+// A source may instead return its own `events` array (e.g.
+// custom/telavivcinematheque.js for a series page, custom/ticketmaster.js for a
+// multi-night run) with page-level description/ctz filling any field an
+// individual event didn't carry. A source that ENUMERATES the page's events that
+// way replaces the base rather than overriding it: it has told us the page holds
+// these N events, and the base's own reading of the same page can't be aligned
+// with them event by event.
+//
+// To support a new event platform, add its host to `supportedDomains` in
+// extension/host-lists.json, then check whether the core generic extractor
+// already gets the page right — if it does, you are done, and the site has no
+// extractor file at all. Only when it doesn't, add
+// event-extractors/custom/<site>.js that pushes onto GCal.sources (see
+// custom/meetup.js for the pattern) stating the fields it gets wrong, and run
+// `npm run index` to regenerate the load list. Either way, add a test case under
+// dev/requirements/extractor/expected/.
 //
 // The orchestrator is exposed as GCal.extract() — THE single top-level
 // extractor every caller goes through (the popup, the test harness). It picks
@@ -86,7 +103,7 @@
     // URL's `ctz` then places them, and the times read as the event's city shows.
     // Each occurrence is normalized into one `times` instance; a source that
     // already returns `times[]` has its instances normalized in place.
-    const normInstance = (t, ctz, fallbackLocation) => {
+    const normInstance = (t, ctz, eventLocation) => {
       const out = {
         start: GCal.localizeToZone(t.start || "", ctz),
         end: t.end ? GCal.localizeToZone(t.end, ctz) : null,
@@ -95,7 +112,7 @@
       // Location is per-instance (the multi-instance model lets each showing carry
       // its own venue — a touring show, a film at several cinemas); fall back to
       // the event-level location when an instance doesn't name its own.
-      const location = t.location != null ? t.location : fallbackLocation;
+      const location = t.location != null ? t.location : eventLocation;
       if (location) out.location = location;
       return out;
     };
@@ -113,22 +130,21 @@
       };
     };
 
-    // Pick the events to show, and whether they came from the generic fallback.
-    // A supported host's dedicated source is self-contained and runs alone — but
-    // when it finds NO events on a page it's expected to handle, fall back to the
-    // generic extractor rather than show an empty popup (#456). The user opened
-    // the popup because they saw an event on the page, so the fallback's
-    // best-effort events are a better answer than nothing; the popup surfaces a
-    // "Suggest Correction" link for them, since the dedicated source missed them.
-    // `fallback` is true ONLY in that case (a supported host's own events, and an
-    // unsupported host's, leave it false) — it's the single signal the popup
-    // (chooseContent) reads to add that correction link on a supported host.
-    let events = group(site ? supportedEvents(site, norm) : fallbackEvents(norm));
-    let fallback = false;
-    if (site && !events.length) {
-      events = group(fallbackEvents(norm));
-      fallback = events.length > 0;
-    }
+    // The core generic extractor runs on every page and is the base layer the
+    // matching source's overrides are merged over. With no source for this host —
+    // an unsupported site, or a supported one the generic extractor covers on its
+    // own — there is nothing to override and the base IS the answer.
+    const base = GCal.genericExtractor.extract();
+    const overrides = (site && site.extract()) || {};
+    const events = group(compose(overrides, base, norm));
+
+    // `sourceMissed` says a per-site source claimed this page and came up empty,
+    // so what we're showing is the generic base alone (#456). The popup
+    // (chooseContent) reads it as the single signal to add a "Suggest Correction"
+    // link. A host with no source at all leaves it false, whether or not we
+    // support that host: where the generic extractor IS the support, nothing was
+    // missed and there is nothing to correct.
+    const sourceMissed = Boolean(site) && !sourceContributed(overrides) && events.length > 0;
 
     // Present everything chronologically regardless of the order the page (or a
     // site extractor's performance list) gave it in. start is an ISO-ish string
@@ -139,7 +155,7 @@
     for (const e of events) e.times.sort((a, b) => cmpStart(a.start, b.start));
     events.sort((a, b) => cmpStart(a.times[0].start, b.times[0].start));
 
-    return { events, supported: Boolean(site), fallback };
+    return { events, sourceMissed };
   }
 
   // Lexicographic start compare with empty/absent sorting last.
@@ -192,30 +208,55 @@
     });
   }
 
-  // Supported host: the matching source is self-contained. Use its result as-is
-  // — no generic/JSON-LD merge over it.
-  function supportedEvents(site, norm) {
-    const result = site.extract();
-    if (Array.isArray(result.events) && result.events.length) {
-      // A site that returned several distinct events; fall back to its own
-      // page-level description/ctz for any event that didn't carry its own.
-      const pageDefaults = { description: result.description, ctz: result.ctz };
-      return result.events.map((e) => norm(GCal.merge(e, pageDefaults)));
+  // Compose the page's events from the two layers: `overrides`, the matching
+  // site source's result (`{}` when there is no source, or none was needed), and
+  // `base`, the core generic extractor's best-effort events for the same page.
+  function compose(overrides, base, norm) {
+    // The source ENUMERATED the page's events (a series page, a multi-night run).
+    // That list replaces the base — the base's own reading of the page can't be
+    // matched to it event by event — with the source's page-level
+    // description/ctz filling any field an individual event didn't carry.
+    if (Array.isArray(overrides.events) && overrides.events.length) {
+      const pageDefaults = { description: overrides.description, ctz: overrides.ctz };
+      return overrides.events.map((e) => norm(GCal.merge(e, pageDefaults)));
     }
-    // A single partial event. A matched host alone is not an event: a supported
-    // site's home/listing page (e.g. cinema.co.il's front page) still carries
-    // the host's og/footer metadata but describes no specific event. Treat it as
-    // a real event only when the source actually parsed a date.
-    const event = norm(result);
+
+    // The source described ONE event while the base read the page as a listing.
+    // Its per-event fields (title/start/end/location) can't say which of them
+    // they belong to, so only its page-level ones carry across all of them.
+    if (base.length > 1) {
+      const pageDefaults = { description: overrides.description, ctz: overrides.ctz };
+      return base.map((e) => norm(GCal.merge(pageDefaults, e)));
+    }
+
+    // The ordinary single-event page: the source's fields win, the base fills
+    // everything it didn't state. A matched host alone is not an event — a
+    // supported site's home/listing page (e.g. cinema.co.il's front page) still
+    // carries the host's og/footer metadata but describes no specific event — so
+    // this counts as a real event only once some layer parsed a date.
+    const event = norm(GCal.merge(overrides, base[0] || {}));
     return event.times.some((t) => t.start) ? [event] : [];
   }
 
-  // The generic best-effort extractor. Used for an unsupported host (no per-site
-  // extractor exists), and as a last resort on a supported host whose dedicated
-  // source found nothing (#456). The popup (chooseContent) decides whether the
-  // result is complete enough to present, and whether to offer a source request.
-  function fallbackEvents(norm) {
-    return GCal.unsupportedSiteEvents.extract().map(norm);
+  // Whether the site source RECOGNIZED the page, as opposed to leaving it whole
+  // to the generic base (which is what sets `sourceMissed`). It counts
+  // as recognized when the source named the event or dated it — a title or a
+  // start. Those are the two fields that identify WHICH event a page is about;
+  // the rest deliberately don't count, because several sources state them as
+  // flat site constants that are present even on a page the source read nothing
+  // from: a single-venue site's fixed `location` (custom/barby.js), a
+  // virtual-only platform's "Online", a fixed `ctz` ("Asia/Jerusalem").
+  //
+  // A source leaving the start to the base is normal now and is NOT a miss —
+  // that's the whole point of the base layer (custom/tel-aviv.js's one-off event
+  // pages take their start from the page's JSON-LD). It's a miss only when
+  // the source contributed neither.
+  function sourceContributed(overrides) {
+    const identified = (e) => Boolean(e.title || e.start);
+    if (Array.isArray(overrides.events) && overrides.events.length) {
+      return overrides.events.some(identified);
+    }
+    return identified(overrides);
   }
 
   GCal.extract = extract;

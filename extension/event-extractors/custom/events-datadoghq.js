@@ -24,20 +24,19 @@
 //   ctz         hardcoded "Asia/Jerusalem" — agenda times are shown in IDT
 //
 (() => {
-  const { text, blockText, parseDateFromText, merge, embeddedEvents } = GCal;
+  const { text, blockText, parseDateFromText } = GCal;
 
   GCal.sources.push({
     name: "events-datadoghq",
     matches: (host) => /(^|\.)events\.datadoghq\.com$/.test(host),
     extract() {
-      const dom = {
+      return {
         title: text("h1"),
         start: parseDateFromText(text("#about h2")),
         location: "Online",
         description: blockText("#about .parse-markdown"),
         ctz: "Asia/Jerusalem",
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

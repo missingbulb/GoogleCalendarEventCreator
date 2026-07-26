@@ -1,4 +1,4 @@
-// The top-level classifier for the generic FALLBACK extractor — the events
+// The top-level classifier for the core generic extractor — the events
 // scraped on a host that has no per-site source. It answers two questions: is a
 // scraped event complete enough to present, and how should we treat a given host?
 //
@@ -13,12 +13,12 @@
 import { GCalConfig } from "./config.js";
 
 // A host with no per-site source yields only best-effort guesses, so we present
-// a fallback event only when it carries all three main fields — a title, a
+// a scraped event only when it carries all three main fields — a title, a
 // location AND a start time — not on a date alone. Location and start are
 // per-instance (the multi-instance `times[]` model): the primary showing must
 // name a venue and at least one showing must have a start. A flat { start,
 // location } event is tolerated too, so callers/tests can pass either shape.
-export function isPresentableFallbackEvent(event) {
+export function isPresentableEvent(event) {
   if (!event || !event.title) return false;
   const times = Array.isArray(event.times) && event.times.length ? event.times : [event];
   if (!times[0] || !times[0].location) return false;
@@ -26,7 +26,7 @@ export function isPresentableFallbackEvent(event) {
 }
 
 // True when `host` equals `entry` or is a subdomain of it — the same shape of
-// host match GCal.isSupportedHost uses for sources.
+// host match a source's own matches() uses.
 function hostMatchesList(host, list) {
   return (list || []).some((entry) => host === entry || host.endsWith("." + entry));
 }
@@ -41,20 +41,22 @@ function hostFromUrl(url) {
   }
 }
 
-// True when `url`'s host already has a dedicated per-site source, per
-// config.js's supportedDomains. That list is a static mirror of the sources'
-// own matches(); the runtime truth is GCal.isSupportedHost
-// (event-extractors/registry.js), which runs the matchers directly. Used ONLY by the
-// auto-extractor triage to close a request for a site we already cover before
-// spending an agent run. Subdomain-aware, same host match as the allow/deny
-// lists. `lists` defaults to the shipped config; tests pass their own.
+// True when we support `url`'s host, per config.js's supportedDomains — THE one
+// declaration of which hosts we claim. It is not derived from the extractors:
+// a host we support may have a per-site source under event-extractors/custom/,
+// or may be served by the core generic extractor alone with no source file at
+// all. Read by the popup (to pick its render state), by the toolbar service
+// worker via the same list (to color the icon), and by the auto-extractor triage
+// (to close a request for a site we already cover before spending an agent run).
+// Subdomain-aware, same host match as the allow/deny lists. `lists` defaults to
+// the shipped config; tests pass their own.
 export function isSupportedDomain(url, lists = GCalConfig) {
   return hostMatchesList(hostFromUrl(url), lists.supportedDomains);
 }
 
-// Classify a host against config.js's fallback lists:
-//   "deny"  — suppress its fallback events (generic guesses there are noise);
-//   "allow" — show them, but don't ask for support (the fallback is trusted);
+// Classify a host against config.js's host lists:
+//   "deny"  — suppress its scraped events (generic guesses there are noise);
+//   "allow" — show them, but don't ask for support (generic extraction is trusted);
 //   "none"  — on neither list (or an unparseable URL): show them AND invite a
 //             support request.
 // Deny wins if a host is somehow on both lists. `lists` defaults to the shipped
@@ -62,7 +64,7 @@ export function isSupportedDomain(url, lists = GCalConfig) {
 export function classifyHost(url, lists = GCalConfig) {
   const host = hostFromUrl(url);
   if (host === "") return "none"; // no URL yet (new tab) or a non-http(s) URL (chrome://, etc.)
-  if (hostMatchesList(host, lists.sourceFallbackDenylist)) return "deny";
-  if (hostMatchesList(host, lists.sourceFallbackAllowlist)) return "allow";
+  if (hostMatchesList(host, lists.unsupportedDenylist)) return "deny";
+  if (hostMatchesList(host, lists.unsupportedAllowlist)) return "allow";
   return "none";
 }

@@ -18,13 +18,13 @@ pipeline" section below, and its three scheduled tasks live under `tasks/`.
   merge.
 - **Generated files are regenerated, never hand-merged.** On a conflict take
   either side and rerun `npm run regen` (load lists + UI snapshots +
-  fallback-coverage baseline/report). The committed `.gitattributes` maps each
+  generic-coverage baseline/report). The committed `.gitattributes` maps each
   generated file to the `ours` merge driver; a stale artifact can't slip through
   — its own gate fails. Under the rule (kept in sync with `.gitattributes`):
   `extension/event-extractors/load-order.generated.json` (from `npm run index`),
   `dev/requirements/<kind>/cases/*.png` (from `npm run refresh:ui`), and
-  `dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json`
-  + `fallback-coverage.GENERATED.md` (from the fallback-coverage test). The
+  `dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json`
+  + `generic-coverage.GENERATED.md` (from the generic-coverage test). The
   inline gallery in `dev/requirements/requirements.md` is part-authored prose —
   **not** on the `ours` driver; reconcile via `npm run regen` + the gallery
   drift gate. If `regen` reports a coverage regression, that's the real gate
@@ -104,7 +104,7 @@ below). Portable rules these instantiate live in the canon packs/skills.
 - **The jsdom-vs-Chrome DOM traps bit this repo directly** (canon): #130/#137
   drove the **production** remedy the canon (framed for tests) leaves out —
   strip `noscript`/`script`/`style` from a clone before reading any element's
-  user-facing text (the fallback's footer-address reader does this, #675).
+  user-facing text (the generic extractor's footer-address reader does this, #675).
 - **Injected block markup inside a `<p>` silently empties it** — the parser
   auto-closes the `<p>` and the content lands as its `nextElementSibling`; a
   `.foo p` selector reads `""` with no error. Bit tel-aviv's description blocks
@@ -146,7 +146,7 @@ per the canon action header's recipe.
 Standing rules for the extractor-automation domain — the three gcec pack
 [`tasks/`](tasks/): **create-extractor** (an `extractor-request` issue → a PR
 adding site support), **record-page** (records a committed `.url`'s cached page),
-and the weekly **fallback-extractor-improvements** (read a spec only when working
+and the weekly **generic-extractor-improvements** (read a spec only when working
 on that pipeline). Adding or refreshing a cached live case by hand is the
 [testing-guide](skills/testing-guide/SKILL.md) skill.
 
@@ -179,7 +179,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   `og:locale`, or a non-English language; a bare `en` (region unknown) stays
   month-first rather than guess. Resolution lives in `helpers/dates.js`
   (`parseDateFromText` / `normalizeDateValue` take a `dayFirst` flag, threaded
-  from `extract-unsupported.js`'s `pageUsesDayFirstDates`), mirroring
+  from `generic-extractor.js`'s `pageUsesDayFirstDates`), mirroring
   `derive-timezone.js`'s locale read; unambiguous dates (a part > 12) and the
   `.` / `-` separators are always day-first regardless (#686).
 - **An unrecordable page is a dead end, not a failed run.** When a fetch can't
@@ -188,7 +188,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   and exits **0** — a task failure would converge to a `needs-human` dispatch
   issue as well, duplicating the signal and implying the pipeline broke when it
   correctly declined. Same for record-page: the pages that did record still land.
-- **The fallback-coverage gate is a high-watermark over a changing case set.** It
+- **The generic-coverage gate is a high-watermark over a changing case set.** It
   ratchets up on an unchanged case set and re-anchors when the set changes,
   compared over the cases the runs **share** — so adding an extractor never fails
   it (#240) while a pre-existing case that regresses still does. A removed/renamed
@@ -196,16 +196,21 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   (commit that); in CI it's an error to fix. *Caveat:* never commit a re-anchored
   baseline while the gate is red — a regression bundled with a case-set change can
   be re-anchored over. Detailed mechanics self-document in the gate's own headers
-  (`dev/requirements/extractor/fallback/fallback-coverage.js` / `.test.js`).
-- **To see what the generic/unsupported extractor gets** on any cached page — even
-  a supported host — load the files, set `GCal.sources = []`, then call
-  `GCal.extract()`: the documented way to force the unsupported-host path through
-  the same norm/sort the popup uses. Most start/end *differences* vs a dedicated
-  source are just its hardcoded `ctz` localizing to floating time (same instant),
-  not extraction bugs; the real gaps are fields it can't know generically
-  (durations, site-specific descriptions, and — where the page doesn't declare
-  corroborating hints, see `helpers/derive-timezone.js` — `ctz`). This is the
-  comparison the fallback-coverage gate automates.
+  (`dev/requirements/extractor/generic-coverage/generic-coverage.js` / `.test.js`).
+- **To see what the core generic extractor gets ON ITS OWN** on any cached page —
+  even a supported host — load the files, set `GCal.sources = []`, then call
+  `GCal.extract()`: the documented way to strip every per-site override and see
+  the bare base through the same norm/sort the popup uses. (`GCal.extract()`
+  alone no longer answers this: the generic extractor is the base layer of every
+  extraction now, so on a supported host its output already carries the site's
+  overrides.) Most start/end *differences* vs a dedicated source are just its
+  hardcoded `ctz` localizing to floating time (same instant), not extraction
+  bugs; the real gaps are fields it can't know generically (durations,
+  site-specific descriptions, and — where the page doesn't declare corroborating
+  hints, see `helpers/derive-timezone.js` — `ctz`). This is the comparison the
+  generic-coverage gate automates — and a case where it shows NO gap is a
+  candidate for deleting the per-site source and listing the host in
+  `supportedDomains`).
 
 ## Architecture rules of the road
 
@@ -213,10 +218,34 @@ Whenever we agree on a new or changed top-level architectural guideline, update
 this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
+- **`extension/event-extractors/custom/` is the extensibility point — one file
+  per site, and nothing else.** The rest of `event-extractors/` is the pipeline
+  itself: the registry, the orchestrator, the shared helpers, and the one core
+  generic extractor (`generic-extractor.js`), which is a different kind of thing
+  from a per-site file and never goes in `custom/`.
+- **The core generic extractor is the base layer of every extraction** — it runs
+  on every page, and a per-site source is only a layer of *overrides* merged over
+  it, stating the fields it gets better. A source never re-reads what the page
+  already says about itself, and the generic extractor may never know about a
+  specific site.
+- **Being supported is DECLARED, never derived from the extractors.**
+  `supportedDomains` in `extension/host-lists.json` is the one list of hosts
+  we claim, read directly by the toolbar worker and the popup. Never add a second
+  list, and never register a placeholder source just to make a host count as
+  supported. The only guarded direction is that every per-site source's host
+  appears in the list.
+- **A site we fully support gets no extractor file when there is nothing to
+  override.** It stays listed in `supportedDomains` and stays fully supported —
+  green icon, no correction prompt — with no file at all. When a
+  `custom/<site>.js` shrinks to nothing, just delete it; when such a site starts
+  needing a fix the generic extractor can't make site-agnostically, add the file
+  back. Never keep a file whose only content is a restatement of the generic
+  base, and never annotate one as "nothing to add".
 - Adding support for a new host is the most common change — the architecture
-  must keep it a single, self-contained new file
-  (`extension/event-extractors/custom/<site>.js`) plus regenerating the load
-  list, touching nothing else and assuming nothing about other extractors.
+  must keep it a single-file change: a host added to `supportedDomains`, plus —
+  only when the generic extractor gets that site wrong — one self-contained new
+  `extension/event-extractors/custom/<site>.js` and a regenerated load list,
+  touching nothing else and assuming nothing about other extractors.
 
 ## Capture policy — lessons land in the local packs
 

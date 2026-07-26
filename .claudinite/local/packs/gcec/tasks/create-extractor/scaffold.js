@@ -21,7 +21,7 @@ const { hostname, slugFor, matchesRegexFor, namesFor } = require("./extractor-na
 const { ROOT } = require("./repo-root");
 const sourcePath = (slug) => path.join(ROOT, "extension", "event-extractors", "custom", `${slug}.js`);
 const casePath = (name) => path.join(ROOT, "dev", "requirements", "extractor", "expected", `${name}.json`);
-const LISTS_FILE = path.join(ROOT, "extension", "fallback-lists.json");
+const LISTS_FILE = path.join(ROOT, "extension", "host-lists.json");
 
 // Pure: the source-file text for a URL. The header + matches() are complete; the
 // extract() body is a starting point the agent refines against the cached page.
@@ -36,27 +36,29 @@ function sourceStub(url) {
 // mirroring event-extractors/custom/meetup.js. The real page is cached at
 // dev/requirements/extractor/data/server-fetched/${caseName}.html.
 //
-// A matched host runs THIS source only — it must produce every field itself; the
-// generic fallback extractor does not run for a supported host. Lean on the
-// page's own schema.org JSON-LD for the fields your DOM selectors miss via the
-// merge() call below (your DOM values win where present).
+// This source is a layer of OVERRIDES over the core generic extractor
+// (generic-extractor.js), which has already read the page's own
+// schema.org JSON-LD, Open Graph tags, microdata and visible dates. State ONLY
+// the fields it gets wrong — anything you leave out comes from that base. If it
+// turns out to get everything right, just delete this file — the host is already
+// registered in supportedDomains, so the site stays fully supported without it.
 (() => {
-  const { text, firstText, blockText, normalizeDateValue, merge, embeddedEvents } = GCal;
+  const { text, firstText, blockText, normalizeDateValue } = GCal;
 
   GCal.sources.push({
     name: "${slug}",
     matches: (host) => ${matchesRegex}.test(host),
     extract() {
-      // TODO(agent): refine these selectors against dev/requirements/extractor/data/server-fetched/${caseName}.html, and
-      // add location / description / ctz as the page needs them.
-      const dom = {
+      // TODO(agent): refine these selectors against dev/requirements/extractor/data/server-fetched/${caseName}.html,
+      // dropping any the generic base already gets right and adding location /
+      // description / ctz as the page needs them.
+      return {
         title: text("h1"),
         start: (() => {
           const el = document.querySelector("time[datetime]");
           return el ? normalizeDateValue(el.getAttribute("datetime")) : "";
         })(),
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

@@ -61,7 +61,7 @@ test("the service worker's runtime resources ship", () => {
   // it fetches the host lists and decodes the per-state icon PNGs into ImageData
   // (it no longer importScripts the pipeline). Every resource it fetches must
   // ship — and exist, so a renamed icon variant fails here, not at runtime.
-  const resources = ["fallback-lists.json"];
+  const resources = ["host-lists.json"];
   for (const size of [16, 32]) {
     for (const suffix of ["", "-supported", "-denied"]) {
       resources.push(`icon/images/icon${size}${suffix}.png`);

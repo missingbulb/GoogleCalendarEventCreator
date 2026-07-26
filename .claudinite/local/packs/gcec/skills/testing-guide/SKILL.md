@@ -19,7 +19,7 @@ The invariants (mirror tree, reviewed-contract cases, `REFERENCE_NOW` floor,
 refusal-test discipline) are always-loaded in the gcec pack's RULES.md. General
 test discipline (see-it-fail, green-twice, high-watermark gating) is canon.
 Adding a cached live case is covered under "Live integration tests" below; the
-fallback-coverage gate's invariants are in the gcec pack's RULES.md.
+generic-coverage gate's invariants are in the gcec pack's RULES.md.
 
 ## The requirements model — every leaf has exactly one case
 
@@ -89,8 +89,8 @@ The *why* of every non-obvious harness decision lives in that file's own
 header/inline comments (the file-local-footgun rule) — read the file when you
 touch it; this is just the map:
 
-- Fallback-coverage gate — `dev/requirements/extractor/fallback/fallback-coverage.js`
-  (field-by-field comparison) + `fallback-coverage.test.js` (the high-watermark
+- Generic-coverage gate — `dev/requirements/extractor/generic-coverage/generic-coverage.js`
+  (field-by-field comparison) + `generic-coverage.test.js` (the high-watermark
   gate, #240).
 - UI snapshot renderer limits (satori/resvg, CSS inlining, tall-list clamp,
   `skipRender`) — `dev/requirements/shared/render/popup-renderer.js`; the

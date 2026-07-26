@@ -25,7 +25,7 @@ const decodeBitmap = (bytes) => {
 
 class FakeBrowser {
   // root: repo root the worker's fetch() paths resolve against.
-  // lists: the object served for the host-list fetch (fallback-lists.json).
+  // lists: the object served for the host-list fetch (host-lists.json).
   // defaultIcon: manifest action.default_icon, { "16": path, "32": path, ... }, shown
   //   when no rule matches (Chrome's behavior).
   constructor({ root, lists, defaultIcon }) {

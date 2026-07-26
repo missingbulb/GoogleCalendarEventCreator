@@ -31,11 +31,10 @@
 // +00:00 start/end), so anchoring a Tel Aviv event to Asia/Jerusalem shows it at
 // the correct local 18:00 rather than the viewer's zone.
 //
-// A matched host runs THIS source only — it must produce every field itself; the
-// generic fallback extractor does not run for a supported host. The merge() below
-// lets these DOM values win, with the page's embedded event filling start/end.
+// start/end come from the generic base's read of that embedded event; the four
+// fields above are the overrides this source states.
 (() => {
-  const { text, blockText, merge, embeddedEvents } = GCal;
+  const { text, blockText } = GCal;
 
   // Map the address's trailing country name to its IANA zone, reusing the
   // canon's country→zone table (COUNTRY_TIMEZONES, keyed by ISO region code)
@@ -72,7 +71,7 @@
       // The pin link at the top of the event header; only that maps anchor
       // wraps the address in a <span> (the "Get directions" buttons don't).
       const location = text('a[href*="google.com/maps"] span');
-      const dom = {
+      return {
         title: text("h1"),
         location,
         // The description block minus its "Read more" button (a sibling).
@@ -84,7 +83,6 @@
         })(),
         ctz: ctzFromCountry(location),
       };
-      return merge(dom, embeddedEvents.toEvent(embeddedEvents.find()[0]));
     },
   });
 })();

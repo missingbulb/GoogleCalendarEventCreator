@@ -48,7 +48,7 @@ export function buildCalendarUrl(data, tab, instanceIndex = 0) {
   const params = new URLSearchParams();
   params.set("action", "TEMPLATE");
 
-  const title = data.title || tab.title || GCalConfig.fallbackEventTitle;
+  const title = data.title || tab.title || GCalConfig.defaultEventTitle;
   params.set("text", title);
 
   const dates = formatDatesParam(instance.start, instance.end, instance.eventLengthInMinutes);

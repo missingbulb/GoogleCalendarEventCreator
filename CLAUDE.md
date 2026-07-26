@@ -26,8 +26,8 @@ beside its deterministic preprocessing worker and, when a stage needs judgment, 
 - [`record-page`](.claudinite/local/packs/gcec/tasks/record-page/task.mjs) —
   records the cached page for any live case whose `.url` is committed and whose
   `.html` is not (agentless).
-- [`fallback-extractor-improvements`](.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md)
-  — the weekly attempt to widen the generic fallback extractor.
+- [`generic-extractor-improvements`](.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.md)
+  — the weekly attempt to widen the generic extractor.
 
 Read a task spec **only** when working on that pipeline — none is needed for
 day-to-day development.

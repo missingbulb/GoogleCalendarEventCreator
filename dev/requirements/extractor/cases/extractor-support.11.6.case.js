@@ -1,8 +1,8 @@
 "use strict";
 
 module.exports = {
-  description: "bandsintown.com — extracted by custom/bandsintown.js",
+  description: "bandsintown.com — fully covered by the core generic extractor, with no per-site file",
   host: "bandsintown.com",
-  source: "extension/event-extractors/custom/bandsintown.js",
+  source: "extension/event-extractors/generic-extractor.js",
   page: "bandsintown-berry-sakharof",
 };

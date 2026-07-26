@@ -1,10 +1,10 @@
-# Fallback extractor coverage
+# generic extractor coverage
 
-> **Auto-generated** by `dev/requirements/extractor/fallback/fallback-coverage.test.js` (logic in `dev/requirements/extractor/fallback/fallback-coverage.js`). Do not hand-edit — it is rewritten whenever the tests run locally. See `.claudinite/local/packs/gcec/RULES.md`.
+> **Auto-generated** by `dev/requirements/extractor/generic-coverage/generic-coverage.test.js` (logic in `dev/requirements/extractor/generic-coverage/generic-coverage.js`). Do not hand-edit — it is rewritten whenever the tests run locally. See `.claudinite/local/packs/gcec/RULES.md`.
 
-What the generic **fallback** extractor (`extension/event-extractors/extract-unsupported.js`) recovers on each integration-test page, compared to that page's **dedicated per-site source** — the reviewed-correct extraction the live test pins down. For every `dev/requirements/extractor/expected/*.json` page, `GCal.extract()` is run twice on the same cached HTML: once normally (custom) and once with the site registry emptied (fallback). We grade the fallback's **primary event** (`events[0]` after the chronological sort) field-by-field against the custom primary event, counting a field only when the custom event filled it.
+What the core generic extractor (`extension/event-extractors/generic-extractor.js`) recovers **on its own** for each integration-test page, compared to the full pipeline — that generic base with the page's **per-site overrides** merged over it, the reviewed-correct extraction the live test pins down. For every `dev/requirements/extractor/expected/*.json` page, `GCal.extract()` is run twice on the same cached HTML: once normally (custom) and once with the site registry emptied (the bare run), which strips every override. We grade the bare run's **primary event** (`events[0]` after the chronological sort) field-by-field against the custom primary event, counting a field only when the custom event filled it. A page where the gap closes to zero is a candidate for deleting its per-site source outright — the host stays in `supportedDomains`, so the site stays supported.
 
-`start`/`end` count as a match when the values are byte-identical **or** resolve to the same absolute instant — a dedicated source localizing to a floating time via its `ctz` is the same moment as the fallback's offset-bearing time, not a miss (see `.claudinite/local/packs/gcec/RULES.md`). A floating time read an hour off, or a date that dropped its time, is a real miss.
+`start`/`end` count as a match when the values are byte-identical **or** resolve to the same absolute instant — a dedicated source localizing to a floating time via its `ctz` is the same moment as the bare run's offset-bearing time, not a miss (see `.claudinite/local/packs/gcec/RULES.md`). A floating time read an hour off, or a date that dropped its time, is a real miss.
 
 ## Score
 
@@ -18,7 +18,7 @@ Headline coverage over all 35 cases in the corpus:
 
 ### Gate
 
-The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERATED.json`) compares the current run to the stored watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes.
+The gate (`dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json`) compares the current run to the stored watermark over the cases they **share**. A newly added case isn't in the watermark's case list, so it's excluded until the watermark is re-baselined — **adding an extractor never fails the gate**. The watermark ratchets **up** on an unchanged case set and re-anchors to the current aggregate when the set changes.
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
@@ -27,7 +27,7 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 
 Gated over **35** shared case(s).
 
-Event coverage is reported but **not gated** (a few listing pages the fallback can't enumerate dominate it).
+Event coverage is reported but **not gated** (a few listing pages the bare run can't enumerate dominate it).
 
 ## By field type
 
@@ -71,7 +71,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 
 ## By exemplar
 
-Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback didn't) · — source left it empty
+Legend: ✓ match · ~ different value · ✗ missing (source had it, the bare run didn't) · — source left it empty
 
 | Case | Events fb/custom | title | start | end | loc | ctz | len | desc |
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
