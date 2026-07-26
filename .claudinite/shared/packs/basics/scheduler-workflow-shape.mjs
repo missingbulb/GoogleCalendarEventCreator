@@ -49,6 +49,26 @@ const rule = {
     if (!/engine\/scheduler\/run\.mjs/.test(text)) {
       flag('does not run the vendored engine entry', 'the job must run node .claudinite/shared/engine/scheduler/run.mjs — all logic lives in the vendored engine, not the workflow');
     }
+    // Baselining runs as this workflow's `agent_preprocessing` and its `deliver()`
+    // pushes the per-cycle maintenance branch and opens/auto-merges its PR via the
+    // Action GITHUB_TOKEN (agent-preprocessing §7/E4). An explicit `permissions:`
+    // block caps the token, so the scheduler MUST grant these writes or the
+    // self-refresh 403s — an easy-to-miss regression the read-only original had.
+    if (!/^\s*contents:\s*write\b/m.test(text)) {
+      flag('does not grant contents: write', "set permissions.contents: write — baselining's deliver() pushes the maintenance branch; without it the self-refresh 403s");
+    }
+    if (!/^\s*pull-requests:\s*write\b/m.test(text)) {
+      flag('does not grant pull-requests: write', "set permissions.pull-requests: write — baselining's deliver() opens the maintenance PR and arms auto-merge; without it the PR create 403s");
+    }
+    // A task's `agent_preprocessing_secrets` are resolved out of the secrets bundle
+    // this step passes in (agent-preprocessing DESIGN §9). Actions can't select
+    // secrets dynamically, so the bundle line is the ONLY way a worker's declared
+    // secret ever arrives — a workflow missing it fails every such task with
+    // "secret not configured", which reads like a repo-settings problem rather than
+    // a stale workflow. Cheap to assert, and the vendor refresh restores it.
+    if (!/CLAUDINITE_SECRETS:\s*\$\{\{\s*toJSON\(secrets\)\s*\}\}/.test(text)) {
+      flag('does not pass the repo secrets bundle to the engine', 'add `CLAUDINITE_SECRETS: ${{ toJSON(secrets) }}` to the engine step\'s env — a task\'s declared agent_preprocessing_secrets are resolved from it (the engine strips the bundle before spawning a worker)');
+    }
     return out;
   },
 };

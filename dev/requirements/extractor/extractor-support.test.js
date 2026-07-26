@@ -42,7 +42,7 @@ for (const testCase of extractorCases) {
     const urlPath = dataFile(`${testCase.page}.url`);
     assert.ok(
       fs.existsSync(htmlPath) && fs.statSync(htmlPath).size > 0,
-      `missing/empty cached page for ${testCase.host}: ${htmlPath} (recorded by the auto-extractor pipeline / by hand via ScraperAPI — see dev/routines/create-extractor/3-prepare.sh)`
+      `missing/empty cached page for ${testCase.host}: ${htmlPath} (recorded by the auto-extractor pipeline — see .claudinite/local/packs/gcec/tasks/create-extractor/prepare.mjs)`
     );
     assert.ok(fs.existsSync(urlPath), `missing source URL: ${urlPath}`);
 

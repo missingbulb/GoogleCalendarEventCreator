@@ -3,5 +3,5 @@
 module.exports = {
   tbd: true,
   description: "Submitting the request kicks off the automated extractor, which implements support for the site and opens a pull request for review.",
-  coveredBy: "dev/routines/create-extractor/test/2-triage.test.js",
+  coveredBy: ".claudinite/local/packs/gcec/tasks/create-extractor/test/triage.test.js",
 };

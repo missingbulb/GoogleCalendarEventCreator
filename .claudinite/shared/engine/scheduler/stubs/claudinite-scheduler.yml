@@ -23,9 +23,10 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read      # read the repo + the vendored engine
-  issues: write       # file / label / close dispatch issues
-  actions: read       # read the run ledger (last successful run) for due-slot math
+  contents: write        # read the repo + vendored engine; baselining's deliver() pushes the maintenance branch (agent-preprocessing §7/E4)
+  issues: write          # file / label / close dispatch issues
+  pull-requests: write   # baselining's deliver() opens the per-cycle maintenance PR and arms auto-merge
+  actions: read          # read the run ledger (last successful run) for due-slot math
 
 jobs:
   schedule:
@@ -38,4 +39,10 @@ jobs:
       - name: Evaluate schedule and dispatch due tasks
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          # The whole repo secrets bundle (agent-preprocessing DESIGN §9). Actions
+          # cannot select secrets dynamically, so the engine receives all of them
+          # and hands each preprocessing worker ONLY the names its task declared in
+          # `agent_preprocessing_secrets` — the bundle itself is stripped from the
+          # subprocess env. A repo with no secrets passes `{}`; nothing to configure.
+          CLAUDINITE_SECRETS: ${{ toJSON(secrets) }}
         run: node .claudinite/shared/engine/scheduler/run.mjs

@@ -4,7 +4,7 @@ The project's standing working rules — injected at session start while this pa
 is declared. Activity-scoped procedures live in this pack's skills
 (snapshot-approval, merge-and-ci, testing-guide, add-live-case) and surface on
 demand; the extractor-automation domain's standing rules are the "Extractor
-pipeline" section below, and its two routines live under `dev/routines/`.
+pipeline" section below, and its three scheduled tasks live under `tasks/`.
 
 ## Working rules
 
@@ -137,32 +137,35 @@ classification: the `Release` stub (`chrome-extension-release.yml`) is
 unattended and already covered — the reporters fire inside the vendored
 create-package/publish/daily workflows, keyed per operation, with per-repo
 values in `.github/release.config`; `test.yml` is attended PR CI — no reporter;
-`fetch-page.yml` is attended by its dispatcher (see the extractor pipeline
-section below); a **new** unattended workflow adds a failure job per the canon
-action header's recipe.
+`claudinite-scheduler.yml` is the vendored scheduler, which converges its own
+failures to `needs-human` issues; a **new** unattended workflow adds a failure job
+per the canon action header's recipe.
 
 ## Extractor pipeline
 
-Standing rules for the extractor-automation domain — the create-extractor routine
-(an `extractor-request` issue → a PR adding site support), still under
-[`dev/routines/`](../../../../dev/routines/), and the weekly
-fallback-extractor-improvements task, now a gcec pack task under
-[`tasks/`](tasks/fallback-extractor-improvements/) (read a spec only when working
+Standing rules for the extractor-automation domain — the three gcec pack
+[`tasks/`](tasks/): **create-extractor** (an `extractor-request` issue → a PR
+adding site support), **record-page** (records a committed `.url`'s cached page),
+and the weekly **fallback-extractor-improvements** (read a spec only when working
 on that pipeline). Adding a cached live case is the
 [add-live-case](skills/add-live-case/SKILL.md) skill.
 
-- **All page fetching is delegated to ScraperAPI via the fetch-page workflow**
-  (`.github/workflows/fetch-page.yml`): a bare curl through ScraperAPI's
-  residential proxy with `render=true`, so a single-page app records post-render
-  HTML with real data. Bot-blocking from CI/sandbox IPs is the portable rule
-  maintained in the canon; here the escape hatch is the `SCRAPER_API_KEY`
-  **GitHub Actions secret** — a page is recorded by dispatching that workflow (the
-  create-extractor routine does this in its step 4), never by a local fetch (this
-  sandbox is bot-blocked). ScraperAPI is the whole fetching surface — swap the
-  vendor in that one workflow if it underperforms. The aid for a flaky SPA render
-  is the **`Wait-for selector`** a source request can carry
+- **All page fetching goes through [`scraperapi.mjs`](scraperapi.mjs), from a
+  task's preprocessing worker and nowhere else.** A rendered fetch through
+  ScraperAPI's residential proxy (`render=true`, so a single-page app records
+  post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the
+  portable rule maintained in the canon; here the escape hatch is the
+  `SCRAPER_API_KEY` **GitHub Actions secret**, which reaches a worker because its
+  task declares `agent_preprocessing_secrets: ['SCRAPER_API_KEY']` and reaches
+  nothing else — never a local fetch (this sandbox is bot-blocked), and never an
+  agent session (which holds no repo secrets). **Never re-introduce a workflow
+  whose only job is to hold that secret for an agent**: `fetch-page.yml` was
+  exactly that, and the dispatch/poll/pull round-trip it forced on the agent is
+  what preprocessing removed. ScraperAPI is the whole fetching surface — swap the
+  vendor in that one module if it underperforms. The aid for a flaky SPA render is
+  the **`Wait-for selector`** a source request can carry
   (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
-  event extractor, #603), passed to the workflow as `wait_for_selector`.
+  event extractor, #603), passed through as `wait_for_selector`.
 - **Facebook can't be a cached live case** — a hard HTTP 400 even through the
   proxy, so its extraction stays unit-tests-only
   (`extension-test/event-extractors/extraction.test.js`).
@@ -179,11 +182,12 @@ on that pipeline). Adding a cached live case is the
   from `extract-unsupported.js`'s `pageUsesDayFirstDates`), mirroring
   `derive-timezone.js`'s locale read; unambiguous dates (a part > 12) and the
   `.` / `-` separators are always day-first regardless (#686).
-- **`fetch-page.yml` is attended by its dispatcher** (the workflow-failure
-  classification above): the create-extractor routine dispatches it, polls the
-  run, and on failure labels the issue `extractor-blocked-needs-human` — a red run
-  reaches a human through the routine, not the Actions list, so the workflow
-  carries no failure reporter (and being dispatch-only it never runs unwatched).
+- **An unrecordable page is a dead end, not a failed run.** When a fetch can't
+  produce a page (bot wall, dead URL, empty render), create-extractor's
+  preprocessing labels the request `extractor-blocked-needs-human` with the reason
+  and exits **0** — a task failure would converge to a `needs-human` dispatch
+  issue as well, duplicating the signal and implying the pipeline broke when it
+  correctly declined. Same for record-page: the pages that did record still land.
 - **The fallback-coverage gate is a high-watermark over a changing case set.** It
   ratchets up on an unchanged case set and re-anchors when the set changes,
   compared over the cases the runs **share** — so adding an extractor never fails

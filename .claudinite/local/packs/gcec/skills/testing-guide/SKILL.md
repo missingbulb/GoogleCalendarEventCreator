@@ -53,7 +53,7 @@ matchers, array length included. The page URL lives **only** in
 and the test both read it; never in the case file). Tests run offline against
 the committed cached HTML, loaded into a DOM at the `.url`'s URL so hostname
 detection behaves exactly as in Chrome. `test.yml` never fetches — recording
-goes through the fetch-page workflow (see add-live-case).
+goes through the record-page task (see add-live-case).
 
 ## UI snapshots
 
