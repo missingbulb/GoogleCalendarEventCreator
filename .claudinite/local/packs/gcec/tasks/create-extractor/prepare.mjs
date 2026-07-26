@@ -318,7 +318,14 @@ export async function main() {
   } catch (e) {
     git('checkout', base);
     git('branch', '-D', decision.branch);
-    await handToHuman(target.number, `The event page could not be recorded, so no extractor was attempted: ${e.message}\n\nThis is usually a bot wall, a dead URL, or a page that renders nothing without interaction. Remove the \`${BLOCKED_LABEL}\` label to retry.`);
+    await handToHuman(target.number, [
+      `The event page could not be recorded, so no extractor was attempted: ${e.message}`,
+      '',
+      'A recorder failure (a 5xx that outlasted its retries) is usually transient and worth simply retrying.',
+      'A refusal or an empty render points at the page itself — a bot wall, a dead URL, or content that needs interaction.',
+      '',
+      `Remove the \`${BLOCKED_LABEL}\` label to retry.`,
+    ].join('\n'));
     return;
   }
   commitAll(`chore: record ${decision.caseName} page via ScraperAPI (Refs #${target.number})`);
