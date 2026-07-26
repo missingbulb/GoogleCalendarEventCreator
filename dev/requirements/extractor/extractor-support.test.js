@@ -10,9 +10,9 @@
 // extension/host-lists.json's `supportedDomains` (the same list the toolbar
 // icon and the popup read), and this test asserts that declaration alongside the
 // extraction. A case's `source` names whichever file the support rests on — a
-// per-site event-extractors/custom/<site>.js, or extension/generic-extractor.js
-// for a host the core generic extractor covers on its own, with no file of its
-// own. The assertions are the same either way: support is support.
+// per-site event-extractors/custom/<site>.js, or the core
+// event-extractors/generic-extractor.js for a host it covers on its own, with no
+// per-site file. The assertions are the same either way: support is support.
 //
 // It asserts only RECOGNITION + COMPLETENESS, not exact field values: the precise
 // extracted values stay pinned by the reviewed per-page cases in

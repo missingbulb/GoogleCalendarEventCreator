@@ -1,7 +1,7 @@
 # Generic-coverage routine
 
 Weekly Claude routine (on a strong model), offline on a fresh clone. Goal: make the **generic**
-generic extractor — `extension/generic-extractor.js` and the
+generic extractor — `extension/event-extractors/generic-extractor.js` and the
 shared `extension/event-extractors/helpers/*.js` — recover **more** of what the
 dedicated per-site sources get, measured by the generic-coverage gate. **Most runs
 correctly change nothing** — the gate already banks every prior win, so a new

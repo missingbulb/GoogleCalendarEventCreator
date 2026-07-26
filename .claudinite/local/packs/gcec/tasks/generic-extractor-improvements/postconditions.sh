@@ -55,7 +55,7 @@ git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=main
 git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=HEAD
 
 # ── 1. SCOPE ──
-allowed='^(extension/generic-extractor\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/generic-coverage/generic-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
+allowed='^(extension/event-extractors/generic-extractor\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/generic-coverage/generic-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
 changed="$( { git diff --name-only "$ref"...HEAD 2>/dev/null; git diff --name-only HEAD 2>/dev/null; \
               git ls-files --others --exclude-standard; } | sort -u | sed '/^$/d' )"
 offenders="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"

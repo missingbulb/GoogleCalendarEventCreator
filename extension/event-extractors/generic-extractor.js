@@ -12,10 +12,10 @@
 //     such a site is fully supported (supportedDomains lists it) with no
 //     extractor file of its own.
 //
-// It deliberately lives OUTSIDE event-extractors/, which is the extensibility
-// point for per-site extractors: this is a fundamentally different thing — one
-// fixed, site-agnostic reader that every one of those extractors layers over,
-// not another entry in the set. Nothing here may know about a specific site.
+// It sits beside the registry and the orchestrator rather than under custom/:
+// that folder is the extensibility point, one file per site, and this is a
+// different thing — the one fixed, site-agnostic reader every one of those files
+// layers over. Nothing here may know about a specific site.
 //
 // extract() returns an array of the page's best-effort events (empty when the
 // page describes none), which assemble-events.js normalizes and presents. It

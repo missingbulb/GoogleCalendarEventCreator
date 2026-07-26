@@ -218,11 +218,11 @@ Whenever we agree on a new or changed top-level architectural guideline, update
 this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
-- **`extension/event-extractors/` is the extensibility point for PER-SITE
-  extractors, and nothing else belongs in it.** The generic extractor is a
-  fundamentally different thing — one fixed, site-agnostic reader, not another
-  entry in the set — so it lives at the extension root
-  (`extension/generic-extractor.js`).
+- **`extension/event-extractors/custom/` is the extensibility point — one file
+  per site, and nothing else.** The rest of `event-extractors/` is the pipeline
+  itself: the registry, the orchestrator, the shared helpers, and the one core
+  generic extractor (`generic-extractor.js`), which is a different kind of thing
+  from a per-site file and never goes in `custom/`.
 - **The core generic extractor is the base layer of every extraction** — it runs
   on every page, and a per-site source is only a layer of *overrides* merged over
   it, stating the fields it gets better. A source never re-reads what the page

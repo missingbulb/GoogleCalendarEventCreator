@@ -8,5 +8,5 @@ module.exports = {
     "facebook.com — fully covered by the core generic extractor, with no per-site file; " +
     "unit-tested only, bot-blocked from caching",
   host: "facebook.com",
-  source: "extension/generic-extractor.js",
+  source: "extension/event-extractors/generic-extractor.js",
 };

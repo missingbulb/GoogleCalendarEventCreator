@@ -369,7 +369,7 @@ function renderMarkdown(cov, watermark) {
   );
   L.push("");
   L.push(
-    "What the core generic extractor (`extension/generic-extractor.js`) recovers " +
+    "What the core generic extractor (`extension/event-extractors/generic-extractor.js`) recovers " +
       "**on its own** for each integration-test page, compared to the full pipeline — that " +
       "generic base with the page's **per-site overrides** merged over it, the " +
       "reviewed-correct extraction the live test pins down. " +
