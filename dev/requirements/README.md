@@ -125,7 +125,6 @@ dev/requirements/
     ui-requirements.js           parses requirements.md into leaf ids
     build-requirements-gallery.js + requirements-gallery.test.js   the two-column gallery
     snapshot-artifacts-dir.js    where snapshot diffs are written on failure
-    gen-states-flowchart.js + popup-states-flowchart.png
     render/                      the popup+icon rendering/diff engine
       render-snapshot.js popup-renderer.js icon-renderer.js fake-chrome.js actions.js
       refresh-snapshots.js (npm run refresh:ui)  visual-snapshots.test.js  fonts/
