@@ -1,13 +1,10 @@
 // Recording an event page through ScraperAPI — the project's ONE page-fetching
 // surface (the gcec RULES.md extractor-pipeline rule). Lives at the pack root
-// rather than inside a task because two tasks need it: `create-extractor` records
-// the page for a new request, and `record-page` records any case whose `.url` has
-// no committed `.html` yet. Lifting it to their common ancestor keeps one
-// implementation of "how this project fetches a page" — swap the vendor here if
-// ScraperAPI underperforms, and both tasks follow.
+// rather than inside the task that uses it, so "how this project fetches a page"
+// has one home — swap the vendor here if ScraperAPI underperforms.
 //
 // Only usable from a task's `agent_preprocessing` worker: it needs
-// SCRAPER_API_KEY, which both tasks name in `required_secrets` — the wiring
+// SCRAPER_API_KEY, which the task names in `required_secrets` — the wiring
 // converge stamps that into the scheduler workflow, so it reaches an Action-side
 // worker and nothing else (an executor session holds no repo secrets). This
 // sandbox is bot-blocked, so a direct fetch from a session would fail even with

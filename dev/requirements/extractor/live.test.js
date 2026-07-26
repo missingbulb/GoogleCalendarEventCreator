@@ -3,8 +3,7 @@
 //
 // These run OFFLINE against committed cached HTML files in
 // data/, recorded from each site by the auto-extractor pipeline
-// (the gcec create-extractor / record-page tasks, which fetch through
-// ScraperAPI). Asserting against a cached copy of the real page
+// (the gcec create-extractor task, which fetches through ScraperAPI). Asserting against a cached copy of the real page
 // makes the suite deterministic and runnable anywhere (no network), while still
 // reflecting each site's current markup.
 //
@@ -37,7 +36,7 @@
 // The scenario's source URL lives alongside the cached HTML, in
 // data/<provenance>/<name>.url, where <provenance> is server-fetched/
 // (pipeline-recorded) or user-submitted/ — the single source of truth —
-// the record-page task records it, and the suite loads the HTML into a DOM at
+// create-extractor's sweep records it, and the suite loads the HTML into a DOM at
 // that URL so hostname-based site detection behaves as in Chrome). It is NOT
 // repeated in the case file.
 //
@@ -66,8 +65,8 @@
 // with the event page URL and a case file (dev/requirements/extractor/expected/<name>.json) with its
 // `expected`. The cached HTML is recorded by the auto-extractor pipeline (open an
 // `extractor-request` issue with the page URL and the create-extractor task does
-// the rest); to add just a page, commit its .url and the record-page task fetches
-// it. Run the suite once to see the actual extracted
+// the rest); to add just a page, commit its .url and create-extractor's sweep
+// fetches it. Run the suite once to see the actual extracted
 // values in the failure output, then copy them into `expected`.
 "use strict";
 

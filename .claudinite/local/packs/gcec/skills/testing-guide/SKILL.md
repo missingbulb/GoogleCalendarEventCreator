@@ -57,8 +57,8 @@ detection behaves exactly as in Chrome. `test.yml` never fetches.
 **Adding one.** Usually you don't: file an `extractor-request` issue with the
 event URL and the `create-extractor` task records the page, writes the
 extractor, and opens the PR. To add a case by hand, land the `.url` alone first
-— a committed `.url` with no sibling `.html` *is* the request the `record-page`
-task acts on, so it fetches the page (ScraperAPI; this sandbox is bot-blocked)
+— a committed `.url` with no sibling `.html` *is* the request the `create-extractor`
+task sweeps for, so it fetches the page (ScraperAPI; this sandbox is bot-blocked)
 and opens a PR carrying it. Merge that, then run `npm run test:live` and paste
 the printed values into `expected/<name>.json` — never hand-write them.
 

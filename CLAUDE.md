@@ -22,10 +22,8 @@ beside its deterministic preprocessing worker and, when a stage needs judgment, 
 `task.md` an agent follows; per-project-scheduling §1):
 
 - [`create-extractor`](.claudinite/local/packs/gcec/tasks/create-extractor/task.md)
-  — an `extractor-request` issue becomes a PR adding site support.
-- [`record-page`](.claudinite/local/packs/gcec/tasks/record-page/task.mjs) —
-  records the cached page for any live case whose `.url` is committed and whose
-  `.html` is not (agentless).
+  — an `extractor-request` issue becomes a PR adding site support; it also records
+  the page for any live case whose `.url` is committed and whose `.html` is not.
 - [`generic-extractor-improvements`](.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.md)
   — the weekly attempt to widen the generic extractor.
 

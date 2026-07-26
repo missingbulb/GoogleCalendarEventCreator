@@ -21,7 +21,7 @@
 export default {
   id: 'create-extractor',
   frequency: 'hourly',           // a submitted request should become a PR in minutes, not overnight
-  precondition_signals: ['issues'],
+  precondition_signals: ['issues', 'commits'],
   agent_model: 'sonnet',               // writing one extract() against a recorded page — bounded, well-specified judgment
   expected_outcome: 'open-pr',            // a human always reviews the extraction; the pipeline never merges
 
@@ -62,6 +62,15 @@ export default {
   // checkout), duplicate detection, and closing anything (a precondition performs
   // no writes). Those are preprocessing's, in prepare.mjs.
   precondition(signals) {
+    // A committed `.url` whose `.html` is missing keeps `test:live` red until the
+    // page is recorded, and only gardening produces that state (a maintainer
+    // re-points a taken-down event). The worker sweeps for it — a directory listing
+    // over the recorder it already owns — but the gate cannot read disk, so a commit
+    // touching that directory is the proxy that lets a pending page fire the task
+    // with no request in sight.
+    const touchedPages = (signals.commits?.touchedPaths ?? [])
+      .filter((f) => f.startsWith('dev/requirements/extractor/data/server-fetched/'));
+
     const open = signals.issues?.open ?? [];
     const eligible = open.filter((i) => {
       const labels = i.labels ?? [];
@@ -70,7 +79,9 @@ export default {
         && !labels.includes('needs-human');
     });
     if (!eligible.length) {
-      return { run: false, reason: 'no open extractor-request issue is eligible (none open, or all claimed / handed to a human)' };
+      return touchedPages.length
+        ? { run: true, reason: `no eligible request, but ${touchedPages.length} cached-page file(s) changed — sweep for a page needing a record`, context: [] }
+        : { run: false, reason: 'no open extractor-request issue is eligible, and no cached-page file changed' };
     }
     const numbers = eligible.map((i) => i.number).sort((a, b) => a - b);
     return {

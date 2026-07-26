@@ -132,3 +132,45 @@ test("a request parked on a human is excluded from peers, so it cannot black-hol
   const peers = all.filter((i) => !labelsOf(i).includes("needs-human")).map((i) => i.number);
   assert.deepEqual(peers, [20]);
 });
+
+// --- the pending-page sweep (absorbed from the retired record-page task) -------
+// A `.url` with no `.html` keeps test:live red. This used to be a task of its own;
+// it is a few lines over the recorder prepare.mjs already owns, so it lives here.
+
+test("pendingCases: a .url with no .html is pending; one already recorded is not", async () => {
+  const { pendingCases } = await load();
+  const entries = ["dice.url", "dice.html", "meetup.url", "somo.url", "somo.html"];
+  assert.deepEqual(pendingCases(entries, (f) => entries.includes(f)), ["meetup"]);
+});
+
+test("pendingCases: an .html with no .url is not a case to record", async () => {
+  const { pendingCases } = await load();
+  assert.deepEqual(pendingCases(["orphan.html"], (f) => f === "orphan.html"), []);
+});
+
+test("pendingCases: nothing to do on an empty or fully-recorded directory", async () => {
+  const { pendingCases } = await load();
+  assert.deepEqual(pendingCases([], () => false), []);
+  assert.deepEqual(pendingCases(["a.url", "a.html"], () => true), []);
+});
+
+test("openFamilyBranch: repeated sweeps accumulate onto the open recorded-pages PR", async () => {
+  const { openFamilyBranch } = await load();
+  const pulls = [{ head: { ref: "claude/extractor/dice" } }, { head: { ref: "claude/record-pages-2026-07-20" } }];
+  assert.equal(openFamilyBranch(pulls), "claude/record-pages-2026-07-20");
+  assert.equal(openFamilyBranch([{ head: { ref: "some/other" } }]), null);
+});
+
+test("hasRoomToStart: leaves room for a worst-case fetch AND the delivery after it", async () => {
+  const { hasRoomToStart } = await load();
+  // 900s budget, 530s worst-case fetch, 60s delivery -> the last safe start is 310s in.
+  assert.equal(hasRoomToStart(300_000, 900_000), true);
+  assert.equal(hasRoomToStart(320_000, 900_000), false);
+});
+
+test("hasRoomToStart: the budget the worker reads is the task's own declaration", async () => {
+  const { hasRoomToStart } = await load();
+  const decl = (await import("../task.mjs")).default;
+  assert.equal(hasRoomToStart(0, decl.agent_preprocessing_timeout * 1000), true);
+  assert.equal(hasRoomToStart(decl.agent_preprocessing_timeout * 1000, decl.agent_preprocessing_timeout * 1000), false);
+});
