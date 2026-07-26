@@ -13,11 +13,27 @@ const load = () => import("../task.mjs").then((m) => m.default);
 const signals = (open) => ({ issues: { open, touched: [] } });
 const req = (number, labels = ["extractor-request"]) => ({ number, title: `Event source request - #${number}`, labels });
 
-test("no open request → skip, with a reason a human can read in the job summary", async () => {
+test("no open request and no page churn → skip, with a reason a human can read in the job summary", async () => {
   const task = await load();
   const v = task.precondition(signals([]));
   assert.equal(v.run, false);
   assert.match(v.reason, /no open extractor-request issue is eligible/);
+});
+
+test("no request, but a cached-page file moved → run anyway, to sweep for a page needing a record", async () => {
+  const task = await load();
+  const v = task.precondition({
+    issues: { open: [] },
+    commits: { touchedPaths: ["dev/requirements/extractor/data/server-fetched/dice.url"] },
+  });
+  assert.equal(v.run, true);
+  assert.match(v.reason, /sweep for a page needing a record/);
+});
+
+test("a commit elsewhere is not a reason to run", async () => {
+  const task = await load();
+  const v = task.precondition({ issues: { open: [] }, commits: { touchedPaths: ["extension/popup.js"] } });
+  assert.equal(v.run, false);
 });
 
 test("an unrelated open issue is not a request", async () => {
@@ -55,7 +71,7 @@ test("the declaration carries the full contract, including the secret preprocess
   const task = await load();
   assert.equal(task.id, "create-extractor");
   assert.equal(task.frequency, "hourly");
-  assert.deepEqual(task.precondition_signals, ["issues"]);
+  assert.deepEqual(task.precondition_signals, ["issues", "commits"]);  // requests, plus the pending-page sweep
   assert.equal(task.expected_outcome, "open-pr");   // a human always reviews the extraction
   assert.equal(task.agent_preprocessing, "node prepare.mjs");
   assert.deepEqual(task.required_secrets, ["SCRAPER_API_KEY"]);

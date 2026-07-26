@@ -4,7 +4,7 @@ The project's standing working rules — injected at session start while this pa
 is declared. Activity-scoped procedures live in this pack's skills
 (snapshot-approval, merge-and-ci, testing-guide) and surface on
 demand; the extractor-automation domain's standing rules are the "Extractor
-pipeline" section below, and its three scheduled tasks live under `tasks/`.
+pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Working rules
 
@@ -143,14 +143,14 @@ per the canon action header's recipe.
 
 ## Extractor pipeline
 
-Standing rules for the extractor-automation domain — the three gcec pack
+Standing rules for the extractor-automation domain — the two gcec pack
 [`tasks/`](tasks/): **create-extractor** (an `extractor-request` issue → a PR
-adding site support), **record-page** (records a committed `.url`'s cached page),
-and the weekly **generic-extractor-improvements** (read a spec only when working
+adding site support, and the sweep that records a committed `.url`'s missing
+cached page) and the weekly **generic-extractor-improvements** (read a spec only when working
 on that pipeline). Adding or refreshing a cached live case by hand is the
 [testing-guide](skills/testing-guide/SKILL.md) skill.
 
-- **All page fetching goes through [`scraperapi.mjs`](scraperapi.mjs), from a
+- **All page fetching goes through [`scraperapi.mjs`](tasks/create-extractor/scraperapi.mjs), from a
   task's preprocessing worker and nowhere else.** A rendered fetch through
   ScraperAPI's residential proxy (`render=true`, so a single-page app records
   post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the
@@ -187,7 +187,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   preprocessing labels the request `needs-human` with the reason
   and exits **0** — a task failure would converge to a `needs-human` dispatch
   issue as well, duplicating the signal and implying the pipeline broke when it
-  correctly declined. Same for record-page: the pages that did record still land.
+  correctly declined. Same for the pending-page sweep: the pages that did record still land.
 - **The generic-coverage gate is a high-watermark over a changing case set.** It
   ratchets up on an unchanged case set and re-anchors when the set changes,
   compared over the cases the runs **share** — so adding an extractor never fails

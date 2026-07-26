@@ -38,11 +38,11 @@
 // correct outcome, not a broken run.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { recordPage } from '../../scraperapi.mjs';
+import { recordPage } from './scraperapi.mjs';
 
 const require = createRequire(import.meta.url);
 const { runTriage } = require('./triage.js');
@@ -60,6 +60,7 @@ const REQUEST_LABEL = 'extractor-request';
 const CLAIMED_LABEL = 'agent-running';
 const BLOCKED_LABEL = 'needs-human';
 const BRANCH_PREFIX = 'claude/extractor/';
+const RECORD_PREFIX = 'claude/record-pages';
 const DATA_DIR = 'dev/requirements/extractor/data/server-fetched';
 
 // How long a claimed request with nothing to show for it may sit before this
@@ -74,8 +75,9 @@ const STALE_CLAIM_MS = 6 * 60 * 60 * 1000;
 // eligibility exactly so the gate and the worker can never disagree about what
 // "eligible" means — the worker re-derives it from full issue objects rather than
 // trusting the gate's older snapshot.
+export const labelsOf = (i) => (i.labels ?? []).map((l) => (typeof l === 'string' ? l : l?.name ?? ''));
+
 export function eligible(issues) {
-  const labelsOf = (i) => (i.labels ?? []).map((l) => (typeof l === 'string' ? l : l?.name ?? ''));
   return (issues ?? [])
     .filter((i) => !i.pull_request)
     .filter((i) => {
@@ -103,6 +105,42 @@ export function staleClaims(issues, openPrs, now) {
     .filter((i) => !claimedByPr.has(i.number))
     .filter((i) => now - new Date(i.updated_at ?? 0).getTime() > STALE_CLAIM_MS)
     .map((i) => i.number);
+}
+
+// --- the pending-page sweep (was the record-page task) ------------------------
+// A `.url` with no `.html` beside it is a case whose page is missing, which keeps
+// `test:live` red until someone records it. Only gardening produces that state — a
+// maintainer re-points a taken-down event and deletes the stale page — because a
+// full pipeline run always writes the two together. It is a handful of lines over
+// the recorder this file already owns, so it lives here rather than in a task of
+// its own.
+
+// The case names needing a record. `entries` is a directory listing; `has` answers
+// "is this file present".
+export function pendingCases(entries, has) {
+  return entries
+    .filter((f) => f.endsWith('.url'))
+    .map((f) => f.slice(0, -'.url'.length))
+    .filter((name) => !has(`${name}.html`))
+    .sort();
+}
+
+// The head branch of the sweep's open PR, found by prefix, so repeated runs
+// accumulate onto one PR instead of opening a new one each time. null → mint one.
+export function openFamilyBranch(pulls, prefix = RECORD_PREFIX) {
+  const pr = (pulls ?? []).find((p) => String(p?.head?.ref ?? '').startsWith(prefix));
+  return pr ? pr.head.ref : null;
+}
+
+// A page fetch retries a transient 5xx (scraperapi.mjs), so a backlog can outlast
+// `agent_preprocessing_timeout` — a hard SIGKILL that would land mid-loop and throw
+// away pages already recorded, since the commit comes after the loop. So only START
+// a fetch while a worst case still fits with room to deliver; anything skipped
+// keeps no `.html` and is picked up next run.
+//
+// worstCaseFetchMs: recordPage's 4 attempts x 120s + ~50s of backoff.
+export function hasRoomToStart(elapsedMs, budgetMs, worstCaseFetchMs = 530_000, deliveryMs = 60_000) {
+  return elapsedMs + worstCaseFetchMs + deliveryMs <= budgetMs;
 }
 
 // The PR title for a finished run, by mode — the same two phrasings the routine
@@ -215,8 +253,20 @@ function commitAll(message) {
   git('-c', 'user.name=claudinite[bot]', '-c', 'user.email=claudinite@users.noreply.github.com', 'commit', '-m', message);
 }
 
-function push(branch) {
-  git('push', '--force', `https://x-access-token:${TOKEN}@github.com/${REPO}.git`, `HEAD:refs/heads/${branch}`);
+// Push, retrying transient network failures on the same 0/2/4/8/16s back-off
+// 3-prepare.sh used. A push that fails once here would otherwise throw away a
+// scaffold, an offline-suite run and a paid page fetch.
+function push(branch, waitMs = [2000, 4000, 8000, 16000]) {
+  const remote = `https://x-access-token:${TOKEN}@github.com/${REPO}.git`;
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      git('push', '--force', remote, `HEAD:refs/heads/${branch}`);
+      return;
+    } catch (e) {
+      if (attempt >= waitMs.length) throw e;
+      execFileSync(process.execPath, ['-e', `setTimeout(()=>{}, ${waitMs[attempt]})`]);
+    }
+  }
 }
 
 // The draft PR the agent continues on. Preprocessing pushed the branch, so the
@@ -242,6 +292,73 @@ async function openDraftPr(decision, base, issueNumber) {
   return json.number;
 }
 
+// Record every case whose `.url` is committed but whose `.html` is not, and deliver
+// them on the sweep's own branch/PR (separate from any extractor PR — a missing page
+// is a repo-maintenance fix, not part of implementing a site). Returns the number
+// recorded. A page that will not record does NOT sink the run: the others still
+// land and the failure is reported in the PR body.
+async function sweepPendingPages(key, base, budgetMs) {
+  const dir = join(ROOT, DATA_DIR);
+  if (!existsSync(dir)) return 0;
+  const pending = pendingCases(readdirSync(dir), (f) => existsSync(join(dir, f)));
+  if (!pending.length) return 0;
+
+  const { json: pulls } = await gh(`/repos/${REPO}/pulls?state=open&per_page=100`);
+  const existing = openFamilyBranch(Array.isArray(pulls) ? pulls : []);
+  const branch = existing ?? `${RECORD_PREFIX}-${new Date().toISOString().slice(0, 10)}`;
+  git('checkout', '-B', branch);
+
+  const startedAt = Date.now();
+  const recorded = [];
+  const failed = [];
+  const deferred = [];
+  for (const name of pending) {
+    // Always attempt the first: a budget too small for even one page is a
+    // declaration bug, and failing loudly beats silently recording nothing.
+    if (recorded.length + failed.length > 0 && !hasRoomToStart(Date.now() - startedAt, budgetMs)) {
+      deferred.push(name);
+      continue;
+    }
+    const url = readFileSync(join(dir, `${name}.url`), 'utf8').trim();
+    try {
+      const bytes = await recordPage(key, { url }, join(dir, `${name}.html`));
+      recorded.push(name);
+      console.log(`create-extractor: recorded ${bytes} bytes for the pending case ${name}`);
+    } catch (e) {
+      failed.push(`${name}: ${e.message}`);
+      console.log(`! create-extractor: pending case ${name} — ${e.message}`);
+    }
+  }
+  if (deferred.length) console.log(`create-extractor: ${deferred.length} pending page(s) left for the next run: ${deferred.join(', ')}`);
+  if (!recorded.length) {
+    git('checkout', base);
+    console.log(`create-extractor: no pending page recorded (${failed.length} failed)`);
+    return 0;
+  }
+
+  git('add', '--', DATA_DIR);
+  git('-c', 'user.name=claudinite[bot]', '-c', 'user.email=claudinite@users.noreply.github.com',
+    'commit', '-m', `chore: record ${recorded.length} cached event page(s) via ScraperAPI [skip ci]`);
+  push(branch);
+  if (!existing) {
+    const body = [
+      'Recorded the cached event page(s) for live cases whose `.url` is committed but whose page was not.',
+      '',
+      ...recorded.map((n) => `- \`${n}\``),
+      ...(failed.length ? ['', 'Could not be recorded (re-point the `.url`, or drop the case):', ...failed.map((f) => `- ${f}`)] : []),
+      '',
+      'Filed by the `gcec/create-extractor` task. Merging this makes `test:live` green for these cases.',
+    ].join('\n');
+    const { status } = await gh(`/repos/${REPO}/pulls`, {
+      method: 'POST', body: { head: branch, base, title: 'Record cached event pages', body },
+    });
+    if (status >= 300) throw new Error(`could not open the recorded-pages PR: ${status}`);
+  }
+  git('checkout', base);
+  console.log(`create-extractor: delivered ${recorded.length} recorded page(s) on ${branch}`);
+  return recorded.length;
+}
+
 export async function main() {
   ROOT = process.env.CLAUDINITE_REPO_ROOT || process.cwd();
   REPO = process.env.CLAUDINITE_REPO || process.env.GITHUB_REPOSITORY;
@@ -254,6 +371,11 @@ export async function main() {
   const scraperKey = process.env.SCRAPER_API_KEY;
   if (!REPO || !TOKEN) throw new Error('no CLAUDINITE_REPO/GITHUB_TOKEN — not in an Actions context');
   if (!scraperKey) throw new Error('SCRAPER_API_KEY is not set');
+
+  // The pending-page sweep first: it is independent of any request, and cheap when
+  // there is nothing to do (one directory listing).
+  const { default: decl } = await import('./task.mjs');
+  await sweepPendingPages(scraperKey, base, decl.agent_preprocessing_timeout * 1000);
 
   const allRequests = await openRequests();
 
@@ -278,14 +400,33 @@ export async function main() {
   // cheap, so a backlog of denied/duplicate requests drains in ONE run rather than
   // one per hour; the first request that genuinely needs an extractor stops the
   // loop and gets the branch.
-  const peers = requests.map((i) => ({ number: i.number, title: i.title, body: i.body ?? '' }));
+  //
+  // `peers` is what triage's duplicate detection sees, and it must be EVERY open
+  // request, not just the eligible ones. The `sample` disposition exists precisely
+  // for "another request for this host is already in flight" — and an in-flight
+  // request is CLAIMED, so filtering peers down to eligible would hide the leader
+  // and let a second request scaffold a rival branch and PR for the same host.
+  // Requests already handed to a human are the one exclusion: a parked leader
+  // would otherwise black-hole every later request for its host forever.
+  const peers = allRequests
+    .filter((i) => !labelsOf(i).includes(BLOCKED_LABEL))
+    .map((i) => ({ number: i.number, title: i.title, body: i.body ?? '' }));
+
   let target = null;
   let decision = null;
   for (const issue of requests) {
-    const d = await runTriage({ body: issue.body ?? '', title: issue.title, number: issue.number }, undefined, peers);
+    // Per-issue isolation, carrying over the retired CLI's fail-open stance: one
+    // unparseable request must never sink the run for every other request.
+    let d = null;
+    try {
+      d = await runTriage({ body: issue.body ?? '', title: issue.title, number: issue.number }, undefined, peers);
+    } catch (e) {
+      await handToHuman(issue.number, `Triage could not read this request: ${e.message}\n\nEdit the issue (the event page URL is the field that matters) and remove the \`${BLOCKED_LABEL}\` label to retry.`);
+      continue;
+    }
     if (d.skipAgent) { await closeSkipped(issue, d); continue; }
     if (!d.url || !d.branch) {
-      await handToHuman(issue.number, 'This request has no parseable event URL, so the pipeline could not act on it. Edit the issue to include the event page URL and remove the `needs-human` label to retry.');
+      await handToHuman(issue.number, `This request has no parseable event URL, so the pipeline could not act on it. Edit the issue to include the event page URL and remove the \`${BLOCKED_LABEL}\` label to retry.`);
       continue;
     }
     target = issue;
@@ -302,11 +443,22 @@ export async function main() {
   await addLabel(target.number, CLAIMED_LABEL);
   console.log(`create-extractor: #${target.number} → ${decision.host} (${decision.mode} mode, case ${decision.caseName})`);
 
-  npm('ci');
-  scaffold(decision);
-  commitAll(decision.mode === 'supported'
-    ? `chore: scaffold ${decision.caseName} case for ${decision.host} (Refs #${target.number})`
-    : `chore: scaffold ${decision.caseName} extractor (Refs #${target.number})`);
+  // Everything from here is the old 3-prepare.sh, whose failure contract was
+  // "comment the failure and label the issue, then stop" — the request itself is
+  // where a human looks. A throw would instead leave it silently CLAIMED until the
+  // stale sweep, so converge on the issue first, then rethrow: the request is
+  // parked with a reason, and the task still fails loudly (a scaffold that cannot
+  // go green is a defect in the pipeline, not a fact about this one page).
+  try {
+    npm('ci');
+    scaffold(decision);
+    commitAll(decision.mode === 'supported'
+      ? `chore: scaffold ${decision.caseName} case for ${decision.host} (Refs #${target.number})`
+      : `chore: scaffold ${decision.caseName} extractor (Refs #${target.number})`);
+  } catch (e) {
+    await handToHuman(target.number, `Scaffolding failed, so no extractor was attempted: ${e.message}\n\nThis is a pipeline defect rather than a problem with the page. Remove the \`${BLOCKED_LABEL}\` label to retry once it is fixed.`);
+    throw e;
+  }
 
   // Record the page. An unfetchable page (bot wall, dead URL, empty render) is a
   // legitimate dead end, not a task failure: hand the request to a human, drop the
@@ -318,13 +470,28 @@ export async function main() {
   } catch (e) {
     git('checkout', base);
     git('branch', '-D', decision.branch);
-    await handToHuman(target.number, `The event page could not be recorded, so no extractor was attempted: ${e.message}\n\nThis is usually a bot wall, a dead URL, or a page that renders nothing without interaction. Remove the \`${BLOCKED_LABEL}\` label to retry.`);
+    await handToHuman(target.number, [
+      `The event page could not be recorded, so no extractor was attempted: ${e.message}`,
+      '',
+      'A recorder failure (a 5xx that outlasted its retries) is usually transient and worth simply retrying.',
+      'A refusal or an empty render points at the page itself — a bot wall, a dead URL, or content that needs interaction.',
+      '',
+      `Remove the \`${BLOCKED_LABEL}\` label to retry.`,
+    ].join('\n'));
     return;
   }
-  commitAll(`chore: record ${decision.caseName} page via ScraperAPI (Refs #${target.number})`);
+  // `[skip ci]` as the retired fetch-page.yml carried: a recorded page is not a
+  // reason to run CI, and test.yml's paths-ignore covers data/** anyway.
+  commitAll(`chore: record ${decision.caseName} page via ScraperAPI (Refs #${target.number}) [skip ci]`);
 
-  push(decision.branch);
-  const pr = await openDraftPr(decision, base, target.number);
+  let pr;
+  try {
+    push(decision.branch);
+    pr = await openDraftPr(decision, base, target.number);
+  } catch (e) {
+    await handToHuman(target.number, `The scaffold and recorded page could not be delivered: ${e.message}\n\nRemove the \`${BLOCKED_LABEL}\` label to retry.`);
+    throw e;
+  }
   console.log(`create-extractor: pushed ${decision.branch} and opened draft PR #${pr}`);
 
   // Request the agent stage: a real page is recorded and an extract() is left to
