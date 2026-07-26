@@ -1001,6 +1001,32 @@ test("Generic site: a stated venue country alone (floating times, non-agreeing l
   assert.equal(e.times[0].start, "2026-07-04T20:30:00");
 });
 
+test("Generic site: a country-code TLD corroborates the stated venue country when the page declares no locale", () => {
+  // visit.tel-aviv.gov.il-style: the JSON-LD names the venue country, the times
+  // are floating, and <html lang="en"> names no country at all — but the page is
+  // published under Israel's ccTLD, which is the same KIND of site-level signal
+  // as its lang and is enough to corroborate the country the page itself stated.
+  const html = `<html lang="en"><body>
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Savta Stories", "startDate": "2026-06-19T10:00:00",
+      "endDate": "2026-06-19T14:00:00",
+      "location": { "@type": "Place", "name": "Liebling Haus",
+                    "address": { "streetAddress": "Idelson 29", "addressCountry": "Israel" } } }
+    </script></body></html>`;
+
+  const e = firstEvent(html, "https://visit.museum.example.co.il/Pages/EventLocation.aspx?ItemId=2169");
+  assert.equal(e.ctz, "Asia/Jerusalem");
+  assert.equal(e.times[0].start, "2026-06-19T10:00:00"); // floating wall-clock, now placed by the ctz
+
+  // Same page under a generic TLD: the country stands alone again, so no zone.
+  assert.equal(firstEvent(html, "https://visit.museum.example.com/e/2169").ctz, "");
+
+  // A locale the page DOES declare outranks the ccTLD, so a country-code TLD can
+  // never override (or be overridden into agreeing with) a real locale signal.
+  const enUS = html.replace('lang="en"', 'lang="en-US"');
+  assert.equal(firstEvent(enUS, "https://visit.museum.example.co.il/e/2169").ctz, "");
+});
+
 test("Page with no event information at all: returns no events", () => {
   // A title (og:title / <h1> / document title) is present on essentially every
   // page, so a title with no date is not an event — the popup shows nothing.

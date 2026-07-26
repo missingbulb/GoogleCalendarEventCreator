@@ -22,11 +22,12 @@
 //            unanimous across the page's events — an international tour listing
 //            (livenation) names several → no hint — else the og/business
 //            country metas or geo.region.
-//   locale   the page's own locale — <html lang> / og:locale region subtag, or
-//            an effectively-single-country language (Hebrew → IL). The weakest
-//            kind: it describes the site's audience, not the venue, so it only
-//            ever CORROBORATES a country, never picks a zone on its own —
-//            boilerplate en-US can neither mint nor veto anything.
+//   locale   the page's own locale — <html lang> / og:locale region subtag, an
+//            effectively-single-country language (Hebrew → IL), or, when
+//            neither named a country, the host's country-code TLD (.co.il → IL,
+//            .co.uk → GB). The weakest kind: it describes the site, not the
+//            venue, so it only ever CORROBORATES a country, never picks a zone
+//            on its own — boilerplate en-US can neither mint nor veto anything.
 //
 // Accepted combinations (first match wins; "" otherwise):
 //   stated+offset    the stated zone reproduces every declared offset at its
@@ -39,7 +40,9 @@
 //                    Angeles → ambiguous → "").
 //   country+locale   no offsets; locale agrees with the country AND the country
 //                    has exactly one zone (eventer.co.il: addressCountry IL +
-//                    lang="he" → Asia/Jerusalem). The accepted residual risk: a
+//                    lang="he" → Asia/Jerusalem; visit.tel-aviv.gov.il:
+//                    addressCountry Israel + the .il ccTLD, its lang being a
+//                    country-less "en"). The accepted residual risk: a
 //                    page whose own address AND locale both claim a single-zone
 //                    country for an event actually held elsewhere — the same
 //                    bet the hardcoded per-site sources already make.
@@ -361,9 +364,15 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     );
   }
 
+  // Country-code TLDs whose ISO-3166 alpha-2 code differs from the TLD label.
+  // ".uk" is the only one in everyday use (GB is the alpha-2); the rest of the
+  // ccTLD space is its own alpha-2, so a plain uppercase of the label is right.
+  const CCTLD_COUNTRY = { UK: "GB" };
+
   // The page's own locale country — "" unless every locale signal agrees. An
   // explicit region subtag ("he-IL", "en_US") wins over the language; a bare
-  // language resolves only through the strict LANG_COUNTRY list.
+  // language resolves only through the strict LANG_COUNTRY list; and when
+  // NEITHER named a country, the host's own country-code TLD stands in.
   function localeCountry() {
     const found = new Set();
     const langAttr = document.documentElement ? document.documentElement.getAttribute("lang") : "";
@@ -378,7 +387,28 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
       const byLang = LANG_COUNTRY[m[1].toLowerCase()];
       if (byLang) found.add(byLang);
     }
-    return found.size === 1 ? [...found][0] : "";
+    if (found.size) return found.size === 1 ? [...found][0] : "";
+    return hostCountry();
+  }
+
+  // The country whose registry the page is published under, read off the host's
+  // country-code TLD (".co.il"/".gov.il" -> IL, ".fr" -> FR, ".co.uk" -> GB);
+  // "" for a generic TLD (.com/.org/.social) or a code we can't place.
+  //
+  // Deliberately a LOCALE-kind hint, never a country one: a ccTLD describes the
+  // SITE, exactly like <html lang> — a Tel Aviv cinema's .co.il says nothing
+  // about where any particular screening happens — so it can only corroborate a
+  // venue country the page itself stated, never name one. That bound is what
+  // makes a ccTLD in vanity use (".co", ".io", ".fm") harmless here: the country
+  // is always the page's own address, and the hint can only agree or disagree
+  // with it. It is also the WEAKEST locale signal, consulted only when <html
+  // lang>/og:locale named no country, so a vanity ccTLD can never contradict a
+  // locale the page actually declared.
+  function hostCountry() {
+    const tld = (location.hostname.split(".").pop() || "").toUpperCase();
+    if (!/^[A-Z]{2}$/.test(tld)) return "";
+    const code = CCTLD_COUNTRY[tld] || tld;
+    return COUNTRY_TIMEZONES[code] ? code : "";
   }
 
   // Decide the page's ctz. `values` are the extracted events' start/end strings
