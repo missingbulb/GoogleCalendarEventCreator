@@ -50,7 +50,15 @@ single-page-app rendering.
   ~26%. So `h-event`/hCalendar is a negligible tail; where it does appear, the
   generic text/`og:` fallback is enough. Note: microformats are **not** part of
   the schema.org vocabulary, so any dedicated reader would need its own parser —
-  another reason not to build one for a sub-1% format.
+  another reason not to build one for a sub-1% format. **Tooling corroboration
+  (2026-07-26):** the one browser tool that ever shipped a microformat→calendar
+  reader at scale — the Google-encouraged "Google Calendar" Chrome extension,
+  which detected `hCalendar` and derivative microformats on the page and offered
+  a one-click add — is formally shut down and no longer installable, and the
+  generic "Microformats" extension that exported `hCalendar` to iCalendar is
+  likewise reported delisted (unmaintained since ~2014). So there is also no
+  live microformat event reader left to borrow from (the demand-side reading of
+  the same fact is in [`../Competitors/`](../Competitors/README.md)).
 - **OpenGraph / meta tags** (`og:title`, `og:description`, and event-ish `<meta>`)
   — not event-specific, but SPA pages very often still inject them, so they are a
   reliable low-fidelity fallback for title/description when nothing structured
@@ -173,6 +181,9 @@ structural decision behind "one button per event":
 - [Announcing the Schema.org usage statistics dataset (blog.schema.org, 2026)](https://blog.schema.org/2026/06/04/announcing-the-schema-org-usage-statistics-dataset/)
 - [Structured data — 2024 Web Almanac (HTTP Archive)](https://almanac.httparchive.org/en/2024/structured-data)
 - [Web Data Commons — schema.org data sets](https://webdatacommons.org/structureddata/schemaorg/)
+- [chimbori/google-calendar-crx — the shut-down "Google Calendar" Chrome extension (archived)](https://github.com/chimbori/google-calendar-crx)
+- [thanhpd/google-calendar-crx — fork documenting its hCalendar/hResume microformat event detection](https://github.com/thanhpd/google-calendar-crx)
+- [Microformats — Chrome extension listing (chrome-stats)](https://chrome-stats.com/d/oalbifknmclbnmjlljdemhjjlkmppjjl)
 - [Google Calendar link parameters (`recur`, `ctz`, `dates`) — add-event-to-calendar-docs](https://github.com/InteractionDesignFoundation/add-event-to-calendar-docs/blob/master/services/google.md)
 - [RFC 5545 §3.8.5.3 — Recurrence Rule (`RRULE`)](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html)
 - [How to Create "Add to Calendar" Links (TeamDynamix KB) — `&recur=RRULE:` example](https://teamdynamix.umich.edu/TDClient/210/DepressionCenter/KB/ArticleDet?ID=13454)
@@ -216,3 +227,10 @@ structural decision behind "one button per event":
   Quoted that contract's actual terms (two independent hints must agree; a
   trailing `Z` is not a hint) so the claim is checkable rather than a pointer to
   the wrong section.
+- **2026-07-26 (third pass)** — added tooling corroboration to the microformats
+  bullet: both browser tools that ever read `hCalendar` into a calendar (the
+  archived "Google Calendar" Chrome extension and the delisted "Microformats"
+  extension) are gone from the Chrome Web Store, so the
+  no-dedicated-microformats-reader conclusion now rests on abandoned tooling as
+  well as sub-1% prevalence. The demand-side reading lives in Competitors. No
+  open question answered or opened here.
