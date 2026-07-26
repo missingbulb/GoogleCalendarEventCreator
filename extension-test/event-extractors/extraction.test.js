@@ -221,6 +221,58 @@ test("Generic site with no structured data: heuristics only", () => {
   assert.equal(e.description, "Gloves and trash grabbers provided.");
 });
 
+test("Generic site: a 00:00–23:59 range is the all-day convention and collapses to date-only", () => {
+  // Many CMS/event platforms (SharePoint, Drupal, WordPress event plugins, the
+  // municipal listing sites built on them) express an all-day event as a range
+  // that covers whole calendar days: midnight to 23:59 on the last day. Read
+  // literally that is a timed event starting at midnight; the string contract's
+  // date-only form is what it actually means.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Savta Stories Exhibition",
+      "startDate": "2026-09-01T00:00:00", "endDate": "2026-09-30T23:59:00",
+      "location": { "@type": "Place", "name": "City Museum" } }
+    </script>
+    <h1>Savta Stories Exhibition</h1>`;
+
+  const e = firstEvent(html, "https://www.example-museum.org/savta-stories");
+  assert.equal(e.times[0].start, "2026-09-01");
+  assert.equal(e.times[0].end, "2026-09-30");
+});
+
+test("Generic site: a midnight start with a real end time stays timed", () => {
+  // Only a range that covers WHOLE days is the all-day convention. A midnight
+  // start paired with any other end is a genuine after-midnight event.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Midnight Set",
+      "startDate": "2026-09-01T00:00:00", "endDate": "2026-09-01T02:30:00",
+      "location": { "@type": "Place", "name": "The Basement" } }
+    </script>
+    <h1>Midnight Set</h1>`;
+
+  const e = firstEvent(html, "https://www.example-club.org/midnight-set");
+  assert.equal(e.times[0].start, "2026-09-01T00:00:00");
+  assert.equal(e.times[0].end, "2026-09-01T02:30:00");
+});
+
+test("Generic site: an offset-bearing 00:00–23:59 range is left alone", () => {
+  // Midnight-to-23:59 only delimits whole calendar days for a floating (unzoned)
+  // value. A value carrying an offset/Z is an exact instant whose day boundary
+  // depends on the reader's zone, so collapsing it would invent an all-day event.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Zoned Festival",
+      "startDate": "2026-09-01T00:00:00Z", "endDate": "2026-09-30T23:59:00Z",
+      "location": { "@type": "Place", "name": "Riverside" } }
+    </script>
+    <h1>Zoned Festival</h1>`;
+
+  const e = firstEvent(html, "https://www.example-festival.org/zoned");
+  assert.equal(e.times[0].start, "2026-09-01T00:00:00Z");
+  assert.equal(e.times[0].end, "2026-09-30T23:59:00Z");
+});
+
 test("Generic site: a day-first dotted date (D.M.YYYY) with no following time yields an all-day event", () => {
   // The everyday non-US format. When no HH:MM time appears in the window after
   // the date (even with Hebrew prose around it), the result is an all-day event.

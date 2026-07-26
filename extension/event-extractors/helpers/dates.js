@@ -227,5 +227,25 @@ globalThis.GCal = Object.assign(globalThis.GCal || {}, (() => {
     return "";
   }
 
-  return { dateToString, normalizeDateValue, parseDateFromText, endFromTimeRange, now };
+  // A start–end pair that covers WHOLE CALENDAR DAYS — midnight through 23:59
+  // (or 23:59:59) — is how a great many CMS/event platforms express an all-day
+  // event: SharePoint, Drupal and the common WordPress event plugins all export
+  // "00:00:00" → "23:59:00" for one, as do the municipal/museum listing sites
+  // built on them. Read literally that is a timed event beginning at midnight;
+  // what it MEANS is the string contract's date-only form, so return the two
+  // dates (end inclusive, as the page states it). Returns null when the pair
+  // isn't that convention.
+  //
+  // Deliberately floating-only: the patterns are anchored with no offset/"Z"
+  // allowance, because midnight-to-23:59 delimits whole days only for an unzoned
+  // wall clock. An exact instant ("...T00:00:00Z") lands on a different calendar
+  // day for different readers, so collapsing it would invent an all-day event.
+  function allDayRange(start, end) {
+    const s = /^(\d{4}-\d{2}-\d{2})T00:00(?::00)?$/.exec(GCal.clean(start));
+    const e = /^(\d{4}-\d{2}-\d{2})T23:59(?::00|:59)?$/.exec(GCal.clean(end));
+    if (!s || !e || e[1] < s[1]) return null;
+    return { start: s[1], end: e[1] };
+  }
+
+  return { dateToString, normalizeDateValue, parseDateFromText, endFromTimeRange, allDayRange, now };
 })());

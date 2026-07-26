@@ -26,12 +26,15 @@
 //               in the page's footer/header chrome (single-venue sites)
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
+//   all-day     a start–end pair covering whole calendar days (00:00 -> 23:59)
+//               is the all-day convention, collapsed to the date-only form
+//               (helpers/dates.js's allDayRange)
 //   ctz         derived only when two independent page-declared hints agree (a
 //               stated inline-JSON timezone, the events' own UTC offsets, the
 //               JSON-LD venue country, the page locale) — see
 //               helpers/derive-timezone.js (#674); otherwise absent
 (() => {
-  const { clean, text, meta, blockText, htmlToText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, merge, embeddedEvents, parts, deriveCtz } = GCal;
+  const { clean, text, meta, blockText, htmlToText, bodyText, normalizeDateValue, parseDateFromText, endFromTimeRange, allDayRange, merge, embeddedEvents, parts, deriveCtz } = GCal;
 
   // How much of the page's body text the date/time scan below considers. Large
   // enough to reach past a long nav/menu block (e.g. a WordPress mega-menu)
@@ -46,13 +49,30 @@
     // (and every non-US site here) writes, in both JSON-LD and visible text.
     const dayFirst = pageUsesDayFirstDates();
     // Several embedded events => a listing page; surface each.
-    if (embedded.length > 1) return withCtz(embedded.map((ld) => embeddedEvents.toEvent(ld, dayFirst)).map(trimVenueTitle));
+    if (embedded.length > 1) return collapseAllDay(withCtz(embedded.map((ld) => embeddedEvents.toEvent(ld, dayFirst)).map(trimVenueTitle)));
 
     const event = trimVenueTitle(merge(embeddedEvents.toEvent(embedded[0], dayFirst), heuristics(dayFirst)));
     // The heuristics always fill a title (og:title -> <h1> -> document title),
     // present on essentially every page, so a title alone is not an event. Treat
     // this as an event only when the page embedded one or a date was parsed.
-    return embedded.length > 0 || event.start ? withCtz([event]) : [];
+    return embedded.length > 0 || event.start ? collapseAllDay(withCtz([event])) : [];
+  }
+
+  // Rewrite any event whose start–end pair spans whole calendar days
+  // (00:00 → 23:59, helpers/dates.js's allDayRange) into the date-only all-day
+  // form the string contract uses. Runs last, over the finished events, so it
+  // sees the merged start/end whichever signal supplied them — and after
+  // withCtz, since a floating midnight carries no offset hint for deriveCtz to
+  // read either way.
+  function collapseAllDay(events) {
+    for (const e of events) {
+      const range = allDayRange(e.start, e.end);
+      if (range) {
+        e.start = range.start;
+        e.end = range.end;
+      }
+    }
+    return events;
   }
 
   // Whether the page's own declared locale is a day-first one (DD/MM/YYYY) — the
