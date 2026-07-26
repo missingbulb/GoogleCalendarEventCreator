@@ -18,3 +18,7 @@ docs/
 # canon at .claudinite/shared/ and the local packs are tracked).
 /.claudinite-hooks.log
 /.claudinite-hooks.log.tmp
+
+# Transient git worktrees the agent harness creates for isolated background
+# subagents (Agent tool isolation:"worktree") — runtime scratch, never content.
+/.claude/worktrees/
