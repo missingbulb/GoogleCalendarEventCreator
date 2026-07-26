@@ -47,7 +47,13 @@ extension).
 ## Open questions (for the next growth pass)
 
 - Pull actual review counts / install counts where the Chrome Web Store exposes
-  them, to gauge relative traction, not just star ratings.
+  them, to gauge relative traction, not just star ratings. **Attempted
+  2026-07-26 and blocked, not answered:** both `chromewebstore.google.com`
+  listing pages and the third-party `chrome-stats.com` mirror return HTTP 403 to
+  the growth worker's fetcher, and web search surfaces the star ratings but not
+  install counts. This needs a different data route (a human spot-check, or a
+  source that publishes the numbers as text) — re-attempting the same two hosts
+  will just burn the next pass's budget.
 - Is there a competitor doing per-site *structured* extraction (JSON-LD/microdata
   aware) rather than generic AI-on-raw-text? Still none found — now checked across
   Chrome, Firefox, and Edge (see the cross-browser note above). Worth periodic
@@ -76,3 +82,8 @@ extension).
   none per-site structured. No JSON-LD-aware rival on Firefox/Edge either.
   Resolved the cross-browser question; narrowed the structured-extraction one to
   "Safari still unchecked".
+- **2026-07-26** — attempted the install/review-count open question and recorded
+  the negative result rather than guessing: the Chrome Web Store and
+  chrome-stats.com both refuse the growth worker's fetcher (HTTP 403), so no
+  traction numbers were obtainable this pass. Noted in the open question so the
+  next run tries a different route. No competitor-landscape claims changed.

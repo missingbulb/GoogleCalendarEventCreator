@@ -12,16 +12,19 @@ the knowledge that most directly drives extraction requirements.
 ## Machine-readable event formats (as of 2026-07-16)
 
 Ordered roughly by how useful they are to a rule-based extractor — highest-signal
-first. The project's stance (see `dev/procedures/technicalGotchas.md`) is to
-**prefer machine-readable markup over brittle DOM scraping**, because it survives
-redesigns and single-page-app rendering.
+first. The project's stance (see the *Codebase gotchas* section of
+`.claudinite/local/packs/gcec/RULES.md` — the `dev/procedures/technicalGotchas.md`
+this page previously cited was superseded when that doc was folded into the gcec
+pack) is to **prefer machine-readable markup over brittle DOM scraping**, because
+it survives redesigns and single-page-app rendering.
 
 - **schema.org `Event` as JSON-LD** — the highest-value target and the one Google
   actively rewards. Emitted as a standalone `<script type="application/ld+json">`
   block, so it is cleanly separable from the page markup and survives client-side
   rendering. Google's required properties are **`name`, `startDate`, and
   `location`**; `startDate`/`endDate` are ISO-8601 **with a UTC/GMT offset**
-  (the offset is what lets us derive `ctz` safely — see `helpers/derive-timezone.js`).
+  (the offset is what lets us derive `ctz` safely — see
+  `extension/event-extractors/helpers/derive-timezone.js`).
   `location` is a `Place` (with `address`: `streetAddress`, `addressLocality`,
   `addressRegion`, `postalCode`) or a `VirtualLocation` (URL only) for online
   events. Since 2020 Google also expects **`eventAttendanceMode`**
@@ -85,15 +88,36 @@ structural decision behind "one button per event":
 - **Recurrence** (`RRULE`, `eventSchedule`) is currently out of the extension's
   scope — it surfaces the event, not its repeat rule. Whether a recurring page
   should yield one instance, the next instance, or a note is an open product
-  question, not a settled requirement.
+  question, not a settled requirement. Two 2026 findings narrow *where* the cost
+  of ever changing that sits:
+  - **The sink is not the blocker.** Google Calendar's
+    `render?action=TEMPLATE` link — the exact URL this extension emits — takes an
+    optional **`recur`** parameter whose value is an RFC-5545 recurrence rule
+    verbatim: `recur=RRULE:FREQ=DAILY` (`required: no`, `format: text
+    (RFC-5545 specs)`), and in practice fuller rules such as
+    `recur=RRULE:FREQ=MONTHLY;INTERVAL=1;BYDAY=2MO;UNTIL=20250609T000000Z`. So
+    "hand the user a repeating event" is already expressible in the target we
+    emit; nothing about the render URL forces the one-instance behaviour.
+  - **The source side speaks a different vocabulary.** schema.org does *not*
+    express repeats as an `RRULE` string. A repeating event carries
+    **`eventSchedule`** → a **`Schedule`**, whose minimum is **`repeatFrequency`
+    as an ISO-8601 *duration*** (`P1W`, `P1M`, `P1D` — not `FREQ=WEEKLY`),
+    alongside `byDay` / `byMonth` / `byMonthDay` (e.g. `byDay` as an array of
+    `https://schema.org/Monday`-style URLs), `scheduleTimezone` (an IANA zone),
+    `startDate`/`endDate`, `startTime`/`endTime`, and `exceptDate` for
+    exclusions. Emitting `recur=` from page markup therefore needs a genuine
+    translation step (`repeatFrequency: P1W` + `byDay` → `FREQ=WEEKLY;BYDAY=…`,
+    `exceptDate` → `EXDATE`), not a pass-through. **That mapping — plus whether
+    target sites emit `eventSchedule` at all — is the real cost, not the URL.**
 
 ## Implications for extraction requirements
 
 - The format ranking above is *why* the extractor is structured as dedicated
   per-site sources + a generic JSON-LD/`og`-first fallback: the machine-readable
   layers are the durable signal, the DOM is the last resort.
-- "An event needs real data, not just a supported host" (technicalGotchas) is a
-  direct consequence of the taxonomy: a host match is not an `Event` object.
+- "An event needs real data, not just a supported host" (gcec pack RULES.md,
+  *Codebase gotchas*) is a direct consequence of the taxonomy: a host match is
+  not an `Event` object.
 - The timezone shapes above are the domain justification for the refusal-to-guess
   `ctz` contract — a product-requirements-level stance, distilled in
   [`../product-requirements/`](../product-requirements/README.md).
@@ -116,7 +140,15 @@ structural decision behind "one button per event":
   a measured split over the sites this extension actually sees; the
   fallback-coverage corpus is the place to derive that.
 - Recurring/series pages: what's the right product behaviour — one instance, the
-  next upcoming, or an explicit "this repeats" affordance?
+  next upcoming, or an explicit "this repeats" affordance? (Narrowed 2026-07-26:
+  the *transport* question is settled — the render URL's `recur=RRULE:…` carries a
+  repeat rule fine — so this is now purely a product-behaviour choice plus the
+  `Schedule`→`RRULE` mapping cost, both described above.)
+- Do any of this extension's target sites actually emit `eventSchedule` /
+  `Schedule` markup, or is schema.org recurrence effectively unused in the wild?
+  (Surfaced 2026-07-26 while answering the recurrence question — the mapping cost
+  above is only worth paying if the source signal exists. The fallback-coverage
+  corpus can answer this the same way it can answer the per-host JSON-LD split.)
 - Does any meaningful share of target sites express events only via `.ics`
   download links (no in-page structured data) worth following?
 
@@ -132,6 +164,12 @@ structural decision behind "one button per event":
 - [Announcing the Schema.org usage statistics dataset (blog.schema.org, 2026)](https://blog.schema.org/2026/06/04/announcing-the-schema-org-usage-statistics-dataset/)
 - [Structured data — 2024 Web Almanac (HTTP Archive)](https://almanac.httparchive.org/en/2024/structured-data)
 - [Web Data Commons — schema.org data sets](https://webdatacommons.org/structureddata/schemaorg/)
+- [Google Calendar link parameters (`recur`, `ctz`, `dates`) — add-event-to-calendar-docs](https://github.com/InteractionDesignFoundation/add-event-to-calendar-docs/blob/master/services/google.md)
+- [RFC 5545 §3.8.5.3 — Recurrence Rule (`RRULE`)](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html)
+- [How to Create "Add to Calendar" Links (TeamDynamix KB) — `&recur=RRULE:` example](https://teamdynamix.umich.edu/TDClient/210/DepressionCenter/KB/ArticleDet?ID=13454)
+- [eventSchedule — Schema.org Property](https://schema.org/eventSchedule)
+- [Schedule — Schema.org Type](https://schema.org/Schedule)
+- [Additional `Schedule` type examples — schemaorg/schemaorg Discussion #2948](https://github.com/schemaorg/schemaorg/discussions/2948)
 
 ## Growth log
 
@@ -149,3 +187,14 @@ structural decision behind "one button per event":
   hCalendar/`h-event` is a negligible tail not worth a dedicated reader — folded
   into the microformats format bullet and Implications; removed that open
   question.
+- **2026-07-26** — worked the recurrence open question and split it in two: the
+  render URL we already emit accepts `recur=RRULE:…` (RFC-5545, verbatim), so the
+  sink was never the constraint; schema.org instead models repeats as
+  `eventSchedule`→`Schedule` with `repeatFrequency` as an ISO-8601 *duration*
+  (`P1W`) plus `byDay`/`scheduleTimezone`/`exceptDate`, so a real
+  `Schedule`→`RRULE` translation is where the cost sits. Narrowed the recurrence
+  question to a pure product-behaviour choice and surfaced a new one (do target
+  sites emit `eventSchedule` at all). Also corrected two stale repo references
+  this page carried: `dev/procedures/technicalGotchas.md` no longer exists — its
+  content moved into the gcec pack's `RULES.md` *Codebase gotchas* section — and
+  `derive-timezone.js` lives at `extension/event-extractors/helpers/`.

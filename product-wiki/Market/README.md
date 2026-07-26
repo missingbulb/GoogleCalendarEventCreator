@@ -53,7 +53,9 @@ recur across the market:
 
 - **Single-event pages** — a venue, a talk, a concert; one clear event, often with
   `schema.org`/JSON-LD event markup (the highest-signal, most future-proof
-  extraction target — see `technicalGotchas.md`'s JSON-LD note).
+  extraction target — see the JSON-LD note in the *Codebase gotchas* section of
+  `.claudinite/local/packs/gcec/RULES.md`; the `technicalGotchas.md` this line
+  previously cited was superseded when that doc was folded into the gcec pack).
   Machine-readable markup is increasingly common because search engines reward it
   (Google's "Events" rich results), which is a structural tailwind for any
   extension that prefers JSON-LD/`og:` over brittle DOM scraping.
@@ -83,6 +85,10 @@ recur across the market:
   JSON-LD vs. requiring DOM/text heuristics? (Would sharpen the fallback-coverage
   routine's generic-extraction priorities too — see
   `.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`.)
+  **Answered web-wide in Domain, 2026-07-17** — `Event` markup is a minority
+  signal (fewer than ~1M domains), so the DOM/`og:` fallback path carries real
+  weight; see [`../Domain/README.md`](../Domain/README.md). What stays open here
+  is the *per-target-host* split, which only the fallback-coverage corpus can give.
 
 ## Sources
 
@@ -101,3 +107,8 @@ recur across the market:
   ics2gcal / ICS to GCal already do one-click Google Calendar import), not
   per-vendor deep links — folded into the platform-landscape note; opened a
   follow-up on the `.ics`-download-vs-render-URL friction tradeoff.
+- **2026-07-26** — corrected a superseded repo reference (`technicalGotchas.md`
+  was folded into the gcec pack's `RULES.md`; the JSON-LD note now lives in its
+  *Codebase gotchas* section), and cross-linked the JSON-LD-prevalence open
+  question to the answer Domain already recorded on 2026-07-17, leaving only the
+  per-target-host split open here.

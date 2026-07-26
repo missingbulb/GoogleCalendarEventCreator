@@ -50,8 +50,12 @@ never silently overwrite.
   engineering mechanism that narrows this over time; this wiki tracks it from the
   *user* side (which misses actually get reported/matter).
 - Timezone correctness on pages that don't declare one clearly — see
-  `derive-timezone.js`'s unanimity rule in `technicalGotchas.md`; a wrong `ctz` is
-  a trust-breaking failure mode worth watching from the user's perspective.
+  `extension/event-extractors/helpers/derive-timezone.js`'s unanimity rule, now
+  documented in the *Codebase gotchas* section of
+  `.claudinite/local/packs/gcec/RULES.md` (the `technicalGotchas.md` this line
+  previously cited was superseded when that doc was folded into the gcec pack);
+  a wrong `ctz` is a trust-breaking failure mode worth watching from the user's
+  perspective.
 - No support yet for calendars other than Google Calendar (see Market's open
   question on Outlook/ICS) — track whether this actually blocks real users or is
   a hypothetical gap.
@@ -88,3 +92,8 @@ permission/privacy data backing the privacy-conscious persona:
   privacy-conscious persona with 2026 industry data on extension permission/PII
   collection and missing privacy policies (Incogni, AboutChromebooks, LayerX) —
   the first externally-sourced claim in this wiki.
+- **2026-07-26** — corrected a superseded repo reference in the timezone pain
+  point: `dev/procedures/technicalGotchas.md` no longer exists (folded into the
+  gcec pack's `RULES.md`, *Codebase gotchas*), and `derive-timezone.js` lives at
+  `extension/event-extractors/helpers/`. No new user-side research this pass —
+  the personas and pain points here still await real feedback signal.
