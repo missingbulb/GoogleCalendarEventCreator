@@ -6,7 +6,7 @@
 // decide without loading the pipeline. This test stops the two from disagreeing.
 //
 // "Registered sources" is BOTH kinds: the per-site extractors under custom/, and
-// the hosts core/generic-sites.js registers as fully served by the core generic
+// the hosts generic-sites.js registers as fully served by the core generic
 // extractor alone (a matcher with no extract()). Both make a host supported, so
 // both must be mirrored in supportedDomains — and moving a host between them
 // must not disturb the list.
@@ -47,7 +47,7 @@ function loadSources() {
     .filter((f) => f.endsWith(".js"))
     .sort();
   for (const f of sources) run(`event-extractors/custom/${f}`);
-  run("event-extractors/core/generic-sites.js");
+  run("generic-sites.js");
   return sandbox.GCal;
 }
 
@@ -69,7 +69,7 @@ test("every supportedDomains entry is matched by a real source (no orphans)", ()
       GCal.sources.some((s) => s.matches(domain)),
       `supportedDomains lists "${domain}", but no source's matches() accepts it — ` +
         `remove the stale entry from extension/fallback-lists.json, add the host to ` +
-        `event-extractors/core/generic-sites.js, or fix the host`
+        `generic-sites.js, or fix the host`
     );
   }
 });

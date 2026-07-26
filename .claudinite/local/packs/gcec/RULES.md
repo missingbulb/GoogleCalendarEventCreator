@@ -179,7 +179,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   `og:locale`, or a non-English language; a bare `en` (region unknown) stays
   month-first rather than guess. Resolution lives in `helpers/dates.js`
   (`parseDateFromText` / `normalizeDateValue` take a `dayFirst` flag, threaded
-  from `core/generic.js`'s `pageUsesDayFirstDates`), mirroring
+  from `generic-extractor.js`'s `pageUsesDayFirstDates`), mirroring
   `derive-timezone.js`'s locale read; unambiguous dates (a part > 12) and the
   `.` / `-` separators are always day-first regardless (#686).
 - **An unrecordable page is a dead end, not a failed run.** When a fetch can't
@@ -210,7 +210,7 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   hints, see `helpers/derive-timezone.js` — `ctz`). This is the comparison the
   fallback-coverage gate automates — and a case where it shows NO gap is a
   candidate for deleting the per-site source and listing the host in
-  `core/generic-sites.js`.
+  `generic-sites.js`.
 
 ## Architecture rules of the road
 
@@ -218,20 +218,25 @@ Whenever we agree on a new or changed top-level architectural guideline, update
 this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
-- **The core generic extractor is the base layer of every extraction**
-  (`extension/event-extractors/core/generic.js`) — it runs on every page, and a
-  per-site source is only a layer of *overrides* merged over it, stating the
-  fields it gets better. A source never re-reads what the page already says about
-  itself, and nothing in `core/` may know about a specific site.
+- **`extension/event-extractors/` is the extensibility point for PER-SITE
+  extractors, and nothing else belongs in it.** The generic extractor is a
+  fundamentally different thing — one fixed, site-agnostic reader, not another
+  entry in the set — so it and its host list live at the extension root
+  (`extension/generic-extractor.js`, `extension/generic-sites.js`).
+- **The core generic extractor is the base layer of every extraction** — it runs
+  on every page, and a per-site source is only a layer of *overrides* merged over
+  it, stating the fields it gets better. A source never re-reads what the page
+  already says about itself, and the generic extractor may never know about a
+  specific site.
 - **A site we fully support gets no extractor file when there is nothing to
-  override.** Its host goes in `core/generic-sites.js` (a `matches`-only
+  override.** Its host goes in `generic-sites.js` (a `matches`-only
   registration) and stays fully supported — green icon, no correction prompt.
   When a `custom/<site>.js` shrinks to nothing, delete it and move the host
   there; when a generic-site starts needing a fix the generic extractor can't
   make site-agnostically, move it back. Never keep a file whose only content is
   a restatement of the generic base, and never annotate one as "nothing to add".
 - Adding support for a new host is the most common change — the architecture
-  must keep it a single-file change: a host added to `core/generic-sites.js`,
+  must keep it a single-file change: a host added to `generic-sites.js`,
   or one self-contained new `extension/event-extractors/custom/<site>.js`, plus
   regenerating the load list — touching nothing else and assuming nothing about
   other extractors.

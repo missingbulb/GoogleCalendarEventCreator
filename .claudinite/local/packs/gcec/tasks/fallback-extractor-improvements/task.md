@@ -1,7 +1,7 @@
 # Fallback-coverage routine
 
 Weekly Claude routine (on a strong model), offline on a fresh clone. Goal: make the **generic**
-fallback extractor — `extension/event-extractors/core/generic.js` and the
+fallback extractor — `extension/generic-extractor.js` and the
 shared `extension/event-extractors/helpers/*.js` — recover **more** of what the
 dedicated per-site sources get, measured by the fallback-coverage gate. **Most runs
 correctly change nothing** — the gate already banks every prior win, so a new
@@ -53,7 +53,7 @@ work, because a run that trips one there is marked **failed**:
   JSON-LD, OG/meta, microdata, `<time datetime>`). Lifting one `custom/<site>.js`'s
   logic or special-casing a host is out of scope: if the only beneficiary is a
   single case and the rule wouldn't fire elsewhere, it isn't generic. **The only
-  files you may leave changed are `core/generic.js`, `helpers/*.js`, your
+  files you may leave changed are `generic-extractor.js`, `helpers/*.js`, your
   covering test in `extension-test/event-extractors/extraction.test.js`, and the
   regenerated fallback-coverage GENERATED artifacts** — anything else fails scope.
 - **A real, non-regressing win** (postcondition: *win*, via the suite's gate). Every

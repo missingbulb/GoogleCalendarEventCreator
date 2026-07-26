@@ -56,9 +56,9 @@ test("Eventbrite: site selectors, with end time filled from JSON-LD", () => {
 });
 
 // --- The two-layer model: core generic base + per-site overrides -------------
-// core/generic.js runs on every page and produces the base event; a per-site
+// generic-extractor.js runs on every page and produces the base event; a per-site
 // source states only the fields it gets better, and they win field by field. A
-// host listed in core/generic-sites.js has no per-site file at all and is
+// host listed in generic-sites.js has no per-site file at all and is
 // supported by the base alone. See assemble-events.js.
 
 test("Site overrides win field by field over the generic base", () => {
@@ -87,7 +87,7 @@ test("Site overrides win field by field over the generic base", () => {
 });
 
 test("A generic-sites host is fully supported with no per-site extractor", () => {
-  // stubhub.com has no custom/<site>.js: core/generic-sites.js registers the host
+  // stubhub.com has no custom/<site>.js: generic-sites.js registers the host
   // and the core generic extractor reads the page's JSON-LD on its own. The host
   // is supported like any other — and `fallback` stays false, because nothing was
   // missed: the generic extractor IS this site's support.

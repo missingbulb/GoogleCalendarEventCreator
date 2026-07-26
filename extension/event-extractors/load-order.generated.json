@@ -26,7 +26,7 @@
   "event-extractors/custom/thinkdrink.js",
   "event-extractors/custom/ticketmaster.js",
   "event-extractors/custom/visit-tel-aviv.js",
-  "event-extractors/core/generic.js",
-  "event-extractors/core/generic-sites.js",
+  "generic-extractor.js",
+  "generic-sites.js",
   "event-extractors/assemble-events.js"
 ]

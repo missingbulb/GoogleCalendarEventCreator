@@ -1398,7 +1398,7 @@ host is equally supported either way:
   fields the core generic extractor gets wrong for that site;
 - **the core generic extractor alone**, for a site whose pages describe
   themselves completely — the host is listed in
-  `extension/event-extractors/core/generic-sites.js` and has no per-site file at
+  `extension/generic-sites.js` and has no per-site file at
   all.
 
 This section is the **executable catalogue** of that support: each leaf is one

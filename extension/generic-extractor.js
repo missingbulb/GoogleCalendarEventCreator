@@ -8,10 +8,13 @@
 //   - on a supported host, assemble-events.js runs it FIRST and merges the site's
 //     source over it, so a per-site extractor only has to state the fields this
 //     one gets wrong (event-extractors/custom/<site>.js);
-//   - on a host listed in core/generic-sites.js, it IS the site's support — those
+//   - on a host listed in generic-sites.js, it IS the site's support — those
 //     hosts are fully supported with no per-site extractor at all.
-// It is core, not one of the extractors under custom/: nothing here may know
-// about a specific site.
+//
+// It deliberately lives OUTSIDE event-extractors/, which is the extensibility
+// point for per-site extractors: this is a fundamentally different thing — one
+// fixed, site-agnostic reader that every one of those extractors layers over,
+// not another entry in the set. Nothing here may know about a specific site.
 //
 // extract() returns an array of the page's best-effort events (empty when the
 // page describes none), which assemble-events.js normalizes and presents. It

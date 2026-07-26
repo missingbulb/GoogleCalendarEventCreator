@@ -6,12 +6,12 @@
 //   { name, matches(hostname), extract() }
 // onto it, and assemble-events.js takes the first source whose `matches` returns
 // true. `extract()` is OPTIONAL: a source registered with only `matches` is a
-// host that core/generic-sites.js declares fully covered by the core generic
+// host that generic-sites.js declares fully covered by the core generic
 // extractor, so there is nothing to override. Either way the host counts as
 // supported (isSupportedHost below, and hence the toolbar icon).
 //
 // A source's `extract()` returns OVERRIDES, not a whole event: the core generic
-// extractor (core/generic.js) has already produced a base event for the page, and
+// extractor (generic-extractor.js) has already produced a base event for the page, and
 // assemble-events.js merges these fields over it, first non-empty value winning.
 // State only what the base gets wrong. (A source may instead return its own
 // `events` array, which replaces the base — see assemble-events.js.) The

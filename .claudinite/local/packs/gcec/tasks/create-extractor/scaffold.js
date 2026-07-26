@@ -37,11 +37,11 @@ function sourceStub(url) {
 // dev/requirements/extractor/data/server-fetched/${caseName}.html.
 //
 // This source is a layer of OVERRIDES over the core generic extractor
-// (event-extractors/core/generic.js), which has already read the page's own
+// (generic-extractor.js), which has already read the page's own
 // schema.org JSON-LD, Open Graph tags, microdata and visible dates. State ONLY
 // the fields it gets wrong — anything you leave out comes from that base. If it
 // turns out to get everything right, delete this file and add the host to
-// event-extractors/core/generic-sites.js instead.
+// generic-sites.js instead.
 (() => {
   const { text, firstText, blockText, normalizeDateValue } = GCal;
 

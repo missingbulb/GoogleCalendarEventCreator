@@ -53,7 +53,7 @@
 // GCal.isSupportedHost gives the toolbar icon, so the popup's supported/
 // unsupported split and the icon can never disagree.
 //
-// ONE PATH, TWO LAYERS. The core generic extractor (core/generic.js) runs on
+// ONE PATH, TWO LAYERS. The core generic extractor (generic-extractor.js) runs on
 // EVERY page and produces the base events. A per-site source
 // (custom/<site>.js) is a layer of OVERRIDES on top of it: its extract()
 // returns only the fields it states better than the generic base, and they win
@@ -61,7 +61,7 @@
 // already says about itself — the page's own schema.org JSON-LD, Open Graph
 // tags, microdata and visible dates all arrive from the base — and a site whose
 // pages describe themselves completely needs NO source file at all: its host is
-// listed in core/generic-sites.js and is fully supported by the base alone.
+// listed in generic-sites.js and is fully supported by the base alone.
 //
 // A source may instead return its own `events` array (e.g.
 // custom/telavivcinematheque.js for a series page, custom/ticketmaster.js for a
@@ -73,7 +73,7 @@
 //
 // To support a new event platform, first check whether the core generic
 // extractor already gets it right — if so, just add the host to
-// core/generic-sites.js. Only when it doesn't, add event-extractors/custom/<site>.js
+// generic-sites.js. Only when it doesn't, add event-extractors/custom/<site>.js
 // that pushes onto GCal.sources (see custom/meetup.js for the pattern) stating
 // the fields it gets wrong. Either way, run `npm run index` to regenerate the
 // load list and add a test case under dev/requirements/extractor/expected/.
@@ -124,7 +124,7 @@
     // the base layer the matching source's overrides are merged over.
     const base = GCal.genericExtractor.extract();
     // A source with no extract() is a host served by the generic extractor alone
-    // (core/generic-sites.js): nothing to override, so the base IS the answer.
+    // (generic-sites.js): nothing to override, so the base IS the answer.
     const overrides = (site && site.extract && site.extract()) || {};
     const events = group(compose(overrides, base, norm));
 
@@ -132,7 +132,7 @@
     // we're showing is the generic base alone — the event that source missed
     // (#456). The popup (chooseContent) reads it as the single signal to add a
     // "Suggest Correction" link. A host with no source at all, a host served by
-    // the generic extractor by design (core/generic-sites.js — nothing was
+    // the generic extractor by design (generic-sites.js — nothing was
     // missed there), and a source that did contribute all leave it false.
     const fallback =
       Boolean(site && site.extract) && !sourceContributed(overrides) && events.length > 0;

@@ -1,5 +1,5 @@
 // Bare-generic-vs-custom extraction coverage: measures what the CORE GENERIC
-// extractor (event-extractors/core/generic.js) recovers ON ITS OWN for each
+// extractor (generic-extractor.js) recovers ON ITS OWN for each
 // integration-test page, relative to the reviewed-correct extraction for that page.
 //
 // For every dev/requirements/extractor/expected/*.json page we run GCal.extract() twice
@@ -15,7 +15,7 @@
 //
 // The gap between the two IS the per-site sources' remaining value: a page where
 // it closes to zero is a candidate for deleting that source and listing its host
-// in event-extractors/core/generic-sites.js.
+// in generic-sites.js.
 //
 // We then grade, field by field, how close the fallback's PRIMARY event
 // (events[0] after the pipeline's own chronological sort) comes to the custom
@@ -369,7 +369,7 @@ function renderMarkdown(cov, watermark) {
   );
   L.push("");
   L.push(
-    "What the core generic extractor (`extension/event-extractors/core/generic.js`) recovers " +
+    "What the core generic extractor (`extension/generic-extractor.js`) recovers " +
       "**on its own** for each integration-test page, compared to the full pipeline — that " +
       "generic base with the page's **per-site overrides** merged over it, the " +
       "reviewed-correct extraction the live test pins down. " +
@@ -379,7 +379,7 @@ function renderMarkdown(cov, watermark) {
       "(`events[0]` after the chronological sort) field-by-field against the custom " +
       "primary event, counting a field only when the custom event filled it. A page " +
       "where the gap closes to zero is a candidate for deleting its per-site source " +
-      "and listing the host in `core/generic-sites.js`."
+      "and listing the host in `generic-sites.js`."
   );
   L.push("");
   L.push(

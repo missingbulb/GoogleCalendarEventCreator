@@ -1,5 +1,5 @@
 // The integration test for the GENERIC fallback extractor
-// (event-extractors/core/generic.js): a high-watermark gate on how much it
+// (generic-extractor.js): a high-watermark gate on how much it
 // recovers, per page, relative to each page's dedicated per-site source.
 //
 // The comparison itself lives in fallback-coverage.js (run GCal.extract()

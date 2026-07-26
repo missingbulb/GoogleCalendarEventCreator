@@ -7,7 +7,7 @@ in [requirements.md §12–§16](../requirements/requirements.md); the per-file 
 
 `toolbar-icon.js` colors the toolbar icon by host (a source matches or it doesn't). On
 click, `popup.js` injects `event-extractors/` and runs `assemble-events.js`, which runs
-`core/generic.js` and merges the matching `custom/<site>.js` over it;
+`generic-extractor.js` and merges the matching `custom/<site>.js` over it;
 `build-calendar-url.js` builds the URL `events-view.js` renders.
 
 The top-level **architecture rules of the road** live in the gcec local pack's
@@ -31,12 +31,15 @@ non-time field are folded into one multi-instance event by the assembler.
 
 Extraction is **two layers, not two paths**:
 
-1. **The core generic extractor** (`extension/event-extractors/core/generic.js`)
+1. **The core generic extractor** (`extension/generic-extractor.js`)
    runs on **every** page, whatever its host, and produces the base events from
    the page's own self-description: embedded schema.org JSON-LD plus generic
    heuristics (microdata, Open Graph / meta tags, `<time datetime>`,
    `<h1>`/`<address>`, venue/location-named elements, and finally a date/time
    scan over the visible text). Nothing in it may know about a specific site.
+   It sits at the extension root, **outside** `event-extractors/`: that folder is
+   the extensibility point for per-site extractors, and this is a fundamentally
+   different thing — the one fixed reader they all layer over.
 
 2. **A per-site source** (`extension/event-extractors/custom/<site>.js`) is a
    layer of **overrides** on top of that base. Its `extract()` returns only the
@@ -47,7 +50,7 @@ Extraction is **two layers, not two paths**:
    Each lives in its own file with a comment describing the HTML it expects.
 
 So a site whose pages describe themselves completely needs **no source file at
-all**: its host goes in `extension/event-extractors/core/generic-sites.js` and is
+all**: its host goes in `extension/generic-sites.js` and is
 fully supported by the base alone — same green icon, same popup, no
 "Suggest Correction" prompt. When adding support for a platform, check the
 generic extractor first and only write a `custom/<site>.js` for what it gets

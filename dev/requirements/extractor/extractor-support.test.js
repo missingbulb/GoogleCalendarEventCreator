@@ -7,7 +7,7 @@
 // events-view-actions.test.js for the `kind: "behavior"` leaves.
 //
 // A case's `source` is whichever file claims the host: a per-site
-// event-extractors/custom/<site>.js, or event-extractors/core/generic-sites.js
+// event-extractors/custom/<site>.js, or generic-sites.js
 // for a host the core generic extractor covers on its own. The assertions are
 // the same either way — support is support.
 //
@@ -71,7 +71,7 @@ for (const testCase of extractorCases) {
 // The file a case names as claiming its host must exist. Without this a case can
 // keep pointing at a source that was deleted — e.g. when a site's per-site file
 // is dropped because the core generic extractor covers it and the host moves to
-// core/generic-sites.js — and nothing would say so (a `tbd` case runs no
+// generic-sites.js — and nothing would say so (a `tbd` case runs no
 // extraction at all, so its stale path would never surface).
 test("each extractor case names a source file that exists", () => {
   const ROOT = path.join(__dirname, "..", "..", "..");

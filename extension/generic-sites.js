@@ -1,6 +1,6 @@
 // The hosts that are FULLY SUPPORTED by the core generic extractor alone —
 // sites whose pages describe themselves well enough (schema.org JSON-LD, Open
-// Graph tags, microdata) that core/generic.js already produces the reviewed-
+// Graph tags, microdata) that generic-extractor.js already produces the reviewed-
 // correct event, with nothing left for a per-site extractor to state better.
 //
 // Each host here registers a source with a `matches` but NO `extract`: the
@@ -18,9 +18,13 @@
 // here. Either way the host stays fully supported and its
 // extension/fallback-lists.json `supportedDomains` entry stays put.
 //
-// Loaded AFTER every custom/<site>.js (pinned in the generated load order), so a
-// dedicated source always wins the host match if one is ever added for a host
-// still listed here.
+// Loaded AFTER every event-extractors/custom/<site>.js (pinned in the generated
+// load order), so a dedicated source always wins the host match if one is ever
+// added for a host still listed here.
+//
+// Lives beside generic-extractor.js rather than in event-extractors/ for the same
+// reason it does: that folder is the extensibility point for per-site extractors,
+// and this file is the opposite — the list of sites that need none.
 (() => {
   const HOSTS = [
     // Every page type (single events, tour and performer listings alike)
