@@ -16,10 +16,10 @@
 //      scaffold, prove the offline baseline green, and commit;
 //   4. RECORD THE PAGE through ScraperAPI directly. Preprocessing runs inside
 //      Actions, where SCRAPER_API_KEY already lives (the task names it in
-//      `required_secrets` so adoption asks the owner to configure it). The
-//      `fetch-page.yml` workflow existed solely to hold that secret for an agent
-//      that couldn't — dispatch, poll, pull. Deleted; this is one fetch in the
-//      same process that needs the bytes;
+//      `required_secrets`, which the wiring converge stamps into the workflow).
+//      The `fetch-page.yml` workflow existed solely to hold that secret for an
+//      agent that couldn't — dispatch, poll, pull. Deleted; this is one fetch in
+//      the same process that needs the bytes;
 //   5. push, open the DRAFT PR the agent continues on, and request the agent
 //      (CLAUDINITE_REQUEST_AGENT).
 //
@@ -229,9 +229,9 @@ export async function main() {
   TOKEN = process.env.GITHUB_TOKEN;
   const base = process.env.CLAUDINITE_DEFAULT_BRANCH || 'main';
   const requestFile = process.env.CLAUDINITE_REQUEST_AGENT;
-  // Named in task.mjs's `required_secrets`, so the owner has been asked to
-  // configure it (bootstrap at adoption, a standing issue from the scheduler
-  // otherwise). Nothing gates on that ask, so check it here and say so plainly.
+  // Named in task.mjs's `required_secrets`, so the wiring converge put it in this
+  // process's env and baselining has asked the owner for it if it isn't set.
+  // Nothing gates on that ask, so check it here and say so plainly.
   const scraperKey = process.env.SCRAPER_API_KEY;
   if (!REPO || !TOKEN) throw new Error('no CLAUDINITE_REPO/GITHUB_TOKEN — not in an Actions context');
   if (!scraperKey) throw new Error('SCRAPER_API_KEY is not set');

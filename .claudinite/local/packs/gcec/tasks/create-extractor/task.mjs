@@ -37,12 +37,12 @@ export default {
   agent_preprocessing_timeout: 1800,      // npm ci + the offline suite + a rendered ScraperAPI fetch
 
   // The repo Actions secret this task needs configured (agent-preprocessing
-  // DESIGN §9) — declarative, so adoption and the scheduler can ask the owner for
-  // it rather than letting the task fail mysteriously. Being ABLE to read it here
-  // is what retired `.github/workflows/fetch-page.yml`: that workflow existed only
-  // because the page fetch needed a secret an agent session cannot hold, so the
-  // agent had to dispatch it, poll it, and pull its commit. Preprocessing runs
-  // inside Actions, where the secret already is.
+  // DESIGN §9). The wiring converge stamps it into the scheduler workflow, so the
+  // worker reads it as ordinary env; baselining asks the owner if it isn't set.
+  // Being able to read it at all is what retired `.github/workflows/fetch-page.yml`:
+  // that workflow existed only because the page fetch needed a secret an agent
+  // session cannot hold, so the agent had to dispatch it, poll it, and pull its
+  // commit. Preprocessing runs inside Actions, where the secret already is.
   required_secrets: ['SCRAPER_API_KEY'],
 
   // Eligibility, and nothing more. A request is eligible when it is an open
