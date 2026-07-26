@@ -257,7 +257,7 @@ export function makeTruncationLabel(shownCards, totalCards, shownEvents, totalEv
 // buttons to show (possibly empty), `request` is the prefill for a "request
 // support" button (or null), `policyLink` is whether to show the "Disagree?"
 // link. The five states, in the order they're decided (specified in
-// dev/requirements/requirements.md §12–§16; diagram in dev/requirements/shared/popup-states-flowchart.png):
+// dev/requirements/requirements.md §12–§16):
 //
 //   State 1 — supported host (its host is in `supportedDomains`): show its
 //     events. That's the same list the toolbar icon colors itself from, so the
