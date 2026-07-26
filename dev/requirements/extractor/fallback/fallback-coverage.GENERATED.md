@@ -13,7 +13,7 @@ Headline coverage over all 35 cases in the corpus:
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
 | **Critical fields** (title + start + location) | **75.2%** | 79 / 105 |
-| **All fields** | **55.9%** | 114 / 204 |
+| **All fields** | **56.9%** | 116 / 204 |
 | Event coverage *(informational)* | 25.3% | 41 / 162 |
 
 ### Gate
@@ -23,7 +23,7 @@ The gate (`dev/requirements/extractor/fallback/fallback-coverage.baseline.GENERA
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
 | Critical fields | 75.2% | 75.2% | ✓ |
-| All fields | 55.9% | 55.9% | ✓ |
+| All fields | 56.9% | 56.9% | ✓ |
 
 Gated over **35** shared case(s).
 
@@ -37,7 +37,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `start` **(critical)** | 35 | 27 | 6 | 2 | 77.1% |
 | `end` | 23 | 15 | 1 | 7 | 65.2% |
 | `location` **(critical)** | 35 | 22 | 6 | 7 | 62.9% |
-| `ctz` | 32 | 12 | 0 | 20 | 37.5% |
+| `ctz` | 32 | 14 | 0 | 18 | 43.8% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
 | `description` | 33 | 8 | 18 | 7 | 24.2% |
 
@@ -67,7 +67,7 @@ Event coverage is reported but **not gated** (a few listing pages the fallback c
 | `tel-aviv.gov.il` | 1 | 1/1 | 66.7% | 60% |
 | `thinkdrink.co.il` | 1 | 1/1 | 100% | 60% |
 | `ticketmaster.co.il` | 1 | 1/1 | 100% | 80% |
-| `visit.tel-aviv.gov.il` | 2 | 2/2 | 50% | 41.7% |
+| `visit.tel-aviv.gov.il` | 2 | 2/2 | 50% | 58.3% |
 
 ## By exemplar
 
@@ -108,5 +108,5 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, fallback d
 | `telavivcinematheque-taiwan-week` | 1/6 | ~ | ✓ | ✗ | ✓ | ✗ | ✗ | ~ |
 | `thinkdrink-quantum-lecture` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ~ |
 | `ticketmaster-ravid-plotnik` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | — | ✓ |
-| `visit-tel-aviv-timed` | 1/1 | ✓ | ✓ | ✓ | ~ | ✗ | — | ✓ |
-| `visit-tel-aviv` | 1/1 | ✓ | ~ | ~ | ~ | ✗ | — | ~ |
+| `visit-tel-aviv-timed` | 1/1 | ✓ | ✓ | ✓ | ~ | ✓ | — | ✓ |
+| `visit-tel-aviv` | 1/1 | ✓ | ~ | ~ | ~ | ✓ | — | ~ |
