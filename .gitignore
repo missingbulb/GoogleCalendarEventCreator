@@ -18,3 +18,7 @@ docs/
 # canon at .claudinite/shared/ and the local packs are tracked).
 /.claudinite-hooks.log
 /.claudinite-hooks.log.tmp
+
+# Ephemeral per-agent git worktrees the harness creates for isolation:"worktree"
+# subagents — each is its own nested checkout, never repo content to commit.
+/.claude/worktrees/
