@@ -6,18 +6,24 @@
 // enforce. An invalid dispatch is rejected (the executor de-labels it and
 // converges it to needs-human), so a forged or mangled issue never runs.
 //
-// Pure over injected capabilities so it unit-tests without a repo or GitHub. The
-// thin `node validate-dispatch.mjs <n>` CLI the executor invokes (fetch the
-// issue, wire `exists`/`isPackDeclared`/`loadTask` to the checkout) lands with
-// the executor shell.
+// Pure over injected capabilities so it unit-tests without a repo or GitHub. It
+// is NOT a CLI — the executor shell beside it, `resolve-dispatch.mjs`, is what
+// drives it in production: that shell takes the issue body out of the label
+// event's payload on disk and wires `exists`/`isPackDeclared`/`loadTask` to the
+// checkout, so validating a dispatch costs no GitHub call at all.
 
 import { validateTaskDeclaration } from './task-contract.mjs';
 import { resolveModel } from './model-map.mjs';
 
 // The only shape a dispatch first line may take (DESIGN §5.2). Anchored end to
 // end — no query strings, no trailing junk, exactly one pack and one task
-// segment under a shared/ or local/ root.
-export const DISPATCH_PATH_RE = /^\.claudinite\/(shared|local)\/packs\/([^/]+)\/tasks\/([^/]+)\/task\.md$/;
+// segment under a packs/ root. The `.claudinite/(shared|local)/` prefix is
+// OPTIONAL: a consumer's task path carries it (its canon is mounted at
+// `.claudinite/shared/packs/`, its own packs at `.claudinite/local/packs/`),
+// while the CANON repo runs its own tree and dispatches root-relative paths
+// (`packs/<pack>/…` for its canon packs, `.claudinite/local/packs/<pack>/…` for
+// its local packs). All three forms are legal; nothing else is.
+export const DISPATCH_PATH_RE = /^(?:\.claudinite\/(?:shared|local)\/)?packs\/([^/]+)\/tasks\/([^/]+)\/task\.md$/;
 
 // The task path a dispatch body points at — its first line, trimmed.
 export const dispatchFirstLine = (body) => String(body ?? '').split('\n')[0].trim();
@@ -35,7 +41,7 @@ export function validateDispatchBody(body, { exists, isPackDeclared, loadTask })
   const m = DISPATCH_PATH_RE.exec(firstLine);
   if (!m) return reject(`first line "${firstLine}" is not a valid task path (${DISPATCH_PATH_RE})`);
 
-  const [, , pack, task] = m;
+  const [, pack, task] = m;
   const taskPath = firstLine;
   const mjsPath = taskPath.replace(/task\.md$/, 'task.mjs');
 

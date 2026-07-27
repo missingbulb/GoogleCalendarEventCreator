@@ -12,8 +12,14 @@
 
 import { pathToFileURL } from 'node:url';
 import { dueSlots } from './slots.mjs';
-import { planDispatch, dispatchTitle, dispatchBody, DISPATCH_PREFIX, READY_LABEL, NEEDS_HUMAN_LABEL, SCHEDULER_LABELS } from './dispatch.mjs';
+import {
+  planDispatch, dispatchTitle, dispatchBody, DISPATCH_PREFIX, READY_LABEL, NEEDS_HUMAN_LABEL,
+  SCHEDULER_LABELS, readyLabelForScope, staleDispatchIssues, staleEscalationComment,
+  rearmDispatchIssues, readyLabelOn, staleClaimedDispatchIssues, staleClaimComment,
+  AGENT_RUNNING_LABEL,
+} from './dispatch.mjs';
 import { isAgentless } from './model-map.mjs';
+import { localSignalContext } from './signals/local.mjs';
 import { runPreprocessing, preprocessingFailure, agentRequestPath, clearAgentRequest, agentRequested } from './preprocess.mjs';
 
 // The due tasks, each paired with the slot it runs under. Union the discovered
@@ -112,12 +118,37 @@ export async function planRun({
         rec.inline = true;
       } else {
         const existing = await existingIssuesFor(task.pack, task.id);
-        rec.dispatch = planDispatch({ existing, pack: task.pack, task: task.id, slotId });
+        // Route the dispatch to the self or fleet ready label by the task's scope
+        // (the fleet/self executor split) — the executor routine wired to that
+        // label runs it.
+        const readyLabel = readyLabelForScope(task.decl.session_scope);
+        rec.dispatch = planDispatch({ existing, pack: task.pack, task: task.id, slotId, readyLabel });
       }
     }
     evaluations.push(rec);
   }
   return { evaluations };
+}
+
+// The `ctx` every signal collector reads (DESIGN §3.3) — the already-resolved
+// facts a collector may not go and fetch for itself, built once per run and
+// handed to `collectSignals`. Exported so the construction itself is testable:
+// the collectors' `ctx.X ?? null` seam makes them unit-testable with a hand-built
+// ctx, which is exactly why a key nothing here populates can read as "collector
+// works" forever. Assert against THIS, not a hand-built shape.
+// `root` is the Action-side checkout: the manifest version, the local-pack
+// presence and the configured retention are all read from it (signals/local.mjs),
+// because a scheduled run already has the tree on disk and an API round-trip
+// would buy nothing.
+export function buildSignalContext({ root, repo, defaultBranch, now, sinceIso, config, fleet = null, packConfigFor = () => ({}) }) {
+  const local = localSignalContext(root, { packIds: config.packs ?? [], packConfigFor });
+  return {
+    repo, defaultBranch, now, sinceIso, config,
+    activePacks: config.packs, fleet,
+    manifestVersion: local.manifestVersion,
+    hasLocalPacks: local.hasLocalPacks,
+    retentionDays: local.retentionDays,
+  };
 }
 
 // --- CLI: the thin I/O shell the vendored workflow invokes -------------------
@@ -138,6 +169,82 @@ async function existingIssuesViaSearch(gh, repo, pack, task) {
     .map((i) => ({ number: i.number, title: i.title, state: i.state }));
 }
 
+// Every OPEN dispatch issue in the repo, with the labels / age / comment count the
+// maintenance pass reads. Separate from existingIssuesViaSearch, which is per task
+// family and state=all for the filing guards; this one is repo-wide and open-only.
+export async function openDispatchIssuesViaSearch(gh, repo) {
+  const q = encodeURIComponent(`repo:${repo} is:issue is:open in:title "${DISPATCH_PREFIX}"`);
+  const { status, json } = await gh(`/search/issues?q=${q}&per_page=100`);
+  if (status !== 200 || !Array.isArray(json?.items)) return [];
+  return json.items.map((i) => ({
+    number: i.number, title: i.title, labels: i.labels ?? [],
+    created_at: i.created_at, updated_at: i.updated_at, comments: i.comments ?? 0,
+  }));
+}
+
+// The per-run maintenance pass over open dispatch issues (DESIGN §4 lifecycle,
+// §5 recovery). Three backstops, in this order:
+//   1. STALE — open past ~2 of its own scheduling periods → escalation comment,
+//      drop the ready label (so it stops being armed), add `needs-human`.
+//   2. DEAD CLAIM — `agent-running` with no activity for ~3h → the session that
+//      claimed it died; comment, drop `agent-running`, add `needs-human`.
+//   3. RE-ARM — armed but untouched past the grace window → the trigger event was
+//      lost, so remove and re-add its ready label to emit a fresh one.
+// Stale wins over re-arm: rearmDispatchIssues already excludes the stale set, so an
+// issue converging to triage is never re-armed back into circulation.
+//
+// This is the ONLY recovery path for a missed label event or a dead session. The
+// executor no longer sweeps other issues — one session runs exactly the one issue
+// that triggered it — so recovery had to become a decision in code here, running
+// once per scheduler run, rather than agent judgment replicated across every
+// concurrently-triggered session.
+export async function maintainDispatchIssues(gh, repo, now, { labelsEnsured = false } = {}) {
+  const open = await openDispatchIssuesViaSearch(gh, repo);
+  const none = { stale: [], deadClaims: [], rearmed: [] };
+  if (!open.length) return none;
+
+  const stale = staleDispatchIssues(open, now);
+  const staleNumbers = new Set(stale.map((i) => i.number));
+  const deadClaims = staleClaimedDispatchIssues(open, now).filter((i) => !staleNumbers.has(i.number));
+  const rearm = rearmDispatchIssues(open, now);
+  if (!stale.length && !deadClaims.length && !rearm.length) return none;
+
+  // Applying a label 422s when it does not exist, so guarantee them first — an
+  // idle run never gets here, so this costs nothing on the common path.
+  if (!labelsEnsured) await ensureLabels(gh, repo, SCHEDULER_LABELS);
+
+  const escalate = async (issue, body, dropLabel) => {
+    await gh(`/repos/${repo}/issues/${issue.number}/comments`, { method: 'POST', body: { body } });
+    if (dropLabel) await gh(`/repos/${repo}/issues/${issue.number}/labels/${encodeURIComponent(dropLabel)}`, { method: 'DELETE' });
+    await gh(`/repos/${repo}/issues/${issue.number}/labels`, { method: 'POST', body: { labels: [NEEDS_HUMAN_LABEL] } });
+  };
+
+  for (const issue of stale) {
+    await escalate(issue, staleEscalationComment(issue), readyLabelOn(issue));
+    console.log(`- escalated stale dispatch #${issue.number} to ${NEEDS_HUMAN_LABEL}`);
+  }
+
+  for (const issue of deadClaims) {
+    await escalate(issue, staleClaimComment(issue), AGENT_RUNNING_LABEL);
+    console.log(`- reclaimed dead ${AGENT_RUNNING_LABEL} claim on #${issue.number} → ${NEEDS_HUMAN_LABEL}`);
+  }
+
+  for (const issue of rearm) {
+    const ready = readyLabelOn(issue);
+    const del = await gh(`/repos/${repo}/issues/${issue.number}/labels/${encodeURIComponent(ready)}`, { method: 'DELETE' });
+    if (del.status >= 300) { console.log(`! could not un-label #${issue.number} to re-arm it: ${del.status}`); continue; }
+    const add = await gh(`/repos/${repo}/issues/${issue.number}/labels`, { method: 'POST', body: { labels: [ready] } });
+    if (add.status >= 300) console.log(`! re-arm of #${issue.number} dropped its ${ready} label: ${add.status}`);
+    else console.log(`- re-armed #${issue.number} (${ready}) — its trigger event never landed`);
+  }
+
+  return {
+    stale: stale.map((i) => i.number),
+    deadClaims: deadClaims.map((i) => i.number),
+    rearmed: rearm.map((i) => i.number),
+  };
+}
+
 // Ensure the dispatch labels exist before any is applied — GitHub 422s when you
 // apply an unknown label (it never creates one on demand), so the scheduler, as the
 // thing that assigns them, guarantees them here. Idempotent (201 created / 422 already
@@ -146,9 +253,21 @@ async function existingIssuesViaSearch(gh, repo, pack, task) {
 export async function ensureLabels(gh, repo, labels) {
   for (const { name, color, description } of labels) {
     const res = await gh(`/repos/${repo}/labels`, { method: 'POST', body: { name, color, description } });
-    if (res.status !== 201 && res.status !== 422) {
-      console.log(`! could not ensure label "${name}": ${res.status}`);
+    if (res.status === 201) continue;                       // created to spec — nothing further
+    if (res.status === 422) {
+      // The NAME is taken; that says nothing about the colour or description. A
+      // label GitHub auto-created (applying an unknown name to an issue mints it
+      // grey `ededed`, no description) would keep those defaults for good, because
+      // POST 422s forever. So reconcile the shape, not just the existence — that
+      // is what makes the self-healing claim above true for drift and not only for
+      // deletion. PATCH is idempotent: an already-correct label is a no-op write.
+      const fix = await gh(`/repos/${repo}/labels/${encodeURIComponent(name)}`, {
+        method: 'PATCH', body: { color, description },
+      });
+      if (fix.status !== 200) console.log(`! could not reconcile label "${name}": ${fix.status}`);
+      continue;
     }
+    console.log(`! could not ensure label "${name}": ${res.status}`);
   }
 }
 
@@ -173,11 +292,31 @@ async function main() {
 
   const due = computeDueTaskSlots(tasks, schedule, now, lastSuccess);
   const sinceIso = windowStart(due, now);
-  const ctx = {
-    repo, defaultBranch, now: now.toISOString(), sinceIso, config,
-    activePacks: config.packs,
-  };
+
+  // The fleet aggregate (canon-only, DESIGN §3.3) is expensive — a full
+  // enumeration over the fleet PAT — so build it ONLY when a due task actually
+  // declares the `fleet` signal, and only when FLEET_GITHUB_TOKEN is set (the
+  // canon repo with the census credential). Otherwise ctx.fleet stays null and
+  // the collector returns null, so a fleet task's precondition skips rather than
+  // crashes. Enumeration failures are surfaced by readFleet as `{ error }`, not
+  // thrown — a fleet task treats that as "no work I can prove".
+  let fleet = null;
+  if (signalsUnion(due).includes('fleet')) {
+    const { readFleet, makeFleetGh } = await import('./signals/fleet.mjs');
+    const fleetGh = makeFleetGh();
+    if (fleetGh) {
+      const owner = repo.split('/')[0];
+      fleet = await readFleet(fleetGh, { owner, canonRepo: repo, sinceIso });
+      if (fleet.error) console.log(`! fleet enumeration: ${fleet.error}`);
+    } else {
+      console.log('- a due task declares the `fleet` signal but FLEET_GITHUB_TOKEN is not set — skipping fleet-scoped tasks');
+    }
+  }
+
   const packConfigFor = (packId) => config.packConfig?.[packId] ?? {};
+  const ctx = buildSignalContext({
+    root, repo, defaultBranch, now: now.toISOString(), sinceIso, config, fleet, packConfigFor,
+  });
 
   const { evaluations } = await planRun({
     tasks, schedule, now, lastSuccess,
@@ -189,16 +328,18 @@ async function main() {
   // Guarantee the dispatch labels exist before we file any labeled issue — when a
   // task will dispatch OR will run preprocessing (which may converge to
   // needs-human). An idle run pays nothing.
-  if (evaluations.some((r) => r.run && (r.preprocessing || (!r.inline && r.dispatch?.action === 'create')))) {
-    await ensureLabels(gh, repo, SCHEDULER_LABELS);
-  }
+  const labelsEnsured = evaluations.some((r) => r.run && (r.preprocessing || (!r.inline && r.dispatch?.action === 'create')));
+  if (labelsEnsured) await ensureLabels(gh, repo, SCHEDULER_LABELS);
 
   // File the labeled hand-off issue the executor runs (READY_LABEL): first line is
   // the task path, body carries the precondition's binding Context (dispatch.mjs).
   const fileHandoff = async (rec, taskObj) => {
     const title = dispatchTitle({ pack: rec.pack, task: rec.task, slotId: rec.slotId });
     const body = dispatchBody({ taskPath: taskObj.taskPath, pack: rec.pack, task: rec.task, slotId: rec.slotId, context: rec.context });
-    const res = await gh(`/repos/${repo}/issues`, { method: 'POST', body: { title, body, labels: [READY_LABEL] } });
+    // The scope-resolved ready label (self vs fleet) from planDispatch — the
+    // executor routine wired to it runs the task.
+    const readyLabel = rec.dispatch?.label ?? READY_LABEL;
+    const res = await gh(`/repos/${repo}/issues`, { method: 'POST', body: { title, body, labels: [readyLabel] } });
     if (res.status >= 300) console.log(`! failed to file dispatch issue for ${rec.pack}/${rec.task}: ${res.status}`);
   };
 
@@ -280,6 +421,11 @@ async function main() {
     // Agent task with no preprocessing → today's immediate labeled dispatch.
     if (rec.dispatch?.action === 'create') await fileHandoff(rec, taskObj);
   }
+
+  // Maintenance over the open dispatch issues, AFTER this run's filings: the
+  // issues just filed are seconds old, so the grace window keeps them out of the
+  // re-arm set and only the previous cycles' leftovers are considered.
+  await maintainDispatchIssues(gh, repo, now, { labelsEnsured });
 
   console.log('## Claudinite scheduler\n');
   console.log(renderSummary(evaluations) || '- no tasks due');
