@@ -35,10 +35,10 @@ and local alike — are injected automatically by the Claudinite SessionStart
 hooks, their checks run at every Stop, and their skills surface when
 the activity matches. Lessons learned **in this repo** are captured into the
 gcec local pack; the capture policy (route to the right section, prefer a check
-over prose, file-local footguns in the file's own header) lives in the gcec
-pack's RULES.md. A lesson's *portability* is the Claudinite canon's concern (its
-growth routine generalizes local capture into the shared canon), not a reason
-to capture it anywhere else.
+over prose) lives in the gcec pack's RULES.md; the file-local-footgun and
+dedupe-before-adding rules are the canon's. A lesson's *portability* is the
+Claudinite canon's concern (its growth routine generalizes local capture into
+the shared canon), not a reason to capture it anywhere else.
 
 All requirements-related documents and the tests that validate them live in one
 top-level folder, `dev/requirements/`. How requirements are modeled (a
