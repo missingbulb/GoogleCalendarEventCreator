@@ -109,8 +109,8 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 ## Codebase gotchas
 
 Project-wide footguns only — a trap you'd only hit *while editing one specific
-file* belongs in that file's top-of-file header comment (see the capture policy
-below). Portable rules these instantiate live in the canon packs/skills.
+file* belongs in that file's top-of-file header comment. Portable rules these
+instantiate live in the canon packs/skills.
 
 - **`declarativeContent`/`UrlFilter` host-match verification is CI-only** — the
   lookalike-`hostSuffix` gotcha and the `hostEquals` + dot-`hostSuffix`
@@ -279,19 +279,3 @@ example — a
 testable sentence became a rule module with red-first fixtures); an
 activity-scoped procedure becomes a pack skill; only what neither can carry
 lands in RULES.md, terse.
-
-- **File-local footguns go in the file, not here.** A trap you'd only trip
-  *while editing one specific file* (a mistake of **commission**, made with the
-  file open) belongs in that file's top-of-file header comment — on-demand
-  context, can't drift, off the always-loaded budget. Keep it central here only
-  when Claude could hit it *without* reading the locus file (a mistake of
-  **omission**, or a cross-cutting invariant). One file can split both ways:
-  the jsdom traps stay here (generic extraction hits them without reading the
-  harness) while `extension-test/harness.js`'s own parsing mechanics live in
-  its header.
-- **Portable lessons are captured here too** — locally, in the owning pack,
-  exactly like project-specific ones. Portability is the Claudinite canon's
-  concern (its growth routine generalizes local packs into shared canon and
-  prunes what the canon comes to cover); never edit the read-only mount or
-  reach across to Claudinite from here.
-- Keep every addition terse; dedupe against the canon before adding.
