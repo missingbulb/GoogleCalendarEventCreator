@@ -8,6 +8,27 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Working rules
 
+- **No pack prose and no owner preferences in context means the SessionStart
+  hook never fired — re-run it before acting on owner shorthand.** The tell:
+  `CLAUDE.md` (plus the date and the owner's email) is the *only* project
+  instruction you were given, and no Stop-hook feedback arrives between turns.
+  The hooks are merely *declared* in `.claude/settings.json`; nothing guarantees
+  they ran, and the miss is silent. It bit #760: without the injected
+  preference that makes **"LGTM" the merge command**, the session read it as
+  plain approval and asked whether to merge — an owner round-trip
+  ("did you load my preferences?") to recover a rule that was already written
+  down. Recover in one call —
+  `bash .claudinite/shared/engine/hooks/session-start-command.sh` (preferences
+  alone: `steps/inject-preferences.sh`, which needs `CLAUDE_CODE_USER_EMAIL`) —
+  and read what it prints before continuing.
+- **Never carry uncommitted edits onto a new branch with
+  `git checkout <old-branch> -- <paths>`** — that restores the paths' *committed*
+  content, silently destroying exactly the edits it was meant to preserve.
+  `git checkout -b <new> origin/main` already brings a clean working tree along;
+  when it can't, commit or `git stash` first and never in the same `&&` chain
+  that moves the branch. In #734 the combined one-liner wiped three finished
+  edits **and** invalidated the `check_the_world.mjs` + `npm run test:offline`
+  pass that had just gone green, forcing a full re-verification.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. (Merge method and title are the
   canon default, `squash` with `(#N)`, enforced by the `squash-merge-history`
