@@ -71,10 +71,9 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 ## Owner commands
 
 - **"bump version"** = cut a release **end to end** — bump, merge, and wait for
-  the published artifact. Raise `version` in **both** `extension/manifest.json`
-  and `package.json` (kept identical by the `shared-constants` check), on a
-  branch. Default to a **minor** bump; honor an explicit target ("bump version
-  to 1.4.0") or level ("bump patch" / "bump major") when given. Open the PR,
+  the published artifact. The bump mechanics are the canon `bump-version`
+  skill's; honor an explicit target ("bump version to 1.4.0") or level ("bump
+  patch" / "bump major") when given. Open the PR,
   get CI green, squash-merge with `(#N)` —
   saying "bump version" is itself the merge authorization for **this**
   deterministic bump PR only. The merge triggers **Release: Create Package**;
@@ -184,13 +183,9 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   ScraperAPI's residential proxy (`render=true`, so a single-page app records
   post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the
   portable rule maintained in the canon; here the escape hatch is the
-  `SCRAPER_API_KEY` **GitHub Actions secret**. Both tasks name it in
-  `required_secrets`, which is what puts it in the scheduler workflow's env (and
-  what gets the owner asked for it) — never a local fetch (this sandbox is
-  bot-blocked), and never an agent session (which holds no repo secrets). **Never re-introduce a workflow
-  whose only job is to hold that secret for an agent**: `fetch-page.yml` was
-  exactly that, and the dispatch/poll/pull round-trip it forced on the agent is
-  what preprocessing removed. ScraperAPI is the whole fetching surface — swap the
+  `SCRAPER_API_KEY` **GitHub Actions secret**, named in both tasks'
+  `required_secrets` — never a local fetch (this sandbox is bot-blocked), and
+  never an agent session. ScraperAPI is the whole fetching surface — swap the
   vendor in that one module if it underperforms. The aid for a flaky SPA render is
   the **`Wait-for selector`** a source request can carry
   (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
@@ -279,11 +274,6 @@ this section as part of the same change (the design doc itself is
 ## Capture policy — lessons land in the local packs
 
 **The gcec local pack is this repo's capture surface.** Route each lesson to its
-section here (extractor-automation to the "Extractor pipeline" section,
-everything else to the fitting section) — then pick the *mechanism* before
-writing prose (the canon promotion ladder, applied locally): a check in the
-pack's `rules` beats prose every time (`test-offline-list-sync` is the worked
-example — a
-testable sentence became a rule module with red-first fixtures); an
-activity-scoped procedure becomes a pack skill; only what neither can carry
-lands in RULES.md, terse.
+section here: extractor-automation to the "Extractor pipeline" section,
+everything else to the fitting section. Mechanism before prose, per the canon's
+local promotion ladder — `test-offline-list-sync` is this pack's worked example.
