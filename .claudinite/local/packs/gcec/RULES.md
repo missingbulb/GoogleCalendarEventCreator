@@ -180,19 +180,20 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
 [testing-guide](skills/testing-guide/SKILL.md) skill.
 
 - **All page fetching goes through [`scraperapi.mjs`](tasks/create-extractor/scraperapi.mjs), from a
-  task's preprocessing worker and nowhere else.** A rendered fetch through
-  ScraperAPI's residential proxy (`render=true`, so a single-page app records
-  post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the
-  portable rule maintained in the canon; here the escape hatch is the
-  `SCRAPER_API_KEY` **GitHub Actions secret**. Both tasks name it in
-  `required_secrets`, which is what puts it in the scheduler workflow's env (and
-  what gets the owner asked for it) — never a local fetch (this sandbox is
-  bot-blocked), and never an agent session (which holds no repo secrets). **Never re-introduce a workflow
-  whose only job is to hold that secret for an agent**: `fetch-page.yml` was
-  exactly that, and the dispatch/poll/pull round-trip it forced on the agent is
-  what preprocessing removed. ScraperAPI is the whole fetching surface — swap the
-  vendor in that one module if it underperforms. The aid for a flaky SPA render is
-  the **`Wait-for selector`** a source request can carry
+  task's preprocessing worker** — a rendered fetch through ScraperAPI's
+  residential proxy (`render=true`, so a single-page app records post-render HTML
+  with real data), retried and bounded in that one module, which is what makes the
+  vendor swappable there if it underperforms. Bot-blocking from CI/sandbox IPs is
+  the portable rule maintained in the canon; here the escape hatch is the
+  `SCRAPER_API_KEY` **GitHub Actions secret**, named in a task's
+  `required_secrets` — which is what puts it in the scheduler workflow's env (and
+  what gets the owner asked for it). Never a local fetch (this sandbox is
+  bot-blocked) and never an agent session (which holds no repo secrets); the
+  retired `fetch-page.yml` existed only to hold that secret for an agent, and the
+  dispatch/poll/pull round-trip it forced is what preprocessing removed. The shape
+  is enforced by this pack's `scraperapi-fetch-surface` check — one endpoint
+  caller, and only the scheduler workflow carries the key. The aid for a flaky SPA
+  render is the **`Wait-for selector`** a source request can carry
   (`extension/events-popup/derive-wait-selector.js`, a source-request tool, NOT an
   event extractor, #603), passed through as `wait_for_selector`.
 - **Facebook can't be a cached live case** — a hard HTTP 400 even through the
@@ -248,10 +249,13 @@ this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
 - **`extension/event-extractors/custom/` is the extensibility point — one file
-  per site, and nothing else.** The rest of `event-extractors/` is the pipeline
-  itself: the registry, the orchestrator, the shared helpers, and the one core
-  generic extractor (`generic-extractor.js`), which is a different kind of thing
-  from a per-site file and never goes in `custom/`.
+  per site, and nothing else** (shape enforced by this pack's
+  `custom-sources-flat` check: the load-order generator reads that directory one
+  level deep and keeps only `*.js`, so a nested directory or any other file kind
+  is silently dropped from the load order and simply never runs). The rest of
+  `event-extractors/` is the pipeline itself: the registry, the orchestrator, the
+  shared helpers, and the one core generic extractor (`generic-extractor.js`),
+  which is a different kind of thing from a per-site file.
 - **The core generic extractor is the base layer of every extraction** — it runs
   on every page, and a per-site source is only a layer of *overrides* merged over
   it, stating the fields it gets better. A source never re-reads what the page
