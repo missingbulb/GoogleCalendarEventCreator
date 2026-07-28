@@ -1,6 +1,6 @@
 ---
 name: merge-and-ci
-description: Drive this repo's PR-to-merged flow cheaply — when to open the PR, how to get CI green in a Claude web session, how to poll without wasting wall time or tokens, and when to arm auto-merge instead of waiting. This repo's entry point for the owner's merge command, so use it when the owner says "LGTM", "merge to main", or otherwise asks to merge/land the current branch — the canon `merge-to-main` skill is NOT mounted here. Also use whenever a session opens, watches, or lands a PR here — including one opened incidentally mid-task by an unattended or scheduled run, and any moment you ask "is CI green yet?" — not only for a deliberate merge or an e2e/heavy/UI change.
+description: Drive this repo's PR-to-merged flow cheaply — when to open the PR, how to get CI green in a Claude web session, how to poll without wasting wall time or tokens, and when to arm auto-merge instead of waiting. Use whenever a session opens, watches, or lands a PR here — including one opened incidentally mid-task by an unattended or scheduled run, and any moment you ask "is CI green yet?" — not only for a deliberate merge or an e2e/heavy/UI change.
 ---
 
 # Merge and CI in this repo
@@ -57,7 +57,7 @@ all. Open the PR early for those.
   "waiting for CI events" instead strands the PR until a person notices —
   measured, in session `558026a0` (2026-07-24): both `test` runs were green at
   03:58:27Z, the turn had ended at 03:57:56Z on a `subscribe_pr_activity` watch,
-  and PR #718 sat unmerged until the owner typed "lgtm" **63 minutes** later.
+  and PR #718 sat unmerged until the owner stepped in **63 minutes** later.
   That one avoidable wait was 85% of the session's 74-minute wall clock.
 - **Batch tool loading**: one `ToolSearch` for every GitHub MCP tool the flow
   needs (`issue_write`, `create_pull_request`, `pull_request_read`,
