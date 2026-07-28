@@ -8,19 +8,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Working rules
 
-- **No pack prose and no owner preferences in context means the SessionStart
-  hook never fired — re-run it before acting on owner shorthand.** The tell:
-  `CLAUDE.md` (plus the date and the owner's email) is the *only* project
-  instruction you were given, and no Stop-hook feedback arrives between turns.
-  The hooks are merely *declared* in `.claude/settings.json`; nothing guarantees
-  they ran, and the miss is silent. It bit #760: without the injected
-  preference that makes **"LGTM" the merge command**, the session read it as
-  plain approval and asked whether to merge — an owner round-trip
-  ("did you load my preferences?") to recover a rule that was already written
-  down. Recover in one call —
-  `bash .claudinite/shared/engine/hooks/session-start-command.sh` (preferences
-  alone: `steps/inject-preferences.sh`, which needs `CLAUDE_CODE_USER_EMAIL`) —
-  and read what it prints before continuing.
 - **Never carry uncommitted edits onto a new branch with
   `git checkout <old-branch> -- <paths>`** — that restores the paths' *committed*
   content, silently destroying exactly the edits it was meant to preserve.
@@ -37,14 +24,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   merge-and-ci skill — **load it for any PR a session opens**, including one
   opened incidentally mid-task by an unattended run, not only for a deliberate
   merge.
-- **On "LGTM" / "merge to main", load `merge-and-ci` — `merge-to-main` is not
-  mounted in this repo.** The owner preference names the canon `merge-to-main`
-  skill, but `git-github` is not among this repo's declared packs
-  (`.claudinite-checks.json`), so `Skill(merge-to-main)` returns *Unknown
-  skill*; `merge-and-ci` is the local pack's replacement and already states this
-  repo's merge rules. Every session in the captured corpus that was told to
-  merge made this call first and then hand-read the unmounted file
-  (#717, #734, #753) — a wrong first move on every single merge.
 - **Generated files are regenerated, never hand-merged.** On a conflict take
   either side and rerun `npm run regen` (load lists + UI snapshots +
   generic-coverage baseline/report). The committed `.gitattributes` maps each
@@ -277,3 +256,18 @@ this section as part of the same change (the design doc itself is
 section here: extractor-automation to the "Extractor pipeline" section,
 everything else to the fitting section. Mechanism before prose, per the canon's
 local promotion ladder — `test-offline-list-sync` is this pack's worked example.
+
+**Three kinds never land here, however strong the evidence** — filter on what a
+lesson is *about* before picking a mechanism:
+
+- **The owner's personal preferences** (which word means "merge it", tone,
+  summary style). They belong to the owner, are injected per-session, and change
+  without this repo hearing about it.
+- **Claudinite loading mechanics** (which packs are declared, why a skill didn't
+  mount, why an injection missed). Engine plumbing, not project knowledge — a
+  real defect there goes upstream instead.
+- **Anything derived from product requirements.** Packs carry
+  **development-process** lessons only; what the extension should do is
+  `dev/requirements/`'s territory, and restating it here will drift.
+
+None of the three is mechanically checkable, so all three stay prose.
