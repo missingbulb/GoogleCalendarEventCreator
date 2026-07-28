@@ -18,3 +18,7 @@ docs/
 # canon at .claudinite/shared/ and the local packs are tracked).
 /.claudinite-hooks.log
 /.claudinite-hooks.log.tmp
+
+# Ephemeral git worktrees created by Claude Code's Agent tool (isolation:
+# "worktree") for subagents mutating files concurrently; not repo content.
+/.claude/worktrees/
