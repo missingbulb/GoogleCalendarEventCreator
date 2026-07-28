@@ -222,10 +222,13 @@ this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
 - **`extension/event-extractors/custom/` is the extensibility point — one file
-  per site, and nothing else.** The rest of `event-extractors/` is the pipeline
-  itself: the registry, the orchestrator, the shared helpers, and the one core
-  generic extractor (`generic-extractor.js`), which is a different kind of thing
-  from a per-site file and never goes in `custom/`.
+  per site, and nothing else** (shape enforced by this pack's
+  `custom-sources-flat` check: the load-order generator reads that directory one
+  level deep and keeps only `*.js`, so a nested directory or any other file kind
+  is silently dropped from the load order and simply never runs). The rest of
+  `event-extractors/` is the pipeline itself: the registry, the orchestrator, the
+  shared helpers, and the one core generic extractor (`generic-extractor.js`),
+  which is a different kind of thing from a per-site file.
 - **The core generic extractor is the base layer of every extraction** — it runs
   on every page, and a per-site source is only a layer of *overrides* merged over
   it, stating the fields it gets better. A source never re-reads what the page

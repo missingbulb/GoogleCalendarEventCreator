@@ -1,4 +1,5 @@
 import testOfflineListSync from './test-offline-list-sync.mjs';
+import customSourcesFlat from './custom-sources-flat.mjs';
 
 // The gcec pack: this project's general working pack, as a LOCAL Claudinite pack
 // (.claudinite/local/packs/ — tracked project content, discovered and run by the
@@ -17,7 +18,7 @@ export default {
   detect: null,
   marker: null,
   prose: 'RULES.md',
-  rules: [testOfflineListSync],
+  rules: [testOfflineListSync, customSourcesFlat],
   skills: ['snapshot-approval', 'merge-and-ci', 'testing-guide'],
   run_daily: [],
 };
