@@ -1,5 +1,4 @@
 import testOfflineListSync from './test-offline-list-sync.mjs';
-import scraperapiFetchSurface from './scraperapi-fetch-surface.mjs';
 import customSourcesFlat from './custom-sources-flat.mjs';
 
 // The gcec pack: this project's general working pack, as a LOCAL Claudinite pack
@@ -19,7 +18,7 @@ export default {
   detect: null,
   marker: null,
   prose: 'RULES.md',
-  rules: [testOfflineListSync, scraperapiFetchSurface, customSourcesFlat],
+  rules: [testOfflineListSync, customSourcesFlat],
   skills: ['snapshot-approval', 'merge-and-ci', 'testing-guide'],
   run_daily: [],
 };
