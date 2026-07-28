@@ -37,6 +37,14 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   merge-and-ci skill — **load it for any PR a session opens**, including one
   opened incidentally mid-task by an unattended run, not only for a deliberate
   merge.
+- **On "LGTM" / "merge to main", load `merge-and-ci` — `merge-to-main` is not
+  mounted in this repo.** The owner preference names the canon `merge-to-main`
+  skill, but `git-github` is not among this repo's declared packs
+  (`.claudinite-checks.json`), so `Skill(merge-to-main)` returns *Unknown
+  skill*; `merge-and-ci` is the local pack's replacement and already states this
+  repo's merge rules. Every session in the captured corpus that was told to
+  merge made this call first and then hand-read the unmounted file
+  (#717, #734, #753) — a wrong first move on every single merge.
 - **Generated files are regenerated, never hand-merged.** On a conflict take
   either side and rerun `npm run regen` (load lists + UI snapshots +
   generic-coverage baseline/report). The committed `.gitattributes` maps each
