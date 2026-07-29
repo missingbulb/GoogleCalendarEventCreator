@@ -74,11 +74,16 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Testing invariants
 
-- `npm test` runs everything; `test:live` (reviewed integration cases against
-  cached pages), `test:offline` (unit), `test:ui` (popup/icon snapshots),
-  `refresh:ui` (regenerate after an intentional UI change), `test:e2e` (heavy,
-  CI-only). The suites, harnesses, and requirements model are mapped in the
-  testing-guide skill.
+- **`npm test` runs everything** — its hand-kept glob list is enforced against
+  the tree by this pack's `npm-test-glob-coverage` check, because the failure is
+  silent: `node --test` doesn't error on a pattern that matches nothing, so a
+  test in a directory no glob reaches simply never runs and npm still exits 0.
+  The heavy CI-only `test:e2e` suite is the one carve-out, and the check reads it
+  from `package.json` rather than pinning the path. The suites — `test:live`
+  (reviewed integration cases against cached pages), `test:offline` (unit),
+  `test:ui` (popup/icon snapshots), `refresh:ui` (regenerate after an intentional
+  UI change), `test:e2e` — and their harnesses and the requirements model are
+  mapped in the testing-guide skill.
 - **Integration cases are the reviewed contract** — a person reads
   `dev/requirements/extractor/expected/`; nobody reviews the unit tests. Every
   required change or bugfix gets a case (one real, focused page per distinct

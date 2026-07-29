@@ -15,7 +15,7 @@ fingerprinted or seeded.
 | Slot | What |
 |---|---|
 | Prose | [RULES.md](RULES.md) — working rules, owner commands, testing invariants, codebase gotchas, workflow-failure classification, architecture rules of the road, the capture policy |
-| Checks | [test-offline-list-sync](test-offline-list-sync.mjs) · [custom-sources-flat](custom-sources-flat.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
+| Checks | [test-offline-list-sync](test-offline-list-sync.mjs) · [custom-sources-flat](custom-sources-flat.mjs) · [npm-test-glob-coverage](npm-test-glob-coverage.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
 | Daily tasks | none |
 | Skills | [snapshot-approval](skills/snapshot-approval/SKILL.md) · [merge-and-ci](skills/merge-and-ci/SKILL.md) · [testing-guide](skills/testing-guide/SKILL.md) |
 
@@ -24,6 +24,7 @@ fingerprinted or seeded.
 | Rule (≤5 words) | How enforced |
 |---|---|
 | test:offline list matches tree | **hardcoded** (`test-offline-list-sync`) |
+| npm test reaches every test | **hardcoded** (`npm-test-glob-coverage`) |
 | Cap/qualify GitHub MCP queries | prose |
 | CI green before merge (2× heavy) | prose (canon owns method/title) |
 | Generated files: regen, never hand-merge | prose (+ each artifact's own gate) |
