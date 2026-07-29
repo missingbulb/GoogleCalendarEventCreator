@@ -36,8 +36,7 @@ fingerprinted or seeded.
 | Integration cases are the contract | prose |
 | Mirror tree, one test per file | prose (list half is the check) |
 | Pin cases to REFERENCE_NOW floor | prose |
-| Refusal tests: mutate the guard | prose |
 | MV3/jsdom/GCal/clean() gotchas | prose (see RULES.md) |
-| Unattended workflows wire the reporter | prose |
+| Unattended workflows wire the reporter | **advisory** (canon `gha/scheduled-failure-escalation`) + prose (the non-`schedule:` gap) |
 | Single-file-per-host architecture | **hardcoded** (`custom-sources-flat`) + prose |
 | Capture into the owning pack | prose (the policy itself) |

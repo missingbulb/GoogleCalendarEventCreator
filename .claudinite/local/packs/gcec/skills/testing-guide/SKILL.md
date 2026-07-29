@@ -15,9 +15,9 @@ npm run test:e2e       # heavy: real Chrome, CI-only (skips without CHROME_PATH)
 npm test               # everything above except e2e
 ```
 
-The invariants (mirror tree, reviewed-contract cases, `REFERENCE_NOW` floor,
-refusal-test discipline) are always-loaded in the gcec pack's RULES.md. General
-test discipline (see-it-fail, green-twice, high-watermark gating) is canon.
+The invariants (mirror tree, reviewed-contract cases, `REFERENCE_NOW` floor) are
+always-loaded in the gcec pack's RULES.md. General test discipline (see-it-fail,
+refusal-test mutation, green-twice, high-watermark gating) is canon.
 Adding a cached live case is covered under "Live integration tests" below; the
 generic-coverage gate's invariants are in the gcec pack's RULES.md.
 
