@@ -26,11 +26,9 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   <Task>"`, or `list_issues` + `labels`) **and** pass a small `perPage` (5–10) —
   the answer wanted is one issue or one run, never a page of them.
 - **This repo's one divergence from the canon merge recipe: CI must be green
-  first** — twice for e2e/heavy-browser changes. (Merge method and title are the
-  canon default, `squash` with `(#N)`, enforced by the `squash-merge-history`
-  check.) The project mechanics of driving a merge (dispatching CI in a web
-  session, the poll back-off, when to arm auto-merge instead of waiting) are the
-  merge-and-ci skill — **load it for any PR a session opens**, including one
+  first** — twice for e2e/heavy-browser changes. The project mechanics of driving
+  a merge (dispatching CI in a web session, the poll back-off, when to arm
+  auto-merge instead of waiting) are the merge-and-ci skill — **load it for any PR a session opens**, including one
   opened incidentally mid-task by an unattended run, not only for a deliberate
   merge.
 - **`npm run regen` is the regenerator** (load lists + UI snapshots +
@@ -51,8 +49,7 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 - **Whenever a change regenerates the UI gallery** (via `npm run refresh:ui`),
   link the branch's copy in the chat in the same turn you commit it —
   `https://github.com/<owner>/<repo>/blob/<branch>/dev/requirements/requirements.md`
-  — for one-page review. A moved snapshot baseline needs owner approval, never
-  silent regeneration: the process is the snapshot-approval skill.
+  — for one-page review.
 
 ## Owner commands
 
@@ -74,11 +71,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Testing invariants
 
-- `npm test` runs everything; `test:live` (reviewed integration cases against
-  cached pages), `test:offline` (unit), `test:ui` (popup/icon snapshots),
-  `refresh:ui` (regenerate after an intentional UI change), `test:e2e` (heavy,
-  CI-only). The suites, harnesses, and requirements model are mapped in the
-  testing-guide skill.
 - **Integration cases are the reviewed contract** — a person reads
   `dev/requirements/extractor/expected/`; nobody reviews the unit tests. Every
   required change or bugfix gets a case (one real, focused page per distinct
@@ -90,9 +82,7 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   departures: `extension-test/integration/` for whole-extension/interaction
   tests; no mirror for `custom/*` sources or data/markup files (covered by live
   cases / snapshots / drift guards); `extension-test/harness.js` is shared
-  infra (not a test) and stays at the root. The hand-kept `test:offline` list in
-  `package.json` is enforced against the tree by this pack's
-  `test-offline-list-sync` check.
+  infra (not a test) and stays at the root.
 - **The pinned `REFERENCE_NOW`** (`dev/requirements/shared/reference-time.js`,
   currently 2026-06-01) **is the floor of the cases' dates**: author a
   neutral/upcoming case **on or after it** so it's pill-free; use a past date or
@@ -137,14 +127,12 @@ packs/skills.
 ## Workflow-failure classification
 
 An unattended workflow must converge its failure to a human-visible state (the
-rule and the `report-failure` reporter live in the canon). This repo's
-classification: the `Release` stub (`chrome-extension-release.yml`) is
-unattended and already covered — the reporters fire inside the vendored
-create-package/publish/daily workflows, keyed per operation, with per-repo
-values in `.github/release.config`; `test.yml` is attended PR CI — no reporter;
-`claudinite-scheduler.yml` is the vendored scheduler, which converges its own
-failures to `needs-human` issues; a **new** unattended workflow adds a failure job
-per the canon action header's recipe.
+rule and the `report-failure` reporter live in the canon). **Mind the one gap the
+check can't see:** `gha/scheduled-failure-escalation` only inspects workflows
+carrying a `schedule:`, so a workflow that is unattended by some *other* trigger
+— `workflow_run`, `repository_dispatch` — needs its failure job wired by hand.
+The `Release` stub (`chrome-extension-release.yml`) is exactly that shape; its
+reporters live in the vendored create-package/publish/daily workflows it calls.
 
 ## Extractor pipeline
 
@@ -220,13 +208,10 @@ this section as part of the same change (the design doc itself is
 `dev/procedures/highLevelDesign.md`):
 
 - **`extension/event-extractors/custom/` is the extensibility point — one file
-  per site, and nothing else** (shape enforced by this pack's
-  `custom-sources-flat` check: the load-order generator reads that directory one
-  level deep and keeps only `*.js`, so a nested directory or any other file kind
-  is silently dropped from the load order and simply never runs). The rest of
-  `event-extractors/` is the pipeline itself: the registry, the orchestrator, the
-  shared helpers, and the one core generic extractor (`generic-extractor.js`),
-  which is a different kind of thing from a per-site file.
+  per site, and nothing else.** The rest of `event-extractors/` is the pipeline
+  itself: the registry, the orchestrator, the shared helpers, and the one core
+  generic extractor (`generic-extractor.js`), which is a different kind of thing
+  from a per-site file.
 - **The core generic extractor is the base layer of every extraction** — it runs
   on every page, and a per-site source is only a layer of *overrides* merged over
   it, stating the fields it gets better. A source never re-reads what the page
@@ -257,6 +242,22 @@ this section as part of the same change (the design doc itself is
 section here: extractor-automation to the "Extractor pipeline" section,
 everything else to the fitting section. Mechanism before prose, per the canon's
 local promotion ladder — `test-offline-list-sync` is this pack's worked example.
+
+**Coming out, apply the deletion test: prose a mechanism fully covers is deleted,
+never trimmed.** Ask it of every paragraph standing beside a landed check —
+*with this paragraph gone, would the check still catch every violation it
+describes **and** tell the agent how to fix it?* If yes, it is redundant: delete
+it whole. The check's failure message is where the rule lives now and its header
+comment is where the rationale lives, so a paragraph restating either pays twice
+and is the drift trap waiting to spring. Before concluding prose is the only
+carrier, look at the pack's **skills** too — an activity-scoped skill often
+already holds the map a rule is repeating. Keep only what no artifact carries.
+The test discriminates rather than just deleting: the `npm test` invariant went
+entirely (#789 — the check catches it, the testing-guide skill already listed the
+suites), while the `extension-test/` mirror bullet stays, because
+`test-offline-list-sync` enforces only the `package.json` list's sync with the
+tree and never the mirror convention itself. Whether a check covers a rule is a
+judgment about meaning, so this test is applied by a reader, not mechanized.
 
 **Three kinds never land here, however strong the evidence** — filter on what a
 lesson is *about* before picking a mechanism:
