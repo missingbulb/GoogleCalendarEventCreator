@@ -16,6 +16,15 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   that moves the branch. In #734 the combined one-liner wiped three finished
   edits **and** invalidated the `check_the_world.mjs` + `npm run test:offline`
   pass that had just gone green, forcing a full re-verification.
+- **Cap and qualify every GitHub MCP list/search call** — an unbounded one
+  hard-fails the tool-result cap and costs a 2–3-call dig through the saved
+  result file. `search_issues` handed a bare title string full-text-searches the
+  whole repo and returns every match with its full body: the standing
+  `Claudinite tracker: <Task>` lookup that opens every scheduled task blew up at
+  185–211 KB three times (#734 twice, #753), and `actions_list` without a page
+  cap at 155 KB (#760). Qualify the query (`in:title "Claudinite tracker:
+  <Task>"`, or `list_issues` + `labels`) **and** pass a small `perPage` (5–10) —
+  the answer wanted is one issue or one run, never a page of them.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. (Merge method and title are the
   canon default, `squash` with `(#N)`, enforced by the `squash-merge-history`
