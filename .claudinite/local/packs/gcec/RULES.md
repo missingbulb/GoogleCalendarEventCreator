@@ -33,11 +33,9 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   merge-and-ci skill — **load it for any PR a session opens**, including one
   opened incidentally mid-task by an unattended run, not only for a deliberate
   merge.
-- **Generated files are regenerated, never hand-merged.** On a conflict take
-  either side and rerun `npm run regen` (load lists + UI snapshots +
-  generic-coverage baseline/report). The committed `.gitattributes` maps each
-  generated file to the `ours` merge driver; a stale artifact can't slip through
-  — its own gate fails. Under the rule (kept in sync with `.gitattributes`):
+- **`npm run regen` is the regenerator** (load lists + UI snapshots +
+  generic-coverage baseline/report); a stale artifact can't slip through — its
+  own gate fails. On the `ours` driver (kept in sync with `.gitattributes`):
   `extension/event-extractors/load-order.generated.json` (from `npm run index`),
   `dev/requirements/<kind>/cases/*.png` (from `npm run refresh:ui`), and
   `dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.json`
@@ -95,17 +93,15 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   infra (not a test) and stays at the root. The hand-kept `test:offline` list in
   `package.json` is enforced against the tree by this pack's
   `test-offline-list-sync` check.
-- **Requirement tests render against the pinned `REFERENCE_NOW`**
-  (`dev/requirements/shared/reference-time.js`, currently 2026-06-01), never the
-  wall clock. The pinned day is the floor of the cases' dates: author a
+- **The pinned `REFERENCE_NOW`** (`dev/requirements/shared/reference-time.js`,
+  currently 2026-06-01) **is the floor of the cases' dates**: author a
   neutral/upcoming case **on or after it** so it's pill-free; use a past date or
   a future year only when the case is *pinning* a pill.
 
 ## Codebase gotchas
 
-Project-wide footguns only — a trap you'd only hit *while editing one specific
-file* belongs in that file's top-of-file header comment. Portable rules these
-instantiate live in the canon packs/skills.
+Project-wide footguns only. Portable rules these instantiate live in the canon
+packs/skills.
 
 - **`declarativeContent`/`UrlFilter` host-match verification is CI-only** — the
   lookalike-`hostSuffix` gotcha and the `hostEquals` + dot-`hostSuffix`
@@ -137,13 +133,6 @@ instantiate live in the canon packs/skills.
   event"** — gating on `Boolean(site)` surfaced phantom events on home pages
   (#133); a real event requires actual data (JSON-LD or a parsed date), never a
   mere host match.
-- **The vendored `.claudinite/shared` canon reflects its stamp, not canon
-  `main`** — check the `claudinite` stamp in `.claudinite-checks.json` (and
-  whether the nightly refresh has run since an upstream fix merged) **before**
-  concluding an upstream fix hasn't arrived and **before committing a
-  workaround for a check finding** (an accept, a suppression pragma): a stale
-  canon twice produced spurious findings whose fixes had already merged
-  (#664, #665).
 
 ## Workflow-failure classification
 
