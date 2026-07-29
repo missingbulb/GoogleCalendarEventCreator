@@ -74,13 +74,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Testing invariants
 
-- **`npm test` runs everything** (its hand-kept glob list is enforced against the
-  tree by this pack's `npm-test-glob-coverage` check — see the check's own header
-  for why and for the `test:e2e` carve-out); `test:live` (reviewed integration
-  cases against cached pages), `test:offline` (unit), `test:ui` (popup/icon
-  snapshots), `refresh:ui` (regenerate after an intentional UI change), `test:e2e`
-  (heavy, CI-only). The suites, harnesses, and requirements model are mapped in
-  the testing-guide skill.
 - **Integration cases are the reviewed contract** — a person reads
   `dev/requirements/extractor/expected/`; nobody reviews the unit tests. Every
   required change or bugfix gets a case (one real, focused page per distinct
@@ -259,6 +252,22 @@ this section as part of the same change (the design doc itself is
 section here: extractor-automation to the "Extractor pipeline" section,
 everything else to the fitting section. Mechanism before prose, per the canon's
 local promotion ladder — `test-offline-list-sync` is this pack's worked example.
+
+**Coming out, apply the deletion test: prose a mechanism fully covers is deleted,
+never trimmed.** Ask it of every paragraph standing beside a landed check —
+*with this paragraph gone, would the check still catch every violation it
+describes **and** tell the agent how to fix it?* If yes, it is redundant: delete
+it whole. The check's failure message is where the rule lives now and its header
+comment is where the rationale lives, so a paragraph restating either pays twice
+and is the drift trap waiting to spring. Before concluding prose is the only
+carrier, look at the pack's **skills** too — an activity-scoped skill often
+already holds the map a rule is repeating. Keep only what no artifact carries.
+The test discriminates rather than just deleting: the `npm test` invariant went
+entirely (#789 — the check catches it, the testing-guide skill already listed the
+suites), while the `extension-test/` mirror bullet stays, because
+`test-offline-list-sync` enforces only the `package.json` list's sync with the
+tree and never the mirror convention itself. Whether a check covers a rule is a
+judgment about meaning, so this test is applied by a reader, not mechanized.
 
 **Three kinds never land here, however strong the evidence** — filter on what a
 lesson is *about* before picking a mechanism:
