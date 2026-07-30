@@ -16,10 +16,13 @@ import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 // here, not from the canon skills tree.
 export default {
   id: 'gcec',
+  ruleRoutingGuidance: {
+    belongs: "this project's standing rules — owner commands, testing invariants, codebase gotchas, extractor-pipeline rules, architecture rules of the road, capture policy",
+    excludes: 'general software-engineering practices and portable procedures — those live in the vendored Claudinite canon, not here',
+  },
   detect: null,
   marker: null,
   prose: 'RULES.md',
-  rules: [testOfflineListSync, customSourcesFlat, npmTestGlobCoverage],
+  worldRules: [testOfflineListSync, customSourcesFlat, npmTestGlobCoverage],
   skills: ['snapshot-approval', 'merge-and-ci', 'testing-guide'],
-  run_daily: [],
 };
