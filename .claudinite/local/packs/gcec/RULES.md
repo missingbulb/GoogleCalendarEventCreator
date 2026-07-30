@@ -94,15 +94,11 @@ Project-wide footguns only. Portable rules these instantiate live in the canon
 packs/skills.
 
 - **`declarativeContent`/`UrlFilter` host-match verification is CI-only** — the
-  lookalike-`hostSuffix` gotcha and the `hostEquals` + dot-`hostSuffix`
-  apex-or-subdomain fix are the canon `chrome-extension` pack's; the real
-  URL→icon match runs inside Chrome, exercised here only by the CI-only
+  real URL→icon match runs inside Chrome, exercised here only by the CI-only
   real-Chrome test (`dev/requirements/heavy/extension-load.chrome.test.js`).
 - **CDP-introspecting the MV3 worker hits the portable traps** (canon): here
   they bit `declarativeContent…getRules` (hung until job timeout), which is why
-  the awaited signal is built from plain promises and the worker publishes
-  `globalThis.iconRulesReady` for the test to poll. Bound every probe and add a
-  test-level timeout regardless.
+  the worker publishes `globalThis.iconRulesReady` for the test to poll.
 - **The jsdom-vs-Chrome DOM traps bit this repo directly** (canon): #130/#137
   drove the **production** remedy the canon (framed for tests) leaves out —
   strip `noscript`/`script`/`style` from a clone before reading any element's
@@ -126,11 +122,10 @@ packs/skills.
 
 ## Workflow-failure classification
 
-An unattended workflow must converge its failure to a human-visible state (the
-rule and the `report-failure` reporter live in the canon). **Mind the one gap the
-check can't see:** `gha/scheduled-failure-escalation` only inspects workflows
-carrying a `schedule:`, so a workflow that is unattended by some *other* trigger
-— `workflow_run`, `repository_dispatch` — needs its failure job wired by hand.
+**Mind the one gap `gha/scheduled-failure-escalation` can't see:** it only
+inspects workflows carrying a `schedule:`, so a workflow that is unattended by
+some *other* trigger — `workflow_run`, `repository_dispatch` — needs its failure
+job wired by hand.
 The `Release` stub (`chrome-extension-release.yml`) is exactly that shape; its
 reporters live in the vendored create-package/publish/daily workflows it calls.
 
@@ -177,11 +172,8 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   and exits **0** — a task failure would converge to a `needs-human` dispatch
   issue as well, duplicating the signal and implying the pipeline broke when it
   correctly declined. Same for the pending-page sweep: the pages that did record still land.
-- **The generic-coverage gate is a high-watermark over a changing case set.** It
-  ratchets up on an unchanged case set and re-anchors when the set changes,
-  compared over the cases the runs **share** — so adding an extractor never fails
-  it (#240) while a pre-existing case that regresses still does. A removed/renamed
-  case the watermark still lists makes it stale: the local refresh re-anchors it
+- **The generic-coverage gate is a high-watermark over a changing case set.** A
+  removed/renamed case the watermark still lists makes it stale: the local refresh re-anchors it
   (commit that); in CI it's an error to fix. *Caveat:* never commit a re-anchored
   baseline while the gate is red — a regression bundled with a case-set change can
   be re-anchored over. Detailed mechanics self-document in the gate's own headers
@@ -242,22 +234,6 @@ this section as part of the same change (the design doc itself is
 section here: extractor-automation to the "Extractor pipeline" section,
 everything else to the fitting section. Mechanism before prose, per the canon's
 local promotion ladder — `test-offline-list-sync` is this pack's worked example.
-
-**Coming out, apply the deletion test: prose a mechanism fully covers is deleted,
-never trimmed.** Ask it of every paragraph standing beside a landed check —
-*with this paragraph gone, would the check still catch every violation it
-describes **and** tell the agent how to fix it?* If yes, it is redundant: delete
-it whole. The check's failure message is where the rule lives now and its header
-comment is where the rationale lives, so a paragraph restating either pays twice
-and is the drift trap waiting to spring. Before concluding prose is the only
-carrier, look at the pack's **skills** too — an activity-scoped skill often
-already holds the map a rule is repeating. Keep only what no artifact carries.
-The test discriminates rather than just deleting: the `npm test` invariant went
-entirely (#789 — the check catches it, the testing-guide skill already listed the
-suites), while the `extension-test/` mirror bullet stays, because
-`test-offline-list-sync` enforces only the `package.json` list's sync with the
-tree and never the mirror convention itself. Whether a check covers a rule is a
-judgment about meaning, so this test is applied by a reader, not mechanized.
 
 **Three kinds never land here, however strong the evidence** — filter on what a
 lesson is *about* before picking a mechanism:
