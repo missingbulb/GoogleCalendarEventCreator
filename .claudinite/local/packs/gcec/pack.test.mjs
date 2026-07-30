@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import testOfflineListSync from './test-offline-list-sync.mjs';
 import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
+import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);
@@ -153,4 +154,74 @@ test('npm-test-glob-coverage: quiet when the test script is not a `node --test` 
     globCtx(['dev/security/csp.test.js'], { test: 'jest' }),
   );
   assert.deepEqual(findings, []);
+});
+
+// pipeline-site-agnostic reads the host list out of the repo, so every fixture
+// tree carries a host-lists.json — the check follows that declaration, never a
+// copy of it.
+const HOSTS = JSON.stringify({
+  supportedDomains: ['stubhub.com', 'tel-aviv.gov.il', 'visit.tel-aviv.gov.il', 'lu.ma'],
+});
+const pipelineCtx = (tree) => treeCtx({ 'extension/host-lists.json': HOSTS, ...tree });
+
+test('pipeline-site-agnostic: fires on a host in shipped pipeline code, in the generic extractor and in a helper', () => {
+  const findings = pipelineSiteAgnostic.run(
+    pipelineCtx({
+      'extension/event-extractors/generic-extractor.js':
+        'function read(doc) {\n  if (host.endsWith("stubhub.com")) return special(doc);\n  return generic(doc);\n}\n',
+      'extension/event-extractors/helpers/derive-timezone.js':
+        'const OVERRIDE = { "visit.tel-aviv.gov.il": "Asia/Jerusalem" };\n',
+    }),
+  );
+  assert.equal(findings.length, 2);
+  assert.equal(findings[0].file, 'extension/event-extractors/generic-extractor.js');
+  assert.equal(findings[0].line, 2); // the blanked comments keep line numbers true
+  assert.match(findings[0].what, /names the supported site stubhub\.com/);
+  // the longest matching entry wins, not the one it contains
+  assert.match(findings[1].what, /visit\.tel-aviv\.gov\.il/);
+  assert.ok(findings.every((f) => f.severity === 'blocking'));
+});
+
+test('pipeline-site-agnostic: fires on a host hidden in a URL string (the `//` must not read as a comment)', () => {
+  const findings = pipelineSiteAgnostic.run(
+    pipelineCtx({
+      'extension/event-extractors/assemble-events.js':
+        'const FEED = "https://lu.ma/api/events";\n',
+    }),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].line, 1);
+  assert.match(findings[0].what, /lu\.ma/);
+});
+
+test('pipeline-site-agnostic: quiet when the sites are only cited in comments, or live in custom/', () => {
+  const findings = pipelineSiteAgnostic.run(
+    pipelineCtx({
+      // citing where a generic pattern was observed is how this codebase records
+      // evidence — both comment forms, and one on the same line as real code
+      'extension/event-extractors/generic-extractor.js':
+        '// or is merely the site\'s domain ("stubhub.com" is not a venue).\n' +
+        '/* seen on visit.tel-aviv.gov.il\n   and lu.ma */\n' +
+        'const venue = readVenue(doc); // not stubhub.com-specific\n',
+      // per-site knowledge belongs here, and this check must never flag it
+      'extension/event-extractors/custom/stubhub.js':
+        'GCal.sources.push({ matches: (h) => /(^|\\.)stubhub\\.com$/.test(h) });\n',
+      // a host-shaped substring is not the host
+      'extension/event-extractors/helpers/text.js': 'const s = "notstubhub.combo";\n',
+      // non-.js pipeline files are out of scope
+      'extension/event-extractors/load-order.generated.json': '["stubhub.com"]',
+    }),
+  );
+  assert.deepEqual(findings, []);
+});
+
+test('pipeline-site-agnostic: quiet when the host list is missing or declares nothing', () => {
+  const tree = {
+    'extension/event-extractors/generic-extractor.js': 'if (h === "stubhub.com") {}\n',
+  };
+  assert.deepEqual(pipelineSiteAgnostic.run(treeCtx(tree)), []);
+  assert.deepEqual(
+    pipelineSiteAgnostic.run(treeCtx({ ...tree, 'extension/host-lists.json': '{"supportedDomains":[]}' })),
+    [],
+  );
 });

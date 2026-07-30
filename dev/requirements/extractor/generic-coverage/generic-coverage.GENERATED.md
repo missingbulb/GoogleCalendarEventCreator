@@ -8,13 +8,13 @@ What the core generic extractor (`extension/event-extractors/generic-extractor.j
 
 ## Score
 
-Headline coverage over all 35 cases in the corpus:
+Headline coverage over all 36 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **78.1%** | 82 / 105 |
-| **All fields** | **58.8%** | 120 / 204 |
-| Event coverage *(informational)* | 25.3% | 41 / 162 |
+| **Critical fields** (title + start + location) | **76.9%** | 83 / 108 |
+| **All fields** | **57.9%** | 121 / 209 |
+| Event coverage *(informational)* | 25.8% | 42 / 163 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`dev/requirements/extractor/generic-coverage/generic-coverage.baseline
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 78.1% | 78.1% | ✓ |
-| All fields | 58.8% | 58.8% | ✓ |
+| Critical fields | 76.9% | 76.9% | ✓ |
+| All fields | 57.9% | 57.9% | ✓ |
 
-Gated over **35** shared case(s).
+Gated over **36** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the bare run can't enumerate dominate it).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 35 | 30 | 3 | 2 | 85.7% |
-| `start` **(critical)** | 35 | 28 | 5 | 2 | 80% |
+| `title` **(critical)** | 36 | 30 | 4 | 2 | 83.3% |
+| `start` **(critical)** | 36 | 29 | 5 | 2 | 80.6% |
 | `end` | 23 | 16 | 0 | 7 | 69.6% |
-| `location` **(critical)** | 35 | 24 | 4 | 7 | 68.6% |
-| `ctz` | 32 | 14 | 0 | 18 | 43.8% |
+| `location` **(critical)** | 36 | 24 | 4 | 8 | 66.7% |
+| `ctz` | 33 | 14 | 0 | 19 | 42.4% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 33 | 8 | 18 | 7 | 24.2% |
+| `description` | 34 | 8 | 19 | 7 | 23.5% |
 
 ## By host
 
@@ -48,6 +48,7 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 | `bandsintown.com` | 1 | 1/1 | 100% | 100% |
 | `barby.co.il` | 1 | 1/1 | 66.7% | 40% |
 | `cinema.co.il` | 5 | 5/118 | 86.7% | 43.3% |
+| `comy.co.il` | 1 | 1/1 | 33.3% | 20% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 100% |
 | `dice.fm` | 1 | 1/1 | 100% | 100% |
 | `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
@@ -77,6 +78,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, the bare r
 | --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | `bandsintown-berry-sakharof` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
 | `barby` | 1/1 | ✓ | ✓ | — | ~ | ✗ | — | ~ |
+| `comy` | 1/1 | ~ | ✓ | — | ✗ | ✗ | — | ~ |
 | `dash-datadoghq` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
 | `dice` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |

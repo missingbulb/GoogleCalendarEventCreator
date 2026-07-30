@@ -15,7 +15,7 @@ fingerprinted or seeded.
 | Slot | What |
 |---|---|
 | Prose | [RULES.md](RULES.md) — working rules, owner commands, testing invariants, codebase gotchas, workflow-failure classification, architecture rules of the road, the capture policy |
-| Checks | [test-offline-list-sync](test-offline-list-sync.mjs) · [custom-sources-flat](custom-sources-flat.mjs) · [npm-test-glob-coverage](npm-test-glob-coverage.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
+| Checks | [test-offline-list-sync](test-offline-list-sync.mjs) · [custom-sources-flat](custom-sources-flat.mjs) · [npm-test-glob-coverage](npm-test-glob-coverage.mjs) · [pipeline-site-agnostic](pipeline-site-agnostic.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
 | Daily tasks | none |
 | Skills | [snapshot-approval](skills/snapshot-approval/SKILL.md) · [merge-and-ci](skills/merge-and-ci/SKILL.md) · [testing-guide](skills/testing-guide/SKILL.md) |
 
@@ -40,4 +40,5 @@ fingerprinted or seeded.
 | MV3/jsdom/GCal/clean() gotchas | prose (see RULES.md) |
 | Unattended workflows wire the reporter | **advisory** (canon `gha/scheduled-failure-escalation`) + prose (the non-`schedule:` gap) |
 | Single-file-per-host architecture | **hardcoded** (`custom-sources-flat`) + prose |
+| Pipeline knows no specific site | **hardcoded** (`pipeline-site-agnostic`, host literals only) + prose |
 | Capture into the owning pack | prose (the policy itself) |
