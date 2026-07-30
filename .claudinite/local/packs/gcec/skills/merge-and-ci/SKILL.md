@@ -62,3 +62,28 @@ all. Open the PR early for those.
 - **Batch tool loading**: one `ToolSearch` for every GitHub MCP tool the flow
   needs (`issue_write`, `create_pull_request`, `pull_request_read`,
   `merge_pull_request`), not one per turn.
+
+## After the merge, `git fetch origin main` — never check `main` out
+
+The canon merge recipe's post-merge step 5 is
+`git checkout main && git pull origin main`. **Skip the checkout here**: a plain
+`git fetch origin main` is all this repo's remaining post-merge work needs, and
+the checkout is the one part that stalls or gets denied.
+
+Nothing downstream reads the working tree. The capture step that follows the
+merge (`capture-log.mjs`) does every branch write through git plumbing against
+the *fetched* remote tip and never touches the checkout or the index — its own
+header says so. The conformance checks resolve their diff base from
+`origin/main`, a remote-tracking ref a fetch alone advances. So the checkout
+buys nothing but a working-tree switch nobody asked for, at the very end of a
+session that is about to end anyway.
+
+Measured across the four captured sessions, all of which ran the canon step
+verbatim: in `295e2230` (2026-07-26) the auto-mode classifier **denied**
+`git checkout main` twice — once inside a `fetch && checkout && pull` chain
+(08:26:09→08:26:39, 30s) and once alone (08:27:13→08:27:40, 27s) — 57s of dead
+wall time plus three recovery calls, after which the session read the capture
+script's header and concluded the checkout had never been needed. The bare
+`git fetch origin main` in between succeeded on the first try. The same step
+cost 44s in `13a6f736` and 8s in `558026a0` for no benefit either. Leave the
+tree on the merged branch and fetch.
