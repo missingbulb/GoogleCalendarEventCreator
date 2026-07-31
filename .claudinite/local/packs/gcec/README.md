@@ -15,7 +15,7 @@ fingerprinted or seeded.
 | Slot | What |
 |---|---|
 | Prose | [RULES.md](RULES.md) — working rules, owner commands, testing invariants, codebase gotchas, workflow-failure classification, architecture rules of the road, the capture policy |
-| Checks | [test-offline-list-sync](test-offline-list-sync.mjs) · [custom-sources-flat](custom-sources-flat.mjs) · [npm-test-glob-coverage](npm-test-glob-coverage.mjs) · [pipeline-site-agnostic](pipeline-site-agnostic.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
+| Checks | [test-offline-list-sync](test-offline-list-sync.mjs) · [custom-sources-flat](custom-sources-flat.mjs) · [npm-test-glob-coverage](npm-test-glob-coverage.mjs) · [pipeline-site-agnostic](pipeline-site-agnostic.mjs) · [regen-artifacts-merge-ours](regen-artifacts-merge-ours.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
 | Daily tasks | none |
 | Skills | [snapshot-approval](skills/snapshot-approval/SKILL.md) · [merge-and-ci](skills/merge-and-ci/SKILL.md) · [testing-guide](skills/testing-guide/SKILL.md) |
 
@@ -28,6 +28,7 @@ fingerprinted or seeded.
 | Cap/qualify GitHub MCP queries | prose |
 | CI green before merge (2× heavy) | prose (canon owns method/title) |
 | Generated files: regen, never hand-merge | prose (+ each artifact's own gate) |
+| Regen artifacts on the `ours` driver | **hardcoded** (`regen-artifacts-merge-ours`; canon `basics/generated-merge-driver` owns the `GENERATED`-named half) |
 | Branch sync: rebase main + regen | prose |
 | Gallery regenerated → link in chat | prose |
 | Snapshot moves need owner approval | skill (snapshot-approval) |
