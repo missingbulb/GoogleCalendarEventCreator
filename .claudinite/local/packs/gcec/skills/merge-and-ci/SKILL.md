@@ -59,6 +59,21 @@ all. Open the PR early for those.
   03:58:27Z, the turn had ended at 03:57:56Z on a `subscribe_pr_activity` watch,
   and PR #718 sat unmerged until the owner stepped in **63 minutes** later.
   That one avoidable wait was 85% of the session's 74-minute wall clock.
+- **`enable_pr_auto_merge` has a narrow window — read its refusal as state, not
+  as failure.** GitHub only arms auto-merge while a required check exists **and
+  is still pending**. Before the branch's first `test` run registers it refuses
+  *"unstable status (required checks are failing)"*; once that run completes
+  green it refuses *"already in clean status … you can merge directly."*
+  Neither is an error to escalate — the first means the run hasn't appeared yet,
+  so poll on the back-off above and retry; the second means the merge is
+  available **now**, so squash-merge it, which is the same end state the arming
+  was for. **A green, conflict-free PR that merely failed to arm is never
+  `needs-human`.** Measured, in session `2925ea4b` (2026-07-30): four arming
+  attempts on PR #793 between 03:46:04Z and 03:54:00Z (two "unstable", two
+  "clean"), after which the run converged dispatch #794 to `needs-human` and
+  stopped — the PR had been green since 03:52:32Z and sat unmerged until the
+  owner stepped in at 04:38:33Z. **46 minutes of avoidable idle plus a
+  hand-cleared escalation**, on a change nothing was wrong with.
 - **Batch tool loading**: one `ToolSearch` for every GitHub MCP tool the flow
   needs (`issue_write`, `create_pull_request`, `pull_request_read`,
   `merge_pull_request`), not one per turn.
