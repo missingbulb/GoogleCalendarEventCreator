@@ -143,8 +143,9 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   ScraperAPI's residential proxy (`render=true`, so a single-page app records
   post-render HTML with real data). Bot-blocking from CI/sandbox IPs is the
   portable rule maintained in the canon; here the escape hatch is the
-  `SCRAPER_API_KEY` **GitHub Actions secret**, named in both tasks'
-  `required_secrets` — never a local fetch (this sandbox is bot-blocked), and
+  `SCRAPER_API_KEY` **GitHub Actions secret**, which every task that imports the
+  surface must name in its own `required_secrets` (`page-fetch-worker-only`
+  guards both halves) — never a local fetch (this sandbox is bot-blocked), and
   never an agent session. ScraperAPI is the whole fetching surface — swap the
   vendor in that one module if it underperforms. The aid for a flaky SPA render is
   the **`Wait-for selector`** a source request can carry
