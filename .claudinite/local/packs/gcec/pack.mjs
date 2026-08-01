@@ -3,6 +3,7 @@ import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
+import pageFetchWorkerOnly from './page-fetch-worker-only.mjs';
 
 // The gcec pack: this project's general working pack, as a LOCAL Claudinite pack
 // (.claudinite/local/packs/ — tracked project content, discovered and run by the
@@ -31,6 +32,7 @@ export default {
     npmTestGlobCoverage,
     pipelineSiteAgnostic,
     regenArtifactsMergeOurs,
+    pageFetchWorkerOnly,
   ],
   skills: ['snapshot-approval', 'merge-and-ci', 'testing-guide'],
 };

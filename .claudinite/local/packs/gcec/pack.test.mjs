@@ -9,6 +9,7 @@ import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
+import pageFetchWorkerOnly from './page-fetch-worker-only.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);
@@ -304,4 +305,89 @@ test('regen-artifacts-merge-ours: honors a basename-only pattern, and a `*` that
 
 test('regen-artifacts-merge-ours: quiet when there are no regen artifacts in scope', () => {
   assert.deepEqual(regenArtifactsMergeOurs.run(attrCtx(['extension/events-popup/popup.js'])), []);
+});
+
+// page-fetch-worker-only resolves an importer's owning task by finding the nearest
+// ancestor task.mjs, so every fixture tree carries the declarations it should be
+// judged against — never a hardcoded pack path.
+const TASKS = '.claudinite/local/packs/gcec/tasks';
+const IMPORTS_SURFACE = "import { recordPage } from './scraperapi.mjs';\n";
+
+test('page-fetch-worker-only: fires on an importer outside any task directory', () => {
+  const findings = pageFetchWorkerOnly.run(
+    treeCtx({
+      'dev/build/record-page.js': `import { recordPage } from '../../${TASKS}/create-extractor/scraperapi.mjs';\n`,
+      // citing the surface by name in a comment is documentation, not use — only an
+      // import/require SPECIFIER counts
+      'extension/events-popup/popup.js': '// the page recorder (scraperapi.mjs) never runs here\n',
+    }),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, 'dev/build/record-page.js');
+  assert.match(findings[0].what, /outside any task directory/);
+  assert.match(findings[0].fix, /bot-blocked/);
+  assert.equal(findings[0].severity, 'blocking');
+});
+
+test('page-fetch-worker-only: fires when the importing task does not declare SCRAPER_API_KEY', () => {
+  const findings = pageFetchWorkerOnly.run(
+    treeCtx({
+      [`${TASKS}/refresh-pages/task.mjs`]:
+        "export default {\n  id: 'refresh-pages',\n  agent_preprocessing: 'node refresh.mjs',\n  required_secrets: ['GITHUB_TOKEN'],\n};\n",
+      [`${TASKS}/refresh-pages/refresh.mjs`]: "import { recordPage } from '../create-extractor/scraperapi.mjs';\n",
+    }),
+  );
+  assert.equal(findings.length, 1);
+  // the finding points at the file to EDIT — the task declaration, not the importer
+  assert.equal(findings[0].file, `${TASKS}/refresh-pages/task.mjs`);
+  assert.match(findings[0].what, /does not name SCRAPER_API_KEY in required_secrets/);
+  assert.match(findings[0].fix, /is not set/);
+});
+
+test('page-fetch-worker-only: a commented-out required_secrets never answers for the declaration', () => {
+  const findings = pageFetchWorkerOnly.run(
+    treeCtx({
+      [`${TASKS}/refresh-pages/task.mjs`]:
+        "export default {\n  id: 'refresh-pages',\n  agent_preprocessing: 'node refresh.mjs',\n" +
+        "  // required_secrets: ['SCRAPER_API_KEY'] — dropped while debugging\n};\n",
+      [`${TASKS}/refresh-pages/refresh.mjs`]: IMPORTS_SURFACE,
+    }),
+  );
+  assert.equal(findings.length, 1);
+  assert.match(findings[0].what, /does not name SCRAPER_API_KEY/);
+});
+
+test('page-fetch-worker-only: fires once per task when the task has no preprocessing worker', () => {
+  const findings = pageFetchWorkerOnly.run(
+    treeCtx({
+      [`${TASKS}/audit/task.mjs`]: "export default {\n  id: 'audit',\n  required_secrets: ['SCRAPER_API_KEY'],\n};\n",
+      [`${TASKS}/audit/probe-a.mjs`]: IMPORTS_SURFACE,
+      [`${TASKS}/audit/probe-b.mjs`]: IMPORTS_SURFACE,
+    }),
+  );
+  assert.equal(findings.length, 1); // two importers, one task to fix
+  assert.equal(findings[0].file, `${TASKS}/audit/task.mjs`);
+  assert.match(findings[0].what, /declares no agent_preprocessing worker/);
+});
+
+test("page-fetch-worker-only: quiet on the repo's real shape", () => {
+  const findings = pageFetchWorkerOnly.run(
+    treeCtx({
+      [`${TASKS}/create-extractor/task.mjs`]:
+        "export default {\n  id: 'create-extractor',\n  agent_preprocessing: 'node prepare.mjs',\n" +
+        '  // The repo Actions secret this task needs configured — the wiring converge\n' +
+        '  // stamps it into the scheduler workflow.\n' +
+        "  required_secrets: ['SCRAPER_API_KEY'],\n};\n",
+      [`${TASKS}/create-extractor/prepare.mjs`]:
+        '// A page fetch retries a transient 5xx (scraperapi.mjs), so a backlog can outlast a slot.\n' +
+        IMPORTS_SURFACE,
+      // the surface itself imports nothing of the sort and is never its own violation
+      [`${TASKS}/create-extractor/scraperapi.mjs`]: "import { mkdirSync } from 'node:fs';\n",
+      // the surface's own test exercises the URL builder and never fetches
+      [`${TASKS}/create-extractor/test/scraperapi.test.js`]: 'const load = () => import("../scraperapi.mjs");\n',
+      // a doc naming the module is not code
+      'dev/procedures/fileDescriptions.md': '| `tasks/create-extractor/scraperapi.mjs` | the one page-fetching surface |\n',
+    }),
+  );
+  assert.deepEqual(findings, []);
 });
