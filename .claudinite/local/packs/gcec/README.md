@@ -34,6 +34,7 @@ fingerprinted or seeded.
 | Snapshot moves need owner approval | skill (snapshot-approval) |
 | Post-merge: fetch main, never check out | skill (merge-and-ci) |
 | Green PR that won't arm: merge it | skill (merge-and-ci) |
+| Post-merge fetch denied: retry once, move on | skill (merge-and-ci) |
 | bump version = full release | prose (owner command) |
 | learned lessons = canon pass | prose (owner command) |
 | Integration cases are the contract | prose |
