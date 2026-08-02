@@ -5,14 +5,25 @@
 //
 //   title       the page's <h1> (rendered twice, identically, for two
 //               responsive breakpoints)
-//   showings    an event with several performances (a run/exhibition) lists
+//   showings    an event with several performances (a run/exhibition), or a
+//               festival/listing page bundling several distinct events, lists
 //               each as a `.childOut` card: a "when" line (`.childDate`, e.g.
 //               "5.7.26<br> יום ראשון, 19:00" — day-first D.M.YY plus a Hebrew
-//               weekday and clock time) and a "where" line
-//               (`.chldLocationDiv`, e.g. "ביתן איל עופר<br>תרס\"ט[שדרות] 6").
-//               Each card becomes one entry in the `events` array (same
-//               title/description/ctz), which the orchestrator folds into one
-//               multi-instance event.
+//               weekday and clock time), a "where" line (`.chldLocationDiv`,
+//               e.g. "ביתן איל עופר<br>תרס\"ט[שדרות] 6"), and a "what" line
+//               (`.chldLinkTitleDiv`). Each card becomes one entry in the
+//               `events` array; the orchestrator groups same-titled entries
+//               into one multi-instance event, so a run's repeated
+//               performances (identical card titles) fold together while a
+//               festival's distinct shows (distinct card titles) stay
+//               separate. The page's own `<h1>` is used as the shared title
+//               only when every card's own title agrees with the others — a
+//               single show's cards carry a shorter repeated name than the
+//               fuller `<h1>` (kept for that case, matching the reviewed
+//               tel-aviv.json baseline); a festival's cards, each a distinct
+//               event, are trusted over the `<h1>` (which is also sometimes
+//               visually truncated in the markup for a responsive breakpoint,
+//               e.g. "...70...").
 //   description assembled in reading order from three DOM blocks: the price/
 //               promotion line (`.benefitDescription`), the long body text
 //               (`.benefitRemarks`), and the "important to know" instructions
@@ -41,12 +52,21 @@
   }
 
   function childEvents() {
-    const title = text("h1");
-    return [...document.querySelectorAll(".childOut")]
-      .map((card) => {
+    const h1 = text("h1");
+    const cards = [...document.querySelectorAll(".childOut")];
+    const cardTitles = cards.map((card) => text(".chldLinkTitleDiv", card));
+    // Distinct non-empty card titles => a festival/listing page bundling
+    // separate events, each trusted with its own title. All-identical (or
+    // absent) card titles => one show's repeated performances, kept under the
+    // shared (fuller) <h1> title as before.
+    const distinct = new Set(cardTitles.filter(Boolean));
+    const usePerCardTitle = distinct.size > 1;
+    return cards
+      .map((card, i) => {
         const dateEl = card.querySelector(".childDate");
         const locEl = card.querySelector(".chldLocationDiv");
         const start = dateEl ? parseChildDate(dateEl) : "";
+        const title = (usePerCardTitle && cardTitles[i]) || h1;
         return start ? { title, start, location: locEl ? parseChildLocation(locEl) : "" } : null;
       })
       .filter(Boolean);
