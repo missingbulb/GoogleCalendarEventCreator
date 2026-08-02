@@ -8,6 +8,16 @@ Sibling to [`../Market/`](../Market/README.md) (the calendar-market
 landscape) and [`../Users/`](../Users/README.md) (who uses this
 extension).
 
+## Key insights
+
+- The per-site structured-extraction lane is empty today on Chrome, Firefox, Edge and Safari alike.
+- It was occupied once: a Google-encouraged extension read hCalendar off pages and had 5MM+ users.
+- It shut down over maintenance load, not lack of demand — the cost a per-site extractor set also accrues.
+- JSON-LD-aware extensions are commoditised, but every one is an SEO inspector; none creates an event.
+- Most rivals need a cloud LLM call, so no-account, no-API-key, nothing-leaves-the-browser is a real edge.
+- Safari's centre of gravity is OCR — screenshot-to-event apps and Apple's Data Detectors, not page markup.
+- Install and review counts stay unobtainable: the Chrome Web Store and its mirrors both 403 the fetcher.
+
 ## Landscape (as of 2026-07-15)
 
 | Tool | Approach | Notes |
@@ -199,3 +209,9 @@ extension).
   sharper ones (why the incumbent vacated; whether a JSON-LD-era platform
   re-entry is a risk). Same 403 caveat on the store listings; the two GitHub
   sources were read end to end.
+- **2026-08-02** — added the `## Key insights` header the product-wiki pack began
+  requiring on 2026-07-30, distilled from findings already cited on this page
+  (including the unobtainable install counts, which is a finding, not a gap). No
+  competitor claim changed and no open question moved: this pass's research
+  budget went to a structural-markup census that belongs in Domain, and the two
+  questions this page opened on 2026-07-26 both need sources the 403 wall blocks.

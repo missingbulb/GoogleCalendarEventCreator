@@ -6,6 +6,15 @@ tools chasing the same job ([`../Competitors/`](../Competitors/README.md))
 and the broader calendar-market context these users sit in
 ([`../Market/`](../Market/README.md)).
 
+## Key insights
+
+- The privacy persona is grounded, not niche: 86% of top-100 Chrome extensions ask for high-risk permissions at install.
+- 52% of AI-branded extensions collect user data, and 71% of extensions publish no privacy policy at all.
+- Chrome grants those permissions once, at install, and they persist across every later update.
+- Because the extension refuses to guess a timezone, expect "it set no timezone", not "it set the wrong time".
+- The extension stops short of saving, so the user always reviews the event before it is committed.
+- Every persona and pain point here is still a hypothesis — no real user feedback has reached this wiki yet.
+
 ## How this wiki grows
 
 Same mechanic as Market — the Claudinite **product-wiki** pack's growth worker
@@ -110,3 +119,9 @@ permission/privacy data backing the privacy-conscious persona:
   that contract also yielded a user-side implication worth tracking — refusing to
   guess makes a *missing* timezone the expected complaint shape rather than a
   wrong one — added as an open question to check against real feedback.
+- **2026-08-02** — added the `## Key insights` header the product-wiki pack began
+  requiring on 2026-07-30, distilled from claims already cited on this page; the
+  last bullet keeps the page's own honesty caveat (still hypotheses, no real user
+  feedback yet) at the top where a reader meets it first. No new user-side
+  research this pass — this run's citable material was structural-markup evidence,
+  which belongs in Domain, not here.
