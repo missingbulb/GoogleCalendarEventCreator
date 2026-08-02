@@ -14,6 +14,7 @@ what usage patterns show up in that market. Distinct from
 - Google Calendar is only ~23% of the calendar-tool market, yet it is the only sink this extension targets.
 - Structured markup is common page-wide; that does not mean most *event* pages are structured.
 - Google Calendar is reported in use at 637,000+ companies, most of them US-based.
+- Only 14 of this project's 24 recorded target hosts publish Event JSON-LD, so the fallback path carries real traffic.
 
 ## How this wiki grows
 
@@ -102,8 +103,17 @@ recur across the market:
   `.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`.)
   **Answered web-wide in Domain, 2026-07-17** — `Event` markup is a minority
   signal (fewer than ~1M domains), so the DOM/`og:` fallback path carries real
-  weight; see [`../Domain/README.md`](../Domain/README.md). What stays open here
-  is the *per-target-host* split, which only the fallback-coverage corpus can give.
+  weight; see [`../Domain/README.md`](../Domain/README.md). The *per-target-host*
+  half is now answered too — **2026-08-02**, by censusing the recorded extractor
+  corpus: **14 of 24 target hosts carry `Event` JSON-LD**, 5 carry JSON-LD with no
+  `Event`, 5 carry none. Both halves are recorded in Domain; nothing on this
+  question stays open here.
+- **Does the `Event`-less-JSON-LD host shape have a market reading?** 5 of 24
+  target hosts publish JSON-LD (usually `Organization`/`WebSite` SEO boilerplate)
+  without ever describing the event. If that is what SEO-tooling adoption without
+  event-schema adoption looks like at scale, the "search engines reward markup"
+  tailwind may be weaker for *event* pages than the page-wide numbers imply.
+  Surfaced 2026-08-02.
 
 ## Sources
 
@@ -115,6 +125,7 @@ recur across the market:
 - [ICS to GCal — Chrome Web Store](https://chromewebstore.google.com/detail/ics-to-gcal/ljobcbehhifehkmamikmchekbbljopao)
 - [Structured data — 2024 Web Almanac (HTTP Archive)](https://almanac.httparchive.org/en/2024/structured-data) — the ~41% JSON-LD / ~26% Microdata page-wide figures
 - [Announcing the Schema.org usage statistics dataset (blog.schema.org, 2026)](https://blog.schema.org/2026/06/04/announcing-the-schema-org-usage-statistics-dataset/) — `schema.org/Event` on fewer than ~1M domains
+- [`dev/requirements/extractor/data/server-fetched/` — this repo's recorded extractor corpus](https://github.com/missingbulb/GoogleCalendarEventCreator/tree/main/dev/requirements/extractor/data/server-fetched) — the 24-host census behind the 14/24 per-target-host split
 
 ## Growth log
 
@@ -139,3 +150,10 @@ recur across the market:
   `product-wiki-key-insights` checks). Every bullet distils a claim already cited
   in the body below; no claim was added, changed, or removed, and no research was
   done on this page this pass.
+- **2026-08-02** — closed the JSON-LD-prevalence open question's remaining
+  *per-target-host* half with the measurement recorded in Domain (14 of 24 hosts
+  carry `Event` JSON-LD; 5 carry JSON-LD without an `Event`; 5 carry none), and
+  surfaced the market-side reading it raises: SEO-boilerplate JSON-LD without
+  event schema would mean the rich-results tailwind is weaker on event pages than
+  page-wide adoption suggests. Added the `## Key insights` header the
+  product-wiki pack began requiring on 2026-07-30. No platform-landscape claim changed.
