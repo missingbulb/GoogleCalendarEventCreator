@@ -40,6 +40,7 @@ fingerprinted or seeded.
 | Mirror tree, one test per file | prose (list half is the check) |
 | Pin cases to REFERENCE_NOW floor | prose |
 | MV3/jsdom/GCal/clean() gotchas | prose (see RULES.md) |
+| Silent Chrome-step CI red = month cache miss | prose (workflow-failure classification) |
 | Unattended workflows wire the reporter | **advisory** (canon `gha/scheduled-failure-escalation`) + prose (the non-`schedule:` gap) |
 | Single-file-per-host architecture | **hardcoded** (`custom-sources-flat`) + prose |
 | Pipeline knows no specific site | **hardcoded** (`pipeline-site-agnostic`, host literals only) + prose |

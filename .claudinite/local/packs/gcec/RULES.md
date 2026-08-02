@@ -122,6 +122,26 @@ packs/skills.
 
 ## Workflow-failure classification
 
+**A `test` job that dies in the Chrome-for-Testing step with *no* output is the
+month-rollover cache miss — deterministic, never flake.** The e2e step's Chrome
+cache key rolls monthly (`cft-${{ runner.os }}-$(date -u +%Y-%m)` in
+`.github/workflows/test.yml`), so on the **first CI run of each calendar month**
+the restore misses and `${RUNNER_TEMP}/cft` does not exist. The step's very first
+command is `find "${RUNNER_TEMP}/cft" … | head -n1`: `find` exits 1 on the
+missing directory, and GitHub runs the step under `bash -e -o pipefail`, so the
+pipeline's failure kills the step **before** the `npx @puppeteer/browsers install`
+fallback it was written to fall through to ever runs. Signature: `Cache not found
+for input keys: cft-<OS>-<YYYY-MM>`, then `##[error]Process completed with exit
+code 1` a few *milliseconds* after `##[endgroup]`, with zero test output. On
+2026-08-01 it turned the required check red repo-wide (#813/#814, and an
+unrelated branch nine minutes earlier); three re-runs reproduced it identically,
+because a re-run cannot repopulate a cache that only saves after a green job.
+**Never read it as a transient outage to re-run or wait out, and never park a
+green-but-blocked PR on it** — fix the step (seed the directory, or `|| true`
+the `find`) in the same session, then re-run. Portable form: in a `-e -o pipefail`
+step, a probe command that legitimately "fails to find" must never be the bare
+head of a pipeline whose exit status the shell will act on.
+
 **Mind the one gap `gha/scheduled-failure-escalation` can't see:** it only
 inspects workflows carrying a `schedule:`, so a workflow that is unattended by
 some *other* trigger — `workflow_run`, `repository_dispatch` — needs its failure
