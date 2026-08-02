@@ -9,6 +9,16 @@ platforms, the people, the rivals), this wiki covers the *thing itself* — the
 event data, formats, and page shapes the extractor has to make sense of. It is
 the knowledge that most directly drives extraction requirements.
 
+## Key insights
+
+- Not one of the 36 recorded event pages emits schema.org `eventSchedule`, so the recurrence mapping cost is moot.
+- `schema.org/Event` sits on under 1M domains, so most event pages carry no Event block at all.
+- Of this project's own 24 recorded target hosts, 14 carry Event JSON-LD; the other 10 need DOM, `og:` or text.
+- Microformats together are under 1% of pages, so `h-event` never justifies its own parser.
+- Google Calendar's render URL already accepts `recur=RRULE:…` — repeats were never blocked by the link we emit.
+- A wrong timezone is worse than none, so a zone ships only when two independent page hints agree.
+- No recorded target page offers a `.ics` download in place of markup; that page shape does not appear.
+
 ## Machine-readable event formats (as of 2026-07-16)
 
 Ordered roughly by how useful they are to a rule-based extractor — highest-signal
@@ -126,6 +136,22 @@ structural decision behind "one button per event":
     translation step (`repeatFrequency: P1W` + `byDay` → `FREQ=WEEKLY;BYDAY=…`,
     `exceptDate` → `EXDATE`), not a pass-through. **That mapping — plus whether
     target sites emit `eventSchedule` at all — is the real cost, not the URL.**
+  - **And the source signal is absent (measured 2026-08-02): the mapping cost is
+    moot.** A census of every recorded page in this repo's own extractor corpus
+    ([`dev/requirements/extractor/data/server-fetched/`](https://github.com/missingbulb/GoogleCalendarEventCreator/tree/main/dev/requirements/extractor/data/server-fetched))
+    — 36 pages across 24 distinct hosts — finds **zero** occurrences of the
+    `eventSchedule` property, of `"@type": "Schedule"`, of `repeatFrequency`, and
+    of any `RRULE` string. (The 15 pages that match a naive `eventSchedule` grep
+    are all false positives: they carry the *`eventStatus`* enum value
+    `schema.org/EventScheduled`, an unrelated token.) This is not a rendering
+    artifact — the pipeline fetches with ScraperAPI `render=true`, so the page's
+    JS has executed before the snapshot is taken (see
+    [`scraperapi.mjs`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/create-extractor/scraperapi.mjs)).
+    So schema.org recurrence is effectively unused across the sites this
+    extension actually targets, and a `Schedule`→`RRULE` translator would have
+    nothing to translate. Sampling caveat: hosts enter this corpus because
+    someone asked for an extractor, which skews toward ticketing/venue *single
+    instance* pages; a genuinely series-shaped host could still emit it.
 
 ## Implications for extraction requirements
 
@@ -149,25 +175,54 @@ structural decision behind "one button per event":
   (see the `h-event` bullet) puts *all* microformats combined under ~1% of pages,
   so `h-event`/hCalendar stays a fallback-only concern — extraction effort belongs
   on the JSON-LD → Microdata → `og:`/text ladder, not a bespoke hCalendar parser.
+- **On this project's own target hosts the JSON-LD/fallback split is roughly
+  60/40 (measured 2026-08-02).** The same corpus census gives the per-target-host
+  number the web-wide figures could not. Of the **24 distinct hosts** with a
+  recorded page, **14 carry an `Event`-family JSON-LD `@type`** (bandsintown,
+  dash.datadoghq.com, dice.fm, eventbrite, eventer.co.il, eventim.co.il,
+  livenation, luma.com, meetup, seetickets, somo.social, stubhub,
+  tel-aviv.gov.il, visit.tel-aviv.gov.il). The remaining **10 split in two**:
+  **5 emit JSON-LD but never an `Event`** (cinema.co.il, comy.co.il, seatgeek,
+  tabitisrael.co.il, thinkdrink.co.il — typically `Organization`/`WebSite`
+  boilerplate, which is worse than no JSON-LD because it looks like a hit), and
+  **5 emit no JSON-LD at all** (barby.co.il, edfringe.com, events.datadoghq.com,
+  secrettelaviv.com, ticketmaster.co.il). So the DOM/`og:`/text ladder is the
+  *only* path on ~40% of the hosts this extension supports — the fallback is a
+  primary code path, not an edge case. Same sampling caveat as above: a host
+  earns a recorded page by being asked for, and the generic path failing is often
+  why it was asked for, so this over-samples hard pages relative to the open web.
+- **`.ics`-only event pages did not appear.** No page in the corpus links a
+  `.ics` file or serves `text/calendar` in place of in-page markup, so
+  "follow the download link" is not a fallback worth building on current evidence.
 
 ## Open questions
 
-- A precise `Event`-JSON-LD-vs-fallback split per *target host* — this cycle got
-  the web-wide direction (Event schema is a minority; resolved 2026-07-17) but not
-  a measured split over the sites this extension actually sees; the
-  fallback-coverage corpus is the place to derive that.
+- ~~A precise `Event`-JSON-LD-vs-fallback split per *target host*.~~ **Answered
+  2026-08-02** by censusing the recorded extractor corpus: 14 of 24 hosts carry
+  `Event` JSON-LD, 5 carry JSON-LD without an `Event`, 5 carry none — see the
+  ~60/40 bullet under Implications. What remains open is narrower: **does the
+  "JSON-LD but no `Event`" shape (5 of 24 hosts) mislead the generic extractor
+  into a false positive?** A page with `Organization` JSON-LD and no `Event` is
+  structurally a fallback case wearing a structured-data costume; the
+  generic-coverage suite is where that would show.
 - Recurring/series pages: what's the right product behaviour — one instance, the
   next upcoming, or an explicit "this repeats" affordance? (Narrowed 2026-07-26:
   the *transport* question is settled — the render URL's `recur=RRULE:…` carries a
   repeat rule fine — so this is now purely a product-behaviour choice plus the
   `Schedule`→`RRULE` mapping cost, both described above.)
-- Do any of this extension's target sites actually emit `eventSchedule` /
-  `Schedule` markup, or is schema.org recurrence effectively unused in the wild?
-  (Surfaced 2026-07-26 while answering the recurrence question — the mapping cost
-  above is only worth paying if the source signal exists. The fallback-coverage
-  corpus can answer this the same way it can answer the per-host JSON-LD split.)
-- Does any meaningful share of target sites express events only via `.ics`
-  download links (no in-page structured data) worth following?
+- ~~Do any of this extension's target sites actually emit `eventSchedule` /
+  `Schedule` markup, or is schema.org recurrence effectively unused in the wild?~~
+  **Answered 2026-08-02: none do** — zero occurrences across 36 recorded pages /
+  24 hosts (see the recurrence section). The mapping cost identified on 2026-07-26
+  is therefore not worth paying against today's target set. Worth a re-check only
+  if a genuinely series-shaped host (a repertory cinema, a weekly class) is added.
+- ~~Does any meaningful share of target sites express events only via `.ics`
+  download links (no in-page structured data) worth following?~~ **Answered
+  2026-08-02: no** — no `.ics` link or `text/calendar` reference in the corpus at all.
+- **Does JSON-LD-without-an-`Event` cause false positives?** 5 of 24 hosts serve
+  JSON-LD carrying no `Event` object. Whether the generic extractor treats that as
+  a structured hit and degrades, or correctly falls through to text, is unmeasured.
+  Surfaced 2026-08-02.
 
 ## Sources
 
@@ -190,6 +245,8 @@ structural decision behind "one button per event":
 - [eventSchedule — Schema.org Property](https://schema.org/eventSchedule)
 - [Schedule — Schema.org Type](https://schema.org/Schedule)
 - [Additional `Schedule` type examples — schemaorg/schemaorg Discussion #2948](https://github.com/schemaorg/schemaorg/discussions/2948)
+- [`dev/requirements/extractor/data/server-fetched/` — this repo's recorded extractor corpus](https://github.com/missingbulb/GoogleCalendarEventCreator/tree/main/dev/requirements/extractor/data/server-fetched) — the 36 pages / 24 hosts censused on 2026-08-02 for `eventSchedule`, `Event` JSON-LD and `.ics` links
+- [`scraperapi.mjs` — the recording pipeline's `render=true` fetch](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/create-extractor/scraperapi.mjs) — why a missing property in the corpus is a real absence, not an unrendered SPA
 
 ## Growth log
 
@@ -234,3 +291,15 @@ structural decision behind "one button per event":
   no-dedicated-microformats-reader conclusion now rests on abandoned tooling as
   well as sub-1% prevalence. The demand-side reading lives in Competitors. No
   open question answered or opened here.
+- **2026-08-02** — answered three open questions from one measurement: a census of
+  this repo's own recorded extractor corpus (36 pages, 24 hosts, fetched with
+  ScraperAPI `render=true` so the JS has run). (1) schema.org **recurrence is
+  absent** — zero `eventSchedule` / `Schedule` / `repeatFrequency` / `RRULE`,
+  which retires the 2026-07-26 mapping-cost question and shows the naive
+  `eventSchedule` grep to be 15 false positives on the `EventScheduled` *status*
+  enum. (2) The **per-target-host JSON-LD split is ~60/40** — 14 of 24 hosts carry
+  `Event` JSON-LD, 5 carry JSON-LD with no `Event`, 5 carry none — closing the
+  question open since 2026-07-17 and confirming the fallback ladder as a primary
+  path. (3) **No `.ics`-only pages** exist in the corpus. Surfaced one new
+  question (does `Event`-less JSON-LD mislead the generic extractor?). Added the
+  `## Key insights` header the product-wiki pack began requiring on 2026-07-30.
