@@ -9,6 +9,7 @@ import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
+import ciRunsOnAgentBranches from './ci-runs-on-agent-branches.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);
@@ -304,4 +305,89 @@ test('regen-artifacts-merge-ours: honors a basename-only pattern, and a `*` that
 
 test('regen-artifacts-merge-ours: quiet when there are no regen artifacts in scope', () => {
   assert.deepEqual(regenArtifactsMergeOurs.run(attrCtx(['extension/events-popup/popup.js'])), []);
+});
+
+// ci-runs-on-agent-branches parses the workflow's `on:` block, so every fixture is
+// real YAML text — comments interleaved between the trigger keys included, which is
+// exactly how test.yml is written.
+const TEST_YML = [
+  'name: Tests',
+  '',
+  'on:',
+  '  # Manual runs from the Actions tab / API, on any branch.',
+  '  workflow_dispatch:',
+  '  pull_request:',
+  '    branches: [main]',
+  '  push:',
+  '    # main, plus agent dev branches, so CI runs without opening a PR.',
+  '    branches: [main, "claude/**"]',
+  '    paths-ignore:',
+  '      - "dev/requirements/extractor/data/**"',
+  '',
+  'jobs:',
+  '  test:',
+  '    runs-on: ubuntu-latest',
+].join('\n');
+
+const wf = (text, path = '.github/workflows/test.yml') => treeCtx({ [path]: text });
+
+test('ci-runs-on-agent-branches: quiet on the repo\'s real test.yml trigger block', () => {
+  assert.deepEqual(ciRunsOnAgentBranches.run(wf(TEST_YML)), []);
+});
+
+test('ci-runs-on-agent-branches: fires when the push trigger is narrowed to main', () => {
+  const findings = ciRunsOnAgentBranches.run(wf(TEST_YML.replace('[main, "claude/**"]', '[main]')));
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, '.github/workflows/test.yml');
+  assert.equal(findings[0].line, 10); // the push trigger's own branches line, not pull_request's
+  assert.match(findings[0].what, /push trigger does not cover claude\/\*\*/);
+  assert.match(findings[0].what, /\[main\]/);
+  assert.equal(findings[0].severity, 'blocking');
+});
+
+test('ci-runs-on-agent-branches: a `branches:` under pull_request alone does not satisfy the rule', () => {
+  // the grep this check replaces would pass here: "claude/**" IS in the file
+  const findings = ciRunsOnAgentBranches.run(
+    wf(TEST_YML.replace('    branches: [main]', '    branches: [main, "claude/**"]').replace('[main, "claude/**"]\n    paths-ignore', '[main]\n    paths-ignore')),
+  );
+  assert.equal(findings.length, 1);
+  assert.match(findings[0].what, /push trigger does not cover/);
+});
+
+test('ci-runs-on-agent-branches: reads a block-sequence branch list, and ignores a negated entry', () => {
+  const blockSeq = (entries) =>
+    TEST_YML.replace('    branches: [main, "claude/**"]', ['    branches:', ...entries.map((e) => `      - ${e}`)].join('\n'));
+  assert.deepEqual(ciRunsOnAgentBranches.run(wf(blockSeq(['main', '"claude/**"']))), []);
+  // `!claude/**` EXCLUDES the namespace — it can never be what covers it
+  const findings = ciRunsOnAgentBranches.run(wf(blockSeq(['main', '"!claude/**"'])));
+  assert.equal(findings.length, 1);
+  assert.match(findings[0].what, /\[main, !claude\/\*\*\]/);
+});
+
+test('ci-runs-on-agent-branches: `*` does not cross a slash, `**` does', () => {
+  const withList = (list) => wf(TEST_YML.replace('[main, "claude/**"]', list));
+  assert.equal(ciRunsOnAgentBranches.run(withList('["*"]')).length, 1); // a bare * misses claude/x
+  assert.deepEqual(ciRunsOnAgentBranches.run(withList('["**"]')), []);
+  assert.deepEqual(ciRunsOnAgentBranches.run(withList('[main, "claude/*"]')), []);
+});
+
+test('ci-runs-on-agent-branches: quiet on a workflow that is not the PR gate, or has no branch allow-list', () => {
+  // the release stub pushes on main and dispatches — it gates no pull request
+  const releaseStub = [
+    'name: Release to Chrome Store',
+    'on:',
+    '  push:',
+    '    branches: [main]',
+    '  workflow_dispatch:',
+  ].join('\n');
+  assert.deepEqual(
+    ciRunsOnAgentBranches.run(wf(releaseStub, '.github/workflows/chrome-extension-release.yml')),
+    [],
+  );
+  // a `push:` with no branches already fires on every branch — nothing to enforce
+  assert.deepEqual(ciRunsOnAgentBranches.run(wf(TEST_YML.replace('    branches: [main, "claude/**"]\n', ''))), []);
+  // an inline `on:` declares no allow-list at all
+  assert.deepEqual(ciRunsOnAgentBranches.run(wf('name: x\non: [push, pull_request]\njobs: {}\n')), []);
+  // and a non-workflow file is never read
+  assert.deepEqual(ciRunsOnAgentBranches.run(wf(TEST_YML.replace('[main, "claude/**"]', '[main]'), 'dev/build/ci-notes.yml')), []);
 });
