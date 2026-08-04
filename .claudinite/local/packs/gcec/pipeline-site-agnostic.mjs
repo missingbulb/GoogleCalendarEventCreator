@@ -55,7 +55,11 @@ const HOST_LIST = 'extension/host-lists.json';
 // numbers stay true. A hand-rolled scanner rather than a regex because `//`
 // inside a string ('https://…') is not a comment and must not swallow the rest
 // of the line — that is precisely where a host literal would hide.
-function blankComments(src) {
+//
+// Exported because custom-source-registers needs the same "code, not comments"
+// reading of an extractor file (a commented-out registration must read as the
+// absence it is), and one scanner is better than two copies of this one.
+export function blankComments(src) {
   const out = [];
   let i = 0;
   const keep = (ch) => out.push(ch);
