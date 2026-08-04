@@ -1,5 +1,6 @@
 import testOfflineListSync from './test-offline-list-sync.mjs';
 import customSourcesFlat from './custom-sources-flat.mjs';
+import customSourceRegisters from './custom-source-registers.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
@@ -28,6 +29,7 @@ export default {
   worldRules: [
     testOfflineListSync,
     customSourcesFlat,
+    customSourceRegisters,
     npmTestGlobCoverage,
     pipelineSiteAgnostic,
     regenArtifactsMergeOurs,

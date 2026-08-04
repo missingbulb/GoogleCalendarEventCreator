@@ -6,6 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import testOfflineListSync from './test-offline-list-sync.mjs';
 import customSourcesFlat from './custom-sources-flat.mjs';
+import customSourceRegisters from './custom-source-registers.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
@@ -94,6 +95,68 @@ test('custom-sources-flat: quiet on a flat tree of per-site sources beside the p
       'extension/event-extractors/registry.js': '',
       'extension/event-extractors/helpers/dates.js': '',
       'extension/event-extractors/load-order.generated.json': '',
+    }),
+  );
+  assert.deepEqual(findings, []);
+});
+
+// custom-source-registers is the inside half of the custom/ pair: the file is
+// there, so it must actually push a source. The fixtures are extractor files as
+// text — the check reads code, never a file list.
+const SCAFFOLD_TAIL = `
+    name: "somesite",
+    matches: (host) => /(^|\\.)somesite\\.com$/.test(host),
+    extract() {
+      return { title: text("h1") };
+    },
+  });
+})();
+`;
+
+test('custom-source-registers: fires on a per-site file that pushes no source', () => {
+  const findings = customSourceRegisters.run(
+    treeCtx({
+      // gutted down to helpers and a note — exactly the "restatement of the
+      // generic base" RULES.md says to delete rather than keep
+      'extension/event-extractors/custom/somesite.js':
+        '(() => {\n  const { text } = GCal;\n  // nothing to add: the generic base gets this site right\n})();\n',
+    }),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, 'extension/event-extractors/custom/somesite.js');
+  assert.match(findings[0].what, /never pushes onto GCal\.sources/);
+  assert.match(findings[0].fix, /DELETE the file/);
+  assert.equal(findings[0].severity, 'blocking');
+});
+
+test('custom-source-registers: a registration that survives only in a comment is still no registration', () => {
+  const findings = customSourceRegisters.run(
+    treeCtx({
+      'extension/event-extractors/custom/somesite.js':
+        '(() => {\n' +
+        '  // GCal.sources.push({ name: "somesite" });  <- disabled while the site is down\n' +
+        '  /* GCal.sources.push({ name: "somesite-alt" }); */\n' +
+        '  const FEED = "https://somesite.com/api"; // a `//` in a string is not a comment\n' +
+        '})();\n',
+    }),
+  );
+  assert.equal(findings.length, 1);
+  assert.match(findings[0].what, /never pushes onto GCal\.sources/);
+});
+
+test('custom-source-registers: quiet on real sources, and silent where custom-sources-flat reports instead', () => {
+  const findings = customSourceRegisters.run(
+    treeCtx({
+      // the shape every source uses today
+      'extension/event-extractors/custom/somesite.js': `(() => {\n  const { text } = GCal;\n  GCal.sources.push({${SCAFFOLD_TAIL}`,
+      // …and a destructured registration reads the same
+      'extension/event-extractors/custom/othersite.js': `(() => {\n  const { sources, text } = GCal;\n  sources.push({${SCAFFOLD_TAIL}`,
+      // one violation, one report: a subdirectory and a non-source file are
+      // custom-sources-flat's finding, never also this rule's
+      'extension/event-extractors/custom/shared/util.js': 'const x = 1;\n',
+      'extension/event-extractors/custom/README.md': 'no sources here',
+      // the pipeline is out of scope — it must NOT register a per-site source
+      'extension/event-extractors/generic-extractor.js': 'const GCal = {};\n',
     }),
   );
   assert.deepEqual(findings, []);
