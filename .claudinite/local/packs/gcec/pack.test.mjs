@@ -9,6 +9,7 @@ import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
+import mergeOursGeneratedOnly from './merge-ours-generated-only.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);
@@ -304,4 +305,66 @@ test('regen-artifacts-merge-ours: honors a basename-only pattern, and a `*` that
 
 test('regen-artifacts-merge-ours: quiet when there are no regen artifacts in scope', () => {
   assert.deepEqual(regenArtifactsMergeOurs.run(attrCtx(['extension/events-popup/popup.js'])), []);
+});
+
+// merge-ours-generated-only is the OTHER direction of the same .gitattributes
+// list, so it reuses attrCtx and the live repo's driver block verbatim.
+const GALLERY = 'dev/requirements/requirements.md';
+
+test('merge-ours-generated-only: fires when a widened pattern pulls the part-authored gallery onto the driver', () => {
+  const findings = mergeOursGeneratedOnly.run(
+    attrCtx(
+      [GALLERY, 'dev/requirements/popup/cases/count-label.8.1.png'],
+      `${GITATTRIBUTES}\ndev/requirements/**/* merge=ours`,
+    ),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, GALLERY);
+  assert.match(findings[0].what, /authored by hand/);
+  assert.match(findings[0].what, /dev\/requirements\/\*\*\/\* merge=ours/); // the entry to narrow is named
+  assert.match(findings[0].fix, /narrow or remove/);
+  assert.equal(findings[0].severity, 'blocking');
+});
+
+test('merge-ours-generated-only: fires on a basename-only pattern that reaches an authored file', () => {
+  // `*.md merge=ours` looks like it is only for the GENERATED coverage report —
+  // with no slash it matches by basename at any depth, so it takes the gallery too.
+  const findings = mergeOursGeneratedOnly.run(
+    attrCtx(
+      [GALLERY, 'dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md'],
+      '*.md merge=ours',
+    ),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, GALLERY); // the GENERATED report beside it is legitimately on the driver
+});
+
+test("merge-ours-generated-only: quiet on the repo's real .gitattributes and file set", () => {
+  const findings = mergeOursGeneratedOnly.run(
+    attrCtx([
+      GALLERY, // part-authored prose, deliberately off the driver
+      'dev/requirements/popup/cases/count-label.8.1.case.js', // an authored case beside the PNGs the block names
+      'extension/event-extractors/load-order.generated.json',
+      'dev/requirements/popup/cases/count-label.8.1.png',
+      'dev/requirements/icon/cases/toolbar-icon.10.1.png',
+      'dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md',
+      'extension/events-popup/popup.js',
+    ]),
+  );
+  assert.deepEqual(findings, []);
+});
+
+test('merge-ours-generated-only: quiet when .gitattributes has no `ours` entries at all', () => {
+  assert.deepEqual(
+    mergeOursGeneratedOnly.run(attrCtx([GALLERY], '# nothing on the ours driver here')),
+    [],
+  );
+});
+
+test('merge-ours-generated-only: an entry matching no committed file is not a finding', () => {
+  // dead weight, or an artifact not created yet — neither can lose anyone's work
+  assert.deepEqual(
+    mergeOursGeneratedOnly.run(attrCtx([GALLERY], 'docs/handbook.md merge=ours')),
+    [],
+  );
 });
