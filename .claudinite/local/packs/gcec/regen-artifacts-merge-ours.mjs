@@ -41,10 +41,27 @@ const why =
   'a regen artifact off the `ours` driver hits a hand-resolved merge conflict — and the UI ' +
   'baselines are binary PNGs git cannot 3-way merge at all';
 
+// THE .gitattributes READER IS SHARED. merge-ours-generated-only.mjs checks the
+// opposite direction of this same list (an AUTHORED file that landed ON the
+// driver), so the notion of "what the `ours` block means" — which patterns count
+// as entries, how a gitignore-style glob matches, and what a generated artifact
+// looks like — is defined once here and imported there. Two copies of these
+// predicates would let the two halves of one list disagree about the same file.
+
 // A UI-snapshot baseline: dev/requirements/<kind>/cases/<case>.png, for ANY kind,
 // because kinds are auto-discovered and a new image kind must not need this check
 // edited to be covered.
-const CASE_SNAPSHOT = /^dev\/requirements\/[^/]+\/cases\/[^/]+\.png$/;
+export const CASE_SNAPSHOT = /^dev\/requirements\/[^/]+\/cases\/[^/]+\.png$/;
+
+// Every shape of generated artifact this repo commits, both markers together:
+// the uppercase GENERATED name the canon rule owns, the lowercase `.generated.`
+// convention, and the snapshot baselines that carry no marker in their names at
+// all. The *union* is what "may sit on the `ours` driver" means; the rule below
+// takes only the non-GENERATED remainder of it (see isLowercaseGenerated).
+export function isGeneratedArtifact(file) {
+  const base = file.split('/').pop();
+  return CASE_SNAPSHOT.test(file) || /\.generated\./.test(base) || base.includes('GENERATED');
+}
 
 // A generated artifact named with the lowercase `.generated.` convention. The
 // uppercase GENERATED marker is the canon rule's half of the set, excluded here so
@@ -56,35 +73,50 @@ function isLowercaseGenerated(file) {
 
 // .gitattributes patterns are gitignore-style: `*` and `?` do not cross a `/`,
 // `**` does, and a pattern containing no `/` matches by basename at any depth.
+//
+// Translated PER SEGMENT rather than character by character, because `**` is only
+// special as a whole segment and — crucially — a `**/` segment matches ZERO or
+// more directories. A naive `** -> .*` leaves the surrounding slashes mandatory,
+// so `dev/requirements/**/*` would miss `dev/requirements/requirements.md`: git
+// puts that file on the driver, the check would say it isn't, and for
+// merge-ours-generated-only (which guards against LOSING authored work) that
+// miss is the whole failure it exists to catch.
+const ESCAPE_RE = /[.+^${}()|[\]\\]/g; // global: a pattern has many dots, and every one must be literal
+const STAR_STAR = '\u0000'; // placeholder for a whole `**` segment, resolved after the join
+
 function globToRe(glob) {
-  let out = '';
-  for (let i = 0; i < glob.length; i += 1) {
-    const ch = glob[i];
-    if (ch === '*') {
-      if (glob[i + 1] === '*') {
-        out += '.*';
-        i += 1;
-      } else {
-        out += '[^/]*';
-      }
-      continue;
-    }
-    if (ch === '?') {
-      out += '[^/]';
-      continue;
-    }
-    out += ch.replace(/[.+^${}()|[\]\\]/, '\\$&');
-  }
-  return new RegExp(`^${out}$`);
+  const source = glob
+    .split('/')
+    .map((seg) =>
+      seg === '**'
+        ? STAR_STAR
+        : seg.replace(ESCAPE_RE, '\\$&').replace(/\*/g, '[^/]*').replace(/\?/g, '[^/]'),
+    )
+    .join('/')
+    .split(`${STAR_STAR}/`)
+    .join('(?:.*/)?')
+    .split(`/${STAR_STAR}`)
+    .join('(?:/.*)?')
+    .split(STAR_STAR)
+    .join('.*');
+  return new RegExp(`^${source}$`);
 }
 
-function oursPatterns(text) {
+export function oursPatterns(text) {
   return (text || '')
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l && !l.startsWith('#') && /\bmerge=ours\b/.test(l))
     .map((l) => l.split(/\s+/)[0].replace(/^\/+/, ''))
     .map((pattern) => ({ pattern, re: globToRe(pattern), byBasename: !pattern.includes('/') }));
+}
+
+// The first `ours` entry claiming this path, or undefined. A pattern with no `/`
+// matches by basename at any depth (gitignore semantics), so the two cases can't
+// be collapsed into one test.
+export function matchingOursPattern(patterns, file) {
+  const base = file.split('/').pop();
+  return patterns.find((p) => (p.byBasename ? p.re.test(base) : p.re.test(file)));
 }
 
 export default {
@@ -107,10 +139,7 @@ export default {
     const patterns = oursPatterns(ctx.read('.gitattributes'));
 
     return artifacts
-      .filter((file) => {
-        const base = file.split('/').pop();
-        return !patterns.some((p) => (p.byBasename ? p.re.test(base) : p.re.test(file)));
-      })
+      .filter((file) => !matchingOursPattern(patterns, file))
       .map((file) => {
         // Suggest the shape the repo already uses: one line per snapshot DIRECTORY,
         // one line per generated file.
