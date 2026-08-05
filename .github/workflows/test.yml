@@ -86,6 +86,12 @@ jobs:
       - name: Run real-Chrome extension-load smoke test
         run: |
           # Reuse the cached binary when present; otherwise fetch Chrome for Testing.
+          # mkdir first: on a cache MISS the directory does not exist, and under this
+          # workflow's `bash -e -o pipefail` a `find` on a missing path exits 1 and
+          # kills the step — before the fallback below, which exists precisely to
+          # handle a cache miss, can run. Redirecting stderr hides the message, not
+          # the exit status. The monthly key roll made that the first run of a month.
+          mkdir -p "${RUNNER_TEMP}/cft"
           CHROME_PATH="$(find "${RUNNER_TEMP}/cft" -type f -name chrome 2>/dev/null | head -n1)"
           if [ -z "$CHROME_PATH" ]; then
             out="$(npx --yes @puppeteer/browsers install chrome@stable --path "${RUNNER_TEMP}/cft")"
