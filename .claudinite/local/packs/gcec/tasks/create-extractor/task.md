@@ -13,15 +13,12 @@ instructions.
 
 ## 1. Continue on the draft PR the issue names
 
-The dispatch issue names it, under **`### Delivered by preprocessing`** — a PR number
-and a branch ref. Work on that branch: `git fetch` and check it out. Its `Closes #<n>`
-line names the request issue.
+The dispatch issue names it, under **`### Delivered by preprocessing`** — a PR number and
+a branch ref. Work on that branch: `git fetch` and check it out. Its `Closes #<n>` line
+names the request issue.
 
-**Never find it by name.** Not by the `claude/extractor/` head-branch prefix, not by any
-convention: a search that finds nothing is indistinguishable from nothing having been
-created, and you will act on the wrong one (Claudinite #649). If the issue carries no
-`### Delivered` section, preprocessing created nothing — that is authoritative, so
-comment it and stop rather than going to look.
+If the issue carries no `### Delivered` section, preprocessing created nothing — comment
+that and stop.
 
 The branch already carries: the scaffolded source (`matches()` filled) or just a
 new case, the recorded page at
