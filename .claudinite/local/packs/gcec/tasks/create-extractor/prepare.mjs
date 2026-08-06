@@ -27,10 +27,12 @@
 // A run that finds only closeable requests, or cannot record a page, requests NO
 // agent — the hours where nothing needs judgment cost no model at all.
 //
-// No code→agent data channel (agent-preprocessing DESIGN §3): everything the agent
-// needs is IN THE REPO — the pushed branch, its scaffold, the recorded page, and
-// the draft PR it finds by head-branch prefix. Nothing is threaded through the
-// dispatch issue.
+// Almost no code→agent data channel (agent-preprocessing DESIGN §3): everything the
+// agent needs is IN THE REPO — the pushed branch, its scaffold, the recorded page.
+// The one exception §3 now names is the IDENTITY of what this run created: the branch
+// and draft-PR number ride the agent-request file into the dispatch issue, because the
+// alternative — the agent finding its own PR by head-branch prefix — cannot tell "no
+// PR exists" from "my search missed it" (Claudinite #649).
 //
 // Exit codes are the task's contract: 0 = handled (with or without an agent),
 // non-zero = the task FAILED and the scheduler converges it to `needs-human`. A
@@ -269,11 +271,11 @@ function push(branch, waitMs = [2000, 4000, 8000, 16000]) {
   }
 }
 
-// The draft PR the agent continues on. Preprocessing pushed the branch, so the
-// agent needs a way to find it that does not put a branch name in the dispatch
-// issue — agent-preprocessing DESIGN §5's answer is exactly this: the family's open
-// PR, discovered by head-branch prefix. DRAFT because the extractor is not written
-// yet; the agent marks it ready for review when the postconditions pass.
+// The draft PR the agent continues on. Its NUMBER is handed to the agent through the
+// dispatch issue (see the handoff at the foot of main), so the agent never searches for
+// it; the `claude/extractor/` prefix below survives only as this task's own bookkeeping
+// — reclaiming stale requests — and no longer as anyone's lookup key. DRAFT because the
+// extractor is not written yet; the agent marks it ready when the postconditions pass.
 async function openDraftPr(decision, base, issueNumber) {
   const body = [
     `Closes #${issueNumber}`,
@@ -495,9 +497,22 @@ export async function main() {
   console.log(`create-extractor: pushed ${decision.branch} and opened draft PR #${pr}`);
 
   // Request the agent stage: a real page is recorded and an extract() is left to
-  // write. This is a pure control signal — the agent discovers the branch, the
-  // scaffold, and the page by reading the repo (§3).
-  if (requestFile) writeFileSync(requestFile, 'agent-requested\n');
+  // write — and NAME what this run created, so the scheduler records it in the
+  // dispatch issue and the agent never has to find it.
+  //
+  // It used to be a pure control signal, leaving the agent to discover the branch by
+  // searching for the `claude/extractor/` head-branch prefix. That is a silent-error
+  // generator: a search that finds nothing is indistinguishable from nothing having
+  // been created, and the agent believes it. Claudinite #649 has the incident this
+  // came from — a delivered-and-merged PR read as "this cycle delivered nothing".
+  // Everything else the agent needs (the scaffold, the recorded page) still comes
+  // from reading the repo, per agent-preprocessing DESIGN §3.
+  if (requestFile) {
+    writeFileSync(requestFile, `${JSON.stringify({
+      marker: 'agent-requested',
+      delivered: { branch: decision.branch, pr, merged: false },
+    })}\n`);
+  }
   console.log('create-extractor: requested the agent stage');
 }
 
