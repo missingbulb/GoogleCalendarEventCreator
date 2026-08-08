@@ -10,7 +10,13 @@
     "product-wiki",
     "tidy-repo",
     "grow_with_claudinite",
-    "local/gcec"
+    "local/gcec",
+    {
+      "id": "claude-code-web-users-support",
+      "config": {
+        "repo": "missingbulb/Sheepdog"
+      }
+    }
   ],
   "taskScheduler": {
     "dailyHour": 4,
@@ -33,6 +39,6 @@
   },
   "claudinite": {
     "updated": "2026-08-05T00:00:00.000Z",
-    "ref": "7bf58aa03f3ea4684aa6777cb7c837293f08cd46"
+    "ref": "26cbe2e650c194930b5cf535bc9fd77a88822741"
   }
 }
