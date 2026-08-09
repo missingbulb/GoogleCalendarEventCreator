@@ -99,15 +99,15 @@ bash .claudinite/local/packs/gcec/tasks/generic-extractor-improvements/postcondi
 - **Non-zero → the run has FAILED.** Do not retry and do not open a PR; surface the
   failure so guiding prose can be re-introduced to this routine.
 
-## 5. Open the PR (never merge)
+## 5. Deliver the PR
 
 Branch `claude/generic-coverage/<date>`, commit the change plus the regenerated
-GENERATED artifacts, and push. Then open a **PR for review** — it never merges
-itself; from there it goes through the usual flow (the gcec pack's
-[merge-and-ci skill](../../skills/merge-and-ci/SKILL.md)). PR body: the
-hypothesis, why it's generic (which unseen sites
-it helps), how the jsdom trap was ruled out, the before→after numbers, and the
-covering test.
+GENERATED artifacts, and push. Open the PR, then hand it to the one delivery
+procedure (`deliver-pr.md` in the mounted engine) and do what it says; the merge
+mechanics are the gcec pack's
+[merge-and-ci skill](../../skills/merge-and-ci/SKILL.md). PR body: the
+hypothesis, why it's generic (which unseen sites it helps), how the jsdom trap was
+ruled out, the before→after numbers, and the covering test.
 
 Then log the run as a dated comment (**not** a sub-issue) on the standing
 *Auto-Improvements Tracker - Generic Extractor Coverage* issue (find it **by

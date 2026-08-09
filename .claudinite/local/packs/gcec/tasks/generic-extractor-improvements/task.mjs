@@ -11,7 +11,7 @@ export default {
   frequency: 'weekly',            // fires on the repo's weekly anchor day/hour
   precondition_signals: ['commits'],
   agent_model: 'opus',                 // closing a real generic-extractor gap is heavy judgment
-  expected_outcome: 'open-pr',            // a generic win lands as a PR the owner reviews; never auto-merged
+  expected_outcome: 'merged-pr',       // postconditions.sh (task.md step 4) is a hard gate ahead of the PR, so nothing unchecked can reach main
 
   agent_instructions: 'task.md',
   // The best-effort run bound the executor surfaces into the subagent's brief
