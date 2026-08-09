@@ -8,6 +8,16 @@ Sibling to [`../Market/`](../Market/README.md) (the calendar-market
 landscape) and [`../Users/`](../Users/README.md) (who uses this
 extension).
 
+## Key insights
+
+- Nobody today wires a page's structured event data to a calendar — JSON-LD tools only inspect it.
+- The one extension that ever read page markup into a calendar had 5M+ users and shut down anyway.
+- It died of platform-integration load — Google's own change requests and an OAuth calendar sync — not of reading pages.
+- Most rivals need a cloud LLM, hence an account or an API key; nothing-leaves-the-browser is an open lane.
+- Multi-calendar `.ics` export is table stakes for the AI rivals and absent here.
+- Safari and Firefox are no different, and lean further toward OCR and screenshots than toward markup.
+- Chrome Web Store install counts are unobtainable — the store and its mirrors 403 automated fetchers.
+
 ## Landscape (as of 2026-07-15)
 
 | Tool | Approach | Notes |
@@ -58,7 +68,30 @@ extension).
   `hCalendar` → iCalendar / add to Google Calendar) is likewise reported delisted
   and unmaintained since ~2014. Two readings, both worth carrying: the lane is
   genuinely empty *today*, and its last occupant died of maintenance cost at
-  scale — the exact cost a rule-based per-site extractor set also accrues.
+  scale. ~~the exact cost a rule-based per-site extractor set also accrues.~~
+  **That last clause was wrong and is corrected below (2026-08-09):** the 2026-07-26
+  pass inferred which maintenance cost killed the incumbent instead of reading the
+  shutdown note, and the note names a different one — the Google-facing
+  integration surface, not the page reader. See the next bullet.
+- **The incumbent died of *platform integration*, not of reading pages (checked
+  2026-08-09).** The shutdown note is specific about the load: *"the number of
+  requests I have received from various teams at Google to make changes … far
+  outweigh the amount of time I am able to spend on it"*, after the author's
+  attempts to get Google's Calendar team to adopt the extension onto their
+  first-party roadmap were declined. And the project's own docs show where that
+  Google-facing surface came from: from v1.5 the extension *"uses the
+  industry-standard OAuth protocol to fetch your calendar"*, a rewrite forced
+  when *"Google turned off version 2 of the Google Calendar Data API in November
+  2014, which had earlier made it possible to re-use your browser
+  credentials"* — i.e. it maintained a live, authenticated, deprecation-exposed
+  integration with a Google API, on top of an agenda/preview surface. Nothing in
+  either account attributes the burden to the `hCalendar` page reader. The
+  precedent's warning is therefore **narrow and inverted**: the cost that killed
+  it attaches to exactly the OAuth/API-integration surface this project
+  deliberately does not have (no sign-in, no API key, a plain
+  `render?action=TEMPLATE` URL). Per-site extractor maintenance is a real cost
+  here, but this precedent is *not* evidence for it, and the earlier reading that
+  it was should not be relied on.
 - **Structured-data awareness and calendar creation are disjoint categories in
   today's extension ecosystem.** JSON-LD-aware extensions are easy to find and
   effectively commoditised — **JSON-LD Schema Extractor** (Chrome *and* Firefox),
@@ -112,12 +145,19 @@ extension).
   while the one microformat-aware calendar extension that did ship is shut down
   (see the two notes under Positioning takeaways). Still worth a periodic
   re-check, but not open in its old form.
-- **Why did the incumbent vacate, and does that predict our cost curve?** The
-  "Google Calendar" extension shut down over maintenance load at 5MM+ users, not
-  demand. Worth understanding whether that load came from the per-site/microformat
-  reader itself — a direct warning for this project's per-site extractor set — or
-  from its calendar-preview/OAuth surface, which this project deliberately lacks.
-  Surfaced 2026-07-26.
+- ~~**Why did the incumbent vacate, and does that predict our cost curve?**~~
+  **Answered 2026-08-09**, and it came out the second way: the load was the
+  calendar/OAuth integration surface (plus Google teams' own change requests),
+  not the microformat page reader — see the "died of platform integration"
+  bullet under Positioning takeaways. It does **not** predict this project's
+  per-site extractor cost curve, and the 2026-07-26 claim that it did has been
+  corrected in place.
+- **What *is* this project's own extractor maintenance cost curve?** The
+  incumbent precedent turned out not to answer it, so it is genuinely open: how
+  often does a landed per-site extractor break as its site changes, and does that
+  rate scale with the number of extractors? Unlike the questions above this one
+  is answerable from repo-native signal (the repo's own extractor-fix commits and
+  re-record runs), not the web. Surfaced 2026-08-09.
 - **Would a JSON-LD-era equivalent be re-tried by a platform player?** The prior
   attempt predates JSON-LD's dominance (~41% of pages vs microformats' sub-1% —
   see [`../Domain/`](../Domain/README.md)). If the lane is empty mainly for
@@ -154,6 +194,7 @@ extension).
 - [Safari Extensions — Apple Developer](https://developer.apple.com/safari/extensions/)
 - [chimbori/google-calendar-crx — the shut-down "Google Calendar" Chrome extension (archived; shutdown notice, "encouraged by the Chrome and Calendar teams at Google", 5MM+ users)](https://github.com/chimbori/google-calendar-crx)
 - [thanhpd/google-calendar-crx — fork documenting its hCalendar/hResume microformat event detection](https://github.com/thanhpd/google-calendar-crx)
+- [Accounts and Authorization — chimbori/google-calendar-crx wiki](https://github.com/chimbori/google-calendar-crx/wiki/Accounts-and-Authorization) — "uses the industry-standard OAuth protocol to fetch your calendar" after Google turned off Calendar Data API v2 in November 2014
 - [JSON-LD Schema Extractor — Chrome Web Store](https://chromewebstore.google.com/detail/json-ld-schema-extractor/njmjjilneheaknlfjidccmnceidcjnop)
 - [JSON-LD Schema Extractor — Firefox Browser Add-ons](https://addons.mozilla.org/en-US/firefox/addon/json-ld-schema-extractor/)
 - [LD+JSON Extractor — Chrome Web Store](https://chromewebstore.google.com/detail/ld+json-extractor/ndkafkinnogfnhllmidiflkgdcijgdnn)
@@ -199,3 +240,15 @@ extension).
   sharper ones (why the incumbent vacated; whether a JSON-LD-era platform
   re-entry is a risk). Same 403 caveat on the store listings; the two GitHub
   sources were read end to end.
+- **2026-08-09** — answered "why did the incumbent vacate", and it **corrected a
+  claim this page made two weeks earlier**. The shutdown note attributes the load
+  to change requests from Google teams after the Calendar team declined to adopt
+  the extension, and the project's own wiki shows the extension carried an
+  **OAuth integration with the Google Calendar Data API** (forced by Google
+  killing API v2 in November 2014). Neither source blames the `hCalendar` reader.
+  So the 2026-07-26 clause reading the shutdown as "the exact cost a rule-based
+  per-site extractor set also accrues" was an inference, not a finding — struck
+  in place with a note rather than deleted, and replaced with the sourced
+  version. Retired the open question and opened a sharper, repo-answerable one
+  (this project's own extractor breakage rate). Also added the standard-required
+  `## Key insights` header, which this page had been missing.
