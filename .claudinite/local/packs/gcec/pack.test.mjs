@@ -9,6 +9,7 @@ import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
+import caseUrlSingleSource from './case-url-single-source.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);
@@ -304,4 +305,109 @@ test('regen-artifacts-merge-ours: honors a basename-only pattern, and a `*` that
 
 test('regen-artifacts-merge-ours: quiet when there are no regen artifacts in scope', () => {
   assert.deepEqual(regenArtifactsMergeOurs.run(attrCtx(['extension/events-popup/popup.js'])), []);
+});
+
+// case-url-single-source reads the live cases' own JSON, so every fixture is a
+// case file's real text — the URL-carrying `details` included, because that is
+// exactly the string a grep-based check would false-alarm on.
+const EXPECTED_DIR = 'dev/requirements/extractor/expected';
+const caseCtx = (tree) => treeCtx(tree);
+
+// The real committed shape: the source URL appears only inside `details` (where
+// buildCalendarUrl puts the link back to the page), never as a key of its own.
+const CLEAN_CASE = JSON.stringify(
+  {
+    description: 'barby.co.il: Hebrew music venue event page',
+    referenceNow: '2026-06-01T00:00:00Z',
+    expected: {
+      events: [
+        {
+          title: 'אפרת גוש',
+          ctz: 'Asia/Jerusalem',
+          details: 'https://barby.co.il/show/4401\n\nfull description…',
+          times: [
+            {
+              start: '2026-06-25T21:00:00+03:00',
+              end: null,
+              eventLengthInMinutes: null,
+              location: 'Barby, Tel Aviv',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  null,
+  2,
+);
+
+test('case-url-single-source: fires on a case file that repeats the page URL at the top level', () => {
+  const withUrl = JSON.stringify(
+    {
+      description: 'barby.co.il event page',
+      url: 'https://barby.co.il/show/4401',
+      expected: { events: [{ title: 'x', times: [] }] },
+    },
+    null,
+    2,
+  );
+  const findings = caseUrlSingleSource.run(caseCtx({ [`${EXPECTED_DIR}/barby.json`]: withUrl }));
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, `${EXPECTED_DIR}/barby.json`);
+  assert.equal(findings[0].line, 3); // the `"url":` line, so the fix is one jump away
+  assert.match(findings[0].what, /declares a page URL of its own \(`url`\)/);
+  assert.match(findings[0].fix, /data\/server-fetched\/barby\.url/);
+  assert.equal(findings[0].severity, 'blocking');
+});
+
+test('case-url-single-source: fires on a URL key nested inside an event, naming its path', () => {
+  const nested = JSON.stringify({
+    description: 'meetup',
+    expected: {
+      events: [{ title: 'x', sourceUrl: 'https://www.meetup.com/x/events/1/', times: [] }],
+    },
+  });
+  const findings = caseUrlSingleSource.run(caseCtx({ [`${EXPECTED_DIR}/meetup.json`]: nested }));
+  assert.equal(findings.length, 1);
+  assert.match(findings[0].what, /expected\.events\[0\]\.sourceUrl/);
+});
+
+test('case-url-single-source: quiet on the real case shape, whose `details` legitimately holds the URL', () => {
+  // The false alarm this check must not have: `details` opens with a link back to
+  // the source page on EVERY committed case, so a text grep for the URL would
+  // report all 36 of them. Only a URL-shaped KEY is a violation.
+  assert.deepEqual(
+    caseUrlSingleSource.run(
+      caseCtx({
+        [`${EXPECTED_DIR}/barby.json`]: CLEAN_CASE,
+        [`${EXPECTED_DIR}/luma-event.json`]: CLEAN_CASE,
+      }),
+    ),
+    [],
+  );
+});
+
+test('case-url-single-source: only the live cases are in scope, and a URL-ish word is not a URL key', () => {
+  assert.deepEqual(
+    caseUrlSingleSource.run(
+      caseCtx({
+        // the .url file itself is the single source of truth — never a finding
+        'dev/requirements/extractor/data/server-fetched/barby.url': 'https://barby.co.il/show/4401',
+        // other JSON in the repo is not a live case
+        'extension/host-lists.json': '{"supportedDomains":["barby.co.il"],"url":"x"}',
+        // a key whose NAME merely contains "url" is not the page-URL declaration
+        [`${EXPECTED_DIR}/dice.json`]: '{"description":"urls in the blurb","expected":{"events":[]}}',
+      }),
+    ),
+    [],
+  );
+});
+
+test('case-url-single-source: quiet on a case file that is not parseable JSON', () => {
+  // A malformed case breaks `npm run test:live` loudly on the next run; this check
+  // does not double-report it.
+  assert.deepEqual(
+    caseUrlSingleSource.run(caseCtx({ [`${EXPECTED_DIR}/broken.json`]: '{ "description": ' })),
+    [],
+  );
 });
