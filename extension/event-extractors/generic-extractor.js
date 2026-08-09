@@ -34,7 +34,10 @@
 //               short element whose class/id mentions "venue" or "location" ->
 //               OG place/business/geo meta tags -> the "@ Venue" title tail ->
 //               an "(Online)"-style title parenthetical -> the street address
-//               in the page's footer/header chrome (single-venue sites)
+//               in the page's footer/header chrome (single-venue sites);
+//               whatever won is then UPGRADED to the fuller address the page's
+//               own "open in maps" link spells out, when that link's text leads
+//               with the venue we already have (upgradeLocation)
 //   description og:description or description meta tag ->
 //               itemprop="description" (line breaks preserved)
 //   all-day     a start–end pair covering whole calendar days (00:00 -> 23:59)
@@ -62,7 +65,7 @@
     // Several embedded events => a listing page; surface each.
     if (embedded.length > 1) return collapseAllDay(withCtz(embedded.map((ld) => embeddedEvents.toEvent(ld, dayFirst)).map(trimVenueTitle)));
 
-    const event = trimVenueTitle(merge(embeddedEvents.toEvent(embedded[0], dayFirst), heuristics(dayFirst)));
+    const event = trimVenueTitle(upgradeLocation(merge(embeddedEvents.toEvent(embedded[0], dayFirst), heuristics(dayFirst))));
     // The heuristics always fill a title (og:title -> <h1> -> document title),
     // present on essentially every page, so a title alone is not an event. Treat
     // this as an event only when the page embedded one or a date was parsed.
@@ -137,6 +140,39 @@
       event.title = clean(event.title.slice(0, at));
     }
     return event;
+  }
+
+  // Replace the event's location with the fuller form the page's own maps link
+  // spells out, when there is one. A schema.org Place is routinely published with
+  // the venue's NAME and an empty address, while the same page links that venue
+  // to a maps service using its full address as the link's own text ("Blue Note,
+  // 131 W 3rd St, New York") — the "open in maps" convention (the same
+  // page-declared marker chromeAddress() already trusts in a site's footer, but
+  // here it marks THIS event's venue). See mapsLinkAddress for the guard.
+  function upgradeLocation(event) {
+    const fuller = mapsLinkAddress(event.location);
+    if (fuller) event.location = fuller;
+    return event;
+  }
+
+  // The first maps-service link whose own text is `location` SPELLED OUT: it
+  // leads with exactly the location we already have and continues past a comma
+  // into the rest of the address. That strict-superset guard (the one
+  // trimVenueTitle uses) is what keeps this an upgrade rather than a second
+  // opinion — a maps link pointing somewhere else on the page (a box office, the
+  // operator's own office, another venue) never replaces the event's location,
+  // and neither does a venue that merely shares a prefix ("Blue Note Cafe"). The
+  // candidate must still read like an address (addressText/looksLikeAddress), so
+  // a bare "Get directions" call to action never qualifies.
+  function mapsLinkAddress(location) {
+    const loc = clean(location);
+    if (!loc) return "";
+    for (const a of document.querySelectorAll("a[href]")) {
+      if (!MAPS_SERVICE.test(a.getAttribute("href") || "")) continue;
+      const address = addressText(a);
+      if (address.startsWith(loc) && /^\s*,/.test(address.slice(loc.length))) return address;
+    }
+    return "";
   }
 
   // Best-effort scrape of any page's meta tags / microdata / text. `dayFirst`

@@ -12,8 +12,8 @@ Headline coverage over all 36 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **76.9%** | 83 / 108 |
-| **All fields** | **57.9%** | 121 / 209 |
+| **Critical fields** (title + start + location) | **77.8%** | 84 / 108 |
+| **All fields** | **58.4%** | 122 / 209 |
 | Event coverage *(informational)* | 25.8% | 42 / 163 |
 
 ### Gate
@@ -22,8 +22,8 @@ The gate (`dev/requirements/extractor/generic-coverage/generic-coverage.baseline
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 76.9% | 76.9% | ✓ |
-| All fields | 57.9% | 57.9% | ✓ |
+| Critical fields | 77.8% | 77.8% | ✓ |
+| All fields | 58.4% | 58.4% | ✓ |
 
 Gated over **36** shared case(s).
 
@@ -36,7 +36,7 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 | `title` **(critical)** | 36 | 30 | 4 | 2 | 83.3% |
 | `start` **(critical)** | 36 | 29 | 5 | 2 | 80.6% |
 | `end` | 23 | 16 | 0 | 7 | 69.6% |
-| `location` **(critical)** | 36 | 24 | 4 | 8 | 66.7% |
+| `location` **(critical)** | 36 | 25 | 3 | 8 | 69.4% |
 | `ctz` | 33 | 14 | 0 | 19 | 42.4% |
 | `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
 | `description` | 34 | 8 | 19 | 7 | 23.5% |
@@ -62,7 +62,7 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 | `seatgeek.com` | 1 | 0/7 | 0% | 0% |
 | `secrettelaviv.com` | 1 | 1/1 | 100% | 66.7% |
 | `seetickets.com` | 1 | 1/1 | 100% | 100% |
-| `somo.social` | 1 | 1/1 | 66.7% | 50% |
+| `somo.social` | 1 | 1/1 | 100% | 66.7% |
 | `stubhub.com` | 1 | 6/6 | 100% | 100% |
 | `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
 | `tel-aviv.gov.il` | 1 | 1/1 | 66.7% | 60% |
@@ -99,7 +99,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, the bare r
 | `seatgeek` | 0/7 | ✗ | ✗ | ✗ | ✗ | ✗ | — | — |
 | `secrettelaviv-world-cup-eve` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `seetickets` | 1/1 | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
-| `somo` | 1/1 | ✓ | ✓ | ✓ | ~ | ✗ | — | ~ |
+| `somo` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
 | `tel-aviv` | 1/1 | ✓ | ✓ | — | ~ | ✓ | — | ~ |
