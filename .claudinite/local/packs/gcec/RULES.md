@@ -235,17 +235,11 @@ section here: extractor-automation to the "Extractor pipeline" section,
 everything else to the fitting section. Mechanism before prose, per the canon's
 local promotion ladder — `test-offline-list-sync` is this pack's worked example.
 
-**Three kinds never land here, however strong the evidence** — filter on what a
+**One kind never lands here, however strong the evidence** — filter on what a
 lesson is *about* before picking a mechanism:
 
-- **The owner's personal preferences** (which word means "merge it", tone,
-  summary style). They belong to the owner, are injected per-session, and change
-  without this repo hearing about it.
 - **Claudinite loading mechanics** (which packs are declared, why a skill didn't
   mount, why an injection missed). Engine plumbing, not project knowledge — a
   real defect there goes upstream instead.
-- **Anything derived from product requirements.** Packs carry
-  **development-process** lessons only; what the extension should do is
-  `dev/requirements/`'s territory, and restating it here will drift.
 
-None of the three is mechanically checkable, so all three stay prose.
+It isn't mechanically checkable, so it stays prose.
