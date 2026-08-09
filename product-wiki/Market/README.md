@@ -6,6 +6,15 @@ what usage patterns show up in that market. Distinct from
 [`../Users/`](../Users/README.md) (who uses *this* extension and how) and
 [`../Competitors/`](../Competitors/README.md) (who else builds this).
 
+## Key insights
+
+- Web-based calendars are the largest slice of a ~$14.6B market, so a browser extension sits where the users are.
+- The portable multi-calendar path is a standards `.ics` file, not per-vendor Outlook or Apple deep links.
+- But an `.ics` is a download, which reintroduces exactly the friction the render URL removes.
+- Google Calendar is only ~23% of the calendar-tool market, yet it is the only sink this extension targets.
+- Structured markup is common page-wide; that does not mean most *event* pages are structured.
+- Google Calendar is reported in use at 637,000+ companies, most of them US-based.
+
 ## How this wiki grows
 
 This follows Andrej Karpathy's ["LLM Wiki" pattern](https://medium.com/@urvvil08/andrej-karpathys-llm-wiki-create-your-own-knowledge-base-8779014accd5):
@@ -125,3 +134,8 @@ recur across the market:
   qualified the "machine-readable markup is increasingly common" claim, which was
   true page-wide but overstated for *event* pages specifically — cited the ~41% /
   ~26% / <1M-domains figures here rather than leaving them only in Domain.
+- **2026-08-09** — added the `## Key insights` header the product-wiki standard
+  requires and this page had been missing (the `product-wiki-page-sections` and
+  `product-wiki-key-insights` checks). Every bullet distils a claim already cited
+  in the body below; no claim was added, changed, or removed, and no research was
+  done on this page this pass.

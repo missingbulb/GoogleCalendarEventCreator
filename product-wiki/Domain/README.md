@@ -9,6 +9,16 @@ platforms, the people, the rivals), this wiki covers the *thing itself* — the
 event data, formats, and page shapes the extractor has to make sense of. It is
 the knowledge that most directly drives extraction requirements.
 
+## Key insights
+
+- JSON-LD reaches ~41% of pages and Microdata ~26%, but `schema.org/Event` itself is on under a million domains.
+- So most event pages carry no `Event` block — the DOM and `og:` fallback is the main path, not an edge case.
+- All microformats combined are under 1% of pages, so hCalendar never justifies its own parser.
+- Google Calendar's render URL already accepts a full RFC-5545 `recur=` rule, so the sink never blocked recurrence.
+- schema.org spells a repeat as an ISO-8601 duration, not `FREQ=WEEKLY`, so `recur=` needs real translation.
+- A timezone is emitted only when two independent page hints agree; a trailing `Z` counts as no hint at all.
+- Google has required a physical location for the Event rich result since June 2025.
+
 ## Machine-readable event formats (as of 2026-07-16)
 
 Ordered roughly by how useful they are to a rule-based extractor — highest-signal
@@ -234,3 +244,8 @@ structural decision behind "one button per event":
   no-dedicated-microformats-reader conclusion now rests on abandoned tooling as
   well as sub-1% prevalence. The demand-side reading lives in Competitors. No
   open question answered or opened here.
+- **2026-08-09** — added the `## Key insights` header the product-wiki standard
+  requires and this page had been missing (the `product-wiki-page-sections` and
+  `product-wiki-key-insights` checks). Every bullet distils a claim already cited
+  in the body below; no claim was added, changed, or removed, and no research was
+  done on this page this pass.
