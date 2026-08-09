@@ -655,6 +655,46 @@ test("Generic site: location falls back to the footer's maps-service link (singl
   assert.equal(e.times[0].location, "הנמל 1 - נמל יפו");
 });
 
+test("Generic site: a maps link's own text upgrades a JSON-LD Place that names the venue only", () => {
+  // schema.org Places are routinely published with the venue's NAME and an empty
+  // (or absent) address, while the SAME page links that venue to a maps service
+  // using its full address as the link's own text — the "open in maps" convention
+  // (somo.social, Wix/Squarespace event pages, countless CMS venue widgets). When
+  // that link text leads with exactly the venue we already have and carries more,
+  // it is the same place spelled out, so take the fuller form.
+  const html = `
+    <script type="application/ld+json">
+    { "@type": "Event", "name": "Late Set",
+      "startDate": "2026-09-12T21:00:00-04:00",
+      "location": { "@type": "Place", "name": "Blue Note", "address": { "@type": "PostalAddress" } } }
+    </script>
+    <a href="https://www.google.com/maps/search/?api=1&query=40.73,-74.00"><span>Blue Note, 131 W 3rd St, New York</span></a>
+    <a href="https://www.google.com/maps/search/?api=1&query=40.73,-74.00">Get directions</a>`;
+
+  const e = firstEvent(html, "https://www.example.com/late-set");
+  assert.equal(e.times[0].location, "Blue Note, 131 W 3rd St, New York");
+});
+
+test("Generic site: a maps link naming a DIFFERENT place never replaces the event's location", () => {
+  // The upgrade is a strict superset only: the link text must lead with the
+  // location we already have and continue past a comma. A maps link pointing at
+  // something else on the page (a box office, the operator's office, a second
+  // venue) leaves the event's own location untouched — and a link whose text
+  // merely starts with the same letters ("Blue Note Cafe") is not the same venue.
+  for (const linkText of ["Ticket Office, 200 W 44th St, New York", "Blue Note Cafe 9 Elm St"]) {
+    const html = `
+      <script type="application/ld+json">
+      { "@type": "Event", "name": "Late Set",
+        "startDate": "2026-09-12T21:00:00-04:00",
+        "location": { "@type": "Place", "name": "Blue Note" } }
+      </script>
+      <a href="https://www.google.com/maps/search/?api=1&query=40.73,-74.00">${linkText}</a>`;
+
+    const e = firstEvent(html, "https://www.example.com/late-set");
+    assert.equal(e.times[0].location, "Blue Note", `maps link "${linkText}" should not replace the location`);
+  }
+});
+
 test("Generic site: footer chrome address is composed with og:site_name — on a single-venue site the site IS the venue", () => {
   // The location-pin icon link (an <img> named location/map-pin/map-marker) is a
   // footer convention for "our address" (cinema.co.il's footer is this shape,
