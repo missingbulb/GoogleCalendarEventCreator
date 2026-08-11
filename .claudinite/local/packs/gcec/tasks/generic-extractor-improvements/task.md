@@ -109,7 +109,5 @@ mechanics are the gcec pack's
 hypothesis, why it's generic (which unseen sites it helps), how the jsdom trap was
 ruled out, the before→after numbers, and the covering test.
 
-Then log the run as a dated comment (**not** a sub-issue) on the standing
-*Auto-Improvements Tracker - Generic Extractor Coverage* issue (find it **by
-title**, currently #366; open it if missing, reopen it if closed) so it builds a
-scrollable history, and `Refs` that issue in the PR.
+Then log the run on the standing *Auto-Improvements Tracker - Generic Extractor
+Coverage* issue, and `Refs` that issue in the PR.

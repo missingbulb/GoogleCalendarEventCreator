@@ -62,8 +62,7 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   deterministic bump PR only. The merge triggers **Release: Create Package**;
   do **not** report done until the `vX.Y.Z` GitHub Release with its refreshed
   `google-calendar-event-creator.zip` asset is published — poll via the GitHub
-  MCP tools on the merge-and-ci skill's back-off (reporting at merge time races
-  the async build).
+  MCP tools on the merge-and-ci skill's back-off.
 - **"learned lessons"** = run the canon lessons-learned pass over the current
   conversation on **the strongest model available**, plus the standing
   efficiency analysis of the conversation's tool/process usage. Only when the

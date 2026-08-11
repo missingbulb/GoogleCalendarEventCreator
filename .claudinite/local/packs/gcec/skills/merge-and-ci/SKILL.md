@@ -76,9 +76,6 @@ all. Open the PR early for those.
   hand-cleared escalation**, on a change nothing was wrong with. So don't spend
   a turn on repeated arming attempts: try once, and otherwise poll to green and
   merge.
-- **Batch tool loading**: one `ToolSearch` for every GitHub MCP tool the flow
-  needs (`issue_write`, `create_pull_request`, `pull_request_read`,
-  `merge_pull_request`), not one per turn.
 
 ## After the merge, `git fetch origin main` — never check `main` out
 
