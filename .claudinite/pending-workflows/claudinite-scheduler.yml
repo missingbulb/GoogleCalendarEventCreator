@@ -24,7 +24,7 @@ name: Claudinite scheduler
 
 on:
   schedule:
-    - cron: '10 * * * *'
+    - cron: '24 * * * *'
   workflow_dispatch:
     inputs:
       overrides:
@@ -64,6 +64,7 @@ jobs:
       - name: Evaluate schedule and dispatch due tasks
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
           # Empty on every scheduled run — `inputs` is only populated by
           # workflow_dispatch. The engine reads only FORCE_TASKS out of it.
           CLAUDINITE_OVERRIDES: ${{ inputs.overrides }}
