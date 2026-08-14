@@ -19,3 +19,4 @@ dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md       
 dev/requirements/popup/cases/*.png                                              merge=ours
 dev/requirements/icon/cases/*.png                                               merge=ours
 usage.GENERATED.json merge=ours
+claudinite-rules.GENERATED.md merge=ours
