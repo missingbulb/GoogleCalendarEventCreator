@@ -1,5 +1,7 @@
 # Maintainer guide
 
+@.claudinite/claudinite-rules.GENERATED.md
+
 Project conventions and how-tos. The project's own working rules live in its
 **Claudinite local pack** under
 [`.claudinite/local/packs/`](.claudinite/local/packs/) — tracked project
