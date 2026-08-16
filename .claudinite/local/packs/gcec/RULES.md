@@ -42,10 +42,9 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   **not** on the `ours` driver; reconcile via `npm run regen` + the gallery
   drift gate. If `regen` reports a coverage regression, that's the real gate
   firing — review it, don't paper over it.
-- **Keep divergence small**: when syncing a branch to `origin/main` (by rebase —
-  this repo forbids merge commits), **run `npm run regen`** as part of the sync,
-  so the branch carries freshly-generated artifacts, not just the latest
-  sources.
+- **Keep divergence small**: when syncing a branch to `origin/main` (by rebase),
+  **run `npm run regen`** as part of the sync, so the branch carries
+  freshly-generated artifacts, not just the latest sources.
 - **Whenever a change regenerates the UI gallery** (via `npm run refresh:ui`),
   link the branch's copy in the chat in the same turn you commit it —
   `https://github.com/<owner>/<repo>/blob/<branch>/dev/requirements/requirements.md`
@@ -64,9 +63,7 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   `google-calendar-event-creator.zip` asset is published — poll via the GitHub
   MCP tools on the merge-and-ci skill's back-off.
 - **"learned lessons"** = run the canon lessons-learned pass over the current
-  conversation on **the strongest model available**, plus the standing
-  efficiency analysis of the conversation's tool/process usage. Only when the
-  owner asks — never extract unprompted. Capture routing: see below.
+  conversation on **the strongest model available**. Capture routing: see below.
 
 ## Testing invariants
 
@@ -76,12 +73,12 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   behavior; keep cases minimal). Unit tests under `extension-test/` are a
   supplementary safety net for page-independent logic.
 - **`extension-test/` mirrors `extension/`'s tree, one test per source file**
-  (`extension/<area>/<name>.js` → `extension-test/<area>/<name>.test.js`; the
-  path IS the link, so a source file never names its test). Deliberate
-  departures: `extension-test/integration/` for whole-extension/interaction
-  tests; no mirror for `custom/*` sources or data/markup files (covered by live
-  cases / snapshots / drift guards); `extension-test/harness.js` is shared
-  infra (not a test) and stays at the root.
+  (`extension/<area>/<name>.js` → `extension-test/<area>/<name>.test.js`).
+  Deliberate departures: `extension-test/integration/` for
+  whole-extension/interaction tests; no mirror for `custom/*` sources or
+  data/markup files (covered by live cases / snapshots / drift guards);
+  `extension-test/harness.js` is shared infra (not a test) and stays at the
+  root.
 - **The pinned `REFERENCE_NOW`** (`dev/requirements/shared/reference-time.js`,
   currently 2026-06-01) **is the floor of the cases' dates**: author a
   neutral/upcoming case **on or after it** so it's pill-free; use a past date or
@@ -229,16 +226,5 @@ this section as part of the same change (the design doc itself is
 
 ## Capture policy — lessons land in the local packs
 
-**The gcec local pack is this repo's capture surface.** Route each lesson to its
-section here: extractor-automation to the "Extractor pipeline" section,
-everything else to the fitting section. Mechanism before prose, per the canon's
-local promotion ladder — `test-offline-list-sync` is this pack's worked example.
-
-**One kind never lands here, however strong the evidence** — filter on what a
-lesson is *about* before picking a mechanism:
-
-- **Claudinite loading mechanics** (which packs are declared, why a skill didn't
-  mount, why an injection missed). Engine plumbing, not project knowledge — a
-  real defect there goes upstream instead.
-
-It isn't mechanically checkable, so it stays prose.
+Route each lesson to its section here: extractor-automation to the "Extractor
+pipeline" section, everything else to the fitting section.
