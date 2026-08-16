@@ -107,9 +107,12 @@ and about one person's browsing, not about a user base.
 ## Pain points to track (hypotheses — verify with real feedback as it arrives)
 
 - Extraction misses or gets a field wrong on a page with unusual markup — the
-  fallback-coverage routine (`.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/`) is the
-  engineering mechanism that narrows this over time; this wiki tracks it from the
-  *user* side (which misses actually get reported/matter).
+  weekly
+  [`generic-extractor-improvements`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.md)
+  task (named `fallback-extractor-improvements` until the 2026-07-26 restructure
+  retired the "fallback" vocabulary) is the engineering mechanism that narrows
+  this over time; this wiki tracks it from the *user* side (which misses actually
+  get reported/matter).
 - Timezone correctness on pages that don't declare one clearly — see the
   unanimity rule in the contract header of
   `extension/event-extractors/helpers/derive-timezone.js` (a zone is emitted only
@@ -222,3 +225,9 @@ user research, and are labelled as such wherever they are used:
   question and opened two sharper ones (is the account gate the cause of the
   zero; is the local skew demand or one reporter). Also added the
   standard-required `## Key insights` header, which this page had been missing.
+- **2026-08-16** — spot-check only: repointed a dead reference in the
+  unusual-markup pain point. The `fallback-extractor-improvements` task was
+  renamed `generic-extractor-improvements` in the 2026-07-26 restructure that
+  retired the "fallback" vocabulary, so the cited path no longer existed. No claim
+  added, changed or removed, and no user-side research was done this pass — the
+  run's research went to Domain and Competitors.
