@@ -98,9 +98,11 @@ recur across the market:
   no-download/no-account friction the render URL avoids? (Weigh against the reach
   gain — see the Outlook/`.ics` note above, resolved 2026-07-17.)
 - What share of "event" pages in the wild already carry `schema.org/Event`
-  JSON-LD vs. requiring DOM/text heuristics? (Would sharpen the fallback-coverage
-  routine's generic-extraction priorities too — see
-  `.claudinite/local/packs/gcec/tasks/fallback-extractor-improvements/task.md`.)
+  JSON-LD vs. requiring DOM/text heuristics? (Would sharpen the weekly
+  generic-extraction task's priorities too — see
+  [`generic-extractor-improvements/task.md`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.md);
+  it was `fallback-extractor-improvements` until the 2026-07-26 restructure
+  retired the "fallback" vocabulary.)
   **Answered web-wide in Domain, 2026-07-17** — `Event` markup is a minority
   signal (fewer than ~1M domains), so the DOM/`og:` fallback path carries real
   weight; see [`../Domain/README.md`](../Domain/README.md). The *per-target-host*
@@ -157,3 +159,9 @@ recur across the market:
   event schema would mean the rich-results tailwind is weaker on event pages than
   page-wide adoption suggests. Added the `## Key insights` header the
   product-wiki pack began requiring on 2026-07-30. No platform-landscape claim changed.
+- **2026-08-16** — spot-check only: repointed a dead reference this page's open
+  question carried. The `fallback-extractor-improvements` task was renamed
+  `generic-extractor-improvements` in the 2026-07-26 restructure that retired the
+  "fallback" vocabulary, so the cited path no longer existed. No claim added,
+  changed or removed, and no research was done on this page this pass — the run's
+  research went to Domain and Competitors.

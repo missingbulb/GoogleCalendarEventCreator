@@ -17,7 +17,7 @@ the knowledge that most directly drives extraction requirements.
 - Microformats together are under 1% of pages, so `h-event` never justifies its own parser.
 - Google Calendar's render URL already accepts `recur=RRULE:…` — repeats were never blocked by the link we emit.
 - A wrong timezone is worse than none, so a zone ships only when two independent page hints agree.
-- No recorded target page offers a `.ics` download in place of markup; that page shape does not appear.
+- Hosts whose JSON-LD carries no `Event` are served worst of all — worse than hosts with no JSON-LD at all.
 
 ## Machine-readable event formats (as of 2026-07-16)
 
@@ -93,7 +93,9 @@ structural decision behind "one button per event":
 - **Listing / index page** — a calendar-of-events or search-results page with many
   entries, often an array of `Event` objects or repeated cards. Drives the
   multiple-buttons behaviour; the generic fallback can't reliably enumerate these
-  (it recovers the primary event only — see the fallback-coverage gate).
+  (it recovers the primary event only — see the generic-coverage gate; it was
+  named the *fallback*-coverage gate until the 2026-07-26 restructure retired the
+  "fallback" vocabulary).
 - **Series / recurring page** — one event described as repeating (an `RRULE` in
   `.ics`, or schema.org `eventSchedule`). A single page can imply many instances;
   how many to surface is genuinely undecided (see Open questions).
@@ -169,8 +171,9 @@ structural decision behind "one button per event":
   domains** — an order of magnitude behind common types like `author` (10M+);
   Web Data Commons corroborates from the Common Crawl corpus. So a large share of
   event pages carry *no* `Event` block, which is exactly why the DOM/text and
-  `og:`/microdata fallback path (and the fallback-coverage routine) carries real
-  weight rather than being a rare edge case.
+  `og:`/microdata fallback path (and the weekly
+  [`generic-extractor-improvements`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.md)
+  task that widens it) carries real weight rather than being a rare edge case.
 - **No dedicated microformats reader is warranted.** The 2026 prevalence check
   (see the `h-event` bullet) puts *all* microformats combined under ~1% of pages,
   so `h-event`/hCalendar stays a fallback-only concern — extraction effort belongs
@@ -184,27 +187,60 @@ structural decision behind "one button per event":
   tel-aviv.gov.il, visit.tel-aviv.gov.il). The remaining **10 split in two**:
   **5 emit JSON-LD but never an `Event`** (cinema.co.il, comy.co.il, seatgeek,
   tabitisrael.co.il, thinkdrink.co.il — typically `Organization`/`WebSite`
-  boilerplate, which is worse than no JSON-LD because it looks like a hit), and
+  boilerplate), and
   **5 emit no JSON-LD at all** (barby.co.il, edfringe.com, events.datadoghq.com,
   secrettelaviv.com, ticketmaster.co.il). So the DOM/`og:`/text ladder is the
   *only* path on ~40% of the hosts this extension supports — the fallback is a
   primary code path, not an edge case. Same sampling caveat as above: a host
   earns a recorded page by being asked for, and the generic path failing is often
   why it was asked for, so this over-samples hard pages relative to the open web.
+  (This bullet read "worse than no JSON-LD because it looks like a hit" until
+  2026-08-16; the reason given was wrong — see the last bullet in this section —
+  though the *outcome* it predicted turned out to hold.)
 - **`.ics`-only event pages did not appear.** No page in the corpus links a
   `.ics` file or serves `text/calendar` in place of in-page markup, so
   "follow the download link" is not a fallback worth building on current evidence.
+- **`Event`-less JSON-LD does not mislead the extractor — yet its hosts are the
+  worst-served of all three cohorts (measured 2026-08-16).** The 2026-08-02 pass
+  guessed that a page carrying `Organization`/`WebSite` JSON-LD but no `Event` is
+  "worse than no JSON-LD because it looks like a hit". **The mechanism half of
+  that guess is wrong.** The reader that collects embedded events
+  ([`helpers/embedded-events.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/helpers/embedded-events.js))
+  walks every `ld+json` block but keeps a node only when one of its `@type` values
+  matches `/event$/i`; an `Organization` or `WebSite` node is never collected. The
+  extractor then treats the page as event-less
+  ([`generic-extractor.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/generic-extractor.js):
+  with no embedded event, a page counts as an event only if a date was parsed from
+  text), so it falls through to exactly the same `og:`/text heuristics as a page
+  with no JSON-LD at all. There is no code path for the "structured-data costume"
+  to mislead — the costume is invisible.
+  **The outcome half of the guess holds anyway, for a different reason.**
+  Averaging the committed generic-coverage report's per-host **critical-field**
+  coverage (title + start + location) across the three cohorts of the 2026-08-02
+  census gives: **~95% for the 14 `Event`-JSON-LD hosts, ~73% for the 5 hosts with
+  no JSON-LD, and ~44% for the 5 with `Event`-less JSON-LD.** The middle cohort is
+  not merely worst — it is worse than carrying no structured data at all, and the
+  only two hosts in the whole corpus where the bare generic run finds **no event
+  whatsoever** (`seatgeek.com`, 0 events against the source's 7;
+  `tabitisrael.co.il`, 0 against 1) both sit in it. Since the code cannot see the
+  non-`Event` JSON-LD, this is correlation without misdirection: the likelier
+  reading is that a site tooled enough to emit SEO JSON-LD but not event schema is
+  also the kind of JS-heavy, template-driven site whose *visible* text resists the
+  date heuristic — the markup shape is a symptom of the site's build, not a cause
+  of the miss. Caveats: n=5 per cohort, and the cohort is not uniform
+  (`thinkdrink.co.il` scores 100% critical, `cinema.co.il` 86.7%), so this is a
+  correlation to hold, not a mechanism to design against.
 
 ## Open questions
 
 - ~~A precise `Event`-JSON-LD-vs-fallback split per *target host*.~~ **Answered
   2026-08-02** by censusing the recorded extractor corpus: 14 of 24 hosts carry
   `Event` JSON-LD, 5 carry JSON-LD without an `Event`, 5 carry none — see the
-  ~60/40 bullet under Implications. What remains open is narrower: **does the
-  "JSON-LD but no `Event`" shape (5 of 24 hosts) mislead the generic extractor
-  into a false positive?** A page with `Organization` JSON-LD and no `Event` is
-  structurally a fallback case wearing a structured-data costume; the
-  generic-coverage suite is where that would show.
+  ~60/40 bullet under Implications. The follow-up it left — does the "JSON-LD but
+  no `Event`" shape mislead the generic extractor into a false positive? — is
+  **answered 2026-08-16: no**, see the last Implications bullet. The reader keeps
+  only `@type`s matching `/event$/i`, so the non-`Event` block is invisible and
+  cannot mislead anything.
 - Recurring/series pages: what's the right product behaviour — one instance, the
   next upcoming, or an explicit "this repeats" affordance? (Narrowed 2026-07-26:
   the *transport* question is settled — the render URL's `recur=RRULE:…` carries a
@@ -219,10 +255,18 @@ structural decision behind "one button per event":
 - ~~Does any meaningful share of target sites express events only via `.ics`
   download links (no in-page structured data) worth following?~~ **Answered
   2026-08-02: no** — no `.ics` link or `text/calendar` reference in the corpus at all.
-- **Does JSON-LD-without-an-`Event` cause false positives?** 5 of 24 hosts serve
-  JSON-LD carrying no `Event` object. Whether the generic extractor treats that as
-  a structured hit and degrades, or correctly falls through to text, is unmeasured.
-  Surfaced 2026-08-02.
+- ~~**Does JSON-LD-without-an-`Event` cause false positives?**~~ **Answered
+  2026-08-16: no** — the extractor never collects a non-`Event` node, so it falls
+  through to text exactly as an unmarked page would. See the last Implications
+  bullet, which also records the surprise the measurement turned up.
+- **Why is the `Event`-less-JSON-LD cohort served *worse* than the no-JSON-LD
+  cohort (~44% vs ~73% critical-field coverage) when the markup itself is
+  invisible to the extractor?** The standing hypothesis is that SEO-tooled-but-not-
+  event-tooled sites are disproportionately JS-heavy and template-driven, so their
+  rendered *text* defeats the date heuristic — i.e. the markup shape is a proxy
+  for the site's build, not a cause. Testable by looking at what actually fails on
+  `seatgeek.com` and `tabitisrael.co.il`, the two hosts where the bare run finds
+  no event at all. Surfaced 2026-08-16.
 
 ## Sources
 
@@ -247,6 +291,9 @@ structural decision behind "one button per event":
 - [Additional `Schedule` type examples — schemaorg/schemaorg Discussion #2948](https://github.com/schemaorg/schemaorg/discussions/2948)
 - [`dev/requirements/extractor/data/server-fetched/` — this repo's recorded extractor corpus](https://github.com/missingbulb/GoogleCalendarEventCreator/tree/main/dev/requirements/extractor/data/server-fetched) — the 36 pages / 24 hosts censused on 2026-08-02 for `eventSchedule`, `Event` JSON-LD and `.ics` links
 - [`scraperapi.mjs` — the recording pipeline's `render=true` fetch](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/create-extractor/scraperapi.mjs) — why a missing property in the corpus is a real absence, not an unrendered SPA
+- [`generic-coverage.GENERATED.md` — the committed per-host coverage report](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md) — the per-host critical-field percentages behind the ~95% / ~73% / ~44% cohort split
+- [`helpers/embedded-events.js` — the JSON-LD reader](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/helpers/embedded-events.js) — `find()` keeps a node only when an `@type` matches `/event$/i`, so non-`Event` JSON-LD is never collected
+- [`generic-extractor.js` — the core generic extractor](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/generic-extractor.js) — with no embedded event, a page counts as an event only when a date is parsed from text
 
 ## Growth log
 
@@ -308,3 +355,22 @@ structural decision behind "one button per event":
   path. (3) **No `.ics`-only pages** exist in the corpus. Surfaced one new
   question (does `Event`-less JSON-LD mislead the generic extractor?). Added the
   `## Key insights` header the product-wiki pack began requiring on 2026-07-30.
+- **2026-08-16** — answered the `Event`-less-JSON-LD question from the code plus
+  the committed coverage report, and it **split into a corrected half and a
+  confirmed half**. Corrected: the 2026-08-02 line calling that shape "worse than
+  no JSON-LD because it looks like a hit" named a mechanism that does not exist —
+  `embedded-events.js`'s `find()` keeps only `@type`s matching `/event$/i`, so an
+  `Organization`/`WebSite` block is never seen and cannot cause a false positive.
+  That reason is struck from the ~60/40 bullet with a pointer, not silently
+  dropped. Confirmed anyway, by measurement rather than inference: averaging
+  per-host critical-field coverage over the 2026-08-02 cohorts gives ~95%
+  (`Event` JSON-LD) / ~73% (no JSON-LD) / ~44% (`Event`-less JSON-LD), and both
+  hosts where the bare run finds no event at all sit in the middle cohort.
+  Retired the answered question and opened the sharper one it exposes (why the
+  cohort underperforms when its markup is invisible). Displaced the
+  `.ics`-absence bullet from `## Key insights` for this stronger finding — the
+  `.ics` claim is unchanged and still stated under Implications. Also repointed
+  two live references the 2026-07-26 restructure superseded: the
+  *fallback*-coverage gate is now the **generic-coverage** gate, and the
+  `fallback-extractor-improvements` task is now
+  **`generic-extractor-improvements`**.

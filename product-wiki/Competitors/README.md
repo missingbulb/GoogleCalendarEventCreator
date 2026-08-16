@@ -16,7 +16,7 @@ extension).
 - Most rivals need a cloud LLM, hence an account or an API key; nothing-leaves-the-browser is an open lane.
 - Multi-calendar `.ics` export is table stakes for the AI rivals and absent here.
 - Safari and Firefox are no different, and lean further toward OCR and screenshots than toward markup.
-- Chrome Web Store install counts are unobtainable — the store and its mirrors 403 automated fetchers.
+- No per-site extractor here has ever broken from a site redesign; six were deleted as the generic base caught up.
 
 ## Landscape (as of 2026-07-15)
 
@@ -121,6 +121,36 @@ extension).
   not as a Safari webpage-markup feature. So the structured-extraction niche is
   open on Safari too, and the Safari-native centre of gravity is OCR/text
   detection — the opposite end of the ladder from JSON-LD.
+- **This project's own extractor maintenance cost, measured (2026-08-16): so far
+  there is no treadmill, and the curve bends down rather than up.** The incumbent
+  precedent above turned out not to predict our cost curve, so the repo's own
+  record was read instead. Across **every commit touching
+  [`extension/event-extractors/custom/`](https://github.com/missingbulb/GoogleCalendarEventCreator/commits/main/extension/event-extractors/custom)**
+  from the restructure that created that directory (2026-06-22) to 2026-08-10, the
+  project landed **nine new per-site extractors** and made only **three
+  post-landing functional edits** to an already-landed one. None of the three was
+  a site redesign breaking an extractor. All three were a *new page shape on the
+  same site*, surfaced by recording a second test case for it: an opening-hours
+  time on single-day `visit.tel-aviv.gov.il` events
+  ([#515](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/515)),
+  category-listing pages on `cinema.co.il`
+  ([#519](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/519)),
+  and a festival listing whose cards carry distinct titles rather than repeating
+  one `<h1>` on `tel-aviv.gov.il`
+  ([#791](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/791)).
+  Not one commit in the window reads "the site changed and the selectors broke."
+  Meanwhile the single largest maintenance event ran the *opposite* way:
+  [#758](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/758) made
+  the generic extractor the base layer of every extraction and **deleted six
+  per-site sources outright** (seetickets, stubhub, bandsintown, dice,
+  dash-datadoghq, facebook), whose hosts stay fully supported with no file at all.
+  So on current evidence per-site extractor count is not a maintenance liability
+  that grows with itself — the generic base absorbs sources faster than sites
+  break them. **Caveats, both real:** the window is roughly seven weeks of this
+  path's current life (the directory was `pipeline/sources/` before, so earlier
+  churn is not visible at this path), and the supported set skews to small venue
+  and civic sites that redesign rarely — a ticketing major's quarterly rebuild is
+  not represented in it.
 - **Screenshot/OCR capture is emerging as a distinct input axis.** Eventy already
   advertised flyer/poster/screenshot input; the Safari scan turned up two more
   image-first tools. This project has no answer to it by design — it reads the
@@ -152,12 +182,20 @@ extension).
   bullet under Positioning takeaways. It does **not** predict this project's
   per-site extractor cost curve, and the 2026-07-26 claim that it did has been
   corrected in place.
-- **What *is* this project's own extractor maintenance cost curve?** The
-  incumbent precedent turned out not to answer it, so it is genuinely open: how
-  often does a landed per-site extractor break as its site changes, and does that
-  rate scale with the number of extractors? Unlike the questions above this one
-  is answerable from repo-native signal (the repo's own extractor-fix commits and
-  re-record runs), not the web. Surfaced 2026-08-09.
+- ~~**What *is* this project's own extractor maintenance cost curve?**~~
+  **Answered 2026-08-16 from the repo's own commit record, and it came out
+  benign:** in the ~7 weeks of `custom/`'s current life, nine extractors landed,
+  three post-landing edits were made (all new *page shapes*, none a site
+  redesign), and six extractors were **deleted** as the generic base absorbed
+  them. See the measured bullet under Positioning takeaways. Re-check when a
+  ticketing major with a real redesign cadence has been supported long enough to
+  be evidence — none is, yet.
+- **Does the deletion effect keep going?** The 2026-07-26 restructure removed six
+  per-site sources in one move because the generic extractor had caught up with
+  them. Whether that is a one-off payoff from a single architectural change or a
+  standing dynamic — the weekly generic-extractor-improvements task steadily
+  retiring per-site files — decides whether the maintenance surface shrinks or
+  merely stopped growing. Surfaced 2026-08-16.
 - **Would a JSON-LD-era equivalent be re-tried by a platform player?** The prior
   attempt predates JSON-LD's dominance (~41% of pages vs microformats' sub-1% —
   see [`../Domain/`](../Domain/README.md)). If the lane is empty mainly for
@@ -201,6 +239,15 @@ extension).
 - [JSON-LD Checker — Chrome Web Store](https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln)
 - [SEO Schema Visualizer — JSON-LD graph](https://www.shtros.com/seo-schema-visualizer/)
 - [Microformats — Chrome extension listing (chrome-stats)](https://chrome-stats.com/d/oalbifknmclbnmjlljdemhjjlkmppjjl)
+
+The 2026-08-16 pass added repo-native evidence for this project's own maintenance
+cost curve — this project's commits and PRs, not competitor research:
+
+- [Commit history of `extension/event-extractors/custom/`](https://github.com/missingbulb/GoogleCalendarEventCreator/commits/main/extension/event-extractors/custom) — the nine-landed / three-edited / six-deleted count, 2026-06-22 to 2026-08-10
+- [PR #758 — the generic extractor becomes the base layer; six per-site sources deleted](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/758)
+- [PR #515 — `visit.tel-aviv.gov.il` opening-hours times](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/515) — a new page shape, not a site redesign
+- [PR #519 — `cinema.co.il` category-listing pages](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/519) — likewise
+- [PR #791 — `tel-aviv.gov.il` festival listing with per-card titles](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/791) — likewise
 
 ## Growth log
 
@@ -252,3 +299,17 @@ extension).
   version. Retired the open question and opened a sharper, repo-answerable one
   (this project's own extractor breakage rate). Also added the standard-required
   `## Key insights` header, which this page had been missing.
+- **2026-08-16** — answered the question the previous pass opened: this project's
+  own extractor maintenance cost curve, read off the repo's commit record rather
+  than the web. From 2026-06-22 (when `custom/` was created) to 2026-08-10, nine
+  per-site extractors landed, three post-landing functional edits were made — all
+  three a *new page shape on the same site* (#515, #519, #791), none a site
+  redesign breaking a working extractor — and six extractors were **deleted** in
+  one change (#758) as the generic extractor became the base layer. So the cost
+  curve does not scale with extractor count on current evidence; recorded with its
+  two honest caveats (a ~7-week window at this path, and a supported set that
+  skews to rarely-redesigned civic and venue sites). Retired that open question
+  and opened a sharper one — whether the deletion effect is a one-off or a
+  standing dynamic. Displaced the install-counts-unobtainable bullet from
+  `## Key insights` for this finding; that blocked attempt is unchanged and still
+  recorded as the first open question.
