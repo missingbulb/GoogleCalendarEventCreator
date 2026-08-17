@@ -1445,7 +1445,7 @@ is covered by unit tests only.
 <tr>
 <td valign="top" width="320">
 
-🧩 _Validated against [daniel-sloss](extractor/expected/edinburghfringe-daniel-sloss.json), [kristen-schaal](extractor/expected/edinburghfringe-kristen-schaal.json), [mr-chonkers](extractor/expected/edinburghfringe-mr-chonkers.json), [richard-herring-rhlstp](extractor/expected/edinburghfringe-richard-herring-rhlstp.json), [sophie-duker](extractor/expected/edinburghfringe-sophie-duker.json)._ <!-- req-gallery:11.3 -->
+🧩 _Validated against [880](extractor/expected/edinburghfringe-880.json), [daniel-sloss](extractor/expected/edinburghfringe-daniel-sloss.json), [kristen-schaal](extractor/expected/edinburghfringe-kristen-schaal.json), [mr-chonkers](extractor/expected/edinburghfringe-mr-chonkers.json), [richard-herring-rhlstp](extractor/expected/edinburghfringe-richard-herring-rhlstp.json), [sophie-duker](extractor/expected/edinburghfringe-sophie-duker.json)._ <!-- req-gallery:11.3 -->
 
 </td>
 <td valign="top">

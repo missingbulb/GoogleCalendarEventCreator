@@ -8,13 +8,13 @@ What the core generic extractor (`extension/event-extractors/generic-extractor.j
 
 ## Score
 
-Headline coverage over all 36 cases in the corpus:
+Headline coverage over all 38 cases in the corpus:
 
 | Metric | Coverage | Hits / gradeable |
 | --- | --: | --: |
-| **Critical fields** (title + start + location) | **77.8%** | 84 / 108 |
-| **All fields** | **58.4%** | 122 / 209 |
-| Event coverage *(informational)* | 25.8% | 42 / 163 |
+| **Critical fields** (title + start + location) | **75.4%** | 86 / 114 |
+| **All fields** | **56.6%** | 125 / 221 |
+| Event coverage *(informational)* | 24.3% | 44 / 181 |
 
 ### Gate
 
@@ -22,10 +22,10 @@ The gate (`dev/requirements/extractor/generic-coverage/generic-coverage.baseline
 
 | Metric | Watermark | Current (shared) | |
 | --- | --: | --: | :-: |
-| Critical fields | 77.8% | 77.8% | ✓ |
-| All fields | 58.4% | 58.4% | ✓ |
+| Critical fields | 75.4% | 75.4% | ✓ |
+| All fields | 56.6% | 56.6% | ✓ |
 
-Gated over **36** shared case(s).
+Gated over **38** shared case(s).
 
 Event coverage is reported but **not gated** (a few listing pages the bare run can't enumerate dominate it).
 
@@ -33,13 +33,13 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 
 | Field | Gradeable | ✓ match | ~ diff | ✗ miss | Match % |
 | --- | --: | --: | --: | --: | --: |
-| `title` **(critical)** | 36 | 30 | 4 | 2 | 83.3% |
-| `start` **(critical)** | 36 | 29 | 5 | 2 | 80.6% |
-| `end` | 23 | 16 | 0 | 7 | 69.6% |
-| `location` **(critical)** | 36 | 25 | 3 | 8 | 69.4% |
-| `ctz` | 33 | 14 | 0 | 19 | 42.4% |
-| `eventLengthInMinutes` | 11 | 0 | 0 | 11 | 0% |
-| `description` | 34 | 8 | 19 | 7 | 23.5% |
+| `title` **(critical)** | 38 | 31 | 5 | 2 | 81.6% |
+| `start` **(critical)** | 38 | 30 | 6 | 2 | 78.9% |
+| `end` | 24 | 16 | 0 | 8 | 66.7% |
+| `location` **(critical)** | 38 | 25 | 5 | 8 | 65.8% |
+| `ctz` | 35 | 15 | 0 | 20 | 42.9% |
+| `eventLengthInMinutes` | 12 | 0 | 0 | 12 | 0% |
+| `description` | 36 | 8 | 20 | 8 | 22.2% |
 
 ## By host
 
@@ -51,7 +51,7 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 | `comy.co.il` | 1 | 1/1 | 33.3% | 20% |
 | `dash.datadoghq.com` | 1 | 1/1 | 100% | 100% |
 | `dice.fm` | 1 | 1/1 | 100% | 100% |
-| `edfringe.com` | 5 | 5/5 | 33.3% | 14.3% |
+| `edfringe.com` | 6 | 6/6 | 33.3% | 14.3% |
 | `eventbrite.com` | 2 | 2/2 | 100% | 71.4% |
 | `eventer.co.il` | 1 | 1/1 | 100% | 83.3% |
 | `eventim.co.il` | 1 | 1/1 | 100% | 83.3% |
@@ -65,7 +65,7 @@ Event coverage is reported but **not gated** (a few listing pages the bare run c
 | `somo.social` | 1 | 1/1 | 100% | 66.7% |
 | `stubhub.com` | 1 | 6/6 | 100% | 100% |
 | `tabitisrael.co.il` | 1 | 0/1 | 0% | 0% |
-| `tel-aviv.gov.il` | 1 | 1/1 | 66.7% | 60% |
+| `tel-aviv.gov.il` | 2 | 2/18 | 50% | 50% |
 | `thinkdrink.co.il` | 1 | 1/1 | 100% | 60% |
 | `ticketmaster.co.il` | 1 | 1/1 | 100% | 80% |
 | `visit.tel-aviv.gov.il` | 2 | 2/2 | 100% | 91.7% |
@@ -81,6 +81,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, the bare r
 | `comy` | 1/1 | ~ | ✓ | — | ✗ | ✗ | — | ~ |
 | `dash-datadoghq` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
 | `dice` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| `edinburghfringe-880` | 1/1 | ✓ | ~ | ✗ | ~ | ✗ | ✗ | ✗ |
 | `edinburghfringe-daniel-sloss` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-kristen-schaal` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | `edinburghfringe-mr-chonkers` | 1/1 | ✓ | ~ | ✗ | ✗ | ✗ | ✗ | ✗ |
@@ -102,6 +103,7 @@ Legend: ✓ match · ~ different value · ✗ missing (source had it, the bare r
 | `somo` | 1/1 | ✓ | ✓ | ✓ | ✓ | ✗ | — | ~ |
 | `stubhub` | 6/6 | ✓ | ✓ | — | ✓ | — | — | ✓ |
 | `tabitisrael` | 0/1 | ✗ | ✗ | — | ✗ | ✗ | — | ✗ |
+| `tel-aviv-790` | 1/17 | ~ | ✓ | — | ~ | ✓ | — | ~ |
 | `tel-aviv` | 1/1 | ✓ | ✓ | — | ~ | ✓ | — | ~ |
 | `telavivcinematheque-506` | 1/109 | ~ | ✓ | — | ✓ | ✗ | — | ✗ |
 | `telavivcinematheque-left-handed-girl` | 1/1 | ✓ | ✓ | — | ✓ | ✗ | ✗ | ~ |
