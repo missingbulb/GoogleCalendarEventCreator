@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "foldedThrough": "2026-08-15",
-  "runsFoldedThrough": "2026-08-16T04:54:59Z",
+  "foldedThrough": "2026-08-16",
+  "runsFoldedThrough": "2026-08-17T04:10:36Z",
   "days": {
     "2026-07-24": {
       "captures": 1,
@@ -1735,56 +1735,56 @@
       }
     },
     "2026-W33": {
-      "days": 6,
-      "captures": 9,
-      "merges": 9,
-      "sessionDays": 9,
+      "days": 7,
+      "captures": 10,
+      "merges": 10,
+      "sessionDays": 10,
       "userMessages": 0,
       "userCommands": 0,
       "skillLoads": {
-        "merge-and-ci": 2,
+        "merge-and-ci": 3,
         "single-issue-triage": 3
       },
       "checks": {
         "work": {
-          "runs": 10,
-          "failures": 8,
+          "runs": 11,
+          "failures": 9,
           "errors": 0,
-          "blocking": 8,
+          "blocking": 9,
           "advisory": 0,
           "ciRuns": 0,
           "ciFailures": 0
         },
         "world": {
-          "runs": 1,
-          "failures": 0,
+          "runs": 5,
+          "failures": 3,
           "errors": 0,
-          "blocking": 0,
-          "advisory": 13,
+          "blocking": 105,
+          "advisory": 52,
           "ciRuns": 0,
           "ciFailures": 0
         }
       },
       "checkFindings": {
         "comment-classification": {
-          "blocking": 8,
+          "blocking": 9,
           "advisory": 0
         },
         "file-placement": {
           "blocking": 0,
-          "advisory": 10
+          "advisory": 20
         },
         "rules-line-length": {
           "blocking": 0,
-          "advisory": 1
+          "advisory": 2
         },
         "task-declaration-shape": {
           "blocking": 0,
-          "advisory": 1
+          "advisory": 2
         },
         "task-phase-discipline": {
           "blocking": 0,
-          "advisory": 1
+          "advisory": 2
         }
       },
       "tasks": {
@@ -1817,7 +1817,7 @@
           "deferred": 0
         },
         "core/update": {
-          "agent": 0,
+          "agent": 1,
           "prework": 2,
           "skipped": 0,
           "failed": 0,
@@ -1855,6 +1855,12 @@
       "taskExec": {
         "basics/update": {
           "success": 2,
+          "failed": 0,
+          "task-gone": 0,
+          "invalid": 0
+        },
+        "core/update": {
+          "success": 1,
           "failed": 0,
           "task-gone": 0,
           "invalid": 0
