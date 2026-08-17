@@ -44,6 +44,15 @@ all. Open the PR early for those.
   for the sleep's completion notification before the next poll. While a sleep
   runs, do real work (review the diff, draft the PR body) or end the turn —
   filler calls to look busy are tight-polling in disguise.
+- **Pass `run_in_background: true` on every sleep in that loop, starting with
+  the first 5s call — not only once a bare one gets blocked.** The harness
+  accepts a short foreground `sleep` but rejects a standalone `sleep 30`
+  (`"Blocked: standalone sleep 30 ... use run_in_background: true"`), so a
+  loop that starts foreground hits the block right at the 30s step and pays a
+  failed Bash call plus an unused `ToolSearch` for `Monitor` before recovering
+  with the same sleep, backgrounded. Measured identically in three separate
+  sessions, always at the same step, always recovered the same way: #892
+  (~10s lost), #894 (~7s), #903 (~6s).
 - **Don't reach for `subscribe_pr_activity` to wait for green** — its webhooks
   never deliver CI **success** (only failures/comments/reviews), so the
   transition you're waiting for never arrives. It's for babysitting a PR, not
