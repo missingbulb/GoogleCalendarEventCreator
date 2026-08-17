@@ -16,6 +16,17 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   that moves the branch. In #734 the combined one-liner wiped three finished
   edits **and** invalidated the `check_the_world.mjs` + `npm run test:offline`
   pass that had just gone green, forcing a full re-verification.
+- **A duplicate dispatch-trigger arriving while a session's own delegated
+  subagent is still running is a signal to stop, not to investigate.**
+  Confirm it via `resolve-dispatch` (the "not mine, change nothing" case) and
+  end the turn — don't let that check snowball into re-reading the subagent's
+  targets and redoing its work. In #876 a dispatched `tidy-issues` subagent
+  was still running in the background when a duplicate webhook fired; the
+  top-level session's "just confirming" pass over all 16 target issues
+  escalated into closing one and posting reconfirmation comments on the
+  rest — duplicating, not verifying, work its own subagent was already
+  producing — and converged the dispatch issue on that duplicate instead of
+  the subagent's actual output.
 - **Cap and qualify every GitHub MCP list/search call** — an unbounded one
   hard-fails the tool-result cap and costs a 2–3-call dig through the saved
   result file. `search_issues` handed a bare title string full-text-searches the
@@ -24,7 +35,13 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   185–211 KB three times (#734 twice, #753), and `actions_list` without a page
   cap at 155 KB (#760). Qualify the query (`in:title "Claudinite tracker:
   <Task>"`, or `list_issues` + `labels`) **and** pass a small `perPage` (5–10) —
-  the answer wanted is one issue or one run, never a page of them.
+  the answer wanted is one issue or one run, never a page of them. `perPage`
+  alone isn't the whole fix: even a single matched issue's full body can be
+  100+ KB, so the same overflow recurred with `in:title` correctly set but
+  `perPage` left off (#879, #890, #896). Pass `fields` too (e.g. `['number',
+  'title', 'state']`) to strip the body outright — a query that added it
+  (#886) returned instantly at ~3 KB where the identical unfielded query the
+  day before (#879) overflowed at 113 KB.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
@@ -149,6 +166,12 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
 - **Facebook can't be a cached live case** — a hard HTTP 400 even through the
   proxy, so its extraction stays unit-tests-only
   (`extension-test/event-extractors/extraction.test.js`).
+- **A scratch script that needs a project dependency (e.g. `jsdom`) can't live
+  in the harness's external scratchpad** — Node's module resolution walks up
+  from the script's own directory, which never reaches this repo's
+  `node_modules`. `generic-extractor-improvements`' habitual "fetch a page,
+  then jsdom-inspect it" throwaway scripts need to live inside the repo (a
+  gitignored scratch dir, cleaned up before committing) instead (#866).
 - **Rendered output isn't deterministic.** A re-record can legitimately shift a
   live case's `expected` — treat such drift like a site-markup change, and prefer
   extracting JSON-LD/`og:` (which apps still inject) over brittle DOM positions.
