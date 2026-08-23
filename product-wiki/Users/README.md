@@ -53,15 +53,17 @@ never silently overwrite.
   separate "paste a URL" step, unlike several competitor tools (see
   `../Competitors/README.md`).
 
-## Reported-demand signal (repo-native, checked 2026-08-09)
+## Reported-demand signal (repo-native, checked 2026-08-23)
 
 The first *observable* answer to "which misses actually get reported" — and it is
-mostly a negative one. As of 2026-08-09 the repo carries **13 issues labelled
+mostly a negative one. As of 2026-08-23 the repo carries **14 issues labelled
 [`extractor-request`](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)**,
-and **every one was filed by the repo owner** (`missingbulb`). No external
-reporter appears anywhere in that set. So the personas and pain points below
-still rest on zero outside feedback; what follows is signal about the *channel*
-and about one person's browsing, not about a user base.
+and **every one was filed by the repo owner** (`missingbulb`) — the same
+owner-only pattern that held at 13 on 2026-08-09 still holds two weeks and one
+filing later. No external reporter appears anywhere in that set. So the
+personas and pain points below still rest on zero outside feedback; what
+follows is signal about the *channel* and about one person's browsing, not
+about a user base.
 
 - **The channel exists, is in-product, and fires at the failure moment — but it
   is gated behind a GitHub account.** The popup's unsupported-host states carry
@@ -103,6 +105,20 @@ and about one person's browsing, not about a user base.
   So the sites most aggressive about bot-blocking are the ones least likely to
   gain a dedicated extractor, and from the user's side this looks like an
   arbitrary, permanent "no events found".
+- **The channel also gets used for a second, quieter purpose: hardening
+  coverage on an already-supported site, not just reporting a miss.** The one
+  new `extractor-request` since 2026-08-09 —
+  [#880](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/880),
+  `edfringe.com`, filed 2026-08-11 — reads like the other twelve site-specific
+  requests, but `edinburghfringe.js` had already existed since the 2026-06-22
+  extractor restructure; the PR that closed it,
+  [#881](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/881),
+  added a second recorded page, hardening an extractor that was already
+  shipping, not new site support. Excluded from the local/civic-skew count
+  below for that reason (it isn't a new-host demand signal), but it is a real
+  use of the same form, filed by the same owner — the channel's only
+  documented user treats it as a general-purpose "make this extractor better"
+  form as much as a "this site doesn't work" one.
 
 ## Pain points to track (hypotheses — verify with real feedback as it arrives)
 
@@ -186,11 +202,13 @@ The 2026-08-09 pass added the first *repo-native* user-side evidence — the
 reported-demand section above. These are this project's own issues and code, not
 user research, and are labelled as such wherever they are used:
 
-- [All `extractor-request` issues (13 as of 2026-08-09, all filed by the repo owner)](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)
+- [All `extractor-request` issues (14 as of 2026-08-23, all filed by the repo owner)](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)
 - [#96 — the original "embed a Google Form in the popup" request](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/96) — shipped instead as a prefilled GitHub issue form
 - [#285 — `axs.com`, abandoned: HTTP 403 blocks page capture](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/285) — owner: "Can't get the html to write an extractor for."
 - [#170 — `bandsintown.com`, same 403 wall, completed only from a browser-saved page](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/170)
 - [PR #199 — the bandsintown extractor that eventually landed](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/199)
+- [#880 — `edfringe.com`, filed 2026-08-11, a hardening request on an already-supported host](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/880)
+- [PR #881 — added a second recorded page to `edinburghfringe.js`, present since the 2026-06-22 restructure](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/881)
 
 ## Growth log
 
@@ -231,3 +249,13 @@ user research, and are labelled as such wherever they are used:
   retired the "fallback" vocabulary, so the cited path no longer existed. No claim
   added, changed or removed, and no user-side research was done this pass — the
   run's research went to Domain and Competitors.
+- **2026-08-23** — refreshed the reported-demand signal: one new
+  `extractor-request` issue since 2026-08-09 (#880, `edfringe.com`, filed
+  2026-08-11), still owner-filed — the zero-external-reports finding holds at
+  14/14. Checked what it actually was before folding it into the count: unlike
+  the twelve prior site-specific requests, `edinburghfringe.js` already existed
+  (since the 2026-06-22 restructure), and the closing PR (#881) added a second
+  test case rather than new site support — so it's excluded from the
+  local/civic-skew tally but kept as a new finding in its own right (the
+  channel doubles as a "harden this extractor" form, not only a "this site
+  doesn't work" one). No open question answered or opened.
