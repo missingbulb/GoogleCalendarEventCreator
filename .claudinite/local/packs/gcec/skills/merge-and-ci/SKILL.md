@@ -33,10 +33,13 @@ all. Open the PR early for those.
   outside `claude/**`, or a `paths-ignore`/`[skip ci]` push). Firing a manual
   dispatch on top of a run that already exists just buys a third run and its
   wall time.
-- **The shell can't observe GitHub state here.** The git remote is a git-only
-  proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
-  there's no API token in the env, and `gh` reaches no `api.github.com` — only
-  an MCP poll sees check state; a background bash/Monitor loop cannot.
+- **The shell can't observe GitHub state here.** `GITHUB_TOKEN`/`GH_TOKEN` *are*
+  set in the env and `api.github.com` answers, so the block is easy to miss: an
+  egress proxy passes only account-level endpoints (`/rate_limit`, `/user`) and
+  refuses every repository path — `/repos/<owner>/<repo>`, a commit's
+  `/check-runs`, `/actions/runs` — with `{"message":"GitHub access is not
+  enabled for this session…"}`, token sent or not. There is no `gh` binary at
+  all. Only an MCP poll sees check state; a background bash/Monitor loop cannot.
 - **Poll on a short back-off, never one long sleep, never tight.** Loop
   **MCP poll → background sleep → MCP poll** until the check leaves
   `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating — a
@@ -47,16 +50,20 @@ all. Open the PR early for those.
 - **Pass `run_in_background: true` on every sleep in that loop, starting with
   the first 5s call — not only once a bare one gets blocked.** The harness
   accepts a short foreground `sleep` but rejects a standalone `sleep 30`
-  (`"Blocked: standalone sleep 30 ... use run_in_background: true"`), so a
+  (`"Blocked: standalone sleep 30. … To wait for a command you started, use
+  run_in_background: true. Do not chain shorter sleeps to work around this
+  block."`), so a
   loop that starts foreground hits the block right at the 30s step and pays a
   failed Bash call plus an unused `ToolSearch` for `Monitor` before recovering
   with the same sleep, backgrounded. Measured identically in three separate
   sessions, always at the same step, always recovered the same way: #892
   (~10s lost), #894 (~7s), #903 (~6s).
-- **Don't reach for `subscribe_pr_activity` to wait for green** — its webhooks
-  never deliver CI **success** (only failures/comments/reviews), so the
-  transition you're waiting for never arrives. It's for babysitting a PR, not
-  merge-on-green.
+- **Don't end a turn on `subscribe_pr_activity` waiting for green** — its stated
+  contract *does* now include successful check-suite rollups alongside comments
+  and CI failures, delivered as `<wake reason="external-event">` envelopes, but
+  a Claude PR Steward already watching the PR takes those events instead: the
+  call still succeeds and only the tool result says this session will receive
+  nothing. It's for babysitting a PR, not merge-on-green.
 - **Won't sit and poll to green? Arm auto-merge — never end a turn on a
   subscription.** A run that opens a PR it can't watch to the end (an
   unattended/scheduled run, or a fix opened incidentally mid-task) should

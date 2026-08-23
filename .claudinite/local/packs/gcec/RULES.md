@@ -27,21 +27,20 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   rest — duplicating, not verifying, work its own subagent was already
   producing — and converged the dispatch issue on that duplicate instead of
   the subagent's actual output.
-- **Cap and qualify every GitHub MCP list/search call** — an unbounded one
-  hard-fails the tool-result cap and costs a 2–3-call dig through the saved
-  result file. `search_issues` handed a bare title string full-text-searches the
-  whole repo and returns every match with its full body: the standing
-  `Claudinite tracker: <Task>` lookup that opens every scheduled task blew up at
-  185–211 KB three times (#734 twice, #753), and `actions_list` without a page
-  cap at 155 KB (#760). Qualify the query (`in:title "Claudinite tracker:
-  <Task>"`, or `list_issues` + `labels`) **and** pass a small `perPage` (5–10) —
-  the answer wanted is one issue or one run, never a page of them. `perPage`
-  alone isn't the whole fix: even a single matched issue's full body can be
-  100+ KB, so the same overflow recurred with `in:title` correctly set but
-  `perPage` left off (#879, #890, #896). Pass `fields` too (e.g. `['number',
-  'title', 'state']`) to strip the body outright — a query that added it
-  (#886) returned instantly at ~3 KB where the identical unfielded query the
-  day before (#879) overflowed at 113 KB.
+- **`fields` is what caps a GitHub MCP list/search call — not the query, and
+  not always the page size.** An unbounded call hard-fails the tool-result cap
+  and costs a 2–3-call dig through the saved result file, and the per-result
+  envelope (user, app, reactions, every `*_url`) is most of that weight, not
+  just the body: `search_issues` at `perPage: 3` unfielded returns ~9 KB, the
+  same query with `fields: ['number','title','state']` ~0.3 KB. `search_issues`
+  is **natural-language semantic matching, already scoped to `is:issue`** — an
+  `in:title "Claudinite tracker: <Task>"` qualifier is not honoured and narrows
+  nothing (it returned five loosely-related issues out of 106 matches), so when
+  the answer is an exact set reach for `list_issues` + `labels` + `fields`.
+  `actions_list` takes neither: it **ignores `per_page`** (`per_page: 1` still
+  returned all 9 workflows; `per_page: 2`, a full default page of runs) and has
+  no `fields` — bound it with `workflow_runs_filter` (`branch` / `status` /
+  `event`), or read the single run you want with `actions_get`.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
