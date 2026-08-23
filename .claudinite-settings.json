@@ -1,0 +1,75 @@
+{
+  "packs": [
+    {
+      "id": "basics",
+      "version": "60823.1"
+    },
+    {
+      "id": "chrome-extension",
+      "version": "60823.1"
+    },
+    {
+      "id": "executable-requirements",
+      "version": "60822.1"
+    },
+    {
+      "id": "git-github",
+      "version": "60822.2"
+    },
+    {
+      "id": "node",
+      "version": "60823.1"
+    },
+    {
+      "id": "spec-driven-product",
+      "version": "60822.1"
+    },
+    {
+      "id": "product-wiki",
+      "version": "60823.2"
+    },
+    {
+      "id": "tidy-repo",
+      "version": "60823.1"
+    },
+    {
+      "id": "claudinite-growth",
+      "version": "60823.2"
+    },
+    "local/gcec",
+    {
+      "id": "claude-code-web-users-support",
+      "version": "60823.1",
+      "config": {
+        "repo": "missingbulb/Shepherd"
+      }
+    },
+    {
+      "id": "claudinite-lifecycle",
+      "version": "60823.1"
+    }
+  ],
+  "taskScheduler": {
+    "agenticTaskInvocationEndpoints": {
+      "default": {
+        "url": "https://api.anthropic.com/v1/claude_code/routines/trig_011iVaE4F36rAHBncAWnmXY2/fire",
+        "tokenSecret": "CCR_ROUTINE_TOKEN"
+      }
+    },
+    "dailyHour": 4,
+    "weeklyDay": "Sun",
+    "monthlyDay": 1
+  },
+  "sharedConstants": [
+    {
+      "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
+      "value": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
+      "regex": true,
+      "counts": {
+        "extension/manifest.json": 1,
+        "package.json": 1
+      }
+    }
+  ],
+  "engineVersion": "60823.1"
+}
