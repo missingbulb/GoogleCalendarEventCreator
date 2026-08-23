@@ -8,7 +8,7 @@ Project conventions and how-tos. The project's own working rules live in its
 content, discovered and run by the same Claudinite engine as the shared canon
 packs (prose injected at session start, checks at every Stop, skills
 mounted on demand), declared like any pack in
-[`.claudinite-checks.json`](.claudinite-checks.json):
+[`.claudinite-settings.json`](.claudinite-settings.json):
 
 - [`gcec`](.claudinite/local/packs/gcec/README.md) — the project's working pack:
   the standing project rules
@@ -79,8 +79,8 @@ shared [`Claudinite`](https://github.com/missingbulb/Claudinite) repo and is
 **vendored** here as tracked files under `.claudinite/shared/` — this repo's
 declared vendor set of the canon, refreshed by the fleet's nightly maintenance,
 with the snapshot's provenance stamped in
-[`.claudinite-checks.json`](.claudinite-checks.json) (`claudinite.updated` /
-`claudinite.ref`). A fresh checkout carries the full corpus; nothing is fetched
+[`.claudinite-settings.json`](.claudinite-settings.json) (`engineVersion` and each
+pack's own `version`). A fresh checkout carries the full corpus; nothing is fetched
 at session start.
 
 Alongside the vendored canon, [`.claudinite/local/packs/`](.claudinite/local/packs/)

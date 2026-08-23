@@ -4,7 +4,7 @@ Product-level requirements for the Google Calendar Event Creator extension — t
 market/user-facing **why** and **what**, as opposed to the engineering **how**.
 
 This is the one folder under `product-wiki/` the rest of the repo may still reference
-(see the barrier rule in [`.claudinite-checks.json`](../../.claudinite-checks.json)).
+(see the barrier rule in [`.claudinite-settings.json`](../../.claudinite-settings.json)).
 `product-wiki/Market/`, `product-wiki/Users/`, and `product-wiki/sample-data/` are a
 self-growing research wiki that the extension's source, tests, and docs must stay
 decoupled from; this file is the reviewed, human-maintained distillation that's

@@ -12,7 +12,7 @@ import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
 // packs'), and the activity-scoped skills that used to live as always-loaded
 // dev/procedures prose.
 //
-// A local pack is always declared by hand in .claudinite-checks.json (never
+// A local pack is always declared by hand in .claudinite-settings.json (never
 // fingerprinted by --init, never seeded), so detect/marker stay null. Its skills
 // live INSIDE the pack (skills/<name>/SKILL.md); the engine mounts them from
 // here, not from the canon skills tree.

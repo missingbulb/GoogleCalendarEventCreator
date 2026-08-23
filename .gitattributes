@@ -20,3 +20,4 @@ dev/requirements/popup/cases/*.png                                              
 dev/requirements/icon/cases/*.png                                               merge=ours
 usage.GENERATED.json merge=ours
 claudinite-rules.GENERATED.md merge=ours
+.claudinite/shared/** linguist-vendored

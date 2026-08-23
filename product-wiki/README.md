@@ -27,7 +27,7 @@ engineering requirements, procedures) must not silently start depending on,
 since an autonomous routine keeps rewriting it. `product-requirements/` is the
 single reviewed crossing point: the extension/tests/docs may reference *it*, and
 only it. See the `barriers` pack entry in
-[`.claudinite-checks.json`](../.claudinite-checks.json) for the enforced rule.
+[`.claudinite-settings.json`](../.claudinite-settings.json) for the enforced rule.
 
 ## How it grows
 
