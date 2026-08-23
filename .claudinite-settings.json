@@ -60,6 +60,13 @@
     "weeklyDay": "Sun",
     "monthlyDay": 1
   },
+  "accept": [
+    {
+      "rule": "adoption-answers-pending",
+      "path": ".claudinite-settings.json",
+      "reason": "false positive from this branch's own settings-file rename (migration 2026-08-23-settings-file-rename): the check's base/head pairing (packs/claudinite-lifecycle/skills/adopt-pack/checks.mjs, via engine/checks/helpers/work.mjs jsonPair/readBase) reads both sides at the SAME literal filename, so on the exact branch that renames the settings file, readBase(the new name) finds nothing at the merge-base and every already-declared pack misreads as newly added. Every already-pending adoption question (pre-existing on main, unrelated to this update) then trips as a blocking new-pack omission. Explained in full on GoogleCalendarEventCreator#1029. Prune this once the check gains rename-awareness (or the real pending questions get answered, which would also need this removed first so the answers actually get reviewed)."
+    }
+  ],
   "sharedConstants": [
     {
       "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump",
