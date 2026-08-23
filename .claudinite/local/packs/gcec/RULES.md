@@ -62,10 +62,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 - **Keep divergence small**: when syncing a branch to `origin/main` (by rebase),
   **run `npm run regen`** as part of the sync, so the branch carries
   freshly-generated artifacts, not just the latest sources.
-- **Whenever a change regenerates the UI gallery** (via `npm run refresh:ui`),
-  link the branch's copy in the chat in the same turn you commit it —
-  `https://github.com/<owner>/<repo>/blob/<branch>/dev/requirements/requirements.md`
-  — for one-page review.
 
 ## Owner commands
 
