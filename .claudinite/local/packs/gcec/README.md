@@ -30,7 +30,6 @@ fingerprinted or seeded.
 | Generated files: regen, never hand-merge | prose (+ each artifact's own gate) |
 | Regen artifacts on the `ours` driver | **hardcoded** (`regen-artifacts-merge-ours`; canon `basics/generated-merge-driver` owns the `GENERATED`-named half) |
 | Branch sync: rebase main + regen | prose |
-| Gallery regenerated → link in chat | prose |
 | Snapshot moves need owner approval | skill (snapshot-approval) |
 | Post-merge: fetch main, never check out | skill (merge-and-ci) |
 | Green PR that won't arm: merge it | skill (merge-and-ci) |
