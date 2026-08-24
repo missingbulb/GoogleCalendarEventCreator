@@ -5,8 +5,8 @@
 //
 //   precondition (here)   — pure code over the collected signals. "Is there any
 //                           request to act on?" Nothing else: no I/O, no writes,
-//                           no page reads. Almost every hour answers no, and the
-//                           hour then costs nothing at all.
+//                           no page reads. Almost every run answers no, and the
+//                           run then costs nothing at all.
 //   preprocessing         — `prepare.mjs`, a subprocess Action-side: triage,
 //                           closing the requests that need no extractor, branch,
 //                           scaffold, the ScraperAPI page fetch, the draft PR.
@@ -20,7 +20,14 @@
 
 export default {
   id: 'create-extractor',
-  frequency: 'hourly',           // a submitted request should become a PR in minutes, not overnight
+  // NOT REALLY A PERIODICAL TASK. A request arriving is an event, and polling for it
+  // is the wrong shape — the right one is a trigger on the issue itself. Until that
+  // flow exists, a slow implementation cycle is the accepted trade (#1060), so this
+  // says `daily` plainly. It has BEEN daily since `hourly` was retired: the canon
+  // normalizes a retired token at the declaration door, so the anchor, the janitor's
+  // stale bound and the signal window have all read daily regardless of what this
+  // line claimed.
+  frequency: 'daily',
   precondition_signals: ['issues', 'commits'],
   agent_model: 'sonnet',               // writing one extract() against a recorded page — bounded, well-specified judgment
   expected_outcome: 'open-pr',            // a human always reviews the extraction; the pipeline never merges
