@@ -70,7 +70,11 @@ test("eligible requests are listed oldest-first, matching the order preprocessin
 test("the declaration carries the full contract, including the secret preprocessing spends", async () => {
   const task = await load();
   assert.equal(task.id, "create-extractor");
-  assert.equal(task.frequency, "hourly");
+  // `daily`, not `hourly`: the canon retired that token and normalizes it away at the
+  // declaration door, so this task has run daily since — and #1060 accepts a slow cycle
+  // until an event trigger replaces the poll. Pinned so the declaration cannot drift back
+  // to a cadence the queue will not honour.
+  assert.equal(task.frequency, "daily");
   assert.deepEqual(task.precondition_signals, ["issues", "commits"]);  // requests, plus the pending-page sweep
   assert.equal(task.expected_outcome, "open-pr");   // a human always reviews the extraction
   assert.equal(task.agent_preprocessing, "node prepare.mjs");
