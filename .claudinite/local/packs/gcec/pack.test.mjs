@@ -9,6 +9,7 @@ import customSourcesFlat from './custom-sources-flat.mjs';
 import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
 import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
 import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
+import genericCoverageScopeAgrees from './generic-coverage-scope-agrees.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);
@@ -304,4 +305,57 @@ test('regen-artifacts-merge-ours: honors a basename-only pattern, and a `*` that
 
 test('regen-artifacts-merge-ours: quiet when there are no regen artifacts in scope', () => {
   assert.deepEqual(regenArtifactsMergeOurs.run(attrCtx(['extension/events-popup/popup.js'])), []);
+});
+
+// --- generic-coverage-scope-agrees ------------------------------------------
+// The scope pattern the generic-coverage routine is held to, as each of the two
+// gates spells it. Kept as one unbroken literal per side so a fixture never
+// disagrees with itself about what "identical" means.
+const SCOPE = '^(extension/event-extractors/generic-extractor\\.js|extension/event-extractors/helpers/[^/]+\\.js|extension-test/event-extractors/extraction\\.test\\.js|dev/requirements/extractor/generic-coverage/generic-coverage\\.(baseline\\.GENERATED\\.json|GENERATED\\.md))$';
+
+const RULES_FILE = '.claudinite/local/packs/gcec/merge-rules.json';
+const POSTCONDITIONS = '.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/postconditions.sh';
+
+const scopeCtx = ({ rules, shell }) => ({
+  files: [],
+  read: (p) => (p === RULES_FILE ? rules : p === POSTCONDITIONS ? shell : null),
+  exists: () => false,
+});
+
+const rulesJson = (pattern) => JSON.stringify([
+  { name: 'generic-coverage-scope', pathMatching: `/${pattern}/`, changeKinds: ['added', 'modified'], editShape: 'any' },
+]);
+const shellScript = (pattern) => `set -uo pipefail\n# ── 1. SCOPE ──\nallowed='${pattern}'\nnpm test\n`;
+
+test('generic-coverage-scope-agrees: fires when one gate is widened alone', () => {
+  const findings = genericCoverageScopeAgrees.run(
+    scopeCtx({ rules: rulesJson(SCOPE), shell: shellScript('^(extension/.*)$') }),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].severity, 'blocking');
+  assert.match(findings[0].what, /describe different file sets/);
+  assert.match(findings[0].fix, /\^\(extension\/\.\*\)\$/);
+});
+
+test('generic-coverage-scope-agrees: fires when the shell scope is no longer a single allowed= line', () => {
+  const findings = genericCoverageScopeAgrees.run(
+    scopeCtx({ rules: rulesJson(SCOPE), shell: 'allowed=$(build_it)\n' }),
+  );
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].file, POSTCONDITIONS);
+  assert.match(findings[0].what, /declares no single-line/);
+});
+
+test('generic-coverage-scope-agrees: quiet when the two literals are identical', () => {
+  assert.deepEqual(
+    genericCoverageScopeAgrees.run(scopeCtx({ rules: rulesJson(SCOPE), shell: shellScript(SCOPE) })),
+    [],
+  );
+});
+
+test('generic-coverage-scope-agrees: quiet when either file or the rule is absent', () => {
+  assert.deepEqual(genericCoverageScopeAgrees.run(scopeCtx({ rules: null, shell: shellScript(SCOPE) })), []);
+  assert.deepEqual(genericCoverageScopeAgrees.run(scopeCtx({ rules: rulesJson(SCOPE), shell: null })), []);
+  assert.deepEqual(genericCoverageScopeAgrees.run(scopeCtx({ rules: '[]', shell: shellScript('^(extension/.*)$') })), []);
+  assert.deepEqual(genericCoverageScopeAgrees.run(scopeCtx({ rules: 'not json', shell: shellScript('^(extension/.*)$') })), []);
 });

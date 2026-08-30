@@ -11,7 +11,15 @@ export default {
   frequency: 'weekly',            // fires on the repo's weekly anchor day/hour
   precondition_signals: ['commits'],
   agent_model: 'opus',                 // closing a real generic-extractor gap is heavy judgment
-  expected_outcome: 'merged-pr',       // postconditions.sh (task.md step 4) is a hard gate ahead of the PR, so nothing unchecked can reach main
+  expected_outcome: 'pr',
+  // What may land unreviewed, measured against the pushed diff rather than trusted:
+  // exactly the file scope postconditions.sh already refuses to exceed — the generic
+  // extractor, its helpers, the covering test and the regenerated artifacts — named
+  // once as `generic-coverage-scope` in the pack's merge-rules.json. A run that
+  // wandered into a custom/<site>.js or the manifest, or that DELETED a helper the
+  // postcondition would have tolerated, parks for review instead of merging: the
+  // postcondition is a gate the run executes on itself, this one is not.
+  automerge: ['generic-coverage-scope'],
 
   agent_instructions: 'task.md',
   // The best-effort run bound the executor surfaces into the subagent's brief

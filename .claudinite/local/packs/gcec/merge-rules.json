@@ -1,0 +1,8 @@
+[
+  {
+    "name": "generic-coverage-scope",
+    "pathMatching": "/^(extension/event-extractors/generic-extractor\\.js|extension/event-extractors/helpers/[^/]+\\.js|extension-test/event-extractors/extraction\\.test\\.js|dev/requirements/extractor/generic-coverage/generic-coverage\\.(baseline\\.GENERATED\\.json|GENERATED\\.md))$/",
+    "changeKinds": ["added", "modified"],
+    "editShape": "any"
+  }
+]

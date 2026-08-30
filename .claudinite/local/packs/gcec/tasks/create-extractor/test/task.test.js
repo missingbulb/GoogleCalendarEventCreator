@@ -76,7 +76,10 @@ test("the declaration carries the full contract, including the secret preprocess
   // to a cadence the queue will not honour.
   assert.equal(task.frequency, "daily");
   assert.deepEqual(task.precondition_signals, ["issues", "commits"]);  // requests, plus the pending-page sweep
-  assert.equal(task.expected_outcome, "open-pr");   // a human always reviews the extraction
+  // The pair the canon's auto-merge contract splits the old `open-pr` ceiling into:
+  // a run may open a PR, and nothing it produces may land without a person.
+  assert.equal(task.expected_outcome, "pr");
+  assert.equal(task.automerge, "nothing");         // a human always reviews the extraction
   assert.equal(task.agent_preprocessing, "node prepare.mjs");
   assert.deepEqual(task.required_secrets, ["SCRAPER_API_KEY"]);
   assert.ok(task.agent_preprocessing_timeout > 0 && task.agent_execution_timeout > 0);
