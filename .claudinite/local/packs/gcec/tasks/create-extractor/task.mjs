@@ -30,7 +30,8 @@ export default {
   frequency: 'daily',
   precondition_signals: ['issues', 'commits'],
   agent_model: 'sonnet',               // writing one extract() against a recorded page — bounded, well-specified judgment
-  expected_outcome: 'open-pr',            // a human always reviews the extraction; the pipeline never merges
+  expected_outcome: 'pr',
+  automerge: 'nothing',                   // a human always reviews the extraction; the pipeline never merges
 
   agent_instructions: 'task.md',
   agent_execution_timeout: 3600,          // generous: a stubborn page can take several extract/verify rounds

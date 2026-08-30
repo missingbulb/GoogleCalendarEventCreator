@@ -193,6 +193,14 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
   baseline while the gate is red — a regression bundled with a case-set change can
   be re-anchored over. Detailed mechanics self-document in the gate's own headers
   (`dev/requirements/extractor/generic-coverage/generic-coverage.js` / `.test.js`).
+- **Widening the generic-coverage routine's file scope** — change the pattern in
+  BOTH gates, identically: `allowed=` in
+  `.claudinite/local/packs/gcec/tasks/generic-extractor-improvements/postconditions.sh`
+  (what the run refuses to exceed) and `generic-coverage-scope`'s `pathMatching` in
+  `.claudinite/local/packs/gcec/merge-rules.json` (what the auto-merge policy will
+  let land unreviewed). A shell literal and a JSON regex cannot share a constant, so
+  the `generic-coverage-scope-agrees` check compares them; widening one alone is
+  blocking.
 - **To see what the core generic extractor gets ON ITS OWN** on any cached page —
   even a supported host — load the files, set `GCal.sources = []`, then call
   `GCal.extract()`: the documented way to strip every per-site override and see
