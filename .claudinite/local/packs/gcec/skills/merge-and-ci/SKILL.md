@@ -14,12 +14,17 @@ on treating CI as a fixed poll-and-sleep ritual).
 ## Open the PR early when the only reviewable output is on CI
 
 A change that adds or modifies an e2e/heavy-browser (`dev/requirements/heavy/`)
-or UI-snapshot (`dev/requirements/{popup,icon}/`) test can't be exercised
-locally — the sandbox has no Chrome — and its reviewable artifacts only exist
-on a PR: CI runs the heavy/e2e suites against the branch, and a UI change's
-reviewable output (the pixel diff GitHub renders, the inline gallery in the
+test can't be exercised locally: a real Chromium is pre-installed
+(`/opt/pw-browsers/chromium` runs fine standalone — `chrome --version`
+succeeds), but the sandbox has no X server/display or dbus session, so the
+extension-load test's own Chrome launch fails (`Missing X server or
+$DISPLAY`) — CI is where it actually runs. A UI-snapshot
+(`dev/requirements/{popup,icon}/`) test needs no Chrome at all (satori+resvg
+rasterizing) and `npm run test:ui` runs and passes locally; only its
+*reviewable* output (the pixel diff GitHub renders, the inline gallery in the
 branch's `dev/requirements/requirements.md`) needs a pushed branch to view at
-all. Open the PR early for those.
+all. Open the PR early for both — CI for the first, reviewability for the
+second.
 
 ## Getting a green check in a Claude web session
 
@@ -33,10 +38,17 @@ all. Open the PR early for those.
   outside `claude/**`, or a `paths-ignore`/`[skip ci]` push). Firing a manual
   dispatch on top of a run that already exists just buys a third run and its
   wall time.
-- **The shell can't observe GitHub state here.** The git remote is a git-only
-  proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
-  there's no API token in the env, and `gh` reaches no `api.github.com` — only
-  an MCP poll sees check state; a background bash/Monitor loop cannot.
+- **The shell still can't observe GitHub state here — but not for the old
+  reason.** The git remote is now a plain `https://github.com/<owner>/<repo>`
+  origin and a bare `git fetch`/`git push` works directly (no
+  `/git/<owner>/<repo>/…` proxy path). `GH_TOKEN`/`GITHUB_TOKEN` are present in
+  the env and even authenticate against generic endpoints (`curl
+  api.github.com/user`, `/rate_limit` return 200) — but a repo-scoped call
+  (`commits/<sha>/check-runs`, `commits/<sha>/status`) 403s with *"GitHub
+  access is not enabled for this session. An org admin must connect the Claude
+  GitHub App"*, and `gh` itself isn't installed (`command not found`). So the
+  practical fact holds: only an MCP poll sees check state; a background
+  bash/Monitor loop cannot.
 - **Poll on a short back-off, never one long sleep, never tight.** Loop
   **MCP poll → background sleep → MCP poll** until the check leaves
   `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating — a
@@ -53,10 +65,12 @@ all. Open the PR early for those.
   with the same sleep, backgrounded. Measured identically in three separate
   sessions, always at the same step, always recovered the same way: #892
   (~10s lost), #894 (~7s), #903 (~6s).
-- **Don't reach for `subscribe_pr_activity` to wait for green** — its webhooks
-  never deliver CI **success** (only failures/comments/reviews), so the
-  transition you're waiting for never arrives. It's for babysitting a PR, not
-  merge-on-green.
+- **Don't reach for `subscribe_pr_activity` to wait for green** — its own tool
+  description now promises delivery of "successful check-suite rollups" too,
+  but that half is the unreliable one: CI success (like a new push or a
+  merge-conflict transition) can arrive late or not at all, unlike
+  failures/comments/reviews. It's for babysitting a PR, not a dependable
+  merge-on-green signal.
 - **Won't sit and poll to green? Arm auto-merge — never end a turn on a
   subscription.** A run that opens a PR it can't watch to the end (an
   unattended/scheduled run, or a fix opened incidentally mid-task) should
