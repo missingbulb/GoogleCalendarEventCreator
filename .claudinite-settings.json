@@ -2,7 +2,7 @@
   "packs": [
     {
       "id": "basics",
-      "version": "60827.2"
+      "version": "60830.1"
     },
     {
       "id": "chrome-extension",
@@ -26,7 +26,7 @@
     },
     {
       "id": "product-wiki",
-      "version": "60824.1"
+      "version": "60830.1"
     },
     {
       "id": "tidy-repo",
@@ -34,7 +34,7 @@
     },
     {
       "id": "claudinite-growth",
-      "version": "60827.1"
+      "version": "60830.1"
     },
     "local/gcec",
     {
@@ -46,7 +46,7 @@
     },
     {
       "id": "claudinite-lifecycle",
-      "version": "60824.6"
+      "version": "60830.1"
     },
     {
       "id": "claudinite-tasks",
