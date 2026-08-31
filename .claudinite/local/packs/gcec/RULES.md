@@ -41,7 +41,12 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   `perPage` left off (#879, #890, #896). Pass `fields` too (e.g. `['number',
   'title', 'state']`) to strip the body outright — a query that added it
   (#886) returned instantly at ~3 KB where the identical unfielded query the
-  day before (#879) overflowed at 113 KB.
+  day before (#879) overflowed at 113 KB. `get_job_logs` hits the same cap a
+  different way: guessing a large `tail_lines` to diagnose a CI failure can
+  itself exceed the tool's token limit (#1101, `tail_lines: 2406` →
+  `exceeds maximum allowed tokens`). Skip the guess — a small call gets you the
+  saved-to-disk log path, then `grep` that file for the failure marker (`not
+  ok`, `FAIL`) the same way an oversized list/search result gets read.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
