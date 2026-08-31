@@ -29,19 +29,21 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   the subagent's actual output.
 - **Cap and qualify every GitHub MCP list/search call** — an unbounded one
   hard-fails the tool-result cap and costs a 2–3-call dig through the saved
-  result file. `search_issues` handed a bare title string full-text-searches the
-  whole repo and returns every match with its full body: the standing
-  `Claudinite tracker: <Task>` lookup that opens every scheduled task blew up at
-  185–211 KB three times (#734 twice, #753), and `actions_list` without a page
-  cap at 155 KB (#760). Qualify the query (`in:title "Claudinite tracker:
-  <Task>"`, or `list_issues` + `labels`) **and** pass a small `perPage` (5–10) —
-  the answer wanted is one issue or one run, never a page of them. `perPage`
-  alone isn't the whole fix: even a single matched issue's full body can be
-  100+ KB, so the same overflow recurred with `in:title` correctly set but
-  `perPage` left off (#879, #890, #896). Pass `fields` too (e.g. `['number',
-  'title', 'state']`) to strip the body outright — a query that added it
-  (#886) returned instantly at ~3 KB where the identical unfielded query the
-  day before (#879) overflowed at 113 KB.
+  result file. `search_issues` is natural-language semantic matching (already
+  scoped to `is:issue`), not literal GitHub search syntax — an `in:title`
+  qualifier isn't honored as a filter, so it returns the same broad set of
+  conceptually-similar issues, full body included, as a bare query: the
+  standing `Claudinite tracker: <Task>` lookup that opens every scheduled task
+  blew up at 185–211 KB three times (#734 twice, #753), and `actions_list`
+  without a page cap at 155 KB (#760). Use `list_issues` + `labels` for an
+  exact-match lookup **and** pass a small `perPage` (5–10) — the answer wanted
+  is one issue or one run, never a page of them. `perPage` alone isn't the
+  whole fix: even a single matched issue's full body can be 100+ KB, so the
+  same overflow recurred with the query narrowed but `perPage` left off (#879,
+  #890, #896). Pass `fields` too (e.g. `['number', 'title', 'state']`) to
+  strip the body outright — a query that added it (#886) returned instantly at
+  ~3 KB where the identical unfielded query the day before (#879) overflowed
+  at 113 KB.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
