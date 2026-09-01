@@ -1,31 +1,35 @@
 // tzavta.co.il event pages: https://www.tzavta.co.il/event/5151
 //
-// TODO(agent): document the page's structure and where each field is read from,
-// mirroring event-extractors/custom/meetup.js. The real page is cached at
-// dev/requirements/extractor/data/server-fetched/tzavta.html.
+// Server-rendered page with no schema.org JSON-LD and no <time datetime>
+// node, so the generic base finds a date but no time-of-day. Each show states
+// its date/time/hall as three ".show_date_num" spans (in that order); the
+// site-wide footer states the venue's street address (Tzavta is one fixed
+// building with several halls).
 //
-// This source is a layer of OVERRIDES over the core generic extractor
-// (generic-extractor.js), which has already read the page's own
-// schema.org JSON-LD, Open Graph tags, microdata and visible dates. State ONLY
-// the fields it gets wrong — anything you leave out comes from that base. If it
-// turns out to get everything right, just delete this file — the host is already
-// registered in supportedDomains, so the site stays fully supported without it.
+//   title       h1.show_title
+//   start       the date+time pair from .show_date_num, day-first (Israeli
+//               "DD.MM.YYYY" format)
+//   location    the hall name (third .show_date_num) + the footer address
+//   description the show's full content block (credits, guest, duration) —
+//               richer than the page's one-line og:description teaser
+//   ctz         fixed to Asia/Jerusalem (Tzavta is in Tel Aviv)
 (() => {
-  const { text, firstText, blockText, normalizeDateValue } = GCal;
+  const { text, clean, blockText, parseDateFromText } = GCal;
 
   GCal.sources.push({
     name: "tzavta",
     matches: (host) => /(^|\.)tzavta\.co\.il$/.test(host),
     extract() {
-      // TODO(agent): refine these selectors against dev/requirements/extractor/data/server-fetched/tzavta.html,
-      // dropping any the generic base already gets right and adding location /
-      // description / ctz as the page needs them.
+      const [dateText, timeText, hall] = [...document.querySelectorAll(".show_date_num")].map((el) =>
+        clean(el.textContent)
+      );
+      const address = text(".footer_contact > div");
       return {
-        title: text("h1"),
-        start: (() => {
-          const el = document.querySelector("time[datetime]");
-          return el ? normalizeDateValue(el.getAttribute("datetime")) : "";
-        })(),
+        title: text("h1.show_title"),
+        start: dateText ? parseDateFromText(`${dateText} ${timeText || ""}`.trim()) : "",
+        location: hall && address ? `${hall}, ${address}` : hall || address,
+        description: blockText(".show_content_insert"),
+        ctz: "Asia/Jerusalem",
       };
     },
   });
