@@ -52,9 +52,5 @@ export default {
   // commit. Preprocessing runs inside Actions, where the secret already is.
   required_secrets: ['SCRAPER_API_KEY'],
 
-  // Eligibility, and nothing more — as the `request-eligible` term in
-  // preconditions.mjs beside this file. Task-local because its subject is this
-  // repo's own request labels rather than a window of activity the shared
-  // vocabulary knows about.
   preconditions: ['extractor-request-eligible'],
 };
