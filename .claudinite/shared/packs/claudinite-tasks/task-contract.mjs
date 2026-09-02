@@ -8,6 +8,7 @@ import { ACCEPTED_FREQUENCIES, normalizeFrequency } from './calendar.mjs';
 import { MODEL_FAMILIES } from './model-map.mjs';
 import { EXECUTING_LEASH_MS } from './queue/leases.mjs';
 import { normalizePolicy } from './merge-policy.mjs';
+import { validatePreconditions, preconditionSignals } from './precondition-policy.mjs';
 
 // A declared timeout is always a whole number of seconds, > 0.
 const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
@@ -106,10 +107,10 @@ export const SIGNAL_NAMES = [
 // Validate one task declaration. Returns an array of `{ what, fix }` problems —
 // empty means the declaration is well-formed. Pure: no I/O, no imports of the
 // task itself; the caller supplies the already-loaded default export.
-export function validateTaskDeclaration(raw) {
+export function validateTaskDeclaration(raw, terms = new Map()) {
   const decl = normalizeTaskDeclaration(raw);
   if (decl === null || typeof decl !== 'object' || Array.isArray(decl)) {
-    return [{ what: 'task.mjs does not default-export a declaration object', fix: 'export default { id, frequency, precondition_signals, agent_model, expected_outcome, agent_instructions, precondition }' }];
+    return [{ what: 'task.mjs does not default-export a declaration object', fix: 'export default { id, frequency, preconditions, agent_model, expected_outcome, agent_instructions }' }];
   }
   const problems = [];
   const bad = (what, fix) => problems.push({ what, fix });
@@ -125,8 +126,17 @@ export function validateTaskDeclaration(raw) {
   if (!ACCEPTED_FREQUENCIES.includes(decl.frequency)) {
     bad(`"frequency" ${JSON.stringify(decl.frequency)} is not a legal frequency`, `set one of: ${ACCEPTED_FREQUENCIES.join(', ')}`);
   }
-  if (!Array.isArray(decl.precondition_signals) || !decl.precondition_signals.every((s) => SIGNAL_NAMES.includes(s))) {
-    bad(`"precondition_signals" must be an array of known signal names`, `use only: ${SIGNAL_NAMES.join(', ')}`);
+  // `precondition_signals` belongs to the LEGACY function form alone. Under
+  // `preconditions` the union is DERIVED from the expression's terms (each names
+  // what it reads), so the collector can never disagree with what the gate
+  // actually consults — and a declaration that still carries the field is stating
+  // something nothing reads.
+  if (decl.preconditions === undefined) {
+    if (!Array.isArray(decl.precondition_signals) || !decl.precondition_signals.every((s) => SIGNAL_NAMES.includes(s))) {
+      bad(`"precondition_signals" must be an array of known signal names`, `use only: ${SIGNAL_NAMES.join(', ')}`);
+    }
+  } else if (decl.precondition_signals !== undefined) {
+    bad('"preconditions" is declared beside "precondition_signals"', 'drop "precondition_signals" — the signal union is derived from the conditions, each of which names what it reads');
   }
   if (!MODEL_FAMILIES.includes(decl.agent_model)) {
     bad(`"agent_model" ${JSON.stringify(decl.agent_model)} is not a legal model family`, `set one of: ${MODEL_FAMILIES.join(', ')}`);
@@ -168,8 +178,17 @@ export function validateTaskDeclaration(raw) {
   // `{ error }` — the precondition COULD NOT ANSWER. The third is a run failure
   // rather than a verdict (F27): a decline is a decision about the world, and one
   // taken on an API that would not answer is a guess whose write-backs cannot land.
-  if (typeof decl.precondition !== 'function') {
-    bad('"precondition" is not a function', 'export a precondition(signals, config, item) that returns { run, reason, context? } — or { error } when it could not answer');
+  //
+  // EXACTLY ONE OF THE TWO FORMS. `preconditions` is the declarative expression
+  // the canon writes; the `precondition` function stays accepted forever, for a
+  // member's own local task files, which nothing converges. Declaring both leaves
+  // the reader — and the evaluator — with no way to tell which is the gate.
+  if (decl.preconditions !== undefined && decl.precondition !== undefined) {
+    bad('the task declares both "preconditions" and a "precondition" function', 'keep one: the declarative "preconditions" expression, or the legacy function');
+  } else if (decl.preconditions !== undefined) {
+    for (const problem of validatePreconditions(decl.preconditions, terms)) bad(problem.what, problem.fix);
+  } else if (typeof decl.precondition !== 'function') {
+    bad('the task declares neither "preconditions" nor a "precondition" function', 'add "preconditions": a list of named conditions, all of which must hold (e.g. ["substantive-change"], or ["none"] for a task the calendar triggers)');
   }
 
   /**
@@ -266,6 +285,26 @@ export function validateTaskDeclaration(raw) {
     bad('"required_secrets" is not an array of secret names', 'list the repo Actions secret names this task needs, e.g. ["SOME_API_KEY"]');
   }
 
+  // The one exception to "whether the repo has them is not our business": GitHub
+  // reserves the `GITHUB_` prefix, answering "Secret names must not start with
+  // GITHUB_" on the secret form. Such a name cannot be configured by anyone, so the
+  // task parks forever on a secret its owner is refused — and only the declaration
+  // can catch it, since the park reads as ordinary missing configuration.
+  for (const name of (Array.isArray(decl.required_secrets) ? decl.required_secrets : [])) {
+    if (typeof name === 'string' && name.toUpperCase().startsWith('GITHUB_')) {
+      bad(`required secret "${name}" cannot be created — GitHub reserves the GITHUB_ prefix`,
+        'rename it without that prefix, e.g. one carrying the pack\'s own name');
+    }
+    // The other namespace a secret cannot borrow. `CLAUDINITE_*` in a task file is the
+    // code-work contract, and `task-code-work-env` reads every name outside that
+    // contract as a variable nobody sets — which a delivered secret is not, so the
+    // finding would be unfixable without renaming the secret anyway.
+    if (typeof name === 'string' && name.toUpperCase().startsWith('CLAUDINITE_')) {
+      bad(`required secret "${name}" sits in the code-work namespace, which its task's own code may not read`,
+        'rename it outside CLAUDINITE_* — that prefix belongs to the variables code_work is handed');
+    }
+  }
+
   // Execution bound (task-code-work DESIGN §2, §6) — an agentic task MUST
   // declare a positive-integer agent_execution_timeout. There is always a bound
   // on an agentic run; enforcement is best-effort (the executor surfaces the
@@ -282,4 +321,13 @@ export function validateTaskDeclaration(raw) {
   }
 
   return problems;
+}
+
+// The signals to collect for one task: the derived union under `preconditions`,
+// the declared list under the legacy function. THE one place the two forms are
+// reconciled, so every caller asks the same question of both.
+export function taskSignalNames(decl, terms = new Map()) {
+  return decl?.preconditions !== undefined
+    ? preconditionSignals(decl.preconditions, terms)
+    : (decl?.precondition_signals ?? []);
 }
