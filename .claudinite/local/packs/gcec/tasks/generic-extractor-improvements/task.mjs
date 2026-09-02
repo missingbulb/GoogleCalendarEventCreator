@@ -9,7 +9,6 @@
 export default {
   id: 'generic-extractor-improvements',
   frequency: 'weekly',            // fires on the repo's weekly anchor day/hour
-  precondition_signals: ['commits'],
   agent_model: 'opus',                 // closing a real generic-extractor gap is heavy judgment
   expected_outcome: 'pr',
   // What may land unreviewed, measured against the pushed diff rather than trusted:
@@ -33,27 +32,7 @@ export default {
   // the whole task stays a single agentic stage.
   agent_execution_timeout: 5400,
 
-  // This is the old preconditions.sh, moved into code over the `commits` signal
-  // (DESIGN §6): the result is a pure function of the source, and most weeks nothing
-  // meaningful lands, so a run over unchanged code would re-derive last week's
-  // answer while burning a full model run. `commits.substantiveChange` is exactly
-  // the shell's "a commit touched real source, not only docs/GENERATED" notion,
-  // windowed to whatever's landed since the last successful run. When in doubt
-  // the week still runs: a run that finds nothing is cheap and makes no PR; a
-  // too-clever skip that misses a real opportunity is not.
-  precondition(signals) {
-    const commits = signals.commits ?? {};
-    if (!commits.substantiveChange) {
-      return { run: false, reason: 'no meaningful code change in the window (idle, or docs/generated churn only)' };
-    }
-    const shas = (commits.list ?? []).filter((c) => c.substantive).map((c) => c.sha.slice(0, 7));
-    return {
-      run: true,
-      reason: `${shas.length} meaningful commit(s) in the window`,
-      context: [
-        `Scope: the ${shas.length} substantive commit(s) in the window — ${shas.join(', ')}.`,
-        'Most runs correctly change nothing — only open a PR on a real generic-extractor win that clears the coverage gate; a forced or fake win is worse than none.',
-      ],
-    };
-  },
+  // When in doubt the week still runs: a run that finds nothing is cheap and makes
+  // no PR; a too-clever skip that misses a real opportunity is not.
+  preconditions: ['substantive-change'],
 };
