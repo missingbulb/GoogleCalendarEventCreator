@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
+  "id": "generic-extractor-improvements",
+  "frequency": "weekly",
+  "preconditions": [
+    "substantive-change"
+  ],
+  "expected_outcome": "pr",
+  "automerge": [
+    "generic-coverage-scope"
+  ],
+  "agent_model": "opus",
+  "agent_instructions": "task.md",
+  "agent_execution_timeout": 5400
+}
