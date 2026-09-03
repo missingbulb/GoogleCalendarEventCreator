@@ -72,7 +72,8 @@ test("eligible requests are listed oldest-first, matching the order preprocessin
 });
 
 test("the declaration carries the full contract, including the secret preprocessing spends", async () => {
-  const task = (await import("../task.mjs")).default;
+  const { findTaskDeclaration, loadTaskDeclaration } = await import("../../../../../../shared/packs/claudinite-tasks/task-declaration.mjs");
+  const task = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
   assert.equal(task.id, "create-extractor");
   // `daily`, not `hourly`: the canon retired that token and normalizes it away at the
   // declaration door, so this task has run daily since — and #1060 accepts a slow cycle

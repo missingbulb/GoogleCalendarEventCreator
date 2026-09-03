@@ -364,7 +364,7 @@ export async function main() {
   TOKEN = process.env.GITHUB_TOKEN;
   const base = process.env.CLAUDINITE_DEFAULT_BRANCH || 'main';
   const requestFile = process.env.CLAUDINITE_REQUEST_AGENT;
-  // Named in task.mjs's `required_secrets`, so the wiring converge put it in this
+  // Named in task.json's `required_secrets`, so the wiring converge put it in this
   // process's env and baselining has asked the owner for it if it isn't set.
   // Nothing gates on that ask, so check it here and say so plainly.
   const scraperKey = process.env.SCRAPER_API_KEY;
@@ -373,7 +373,8 @@ export async function main() {
 
   // The pending-page sweep first: it is independent of any request, and cheap when
   // there is nothing to do (one directory listing).
-  const { default: decl } = await import('./task.mjs');
+  const { findTaskDeclaration, loadTaskDeclaration } = await import('../../../../../shared/packs/claudinite-tasks/task-declaration.mjs');
+  const decl = await loadTaskDeclaration(findTaskDeclaration(new URL('.', import.meta.url).pathname));
   await sweepPendingPages(scraperKey, base, decl.agent_preprocessing_timeout * 1000);
 
   const allRequests = await openRequests();

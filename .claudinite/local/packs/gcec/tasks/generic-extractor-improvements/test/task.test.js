@@ -14,10 +14,13 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 
 const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
-const load = async () => ({
-  task: (await import("../task.mjs")).default,
-  policy: await import(`${MOUNT}/precondition-policy.mjs`),
-});
+const load = async () => {
+  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/task-declaration.mjs`);
+  return {
+    task: await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`)),
+    policy: await import(`${MOUNT}/precondition-policy.mjs`),
+  };
+};
 
 const commits = (list) => ({ commits: { substantiveChange: list.length > 0, list } });
 const sub = (sha) => ({ sha, substantive: true });

@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
+  "id": "generic-extractor-improvements",
+  "description": "Tries to close the gap between the generic extractor and what dedicated per-site sources capture, by hypothesizing an improvement, editing the extractor, and verifying against live pages. A genuine win is rare; finding none is the expected, correct outcome, not a failure.",
+  "frequency": "weekly",
+  "preconditions": [
+    "substantive-change"
+  ],
+  "expected_outcome": "pr",
+  "automerge": [
+    "generic-coverage-scope"
+  ],
+  "agent_model": "opus",
+  "agent_instructions": "task.md",
+  "agent_execution_timeout": 5400
+}

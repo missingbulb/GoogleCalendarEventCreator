@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
+  "id": "create-extractor",
+  "description": "Turns an extractor-request issue into a PR adding site support: preprocessing triages the request, fetches and records the target page, and scaffolds the extractor; the agent then writes extract() against that recorded page and fills in the test case.",
+  "frequency": "daily",
+  "preconditions": [
+    "extractor-request-eligible"
+  ],
+  "expected_outcome": "pr",
+  "automerge": "nothing",
+  "agent_model": "sonnet",
+  "agent_instructions": "task.md",
+  "agent_execution_timeout": 3600,
+  "agent_preprocessing": "node prepare.mjs",
+  "agent_preprocessing_timeout": 1800,
+  "required_secrets": [
+    "SCRAPER_API_KEY"
+  ]
+}
