@@ -2,15 +2,15 @@
   "packs": [
     {
       "id": "basics",
-      "version": "60903.5"
+      "version": "60904.3"
     },
     {
       "id": "chrome-extension",
-      "version": "60903.5"
+      "version": "60903.6"
     },
     {
       "id": "executable-requirements",
-      "version": "60902.1"
+      "version": "60903.1"
     },
     {
       "id": "git-github",
@@ -18,15 +18,15 @@
     },
     {
       "id": "node",
-      "version": "60902.1"
+      "version": "60903.1"
     },
     {
       "id": "spec-driven-product",
-      "version": "60902.1"
+      "version": "60903.1"
     },
     {
       "id": "product-wiki",
-      "version": "60903.2"
+      "version": "60904.1"
     },
     {
       "id": "tidy-repo",
@@ -34,7 +34,7 @@
     },
     {
       "id": "claudinite-growth",
-      "version": "60903.5"
+      "version": "60904.4"
     },
     "local/gcec",
     {
@@ -46,11 +46,11 @@
     },
     {
       "id": "claudinite-lifecycle",
-      "version": "60903.5"
+      "version": "60904.1"
     },
     {
       "id": "claudinite-tasks",
-      "version": "60903.4"
+      "version": "60904.2"
     }
   ],
   "taskScheduler": {
