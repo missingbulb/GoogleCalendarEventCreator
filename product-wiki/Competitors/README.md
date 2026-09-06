@@ -195,7 +195,13 @@ extension).
   them. Whether that is a one-off payoff from a single architectural change or a
   standing dynamic — the weekly generic-extractor-improvements task steadily
   retiring per-site files — decides whether the maintenance surface shrinks or
-  merely stopped growing. Surfaced 2026-08-16.
+  merely stopped growing. Surfaced 2026-08-16. **Checked 2026-09-06, no signal
+  yet:** the GitHub commit history (not this session's shallow local clone,
+  which only reaches back to 2026-08-22) shows zero commits touching
+  `extension/event-extractors/custom/` between 2026-08-16 and 2026-09-06 —
+  no new extractor and no deletion. Three quiet weeks doesn't answer the
+  question either way; re-check after the weekly task next lands a
+  site-absorbing change.
 - **Would a JSON-LD-era equivalent be re-tried by a platform player?** The prior
   attempt predates JSON-LD's dominance (~41% of pages vs microformats' sub-1% —
   see [`../Domain/`](../Domain/README.md)). If the lane is empty mainly for
@@ -313,3 +319,11 @@ cost curve — this project's commits and PRs, not competitor research:
   standing dynamic. Displaced the install-counts-unobtainable bullet from
   `## Key insights` for this finding; that blocked attempt is unchanged and still
   recorded as the first open question.
+- **2026-09-06** — spot-checked the "does the deletion effect keep going"
+  question via the GitHub API's full commit history (this session's local
+  clone is shallow and starts 2026-08-22, too short to answer it alone): zero
+  commits touched `extension/event-extractors/custom/` in the three weeks
+  since 2026-08-16. Recorded as a dated null result so the next pass doesn't
+  re-spend budget checking too early. No claim added, changed, or removed;
+  the question stays open. This pass's research went to Domain (see its
+  2026-09-06 entry).
