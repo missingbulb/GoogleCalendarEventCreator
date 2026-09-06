@@ -230,6 +230,36 @@ structural decision behind "one button per event":
   of the miss. Caveats: n=5 per cohort, and the cohort is not uniform
   (`thinkdrink.co.il` scores 100% critical, `cinema.co.il` 86.7%), so this is a
   correlation to hold, not a mechanism to design against.
+- **Read at the two zero-scoring hosts directly (answered 2026-09-06): neither
+  failure matches the hypothesized "JS-heavy text defeats the date heuristic" —
+  each already has a dedicated extractor whose own comment names a different,
+  host-specific reason.** `seatgeek.com`'s zero-event page is the
+  `/concert-tickets` listing; per its extractor's header comment, SeatGeek
+  "bakes all event data into the page's Next.js `#__NEXT_DATA__` JSON blob" — a
+  `popularEvents.events` array in `pageProps`, not schema.org markup and not
+  visible page text, so no generic heuristic (JSON-LD, `og:`, or DOM date
+  parsing) could ever reach it, however the text itself renders (see
+  [`custom/seatgeek.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/seatgeek.js)).
+  `tabitisrael.co.il`'s recorded page is not a calendar "event" at all — it's a
+  saved restaurant-table reservation on Tabit, an Israeli reservation platform
+  (committed fixture:
+  [`tabitisrael.html`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/data/server-fetched/tabitisrael.html)).
+  Its extractor's comment confirms the page's JSON-LD types as `Restaurant`, not
+  `Event`, "so `GCal.embeddedEvents` can't help," and reads every field straight
+  off specific rendered DOM nodes of an Angular SPA, including a locale date
+  with no year and a Hebrew day-of-week prefix (`"א׳ 21/6"`) that no generic
+  date-in-text pattern is built to parse (see
+  [`custom/tabitisrael.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/tabitisrael.js)).
+  So the 2026-08-16 guess is struck, not silently corrected: ~~a site tooled
+  enough to emit SEO JSON-LD but not event schema is also the kind of JS-heavy,
+  template-driven site whose rendered text resists the date heuristic~~ — the
+  real reasons are two unrelated, host-specific ones (event data that sits
+  outside any markup layer the extractor reads at all; a page that isn't a
+  calendar event to begin with), not a shared "JS-heaviness" property. Caveat:
+  this reads only the two zero-scoring hosts the open question named, not the
+  other three in the cohort (`cinema.co.il` 86.7%, `comy.co.il` 33.3%,
+  `thinkdrink.co.il` 100% critical-field coverage), which were not
+  re-examined this pass.
 
 ## Open questions
 
@@ -259,14 +289,20 @@ structural decision behind "one button per event":
   2026-08-16: no** — the extractor never collects a non-`Event` node, so it falls
   through to text exactly as an unmarked page would. See the last Implications
   bullet, which also records the surprise the measurement turned up.
-- **Why is the `Event`-less-JSON-LD cohort served *worse* than the no-JSON-LD
+- ~~Why is the `Event`-less-JSON-LD cohort served *worse* than the no-JSON-LD
   cohort (~44% vs ~73% critical-field coverage) when the markup itself is
-  invisible to the extractor?** The standing hypothesis is that SEO-tooled-but-not-
-  event-tooled sites are disproportionately JS-heavy and template-driven, so their
-  rendered *text* defeats the date heuristic — i.e. the markup shape is a proxy
-  for the site's build, not a cause. Testable by looking at what actually fails on
-  `seatgeek.com` and `tabitisrael.co.il`, the two hosts where the bare run finds
-  no event at all. Surfaced 2026-08-16.
+  invisible to the extractor?~~ **Answered 2026-09-06, and the standing
+  hypothesis was wrong:** reading the two zero-scoring hosts' own dedicated
+  extractors shows neither fails from "JS-heavy, template-driven text" —
+  `seatgeek.com`'s events live in a Next.js JSON blob no markup-based heuristic
+  reaches, and `tabitisrael.co.il`'s page is a restaurant reservation, not an
+  event, whose JSON-LD is correctly typed `Restaurant`. See the corrected bullet
+  under Implications.
+- **Does the same "not actually JS-heavy text, something host-specific" pattern
+  hold for the other three `Event`-less-JSON-LD hosts** (`cinema.co.il` 86.7%,
+  `comy.co.il` 33.3%, `thinkdrink.co.il` 100% critical-field coverage), or were
+  `seatgeek.com` / `tabitisrael.co.il` answerable only because they happened to
+  be the two zero-scorers? Surfaced 2026-09-06.
 
 ## Sources
 
@@ -294,6 +330,13 @@ structural decision behind "one button per event":
 - [`generic-coverage.GENERATED.md` — the committed per-host coverage report](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md) — the per-host critical-field percentages behind the ~95% / ~73% / ~44% cohort split
 - [`helpers/embedded-events.js` — the JSON-LD reader](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/helpers/embedded-events.js) — `find()` keeps a node only when an `@type` matches `/event$/i`, so non-`Event` JSON-LD is never collected
 - [`generic-extractor.js` — the core generic extractor](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/generic-extractor.js) — with no embedded event, a page counts as an event only when a date is parsed from text
+
+The 2026-09-06 pass added the two zero-scoring hosts' own extractors and recorded
+fixtures as evidence for what actually blocks the generic path on each:
+
+- [`custom/seatgeek.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/seatgeek.js) — events read from the page's Next.js `#__NEXT_DATA__` JSON, not schema.org markup or visible text
+- [`custom/tabitisrael.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/tabitisrael.js) — the page's JSON-LD is a `Restaurant`, not an `Event`; every field is read off specific rendered DOM nodes
+- [`dev/requirements/extractor/data/server-fetched/tabitisrael.html` — the committed page fixture](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/data/server-fetched/tabitisrael.html) — a Tabit restaurant-reservation confirmation, not a ticketed event
 
 ## Growth log
 
@@ -374,3 +417,15 @@ structural decision behind "one button per event":
   *fallback*-coverage gate is now the **generic-coverage** gate, and the
   `fallback-extractor-improvements` task is now
   **`generic-extractor-improvements`**.
+- **2026-09-06** — answered the question the previous pass opened, by reading
+  the two zero-scoring hosts' own dedicated extractors and recorded fixtures
+  rather than researching the web. The 2026-08-16 "JS-heavy, template-driven
+  text" hypothesis turned out wrong for both: `seatgeek.com`'s zero-event page
+  fails because its events live in a Next.js JSON blob (`#__NEXT_DATA__`) no
+  markup-based heuristic could ever reach, not because of hard-to-parse text;
+  `tabitisrael.co.il`'s recorded page isn't a calendar event at all — it's a
+  saved restaurant-table reservation, and its JSON-LD is correctly typed
+  `Restaurant`. Struck the wrong clause in place under Implications (kept, not
+  deleted, per policy) and retired the open question, opening a narrower one
+  (does the same pattern hold for the cohort's other three hosts). No other
+  claim on this page changed this pass.
