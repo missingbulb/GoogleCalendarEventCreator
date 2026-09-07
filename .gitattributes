@@ -18,7 +18,3 @@ dev/requirements/extractor/generic-coverage/generic-coverage.baseline.GENERATED.
 dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md              merge=ours
 dev/requirements/popup/cases/*.png                                              merge=ours
 dev/requirements/icon/cases/*.png                                               merge=ours
-usage.GENERATED.json merge=ours
-claudinite-rules.GENERATED.md merge=ours
-.claudinite/shared/** linguist-vendored
-claudinite-skills.GENERATED.md merge=ours
