@@ -22,7 +22,7 @@ the knowledge that most directly drives extraction requirements.
 ## Machine-readable event formats (as of 2026-07-16)
 
 Ordered roughly by how useful they are to a rule-based extractor — highest-signal
-first. The project's stance (see the **architecture rules of the road** section of
+first. The project's stance (see the **Extractor pipeline** section of
 `.claudinite/local/packs/gcec/RULES.md`, where it reads "prefer extracting
 JSON-LD/`og:` (which apps still inject) over brittle DOM positions" — the
 `dev/procedures/technicalGotchas.md` this page previously cited was superseded
@@ -429,3 +429,9 @@ fixtures as evidence for what actually blocks the generic path on each:
   deleted, per policy) and retired the open question, opening a narrower one
   (does the same pattern hold for the cohort's other three hosts). No other
   claim on this page changed this pass.
+- **2026-09-07** — corrected a stale section-name reference in the
+  machine-readable-formats paragraph: the "prefer extracting JSON-LD/`og:`
+  … over brittle DOM positions" quote lives in the gcec pack RULES.md's
+  **Extractor pipeline** section, not *architecture rules of the road* as this
+  page said. The sourced text itself is unchanged; only the section name it
+  points to was wrong.
