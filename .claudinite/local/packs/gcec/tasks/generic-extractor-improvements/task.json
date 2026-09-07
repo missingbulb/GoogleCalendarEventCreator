@@ -2,8 +2,9 @@
   "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
   "id": "generic-extractor-improvements",
   "description": "Tries to close the gap between the generic extractor and what dedicated per-site sources capture, by hypothesizing an improvement, editing the extractor, and verifying against live pages. A genuine win is rare; finding none is the expected, correct outcome, not a failure.",
-  "frequency": "weekly",
+  "trigger": "schedule",
   "preconditions": [
+    "due:weekly",
     "substantive-change"
   ],
   "expected_outcome": "pr",

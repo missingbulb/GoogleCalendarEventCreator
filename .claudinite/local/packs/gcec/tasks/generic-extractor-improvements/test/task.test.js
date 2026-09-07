@@ -22,14 +22,28 @@ const load = async () => {
   };
 };
 
-const commits = (list) => ({ commits: { substantiveChange: list.length > 0, list } });
+// `runs` and `now` are here for the cadence term the declaration leads with, not
+// for anything these cases assert: `due:weekly` reads the task's own run history
+// against an anchor, and no run at all is the state in which it holds, so every
+// verdict below turns purely on `substantive-change`. Omitting them is not a
+// neutral simplification — a cadence term with no instant to anchor on makes
+// evaluatePreconditions return an error rather than a verdict, and every `v.run`
+// reads `undefined`.
+const commits = (list) => ({
+  commits: { substantiveChange: list.length > 0, list },
+  runs: { list: [], horizonDays: 30 },
+});
 const sub = (sha) => ({ sha, substantive: true });
 const verdict = ({ task, policy }, signals) =>
-  policy.evaluatePreconditions({ preconditions: task.preconditions, signals, windowDays: 8 });
+  policy.evaluatePreconditions({
+    preconditions: task.preconditions, signals, windowDays: 8, now: new Date("2026-09-07T00:00:00Z"),
+  });
 
 test("the gate is the canon term, not a local copy of it", async () => {
   const { task } = await load();
-  assert.deepEqual(task.preconditions, ["substantive-change"]);
+  // The cadence leads the list as its own term (missingbulb/Claudinite#1725): the
+  // retired `frequency` field said weekly, and `due:weekly` is what it became.
+  assert.deepEqual(task.preconditions, ["due:weekly", "substantive-change"]);
   // The legacy pair is gone: declaring either beside `preconditions` is a contract
   // violation the shape check reds, and the signal union is derived from the term.
   assert.equal(task.precondition, undefined);

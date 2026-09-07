@@ -75,16 +75,17 @@ test("the declaration carries the full contract, including the secret preprocess
   const { findTaskDeclaration, loadTaskDeclaration } = await import("../../../../../../shared/packs/claudinite-tasks/task-declaration.mjs");
   const task = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
   assert.equal(task.id, "create-extractor");
-  // `daily`, not `hourly`: the canon retired that token and normalizes it away at the
-  // declaration door, so this task has run daily since — and #1060 accepts a slow cycle
-  // until an event trigger replaces the poll. Pinned so the declaration cannot drift back
-  // to a cadence the queue will not honour.
-  assert.equal(task.frequency, "daily");
   // The declarative expression is the ONLY gate mechanism: the `precondition`
   // function and its `precondition_signals` companion are retired, and the signal
   // union is DERIVED from the term rather than restated here
   // (missingbulb/Claudinite#1617).
-  assert.deepEqual(task.preconditions, ["extractor-request-eligible"]);
+  //
+  // The cadence is a term in that same list now, not a `frequency` field beside it
+  // (missingbulb/Claudinite#1725). Daily, not hourly: #1060 accepts a slow cycle
+  // until an event trigger replaces the poll. Pinned so the declaration cannot
+  // drift back to a cadence the queue will not honour.
+  assert.deepEqual(task.preconditions, ["due:daily", "extractor-request-eligible"]);
+  assert.equal(task.frequency, undefined);
   assert.equal(task.precondition, undefined);
   assert.equal(task.precondition_signals, undefined);
   // The pair the canon's auto-merge contract splits the old `open-pr` ceiling into:
