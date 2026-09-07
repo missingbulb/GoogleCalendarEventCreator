@@ -1,0 +1,33 @@
+[
+  {
+    "id": "github-list-search-missing-perpage",
+    "severity": "advisory",
+    "since": "2026-09-07",
+    "scope": "action",
+    "failureMessage": "search_issues/list_issues/actions_list return every match with its full body when uncapped, which has hard-failed the tool-result token cap here repeatedly (#734 twice, #753, #760)",
+    "guardToolCalls": [
+      {
+        "tool": "/^mcp__github__(search_issues|list_issues|actions_list)$/",
+        "inputFieldAbsent": ["perPage"],
+        "what": "a {tool} call with no perPage cap",
+        "fix": "pass a small perPage (5–10) — and for search_issues/list_issues, fields too (e.g. ['number','title','state']) to strip the body, since perPage alone doesn't stop a single oversized result"
+      }
+    ]
+  },
+  {
+    "id": "github-job-logs-guessed-tail-lines",
+    "severity": "advisory",
+    "since": "2026-09-07",
+    "scope": "action",
+    "failureMessage": "guessing a large tail_lines to diagnose a CI failure can itself exceed get_job_logs' token limit (#1101 hit this at tail_lines: 2406)",
+    "guardToolCalls": [
+      {
+        "tool": "mcp__github__get_job_logs",
+        "inputField": "tail_lines",
+        "match": "/^[0-9]{4,}$/",
+        "what": "a get_job_logs call guessing tail_lines={field}",
+        "fix": "skip the guess — call without tail_lines (or the small default) to get the saved-to-disk log path, then grep that file for the failure marker (not ok, FAIL)"
+      }
+    ]
+  }
+]
