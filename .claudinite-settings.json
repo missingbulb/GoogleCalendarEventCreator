@@ -30,7 +30,7 @@
     },
     {
       "id": "claudinite-growth",
-      "version": "60907.3"
+      "version": "60910.1"
     },
     "local/gcec",
     {
@@ -42,7 +42,7 @@
     },
     {
       "id": "claudinite-lifecycle",
-      "version": "60907.2"
+      "version": "60911.1"
     },
     {
       "id": "claudinite-tasks",
