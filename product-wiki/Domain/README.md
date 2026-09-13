@@ -68,7 +68,7 @@ single-page-app rendering.
   generic "Microformats" extension that exported `hCalendar` to iCalendar is
   likewise reported delisted (unmaintained since ~2014). So there is also no
   live microformat event reader left to borrow from (the demand-side reading of
-  the same fact is in [`../Competitors/`](../Competitors/README.md)).
+  the same fact is in [`../Competitors/README.md`](../Competitors/README.md)).
 - **OpenGraph / meta tags** (`og:title`, `og:description`, and event-ish `<meta>`)
   — not event-specific, but SPA pages very often still inject them, so they are a
   reliable low-fidelity fallback for title/description when nothing structured
@@ -260,6 +260,40 @@ structural decision behind "one button per event":
   other three in the cohort (`cinema.co.il` 86.7%, `comy.co.il` 33.3%,
   `thinkdrink.co.il` 100% critical-field coverage), which were not
   re-examined this pass.
+- **Read at the remaining three `Event`-less-JSON-LD hosts too (answered
+  2026-09-13): the pattern generalizes — no shared property, and two of the
+  three barely have a shortfall to explain.** `thinkdrink.co.il` (100%
+  critical-field coverage, 1 case) has nothing to account for: the bare generic
+  run already matches title, start, and location exactly (see
+  [`custom/thinkdrink.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/thinkdrink.js)
+  — a plain `<h1>` title, a venue link, and an in-text `DD.MM.YYYY` date the
+  generic date heuristic already parses). `cinema.co.il` (86.7% over 5 cases)
+  misses title only on its two listing/series-shaped pages —
+  `telavivcinematheque-506` (a 109-film listing) and `-taiwan-week` (a 6-film
+  festival page), per the committed per-case detail table — where the bare
+  run's single-primary-event pick necessarily differs from the reviewed
+  pipeline's choice; that is the already-documented **listing/index-page**
+  category above (see Page-shape taxonomy), not a text-parsing weakness, and on
+  its three single-event pages every critical field matches. `comy.co.il`
+  (33.3%, 1 case, the genuine low scorer) fails for two identifiable,
+  unrelated structural reasons, both confirmed against the recorded fixture
+  rather than inferred from the extractor's comment alone: a sitewide
+  accessibility-toolbar plugin (`wp-content/plugins/access_ama`) injects its
+  own `<h2>תפריט נגישות</h2>` ("accessibility menu") inside
+  `<nav id="acc-toolbar-wrap">`, earlier in the DOM than the real show's
+  `<h1>`/`<h2>` pair scoped to `.te-details` — so an untargeted title read
+  collects the decoy, and the per-case table shows exactly that: title comes
+  back `~` (a wrong value, not a miss), confirmed in
+  [`custom/comy.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/comy.js)'s
+  own header comment and the
+  [recorded fixture](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/data/server-fetched/comy.html).
+  Separately, the venue name lives only in a per-performance
+  `.single-place-string` row with no `og:site_name`-style signal the generic
+  extractor could catch instead, so location comes back `✗` (a genuine miss,
+  not a wrong guess). Neither cause is "JS-heavy templated text": one is a
+  DOM-order collision with an unrelated site-wide widget, the other is a field
+  the page simply never exposes generically. The 2026-09-06 finding on the two
+  zero-scorers now holds for the full five-host cohort, not just its extremes.
 
 ## Open questions
 
@@ -298,11 +332,17 @@ structural decision behind "one button per event":
   reaches, and `tabitisrael.co.il`'s page is a restaurant reservation, not an
   event, whose JSON-LD is correctly typed `Restaurant`. See the corrected bullet
   under Implications.
-- **Does the same "not actually JS-heavy text, something host-specific" pattern
-  hold for the other three `Event`-less-JSON-LD hosts** (`cinema.co.il` 86.7%,
-  `comy.co.il` 33.3%, `thinkdrink.co.il` 100% critical-field coverage), or were
-  `seatgeek.com` / `tabitisrael.co.il` answerable only because they happened to
-  be the two zero-scorers? Surfaced 2026-09-06.
+- ~~**Does the same "not actually JS-heavy text, something host-specific"
+  pattern hold for the other three `Event`-less-JSON-LD hosts** (`cinema.co.il`
+  86.7%, `comy.co.il` 33.3%, `thinkdrink.co.il` 100% critical-field coverage),
+  or were `seatgeek.com` / `tabitisrael.co.il` answerable only because they
+  happened to be the two zero-scorers?~~ **Answered 2026-09-13: yes, it holds
+  for all five.** `thinkdrink.co.il` has essentially no shortfall to explain;
+  `cinema.co.il`'s only misses are on listing-shaped pages, an already-known
+  category; `comy.co.il`'s are a decoy `<h2>` from an unrelated accessibility
+  plugin and a venue field with no generic fallback. See the newest Implications
+  bullet. No further re-check needed unless the cohort's membership changes
+  (a new host added or an existing one's markup changes).
 
 ## Sources
 
@@ -327,7 +367,7 @@ structural decision behind "one button per event":
 - [Additional `Schedule` type examples — schemaorg/schemaorg Discussion #2948](https://github.com/schemaorg/schemaorg/discussions/2948)
 - [`dev/requirements/extractor/data/server-fetched/` — this repo's recorded extractor corpus](https://github.com/missingbulb/GoogleCalendarEventCreator/tree/main/dev/requirements/extractor/data/server-fetched) — the 36 pages / 24 hosts censused on 2026-08-02 for `eventSchedule`, `Event` JSON-LD and `.ics` links
 - [`scraperapi.mjs` — the recording pipeline's `render=true` fetch](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/.claudinite/local/packs/gcec/tasks/create-extractor/scraperapi.mjs) — why a missing property in the corpus is a real absence, not an unrendered SPA
-- [`generic-coverage.GENERATED.md` — the committed per-host coverage report](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md) — the per-host critical-field percentages behind the ~95% / ~73% / ~44% cohort split
+- [`generic-coverage.GENERATED.md` — the committed per-host coverage report](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/generic-coverage/generic-coverage.GENERATED.md) — the per-host critical-field percentages behind the ~95% / ~73% / ~44% cohort split, and the per-case ✓/~/✗ detail table
 - [`helpers/embedded-events.js` — the JSON-LD reader](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/helpers/embedded-events.js) — `find()` keeps a node only when an `@type` matches `/event$/i`, so non-`Event` JSON-LD is never collected
 - [`generic-extractor.js` — the core generic extractor](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/generic-extractor.js) — with no embedded event, a page counts as an event only when a date is parsed from text
 
@@ -337,6 +377,15 @@ fixtures as evidence for what actually blocks the generic path on each:
 - [`custom/seatgeek.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/seatgeek.js) — events read from the page's Next.js `#__NEXT_DATA__` JSON, not schema.org markup or visible text
 - [`custom/tabitisrael.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/tabitisrael.js) — the page's JSON-LD is a `Restaurant`, not an `Event`; every field is read off specific rendered DOM nodes
 - [`dev/requirements/extractor/data/server-fetched/tabitisrael.html` — the committed page fixture](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/data/server-fetched/tabitisrael.html) — a Tabit restaurant-reservation confirmation, not a ticketed event
+
+The 2026-09-13 pass added the remaining three hosts' own extractors and the one
+recorded fixture needed to confirm the accessibility-widget claim directly
+rather than trust the extractor's comment alone:
+
+- [`custom/telavivcinematheque.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/telavivcinematheque.js) — the cinema.co.il extractor; its listing/series-page branches explain the two title misses
+- [`custom/comy.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/comy.js) — the comy.co.il extractor; its header comment names the accessibility-toolbar `<h2>` collision
+- [`custom/thinkdrink.js`](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/extension/event-extractors/custom/thinkdrink.js) — the thinkdrink.co.il extractor, which the generic run already matches on every critical field
+- [`dev/requirements/extractor/data/server-fetched/comy.html` — the recorded comy.co.il fixture](https://github.com/missingbulb/GoogleCalendarEventCreator/blob/main/dev/requirements/extractor/data/server-fetched/comy.html) — confirms `<nav id="acc-toolbar-wrap">`'s `<h2>תפריט נגישות</h2>` appears in the DOM before `.te-details`'s real title elements
 
 ## Growth log
 
@@ -435,3 +484,18 @@ fixtures as evidence for what actually blocks the generic path on each:
   **Extractor pipeline** section, not *architecture rules of the road* as this
   page said. The sourced text itself is unchanged; only the section name it
   points to was wrong.
+- **2026-09-13** — answered the question the previous pass opened, closing out
+  the `Event`-less-JSON-LD cohort: read the remaining three hosts' own dedicated
+  extractors, the per-case detail rows in `generic-coverage.GENERATED.md`, and
+  (to confirm rather than infer) the recorded `comy.html` fixture directly. The
+  "no shared JS-heaviness property" finding generalizes from the two
+  zero-scorers to all five: `thinkdrink.co.il` (100% critical) has no shortfall
+  to explain, `cinema.co.il` (86.7%) only misses on its two listing/series-shaped
+  pages — a page-shape issue already named above, not a text-parsing one — and
+  `comy.co.il` (33.3%, the real low scorer) fails from two unrelated, confirmed
+  causes: an accessibility-toolbar plugin's decoy `<h2>` outranking the real
+  title in DOM order, and a venue field the generic extractor has no fallback
+  signal for at all. Retired the open question; none remains open on this
+  cohort barring a change to its membership. No citation elsewhere on the page
+  was found stale on spot-check (the cited 86.7% / 33.3% / 100% per-host figures
+  still match the current generated coverage report byte-for-byte).

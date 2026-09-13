@@ -186,10 +186,10 @@ extension).
   **Answered 2026-08-16 from the repo's own commit record, and it came out
   benign:** in the ~7 weeks of `custom/`'s current life, nine extractors landed,
   three post-landing edits were made (all new *page shapes*, none a site
-  redesign), and six extractors were **deleted** as the generic base absorbed
-  them. See the measured bullet under Positioning takeaways. Re-check when a
-  ticketing major with a real redesign cadence has been supported long enough to
-  be evidence — none is, yet.
+  redesign), and six extractors were **deleted** in one change as the generic
+  base absorbed them. See the measured bullet under Positioning takeaways.
+  Re-check when a ticketing major with a real redesign cadence has been
+  supported long enough to be evidence — none is, yet.
 - **Does the deletion effect keep going?** The 2026-07-26 restructure removed six
   per-site sources in one move because the generic extractor had caught up with
   them. Whether that is a one-off payoff from a single architectural change or a
@@ -201,7 +201,11 @@ extension).
   `extension/event-extractors/custom/` between 2026-08-16 and 2026-09-06 —
   no new extractor and no deletion. Three quiet weeks doesn't answer the
   question either way; re-check after the weekly task next lands a
-  site-absorbing change.
+  site-absorbing change. **Re-checked 2026-09-13, still no signal:** the full
+  (non-shallow) commit history shows zero commits touching that directory
+  between 2026-08-16 and 2026-09-13 either — four quiet weeks now, not three.
+  Still not enough either way; re-check after the weekly task next lands a
+  site-absorbing (or site-adding) change.
 - **Would a JSON-LD-era equivalent be re-tried by a platform player?** The prior
   attempt predates JSON-LD's dominance (~41% of pages vs microformats' sub-1% —
   see [`../Domain/`](../Domain/README.md)). If the lane is empty mainly for
@@ -327,3 +331,11 @@ cost curve — this project's commits and PRs, not competitor research:
   re-spend budget checking too early. No claim added, changed, or removed;
   the question stays open. This pass's research went to Domain (see its
   2026-09-06 entry).
+- **2026-09-13** — re-checked the same "does the deletion effect keep going"
+  question against the full, non-shallow commit history: still zero commits
+  touched `extension/event-extractors/custom/`, now across a four-week window
+  (2026-08-16 to 2026-09-13). Extended the dated null result rather than
+  re-opening the question with no new information; still not enough to answer
+  it either way. No other claim on this page changed. This pass's main research
+  went to Domain — see its 2026-09-13 entry, which closes out the
+  `Event`-less-JSON-LD cohort question.
