@@ -53,9 +53,10 @@ all. Open the PR early for those.
   with the same sleep, backgrounded. Measured identically in three separate
   sessions, always at the same step, always recovered the same way: #892
   (~10s lost), #894 (~7s), #903 (~6s).
-- **Don't reach for `subscribe_pr_activity` to wait for green** — its webhooks
-  never deliver CI **success** (only failures/comments/reviews), so the
-  transition you're waiting for never arrives. It's for babysitting a PR, not
+- **Don't reach for `subscribe_pr_activity` to wait for green** — a successful
+  check-suite rollup can now arrive as an event, but delivery isn't guaranteed
+  (it can come late or not at all), so the transition you're waiting for may
+  never show up in the turn you spend on it. It's for babysitting a PR, not
   merge-on-green.
 - **Won't sit and poll to green? Arm auto-merge — never end a turn on a
   subscription.** A run that opens a PR it can't watch to the end (an
