@@ -29,5 +29,21 @@
         "fix": "skip the guess — call without tail_lines (or the small default) to get the saved-to-disk log path, then grep that file for the failure marker (not ok, FAIL)"
       }
     ]
+  },
+  {
+    "id": "git-checkout-paths-and-branch-move-combined",
+    "severity": "advisory",
+    "since": "2026-09-13",
+    "scope": "action",
+    "failureMessage": "combining `git checkout <branch> -- <paths>` with `git checkout -b` in one command silently discards uncommitted edits on those paths — the #734 one-liner that wiped three finished edits",
+    "guardToolCalls": [
+      {
+        "tool": "Bash",
+        "inputField": "command",
+        "match": "/(?=[\\s\\S]*git checkout \\S+ -- )(?=[\\s\\S]*git checkout -b )/",
+        "what": "a single command combining a path-restoring `git checkout <branch> -- <paths>` with `git checkout -b`",
+        "fix": "split them into two calls — commit or `git stash` any edits on those paths first, then run the restore and the branch move separately, never in the same `&&` chain"
+      }
+    ]
   }
 ]
