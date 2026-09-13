@@ -8,14 +8,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Working rules
 
-- **Never carry uncommitted edits onto a new branch with
-  `git checkout <old-branch> -- <paths>`** — that restores the paths' *committed*
-  content, silently destroying exactly the edits it was meant to preserve.
-  `git checkout -b <new> origin/main` already brings a clean working tree along;
-  when it can't, commit or `git stash` first and never in the same `&&` chain
-  that moves the branch. In #734 the combined one-liner wiped three finished
-  edits **and** invalidated the `check_the_world.mjs` + `npm run test:offline`
-  pass that had just gone green, forcing a full re-verification.
 - **A duplicate dispatch-trigger arriving while a session's own delegated
   subagent is still running is a signal to stop, not to investigate.**
   Confirm it via `resolve-dispatch` (the "not mine, change nothing" case) and

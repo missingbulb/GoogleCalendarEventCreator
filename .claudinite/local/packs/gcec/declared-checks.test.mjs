@@ -62,3 +62,39 @@ test('github-job-logs-guessed-tail-lines: quiet at the tool default, with no tai
     [],
   );
 });
+
+test('git-checkout-paths-and-branch-move-combined: fires on the #734 shape, either order', () => {
+  const rule = ruleById('git-checkout-paths-and-branch-move-combined');
+  const forward = guardFindings(rule, {
+    name: 'Bash',
+    input: { command: 'git checkout old-branch -- src/foo.js && git checkout -b new-branch origin/main' },
+  });
+  assert.equal(forward.length, 1);
+  assert.match(forward[0].what, /path-restoring/);
+
+  const reversed = guardFindings(rule, {
+    name: 'Bash',
+    input: { command: 'git checkout -b new-branch origin/main && git checkout old-branch -- src/foo.js src/bar.js' },
+  });
+  assert.equal(reversed.length, 1);
+});
+
+test('git-checkout-paths-and-branch-move-combined: quiet on either alone, and for an unrelated command', () => {
+  const rule = ruleById('git-checkout-paths-and-branch-move-combined');
+  assert.deepEqual(
+    guardFindings(rule, { name: 'Bash', input: { command: 'git checkout -b new-branch origin/main' } }),
+    [],
+  );
+  assert.deepEqual(
+    guardFindings(rule, { name: 'Bash', input: { command: 'git checkout old-branch -- src/foo.js' } }),
+    [],
+  );
+  assert.deepEqual(
+    guardFindings(rule, { name: 'Bash', input: { command: 'npm run build -- --prod && git checkout -b feature' } }),
+    [],
+  );
+  assert.deepEqual(
+    guardFindings(rule, { name: 'Bash', input: { command: 'git checkout main' } }),
+    [],
+  );
+});
