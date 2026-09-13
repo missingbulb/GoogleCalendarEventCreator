@@ -8,14 +8,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Working rules
 
-- **Never carry uncommitted edits onto a new branch with
-  `git checkout <old-branch> -- <paths>`** — that restores the paths' *committed*
-  content, silently destroying exactly the edits it was meant to preserve.
-  `git checkout -b <new> origin/main` already brings a clean working tree along;
-  when it can't, commit or `git stash` first and never in the same `&&` chain
-  that moves the branch. In #734 the combined one-liner wiped three finished
-  edits **and** invalidated the `check_the_world.mjs` + `npm run test:offline`
-  pass that had just gone green, forcing a full re-verification.
 - **A duplicate dispatch-trigger arriving while a session's own delegated
   subagent is still running is a signal to stop, not to investigate.**
   Confirm it via `resolve-dispatch` (the "not mine, change nothing" case) and
@@ -27,26 +19,13 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   rest — duplicating, not verifying, work its own subagent was already
   producing — and converged the dispatch issue on that duplicate instead of
   the subagent's actual output.
-- **Cap and qualify every GitHub MCP list/search call** — an unbounded one
-  hard-fails the tool-result cap and costs a 2–3-call dig through the saved
-  result file. `search_issues` handed a bare title string full-text-searches the
-  whole repo and returns every match with its full body: the standing
-  `Claudinite tracker: <Task>` lookup that opens every scheduled task blew up at
-  185–211 KB three times (#734 twice, #753), and `actions_list` without a page
-  cap at 155 KB (#760). Qualify the query (`in:title "Claudinite tracker:
-  <Task>"`, or `list_issues` + `labels`) **and** pass a small `perPage` (5–10) —
-  the answer wanted is one issue or one run, never a page of them. `perPage`
-  alone isn't the whole fix: even a single matched issue's full body can be
-  100+ KB, so the same overflow recurred with `in:title` correctly set but
-  `perPage` left off (#879, #890, #896). Pass `fields` too (e.g. `['number',
-  'title', 'state']`) to strip the body outright — a query that added it
-  (#886) returned instantly at ~3 KB where the identical unfielded query the
-  day before (#879) overflowed at 113 KB. `get_job_logs` hits the same cap a
-  different way: guessing a large `tail_lines` to diagnose a CI failure can
-  itself exceed the tool's token limit (#1101, `tail_lines: 2406` →
-  `exceeds maximum allowed tokens`). Skip the guess — a small call gets you the
-  saved-to-disk log path, then `grep` that file for the failure marker (`not
-  ok`, `FAIL`) the same way an oversized list/search result gets read.
+- **`get_job_logs`'s `tail_lines` can blow the tool's token limit on its own**
+  (canon covers capping and qualifying list/search calls) — guessing a large
+  value to diagnose a CI failure can itself exceed the limit (#1101,
+  `tail_lines: 2406` → `exceeds maximum allowed tokens`). Skip the guess — a
+  small call gets you the saved-to-disk log path, then `grep` that file for the
+  failure marker (`not ok`, `FAIL`) the same way an oversized list/search
+  result gets read.
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
