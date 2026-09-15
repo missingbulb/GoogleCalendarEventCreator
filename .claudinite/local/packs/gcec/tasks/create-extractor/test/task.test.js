@@ -72,7 +72,7 @@ test("eligible requests are listed oldest-first, matching the order preprocessin
 });
 
 test("the declaration carries the full contract, including the secret preprocessing spends", async () => {
-  const { findTaskDeclaration, loadTaskDeclaration } = await import("../../../../../../shared/packs/claudinite-tasks/task-declaration.mjs");
+  const { findTaskDeclaration, loadTaskDeclaration } = await import("../../../../../../shared/packs/claudinite-tasks/public/task-discovery.mjs");
   const task = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
   assert.equal(task.id, "create-extractor");
   // The declarative expression is the ONLY gate mechanism: the `precondition`
@@ -109,8 +109,8 @@ test("the precondition is pure — it never reads a body or reaches for I/O", as
 // covering the pipeline's own output would park every extractor PR silently.
 const POLICY = async () => {
   const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
-  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/merge-policy.mjs`);
-  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/task-declaration.mjs`);
+  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/public/merge-policy.mjs`);
+  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/public/task-discovery.mjs`);
   const root = require("node:path").join(__dirname, "../../../../../../..");
   const config = JSON.parse(require("node:fs").readFileSync(`${root}/.claudinite-settings.json`, "utf8"));
   const { rules, errors } = declaredMergeRules(
