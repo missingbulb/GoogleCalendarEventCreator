@@ -31,7 +31,13 @@ normalizes a retired token at the declaration door, so the anchor, the janitor's
 stale bound and the signal window have all read daily regardless of what this
 line claimed.
 writing one extract() against a recorded page — bounded, well-specified judgment
-a human always reviews the extraction; the pipeline never merges
+the pipeline's whole write surface, named as one declared rule
+(`site-support-scope` in the pack's merge-rules.json): the recorded page and its
+`.url`, the case, the per-site source, the load list and the supportedDomains entry.
+A diff inside that prediction lands unattended; anything else parks for a person.
+Deletions are deliberately not covered — the scaffolded source being dropped nets
+out against preprocessing's own commit, so a deletion that survives to the merge
+gate is one nobody predicted
 generous: a stubborn page can take several extract/verify rounds
 The deterministic stage. It needs three things a precondition cannot have —
 issue BODIES (the `issues` signal carries none), GitHub WRITES (closing

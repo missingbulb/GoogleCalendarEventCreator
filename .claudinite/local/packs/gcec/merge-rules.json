@@ -4,5 +4,11 @@
     "pathMatching": "/^(extension/event-extractors/generic-extractor\\.js|extension/event-extractors/helpers/[^/]+\\.js|extension-test/event-extractors/extraction\\.test\\.js|dev/requirements/extractor/generic-coverage/generic-coverage\\.(baseline\\.GENERATED\\.json|GENERATED\\.md))$/",
     "changeKinds": ["added", "modified"],
     "editShape": "any"
+  },
+  {
+    "name": "site-support-scope",
+    "pathMatching": "/^(extension/host-lists\\.json|extension/event-extractors/load-order\\.generated\\.json|extension/event-extractors/custom/[^/]+\\.js|dev/requirements/extractor/expected/[^/]+\\.json|dev/requirements/extractor/data/server-fetched/[^/]+\\.(url|html))$/",
+    "changeKinds": ["added", "modified"],
+    "editShape": "any"
   }
 ]

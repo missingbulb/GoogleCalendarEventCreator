@@ -8,7 +8,9 @@
     "extractor-request-eligible"
   ],
   "expected_outcome": "pr",
-  "automerge": "nothing",
+  "automerge": [
+    "site-support-scope"
+  ],
   "agent_model": "sonnet",
   "agent_instructions": "task.md",
   "agent_execution_timeout": 3600,

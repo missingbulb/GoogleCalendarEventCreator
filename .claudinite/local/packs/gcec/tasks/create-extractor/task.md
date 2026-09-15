@@ -89,8 +89,8 @@ suite. Non-zero → treat it as §5: **do not mark the PR ready**.
 ## 5. Deliver — or bail
 
 **Success**: commit the two files, push, mark the draft PR **ready for review**,
-and comment the PR link on the request issue. Never merge it — a human reviews the
-`extract()` logic and the case values. Your push (not preprocessing's) is what
+and comment the PR link on the request issue. Never merge it yourself. Your push
+(not preprocessing's) is what
 triggers `test.yml` on the PR; one green run suffices.
 
 **Bail** (the page was not one usable event, or the postcondition failed): leave
