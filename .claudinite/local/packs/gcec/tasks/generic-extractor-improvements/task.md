@@ -8,20 +8,12 @@ correctly change nothing** — the gate already banks every prior win, so a new
 generic win is rare and a forced or fake one is worse than none. No win → no branch,
 no PR.
 
-## 1. Scope — the strong model runs only because the cheap gate already passed
+## 1. Scope
 
-This task is a two-tier run, cheap gate first: the **scheduler** (a pure-code Action,
-no model at all) ran this task's precondition (`task.mjs`, over the `commits` signal),
-and only *because* it found a meaningful change did it dispatch you — a strong-model
-subagent — via the `ready-for-agent` issue. Most weeks the gate skips and no strong
-model ever boots; you are paid for solely on the weeks there's real work. (This is
-the "cheap dispatcher front door" cost model — the scheduler precondition is that
-front door, cheaper than a dispatcher session because it runs no model.)
-
-So **you don't re-run that gate.** The dispatch issue's **Context** names the
-substantive commits in the window; treat it as binding scope and don't re-litigate
-whether to run. Still: **most runs correctly change nothing** (below), so "ran" never
-means "must produce a PR".
+**Don't re-litigate whether this run should have happened** — that was settled
+before you started. The **Context** section names the substantive commits in the
+window; treat it as binding scope. Still: **most runs correctly change nothing**
+(below), so "ran" never means "must produce a PR".
 
 ## 2. Measure the baseline
 
@@ -102,8 +94,10 @@ bash .claudinite/local/packs/gcec/tasks/generic-extractor-improvements/postcondi
 ## 5. Deliver the PR
 
 Branch `claude/generic-coverage/<date>`, commit the change plus the regenerated
-GENERATED artifacts, and push. Open the PR, then hand it to the one delivery
-procedure (`deliver-pr.md` in the mounted engine) and do what it says; the merge
+GENERATED artifacts, and push. Open the PR, titling it `Generic coverage: <the
+gap closed>` — the prefix is exact, and a round only starts once the previous
+round's PR has landed, which is read off that title. Then hand it to the one
+delivery procedure (`deliver-pr.md` in the mounted engine) and do what it says; the merge
 mechanics are the gcec pack's
 [merge-and-ci skill](../../skills/merge-and-ci/SKILL.md). PR body: the
 hypothesis, why it's generic (which unseen sites it helps), how the jsdom trap was

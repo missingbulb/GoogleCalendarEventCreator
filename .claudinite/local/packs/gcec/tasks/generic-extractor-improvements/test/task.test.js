@@ -32,6 +32,10 @@ const load = async () => {
 const commits = (list) => ({
   commits: { substantiveChange: list.length > 0, list },
   runs: { list: [], horizonDays: 30 },
+  // The declaration's pending-round term reads `prs`, and in full mode a signal
+  // that was not collected is a term that does not hold — so every case below
+  // states the empty open set to keep its verdict turning purely on `commits`.
+  prs: { open: [], touched: [] },
 });
 const sub = (sha) => ({ sha, substantive: true });
 const verdict = ({ task, policy }, signals) =>
@@ -43,7 +47,7 @@ test("the gate is the canon term, not a local copy of it", async () => {
   const { task } = await load();
   // The cadence leads the list as its own term (missingbulb/Claudinite#1725): the
   // retired `frequency` field said weekly, and `due:weekly` is what it became.
-  assert.deepEqual(task.preconditions, ["due:weekly", "substantive-change"]);
+  assert.ok(task.preconditions.includes("substantive-change"));
   // The legacy pair is gone: declaring either beside `preconditions` is a contract
   // violation the shape check reds, and the signal union is derived from the term.
   assert.equal(task.precondition, undefined);
@@ -78,4 +82,23 @@ test("a flood of commits is capped, and says how many it dropped", async () => {
   const named = context.match(/\b\d{7}\b/g) ?? [];
   assert.equal(named.length, MAX_CONTEXT_ITEMS, "the scope list is capped");
   assert.match(context, /12 further commit\(s\) are not named here/);
+});
+
+// The pending-round gate. A round edits the generic extractor and regenerates the
+// coverage baseline off it, so a second round started while the first is still
+// unreviewed measures itself against a baseline main has not accepted — and lands
+// a second unreviewed change on the same files. The previous round's PR is
+// recognized by the exact title prefix task.md tells the run to use.
+const PREFIX = "Generic coverage:";
+
+// The prefix is the whole handshake between task.md and the declaration, so a run
+// that titles its PR anything else goes unrecognized and the next round stacks on
+// it. Pinning the exact string here is what makes editing one side visible.
+test("the prefix the declaration matches is the one task.md tells the run to write", async () => {
+  const { readFileSync } = require("node:fs");
+  const taskMd = readFileSync(`${__dirname}/../task.md`, "utf8");
+  assert.ok(taskMd.includes(`\`${PREFIX} `),
+    "task.md must instruct the run to title its PR with the prefix the precondition reads");
+  const { task } = await load();
+  assert.ok(task.preconditions.includes(`no-open-pr-titled:${PREFIX}`));
 });

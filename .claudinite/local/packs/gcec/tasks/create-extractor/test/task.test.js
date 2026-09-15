@@ -88,10 +88,7 @@ test("the declaration carries the full contract, including the secret preprocess
   assert.equal(task.frequency, undefined);
   assert.equal(task.precondition, undefined);
   assert.equal(task.precondition_signals, undefined);
-  // The pair the canon's auto-merge contract splits the old `open-pr` ceiling into:
-  // a run may open a PR, and nothing it produces may land without a person.
   assert.equal(task.expected_outcome, "pr");
-  assert.equal(task.automerge, "nothing");         // a human always reviews the extraction
   assert.equal(task.agent_preprocessing, "node prepare.mjs");
   assert.deepEqual(task.required_secrets, ["SCRAPER_API_KEY"]);
   assert.ok(task.agent_preprocessing_timeout > 0 && task.agent_execution_timeout > 0);
@@ -104,4 +101,68 @@ test("the precondition is pure — it never reads a body or reaches for I/O", as
   assert.equal(v.holds, true);
   // And a missing signal must not throw — a collector error can't sink the gate.
   assert.equal(term.holds({}).holds, false);
+});
+
+// The policy is only as good as the paths behind its name, so these drive the
+// VENDORED engine over a synthetic diff rather than re-reading the regex: what a
+// run may land unattended is what this resolves to, and a rule that stopped
+// covering the pipeline's own output would park every extractor PR silently.
+const POLICY = async () => {
+  const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
+  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/merge-policy.mjs`);
+  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/task-declaration.mjs`);
+  const root = require("node:path").join(__dirname, "../../../../../../..");
+  const config = JSON.parse(require("node:fs").readFileSync(`${root}/.claudinite-settings.json`, "utf8"));
+  const { rules, errors } = declaredMergeRules(
+    [{ id: "gcec", dir: require("node:path").join(root, ".claudinite/local/packs/gcec") }], config);
+  assert.deepEqual(errors, [], "the pack's merge-rules.json must compile");
+  // The task's OWN policy, not a copy of it — the declaration and the rule it
+  // names cannot drift apart while these cases read the declared value.
+  const { automerge } = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
+  return (files) => policyVerdict({
+    policy: automerge,
+    entries: files.map((file) => ({ file, before: null, after: "x" })),
+    declaredRules: rules,
+    ruleErrors: errors,
+  });
+};
+
+// Every file a run of this pipeline writes — preprocessing's five and the agent's
+// two — in one diff, which is the shape the merge gate actually sees.
+test("the policy covers a whole new-source run, preprocessing's files included", async () => {
+  const verdict = (await POLICY())([
+    "dev/requirements/extractor/data/server-fetched/dice-berlin.url",
+    "dev/requirements/extractor/data/server-fetched/dice-berlin.html",
+    "dev/requirements/extractor/expected/dice-berlin.json",
+    "extension/event-extractors/custom/dice.js",
+    "extension/host-lists.json",
+    "extension/event-extractors/load-order.generated.json",
+  ]);
+  assert.equal(verdict.mergeable, true, verdict.why);
+});
+
+// The add-a-case mode writes no source and no host entry.
+test("the policy covers a supported-host run, which only adds a case", async () => {
+  const verdict = (await POLICY())([
+    "dev/requirements/extractor/data/server-fetched/meetup-berlin.url",
+    "dev/requirements/extractor/data/server-fetched/meetup-berlin.html",
+    "dev/requirements/extractor/expected/meetup-berlin.json",
+  ]);
+  assert.equal(verdict.mergeable, true, verdict.why);
+});
+
+// The reason the policy is a prediction and not a convenience: the one thing the
+// agent is told never to touch is a shared helper, and that is exactly what must
+// park rather than land.
+test("a shared helper or the generic extractor in the diff parks the PR", async () => {
+  const policy = await POLICY();
+  for (const stray of [
+    "extension/event-extractors/helpers/dates.js",
+    "extension/event-extractors/generic-extractor.js",
+    "extension/events-popup/popup.js",
+  ]) {
+    const verdict = policy(["dev/requirements/extractor/expected/dice-berlin.json", stray]);
+    assert.equal(verdict.mergeable, false, `${stray} must not be coverable`);
+    assert.ok(verdict.problems.some((p) => p.file === stray), `${stray} must be named as the refusal`);
+  }
 });
