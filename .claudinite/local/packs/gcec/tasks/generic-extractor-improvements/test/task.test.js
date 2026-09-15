@@ -15,10 +15,10 @@ const assert = require("node:assert/strict");
 
 const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
 const load = async () => {
-  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/task-declaration.mjs`);
+  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/public/task-discovery.mjs`);
   return {
     task: await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`)),
-    policy: await import(`${MOUNT}/precondition-policy.mjs`),
+    policy: await import(`${MOUNT}/public/preconditions.mjs`),
   };
 };
 
