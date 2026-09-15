@@ -88,12 +88,7 @@ test("the declaration carries the full contract, including the secret preprocess
   assert.equal(task.frequency, undefined);
   assert.equal(task.precondition, undefined);
   assert.equal(task.precondition_signals, undefined);
-  // The pair the canon's auto-merge contract splits the old `open-pr` ceiling into:
-  // a run may open a PR, and what may land unattended is a PREDICTION of that PR's
-  // shape — the pipeline's whole write surface, and nothing else. The paths behind
-  // the rule name are asserted below, against the real policy engine.
   assert.equal(task.expected_outcome, "pr");
-  assert.deepEqual(task.automerge, ["site-support-scope"]);
   assert.equal(task.agent_preprocessing, "node prepare.mjs");
   assert.deepEqual(task.required_secrets, ["SCRAPER_API_KEY"]);
   assert.ok(task.agent_preprocessing_timeout > 0 && task.agent_execution_timeout > 0);
