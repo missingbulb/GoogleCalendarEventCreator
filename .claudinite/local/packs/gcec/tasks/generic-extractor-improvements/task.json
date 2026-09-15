@@ -5,7 +5,8 @@
   "trigger": "schedule",
   "preconditions": [
     "due:weekly",
-    "substantive-change"
+    "substantive-change",
+    "no-open-pr-titled:Generic coverage:"
   ],
   "expected_outcome": "pr",
   "automerge": [
