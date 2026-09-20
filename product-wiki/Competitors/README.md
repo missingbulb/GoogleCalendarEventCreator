@@ -10,12 +10,12 @@ extension).
 
 ## Key insights
 
+- A platform player re-entered the lane in 2026 — but with an LLM reading the page, not a markup parser.
 - Nobody today wires a page's structured event data to a calendar — JSON-LD tools only inspect it.
 - The one extension that ever read page markup into a calendar had 5M+ users and shut down anyway.
 - It died of platform-integration load — Google's own change requests and an OAuth calendar sync — not of reading pages.
 - Most rivals need a cloud LLM, hence an account or an API key; nothing-leaves-the-browser is an open lane.
 - Multi-calendar `.ics` export is table stakes for the AI rivals and absent here.
-- Safari and Firefox are no different, and lean further toward OCR and screenshots than toward markup.
 - No per-site extractor here has ever broken from a site redesign; six were deleted as the generic base caught up.
 
 ## Landscape (as of 2026-07-15)
@@ -156,6 +156,28 @@ extension).
   image-first tools. This project has no answer to it by design — it reads the
   page's markup, and a screenshot has none — but the two approaches fail on
   opposite inputs, so this is a positioning question rather than a feature gap.
+- **A platform player re-entered the lane in 2026, answering the standing
+  question — but by reading the page with an LLM, not by parsing markup.**
+  Starting 2026-08-18, Google rolled Gemini in Chrome out to every Android user
+  in the US: a Gemini icon sits in the browser toolbar, and multiple independent
+  outlets (Android Headlines, 9to5Google, Chrome Unboxed, Sammy Fans, Android
+  Police) describe the same flow — reading an event listing or a flight
+  confirmation on a page and asking Gemini to add it to Google Calendar, with
+  Calendar listed among Gemini's "Connected Apps" integrations alongside Gmail
+  and Keep. This is a real platform re-entry (Google, not a third party, now
+  ships page-to-calendar in the browser itself) but not the JSON-LD-era
+  *structured-extraction* equivalent the open question asked about: it is a
+  general-purpose assistant reading whatever text and markup the page renders,
+  the same LLM-dependent approach this page already documents for Eventy/ChatGPT
+  for Google Calendar/Smart Calendars AI, not a dedicated schema.org parser. It
+  also requires the Gemini sign-in and Connected Apps grant this project's
+  positioning is built around avoiding, and as of this pass is Android-only —
+  Chrome desktop and other browsers are unaffected. **Evidence caveat:** the
+  primary sources (`blog.google`, `support.google.com`) returned a domain-wide
+  egress block to this worker's fetcher, so this rests on independent outlets'
+  search-surfaced descriptions of the same rollout rather than a first-party
+  page read end to end — a pass with an unblocked fetcher should confirm
+  directly against Google's own posts.
 
 ## Open questions (for the next growth pass)
 
@@ -186,10 +208,10 @@ extension).
   **Answered 2026-08-16 from the repo's own commit record, and it came out
   benign:** in the ~7 weeks of `custom/`'s current life, nine extractors landed,
   three post-landing edits were made (all new *page shapes*, none a site
-  redesign), and six extractors were **deleted** as the generic base absorbed
-  them. See the measured bullet under Positioning takeaways. Re-check when a
-  ticketing major with a real redesign cadence has been supported long enough to
-  be evidence — none is, yet.
+  redesign), and six extractors were **deleted** in one change as the generic
+  base absorbed them. See the measured bullet under Positioning takeaways.
+  Re-check when a ticketing major with a real redesign cadence has been
+  supported long enough to be evidence — none is, yet.
 - **Does the deletion effect keep going?** The 2026-07-26 restructure removed six
   per-site sources in one move because the generic extractor had caught up with
   them. Whether that is a one-off payoff from a single architectural change or a
@@ -201,12 +223,24 @@ extension).
   `extension/event-extractors/custom/` between 2026-08-16 and 2026-09-06 —
   no new extractor and no deletion. Three quiet weeks doesn't answer the
   question either way; re-check after the weekly task next lands a
-  site-absorbing change.
-- **Would a JSON-LD-era equivalent be re-tried by a platform player?** The prior
-  attempt predates JSON-LD's dominance (~41% of pages vs microformats' sub-1% —
-  see [`../Domain/`](../Domain/README.md)). If the lane is empty mainly for
-  historical reasons, platform re-entry is a live competitive risk to track.
-  Surfaced 2026-07-26.
+  site-absorbing change. **Re-checked 2026-09-13, still no signal:** the full
+  (non-shallow) commit history shows zero commits touching that directory
+  between 2026-08-16 and 2026-09-13 either — four quiet weeks now, not three.
+  Still not enough either way; re-check after the weekly task next lands a
+  site-absorbing (or site-adding) change. **Re-checked 2026-09-20: still zero**
+  — five quiet weeks now (2026-08-16 to 2026-09-20). Note a `tzavta.co.il`
+  extractor request (see [`../Users/`](../Users/README.md)) is mid-flight as of
+  this pass (open PR, not yet merged) — once it lands the window resets to
+  measuring new-extractor cadence, not the deletion effect specifically.
+- ~~**Would a JSON-LD-era equivalent be re-tried by a platform player?**~~
+  **Answered 2026-09-20: yes, but not the structured-extraction form the
+  question asked about.** Google's Gemini in Chrome (Android, all US users from
+  2026-08-18) reads whatever a page shows and offers to add it to Google
+  Calendar — a platform re-entry into "page → calendar", but via a
+  general-purpose LLM reading rendered content, not a schema.org/JSON-LD parser
+  competing on the structured-extraction axis this project occupies. See the
+  new Positioning takeaways bullet. Re-check if Gemini in Chrome reaches
+  desktop, or if a platform ships a markup-specific (not LLM-general) reader.
 - ~~Safari-native tools weren't reachable in this pass (no store scan).~~
   **Answered 2026-07-26** — see the Safari bullet under Positioning takeaways: the
   picture does not differ, and skews to OCR/text detection. Evidence caveat: the
@@ -245,6 +279,19 @@ extension).
 - [JSON-LD Checker — Chrome Web Store](https://chromewebstore.google.com/detail/json-ld-checker/jdddgiebgdijpopfapkocdnnbgkhddln)
 - [SEO Schema Visualizer — JSON-LD graph](https://www.shtros.com/seo-schema-visualizer/)
 - [Microformats — Chrome extension listing (chrome-stats)](https://chrome-stats.com/d/oalbifknmclbnmjlljdemhjjlkmppjjl)
+
+The 2026-09-20 pass added evidence for the platform-re-entry answer — all read via
+search-surfaced summaries, since the primary Google sources were egress-blocked
+to this worker's fetcher (see the evidence caveat on the new Positioning
+takeaways bullet):
+
+- [Gemini in Chrome for Android is my new favorite way to add Calendar events (Android Headlines)](https://www.androidheadlines.com/2026/08/gemini-in-chrome-for-android-is-my-new-favorite-way-to-add-calendar-events.html)
+- [Chrome for Android adding full Gemini integration and auto browse (9to5Google)](https://9to5google.com/2026/05/12/gemini-chrome-android/)
+- [Gemini in Chrome is now available to all Android users in the US (Sammy Fans)](https://www.sammyfans.com/2026/08/19/gemini-in-chrome-android-us/)
+- [Gemini in Chrome for Android is rolling out to everyone with a wild new 'Auto Browse' tool (Chrome Unboxed)](https://chromeunboxed.com/gemini-in-chrome-for-android-is-rolling-out-to-everyone-with-a-wild-new-auto-browse-tool/)
+- [I almost gave up on Google Calendar until this Gemini hack fixed my main gripe (Android Police)](https://www.androidpolice.com/i-almost-gave-up-on-google-calendar-until-this-gemini-hack-fixed-my-main-gripe/)
+- [Tap into the power of Gemini in Chrome on Android (Google, blog.google — not fetched directly, egress-blocked)](https://blog.google/products-and-platforms/products/chrome/gemini-in-chrome-android-auto-browse/)
+- [Create & manage your calendar events with Gemini Apps — Android (Google Support — not fetched directly, egress-blocked)](https://support.google.com/gemini/answer/15305236?hl=en&co=GENIE.Platform%3DAndroid)
 
 The 2026-08-16 pass added repo-native evidence for this project's own maintenance
 cost curve — this project's commits and PRs, not competitor research:
@@ -327,3 +374,26 @@ cost curve — this project's commits and PRs, not competitor research:
   re-spend budget checking too early. No claim added, changed, or removed;
   the question stays open. This pass's research went to Domain (see its
   2026-09-06 entry).
+- **2026-09-13** — re-checked the same "does the deletion effect keep going"
+  question against the full, non-shallow commit history: still zero commits
+  touched `extension/event-extractors/custom/`, now across a four-week window
+  (2026-08-16 to 2026-09-13). Extended the dated null result rather than
+  re-opening the question with no new information; still not enough to answer
+  it either way. No other claim on this page changed. This pass's main research
+  went to Domain — see its 2026-09-13 entry, which closes out the
+  `Event`-less-JSON-LD cohort question.
+- **2026-09-20** — answered the standing "would a JSON-LD-era equivalent be
+  re-tried by a platform player" question: yes, Google's Gemini in Chrome (all
+  US Android users since 2026-08-18) now offers page→Calendar in the browser
+  itself, but as a general LLM reading rendered content, not a structured-data
+  parser — so the specific competitive risk the question named (a markup-aware
+  rival) has not materialized, while a broader one (a platform-owned AI
+  assistant) has. Retired the question, added a Positioning takeaways bullet
+  and displaced the Safari/Firefox bullet from `## Key insights` for it (the
+  Safari/Firefox finding is unchanged and still in the body). Also re-checked
+  the deletion-effect null result: still zero commits to
+  `extension/event-extractors/custom/`, five quiet weeks now, though a
+  `tzavta.co.il` extractor is mid-flight per Users' refreshed count. Primary
+  Google sources were egress-blocked to this worker's fetcher; the finding
+  rests on five independent outlets' descriptions of the same rollout, noted
+  as a caveat for a future pass with an unblocked fetcher to confirm directly.

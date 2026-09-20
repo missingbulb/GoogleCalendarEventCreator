@@ -53,17 +53,17 @@ never silently overwrite.
   separate "paste a URL" step, unlike several competitor tools (see
   `../Competitors/README.md`).
 
-## Reported-demand signal (repo-native, checked 2026-08-23)
+## Reported-demand signal (repo-native, last refreshed 2026-09-20)
 
 The first *observable* answer to "which misses actually get reported" — and it is
-mostly a negative one. As of 2026-08-23 the repo carries **14 issues labelled
-[`extractor-request`](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)**,
-and **every one was filed by the repo owner** (`missingbulb`) — the same
-owner-only pattern that held at 13 on 2026-08-09 still holds two weeks and one
-filing later. No external reporter appears anywhere in that set. So the
-personas and pain points below still rest on zero outside feedback; what
-follows is signal about the *channel* and about one person's browsing, not
-about a user base.
+mostly a negative one. As of 2026-09-20 the repo carries **15 issues labelled
+[`extractor-request`](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)**
+(up from 14 on 2026-08-23), and **every one was filed by the repo owner**
+(`missingbulb`) — the same owner-only pattern that held at 13 on 2026-08-09,
+14 on 2026-08-23, and now 15 one month later. No external reporter appears
+anywhere in that set. So the personas and pain points below still rest on
+zero outside feedback; what follows is signal about the *channel* and about
+one person's browsing, not about a user base.
 
 - **The channel exists, is in-product, and fires at the failure moment — but it
   is gated behind a GitHub account.** The popup's unsupported-host states carry
@@ -81,16 +81,19 @@ about a user base.
   reporter must be a logged-in GitHub user. That is a plausible — and
   **unverified** — explanation for why the external-report count is zero, and it
   is a friction this product otherwise spends all its design budget removing.
-- **Reported demand skews local and civic, not global-platform.** Of the twelve
-  site-specific requests, **eight name Israeli hosts** (`tel-aviv.gov.il`,
+- **Reported demand skews local and civic, not global-platform.** Of the
+  thirteen site-specific requests (twelve plus the newest,
+  [#1118](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/1118),
+  filed 2026-08-31), **nine now name Israeli hosts** (`tel-aviv.gov.il`,
   `comy.co.il`, `cinema.co.il`, `secrettelaviv.com`, `barby.co.il`,
-  `eventim.co.il`, `thinkdrink.co.il`, and `ticketmaster.co.il` — the local
-  edition of a global platform), against only two genuinely international ones
-  (`axs.com`, `bandsintown.com`). With a single reporter this is one person's
-  browsing rather than a market shape, but it is worth holding as a hypothesis:
-  the pages a person actually wants on their calendar are the small civic and
-  venue sites near them, which are also the sites least likely to be served by a
-  general AI tool trained on the majors.
+  `eventim.co.il`, `thinkdrink.co.il`, `ticketmaster.co.il` — the local edition
+  of a global platform — and now `tzavta.co.il`, a Tel Aviv performance venue),
+  against only two genuinely international ones (`axs.com`, `bandsintown.com`).
+  With a single reporter this is one person's browsing rather than a market
+  shape, but it is worth holding as a hypothesis: the pages a person actually
+  wants on their calendar are the small civic and venue sites near them, which
+  are also the sites least likely to be served by a general AI tool trained on
+  the majors.
 - **A reported miss can be unfixable for reasons the user never sees — and the
   blocker is page *capture*, not extraction.** The `axs.com` request
   ([#285](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/285))
@@ -173,10 +176,11 @@ about a user base.
   [`../Competitors/`](../Competitors/README.md)'s standing open question).
   Surfaced 2026-08-09.
 - **Is the local/civic skew in reported demand a property of the demand or of
-  the single reporter?** Eight of twelve site requests name Israeli hosts. If it
-  is real, it argues the product's edge is small venue and civic sites rather
-  than the ticketing majors an AI competitor covers by default; if it is just
-  one person's browsing, it should not steer extractor priorities. Only outside
+  the single reporter?** Nine of thirteen site requests now name Israeli hosts
+  (up from eight of twelve — see the 2026-09-20 refresh below). If it is real,
+  it argues the product's edge is small venue and civic sites rather than the
+  ticketing majors an AI competitor covers by default; if it is just one
+  person's browsing, it should not steer extractor priorities. Only outside
   reports can separate the two. Surfaced 2026-08-09.
 - Does the lack of non-Google-Calendar support actually block real users? (Pairs
   with Market's `.ics`-export note.)
@@ -202,13 +206,15 @@ The 2026-08-09 pass added the first *repo-native* user-side evidence — the
 reported-demand section above. These are this project's own issues and code, not
 user research, and are labelled as such wherever they are used:
 
-- [All `extractor-request` issues (14 as of 2026-08-23, all filed by the repo owner)](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)
+- [All `extractor-request` issues (15 as of 2026-09-20, all filed by the repo owner)](https://github.com/missingbulb/GoogleCalendarEventCreator/issues?q=label%3Aextractor-request)
 - [#96 — the original "embed a Google Form in the popup" request](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/96) — shipped instead as a prefilled GitHub issue form
 - [#285 — `axs.com`, abandoned: HTTP 403 blocks page capture](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/285) — owner: "Can't get the html to write an extractor for."
 - [#170 — `bandsintown.com`, same 403 wall, completed only from a browser-saved page](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/170)
 - [PR #199 — the bandsintown extractor that eventually landed](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/199)
 - [#880 — `edfringe.com`, filed 2026-08-11, a hardening request on an already-supported host](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/880)
 - [PR #881 — added a second recorded page to `edinburghfringe.js`, present since the 2026-06-22 restructure](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/881)
+- [#1118 — `tzavta.co.il`, filed 2026-08-31, a new-host request (no existing extractor)](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/1118)
+- [PR #1132 — the in-flight `tzavta.co.il` extractor, open as of this pass](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/1132)
 
 ## Growth log
 
@@ -259,3 +265,11 @@ user research, and are labelled as such wherever they are used:
   local/civic-skew tally but kept as a new finding in its own right (the
   channel doubles as a "harden this extractor" form, not only a "this site
   doesn't work" one). No open question answered or opened.
+- **2026-09-20** — refreshed the reported-demand signal: one new
+  `extractor-request` issue since 2026-08-23 (#1118, `tzavta.co.il`, filed
+  2026-08-31), still owner-filed and, unlike #880 last pass, a genuine new-host
+  request — no `custom/tzavta.js` exists yet, and its implementation
+  (PR #1132) is still open. The zero-external-reports finding holds at 15/15,
+  and the local/civic skew count moves to nine of thirteen (was eight of
+  twelve). No open question answered or opened; this pass's other research went
+  to Competitors (the platform-re-entry question).
