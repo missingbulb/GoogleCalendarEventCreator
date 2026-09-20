@@ -373,8 +373,7 @@ export async function main() {
 
   // The pending-page sweep first: it is independent of any request, and cheap when
   // there is nothing to do (one directory listing).
-  const { findTaskDeclaration, loadTaskDeclaration } = await import('../../../../../shared/packs/claudinite-tasks/public/task-discovery.mjs');
-  const decl = await loadTaskDeclaration(findTaskDeclaration(new URL('.', import.meta.url).pathname));
+  const { default: decl } = await import('./task.json', { with: { type: 'json' } });
   await sweepPendingPages(scraperKey, base, decl.agent_preprocessing_timeout * 1000);
 
   const allRequests = await openRequests();

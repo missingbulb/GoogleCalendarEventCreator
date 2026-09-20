@@ -72,8 +72,7 @@ test("eligible requests are listed oldest-first, matching the order preprocessin
 });
 
 test("the declaration carries the full contract, including the secret preprocessing spends", async () => {
-  const { findTaskDeclaration, loadTaskDeclaration } = await import("../../../../../../shared/packs/claudinite-tasks/public/task-discovery.mjs");
-  const task = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
+  const task = require("../task.json");
   assert.equal(task.id, "create-extractor");
   // The declarative expression is the ONLY gate mechanism: the `precondition`
   // function and its `precondition_signals` companion are retired, and the signal
