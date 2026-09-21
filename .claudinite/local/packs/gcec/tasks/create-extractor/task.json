@@ -4,7 +4,7 @@
   "description": "Turns an extractor-request issue into a PR adding site support: preprocessing triages the request, fetches and records the target page, and scaffolds the extractor; the agent then writes extract() against that recorded page and fills in the test case.",
   "trigger": "schedule",
   "preconditions": [
-    "due:daily",
+    "schedule:at-most-daily",
     "extractor-request-eligible"
   ],
   "expected_outcome": "pr",

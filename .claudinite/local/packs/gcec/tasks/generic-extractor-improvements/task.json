@@ -4,7 +4,7 @@
   "description": "Tries to close the gap between the generic extractor and what dedicated per-site sources capture, by hypothesizing an improvement, editing the extractor, and verifying against live pages. A genuine win is rare; finding none is the expected, correct outcome, not a failure.",
   "trigger": "schedule",
   "preconditions": [
-    "due:weekly",
+    "schedule:at-most-weekly",
     "substantive-change",
     "no-open-pr-titled:Generic coverage:"
   ],
