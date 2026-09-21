@@ -83,7 +83,7 @@ test("the declaration carries the full contract, including the secret preprocess
   // (missingbulb/Claudinite#1725). Daily, not hourly: #1060 accepts a slow cycle
   // until an event trigger replaces the poll. Pinned so the declaration cannot
   // drift back to a cadence the queue will not honour.
-  assert.deepEqual(task.preconditions, ["due:daily", "extractor-request-eligible"]);
+  assert.deepEqual(task.preconditions, ["schedule:at-most-daily", "extractor-request-eligible"]);
   assert.equal(task.frequency, undefined);
   assert.equal(task.precondition, undefined);
   assert.equal(task.precondition_signals, undefined);
@@ -108,8 +108,8 @@ test("the precondition is pure — it never reads a body or reaches for I/O", as
 // covering the pipeline's own output would park every extractor PR silently.
 const POLICY = async () => {
   const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
-  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/public/merge-policy.mjs`);
-  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/public/task-discovery.mjs`);
+  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/public/task-declaration.mjs`);
+  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/src/contract/task-declaration.mjs`);
   const root = require("node:path").join(__dirname, "../../../../../../..");
   const config = JSON.parse(require("node:fs").readFileSync(`${root}/.claudinite-settings.json`, "utf8"));
   const { rules, errors } = declaredMergeRules(
