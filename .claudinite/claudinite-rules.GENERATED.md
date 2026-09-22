@@ -9,3 +9,4 @@
 @shared/packs/product-wiki/RULES.md
 @shared/packs/spec-driven-product/RULES.md
 @local/packs/gcec/RULES.md
+@temp/packs/current_user/RULES.md

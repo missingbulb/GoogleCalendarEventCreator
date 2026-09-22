@@ -1,6 +1,8 @@
 ---
 name: snapshot-approval
 description: Get owner approval for a moved UI-snapshot baseline. Use whenever a change to a dev/requirements case (its spec or its rendering) makes the snapshot tests fail — the pixels moved and the baseline wants to change.
+metadata:
+  body: workflow
 ---
 
 # Snapshot-approval process

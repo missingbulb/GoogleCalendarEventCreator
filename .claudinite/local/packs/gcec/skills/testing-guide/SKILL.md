@@ -1,6 +1,8 @@
 ---
 name: testing-guide
 description: Map of this repo's test suites, the requirements model, and where each harness documents itself. Use before writing or changing tests here, adding a requirement case, or debugging a suite — the invariants live in the gcec pack's RULES.md; this is the deeper how-to.
+metadata:
+  body: workflow
 ---
 
 # Testing in this repo
