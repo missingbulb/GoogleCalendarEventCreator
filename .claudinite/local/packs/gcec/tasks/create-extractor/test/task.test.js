@@ -87,10 +87,10 @@ test("the declaration carries the full contract, including the secret preprocess
   assert.equal(task.frequency, undefined);
   assert.equal(task.precondition, undefined);
   assert.equal(task.precondition_signals, undefined);
-  assert.equal(task.expected_outcome, "pr");
-  assert.equal(task.agent_preprocessing, "node prepare.mjs");
-  assert.deepEqual(task.required_secrets, ["SCRAPER_API_KEY"]);
-  assert.ok(task.agent_preprocessing_timeout > 0 && task.agent_execution_timeout > 0);
+  assert.equal(task.expected_outcome, "fresh_pr");
+  assert.equal(task.code_work, "node prepare.mjs");
+  assert.deepEqual(task.code_work_required_secrets, ["SCRAPER_API_KEY"]);
+  assert.ok(task.code_work_timeout > 0 && task.agent_execution_timeout > 0);
 });
 
 test("the precondition is pure — it never reads a body or reaches for I/O", async () => {
