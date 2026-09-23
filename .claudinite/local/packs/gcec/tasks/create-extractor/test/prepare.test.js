@@ -171,6 +171,6 @@ test("hasRoomToStart: leaves room for a worst-case fetch AND the delivery after 
 test("hasRoomToStart: the budget the worker reads is the task's own declaration", async () => {
   const { hasRoomToStart } = await load();
   const decl = require("../task.json");
-  assert.equal(hasRoomToStart(0, decl.agent_preprocessing_timeout * 1000), true);
-  assert.equal(hasRoomToStart(decl.agent_preprocessing_timeout * 1000, decl.agent_preprocessing_timeout * 1000), false);
+  assert.equal(hasRoomToStart(0, decl.code_work_timeout * 1000), true);
+  assert.equal(hasRoomToStart(decl.code_work_timeout * 1000, decl.code_work_timeout * 1000), false);
 });

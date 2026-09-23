@@ -8,7 +8,7 @@
     "substantive-change",
     "no-open-pr-titled:Generic coverage:"
   ],
-  "expected_outcome": "pr",
+  "expected_outcome": "fresh_pr",
   "automerge": [
     "generic-coverage-scope"
   ],
