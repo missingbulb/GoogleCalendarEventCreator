@@ -7,16 +7,16 @@
     "schedule:at-most-daily",
     "extractor-request-eligible"
   ],
-  "expected_outcome": "pr",
+  "expected_outcome": "fresh_pr",
   "automerge": [
     "site-support-scope"
   ],
   "agent_model": "sonnet",
   "agent_instructions": "task.md",
   "agent_execution_timeout": 3600,
-  "agent_preprocessing": "node prepare.mjs",
-  "agent_preprocessing_timeout": 1800,
-  "required_secrets": [
+  "code_work": "node prepare.mjs",
+  "code_work_timeout": 1800,
+  "code_work_required_secrets": [
     "SCRAPER_API_KEY"
   ]
 }
