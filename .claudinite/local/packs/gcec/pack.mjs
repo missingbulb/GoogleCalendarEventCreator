@@ -6,17 +6,10 @@ import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
 import genericCoverageScopeAgrees from './generic-coverage-scope-agrees.mjs';
 
 // The gcec pack: this project's general working pack, as a LOCAL Claudinite pack
-// (.claudinite/local/packs/ — tracked project content, discovered and run by the
-// same engine as the canon packs). It carries the standing project rules
-// (RULES.md, injected at session start while the pack is declared), the project's
-// own conformance checks (run at every Stop and in CI alongside the canon
-// packs'), and the activity-scoped skills that used to live as always-loaded
-// dev/procedures prose.
-//
-// A local pack is always declared by hand in .claudinite-settings.json (never
-// fingerprinted by --init, never seeded), so detect/marker stay null. Its skills
-// live INSIDE the pack (skills/<name>/SKILL.md); the engine mounts them from
-// here, not from the canon skills tree.
+// (.claudinite/local/packs/). It carries the standing project rules (RULES.md),
+// the project's own conformance checks, and its activity-scoped skills
+// (skills/<name>/SKILL.md, mounted from here). Declared by hand in
+// .claudinite-settings.json, so detect/marker stay null.
 export default {
   id: 'gcec',
   ruleRoutingGuidance: {

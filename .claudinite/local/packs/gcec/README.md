@@ -2,11 +2,7 @@
 
 This project's general working pack — a **local pack**
 (`.claudinite/local/packs/` — tracked project content, run by the same
-Claudinite engine as the canon packs). It replaced the always-`@`-imported
-`dev/procedures/{workflow,github,testing,technicalGotchas}.md` docs: the
-always-relevant rules became [RULES.md](RULES.md) (injected at session start),
-the activity-scoped procedures became this pack's skills (surfaced on demand),
-and the first always-testable rule became a check. Declared by hand in
+Claudinite engine as the canon packs). Declared by hand in
 [`.claudinite-settings.json`](../../../../.claudinite-settings.json); never
 fingerprinted or seeded.
 
