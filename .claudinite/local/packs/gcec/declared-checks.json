@@ -31,6 +31,20 @@
     ]
   },
   {
+    "id": "custom-source-annotated-nothing-to-add",
+    "severity": "blocking",
+    "since": "2026-09-27",
+    "failureMessage": "a fully-supported site with nothing to override gets no custom/<site>.js file at all — one left behind and annotated as having nothing to add should have been deleted instead",
+    "scanFiles": "/^extension\\/event-extractors\\/custom\\/[^/]+\\.js$/",
+    "matchLines": [
+      {
+        "match": "/nothing to add/i",
+        "what": "{path} is annotated \"nothing to add\" instead of being deleted",
+        "fix": "delete this file — a site with nothing to override stays listed in supportedDomains with no custom/ file at all"
+      }
+    ]
+  },
+  {
     "id": "git-checkout-paths-and-branch-move-combined",
     "severity": "advisory",
     "since": "2026-09-13",

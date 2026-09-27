@@ -63,6 +63,41 @@ test('github-job-logs-guessed-tail-lines: quiet at the tool default, with no tai
   );
 });
 
+// A minimal world-scope ctx: matchLines reads ctx.files/ctx.tracked (the scan set)
+// and ctx.read(path), unlike the action-scope rules above (guardFindings needs no ctx).
+const worldCtx = (tree) => ({
+  files: Object.keys(tree),
+  tracked: Object.keys(tree),
+  read: (p) => (p in tree ? tree[p] : null),
+});
+
+test('custom-source-annotated-nothing-to-add: fires on a stub left annotated instead of deleted', () => {
+  const rule = ruleById('custom-source-annotated-nothing-to-add');
+  const findings = rule.run(worldCtx({
+    'extension/event-extractors/custom/stubhub.js':
+      '// Nothing to add — the generic extractor already gets this site right.\n',
+  }));
+  assert.equal(findings.length, 1);
+  assert.match(findings[0].what, /annotated "nothing to add"/);
+  assert.equal(findings[0].severity, 'blocking');
+});
+
+test('custom-source-annotated-nothing-to-add: quiet on a real override, a near-miss phrase, and outside custom/', () => {
+  const rule = ruleById('custom-source-annotated-nothing-to-add');
+  assert.deepEqual(rule.run(worldCtx({
+    'extension/event-extractors/custom/thinkdrink.js': 'GCal.sources.push({ name: "thinkdrink" });\n',
+  })), []);
+  // the real near-miss already in this tree (tabitisrael.js): not the banned phrase
+  assert.deepEqual(rule.run(worldCtx({
+    'extension/event-extractors/custom/tabitisrael.js':
+      '// nothing for that base to read here: the page\'s only JSON-LD is a Restaurant\n',
+  })), []);
+  // the pipeline itself is out of scope, even with the banned phrase
+  assert.deepEqual(rule.run(worldCtx({
+    'extension/event-extractors/generic-extractor.js': '// nothing to add here\n',
+  })), []);
+});
+
 test('git-checkout-paths-and-branch-move-combined: fires on the #734 shape, either order', () => {
   const rule = ruleById('git-checkout-paths-and-branch-move-combined');
   const forward = guardFindings(rule, {
