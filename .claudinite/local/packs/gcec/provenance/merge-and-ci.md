@@ -95,3 +95,13 @@
   guaranteed.
 - **Actor:** @missingbulb (owner).
 - **Landed:** #1227.
+
+## 2026-09-27 · reworded · Claudinite growth: dedup local packs (Refs #1349)
+- **Source:** git-github's merge-to-main SKILL.md dropped the post-merge `checkout main && pull`
+  step this section was contrasting itself against (canon now syncs `main` only for continued work,
+  via `checkout main && reset --hard origin/main`).
+- **Reason:** the paragraph's framing ("the canon merge recipe's post-merge step 5 is …") named a
+  step canon no longer has; corrected to describe canon's current recipe, keeping the same
+  fetch-not-checkout guidance and evidence.
+- **Actor:** growth-dedup task (agent).
+- **Model:** Claude Sonnet 5.
