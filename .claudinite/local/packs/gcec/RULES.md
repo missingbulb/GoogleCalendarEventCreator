@@ -19,13 +19,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
   rest — duplicating, not verifying, work its own subagent was already
   producing — and converged the dispatch issue on that duplicate instead of
   the subagent's actual output. (duplicate-dispatch-trigger)
-- **`get_job_logs`'s `tail_lines` can blow the tool's token limit on its own**
-  (canon covers capping and qualifying list/search calls) — guessing a large
-  value to diagnose a CI failure can itself exceed the limit (#1101,
-  `tail_lines: 2406` → `exceeds maximum allowed tokens`). Skip the guess — a
-  small call gets you the saved-to-disk log path, then `grep` that file for the
-  failure marker (`not ok`, `FAIL`) the same way an oversized list/search
-  result gets read. (getjoblogss-taillines-can)
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
