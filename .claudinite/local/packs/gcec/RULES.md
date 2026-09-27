@@ -87,9 +87,11 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 Project-wide footguns only. Portable rules these instantiate live in the canon
 packs/skills.
 
-- **`declarativeContent`/`UrlFilter` host-match verification is CI-only** — the
-  real URL→icon match runs inside Chrome, exercised here only by the CI-only
-  real-Chrome test (`dev/requirements/heavy/extension-load.chrome.test.js`).
+- **`declarativeContent`/`UrlFilter` host-match verification is no longer
+  CI-only** — the real URL→icon match still runs only inside Chrome, exercised
+  by `dev/requirements/heavy/extension-load.chrome.test.js`, which now also
+  runs right here: `CHROME_PATH=/opt/pw-browsers/chromium xvfb-run -a node
+  --test dev/requirements/heavy/extension-load.chrome.test.js`.
   (declarativecontent-urlfilter-host)
 - **CDP-introspecting the MV3 worker hits the portable traps** (canon): here
   they bit `declarativeContent…getRules` (hung until job timeout), which is why
