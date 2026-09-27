@@ -9,3 +9,11 @@
   residue became a rule of its own.
 - **Actor:** @missingbulb (owner).
 - **Landed:** #1176.
+
+## 2026-09-27 · retired · prose-to-checks sweep round 3
+- **Reason:** since #1176 split the bullet down to just this content, it states nothing
+  `github-job-logs-guessed-tail-lines` (declared-checks.json, landed round 1) doesn't already assert
+  — what/why/fix match verbatim. Deletion test re-applied now that the split makes it apply; the
+  parenthetical pointing at the canon's separate rule carries no further remedy.
+- **Mechanism:** `github-job-logs-guessed-tail-lines`, landed on this same PR's round 1.
+- **Actor:** Claude (agent), prose-to-checks-sweep task, item #1350.
