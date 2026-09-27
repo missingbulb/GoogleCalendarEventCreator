@@ -28,3 +28,14 @@
 - **Actor:** @missingbulb (owner).
 - **Model:** Claude, per the commit trailer.
 - **Landed:** #802 (Refs #798).
+
+## 2026-09-27 · reworded · Claudinite growth: rule revalidation (#1351)
+- **Source:** re-running `dev/requirements/heavy/extension-load.chrome.test.js` in a Claude Code
+  cloud session with `CHROME_PATH=/opt/pw-browsers/chromium xvfb-run -a node --test …` — it
+  passed, exercising the real `declarativeContent` registration and the `iconRulesReady` CDP poll.
+- **Reason:** the session's pre-installed Playwright Chromium plus `xvfb-run` satisfy what the test
+  needs, so "CI-only" is no longer true; only a Chrome-less checkout still skips it.
+- **Actor:** Claudinite rule-revalidation task, run item #1351.
+- **Model:** Claude Sonnet 5, per the commit trailer.
+- **Retire when:** the test's own header comment stops calling the offline sandbox a skip case, or
+  the heavy suite runs by default without manual `CHROME_PATH`/`xvfb-run` setup.
