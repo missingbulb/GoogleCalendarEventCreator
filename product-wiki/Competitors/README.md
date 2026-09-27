@@ -232,6 +232,13 @@ extension).
   extractor request (see [`../Users/`](../Users/README.md)) is mid-flight as of
   this pass (open PR, not yet merged) — once it lands the window resets to
   measuring new-extractor cadence, not the deletion effect specifically.
+  **Re-checked 2026-09-27: still zero** — six quiet weeks now (2026-08-16 to
+  2026-09-27), again via the GitHub API's full commit history rather than this
+  session's own shallow local clone (which this pass confirmed is shallow too:
+  its `git log` on the path surfaces only a single grafted boundary commit that
+  reads as a pure addition of every file, an artifact of the graft point, not a
+  real diff). PR #1132 (`tzavta.co.il`) is still open and unmerged as of this
+  check, so the window has still not reset onto new-extractor cadence.
 - ~~**Would a JSON-LD-era equivalent be re-tried by a platform player?**~~
   **Answered 2026-09-20: yes, but not the structured-extraction form the
   question asked about.** Google's Gemini in Chrome (Android, all US users from
@@ -397,3 +404,11 @@ cost curve — this project's commits and PRs, not competitor research:
   Google sources were egress-blocked to this worker's fetcher; the finding
   rests on five independent outlets' descriptions of the same rollout, noted
   as a caveat for a future pass with an unblocked fetcher to confirm directly.
+- **2026-09-27** — re-checked the standing "does the deletion effect keep going"
+  null result via the GitHub API's full commit history: still zero commits to
+  `extension/event-extractors/custom/` across six quiet weeks (2026-08-16 to
+  2026-09-27), and confirmed PR #1132 (`tzavta.co.il`) is still open and
+  unmerged, so the window has not reset. Also re-ran the reported-demand count
+  for [`../Users/`](../Users/README.md): still 15 `extractor-request` issues,
+  all owner-filed, no new one since #1118 (2026-08-31) — no change there, so
+  that page was not touched this pass. No open question answered or opened.
