@@ -91,10 +91,10 @@ all. Open the PR early for those.
 
 ## After the merge, `git fetch origin main` — never check `main` out
 
-The canon merge recipe's post-merge step 5 is
-`git checkout main && git pull origin main`. **Skip the checkout here**: a plain
-`git fetch origin main` is all this repo's remaining post-merge work needs, and
-the checkout is the part that reliably stalls or gets denied.
+Canon no longer syncs `main` post-merge by default; it syncs only for
+continued work, via `checkout main && reset --hard origin/main`. **Fetch
+anyway**: `git fetch origin main` is all this repo needs — the checkout is
+what reliably stalls or gets denied.
 
 Nothing downstream reads the working tree. The capture step that follows the
 merge (`capture-log.mjs`) does every branch write through git plumbing against
