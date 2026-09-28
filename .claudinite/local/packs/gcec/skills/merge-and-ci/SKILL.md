@@ -1,8 +1,10 @@
 ---
 name: merge-and-ci
-description: Drive this repo's PR-to-merged flow cheaply — when to open the PR, how to get CI green in a Claude web session, how to poll without wasting wall time or tokens, and when to arm auto-merge instead of waiting. Use whenever a session opens, watches, or lands a PR here — including one opened incidentally mid-task by an unattended or scheduled run, and any moment you ask "is CI green yet?" — not only for a deliberate merge or an e2e/heavy/UI change.
+description: Drive this repo's PR-to-merged flow cheaply — when to open the PR, how to get CI green in a Claude web session, how to poll without wasting wall time or tokens, and when to arm auto-merge instead of waiting. Use whenever a session opens, watches, or lands a PR here — including one opened incidentally mid-task by an unattended or scheduled run, and any moment you ask "is CI green yet?" — not only for a deliberate merge or an e2e/heavy/UI change. The same poll discipline governs watching any forced/dispatched Actions run to a terminal state, PR or not.
 metadata:
   body: guidelines
+  force-load-on-tool-calls:
+    - 'mcp__github__actions_run_trigger'
 ---
 
 # Merge and CI in this repo
@@ -39,13 +41,18 @@ all. Open the PR early for those.
   proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
   there's no API token in the env, and `gh` reaches no `api.github.com` — only
   an MCP poll sees check state; a background bash/Monitor loop cannot.
-- **Poll on a short back-off, never one long sleep, never tight.** Loop
-  **MCP poll → background sleep → MCP poll** until the check leaves
-  `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating — a
-  fast run wakes you within seconds, a slow one isn't tight-polled. Always wait
-  for the sleep's completion notification before the next poll. While a sleep
-  runs, do real work (review the diff, draft the PR body) or end the turn —
-  filler calls to look busy are tight-polling in disguise.
+- **Poll on a short back-off, never one long sleep, never tight — the same loop
+  for watching a forced Actions run to completion, not only a PR's check.**
+  Loop **MCP poll → background sleep → MCP poll** until the check or run
+  leaves `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating —
+  a fast run wakes you within seconds, a slow one isn't tight-polled. Always
+  wait for the sleep's completion notification before the next poll: issuing
+  the next poll right after launching the sleep (not after it resolves) was
+  measured firing the follow-up MCP call 2–3s into a 5–30s backgrounded sleep,
+  seven times in 54s, while watching a forced `claudinite-scheduler.yml` run
+  (#1230). While a sleep runs, do real work (review the diff, draft the PR
+  body) or end the turn — filler calls to look busy are tight-polling in
+  disguise.
 - **Pass `run_in_background: true` on every sleep in that loop, starting with
   the first 5s call — not only once a bare one gets blocked.** The harness
   accepts a short foreground `sleep` but rejects a standalone `sleep 30`

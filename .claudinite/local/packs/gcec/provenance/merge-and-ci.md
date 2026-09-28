@@ -105,3 +105,18 @@
   fetch-not-checkout guidance and evidence.
 - **Actor:** growth-dedup task (agent).
 - **Model:** Claude Sonnet 5.
+
+## 2026-09-28 · trigger-changed · Claudinite growth: extract lessons (#1375)
+- **Source:** issue-1230's session (2026-09-13 hindsight-window capture) forced
+  `claudinite-scheduler.yml` to a terminal state per the basics pack's "watch scheduled machinery"
+  rule, then broke its own already-written backoff twice — the next MCP poll fired 2–3s after
+  launching a 5–30s backgrounded sleep, seven times in 54s — because this skill's only trigger
+  was a PR-scoped description, never loaded for a non-PR forced run.
+- **Reason:** the poll-cheaply loop already written here is generic to any watched run, not only a
+  PR's check-suite; widened the description to say so and gave the skill a real trigger so it
+  force-loads before an agent starts polling a run it just forced.
+- **Actor:** growth-extract task (agent).
+- **Model:** Claude Sonnet 5.
+- **Mechanism:** the skill's description, plus `force-load-on-tool-calls:
+  mcp__github__actions_run_trigger`.
+- **Landed:** #1375.
