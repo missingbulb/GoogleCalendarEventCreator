@@ -4,12 +4,12 @@
 // quiet on a clean one.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import testOfflineListSync from './test-offline-list-sync.mjs';
-import customSourcesFlat from './custom-sources-flat.mjs';
-import npmTestGlobCoverage from './npm-test-glob-coverage.mjs';
-import pipelineSiteAgnostic from './pipeline-site-agnostic.mjs';
-import regenArtifactsMergeOurs from './regen-artifacts-merge-ours.mjs';
-import genericCoverageScopeAgrees from './generic-coverage-scope-agrees.mjs';
+import testOfflineListSync from './worldRules/test-offline-list-sync.mjs';
+import customSourcesFlat from './worldRules/custom-sources-flat.mjs';
+import npmTestGlobCoverage from './worldRules/npm-test-glob-coverage.mjs';
+import pipelineSiteAgnostic from './worldRules/pipeline-site-agnostic.mjs';
+import regenArtifactsMergeOurs from './worldRules/regen-artifacts-merge-ours.mjs';
+import genericCoverageScopeAgrees from './worldRules/generic-coverage-scope-agrees.mjs';
 
 function ctx({ files = [], pkg }) {
   const disk = new Set([...files, 'package.json']);

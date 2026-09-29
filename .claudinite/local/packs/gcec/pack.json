@@ -1,0 +1,6 @@
+{
+  "ruleRoutingGuidance": {
+    "belongs": "this project's standing rules — owner commands, testing invariants, codebase gotchas, extractor-pipeline rules, architecture rules of the road, capture policy",
+    "excludes": "general software-engineering practices and portable procedures — those live in the vendored Claudinite canon, not here"
+  }
+}
