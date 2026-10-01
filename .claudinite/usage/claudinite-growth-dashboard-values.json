@@ -2,15 +2,15 @@
   "usage-findings": {
     "value": 10,
     "previous": 10,
-    "note": "2026-09-01 to 2026-09-28"
+    "note": "2026-09-03 to 2026-09-30"
   },
   "usage-newest": {
     "rows": [
       {
-        "subject": "writing-pack-prose",
-        "rule": "skill-triggered-missing-moments",
+        "subject": "searching-for-a-tool",
+        "rule": "skill-always-loaded",
         "cause": "known",
-        "since": "2026-09-29"
+        "since": "2026-10-01"
       },
       {
         "subject": "changing-pack-elements",
