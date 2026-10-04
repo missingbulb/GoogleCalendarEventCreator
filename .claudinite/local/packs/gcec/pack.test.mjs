@@ -1,7 +1,6 @@
 // Red-first fixture tests for the gcec pack's checks, runnable by this repo's own
-// `npm test` (no imports from the gitignored .claudinite mount — see the check
-// module's header). Each rule is shown firing on a violating fixture and staying
-// quiet on a clean one.
+// `npm test` (no imports from the engine — see the check modules' headers). Each rule is shown firing on a violating
+// fixture and staying quiet on a clean one.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import testOfflineListSync from './worldRules/test-offline-list-sync.mjs';

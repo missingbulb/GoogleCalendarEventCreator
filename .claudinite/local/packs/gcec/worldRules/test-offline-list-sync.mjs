@@ -2,14 +2,12 @@
 // with the extension-test/ mirror tree — it names every extension-test/**/*.test.js
 // that exists, and only files that exist. `npm test` discovers by glob, so a test
 // missing from test:offline still runs there; what this check catches is the
-// offline suite silently thinning as tests are added, moved, or renamed (the rule
-// this converts was prose in the project's old testing procedure doc).
+// offline suite silently thinning as tests are added, moved, or renamed.
 //
 // Local-pack check modules are dependency-free on purpose: they return plain
 // finding objects ({ rule, severity, file, line, what, why, fix, doc }) instead of
-// importing the engine's checks/lib helpers — the mount those helpers live in is
-// gitignored and absent on a fresh checkout, and this module must also load under
-// the repo's own `npm test` (pack.test.mjs).
+// importing the engine's checks/lib helpers, so this module also loads under the
+// repo's own `npm test` (pack.test.mjs).
 const id = 'test-offline-list-sync';
 const severity = 'blocking';
 const doc = '.claudinite/local/packs/gcec/RULES.md';
