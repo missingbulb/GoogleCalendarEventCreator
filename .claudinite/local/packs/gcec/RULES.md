@@ -151,12 +151,9 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
 - **Facebook can't be a cached live case** — a hard HTTP 400 even through the
   proxy, so its extraction stays unit-tests-only
   (`extension-test/event-extractors/extraction.test.js`). (facebook-cant-be)
-- **A scratch script that needs a project dependency (e.g. `jsdom`) can't live
-  in the harness's external scratchpad** — Node's module resolution walks up
-  from the script's own directory, which never reaches this repo's
-  `node_modules`. `generic-extractor-improvements`' habitual "fetch a page,
-  then jsdom-inspect it" throwaway scripts need to live inside the repo (a
-  gitignored scratch dir, cleaned up before committing) instead (#866). (scratch-script-needs)
+- **`generic-extractor-improvements`' "fetch a page, then jsdom-inspect it"
+  throwaway scripts live in a gitignored scratch dir inside the repo, cleaned up
+  before committing** (canon covers why) (#866). (scratch-script-needs)
 - **Rendered output isn't deterministic.** A re-record can legitimately shift a
   live case's `expected` — treat such drift like a site-markup change, and prefer
   extracting JSON-LD/`og:` (which apps still inject) over brittle DOM positions.
