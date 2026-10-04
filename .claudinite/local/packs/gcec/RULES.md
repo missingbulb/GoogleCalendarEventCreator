@@ -118,15 +118,6 @@ packs/skills.
   (#133); a real event requires actual data (JSON-LD or a parsed date), never a
   mere host match. (supported-registered-host)
 
-## Workflow-failure classification
-
-**Mind the one gap `gha/scheduled-failure-escalation` can't see:** it only
-inspects workflows carrying a `schedule:`, so a workflow that is unattended by
-some *other* trigger — `workflow_run`, `repository_dispatch` — needs its failure
-job wired by hand.
-The `Release` stub (`chrome-extension-release.yml`) is exactly that shape; its
-reporters live in the vendored create-package/publish/daily workflows it calls.
-
 ## Extractor pipeline
 
 Standing rules for the extractor-automation domain — the two gcec pack
