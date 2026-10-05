@@ -53,7 +53,6 @@ jobs:
           CLAUDINITE_VARS: ${{ toJSON(vars) }}
           CCR_ROUTINE_TOKEN: ${{ secrets.CCR_ROUTINE_TOKEN }}
           # claudinite:secrets
-          CCR_ROUTINE_TOKEN: ${{ secrets.CCR_ROUTINE_TOKEN }}
           SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
         run: .claudinite/bin/cn execute loop
 
