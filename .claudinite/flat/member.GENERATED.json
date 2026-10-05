@@ -5,8 +5,8 @@
     "format": "yaml"
   },
   "engine": {
-    "package": "@claudinite/cli-rc",
-    "version": "1.61005.2",
+    "package": "@claudinite/cli",
+    "version": "1.61005.3",
     "channel": "canary"
   },
   "packs": {
