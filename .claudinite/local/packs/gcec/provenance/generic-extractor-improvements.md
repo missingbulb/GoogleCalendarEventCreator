@@ -80,3 +80,19 @@
 - **Mechanism:** the `no-open-pr-titled` precondition, with task.md pinning the PR-title prefix it
   reads.
 - **Landed:** #1244 (Closes #1243).
+
+## 2026-10-05 · ported · the declaration drops the Node task schema pointer (#1422)
+- **Reason:** the move to cn: the canon no longer ships the Node task schema the `$schema` key
+  pointed at; what the task does is unchanged.
+- **Actor:** @missingbulb (owner), moving the repo to cn.
+- **Model:** Claude, per the commit trailer.
+- **Landed:** #1422.
+
+## 2026-10-05 · gate-changed · a winning round carries its own patch bump
+- **Reason:** the chrome-extension release no longer bumps the version, and the generic extractor
+  ships, so a round raises the patch before its postcondition, which now checks the version against
+  main through the pack's lib/version-change.mjs. The automerge adds `extension-version-bump`;
+  `generic-coverage-scope` and `allowed=` are unchanged, so the two gates still agree.
+- **Mechanism:** task.md step 4, postconditions.sh step 1b, the `extension-version-bump` merge rule.
+- **Actor:** @missingbulb (owner), refreshing the release pipeline in the move to cn.
+- **Model:** claude-opus-5-5

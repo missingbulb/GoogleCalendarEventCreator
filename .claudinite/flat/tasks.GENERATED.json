@@ -4,7 +4,6 @@
     "basics/ci-performance": {
       "path": ".claudinite/shared/packs/basics/tasks/ci-performance/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "ci-performance",
         "description": "Reads where this repository's CI time goes from the Actions run history, keeps a standing record of each workflow's median, and hands an agent a real regression already localised to a workflow and a before-and-after delta.",
         "trigger": "schedule",
@@ -25,7 +24,6 @@
     "basics/improve-comments": {
       "path": ".claudinite/shared/packs/basics/tasks/improve-comments/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "improve-comments",
         "description": "Reads a slice of the repository's code as comments, deletes the ones that restate the code, corrects the ones that drifted, and adds the why only a reader's guess carried.",
         "trigger": "schedule",
@@ -47,7 +45,6 @@
     "chrome-extension/store-release": {
       "path": ".claudinite/shared/packs/chrome-extension/tasks/store-release/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "store-release",
         "description": "Fires the Chrome Web Store release leg for an extension repository, so the release workflow keeps only its push and manual triggers and the scheduler stays the repository's only cron. The workflow itself does the authoritative shipped-file diff.",
         "trigger": "schedule",
@@ -63,7 +60,6 @@
     "claudinite-growth/growth-dedup": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/growth-dedup/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "growth-dedup",
         "description": "The growth lifecycle's pruning stage: reconciles this repository's local packs against the canon it mounts, removing local items the canon now covers and keeping those the canon states too generally.",
         "trigger": "schedule",
@@ -85,11 +81,10 @@
     "claudinite-growth/growth-extract": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/growth-extract/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "growth-extract",
         "description": "The growth lifecycle's capture stage: mines the window's repository activity and the captured conversation logs for durable lessons, folds them into this repository's local packs, and runs prose-to-checks over what it wrote.",
         "schedule_after": [
-          "claudinite-lifecycle/update"
+          "engine/update"
         ],
         "trigger": "schedule",
         "preconditions": [
@@ -108,7 +103,6 @@
     "claudinite-growth/logs-prune": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/logs-prune/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "logs-prune",
         "description": "Retention on the conversation-logs branch: deletes capture files older than the configured window so the branch stays bounded.",
         "trigger": "request",
@@ -116,14 +110,13 @@
           "log-past-retention"
         ],
         "expected_outcome": "no_code_changes",
-        "code_worker_mjs": "worker.mjs",
+        "code_work": "cn growth prune",
         "code_work_timeout": 60
       }
     },
     "claudinite-growth/prose-to-checks-sweep": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/prose-to-checks-sweep/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "prose-to-checks-sweep",
         "description": "Mines this repository's existing pack prose for always-testable rules the conversion missed and converts the strongest ones into checks.",
         "trigger": "schedule",
@@ -143,7 +136,6 @@
     "claudinite-growth/rule-revalidation": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/rule-revalidation/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "rule-revalidation",
         "description": "Re-probes the pack rules whose truth lives outside this repository, such as what the harness rejects or which tools exist, and corrects the ones the platform has moved under.",
         "trigger": "schedule",
@@ -163,7 +155,6 @@
     "claudinite-growth/usage-review": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/usage-review/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "usage-review",
         "description": "Compares what each skill declares about its own usage against what the record shows, by a file of readable rule declarations, and writes the findings with their causes and recommendations. Changes nothing it reviews.",
         "schedule_after": [
@@ -184,7 +175,6 @@
     "claudinite-growth/usage-triage": {
       "path": ".claudinite/shared/packs/claudinite-growth/tasks/usage-triage/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "usage-triage",
         "description": "Turns a usage-review finding that has stood two weeks into a proposed change to this repo's own local packs - the edit itself, one pull request per subject, for the owner to merge or decline.",
         "trigger": "schedule",
@@ -202,7 +192,6 @@
     "claudinite-lifecycle/adopt-requested-packs": {
       "path": ".claudinite/shared/packs/claudinite-lifecycle/tasks/adopt-requested-packs/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "adopt-requested-packs",
         "description": "The member half of the fleet fan-out: adopts the packs an add-packs work list asks for, in this repository, by this repository's own agent.",
         "trigger": "request",
@@ -217,35 +206,9 @@
         "agent_execution_timeout": 3600
       }
     },
-    "claudinite-lifecycle/update": {
-      "path": ".claudinite/shared/packs/claudinite-lifecycle/tasks/update/task.json",
-      "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
-        "id": "update",
-        "description": "Maintains this repository's Claudinite mount: updates the vendored engine and packs to the canon's versions, runs the version-ranged migrations, gates on the self-test and delivers the update pull request. An agent runs where the new rules meet member-authored content, and where the update wrote what this repo's tests can see.",
-        "trigger": "schedule",
-        "preconditions": [
-          "schedule:at-most-daily"
-        ],
-        "expected_outcome": "supersede_existing_pr",
-        "automerge": [
-          "claudinite-shared-packs",
-          "under:.claudinite",
-          "claudinite-settings-updates",
-          "under:.github/workflows",
-          "test-changes"
-        ],
-        "code_worker_mjs": "worker.mjs",
-        "code_work_timeout": 900,
-        "agent_model": "sonnet",
-        "agent_instructions": "task.md",
-        "agent_execution_timeout": 3600
-      }
-    },
     "claudinite-tasks/usage-fold": {
       "path": ".claudinite/shared/packs/claudinite-tasks/tasks/usage-fold/task.json",
       "declaration": {
-        "$schema": "../../task.schema.json",
         "id": "usage-fold",
         "description": "Folds the repository's captured session logs, workflow runs and closed work items into two small tracked usage aggregates: what its sessions did - skill loads, scheduler and executor activity, work-item outcomes - and what its machinery cost - billed minutes, API calls, latencies.",
         "trigger": "schedule",
@@ -265,7 +228,6 @@
     "claudinite-tasks/verify-production": {
       "path": ".claudinite/shared/packs/claudinite-tasks/tasks/verify-production/task.json",
       "declaration": {
-        "$schema": "../../task.schema.json",
         "id": "verify-production",
         "description": "The queue's coded verification lane: runs the declarative probes a verification issue carries against their public URLs, where egress exists, and judges the result as code.",
         "trigger": "request",
@@ -277,7 +239,6 @@
     "local/gcec/create-extractor": {
       "path": ".claudinite/local/packs/gcec/tasks/create-extractor/task.json",
       "declaration": {
-        "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
         "id": "create-extractor",
         "description": "Turns an extractor-request issue into a PR adding site support: preprocessing triages the request, fetches and records the target page, and scaffolds the extractor; the agent then writes extract() against that recorded page and fills in the test case.",
         "trigger": "schedule",
@@ -287,7 +248,8 @@
         ],
         "expected_outcome": "fresh_pr",
         "automerge": [
-          "site-support-scope"
+          "site-support-scope",
+          "extension-version-bump"
         ],
         "agent_model": "sonnet",
         "agent_instructions": "task.md",
@@ -302,7 +264,6 @@
     "local/gcec/generic-extractor-improvements": {
       "path": ".claudinite/local/packs/gcec/tasks/generic-extractor-improvements/task.json",
       "declaration": {
-        "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
         "id": "generic-extractor-improvements",
         "description": "Tries to close the gap between the generic extractor and what dedicated per-site sources capture, by hypothesizing an improvement, editing the extractor, and verifying against live pages. A genuine win is rare; finding none is the expected, correct outcome, not a failure.",
         "trigger": "schedule",
@@ -313,7 +274,8 @@
         ],
         "expected_outcome": "fresh_pr",
         "automerge": [
-          "generic-coverage-scope"
+          "generic-coverage-scope",
+          "extension-version-bump"
         ],
         "agent_model": "opus",
         "agent_instructions": "task.md",
@@ -323,7 +285,6 @@
     "product-wiki/wiki-growth": {
       "path": ".claudinite/shared/packs/product-wiki/tasks/wiki-growth/task.json",
       "declaration": {
-        "$schema": "../../../claudinite-tasks/task.schema.json",
         "id": "wiki-growth",
         "description": "One research-and-refine pass over the repository's product wikis: reads what each wiki already knows, researches only what its own backlog flags, and writes the findings back cited. Most runs find nothing new, and that is the documented good outcome.",
         "trigger": "schedule",

@@ -30,7 +30,7 @@ and an edit made another way is caught at Stop.
 
 | Skill | Pack | Loads when |
 |---|---|---|
-| `adopt-claudinite` | claudinite-lifecycle | Bootstrap Claudinite into a repo: mount, hooks, checks, skills. Use when asked to adopt or set up Claudinite, or to re-vendor a repo's mount. |
+| `adopt-claudinite` | claudinite-lifecycle | Bootstrap Claudinite into a repo with cn init: packs, questions, workflows, the executor routine, the handover issue. Use when asked to adopt or set up Claudinite. |
 | `adopt-pack` | claudinite-lifecycle | Add packs to a repo already running Claudinite: declare, interview, re-vendor, scaffold, land. Use when asked to adopt, add, enable or declare a pack. |
 | `backfilling-provenance` | claudinite-growth | Filling a pack's empty provenance files from its history. Use when a pack carries empty provenance files, or when asked to backfill a pack's provenance. |
 | `bug-investigation` | basics | Pinning down a bug's root cause. Use when investigating a bug report, when a fix didn't hold or a bug recurs, or when a report doesn't reproduce. |

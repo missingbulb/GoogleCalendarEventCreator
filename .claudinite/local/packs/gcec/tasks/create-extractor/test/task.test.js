@@ -103,39 +103,39 @@ test("the precondition is pure — it never reads a body or reaches for I/O", as
 });
 
 // The policy is only as good as the paths behind its name, so these drive the
-// VENDORED engine over a synthetic diff rather than re-reading the regex: what a
+// pinned engine over a synthetic diff rather than re-reading the regex: what a
 // run may land unattended is what this resolves to, and a rule that stopped
 // covering the pipeline's own output would park every extractor PR silently.
 const POLICY = async () => {
-  const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
-  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/public/task-declaration.mjs`);
-  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/src/contract/task-declaration.mjs`);
-  const root = require("node:path").join(__dirname, "../../../../../../..");
-  const config = JSON.parse(require("node:fs").readFileSync(`${root}/.claudinite-settings.json`, "utf8"));
-  const { rules, errors } = declaredMergeRules(
-    [{ id: "gcec", dir: require("node:path").join(root, ".claudinite/local/packs/gcec") }], config);
-  assert.deepEqual(errors, [], "the pack's merge-rules.json must compile");
-  // The task's OWN policy, not a copy of it — the declaration and the rule it
-  // names cannot drift apart while these cases read the declared value.
-  const { automerge } = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
-  return (files) => policyVerdict({
-    policy: automerge,
-    entries: files.map((file) => ({ file, before: null, after: "x" })),
-    declaredRules: rules,
-    ruleErrors: errors,
-  });
+  // The terms preconditions.mjs exports, which the contract resolves the task's
+  // own condition against.
+  const { terms: local } = await import("../preconditions.mjs");
+  const terms = Object.fromEntries(Object.entries(local).map(([name, t]) =>
+    [name, { signals: t.signals ?? [], needsItem: !!t.needsItem, takesArg: !!t.takesArg }]));
+  // The task's OWN policy, as the engine normalizes the declaration, not a copy
+  // of it — the declaration and the rule it names cannot drift apart while these
+  // cases read the declared value.
+  return require("../../../lib/cn-answer.js").taskPolicy(`${__dirname}/..`, terms);
 };
 
-// Every file a run of this pipeline writes — preprocessing's five and the agent's
-// two — in one diff, which is the shape the merge gate actually sees.
-test("the policy covers a whole new-source run, preprocessing's files included", async () => {
+// The patch bump a shipped change carries: the two version records, modified.
+const BUMP = [
+  { file: "extension/manifest.json", kind: "modified" },
+  { file: "package.json", kind: "modified" },
+];
+
+// Every file a run of this pipeline writes — preprocessing's five, its version
+// bump and the agent's two — in one diff, which is the shape the merge gate
+// actually sees.
+test("the policy covers a whole new-source run, preprocessing's files and bump included", async () => {
   const verdict = (await POLICY())([
     "dev/requirements/extractor/data/server-fetched/dice-berlin.url",
     "dev/requirements/extractor/data/server-fetched/dice-berlin.html",
     "dev/requirements/extractor/expected/dice-berlin.json",
     "extension/event-extractors/custom/dice.js",
-    "extension/host-lists.json",
-    "extension/event-extractors/load-order.generated.json",
+    { file: "extension/host-lists.json", kind: "modified" },
+    { file: "extension/event-extractors/load-order.generated.json", kind: "modified" },
+    ...BUMP,
   ]);
   assert.equal(verdict.mergeable, true, verdict.why);
 });
@@ -150,9 +150,19 @@ test("the policy covers a supported-host run, which only adds a case", async () 
   assert.equal(verdict.mergeable, true, verdict.why);
 });
 
+// …or, when the new page needed it, changes the source and raises the patch.
+test("the policy covers a supported-host run that changes the source and bumps", async () => {
+  const verdict = (await POLICY())([
+    "dev/requirements/extractor/expected/meetup-berlin.json",
+    { file: "extension/event-extractors/custom/meetup.js", kind: "modified" },
+    ...BUMP,
+  ]);
+  assert.equal(verdict.mergeable, true, verdict.why);
+});
+
 // The reason the policy is a prediction and not a convenience: the one thing the
 // agent is told never to touch is a shared helper, and that is exactly what must
-// park rather than land.
+// park rather than land — bump or no bump.
 test("a shared helper or the generic extractor in the diff parks the PR", async () => {
   const policy = await POLICY();
   for (const stray of [
@@ -160,8 +170,26 @@ test("a shared helper or the generic extractor in the diff parks the PR", async 
     "extension/event-extractors/generic-extractor.js",
     "extension/events-popup/popup.js",
   ]) {
-    const verdict = policy(["dev/requirements/extractor/expected/dice-berlin.json", stray]);
-    assert.equal(verdict.mergeable, false, `${stray} must not be coverable`);
-    assert.ok(verdict.problems.some((p) => p.file === stray), `${stray} must be named as the refusal`);
+    for (const diff of [[], BUMP]) {
+      const verdict = policy(["dev/requirements/extractor/expected/dice-berlin.json", stray, ...diff]);
+      assert.equal(verdict.mergeable, false, `${stray} must not be coverable`);
+      assert.ok(verdict.problems.some((p) => p.file === stray), `${stray} must be named as the refusal`);
+    }
+  }
+});
+
+// The bump rule covers the two records by path and as modifications only; that
+// their content changes in the version alone is the postcondition's version step.
+test("a version record added or deleted, or another root file, still parks", async () => {
+  const policy = await POLICY();
+  for (const change of [
+    { file: "extension/manifest.json", kind: "deleted" },
+    { file: "package.json", kind: "deleted" },
+    { file: "package-lock.json", kind: "modified" },
+    { file: "extension/other/manifest.json", kind: "modified" },
+  ]) {
+    const verdict = policy(["dev/requirements/extractor/expected/dice-berlin.json", change]);
+    assert.equal(verdict.mergeable, false, `${change.file} (${change.kind}) must not be coverable`);
+    assert.ok(verdict.problems.some((p) => p.file === change.file), `${change.file} must be named as the refusal`);
   }
 });

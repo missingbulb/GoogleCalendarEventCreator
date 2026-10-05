@@ -26,7 +26,8 @@ too. Do not widen past that window.
 - **The repo's local packs.** The set identified in
   [this pack's README](../../README.md#identifying-a-projects-capture-surface-its-local-packs) — everything
   under `.claudinite/local/packs/`, the repo's own packs; never the read-only mounted canon
-  elsewhere under `.claudinite/`.
+  elsewhere under `.claudinite/`. A repo with none gets one first through `.claudinite/bin/cn pack new
+  <name>`, which scaffolds and declares it.
 
 ## The run — two source skills, then the upgrade pass
 
@@ -59,7 +60,7 @@ upgrade pass produced — through a **single PR**: one commit for the whole run 
 the run then joins the review already pending — and otherwise open the PR on that branch (title
 `Claudinite growth: extract lessons`, its commit referencing the tracking issue); never search for an
 open pull request or pick a branch of your own. Then **deliver it by the shared procedure —
-[deliver-pr.md](../../../claudinite-tasks/src/deliver/deliver-pr.md)** — that procedure, never this
+[deliver-pr.md](../../../claudinite-tasks/public/deliver-pr.md)** — that procedure, never this
 file, owns whether and how the PR lands. This writes only the repo's *own* local
 packs (not the shared canon). A run that finds nothing and opens nothing is fine — and common.
 

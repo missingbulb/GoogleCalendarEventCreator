@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "settings": {
+    "path": ".claudinite/settings.yaml",
+    "format": "yaml"
+  },
+  "engine": {
+    "package": "@claudinite/cli-rc",
+    "version": "1.61005.2",
+    "channel": "canary"
+  },
+  "packs": {
+    "channel": "canary",
+    "declared": [
+      {
+        "id": "basics",
+        "config": {
+          "sharedConstants": [
+            {
+              "counts": {
+                "extension/manifest.json": 1,
+                "package.json": 1
+              },
+              "regex": true,
+              "value": "\"version\": \"\\d+\\.\\d+\\.\\d+\"",
+              "what": "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump"
+            }
+          ]
+        }
+      },
+      {
+        "id": "chrome-extension"
+      },
+      {
+        "id": "executable-requirements"
+      },
+      {
+        "id": "git-github"
+      },
+      {
+        "id": "node"
+      },
+      {
+        "id": "spec-driven-product"
+      },
+      {
+        "id": "product-wiki"
+      },
+      {
+        "id": "claudinite-growth"
+      },
+      {
+        "id": "local/gcec"
+      },
+      {
+        "id": "claude-code-web-users-support",
+        "config": {
+          "repo": "missingbulb/Shepherd"
+        }
+      },
+      {
+        "id": "claudinite-lifecycle"
+      },
+      {
+        "id": "claudinite-tasks",
+        "config": {
+          "agenticTaskInvocationEndpoints": {
+            "default": {
+              "tokenSecret": "CCR_ROUTINE_TOKEN",
+              "url": "https://api.anthropic.com/v1/claude_code/routines/trig_011iVaE4F36rAHBncAWnmXY2/fire"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "dormant": false,
+  "held": {
+    "basics": "1.61005.1",
+    "chrome-extension": "1.61005.1",
+    "claude-code-web-users-support": "1.61005.1",
+    "claudinite-growth": "1.61005.1",
+    "claudinite-lifecycle": "1.61005.1",
+    "claudinite-tasks": "1.61005.1",
+    "executable-requirements": "1.61004.1",
+    "git-github": "1.61005.1",
+    "node": "1.61004.1",
+    "product-wiki": "1.61004.1",
+    "spec-driven-product": "1.61004.1"
+  }
+}

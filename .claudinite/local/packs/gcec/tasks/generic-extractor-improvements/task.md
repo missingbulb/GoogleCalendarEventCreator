@@ -81,6 +81,13 @@ and stop.
 
 ## 4. Postcondition
 
+The generic extractor ships, so a win raises the extension's patch version in the
+same change. Once the change is final, bump it once:
+
+```sh
+node .github/actions/bump-extension-patch/bump.mjs extension/manifest.json package.json
+```
+
 Pass every value the change newly recovered via the body-text scan as arguments:
 
 ```sh
@@ -94,7 +101,7 @@ bash .claudinite/local/packs/gcec/tasks/generic-extractor-improvements/postcondi
 ## 5. Deliver the PR
 
 Branch `claude/generic-coverage/<date>`, commit the change plus the regenerated
-GENERATED artifacts, and push. Open the PR, titling it `Generic coverage: <the
+GENERATED artifacts and the version bump, and push. Open the PR, titling it `Generic coverage: <the
 gap closed>` — the prefix is exact, and a round only starts once the previous
 round's PR has landed, which is read off that title. Then hand it to the one
 delivery procedure (`deliver-pr.md` in the mounted engine) and do what it says; the merge

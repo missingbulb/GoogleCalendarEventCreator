@@ -1,0 +1,48 @@
+engine:
+  package: "@claudinite/cli-rc"
+  version: "1.61005.2"
+  manifest: "sha512-18A8qlwmPfrClFSyMLRfA9DFlGO4UdpE6MRCAwygKJa2Vh6XrzHSCy5U4d1Ej5DTQiWiU9z4B9IHkKAQB4sdKw=="
+packs:
+  channel: "canary"
+  declared:
+    - id: "basics"
+      config:
+        sharedConstants:
+          - what: "extension version — one X.Y.Z token per file, kept identical across the manifest and package.json (bumped by the canon daily auto-release and the human \"bump version\" flow); regex so it needs no re-pinning on a bump"
+            value: "\"version\": \"\\d+\\.\\d+\\.\\d+\""
+            regex: true
+            counts:
+              "extension/manifest.json": 1
+              "package.json": 1
+    - "chrome-extension"
+    - id: "executable-requirements"
+      answers:
+        ui_testing: "DOM-level golden rendering: popup and icon renderers with committed visual snapshots (npm run test:ui, dev/requirements/shared/render), plus a headless Chrome load test (npm run test:e2e, dev/requirements/heavy)"
+        requirements_source: "the existing executable spec, dev/requirements/requirements.md"
+    - "git-github"
+    - "node"
+    - "spec-driven-product"
+    - id: "product-wiki"
+      answers:
+        product: "A Chrome extension that reads event details (name, date and time, location, description) from the current web page and opens a pre-filled Google Calendar event, with no API keys or OAuth; described in README.md and product-wiki/"
+        users: "Google Calendar users who find events on web pages such as venue, ticketing and listings sites; so far the extractor requests come from the repo owner (product-wiki/Users)"
+        market: "Tools that get an event from a web page onto a calendar with minimal friction: other calendar browser extensions, calendars' own email and link parsing, and manual entry; surveyed in product-wiki/Competitors and product-wiki/Market"
+    - "claudinite-growth"
+    - "local/gcec"
+    - id: "claude-code-web-users-support"
+      config:
+        repo: "missingbulb/Shepherd"
+      answers:
+        store: "missingbulb/Shepherd (already this entry's config.repo; carried from the Node declaration)"
+    - "claudinite-lifecycle"
+    - id: "claudinite-tasks"
+      config:
+        agenticTaskInvocationEndpoints:
+          default:
+            url: "https://api.anthropic.com/v1/claude_code/routines/trig_011iVaE4F36rAHBncAWnmXY2/fire"
+            tokenSecret: "CCR_ROUTINE_TOKEN"
+checks:
+  accept:
+    - rule: "scheduler-workflow-shape"
+      path: ".github/workflows/claudinite-scheduler.yml"
+      reason: "the owner cut this repo to one tick a day to halve its scheduled runs; daily-period tasks still run, and drain-tick work waits for the next day's tick."

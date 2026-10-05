@@ -16,10 +16,13 @@ closing a real generic-extractor gap is heavy judgment
 What may land unreviewed, measured against the pushed diff rather than trusted:
 exactly the file scope postconditions.sh already refuses to exceed — the generic
 extractor, its helpers, the covering test and the regenerated artifacts — named
-once as `generic-coverage-scope` in the pack's merge-rules.json. A run that
-wandered into a custom/<site>.js or the manifest, or that DELETED a helper the
-postcondition would have tolerated, parks for review instead of merging: the
-postcondition is a gate the run executes on itself, this one is not.
+once as `generic-coverage-scope` in the pack's merge-rules.json — plus the patch
+bump the shipped change carries, `extension-version-bump` (the manifest and
+package.json, modified only). A run that wandered into a custom/<site>.js, or
+that DELETED a helper the postcondition would have tolerated, parks for review
+instead of merging: the postcondition is a gate the run executes on itself, this
+one is not. The rule sees paths, not content, so that the version records change
+in their version alone is held by the postcondition's version step.
 The best-effort run bound the executor surfaces into the subagent's brief
 (agent-preprocessing DESIGN §2, §6): "fail after N minutes". Very generous —
 this is an OPEN-ENDED judgment loop (hypothesize → edit → the network-bound

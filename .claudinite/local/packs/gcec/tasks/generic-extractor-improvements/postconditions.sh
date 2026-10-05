@@ -23,6 +23,8 @@
 #      edit or a host special-case is out of scope — it isn't a GENERIC win. (This
 #      enforces WHICH files changed; whether the rule keys off a widely-used
 #      convention rather than one page's quirk is the agent's judgment.)
+#   1b. VERSION — the generic extractor ships, so the branch raises the patch
+#      exactly once, and the manifest and package.json change in their version only.
 #   2. SUITE — `npm test` is green. Runs the whole offline+live+UI suite, including
 #      the generic-coverage high-watermark gate, which FAILS on any field
 #      regression. (Red-before-green and authoring the covering test are the
@@ -58,9 +60,13 @@ git rev-parse --verify --quiet "$ref" >/dev/null 2>&1 || ref=HEAD
 allowed='^(extension/event-extractors/generic-extractor\.js|extension/event-extractors/helpers/[^/]+\.js|extension-test/event-extractors/extraction\.test\.js|dev/requirements/extractor/generic-coverage/generic-coverage\.(baseline\.GENERATED\.json|GENERATED\.md))$'
 changed="$( { git diff --name-only "$ref"...HEAD 2>/dev/null; git diff --name-only HEAD 2>/dev/null; \
               git ls-files --others --exclude-standard; } | sort -u | sed '/^$/d' )"
-offenders="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
+offenders="$(printf '%s\n' "$changed" | grep -Ev "$allowed" | grep -Fvx -e extension/manifest.json -e package.json || true)"
 [ -z "$offenders" ] || fail "out-of-scope changes (only the generic extractor may change):
 $(printf '  %s\n' $offenders)"
+
+# ── 1b. VERSION ──
+node .claudinite/local/packs/gcec/lib/version-change.mjs "$ref" \
+  || fail "the version change does not match what this branch ships (see above)"
 
 # ── 2. SUITE ──
 npm test || fail "npm test is not green"

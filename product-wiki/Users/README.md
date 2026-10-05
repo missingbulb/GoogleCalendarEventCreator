@@ -18,8 +18,7 @@ and the broader calendar-market context these users sit in
 
 ## How this wiki grows
 
-Same mechanic as Market — the Claudinite **product-wiki** pack's growth worker
-(mounted read-only under `.claudinite/`), following the "LLM Wiki" pattern:
+Same mechanic as Market — the Claudinite **product-wiki** pack's growth worker, following the "LLM Wiki" pattern:
 compile once, refine in place, cite sources,
 never silently overwrite.
 
