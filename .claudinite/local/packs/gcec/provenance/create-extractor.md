@@ -74,3 +74,14 @@
 - **Actor:** @missingbulb (owner), moving the repo to cn.
 - **Model:** Claude, per the commit trailer.
 - **Landed:** #1422.
+
+## 2026-10-05 · gate-changed · a shipped change carries its own patch bump
+- **Reason:** the chrome-extension release no longer bumps the version: a change touching a shipped
+  file raises the patch itself, which version-bumped holds. Preprocessing now bumps in the scaffold
+  commit for a new source; in add-a-case mode the agent bumps only when it changed the source, so a
+  case-only PR cuts no identical release. The postcondition checks the version against main through
+  the pack's lib/version-change.mjs, and the automerge adds `extension-version-bump`.
+- **Mechanism:** prepare.mjs (scaffoldBumpsVersion), task.md, postconditions.sh step 1c, the
+  `extension-version-bump` merge rule.
+- **Actor:** @missingbulb (owner), refreshing the release pipeline in the move to cn.
+- **Model:** claude-opus-5-5

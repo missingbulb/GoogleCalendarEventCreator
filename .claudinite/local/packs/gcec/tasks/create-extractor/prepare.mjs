@@ -151,6 +151,18 @@ export function prTitle(mode, host, sourceBase) {
     : `Implement the extractor for ${host}`;
 }
 
+// Whether the scaffold ships a change, and so raises the patch in the same
+// commit. A new source registers its host and lands a source, both shipped,
+// whatever the agent does next; a case for a supported host ships nothing
+// unless the agent changes the source, which is the agent's bump to make.
+export function scaffoldBumpsVersion(mode) {
+  return mode !== 'supported';
+}
+
+// The vendored release action's bump, the one the version-bumped check holds a
+// shipped change to, run over the two version records.
+export const BUMP_ARGS = ['.github/actions/bump-extension-patch/bump.mjs', 'extension/manifest.json', 'package.json'];
+
 // --- I/O shell ---------------------------------------------------------------
 
 const run = (cmd, args, opts = {}) =>
@@ -244,6 +256,9 @@ function scaffold(decision) {
   } else {
     run(process.execPath, [join(import.meta.dirname, 'scaffold.js'), 'new', decision.caseName, decision.host, decision.url], { cwd: ROOT });
     npm('run', 'index');
+  }
+  if (scaffoldBumpsVersion(decision.mode)) {
+    run(process.execPath, BUMP_ARGS, { cwd: ROOT });
   }
   npm('run', 'test:offline');
 }

@@ -8,7 +8,8 @@
   ],
   "expected_outcome": "fresh_pr",
   "automerge": [
-    "site-support-scope"
+    "site-support-scope",
+    "extension-version-bump"
   ],
   "agent_model": "sonnet",
   "agent_instructions": "task.md",

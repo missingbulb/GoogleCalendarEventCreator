@@ -9,7 +9,8 @@
   ],
   "expected_outcome": "fresh_pr",
   "automerge": [
-    "generic-coverage-scope"
+    "generic-coverage-scope",
+    "extension-version-bump"
   ],
   "agent_model": "opus",
   "agent_instructions": "task.md",
