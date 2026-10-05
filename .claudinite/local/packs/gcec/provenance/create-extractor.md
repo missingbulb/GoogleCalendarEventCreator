@@ -67,3 +67,10 @@
 - **Actor:** @missingbulb (owner).
 - **Mechanism:** the pack's `site-support-scope` merge rule.
 - **Landed:** #1244 (Closes #1243).
+
+## 2026-10-05 · ported · the declaration drops the Node task schema pointer (#1422)
+- **Reason:** the move to cn: the canon no longer ships the Node task schema the `$schema` key
+  pointed at; what the task does is unchanged.
+- **Actor:** @missingbulb (owner), moving the repo to cn.
+- **Model:** Claude, per the commit trailer.
+- **Landed:** #1422.
