@@ -13,8 +13,3 @@ dev/requirements/shared/.artifacts/
 # Stray clone left by an earlier submodule mount that some environments checked
 # out at the wrong path; ignore it.
 docs/
-
-# Claudinite's session pack root, which a personal pack is copied into at
-# session start (the vendored canon at .claudinite/shared/ and the local packs
-# are tracked).
-/.claudinite/temp/
