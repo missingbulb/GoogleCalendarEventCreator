@@ -3,7 +3,7 @@
 This project's general working pack — a **local pack**
 (`.claudinite/local/packs/` — tracked project content, run by the same
 Claudinite engine as the canon packs). Declared by hand in
-[`.claudinite-settings.json`](../../../../.claudinite-settings.json); never
+[`.claudinite/settings.yaml`](../../../settings.yaml); never
 fingerprinted or seeded.
 
 ## Contents
