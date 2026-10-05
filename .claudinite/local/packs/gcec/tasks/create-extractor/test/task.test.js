@@ -103,27 +103,52 @@ test("the precondition is pure — it never reads a body or reaches for I/O", as
 });
 
 // The policy is only as good as the paths behind its name, so these drive the
-// VENDORED engine over a synthetic diff rather than re-reading the regex: what a
+// pinned engine over a synthetic diff rather than re-reading the regex: what a
 // run may land unattended is what this resolves to, and a rule that stopped
 // covering the pipeline's own output would park every extractor PR silently.
+const ROOT = require("node:path").join(__dirname, "../../../../../../..");
+const PACK = require("node:path").join(ROOT, ".claudinite/local/packs/gcec");
+
+// `cn tasks <kind> --world <file>` answers one of the engine's task decision
+// cores over a JSON world. The engine is the repo's pinned one, linked by
+// `sh .claudinite/launch version`.
+const cnAnswer = (kind, world) => {
+  const fs = require("node:fs");
+  const cn = `${ROOT}/.claudinite/bin/cn`;
+  assert.ok(fs.existsSync(cn), `${cn} is missing; run \`sh .claudinite/launch version\` to link the pinned engine`);
+  const dir = fs.mkdtempSync(require("node:path").join(require("node:os").tmpdir(), "gcec-cn-"));
+  try {
+    fs.writeFileSync(`${dir}/world.json`, JSON.stringify(world));
+    const out = require("node:child_process").execFileSync(cn, ["tasks", kind, "--world", `${dir}/world.json`], { encoding: "utf8" });
+    return JSON.parse(out);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+};
+
 const POLICY = async () => {
-  const MOUNT = "../../../../../../shared/packs/claudinite-tasks";
-  const { declaredMergeRules, policyVerdict } = await import(`${MOUNT}/public/task-declaration.mjs`);
-  const { findTaskDeclaration, loadTaskDeclaration } = await import(`${MOUNT}/src/contract/task-declaration.mjs`);
-  const root = require("node:path").join(__dirname, "../../../../../../..");
-  const config = JSON.parse(require("node:fs").readFileSync(`${root}/.claudinite-settings.json`, "utf8"));
-  const { rules, errors } = declaredMergeRules(
-    [{ id: "gcec", dir: require("node:path").join(root, ".claudinite/local/packs/gcec") }], config);
-  assert.deepEqual(errors, [], "the pack's merge-rules.json must compile");
-  // The task's OWN policy, not a copy of it — the declaration and the rule it
-  // names cannot drift apart while these cases read the declared value.
-  const { automerge } = await loadTaskDeclaration(findTaskDeclaration(`${__dirname}/..`));
-  return (files) => policyVerdict({
-    policy: automerge,
-    entries: files.map((file) => ({ file, before: null, after: "x" })),
-    declaredRules: rules,
-    ruleErrors: errors,
+  const fs = require("node:fs");
+  // The task's OWN policy, as the engine normalizes the declaration, not a copy
+  // of it — the declaration and the rule it names cannot drift apart while these
+  // cases read the declared value.
+  // The terms preconditions.mjs exports, which the contract resolves the task's
+  // own condition against.
+  const { terms: local } = await import("../preconditions.mjs");
+  const terms = Object.fromEntries(Object.entries(local).map(([name, t]) =>
+    [name, { signals: t.signals ?? [], needsItem: !!t.needsItem, takesArg: !!t.takesArg }]));
+  const [{ normalized, problems }] = cnAnswer("contract", {
+    declarations: [{ declaration: JSON.parse(fs.readFileSync(`${__dirname}/../task.json`, "utf8")), terms }],
   });
+  assert.deepEqual(problems, [], "the task declaration must satisfy the contract");
+  const rules = JSON.parse(fs.readFileSync(`${PACK}/merge-rules.json`, "utf8"));
+  return (files) => {
+    const { ruleErrors, verdicts } = cnAnswer("policy", {
+      packs: [{ id: "local/gcec", rules }],
+      cases: [{ policy: normalized.automerge, entries: files.map((file) => ({ file, before: null, after: "x" })) }],
+    });
+    assert.deepEqual(ruleErrors, [], "the pack's merge-rules.json must compile");
+    return verdicts[0];
+  };
 };
 
 // Every file a run of this pipeline writes — preprocessing's five and the agent's
