@@ -15,16 +15,25 @@ packs:
               "extension/manifest.json": 1
               "package.json": 1
     - "chrome-extension"
-    - "executable-requirements"
+    - id: "executable-requirements"
+      answers:
+        ui_testing: "DOM-level golden rendering: popup and icon renderers with committed visual snapshots (npm run test:ui, dev/requirements/shared/render), plus a headless Chrome load test (npm run test:e2e, dev/requirements/heavy)"
+        requirements_source: "the existing executable spec, dev/requirements/requirements.md"
     - "git-github"
     - "node"
     - "spec-driven-product"
-    - "product-wiki"
+    - id: "product-wiki"
+      answers:
+        product: "A Chrome extension that reads event details (name, date and time, location, description) from the current web page and opens a pre-filled Google Calendar event, with no API keys or OAuth; described in README.md and product-wiki/"
+        users: "Google Calendar users who find events on web pages such as venue, ticketing and listings sites; so far the extractor requests come from the repo owner (product-wiki/Users)"
+        market: "Tools that get an event from a web page onto a calendar with minimal friction: other calendar browser extensions, calendars' own email and link parsing, and manual entry; surveyed in product-wiki/Competitors and product-wiki/Market"
     - "claudinite-growth"
     - "local/gcec"
     - id: "claude-code-web-users-support"
       config:
         repo: "missingbulb/Shepherd"
+      answers:
+        store: "missingbulb/Shepherd (already this entry's config.repo; carried from the Node declaration)"
     - "claudinite-lifecycle"
     - id: "claudinite-tasks"
       config:
@@ -34,9 +43,6 @@ packs:
             tokenSecret: "CCR_ROUTINE_TOKEN"
 checks:
   accept:
-    - rule: "adoption-answers-pending"
-      path: ".claudinite-settings.json"
-      reason: "false positive from this branch's own settings-file rename (migration 2026-08-23-settings-file-rename): the check's base/head pairing (packs/claudinite-lifecycle/skills/adopt-pack/checks.mjs, via engine/checks/helpers/work.mjs jsonPair/readBase) reads both sides at the SAME literal filename, so on the exact branch that renames the settings file, readBase(the new name) finds nothing at the merge-base and every already-declared pack misreads as newly added. Every already-pending adoption question (pre-existing on main, unrelated to this update) then trips as a blocking new-pack omission. Explained in full on GoogleCalendarEventCreator#1029. Prune this once the check gains rename-awareness (or the real pending questions get answered, which would also need this removed first so the answers actually get reviewed)."
     - rule: "scheduler-workflow-shape"
       path: ".github/workflows/claudinite-scheduler.yml"
       reason: "the owner cut this repo to one tick a day to halve its scheduled runs; daily-period tasks still run, and drain-tick work waits for the next day's tick."
