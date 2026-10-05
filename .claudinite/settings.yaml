@@ -1,7 +1,7 @@
 engine:
   package: "@claudinite/cli-rc"
-  version: "1.61005.1"
-  manifest: "sha512-A2Nxs0zPVGkFq7vJ3BQMo7WKz/5hj8JG1OwuHj7D2SCpXyhi288LfinY8xKIERXeAhmleGE4BOAEwPTyTxboew=="
+  version: "1.61005.2"
+  manifest: "sha512-18A8qlwmPfrClFSyMLRfA9DFlGO4UdpE6MRCAwygKJa2Vh6XrzHSCy5U4d1Ej5DTQiWiU9z4B9IHkKAQB4sdKw=="
 packs:
   channel: "canary"
   declared:
