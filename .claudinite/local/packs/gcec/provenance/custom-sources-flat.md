@@ -8,3 +8,10 @@
 - **Mechanism:** a coded check discovered from the pack's rule folder.
 - **Actor:** @missingbulb (owner).
 - **Model:** claude-opus-5-5
+
+## 2026-10-05 · ported · to a Go coded check for cn
+- **Reason:** cn runs no JavaScript checks, so the worldRules module became checks/<file>.go: the
+  same files scanned, conditions, messages and blocking class.
+- **Mechanism:** a Go coded check (checksdk), tagged world.
+- **Actor:** Claude, on the move to cn.
+- **Model:** claude-opus-5-5

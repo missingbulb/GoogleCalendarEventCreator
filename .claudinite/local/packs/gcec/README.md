@@ -11,7 +11,7 @@ fingerprinted or seeded.
 | Slot | What |
 |---|---|
 | Prose | [RULES.md](RULES.md) — working rules, owner commands, testing invariants, codebase gotchas, workflow-failure classification, architecture rules of the road, the capture policy |
-| Checks | [test-offline-list-sync](worldRules/test-offline-list-sync.mjs) · [custom-sources-flat](worldRules/custom-sources-flat.mjs) · [npm-test-glob-coverage](worldRules/npm-test-glob-coverage.mjs) · [pipeline-site-agnostic](worldRules/pipeline-site-agnostic.mjs) · [regen-artifacts-merge-ours](worldRules/regen-artifacts-merge-ours.mjs) · [generic-coverage-scope-agrees](worldRules/generic-coverage-scope-agrees.mjs) (+ red-first fixtures in [pack.test.mjs](pack.test.mjs), run by this repo's own `npm test`) |
+| Checks | Go, in [checks/](checks/): [test-offline-list-sync](checks/test_offline_list_sync.go) · [custom-sources-flat](checks/custom_sources_flat.go) · [npm-test-glob-coverage](checks/npm_test_glob_coverage.go) · [pipeline-site-agnostic](checks/pipeline_site_agnostic.go) · [regen-artifacts-merge-ours](checks/regen_artifacts_merge_ours.go) · [generic-coverage-scope-agrees](checks/generic_coverage_scope_agrees.go) (+ fixtures in [checks_test.go](checks/checks_test.go), run by [checks/test.sh](checks/test.sh)) |
 | Daily tasks | none |
 | Skills | [snapshot-approval](skills/snapshot-approval/SKILL.md) · [merge-and-ci](skills/merge-and-ci/SKILL.md) · [testing-guide](skills/testing-guide/SKILL.md) |
 
