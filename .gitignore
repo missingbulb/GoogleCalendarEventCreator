@@ -14,9 +14,7 @@ dev/requirements/shared/.artifacts/
 # out at the wrong path; ignore it.
 docs/
 
-# Claudinite's untracked artifacts: hook logs, and the session pack root a
-# personal pack is copied into at session start (the vendored canon at
-# .claudinite/shared/ and the local packs are tracked).
-/.claudinite-hooks.log
-/.claudinite-hooks.log.tmp
+# Claudinite's session pack root, which a personal pack is copied into at
+# session start (the vendored canon at .claudinite/shared/ and the local packs
+# are tracked).
 /.claudinite/temp/
