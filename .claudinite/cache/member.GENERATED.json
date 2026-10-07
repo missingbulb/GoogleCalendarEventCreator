@@ -6,7 +6,7 @@
   },
   "engine": {
     "package": "@claudinite/cli",
-    "version": "1.61005.8",
+    "version": "1.61007.1",
     "channel": "canary"
   },
   "packs": {
