@@ -1,0 +1,46 @@
+name: approve-probe
+on:
+  push:
+    branches: [claude/approve-probe]
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: open a job-token PR and try to approve its held runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          t=claude/approve-probe-target
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git checkout -b $t
+          echo probe > .approve-probe
+          git add .approve-probe && git commit -qm "approve probe (throwaway)"
+          git push -q origin $t
+          sha=$(git rev-parse HEAD)
+          pr=$(gh api repos/$GITHUB_REPOSITORY/pulls -f title="approve probe (throwaway, closes itself)" -f head=$t -f base=main -f body="Throwaway probe: can the job token approve its own PR's held runs?" --jq .number)
+          echo "PR #$pr sha $sha"
+          for i in $(seq 1 12); do
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha" --jq '[.workflow_runs[]|select(.event=="pull_request")]|length')
+            [ "$n" -gt 0 ] && break; sleep 5
+          done
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha" --jq '.workflow_runs[]|"\(.id) \(.name) \(.event) \(.status) \(.conclusion)"'
+          for id in $(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha" --jq '.workflow_runs[]|select(.event=="pull_request")|.id'); do
+            echo "== approve $id"; gh api -X POST repos/$GITHUB_REPOSITORY/actions/runs/$id/approve -i 2>&1 | head -20
+          done
+          sleep 30
+          echo "== after"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha" --jq '.workflow_runs[]|"\(.id) \(.name) \(.event) \(.status) \(.conclusion)"'
+          for id in $(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$sha" --jq '.workflow_runs[]|select(.event=="pull_request")|.id'); do
+            gh api repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs --jq '"\(.total_count) jobs: " + ([.jobs[]|.name+"="+(.status)]|join(","))'
+          done
+          gh api -X PATCH repos/$GITHUB_REPOSITORY/pulls/$pr -f state=closed --jq .state
+          git push -q origin --delete $t
