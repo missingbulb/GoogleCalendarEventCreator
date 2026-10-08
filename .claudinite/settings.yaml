@@ -1,7 +1,7 @@
 engine:
   channel: "canary"
-  version: "1.61007.1"
-  manifest: "sha512-RYQ+ShnBJAPX7jyNmqOGt8KGcEqeP+tyDGaRNOzI5nca3dl8hk5EA0Z8eTgqfPZNW8qvk2786TBq98L3hk8ZbA=="
+  version: "1.61008.1"
+  manifest: "sha512-qP8dN8ipJV9+IUZW2x/BCCT9FO6xWkI+y7e2mBS/jlX8MDy0rbdLKBiXwPd49bVtOF0VOLZK0/v4OBnBG4LIWQ=="
 packs:
   channel: "canary"
   declared:
