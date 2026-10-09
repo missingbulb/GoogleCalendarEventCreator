@@ -92,8 +92,8 @@ outage self-heals by looking at the queue rather than by replaying a ledger.
   `task-declaration-shape` bounds the length; the rest is yours.
 
 - **Every task declaration carries the full contract.** A `tasks/<name>/task.json`
-  (one JSON object with no `"$schema"` key — the engine validates it, `cn tasks
-  contract`, and publishes no schema file to point at; keys grouped as identity, scheduling, outcome, then the
+  (one JSON object with no `"$schema"` key — the engine validates it, the
+  `task-declaration-shape` check, and publishes no schema file to point at; keys grouped as identity, scheduling, outcome, then the
   `code_*` fields, then the `agent_*` fields) declares `id` (matching its directory), `description`
   (below), `trigger` (`schedule | request` — who mints an occurrence, below),
   `preconditions` (what must then hold — optional, and absent means nothing does; its
@@ -286,8 +286,7 @@ where the mechanics belong: `agent_model`, `schedule_after`, `expected_outcome` 
 **What happens to the run's pull request is never in `task.md`** — not whether it
 merges itself, not what it authorizes to land unreviewed, not what becomes of an
 earlier run's still-open one. Say what this run must do (open a PR, never merge
-it, what its body must carry), point at the shared delivery procedure
-([deliver-pr.md](../../../claudinite-tasks/public/deliver-pr.md)) where the run must
+it, what its body must carry), say to deliver it as the routine instructions say where the run must
 invoke one, and stop. Watch for the spelled-out form, which names no field and so
 reads as ordinary instruction: "an earlier round's pull request closes as
 superseded once yours exists" *is* `expected_outcome`. (2)
@@ -308,7 +307,7 @@ Declare one only when its rule applies.
 - **`on_interrupt: 'requeue' | 'needs-human'`** (default `requeue`) — declare `'needs-human'`
   only for a genuinely one-shot side effect (a store submission, an external notification):
   it makes every recovery path that would re-execute the task converge to triage instead.
-- **`invocation_endpoint: '<name>'`** — a key into the `claudinite-tasks` entry's `config.agenticTaskInvocationEndpoints`, for a
+- **`invocation_endpoint: '<name>'`** — a key into the settings' `tasks.routines` map, for a
   task whose agentic phase needs reach the repo's ordinary sessions lack. **Never a URL**: a
   task declaration is vendored verbatim into every consuming repo, so deployment detail and
   anything adjacent to a credential stay in that repo's own config.
@@ -394,8 +393,8 @@ mistake:
 - **Repo shape.** "This repo ships the release pipeline", "this repo has a
   vendored mount" are facts adoption settled, not questions worth re-asking every
   night. A repo that carries a pack but not one task's subject names that task in
-  its own `.claudinite/settings.*`, on the `claudinite-tasks` entry's `config.disabledTasks:
-  ['<pack>/<task>']`, which the scheduler reads before asking anything.
+  its own `.claudinite/settings.*`, in the top-level `tasks.disabled: ['<pack>/<task>']`,
+  which the scheduler reads before asking anything.
 - **Scope.** Which files, PRs or members a granted run works on is the worker's
   decision, made in the work sections from the same signals. The conditions decide
   run or no-run, nothing else.
@@ -627,14 +626,22 @@ closing or running anything.
   (`record-exec.mjs`), so the usage fold counts task statuses out of the captured
   conversation logs deterministically.
 
+## The settings' `tasks` block
+
+The queue is the engine's, and a repo configures it in the top-level `tasks` block of
+`.claudinite/settings.*`, every key optional: `routines` (endpoint name to the routine a
+hand-off fires, what `invocation_endpoint` names), `delivery` (`auto-merge`, the default, or
+`review`, where an authorized task pull request waits for the owner), `disabled` (the
+`<pack>/<task>` ids the scheduler never files), `dormant` (below) and `actionsMinuteRate`
+(what a minute of Actions costs, which the usage fold prices billed minutes at; absent prices
+none). A key the block does not know is refused by name.
+
 ## A dormant scheduler runs nothing
 
-A project nobody is working on stops its scheduler. It declares that on the pack that
-owns the scheduler, not at the top level of `.claudinite/settings.*` — a repo
-declaring no `claudinite-tasks` has no scheduler for the word to mean anything about:
+A project nobody is working on stops its scheduler:
 
 ```json
-{ "id": "claudinite-tasks", "config": { "dormant": true } }
+{ "tasks": { "dormant": true } }
 ```
 
 The scheduler run asks, readies and reclaims nothing, and the executor picks nothing up;
