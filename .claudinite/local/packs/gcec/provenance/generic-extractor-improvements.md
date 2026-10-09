@@ -20,7 +20,7 @@
   open-ended loop.
 - **Rejected:** splitting a deterministic pre-step into `agent_preprocessing` - the agent must see
   the baseline measured on its own clone, and preprocessing has no code-to-agent channel.
-- **Landed:** #711.
+- **Landed:** #711 (Refs missingbulb/Claudinite#394).
 
 ## 2026-07-24 · policy-changed · run weekly instead of daily (#729)
 - **Reason:** a clean win is rare on any given day; weekly still catches new opportunities without a
