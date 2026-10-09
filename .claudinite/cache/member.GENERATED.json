@@ -6,8 +6,8 @@
   },
   "engine": {
     "package": "@claudinite/cli",
-    "version": "1.61008.2",
-    "channel": "canary"
+    "version": "1.61009.3",
+    "channel": "staging"
   },
   "packs": {
     "channel": "canary",
