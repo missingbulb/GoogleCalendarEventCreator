@@ -158,7 +158,7 @@
         "id": "usage-review",
         "description": "Compares what each skill declares about its own usage against what the record shows, by a file of readable rule declarations, and writes the findings with their causes and recommendations. Changes nothing it reviews.",
         "schedule_after": [
-          "claudinite-tasks/usage-fold"
+          "engine/usage-fold"
         ],
         "trigger": "schedule",
         "preconditions": [
@@ -221,17 +221,6 @@
           "rolling-usage-files",
           "rolling-usage-file-moves"
         ],
-        "code_worker_mjs": "worker.mjs",
-        "code_work_timeout": 600
-      }
-    },
-    "claudinite-tasks/verify-production": {
-      "path": ".claudinite/shared/packs/claudinite-tasks/tasks/verify-production/task.json",
-      "declaration": {
-        "id": "verify-production",
-        "description": "The queue's coded verification lane: runs the declarative probes a verification issue carries against their public URLs, where egress exists, and judges the result as code.",
-        "trigger": "request",
-        "expected_outcome": "no_code_changes",
         "code_worker_mjs": "worker.mjs",
         "code_work_timeout": 600
       }
