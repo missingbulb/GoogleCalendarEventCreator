@@ -76,13 +76,12 @@ test("the declaration carries the full contract, including the secret preprocess
   assert.equal(task.id, "create-extractor");
   // The declarative expression is the ONLY gate mechanism: the `precondition`
   // function and its `precondition_signals` companion are retired, and the signal
-  // union is DERIVED from the term rather than restated here
-  // (missingbulb/Claudinite#1617).
+  // union is DERIVED from the term rather than restated here.
   //
-  // The cadence is a term in that same list now, not a `frequency` field beside it
-  // (missingbulb/Claudinite#1725). Daily, not hourly: #1060 accepts a slow cycle
-  // until an event trigger replaces the poll. Pinned so the declaration cannot
-  // drift back to a cadence the queue will not honour.
+  // The cadence is a term in that same list now, not a `frequency` field beside it.
+  // Daily, not hourly: a slow cycle is accepted until an event trigger replaces
+  // the poll. Pinned so the declaration cannot drift back to a cadence the
+  // queue will not honour.
   assert.deepEqual(task.preconditions, ["schedule:at-most-daily", "extractor-request-eligible"]);
   assert.equal(task.frequency, undefined);
   assert.equal(task.precondition, undefined);
