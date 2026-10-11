@@ -1,5 +1,4 @@
 {
-  "$schema": "../../../../../shared/packs/claudinite-tasks/task.schema.json",
   "id": "create-extractor",
   "description": "Turns an extractor-request issue into a PR adding site support: preprocessing triages the request, fetches and records the target page, and scaffolds the extractor; the agent then writes extract() against that recorded page and fills in the test case.",
   "trigger": "schedule",
@@ -9,7 +8,8 @@
   ],
   "expected_outcome": "fresh_pr",
   "automerge": [
-    "site-support-scope"
+    "site-support-scope",
+    "extension-version-bump"
   ],
   "agent_model": "sonnet",
   "agent_instructions": "task.md",

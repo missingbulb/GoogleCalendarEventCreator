@@ -33,7 +33,11 @@ line claimed.
 writing one extract() against a recorded page — bounded, well-specified judgment
 the pipeline's whole write surface, named as one declared rule
 (`site-support-scope` in the pack's merge-rules.json): the recorded page and its
-`.url`, the case, the per-site source, the load list and the supportedDomains entry.
+`.url`, the case, the per-site source, the load list and the supportedDomains entry,
+plus `extension-version-bump` — the manifest and package.json, modified only — for
+the patch bump a shipped change carries (preprocessing writes it for a new source;
+the agent, for a changed source in add-a-case mode). That rule sees paths, not
+content: the postcondition's version step holds those two files to their version.
 A diff inside that prediction lands unattended; anything else parks for a person.
 Deletions are deliberately not covered — the scaffolded source being dropped nets
 out against preprocessing's own commit, so a deletion that survives to the merge

@@ -174,3 +174,42 @@ test("hasRoomToStart: the budget the worker reads is the task's own declaration"
   assert.equal(hasRoomToStart(0, decl.code_work_timeout * 1000), true);
   assert.equal(hasRoomToStart(decl.code_work_timeout * 1000, decl.code_work_timeout * 1000), false);
 });
+
+// --- the version bump ---------------------------------------------------------
+// A new source ships (its file and its supportedDomains entry), so the scaffold
+// commit carries the patch bump; a case for a supported host ships nothing until
+// the agent changes the source, so preprocessing leaves the version alone there.
+test("scaffoldBumpsVersion: a new source bumps, a case for a supported host does not", async () => {
+  const { scaffoldBumpsVersion } = await load();
+  assert.equal(scaffoldBumpsVersion("new"), true);
+  assert.equal(scaffoldBumpsVersion("supported"), false);
+});
+
+test("BUMP_ARGS raises the patch in both version records, which the version gate then accepts", async () => {
+  const { BUMP_ARGS } = await load();
+  const fs = require("node:fs");
+  const os = require("node:os");
+  const path = require("node:path");
+  const root = path.join(__dirname, "../../../../../../..");
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "gcec-bump-"));
+  try {
+    for (const f of BUMP_ARGS) {
+      fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true });
+      fs.copyFileSync(path.join(root, f), path.join(tmp, f));
+    }
+    const before = Object.fromEntries(BUMP_ARGS.slice(1).map((f) => [f, fs.readFileSync(path.join(tmp, f), "utf8")]));
+    require("node:child_process").execFileSync(process.execPath, BUMP_ARGS, { cwd: tmp, stdio: "ignore", env: { ...process.env, GITHUB_OUTPUT: "" } });
+    const { judgeVersionChange } = await import(path.join(root, ".claudinite/local/packs/gcec/lib/version-change.mjs"));
+    const { nextVersion, readVersion } = await import(path.join(tmp, BUMP_ARGS[0]));
+    const problems = judgeVersionChange({
+      changed: ["extension/event-extractors/custom/dice.js", "extension/host-lists.json", ...BUMP_ARGS.slice(1)],
+      roots: ["extension"],
+      records: BUMP_ARGS.slice(1).map((f) => ({ path: f, base: before[f], head: fs.readFileSync(path.join(tmp, f), "utf8") })),
+      nextVersion,
+      readVersion,
+    });
+    assert.deepEqual(problems, []);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

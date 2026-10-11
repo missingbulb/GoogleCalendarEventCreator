@@ -26,8 +26,7 @@ loosely-sourced research — exactly the kind of content the rest of the repo (e
 engineering requirements, procedures) must not silently start depending on,
 since an autonomous routine keeps rewriting it. `product-requirements/` is the
 single reviewed crossing point: the extension/tests/docs may reference *it*, and
-only it. See the `barriers` pack entry in
-[`.claudinite-settings.json`](../.claudinite-settings.json) for the enforced rule.
+only it. The product-wiki pack's barrier check enforces the rule.
 
 ## How it grows
 
@@ -36,5 +35,5 @@ Karpathy's ["LLM Wiki"](https://medium.com/@urvvil08/andrej-karpathys-llm-wiki-c
 pattern — compile findings into the wiki once, refine in place on later passes,
 rather than re-deriving everything from scratch each time. The mechanic
 (schedule, what counts as real growth, review flow) is owned by the Claudinite
-**product-wiki** pack's growth worker (mounted read-only under `.claudinite/`).
+**product-wiki** pack's growth worker.
 `product-requirements/` is **not** auto-grown — it only changes on human review.

@@ -11,7 +11,8 @@
 // regression is decided in one place and tested there rather than inferred from a
 // live repo's weather.
 
-import { findOrCreateTracker, writeTracker } from '../../../claudinite-tasks/public/github.mjs';
+import { github, log } from '@claudinite/sdk';
+import { makeGh } from './github-api.mjs';
 
 export const WINDOW_DAYS = 7;
 // A regression has to clear BOTH bars. The ratio alone fires on a fast workflow
@@ -124,12 +125,31 @@ export function reportBody(summary, { repo, nowIso, steps = [] }) {
 // The standing record this task keeps. Its own, named here and nowhere else.
 export const TRACKER_TITLE = '[claudinite] CI performance';
 
-export async function worker({ repo, gh, log }) {
+// The API caps a filtered listing at 1000 results.
+const LEDGER_PAGE_SIZE = 100;
+const LEDGER_MAX_PAGES = 10;
 
-  const { status, json } = await gh(`/repos/${repo}/actions/runs?per_page=100&status=completed`);
-  if (status !== 200) throw new Error(`run ledger unreadable: GET actions/runs returned ${status}`);
-  const runs = json?.workflow_runs ?? [];
-  const nowMs = Date.now();
+// Every completed run started inside both windows. A single repo-wide page reaches back
+// only as far as the busiest workflow lets it, so a quiet workflow's previous window
+// would be judged on whatever few runs that page happened to hold.
+export async function readWindowRuns(repo, gh, nowMs) {
+  const since = new Date(nowMs - 2 * WINDOW_DAYS * 86400 * 1000).toISOString().slice(0, 10);
+  const runs = [];
+  for (let page = 1; page <= LEDGER_MAX_PAGES; page++) {
+    const { status, json } = await gh(
+      `/repos/${repo}/actions/runs?status=completed&created=${encodeURIComponent(`>=${since}`)}&per_page=${LEDGER_PAGE_SIZE}&page=${page}`,
+    );
+    if (status !== 200) throw new Error(`run ledger unreadable: GET actions/runs returned ${status}`);
+    const batch = json?.workflow_runs ?? [];
+    runs.push(...batch);
+    if (batch.length < LEDGER_PAGE_SIZE) break;
+  }
+  return runs;
+}
+
+// The run ledger and a run's jobs have no SDK action; the tracker does.
+export async function worker({ repo }, gh = makeGh(), nowMs = Date.now()) {
+  const runs = await readWindowRuns(repo, gh, nowMs);
   const summary = summarize(runs, nowMs);
 
   // The step breakdown of the slowest workflow's latest run — one extra read, and
@@ -156,13 +176,13 @@ export async function worker({ repo, gh, log }) {
   const comment = summary.regressions.length
     ? `${nowIso} — regression: ${detail}. Investigating by the \`ci-performance-evaluation\` skill.`
     : null;
-  // THIS TASK's tracker, resolved by this task — the shared helper owns only the
-  // exact-title lookup and the create-then-close pair, never the decision to keep
+  // THIS TASK's tracker, resolved by this task — the engine's tracker actions own only
+  // the exact-title lookup and the create-then-close pair, never the decision to keep
   // one. Every run rewrites the body (the measurement IS the record), so
   // find-or-create is right here; the comment is conditional, because a dated note
   // per run turns a standing record into a scroll of identical lines nobody reads.
-  const { number: tracker } = await findOrCreateTracker(gh, repo, TRACKER_TITLE);
-  await writeTracker(gh, repo, tracker, { body, comment });
+  const { number: tracker } = await github.findOrCreateTracker({ title: TRACKER_TITLE });
+  await github.writeTracker({ number: tracker, body, ...(comment ? { comment } : {}) });
   log(`tracker #${tracker} refreshed`);
 
   if (!summary.regressions.length) {

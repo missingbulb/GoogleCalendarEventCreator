@@ -1,16 +1,21 @@
 # Usage fold — the repo's own past-data plane
 
-**This task runs no agent.** It is `agent_model: none` with `code-work: node worker.mjs`, so the whole pass is the deterministic [`worker.mjs`](worker.mjs) the executor runs as code-work, which calls its sibling in this folder, the counting and folding core ([`fold-usage.mjs`](fold-usage.mjs)). This file is the human-facing record of what that worker does; there is no agent phase.
+**This task runs no agent.** It declares `code_worker_mjs: worker.mjs` and no agent, so the whole pass is the deterministic [`worker.mjs`](worker.mjs) the executor runs as code-work. It folds two rolling files, each past its own watermarks, and delivers them on one pull request:
+
+- **the session half** - `.claudinite/usage/sessions-and-elements.json`, what this repo's sessions did, counted by [`fold-usage.mjs`](fold-usage.mjs);
+- **the machinery half** - `.claudinite/usage/task-runs-and-costs.json`, what the scheduler and executor cost, counted by [`fold-tasks-usage.mjs`](fold-tasks-usage.mjs) behind [`machinery-half.mjs`](machinery-half.mjs); see [The machinery half](#the-machinery-half).
+
+A half that fails costs only its own file: the other still lands, and the run then fails, naming the half that broke. This file is the human-facing record of what the worker does; there is no agent phase.
 
 ## What it does
 
-Daily, when the repo moved: fetch this repo's orphan `conversation-logs` branch and count each capture file still inside the retention window; list the scheduler's and the executor's completed workflow runs since the last fold; list the work items that closed since the last fold, and the parks each of them collected; list the pull requests merged since the last fold, with what each took from opening, from its issue and from the session that did the work; deepen and read the local git history and the releases listing; and regenerate `.claudinite/local/usage.GENERATED.json` on a PR that lands itself where this repo's delivery settings allow (the shared landing helper, `packs/claudinite-tasks/src/deliver/land-pr.mjs`, owns those nuances — a `review` repo's PR waits for the owner). A recompute that differs only in its `generated` stamp opens nothing, and a repo with no logs branch yet still folds every other source.
+Daily, when the repo moved: fetch this repo's orphan `conversation-logs` branch and count each capture file still inside the retention window; list the scheduler's and the executor's completed workflow runs since the last fold; list the work items that closed since the last fold, and the parks each of them collected; list the pull requests merged since the last fold, with what each took from opening, from its issue and from the session that did the work; deepen and read the local git history and the releases listing; and regenerate `.claudinite/usage/sessions-and-elements.json` on a PR that lands itself where this repo's delivery settings allow (the engine's landing lane owns those nuances — a `review` repo's PR waits for the owner). A recompute that differs only in its `generated` stamp opens nothing, and a repo with no logs branch yet still folds every other source.
 
 ### Why daily, and what stops it being daily noise
 
-This file is the **past-data plane the dashboard renders from** ([claudinite-dashboard](../../../claudinite-dashboard/README.md)): every panel reaching further back than one page of live reads comes from here, so the file's freshness *is* the page's. The cadence is affordable because the sources are — the capture files are local git, and the REST side is a handful of listings, all watermarked, plus one narrow read per item this fold is seeing settle for the first time.
+This file is the **past-data plane the dashboard renders from** ([claudinite-single-repo-dashboard](../../../claudinite-single-repo-dashboard/README.md)): every panel reaching further back than one page of live reads comes from here, so the file's freshness *is* the page's. The cadence is affordable because the sources are — the capture files are local git, and the REST side is a handful of listings, all watermarked, plus one narrow read per item this fold is seeing settle for the first time.
 
-What keeps a quiet repo quiet is the **precondition**, which runs the fold only when something moved since the last fold: a commit on the default branch, or a conversation log stamped inside the window. It is deliberately *not* gated on the scheduler having run, since the scheduler runs on its own fixed cadence by definition and that would be no gate at all. Declining loses nothing — the run and queue reads sit past their watermarks until the next fold that does have something to do, and the dashboard tops up the freshest hours from the live run listing it already fetches.
+What keeps a quiet repo quiet is the **precondition**, which runs the fold only when something moved since the last fold: a commit on the default branch, a conversation log stamped inside the window, or machinery that ran and is not yet folded - the machinery file's own `runsFoldedThrough` still standing before the day's anchor ([`preconditions.mjs`](preconditions.mjs)'s `runs-since-fold`). That last term reads the mark's own movement rather than standing state: it goes false the moment a fold catches up, and costs no API call. Declining loses nothing - the run and queue reads sit past their watermarks until the next fold that does have something to do, and the dashboard tops up the freshest hours from the live run listing it already fetches.
 
 What it counts, per bucket:
 
@@ -22,6 +27,7 @@ What it counts, per bucket:
 - **`toolCalls`**, per tool - every `tool_use` block, sidechains included. **`guardFires`**, per rule - an action guard's firings, split by what the call was told.
 - **`skillCaught`**, per skill - sessions that loaded it and were caught blocking anyway by a check it owns. No key where the engine does not stamp which skill owns a check.
 - **`checkTiming`**, per `<scope>` and `<scope>/<rule>` - what the Stop hook's sweep cost, from the timing record the runner prints. `maxMs` folds as a peak rather than a sum, because a week's slowest run is the slowest of its days' and never their total.
+- **`buildSessions`**, per session id - what the engine's checks build cost that session, from the engine's `[cn] build ...` and `[cn] buildwait ...` breadcrumbs ([`check-build.mjs`](check-build.mjs)): whether its start found the binary `cached` or `started` a build, the compile it reported (`compiledMs`, `compiledOk`; **no slot** where it reported none, which is not a zero-second build), and its `waits`, `waitMs` and `waitMaxMs` for the binary. A session with build lines and no wait was not blocked; a session with no build line ran an engine that leaves none and has no key. **`buildWaits`**, per event that waited (`stop`, `check`, `world`) - `waits`, `sessions`, `totalMs`, `maxMs` (a peak) and `timeouts`. The pull request carries the last closed week against the one before: builds by cache state and outcome, the compile time's count, median and max, the sessions that waited and the waits by event.
 - **`captures`** — capture events folded. **`merges`** — the subset with an issue behind them (issue `0` means none).
 - **`sessions`** — distinct session ids; one session can capture more than once.
 - **`userMessages`** — genuine human turns. **`userCommands`** — every typed `/command`.
@@ -37,7 +43,7 @@ What it counts, per bucket:
 
 - **`queue`**, per `pack/task` — what each occurrence came to: closed work items counted under their outcome word (`done`, `delivered`, `obsolete`, `none`). The queue-era successor to the `tasks` rows below (#994) — see "What each occurrence came to".
 - **`tasks`**, per `pack/task` — **historical only.** These rows counted what the retired slot scheduler did with each due task (`agent`, `code_work`, `skipped`, `failed`, `deferred`). Nothing writes that record any more, so these rows stop growing as the last slot-era logs age out of Actions retention. The reader stays because the logs inside that window are still real; see "The task invocations are a census" below for what replaces it and what does not.
-- **`taskExec`**, per `pack/task` — what the **agent session** did with the item it was handed, distilled from the captured conversation logs: `success`, `failed`, `task-gone` (the item named a task the repo no longer carries), `invalid`. Counted off the machine-readable `claudinite-task-exec` records the session prints (`src/session/record-exec.mjs`; format owned by `packs/claudinite-tasks/src/items/run-record.mjs`), deduped on the full record tuple per capture file — never scraped from the agent's prose. A sample, of the sessions that captured.
+- **`taskExec`**, per `pack/task` — what the **agent session** did with the item it was handed, distilled from the captured conversation logs: `success`, `failed`, `task-gone` (the item named a task the repo no longer carries), `invalid`. Counted off the machine-readable `claudinite-task-exec` records the session prints (`cn work converge`, or `cn work record-exec` on its own; the format is the engine's `tasks/queue`), deduped on the full record tuple per capture file — never scraped from the agent's prose. A sample, of the sessions that captured.
 
 The denominators are the point. A raw load count cannot tell healthy-rare from broken — a version-bump skill loading rarely is fine — so the question is loads *against the sessions where that skill's own declared trigger plausibly applied.*
 
@@ -69,13 +75,13 @@ The `tasks` rows used to answer that from the other side: the slot scheduler pri
 
 What replaced it is the **`queue`** rows (#994), and they are a better record: every occurrence *is* a work item, and a converged one closes wearing an `outcome:*` label. That survives Actions retention, it is clickable, and it names its own task. [`read-queue.mjs`](read-queue.mjs) reads the items that closed since the last fold and counts them per task per outcome.
 
-Two families here are **appended once rather than recomputed**, each past its own watermark:
+Three families here are **appended once rather than recomputed**, each past its own watermark:
 
 - the **hour rows'** run counts, past `runsFoldedThrough` ([`read-runs.mjs`](read-runs.mjs));
 - the **`queue`** and **`parks`** rows, past `queueFoldedThrough` ([`read-queue.mjs`](read-queue.mjs));
 - the **`prs`** rows, past `prsFoldedThrough` ([`read-prs.mjs`](read-prs.mjs)).
 
-The reason is the source, not taste: the capture files are a local git branch this fold re-reads for free, while both of these are rate-limited REST listings, and re-reading a month of them every hour would cost orders of magnitude more calls for the same answer. Appending is safe because each is settled once seen — a completed run's conclusion does not change, a closed item's outcome label is written at convergence and never moved, and a merge date never moves at all. The merged-PR read is bounded on `merged_at` for the same reason. The queue read is bounded on `closed_at` rather than `updated_at` for exactly that reason: the listing is asked for everything *touched* since the mark (a comment counts as a touch), and only items that closed past it are counted, so nothing is ever counted twice.
+The reason is the source, not taste: the capture files are a local git branch this fold re-reads for free, while all three are rate-limited REST listings, and re-reading a month of them every run would cost orders of magnitude more calls for the same answer. Appending is safe because each is settled once seen - a completed run's conclusion does not change, a closed item's outcome label is written at convergence and never moved, and a merge date never moves at all. The merged-PR read is bounded on `merged_at` for the same reason. The queue read is bounded on `closed_at` rather than `updated_at` for exactly that reason: the listing is asked for everything *touched* since the mark (a comment counts as a touch), and only items that closed past it are counted, so nothing is ever counted twice.
 
 The price is stated rather than hidden: a counting bug fixed later applies from the fix forward and does not heal these rows.
 
@@ -89,7 +95,7 @@ Week rows are frozen by that trade: a counting bug found later heals the day win
 
 ## The file is GENERATED
 
-`.claudinite/local/usage.GENERATED.json` is machine-written and never hand-edited — it lives under `.claudinite/local/` because that is the repo-owned area the vendoring refresh never touches. `merge=ours` reaches it through `.claudinite/.gitattributes`, which the engine converges, so a conflicting merge resolves by re-running the fold rather than by hand.
+`.claudinite/usage/sessions-and-elements.json` is machine-written and never hand-edited. It lives under `.claudinite/usage/`, beside the repo's other rolling records, where the vendoring refresh never reaches. It is rolling rather than regenerated: each fold starts from the last, so a lost copy is lost history. That is why its name carries no `GENERATED` and no `merge=ours` resolves a conflict by dropping one side; the fold rebuilds its branch from the base on every run instead. A member whose file still sits at `.claudinite/local/usage.GENERATED.json` has it moved by the next fold, in a rename commit that carries its bytes unchanged.
 
 ## Failure is visible, never silent
 
@@ -101,16 +107,41 @@ And the same rule runs through every field: **an absent source leaves no key, ne
 
 ## The freshness stamp
 
-The file carries `generated`, the time of the fold that last confirmed its numbers. That is **not** the same as when the file last landed: a quiet repo recomputes to the same numbers and opens no PR, so the commit date can be days older. The unchanged-compare deliberately ignores that one line — a stamp that forced a PR every hour would be a stamp nobody could afford.
+The file carries `generated`, the time of the fold that last confirmed its numbers. That is **not** the same as when the file last landed: a quiet repo recomputes to the same numbers and opens no PR, so the commit date can be days older. The unchanged-compare deliberately ignores that one line - a stamp that forced a PR every run would be a stamp nobody could afford.
+
+## The machinery half
+
+The session file's numbers come out of capture files re-read for free off a local branch; every source behind the machinery file is a rate-limited REST listing read past a watermark. That difference is why they are two files with separate watermarks: one source's outage must not degrade the other's rows, and one watermark cannot stand for two clocks. They share their discipline - the tiers, the per-source fail-soft, **an absent source leaves no key, never a zero** - and their readers: the run listings are [`read-runs.mjs`](read-runs.mjs)'s, the task-and-park decoding [`read-queue.mjs`](read-queue.mjs)'s.
+
+### What the file carries
+
+`.claudinite/usage/task-runs-and-costs.json`, per hour, per day and per week:
+
+- **Per workflow** (`scheduler`, `executor`) - `runs`, `jobs`, `minutesBilled`, and `spend`. Actions bills per **job**, not per run, so a run's minutes are the sum over its jobs of each job's wall time rounded up to a whole minute, and the two counts are kept apart. `spend` exists only where this pack's config carries `actionsMinuteRate`: unset leaves **no key at all**, because a public repo bills nothing and a private one bills something, and a zero would be a claim nobody made. The rate every figure was priced at is written into the file beside them, so a rate changed later cannot silently re-price rows frozen under the old one.
+- **Per run** - `apiCalls` and the wall milliseconds of each phase (`list`, `ask`, `drain` for a tick; `pick`, `claim`, `code-work`, `hand-off`, `converge` for an executor run), from the `claudinite-run-cost` record every run prints. The format is the engine's `tasks/queue`; the API calls are counted at the GitHub port itself, which is the only place every call passes through.
+- **Per task** - what its occurrences came to (`done`, `delivered`, `obsolete`, `none`), the parks they collected by kind, and four **latency samples** off each closed item's own label events: tick→item, item→pick, pick→hand-off, hand-off→converge. Samples, never quantiles. A slot whose far end never happened - an agentless item has no hand-off - is absent, which is not a latency of zero.
+
+### Where a run's cost record is read from
+
+A **scheduler tick owns no work item**, so the record it printed exists nowhere but its job log, and the fold reads it there: at most two of its runs have their log read per fold, and at most two jobs are opened per run, so the log reads are bounded at four whatever else happened.
+
+An **executor run has items**, so it writes its record onto every item it settles, in the same fenced block as the execution record. One run therefore leaves several snapshots of one record, each a reading of counters that only ever grow, and the fold keys them by run id and keeps the **largest** - the run's total as of its last item.
+
+### The API budget
+
+Per fold: two run listings, flat; one jobs listing per run this fold has not seen; at most four job-log reads; one issues listing page, plus one **timeline** read per item closing for the first time - the timeline carries the labelings, the comments and the close together, which is exactly the three things wanted off an item. On a cadence of two ticks a day and a quiet queue the run half of that is under ten calls a day, which a test asserts by counting the fetches a representative day makes. `MAX_RUN_READS` is the runaway guard rather than the budget: a day that somehow produced hundreds of runs stops at the cap, leaves the watermark at the last run measured, and says so.
+
+### Every tier is appended once
+
+This is where the machinery half differs from the session half: **nothing is recomputed.** Every source is a watermarked listing, a run or an item is folded on the one pass that first sees it, and a counting fix applies from the fix forward. That is safe because each fact is settled once seen - a completed run's start and conclusion do not move, a closed item's outcome label is written at convergence - and both watermarks are monotone over those facts.
+
+Two maps do not reach the week tier on the same terms as the rest. `runCosts`, keyed by run id, is dropped there and its numbers survive as the week's own scalars; `latency` is kept, because the samples *are* the week-level answer.
 
 ## Why the declaration reads as it does
 
-Carried over from the declaration's comments when it became `task.json`.
-
-claudinite-growth task: usage-fold - the per-repo usage aggregate.
-`agent_model: 'none'` with
-`code_work: 'node worker.mjs'`: the whole pass is deterministic code the
-executor runs as code-work — no agent phase, seconds of runtime.
+usage-fold - the per-repo usage aggregate. `code_worker_mjs: 'worker.mjs'` and no
+agent: the whole pass is deterministic code the executor runs as code-work - no
+agent phase, seconds of runtime.
 
 WHY: a skill is MOUNTED per repo, but mounting only puts a name and a one-line
 description into the session prompt — actually LOADING it is model discretion, and
@@ -127,22 +158,21 @@ came to, and what landed in git. That half exists in a repo whose sessions are a
 unattended and captured nothing at all.
 
 WHY DAILY. The file is the whole past-data plane the dashboard renders from
-(claudinite-dashboard) — every panel that reaches further back than one page of live reads
-comes from here. It folded hourly until the scheduler's cron went to two ticks a day
-(docs/PRINCIPLES.md): a cadence finer than the cron cannot be honoured, since the
-anchor is only ever seen when a tick comes. Nothing about the DATA changes — hour rows are
-still recomputed from source across a three-day window, so only the newest rows' freshness
-moves, and the dashboard already tops up the freshest hours from the live run listing it
-fetches anyway. The precondition is what keeps a quiet repo quiet.
+(claudinite-single-repo-dashboard) — every panel that reaches further back than one page of live reads
+comes from here. A cadence finer than the scheduler's cron cannot be honoured, since the
+anchor is only ever seen when a tick comes. Hour rows are recomputed from source across a
+three-day window, so only the newest rows' freshness depends on the cadence, and the
+dashboard tops up the freshest hours from the live run listing it fetches anyway. The precondition is what keeps a quiet repo quiet.
 
 `any-commit`, not `substantive-change`: this task measures the MACHINERY, so a
 task's own output is exactly what the aggregate folds rather than something to
-be blind to.
+be blind to. `runs-since-fold` beside it: a repo whose only activity is its own
+queue commits nothing and captures nothing, yet its scheduler ticked, and the
+machinery half has those runs to fold.
 The regenerated aggregate is the whole delivery — scoped to the tree it
 lands in, so a GENERATED file elsewhere in the repo is some other task's.
-Its merge=ours line is seeded at adoption.
 One tree read plus one blob read per capture file in the ~10-day window, all
 local git, then four REST reads and one PR. A busy repo captures a few files a
 day, so this is seconds; 600s is ~100x that, generous enough that a huge backlog
-on a first fold still completes while a hung run is killed well inside the hourly
+on a first fold still completes while a hung run is killed well inside the daily
 cadence.

@@ -1,5 +1,5 @@
 // The usage FOLD's counting and folding core. Every function here is pure and
-// individually tested; worker.mjs is the I/O shell that reads the logs branch,
+// individually tested; the worker is the I/O shell that reads the logs branch,
 // calls these, and delivers the result.
 //
 // The questions this answers, one tested function each:
@@ -7,39 +7,37 @@
 //   - what workload was that against (captures, merges, sessions, user messages,
 //     user commands) — the denominators without which a raw load count cannot
 //     distinguish healthy-rare from broken;
-//   - what the SCHEDULER did with each task — agent runs, deterministic
-//     preprocessing-only runs, precondition skips, failures, deferrals. That last
-//     family comes from the scheduler's own run records rather than from a captured
-//     session, which is why it is a census of scheduled work where everything else
-//     here is a sample of captured sessions.
+//   - what each scheduled occurrence came to. That family comes from the queue's
+//     own closed work items rather than from a captured session, which is why it is
+//     a census of scheduled work where everything else here is a sample of captured
+//     sessions.
 //
 // Zeros are implicit throughout: a mounted skill with no loads simply has no key.
 // The zero set is derived by the consumer, diffing against the repo's mounted
 // skills — which is exactly what makes "this skill never loads" visible at all.
 
-// The non-builtin imports are both the engine surface a pack may build on
-// (pack-independence). "Which skills does this repo mount" has exactly one home —
-// the pack registry — and asking it here is what keeps the fold's answer identical
-// to what the SessionStart hook actually mounted. The task-run outcome vocabulary
-// has exactly one home too: the scheduler that prints those records, so the counter
-// keys here cannot drift from the words the runs actually emit.
-import { loadPacks, isActive, bundledSkillSources } from '../../../../engine/pack_loader/pack-registry.mjs';
-import { TASK_EXEC_STATUSES, parseTaskExecs } from '../../src/items/run-record.mjs';
-// The file's on-disk shape is its SIBLING here (usage-format.mjs). Everything below
+// "Which skills does this repo mount" is read off the declared packs' own trees, the
+// list the engine hands the task; the task-exec status vocabulary is the queue's
+// wire, beside the record parse, so the counter keys here cannot drift from the
+// words the runs actually emit.
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { TASK_EXEC_STATUSES, parseTaskExecs } from './queue-wire.mjs';
+// The file's on-disk shape is the format module's. Everything below
 // works in the NAMED counter shape and meets the tuples only at the two boundary
 // functions at the foot of this file.
 import { isUserMessage, commandName, skillToolLoads, entryText } from './capture-entries.mjs';
 import { countCorpusUse, countMoments, countCheckTiming } from './corpus-use.mjs';
+import { readCheckBuild, foldCheckBuild } from './check-build.mjs';
 import {
   USAGE_FIELDS, USAGE_VERSION, CAPTURE_DAY_FIELDS, WEEK_FROM_DAY, QUEUE_OUTCOMES,
   COUNTER_GROUPS, BARE_MAPS, MAX_FIELDS, USAGE_CAPS, hourKey, encodeUsageFile, decodeUsageFile,
-} from '../../src/items/usage-format.mjs';
+} from './usage-format.mjs';
 
 // --- entry classification -----------------------------------------------------
-// The per-entry readers live in capture-entries.mjs, beside the second counting
-// pass that asks the same questions of the same shapes. Re-exported here because
-// they were this module's before that split, and a member's own code may import
-// them by this path.
+// The per-entry readers live beside the second counting pass that asks the same
+// questions of the same shapes. Re-exported here because a member's own code may
+// import them by this path.
 export { isUserMessage, commandName, skillToolLoads, entryText };
 
 // --- check activations ---------------------------------------------------------
@@ -354,33 +352,21 @@ export function countChecks(entries) {
 
 // --- per-file counting ---------------------------------------------------------
 
-// Count one capture file's entries. `mounted` is the set of skill names this repo
-// mounts; a typed `/command` counts as a skill load only when it names one of them,
-// which is what keeps the built-in CLI commands (`/model`, `/clear`, …) out.
-//
-// Stated overlap: a typed `/merge-to-main` counts in BOTH userCommands and
-// skillLoads. One event, two axes, both true.
-// Every string value anywhere in one entry, newline-joined — the haystack the
-// executor's exec records are fished out of. They are printed by executor-side
-// CODE (resolve-dispatch, record-exec) into Bash tool results, but the model may
-// also quote one back, and the harness records both — so the caller dedupes on
-// the full record tuple rather than trusting any one entry shape.
-
 // An empty per-task execution row — every status present, zeros included, same
 // fixed-shape discipline as the scheduler's task-run rows.
 export const emptyTaskExec = () => Object.fromEntries(TASK_EXEC_STATUSES.map((s) => [s, 0]));
 
 // The executor-side task statuses one capture file attests: `claudinite-task-exec`
-// records (run-record.mjs — the owned contract, never scraped prose), DEDUPED on
+// records (the owned contract, never scraped prose), DEDUPED on
 // the full (pack, task, slot, status) tuple within the file. One session runs one
 // dispatch, so a record echoed by the model, or repeated across a command's
 // stdout and the harness's copy of it, collapses to the one execution it names;
 // a retry of the same slot is a different session, hence a different capture
 // file, and still counts.
 // @deprecated The `taskExec` rows have a successor: the `queue` rows of
-// `.claudinite/local/tasks-usage.GENERATED.json`, which read what each occurrence
+// `.claudinite/usage/task-runs-and-costs.json`, which read what each occurrence
 // came to off the item itself rather than off whether its session happened to
-// capture (`packs/claudinite-tasks/tasks/tasks-usage-fold/README.md`). Still
+// capture (the README's "The machinery half"). Still
 // written, and still a sample of the sessions that captured; retiring it is a later
 // plan of its own.
 export function countTaskExecs(entries) {
@@ -516,9 +502,9 @@ export const TASK_COST_UNRESOLVED = '(unresolved)';
 // `keyed` is the number the capture's filename carries — its PR, or its issue.
 //
 // @deprecated The `taskCost` rows have a successor for the cost half of the
-// question: `.claudinite/local/tasks-usage.GENERATED.json` carries what each run of
+// question: `.claudinite/usage/task-runs-and-costs.json` carries what each run of
 // the machinery was billed and what it spent in API calls, per workflow and per run
-// (`packs/claudinite-tasks/tasks/tasks-usage-fold/README.md`). The TOKEN share these
+// (the README's "The machinery half"). The TOKEN share these
 // rows carry has no successor there and is not meant to gain one — that is what the
 // sessions spent, which is the session fold's subject. Still written; retiring it is
 // a later plan of its own.
@@ -541,6 +527,11 @@ export const ruleTokensIn = () => null;
 // @legacy-tolerance advisory:none retire:#1989
 export const ruleTokensByPackIn = () => null;
 
+// Count one capture file's entries. A typed `/command` counts as a skill load only
+// when it names a mounted skill, which is what keeps the built-in CLI commands
+// (`/model`, `/clear`, …) out. Stated overlap: a typed `/merge-to-main` counts in
+// BOTH userCommands and skillLoads. One event, two axes, both true.
+//
 // `corpus` is what the mounted corpus offers this repo, for the counters that need
 // to know it: `{ mounted, declarations, hits, ownerOf }`. Absent - a caller that
 // only wants the production counters, or an engine too old to resolve the
@@ -575,6 +566,7 @@ export function countEntries(entries, corpus = {}) {
     ...use,
     moments: countMoments(entries, corpus.declarations ?? [], corpus.hits ?? {}),
     checkTiming: countCheckTiming(entries),
+    checkBuild: readCheckBuild(entries),
     skillCaught: caughtSkills(Object.keys(use.skillLoadsBy), checks.checkFindings, corpus.ownerOf),
   };
 }
@@ -707,6 +699,7 @@ export function foldDays(files) {
     s.userMessages += file.counts.userMessages;
   }
 
+  foldCheckBuild(days, files);
   // Distinct sessions, not capture count: one session can capture more than once
   // (a merge, then the session-end tail).
   for (const [date, set] of Object.entries(sessionsByDay)) days[date].sessions = set.size;
@@ -781,9 +774,9 @@ export function foldDayFields(days, bySource = {}) {
 // and the machine twice is one park of that kind, not two — or `null` where the item's
 // event listing could not be read, which costs its parks and not its outcome.
 // @deprecated The `queue` and `parks` rows have a successor:
-// `.claudinite/local/tasks-usage.GENERATED.json`, which counts the same outcomes and
+// `.claudinite/usage/task-runs-and-costs.json`, which counts the same outcomes and
 // the same parks beside the latencies and costs they belong with
-// (`packs/claudinite-tasks/tasks/tasks-usage-fold/README.md`). This writer keeps
+// (the README's "The machinery half"). This writer keeps
 // running — the rows it has already written are real and its readers still read them
 // — and retiring it is a later plan of its own rather than a window this one closes.
 export function foldQueueOutcomes(days, priorDays = {}, records = [], today) {
@@ -926,12 +919,10 @@ export function withinTaskWindow(date, today, days = TASK_DAY_WINDOW_DAYS) {
 // Carry the slot scheduler's task-invocation rows forward while they are still inside
 // the day window.
 //
-// HISTORY ONLY, WITH NO WRITER LEFT. These rows counted what the retired slot
-// scheduler printed into its own Actions log about each due task; that writer is gone
-// (#974) and its logs have aged out of retention, so nothing appends to them any more
-// and the reader that did was retired with them rather than left to spend two API
-// calls a run finding nothing. What each occurrence came to is read from the queue's
-// own closed items now (`foldQueueOutcomes`), which is the record that replaced it.
+// HISTORY ONLY, WITH NO WRITER LEFT (#974). These rows counted what the retired slot
+// scheduler printed into its own Actions log about each due task, and nothing appends
+// to them any more. What each occurrence came to is read from the queue's own closed
+// items (`foldQueueOutcomes`).
 //
 // So this only ages them out: a day row keeps its `tasks` counts until it leaves the
 // window, and the week rows that already froze them keep them forever.
@@ -1095,43 +1086,32 @@ export { encodeUsageFile as encodeUsage, decodeUsageFile as decodeUsage };
 
 // --- the mounted-skill set -----------------------------------------------------
 
-// The skill names this repo mounts, from the PACK REGISTRY — never from
-// `.claude/skills/`, which is gitignored session state an Action checkout does not
-// carry at all. Fails soft to an empty set: with no mounted set, a typed `/command`
-// still counts as a userCommand and simply never counts as a skill load.
-export async function mountedSkillNames(root, config) {
-  return (await mountedCorpus(root, config)).mounted;
+// Where each kind of declared pack is mounted in the member.
+const MOUNTS = { canon: '.claudinite/shared/packs', local: '.claudinite/local/packs', temp: '.claudinite/temp/packs' };
+
+// The skill names this repo mounts, read off the declared packs' own trees — never
+// from `.claude/skills/`, which is gitignored session state an Action checkout does
+// not carry at all. Fails soft to an empty set: with no mounted set, a typed
+// `/command` still counts as a userCommand and simply never counts as a skill load.
+export async function mountedSkillNames(root, declared) {
+  return (await mountedCorpus(root, declared)).mounted;
 }
 
-// What the mounted corpus offers the counters that need to know it: the skill
-// names, the force-load declarations a moment is counted against, the predicates
-// that decide whether a moment hit, and which skill owns which check.
+// What the mounted corpus offers the counters that need to know it: the skill names
+// of the declared packs (`declared` is the engine's `packs()` answer).
 //
-// The engine is probed rather than depended on. Its predicates and the
-// `ownerSkill` stamp are newer than this pack's first delivery of these counters,
-// and the two lanes land on separate cycles, so every member spends a window
-// holding an older engine beside this pack. A namespace import that comes back
-// without them leaves `hits`/`ownerOf` unset, and the counters reading them write
-// NO KEY - *not recorded*, which is the honest answer, where a zero would report a
-// skill whose moments could not be resolved as one whose moments never came.
-export async function mountedCorpus(root, config) {
-  const empty = { mounted: new Set(), declarations: [], hits: {}, ownerOf: null };
-  try {
-    const active = (await loadPacks({ localRoot: root })).filter((p) => isActive(p, config));
-    const scoped = await import('../../../../engine/pack_loader/path-scoped-skills.mjs');
-    const hits = scoped.hitsCall && scoped.hitsPrompt && scoped.hitsPath
-      ? { call: scoped.hitsCall, prompt: scoped.hitsPrompt, path: scoped.hitsPath }
-      : {};
-    const declarations = [...scoped.triggeredSkills(active), ...scoped.pathScopedSkills(active)];
-    const byRule = new Map();
-    for (const pack of active) {
-      for (const rule of pack.skillChecks ?? []) if (rule?.ownerSkill) byRule.set(rule.id, rule.ownerSkill);
-    }
-    return {
-      mounted: new Set(bundledSkillSources(active).keys()),
-      declarations,
-      hits,
-      ownerOf: byRule.size ? (id) => byRule.get(id) ?? null : null,
-    };
-  } catch { return empty; }
+// The force-load declarations, the predicates that decide whether a moment hit, and
+// which skill owns which check are the engine's, and no SDK call answers them, so
+// they stay unset: the counters reading them write NO KEY - *not recorded*, which is
+// the honest answer, where a zero would report a skill whose moments could not be
+// resolved as one whose moments never came.
+export async function mountedCorpus(root, declared) {
+  const mounted = new Set();
+  for (const pack of Array.isArray(declared) ? declared : []) {
+    const dir = join(root, MOUNTS[pack?.kind] ?? MOUNTS.canon, String(pack?.id ?? ''), 'skills');
+    let names = [];
+    try { names = readdirSync(dir, { withFileTypes: true }); } catch { continue; }
+    for (const d of names) if (d.isDirectory() && existsSync(join(dir, d.name, 'SKILL.md'))) mounted.add(d.name);
+  }
+  return { mounted, declarations: [], hits: {}, ownerOf: null };
 }

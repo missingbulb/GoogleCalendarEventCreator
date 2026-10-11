@@ -1,12 +1,8 @@
 // The usage fold's THIRD source: what each scheduled occurrence actually came to.
 //
-// The slot scheduler used to print that per due task into its own Actions log, and the
-// fold counted those lines. That writer retired with the slot scheduler (#974) and the
-// queue does not print an equivalent — because it does not need to. Every occurrence
-// is a work ITEM, and when it converges it closes wearing an `outcome:*` label. The
-// record is better than the log line was (it survives Actions retention, it is
-// clickable, and it carries the task on its own title) and it is a different read,
-// which is what #994 asked for. This module is that read.
+// Every occurrence is a work ITEM, and when it converges it closes wearing an
+// `outcome:*` label - a record that survives Actions retention, is clickable, and
+// carries the task on its own title. This module is that read.
 //
 // APPEND-ONCE past `queueFoldedThrough`, for the same reason the run listing is
 // forward-only: this is a paged REST resource where the capture files are local git.
@@ -24,11 +20,11 @@
 
 // One definition of what a work item is, shared with the queue's own reader — a filed
 // `[claudinite-work]` issue OR an adopted marked issue, which keeps the person's title.
-import { isQueueItem } from '../../src/items/read.mjs';
-import { PARK_PREFIX, PARK_KINDS, NEEDS_HUMAN } from '../../public/task-constants.mjs';
+import { isQueueItem } from './queue-wire.mjs';
+import { PARK_PREFIX, PARK_KINDS, NEEDS_HUMAN } from './queue-wire.mjs';
 import {
   parseWorkItemTitle, parseWorkItemBody, taskIdFromPath, outcomeOf,
-} from '../../public/work-item-grammar.mjs';
+} from './queue-wire.mjs';
 
 const API = process.env.GITHUB_API_URL || 'https://api.github.com';
 

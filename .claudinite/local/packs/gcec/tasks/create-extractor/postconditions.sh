@@ -56,10 +56,14 @@ PREP=$(git log --format='%H' --grep='chore: scaffold' --grep='chore: record' ori
 #    file is allowed for that reason alone. (The host needs no further change:
 #    preprocessing already registered it in supportedDomains, which is what makes
 #    the site supported.)
+#    The version records are the other exception, for add-a-case mode alone
+#    (task.md §3): a changed shipped source raises the patch. Step 1c holds what
+#    they may say.
 LOAD_ORDER="extension/event-extractors/load-order.generated.json"
 changed="$( { git diff --name-only "$PREP"; git ls-files --others --exclude-standard; } \
   | sort -u | sed '/^$/d' )"
-offenders="$(printf '%s\n' "$changed" | grep -Fvx -e "$SRC" -e "$CASE_FILE" -e "$LOAD_ORDER" || true)"
+offenders="$(printf '%s\n' "$changed" | grep -Fvx -e "$SRC" -e "$CASE_FILE" -e "$LOAD_ORDER" \
+  -e extension/manifest.json -e package.json || true)"
 [ -z "$offenders" ] || fail "out-of-scope changes (only $SRC and $CASE_FILE may change):
 $(printf '  %s\n' $offenders)"
 
@@ -68,6 +72,12 @@ $(printf '  %s\n' $offenders)"
 if printf '%s\n' "$changed" | grep -Fxq "$LOAD_ORDER"; then
   [ ! -e "$SRC" ] || fail "$LOAD_ORDER changed but $SRC still exists — the load list is generated, never hand-edited"
 fi
+
+# 1c. VERSION — measured against main, so preprocessing's new-source bump counts:
+#     a branch that ships a change raises the patch exactly once, one that ships
+#     nothing raises nothing, and the version records change in their version only.
+node .claudinite/local/packs/gcec/lib/version-change.mjs origin/main \
+  || fail "the version change does not match what this branch ships (see above)"
 
 # 2. QUALITY FLOOR — a deterministic backstop to the agent's bail judgment. The
 #    case must be a real, presentable event: not 'empty' (nothing extracted) and

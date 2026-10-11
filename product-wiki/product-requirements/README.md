@@ -4,7 +4,7 @@ Product-level requirements for the Google Calendar Event Creator extension — t
 market/user-facing **why** and **what**, as opposed to the engineering **how**.
 
 This is the one folder under `product-wiki/` the rest of the repo may still reference
-(see the barrier rule in [`.claudinite-settings.json`](../../.claudinite-settings.json)).
+(the product-wiki pack's barrier check enforces this).
 `product-wiki/Market/`, `product-wiki/Users/`, and `product-wiki/sample-data/` are a
 self-growing research wiki that the extension's source, tests, and docs must stay
 decoupled from; this file is the reviewed, human-maintained distillation that's
@@ -22,8 +22,7 @@ allowed to cross that line.
   [`../Competitors/`](../Competitors/README.md) — folders the
   rest of the repo may **not** read directly.
 - Unlike the two wikis, **this file is not auto-grown.** The wikis are maintained by
-  the Claudinite **product-wiki** pack's scheduled growth worker (mounted
-  read-only under `.claudinite/`);
+  the Claudinite **product-wiki** pack's scheduled growth worker;
   this file only changes when a human (or a session acting on the owner's behalf)
   reviews the wikis and decides something here should change — it's the crossing
   point the rest of the repo depends on, so it stays stable and reviewed.

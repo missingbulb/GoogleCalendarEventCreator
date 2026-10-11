@@ -80,9 +80,11 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 Project-wide footguns only. Portable rules these instantiate live in the canon
 packs/skills.
 
-- **`declarativeContent`/`UrlFilter` host-match verification is CI-only** — the
-  real URL→icon match runs inside Chrome, exercised here only by the CI-only
-  real-Chrome test (`dev/requirements/heavy/extension-load.chrome.test.js`).
+- **`declarativeContent`/`UrlFilter` host-match verification is no longer
+  CI-only** — the real URL→icon match still runs only inside Chrome, exercised
+  by `dev/requirements/heavy/extension-load.chrome.test.js`, which now also
+  runs right here: `CHROME_PATH=/opt/pw-browsers/chromium xvfb-run -a node
+  --test dev/requirements/heavy/extension-load.chrome.test.js`.
   (declarativecontent-urlfilter-host)
 - **CDP-introspecting the MV3 worker hits the portable traps** (canon): here
   they bit `declarativeContent…getRules` (hung until job timeout), which is why
@@ -109,15 +111,6 @@ packs/skills.
   (#133); a real event requires actual data (JSON-LD or a parsed date), never a
   mere host match. (supported-registered-host)
 
-## Workflow-failure classification
-
-**Mind the one gap `gha/scheduled-failure-escalation` can't see:** it only
-inspects workflows carrying a `schedule:`, so a workflow that is unattended by
-some *other* trigger — `workflow_run`, `repository_dispatch` — needs its failure
-job wired by hand.
-The `Release` stub (`chrome-extension-release.yml`) is exactly that shape; its
-reporters live in the vendored create-package/publish/daily workflows it calls.
-
 ## Extractor pipeline
 
 Standing rules for the extractor-automation domain — the two gcec pack
@@ -142,12 +135,9 @@ on that pipeline). Adding or refreshing a cached live case by hand is the
 - **Facebook can't be a cached live case** — a hard HTTP 400 even through the
   proxy, so its extraction stays unit-tests-only
   (`extension-test/event-extractors/extraction.test.js`). (facebook-cant-be)
-- **A scratch script that needs a project dependency (e.g. `jsdom`) can't live
-  in the harness's external scratchpad** — Node's module resolution walks up
-  from the script's own directory, which never reaches this repo's
-  `node_modules`. `generic-extractor-improvements`' habitual "fetch a page,
-  then jsdom-inspect it" throwaway scripts need to live inside the repo (a
-  gitignored scratch dir, cleaned up before committing) instead (#866). (scratch-script-needs)
+- **`generic-extractor-improvements`' "fetch a page, then jsdom-inspect it"
+  throwaway scripts live in a gitignored scratch dir inside the repo, cleaned up
+  before committing** (canon covers why) (#866). (scratch-script-needs)
 - **Rendered output isn't deterministic.** A re-record can legitimately shift a
   live case's `expected` — treat such drift like a site-markup change, and prefer
   extracting JSON-LD/`og:` (which apps still inject) over brittle DOM positions.
