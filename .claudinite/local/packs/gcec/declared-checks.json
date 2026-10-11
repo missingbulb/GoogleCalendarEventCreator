@@ -1,7 +1,7 @@
 [
   {
     "id": "github-list-search-missing-perpage",
-    "severity": "advisory",
+    "on_fail": "advise",
     "since": "2026-09-07",
     "scope": "action",
     "failureMessage": "search_issues/list_issues/actions_list return every match with its full body when uncapped, which has hard-failed the tool-result token cap here repeatedly (#734 twice, #753, #760)",
@@ -16,7 +16,7 @@
   },
   {
     "id": "github-job-logs-guessed-tail-lines",
-    "severity": "advisory",
+    "on_fail": "advise",
     "since": "2026-09-07",
     "scope": "action",
     "failureMessage": "guessing a large tail_lines to diagnose a CI failure can itself exceed get_job_logs' token limit (#1101 hit this at tail_lines: 2406)",
@@ -32,7 +32,7 @@
   },
   {
     "id": "custom-source-annotated-nothing-to-add",
-    "severity": "blocking",
+    "on_fail": "block",
     "since": "2026-09-27",
     "failureMessage": "a fully-supported site with nothing to override gets no custom/<site>.js file at all — one left behind and annotated as having nothing to add should have been deleted instead",
     "scanFiles": "/^extension\\/event-extractors\\/custom\\/[^/]+\\.js$/",
@@ -46,7 +46,7 @@
   },
   {
     "id": "git-checkout-paths-and-branch-move-combined",
-    "severity": "advisory",
+    "on_fail": "advise",
     "since": "2026-09-13",
     "scope": "action",
     "failureMessage": "combining `git checkout <branch> -- <paths>` with `git checkout -b` in one command silently discards uncommitted edits on those paths — the #734 one-liner that wiped three finished edits",
