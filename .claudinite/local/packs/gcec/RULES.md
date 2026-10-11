@@ -8,24 +8,6 @@ pipeline" section below, and its scheduled tasks live under `tasks/`.
 
 ## Working rules
 
-- **A duplicate dispatch-trigger arriving while a session's own delegated
-  subagent is still running is a signal to stop, not to investigate.**
-  Confirm it via `resolve-dispatch` (the "not mine, change nothing" case) and
-  end the turn — don't let that check snowball into re-reading the subagent's
-  targets and redoing its work. In #876 a dispatched `tidy-issues` subagent
-  was still running in the background when a duplicate webhook fired; the
-  top-level session's "just confirming" pass over all 16 target issues
-  escalated into closing one and posting reconfirmation comments on the
-  rest — duplicating, not verifying, work its own subagent was already
-  producing — and converged the dispatch issue on that duplicate instead of
-  the subagent's actual output. (duplicate-dispatch-trigger)
-- **`get_job_logs`'s `tail_lines` can blow the tool's token limit on its own**
-  (canon covers capping and qualifying list/search calls) — guessing a large
-  value to diagnose a CI failure can itself exceed the limit (#1101,
-  `tail_lines: 2406` → `exceeds maximum allowed tokens`). Skip the guess — a
-  small call gets you the saved-to-disk log path, then `grep` that file for the
-  failure marker (`not ok`, `FAIL`) the same way an oversized list/search
-  result gets read. (getjoblogss-taillines-can)
 - **This repo's one divergence from the canon merge recipe: CI must be green
   first** — twice for e2e/heavy-browser changes. The project mechanics of driving
   a merge (dispatching CI in a web session, the poll back-off, when to arm
