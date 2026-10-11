@@ -239,6 +239,16 @@ extension).
   reads as a pure addition of every file, an artifact of the graft point, not a
   real diff). PR #1132 (`tzavta.co.il`) is still open and unmerged as of this
   check, so the window has still not reset onto new-extractor cadence.
+  **Re-checked 2026-10-11: still zero, and the in-flight claim is corrected.**
+  The last commit to `extension/event-extractors/custom/` remains 2026-08-09
+  (#791), so nine quiet weeks now. But `tzavta.co.il` is not "mid-flight" any
+  more: the draft PR [#1132](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/1132)
+  was **closed unmerged** on 2026-10-06, and a re-created draft,
+  [#1458](https://github.com/missingbulb/GoogleCalendarEventCreator/pull/1458),
+  was closed unmerged six minutes later; its request issue
+  [#1118](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/1118)
+  is still open. The earlier "window resets when it lands" expectation therefore
+  has no pending trigger — nothing is in flight to reset it.
 - ~~**Would a JSON-LD-era equivalent be re-tried by a platform player?**~~
   **Answered 2026-09-20: yes, but not the structured-extraction form the
   question asked about.** Google's Gemini in Chrome (Android, all US users from
@@ -412,3 +422,10 @@ cost curve — this project's commits and PRs, not competitor research:
   for [`../Users/`](../Users/README.md): still 15 `extractor-request` issues,
   all owner-filed, no new one since #1118 (2026-08-31) — no change there, so
   that page was not touched this pass. No open question answered or opened.
+- **2026-10-11** — re-checked the deletion-effect null result: still zero commits
+  to `extension/event-extractors/custom/` since 2026-08-09 (nine quiet weeks).
+  Corrected the earlier note that the `tzavta.co.il` PR was open and pending:
+  PRs #1132 and #1458 were both closed unmerged on 2026-10-06 and #1118 remains
+  open, so no extractor is in flight. Reported-demand count unchanged (15
+  `extractor-request` issues, all owner-filed, none since #1118), so Users was
+  not touched. No open question answered or opened.
