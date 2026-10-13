@@ -42,6 +42,8 @@ packs:
           default:
             url: "https://api.anthropic.com/v1/claude_code/routines/trig_011iVaE4F36rAHBncAWnmXY2/fire"
             tokenSecret: "CCR_ROUTINE_TOKEN"
+  sources:
+    - "missingbulb/Shepherd"
 checks:
   accept:
     - rule: "scheduler-workflow-shape"
