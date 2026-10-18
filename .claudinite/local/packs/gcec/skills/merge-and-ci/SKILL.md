@@ -37,10 +37,12 @@ all. Open the PR early for those.
   outside `claude/**`, or a `paths-ignore`/`[skip ci]` push). Firing a manual
   dispatch on top of a run that already exists just buys a third run and its
   wall time.
-- **The shell can't observe GitHub state here.** The git remote is a git-only
-  proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
-  there's no API token in the env, and `gh` reaches no `api.github.com` — only
-  an MCP poll sees check state; a background bash/Monitor loop cannot.
+- **Whether the shell can observe GitHub state depends on the session.** Some
+  sessions carry `GH_TOKEN`/`GITHUB_TOKEN` and `gh api` answers; others have
+  only a git-only proxy remote and no token, where `gh` reaches no
+  `api.github.com` and only an MCP poll sees check state. Try one `gh api`
+  call before building a shell loop on it, and fall back to the MCP poll when
+  it fails.
 - **Poll on a short back-off, never one long sleep, never tight — the same loop
   for watching a forced Actions run to completion, not only a PR's check.**
   Loop **MCP poll → background sleep → MCP poll** until the check or run

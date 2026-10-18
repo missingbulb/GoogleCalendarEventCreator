@@ -120,3 +120,12 @@
 - **Mechanism:** the skill's description, plus `force-load-on-tool-calls:
   mcp__github__actions_run_trigger`.
 - **Landed:** #1375.
+
+## 2026-10-18 · reworded · Claudinite growth: rule revalidation
+- **Source:** in the rule-revalidation run for item #1540, `gh api repos/...` answered from the
+  shell (`GH_TOKEN` and `GITHUB_TOKEN` set, plain github.com remote), contradicting "no API token in
+  the env, `gh` reaches no `api.github.com`".
+- **Reason:** shell reach to GitHub varies with how the session was provisioned, so the bullet now
+  says to try one `gh api` call and fall back to the MCP poll.
+- **Actor:** Claudinite rule-revalidation task, run item #1540.
+- **Retire when:** every session this repo runs carries a token, or none does.
