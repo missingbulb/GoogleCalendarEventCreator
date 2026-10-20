@@ -1,8 +1,8 @@
 engine:
   channel: "staging"
   releases: "missingbulb/ClaudiniteStagingDistro"
-  version: "1.61012.1"
-  manifest: "sha512-f4oREj6OM6qssyzAL0TB9tUUiAwYF1ZXr43J0BtUfHpQ2kLqd8SxJTZsySBqbXaXM2g2vIfJxQJx3kmjgIuoDw=="
+  version: "1.61020.6"
+  manifest: "sha512-iRC85eNt6WA/NqrZfTo3YfULKPGzWZ69JKmuLc/1ML/+UOCwzCzm7l3WgZ3S69Vycwk3g5CByRvEf9tmGFN17Q=="
 packs:
   channel: "canary"
   declared:
@@ -29,7 +29,8 @@ packs:
         users: "Google Calendar users who find events on web pages such as venue, ticketing and listings sites; so far the extractor requests come from the repo owner (product-wiki/Users)"
         market: "Tools that get an event from a web page onto a calendar with minimal friction: other calendar browser extensions, calendars' own email and link parsing, and manual entry; surveyed in product-wiki/Competitors and product-wiki/Market"
     - "claudinite-growth"
-    - "local/gcec"
+    - id: "gcec"
+      source: "local"
     - id: "claude-code-web-users-support"
       config:
         repo: "missingbulb/Shepherd"
@@ -44,6 +45,8 @@ packs:
             tokenSecret: "CCR_ROUTINE_TOKEN"
   sources:
     - "missingbulb/Shepherd"
+  manager:
+    repo: "missingbulb/Shepherd"
 checks:
   accept:
     - rule: "scheduler-workflow-shape"
