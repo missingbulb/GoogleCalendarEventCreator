@@ -120,3 +120,11 @@
 - **Mechanism:** the skill's description, plus `force-load-on-tool-calls:
   mcp__github__actions_run_trigger`.
 - **Landed:** #1375.
+
+## 2026-10-21 · reworded · Claudinite growth: rule revalidation (#1556)
+- **Source:** a probe in the cloud session: Chromium 141 at /opt/pw-browsers/chromium, and `gh api
+  rate_limit` answering authenticated.
+- **Reason:** the sandbox does have Chrome, and the shell can hold an API token; the skill claimed
+  neither.
+- **Actor:** Claudinite task rule-revalidation.
+- **Landed:** pending.
