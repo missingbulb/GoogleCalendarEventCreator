@@ -127,4 +127,4 @@
 - **Reason:** the sandbox does have Chrome, and the shell can hold an API token; the skill claimed
   neither.
 - **Actor:** Claudinite task rule-revalidation.
-- **Landed:** pending.
+- **Landed:** #1562 (Refs #1556).
