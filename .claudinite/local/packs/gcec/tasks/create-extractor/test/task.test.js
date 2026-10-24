@@ -1,5 +1,4 @@
-// The create-extractor task's PRECONDITION TERM (`extractor-request-eligible` in
-// preconditions.mjs) — the cheap gate the scheduler runs in code before anything
+// The create-extractor task's PRECONDITION TERM (`extractor-request-eligible`) — the cheap gate the scheduler runs in code before anything
 // else exists. Its whole job is eligibility over the
 // `issues` signal; everything it must NOT do (parse a body, classify a host, close
 // anything) belongs to preprocessing, and the absence of that here is the point of
@@ -74,11 +73,11 @@ test("eligible requests are listed oldest-first, matching the order preprocessin
 test("the declaration carries the full contract, including the secret preprocessing spends", async () => {
   const task = require("../task.json");
   assert.equal(task.id, "create-extractor");
-  // The declarative expression is the ONLY gate mechanism: the `precondition`
-  // function and its `precondition_signals` companion are retired, and the signal
-  // union is DERIVED from the term rather than restated here.
+  // The declarative expression is the ONLY gate mechanism: no `precondition`
+  // function or `precondition_signals` field, and the signal union is DERIVED
+  // from the terms rather than restated here.
   //
-  // The cadence is a term in that same list now, not a `frequency` field beside it.
+  // The cadence is a term in that same list, not a `frequency` field beside it.
   // Daily, not hourly: a slow cycle is accepted until an event trigger replaces
   // the poll. Pinned so the declaration cannot drift back to a cadence the
   // queue will not honour.
