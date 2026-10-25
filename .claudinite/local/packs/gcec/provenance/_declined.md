@@ -13,3 +13,11 @@
   today's tree. The sweep's other candidates were already proven by existing suites (`load-order.test.js`,
   `supported-domains.test.js`) or are product statements.
 - **Actor:** the `claudinite/prose-to-checks-sweep` task.
+
+## 2026-10-25 · declined · the testing-guide / snapshot-approval / merge-and-ci skill prose (#1574)
+- **Source:** the prose-to-checks sweep of #1574 (Refs #1555), over the gcec pack's skills.
+- **Reason:** the rules found there are in-flight procedure (hold the baseline until approval, poll back-off,
+  never hand-write expecteds) that leave no artifact a scan could observe, or describe how the
+  requirements harness is organised (a product-test statement, not a working rule). Nothing cleared the
+  first gate with a confident see-it-fail fixture.
+- **Actor:** the `claudinite/prose-to-checks-sweep` task.
