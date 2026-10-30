@@ -51,3 +51,5 @@ checks:
     - rule: "scheduler-workflow-shape"
       path: ".github/workflows/claudinite-scheduler.yml"
       reason: "the owner cut this repo to one tick a day to halve its scheduled runs; daily-period tasks still run, and drain-tick work waits for the next day's tick."
+growth:
+  sessionHistory: "localPlaintext"
