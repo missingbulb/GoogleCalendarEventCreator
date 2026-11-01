@@ -21,3 +21,11 @@
   requirements harness is organised (a product-test statement, not a working rule). Nothing cleared the
   first gate with a confident see-it-fail fixture.
 - **Actor:** the `claudinite/prose-to-checks-sweep` task.
+
+## 2026-11-01 · declined · the gcec RULES.md backlog re-sweep (#1596)
+- **Source:** the prose-to-checks sweep of #1596, over the gcec pack's RULES.md after the merge of main.
+- **Reason:** nothing new cleared the first gate with a confident see-it-fail fixture. `clean-collapses-all`
+  and `injected-block-markup` need data-flow or parser-quirk judgment a scan can't make; `pinned-referencenow`,
+  `facebook-cant-be` and `ambiguous-numeric-slash` state product or test-harness behavior (requirements);
+  `scratch-script-needs` and `keep-divergence-small` are in-flight procedure with no durable artifact.
+- **Actor:** the `claudinite/prose-to-checks-sweep` task.
