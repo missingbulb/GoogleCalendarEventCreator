@@ -18,9 +18,9 @@ on treating CI as a fixed poll-and-sleep ritual).
 ## Open the PR early when the only reviewable output is on CI
 
 A change that adds or modifies an e2e/heavy-browser (`dev/requirements/heavy/`)
-or UI-snapshot (`dev/requirements/{popup,icon}/`) test can't be exercised
-locally — the sandbox has no Chrome — and its reviewable artifacts only exist
-on a PR: CI runs the heavy/e2e suites against the branch, and a UI change's
+or UI-snapshot (`dev/requirements/{popup,icon}/`) test has reviewable artifacts
+that only exist on a PR (the sandbox's Chromium can run the heavy suite locally, but
+CI is the gate): CI runs the heavy/e2e suites against the branch, and a UI change's
 reviewable output (the pixel diff GitHub renders, the inline gallery in the
 branch's `dev/requirements/requirements.md`) needs a pushed branch to view at
 all. Open the PR early for those.
@@ -37,10 +37,9 @@ all. Open the PR early for those.
   outside `claude/**`, or a `paths-ignore`/`[skip ci]` push). Firing a manual
   dispatch on top of a run that already exists just buys a third run and its
   wall time.
-- **The shell can't observe GitHub state here.** The git remote is a git-only
-  proxy (smart-HTTP under `/git/<owner>/<repo>/…`; every other path 400s),
-  there's no API token in the env, and `gh` reaches no `api.github.com` — only
-  an MCP poll sees check state; a background bash/Monitor loop cannot.
+- **Poll check state through MCP, not a shell loop.** Whether the shell holds
+  an API token varies by session (`gh api rate_limit` tells in one call), so
+  don't build the wait on it; the MCP poll is the reading that always works.
 - **Poll on a short back-off, never one long sleep, never tight — the same loop
   for watching a forced Actions run to completion, not only a PR's check.**
   Loop **MCP poll → background sleep → MCP poll** until the check or run
