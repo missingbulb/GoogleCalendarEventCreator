@@ -100,12 +100,3 @@ script's header and concluded the checkout had never been needed. The bare
 `git fetch origin main` in between succeeded on the first try. The same step
 cost 44s in `13a6f736` and 8s in `558026a0` for no benefit either. Leave the
 tree on the merged branch and fetch.
-
-**The fetch is denied sometimes too — one retry, then move on.** The permission
-classifier is non-deterministic and not scoped to the checkout: the bare
-`git fetch origin main` has been denied outright, and an identical immediate retry
-has both failed and succeeded. Each denial costs 30–45s, and nothing downstream
-needs the fetch — a run that was denied twice ran `capture-log.mjs` anyway and the
-capture landed. So: one retry, and a denial is never an error to report, escalate,
-or work around. Decomposing the command or switching tools to get the same bytes
-spends the session's last minutes on a sync that buys nothing.
