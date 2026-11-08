@@ -135,3 +135,10 @@
   refusal is not a verdict" carries the unstable/clean refusal readings and never re-arming on a
   loop. The skill keeps the narrower residue.
 - **Actor:** growth-dedup task (agent).
+
+## 2026-11-08 · weakened · Claudinite growth: dedup local packs (Refs #1614)
+- **Reason:** git-github-advanced "A local git-mutation refusal after a merge already succeeded
+  server-side": take one attempt and stop; a retry via `fetch origin main` hits the same classifier.
+  The skill drops its fetch-denied paragraph.
+- **Actor:** growth-dedup task (agent).
+- **Model:** Claude.
