@@ -249,6 +249,9 @@ extension).
   [#1118](https://github.com/missingbulb/GoogleCalendarEventCreator/issues/1118)
   is still open. The earlier "window resets when it lands" expectation therefore
   has no pending trigger — nothing is in flight to reset it.
+  **Re-checked 2026-11-08: still zero** — thirteen quiet weeks now; the latest
+  commit to the directory is still [#791](https://github.com/missingbulb/GoogleCalendarEventCreator/commit/4fe1b5e832fa5184f0cb3721070013593c755e2d)
+  (2026-08-09), and #1118 is still the newest `extractor-request` and still open.
 - ~~**Would a JSON-LD-era equivalent be re-tried by a platform player?**~~
   **Answered 2026-09-20: yes, but not the structured-extraction form the
   question asked about.** Google's Gemini in Chrome (Android, all US users from
@@ -429,3 +432,7 @@ cost curve — this project's commits and PRs, not competitor research:
   open, so no extractor is in flight. Reported-demand count unchanged (15
   `extractor-request` issues, all owner-filed, none since #1118), so Users was
   not touched. No open question answered or opened.
+- **2026-11-08** — re-checked the deletion-effect null result: still zero commits
+  to `extension/event-extractors/custom/` since 2026-08-09 (thirteen quiet weeks);
+  `extractor-request` count unchanged at 15, newest #1118 still open. No open
+  question answered or opened.
