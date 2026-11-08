@@ -40,18 +40,13 @@ all. Open the PR early for those.
 - **Poll check state through MCP, not a shell loop.** Whether the shell holds
   an API token varies by session (`gh api rate_limit` tells in one call), so
   don't build the wait on it; the MCP poll is the reading that always works.
-- **Poll on a short back-off, never one long sleep, never tight — the same loop
-  for watching a forced Actions run to completion, not only a PR's check.**
-  Loop **MCP poll → background sleep → MCP poll** until the check or run
-  leaves `in_progress`, backing off **5s, 10s, 15s, 30s, then 30s** repeating —
-  a fast run wakes you within seconds, a slow one isn't tight-polled. Always
-  wait for the sleep's completion notification before the next poll: issuing
-  the next poll right after launching the sleep (not after it resolves) was
-  measured firing the follow-up MCP call 2–3s into a 5–30s backgrounded sleep,
-  seven times in 54s, while watching a forced `claudinite-scheduler.yml` run
-  (#1230). While a sleep runs, do real work (review the diff, draft the PR
-  body) or end the turn — filler calls to look busy are tight-polling in
-  disguise.
+- **Loop MCP poll → background sleep → MCP poll, and always wait for the sleep's
+  completion notification before the next poll** — the same loop for watching a
+  forced Actions run to completion, not only a PR's check. Issuing the next poll
+  right after launching the sleep was measured firing the follow-up MCP call 2–3s
+  into a 5–30s backgrounded sleep, seven times in 54s, while watching a forced
+  `claudinite-scheduler.yml` run (#1230). While a sleep runs, do real work
+  (review the diff, draft the PR body) or end the turn.
 - **Pass `run_in_background: true` on every sleep in that loop, starting with
   the first 5s call — not only once a bare one gets blocked.** The harness
   accepts a short foreground `sleep` but rejects a standalone `sleep 30`
@@ -61,11 +56,6 @@ all. Open the PR early for those.
   with the same sleep, backgrounded. Measured identically in three separate
   sessions, always at the same step, always recovered the same way: #892
   (~10s lost), #894 (~7s), #903 (~6s).
-- **Don't reach for `subscribe_pr_activity` to wait for green** — a successful
-  check-suite rollup can now arrive as an event, but delivery isn't guaranteed
-  (it can come late or not at all), so the transition you're waiting for may
-  never show up in the turn you spend on it. It's for babysitting a PR, not
-  merge-on-green.
 - **Won't sit and poll to green? Arm auto-merge — never end a turn on a
   subscription.** A run that opens a PR it can't watch to the end (an
   unattended/scheduled run, or a fix opened incidentally mid-task) should
@@ -77,23 +67,14 @@ all. Open the PR early for those.
   03:58:27Z, the turn had ended at 03:57:56Z on a `subscribe_pr_activity` watch,
   and PR #718 sat unmerged until the owner stepped in **63 minutes** later.
   That one avoidable wait was 85% of the session's 74-minute wall clock.
-- **…but expect the arming itself to be refused here, and read the refusal as
-  state, not as failure.** On this repo's single required `test` check,
-  `enable_pr_auto_merge` has essentially no window: while the run is queued or
-  `in_progress` GitHub refuses *"unstable status (required checks are
-  failing)"*, and the moment it completes green it refuses *"already in clean
-  status … you can merge directly."* Neither is an error to escalate — the
-  first means poll on the back-off above and retry, the second means the merge
-  is available **now**, so squash-merge it, which is the same end state the
-  arming was for. **A green, conflict-free PR that merely failed to arm is never
-  `needs-human`.** Measured, in session `2925ea4b` (2026-07-30): four arming
-  attempts on PR #793 between 03:46:04Z and 03:54:00Z (two "unstable", two
-  "clean"), after which the run converged dispatch #794 to `needs-human` and
-  stopped — the PR had been green since 03:52:32Z and sat unmerged until the
-  owner stepped in at 04:38:33Z. **46 minutes of avoidable idle plus a
-  hand-cleared escalation**, on a change nothing was wrong with. So don't spend
-  a turn on repeated arming attempts: try once, and otherwise poll to green and
-  merge.
+- **…but expect the arming itself to be refused here.** On this repo's single
+  required `test` check there is essentially no window to arm in, so try once,
+  and otherwise poll to green and merge. **A green, conflict-free PR that merely
+  failed to arm is never `needs-human`.** Measured, in session `2925ea4b`
+  (2026-07-30): four arming attempts on PR #793 between 03:46:04Z and 03:54:00Z,
+  after which the run converged dispatch #794 to `needs-human` and stopped — the
+  PR had been green since 03:52:32Z and sat unmerged until the owner stepped in
+  at 04:38:33Z. **46 minutes of avoidable idle plus a hand-cleared escalation.**
 
 ## After the merge, `git fetch origin main` — never check `main` out
 

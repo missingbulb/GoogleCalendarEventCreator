@@ -128,3 +128,10 @@
   neither.
 - **Actor:** Claudinite task rule-revalidation.
 - **Landed:** #1562 (Refs #1556).
+
+## 2026-10-25 · reworded · Claudinite growth: dedup local packs (Refs #1573)
+- **Reason:** the canon unattended-agents rule driving-ci-gated carries the 5→10→15→30 rolling
+  backoff, never-tight-poll and don't-subscribe-for-green; git-github-advanced's "An auto-merge
+  refusal is not a verdict" carries the unstable/clean refusal readings and never re-arming on a
+  loop. The skill keeps the narrower residue.
+- **Actor:** growth-dedup task (agent).
