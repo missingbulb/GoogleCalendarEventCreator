@@ -50,7 +50,7 @@ all. Open the PR early for those.
 - **Pass `run_in_background: true` on every sleep in that loop, starting with
   the first 5s call — not only once a bare one gets blocked.** The harness
   accepts a short foreground `sleep` but rejects a standalone `sleep 30`
-  (`"Blocked: standalone sleep 30 ... use run_in_background: true"`), so a
+  (`"Blocked: sleep 30 followed by: ... use Monitor with an until-loop ... or run_in_background: true"`), so a
   loop that starts foreground hits the block right at the 30s step and pays a
   failed Bash call plus an unused `ToolSearch` for `Monitor` before recovering
   with the same sleep, backgrounded. Measured identically in three separate
