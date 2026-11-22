@@ -83,13 +83,12 @@ continued work, via `checkout main && reset --hard origin/main`. **Fetch
 anyway**: `git fetch origin main` is all this repo needs — the checkout is
 what reliably stalls or gets denied.
 
-Nothing downstream reads the working tree. The capture step that follows the
-merge (`capture-log.mjs`) does every branch write through git plumbing against
-the *fetched* remote tip and never touches the checkout or the index — its own
-header says so. The conformance checks resolve their diff base from
-`origin/main`, a remote-tracking ref a fetch alone advances. So the checkout
-buys nothing but a working-tree switch nobody asked for, at the very end of a
-session that is about to end anyway.
+Nothing downstream needs the working tree switched. The capture step that follows
+the merge (`cn growth capture`) pushes the session log onto the repo's
+`conversation-logs` branch, and the conformance checks resolve their diff base from
+`origin/main`, a remote-tracking ref a fetch alone advances. So the checkout buys
+nothing but a working-tree switch nobody asked for, at the very end of a session
+that is about to end anyway.
 
 Measured across the four captured sessions, all of which ran the canon step
 verbatim: in `295e2230` (2026-07-26) the auto-mode classifier **denied**
