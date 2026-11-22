@@ -29,3 +29,10 @@
   `facebook-cant-be` and `ambiguous-numeric-slash` state product or test-harness behavior (requirements);
   `scratch-script-needs` and `keep-divergence-small` are in-flight procedure with no durable artifact.
 - **Actor:** the `claudinite/prose-to-checks-sweep` task.
+
+## 2026-11-22 · declined · the gcec pack re-sweep after the 2026-11 main merges (#1658)
+- **Source:** the prose-to-checks sweep of #1658, over the gcec pack's RULES.md and skills.
+- **Reason:** the only prose that moved since the 2026-11-01 re-sweep is the merge-and-ci skill's quoted harness
+  error message, which is in-flight procedure with no durable artifact. The earlier verdicts stand, and nothing
+  cleared the first gate with a confident see-it-fail fixture.
+- **Actor:** the `claudinite/prose-to-checks-sweep` task.
