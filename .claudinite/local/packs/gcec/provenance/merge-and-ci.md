@@ -144,3 +144,11 @@
   now matches it. The behaviour itself is unchanged.
 - **Actor:** Claudinite task rule-revalidation.
 - **Landed:** Refs #1617.
+
+## 2026-11-22 · reworded · Claudinite growth: rule revalidation (Refs #1659)
+- **Source:** a probe in the cloud session: no `capture-log.mjs` exists in the tree; the capture
+  step is `cn growth capture`, which pushes the log onto `conversation-logs`.
+- **Reason:** the skill cited a script and its header that are gone; the checkout advice stands,
+  resting on the fetch-only diff base.
+- **Actor:** Claudinite task rule-revalidation.
+- **Landed:** Refs #1659.
