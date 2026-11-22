@@ -135,3 +135,12 @@
   refusal is not a verdict" carries the unstable/clean refusal readings and never re-arming on a
   loop. The skill keeps the narrower residue.
 - **Actor:** growth-dedup task (agent).
+
+## 2026-11-08 · reworded · Claudinite growth: rule revalidation (Refs #1617)
+- **Source:** a probe in the cloud session: foreground `sleep 5` ran; `sleep 30` was refused with
+  `Blocked: sleep 30 followed by: ... use Monitor with an until-loop ... or run_in_background:
+  true`.
+- **Reason:** the harness's block message no longer reads "standalone sleep 30"; the quoted string
+  now matches it. The behaviour itself is unchanged.
+- **Actor:** Claudinite task rule-revalidation.
+- **Landed:** Refs #1617.
